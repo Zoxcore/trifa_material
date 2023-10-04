@@ -1,5 +1,6 @@
 package com.zoffcc.applications.trifa
 
+import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
 import com.zoffcc.applications.trifa.Log.i
 import com.zoffcc.applications.trifa.TRIFAGlobals.LOWER_NGC_VIDEO_BITRATE
 import com.zoffcc.applications.trifa.TRIFAGlobals.LOWER_NGC_VIDEO_QUANTIZER
@@ -16,6 +17,11 @@ class MainActivity {
     companion object {
         private const val TAG = "trifa.MainActivity"
         const val Version = "0.99.0"
+        // --------- global config ---------
+        // --------- global config ---------
+        const val CTOXCORE_NATIVE_LOGGING = true // set "false" for release builds
+        // --------- global config ---------
+        // --------- global config ---------
         var native_lib_loaded = false
         var tox_service_fg: TrifaToxService? = null
         var app_files_directory = "."
@@ -670,7 +676,10 @@ class MainActivity {
         // -------- called by native methods --------
         // -------- called by native methods --------
         // -------- called by native methods --------
-        @JvmStatic fun android_tox_callback_self_connection_status_cb_method(a_TOX_CONNECTION: Int) {}
+        @JvmStatic fun android_tox_callback_self_connection_status_cb_method(a_TOX_CONNECTION: Int) {
+            Log.i(TAG, "android_tox_callback_self_connection_status_cb_method: " + a_TOX_CONNECTION)
+            update_savedata_file_wrapper()
+        }
         @JvmStatic fun android_tox_callback_friend_name_cb_method(friend_number: Long, friend_name: String?, length: Long) {}
         @JvmStatic fun android_tox_callback_friend_status_message_cb_method(
             friend_number: Long,
@@ -687,7 +696,10 @@ class MainActivity {
         }
 
         @JvmStatic fun android_tox_callback_friend_status_cb_method(friend_number: Long, a_TOX_USER_STATUS: Int) {}
-        @JvmStatic fun android_tox_callback_friend_connection_status_cb_method(friend_number: Long, a_TOX_CONNECTION: Int) {}
+        @JvmStatic fun android_tox_callback_friend_connection_status_cb_method(friend_number: Long, a_TOX_CONNECTION: Int) {
+            Log.i(TAG, "android_tox_callback_friend_connection_status_cb_method: fn=" + friend_number + " " + a_TOX_CONNECTION)
+            update_savedata_file_wrapper()
+        }
         @JvmStatic fun android_tox_callback_friend_typing_cb_method(friend_number: Long, typing: Int) {}
         @JvmStatic fun android_tox_callback_friend_read_receipt_cb_method(friend_number: Long, message_id: Long) {}
         @JvmStatic fun android_tox_callback_friend_request_cb_method(
@@ -695,6 +707,9 @@ class MainActivity {
             friend_request_message: String?,
             length: Long
         ) {
+            Log.i(TAG, "android_tox_callback_friend_request_cb_method: friend_public_key=" + friend_public_key)
+            tox_friend_add_norequest(friend_public_key)
+            update_savedata_file_wrapper()
         }
 
         @JvmStatic fun android_tox_callback_friend_message_cb_method(
@@ -705,6 +720,7 @@ class MainActivity {
             msgV3hash_bin: ByteArray?,
             message_timestamp: Long
         ) {
+            Log.i(TAG, "android_tox_callback_friend_message_cb_method: fn=" + friend_number + " friend_message=" + friend_message)
         }
 
         @JvmStatic fun android_tox_callback_friend_message_v2_cb_method(
@@ -716,6 +732,7 @@ class MainActivity {
             raw_message: ByteArray?,
             raw_message_length: Long
         ) {
+            Log.i(TAG, "android_tox_callback_friend_message_v2_cb_method: fn=" + friend_number + " friend_message=" + friend_message)
         }
 
         @JvmStatic fun android_tox_callback_friend_sync_message_v2_cb_method(
@@ -787,6 +804,11 @@ class MainActivity {
             function: String?,
             message: String?
         ) {
+            if (CTOXCORE_NATIVE_LOGGING)
+            {
+                i(TAG, "C-TOXCORE:" + ToxVars.TOX_LOG_LEVEL.value_str(a_TOX_LOG_LEVEL) + ":file=" + file + ":linenum=" +
+                        line + ":func=" + function + ":msg=" + message);
+            }
         }
 
         // -------- called by native methods --------
