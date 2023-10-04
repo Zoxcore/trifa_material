@@ -7,7 +7,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import java.io.File
+import com.zoffcc.applications.trifa.MainActivity
 
 private const val TAG = "trifa.Main.kt"
 

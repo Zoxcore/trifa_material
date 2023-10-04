@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.zoffcc.applications.trifa_material"
-version = "1.0-SNAPSHOT"
+version = "1.0.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -33,10 +33,25 @@ compose.desktop {
             packageName = "trifa_material"
             packageVersion = "1.0.0"
             // description = "Compose Example App"
-            // copyright = "© 2020 My Name. All rights reserved."
+            copyright = "© 2023 Zoff. All rights reserved."
             // vendor = "Example vendor"
             // licenseFile.set(project.file("LICENSE.txt"))
             appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
+
+            val iconsRoot = project.file("resources")
+            macOS {
+                iconFile.set(iconsRoot.resolve("icon-mac.icns"))
+            }
+            windows {
+                iconFile.set(iconsRoot.resolve("icon-windows.ico"))
+                menuGroup = "TRIfA Material"
+                // see https://wixtoolset.org/documentation/manual/v3/howtos/general/generate_guids.html
+                // and https://www.guidgen.com/
+                upgradeUuid = "7774da26-11dd-4ea4-bd08-f4950d252504"
+            }
+            linux {
+                iconFile.set(iconsRoot.resolve("icon-linux.png"))
+            }
         }
     }
 }
