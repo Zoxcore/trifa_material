@@ -68,4 +68,28 @@ jobs:
       - name: check jar
         run:  id;pwd;ls -hal ./build/compose/jars/trifa_material-linux-x64-1.0.0.jar
 
+      - name: check deb
+        run:  id;pwd;ls -hal ./build/compose/binaries/main/deb/trifa-material_1.0.0-1_amd64.deb
+
+      - name: Rename artifact for nightly upload
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: |
+          cp -v ./build/compose/binaries/main/deb/trifa-material_*_amd64.deb trifa-material_nightly.deb
+      - name: Upload appimage
+        uses: actions/upload-artifact@v3
+        with:
+          name: trifa-material_nightly.deb
+          path: trifa-material_nightly.deb
+      - name: Upload to nightly release
+        uses: ncipollo/release-action@v1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        with:
+          allowUpdates: true
+          tag: nightly
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          prerelease: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "trifa-material_nightly.deb"
 
