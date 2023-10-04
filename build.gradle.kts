@@ -24,12 +24,19 @@ dependencies {
 
 compose.desktop {
     application {
-        mainClass = "MainKt"
+        mainClass = "com.zoffcc.applications.trifa.MainKt"
+        // jvmArgs += listOf("-Xmx2G")
+        // args += listOf("-customArgument")
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "trifa_material"
             packageVersion = "1.0.0"
+            // description = "Compose Example App"
+            // copyright = "© 2020 My Name. All rights reserved."
+            // vendor = "Example vendor"
+            // licenseFile.set(project.file("LICENSE.txt"))
+            appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
         }
     }
 }
