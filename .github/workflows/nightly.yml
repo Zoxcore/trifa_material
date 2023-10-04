@@ -61,8 +61,11 @@ jobs:
         run:  type -a java;java -version
 
       - name: build package
-        run:  id;pwd;ls -al;./gradlew packageDistributionForCurrentOS
+        run:  id;pwd;ls -al;./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64 packageDistributionForCurrentOS
       - name: build jar
-        run:  id;pwd;ls -al;./gradlew packageUberJarForCurrentOS
+        run:  id;pwd;ls -al;./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64 packageUberJarForCurrentOS
+
+      - name: check jar
+        run:  id;pwd;ls -hal ./build/compose/jars/trifa_material-linux-x64-1.0.0.jar
 
 
