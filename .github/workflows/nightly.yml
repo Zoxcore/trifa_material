@@ -51,8 +51,15 @@ jobs:
           openjdk-17-jdk \
           openjdk-17-jdk-headless
 
+      - name: set java version
+        run:  update-java-alternatives -s java-1.17.0-openjdk-amd64
+
       - name: show java version
         run:  type -a java;java -version
+
+      - name: show java version
+        run:  type -a java;java -version
+
       - name: build package
         run:  id;pwd;ls -al;./gradlew packageDistributionForCurrentOS
       - name: build jar
