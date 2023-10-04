@@ -1,0 +1,61 @@
+name: Nightly
+
+on:
+  push:
+    paths-ignore:
+     - 'README.md'
+  pull_request:
+    paths-ignore:
+     - 'README.md'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: dummy
+        default: dummy
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  update-nightly-tag:
+    name: Update nightly release tag
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    permissions:
+        contents: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Move nightly tag to head for nightly release
+        run: git tag -f nightly && git push origin nightly -f
+
+  build-nightly-artifact:
+    name: Nightly Artifact Build
+    runs-on: ubuntu-20.04
+    needs: [update-nightly-tag]
+    if: |
+      always() &&
+      (needs.update-nightly-tag.result == 'success' ||
+        needs.update-nightly-tag.result == 'skipped')
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: install dependencies
+        run: |
+          sudo apt-get update && \
+          sudo DEBIAN_FRONTEND=noninteractive \
+          apt-get install -y --no-install-recommends \
+          ca-certificates \
+          openjdk-17-jdk \
+          openjdk-17-jdk-headless
+
+      - name: show java version
+        run:  type -a java;java -version
+      - name: build package
+        run:  id;pwd;ls -al;./gradlew packageDistributionForCurrentOS
+      - name: build jar
+        run:  id;pwd;ls -al;./gradlew packageUberJarForCurrentOS
+
+
