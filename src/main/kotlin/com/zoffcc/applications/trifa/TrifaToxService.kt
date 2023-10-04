@@ -1,5 +1,6 @@
 package com.zoffcc.applications.trifa
 
+import androidx.compose.runtime.Composable
 import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
 import com.zoffcc.applications.trifa.Log.i
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__udp_enabled
@@ -49,6 +50,7 @@ class TrifaToxService {
                 // ------- MAIN TOX LOOP ---------------------------------------------------------------
                 // ------- MAIN TOX LOOP ---------------------------------------------------------------
                 // ------- MAIN TOX LOOP ---------------------------------------------------------------
+                set_tox_running_state("running")
                 while (!stop_me) {
                     try {
                         sleep(tox_iteration_interval_ms)
@@ -58,6 +60,7 @@ class TrifaToxService {
                         e.printStackTrace()
                     }
                     tox_iterate()
+                    // Log.i(TAG, "=====>>>>> tox_iterate()");
                     tox_iteration_interval_ms = tox_iteration_interval()
                 }
                 // ------- MAIN TOX LOOP ---------------------------------------------------------------
@@ -80,6 +83,8 @@ class TrifaToxService {
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
+                update_savedata_file_wrapper()
+                set_tox_running_state("stopped")
             }
         }
         (ToxServiceThread as Thread).start()
