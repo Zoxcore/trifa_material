@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
+import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 
 private const val TAG = "trifa.Main.kt"
 
@@ -38,7 +39,7 @@ fun App() {
     var online_button_color by remember { mutableStateOf(Color.White.toArgb()) }
 
     MaterialTheme {
-        Row (Modifier.fillMaxSize(), Arrangement.spacedBy(5.dp)) {
+        Row(Modifier.fillMaxSize(), Arrangement.spacedBy(5.dp)) {
             Button(onClick = {
                 if (tox_running_state == "running") {
                     tox_running_state = "stopping ..."
@@ -140,7 +141,7 @@ fun main() = application(exitProcessOnExit = true) {
             if (isAskingToClose) {
                 Dialog(
                     onCloseRequest = { isAskingToClose = false },
-                    title = "Close TRIfA ?",
+                    title = i18n("Close TRIfA ?"),
                 ) {
                     Button(
                         onClick = {
@@ -162,7 +163,7 @@ fun main() = application(exitProcessOnExit = true) {
                             }
                         }
                     ) {
-                        Text("Yes")
+                        Text(i18n("Yes"))
                     }
                 }
             }

@@ -42,7 +42,7 @@ class MainActivity {
         // !!!!!! DEBUG !!!!!! change to real password later !!!!!!
         // !!!!!! DEBUG !!!!!! change to real password later !!!!!!
         //
-        var password_hash = "passXY!7$9%"
+        var password_hash = """passXY!7$9%"""
         //
         // !!!!!! DEBUG !!!!!! change to real password later !!!!!!
         // !!!!!! DEBUG !!!!!! change to real password later !!!!!!
