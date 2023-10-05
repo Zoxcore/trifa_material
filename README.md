@@ -16,6 +16,17 @@
 ## Development Snapshot Version (Android)
 the latest Development Snapshot can be downloaded from [here](https://github.com/Zoxcore/trifa_material/releases/tag/nightly)
 
+## Installation & starting the App [Linux, Windows and MacOS]
+
+- Install (minimum) JDK 17 as your default java
+- Download or checkout the source repository
+- enter the ```trifa_material``` directory
+- run:
+  -  Linux :```./gradlew run```
+  -  Windows: ```gradlew.bat run```
+  -  MacOS :```./gradlew run```
+
+
 ## Help Translate the App in your Language
 Use Weblate:
 https://hosted.weblate.org/projects/trifa-a-tox-client-for-android/trifa-material/
