@@ -3,6 +3,11 @@
 ## Build Status
 
 **Github:** [![Android CI](https://github.com/Zoxcore/trifa_material/workflows/Nightly/badge.svg)](https://github.com/Zoxcore/trifa_material/actions?query=workflow%3A%22Nightly%22)
+[![Last release](https://img.shields.io/github/v/release/Zoxcore/trifa_material)](https://github.com/Zoxcore/trifa_material/releases/latest)
+<a href="https://github.com/Zoxcore/trifa_material/blob/master/LICENSE">
+<img src="https://img.shields.io/badge/license-GPLv3%2B-blue.svg" alt="GPLv3+" />
+</a>
+
 
 <a href="https://github.com/Zoxcore/trifa_material/releases/download/nightly/trifa-material_nightly.deb
 "><img src="https://raw.githubusercontent.com/Zoxcore/trifa_material/master/images/on_github_nightly.png" width="200"></a>
