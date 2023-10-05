@@ -9,12 +9,11 @@
 <img src="https://img.shields.io/badge/license-GPLv3%2B-blue.svg" alt="GPLv3+" />
 </a>
 
+## Development Snapshot Version (Android)
+the latest Development Snapshot can be downloaded from [here](https://github.com/Zoxcore/trifa_material/releases/tag/nightly)
 
 <a href="https://github.com/Zoxcore/trifa_material/releases/download/nightly/trifa-material_nightly.deb
 "><img src="https://raw.githubusercontent.com/Zoxcore/trifa_material/master/images/on_github_nightly.png" width="200"></a>
-
-## Development Snapshot Version (Android)
-the latest Development Snapshot can be downloaded from [here](https://github.com/Zoxcore/trifa_material/releases/tag/nightly)
 
 ## Installation & starting the App [Linux, Windows and MacOS]
 
