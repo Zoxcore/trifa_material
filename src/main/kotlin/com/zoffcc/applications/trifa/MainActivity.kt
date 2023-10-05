@@ -106,7 +106,21 @@ class MainActivity {
         init {
             val resourcesDir = File(System.getProperty("compose.application.resources.dir"))
             System.out.println("XXXXX1:" + resourcesDir)
-            val libFile = File(resourcesDir, "libjni-c-toxcore.so")
+            System.out.println("XXXXX1.1:OS:" + OperatingSystem.getCurrent())
+            System.out.println("XXXXX1.2:OS:" + OperatingSystem.getName())
+            System.out.println("XXXXX1.3:OS:" + OperatingSystem.getArchitecture())
+            var libFile = File(resourcesDir, "libjni-c-toxcore.so")
+            if (OperatingSystem.getCurrent() == OperatingSystem.LINUX)
+            {
+                libFile = File(resourcesDir, "libjni-c-toxcore.so")
+            } else if (OperatingSystem.getCurrent() == OperatingSystem.WINDOWS) {
+                libFile = File(resourcesDir, "jni-c-toxcore.dll")
+            } else if (OperatingSystem.getCurrent() == OperatingSystem.MACOS) {
+                libFile = File(resourcesDir, "libjni-c-toxcore.jnilib")
+            } else {
+                System.out.println("XXXXX1.1:OS:Unknown operating system:EXIT")
+                System.exit(3)
+            }
             // var libFile = File("./jni_/libjni-c-toxcore.so");
             System.out.println("XXXXX2:" + libFile + " " + libFile.canonicalPath)
 
