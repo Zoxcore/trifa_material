@@ -24,6 +24,16 @@ dependencies {
 }
 
 compose.desktop {
+    java {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(17))
+        }
+    }
+
+    kotlin {
+        jvmToolchain(17)
+    }
+
     application {
         mainClass = "com.zoffcc.applications.trifa.MainKt"
         // jvmArgs += listOf("-Xmx2G")
@@ -33,10 +43,10 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "trifa_material"
             packageVersion = "1.0.0"
-            // description = "Compose Example App"
+            description = "TRIfA Material App"
             copyright = "© 2023 Zoff. All rights reserved."
-            // vendor = "Example vendor"
-            // licenseFile.set(project.file("LICENSE.txt"))
+            vendor = "Zoxcore"
+            licenseFile.set(project.file("LICENSE"))
             appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
 
             val iconsRoot = project.file("resources")
@@ -56,3 +66,4 @@ compose.desktop {
         }
     }
 }
+
