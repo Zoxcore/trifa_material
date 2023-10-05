@@ -105,18 +105,5 @@ $_INST_/lib/libsodium.a \
 ls -al libjni-c-toxcore.so || exit 1
 pwd
 file libjni-c-toxcore.so
-cp -a libjni-c-toxcore.so /workspace/data/java_ref_client/app/src/main/java/ || exit 1
-
-# -------------- now compile the JNI lib ----------------------
-
-# --------- compile java example ---------
-cd /workspace/data/java_ref_client/app/src/main/java/
-javac com/zoffcc/applications/trifa/ToxVars.java
-javac com/zoffcc/applications/trifa/TRIFAGlobals.java
-javac com/zoffcc/applications/trifa/MainActivity.java
-javac com/zoffcc/applications/trifa/TrifaToxService.java
-# --------- package java example ---------
-cd /workspace/data/java_ref_client/app/src/main/java/
-tar -cvf /artefacts/install_linux.tar com *.sh *.so || tar -cvf ~/work/artefacts/install_linux.tar com *.sh *.so
-
+cp -a libjni-c-toxcore.so /artefacts/ || exit 1
 

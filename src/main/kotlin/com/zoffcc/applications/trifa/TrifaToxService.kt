@@ -1,8 +1,6 @@
 package com.zoffcc.applications.trifa
 
-import androidx.compose.runtime.Composable
 import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
-import com.zoffcc.applications.trifa.Log.i
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__udp_enabled
 import com.zoffcc.applications.trifa.MainActivity.Companion.add_tcp_relay_single_wrapper
 import com.zoffcc.applications.trifa.MainActivity.Companion.bootstrap_single_wrapper
@@ -13,15 +11,15 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_kill
 
 class TrifaToxService {
     fun tox_thread_start_fg() {
-        i(TAG, "tox_thread_start_fg")
+        Log.i(TAG, "tox_thread_start_fg")
         ToxServiceThread = object : Thread() {
             override fun run() {
 
                 // ------ correct startup order ------
                 val old_is_tox_started = is_tox_started
-                i(TAG, "is_tox_started:==============================")
-                i(TAG, "is_tox_started=" + is_tox_started)
-                i(TAG, "is_tox_started:==============================")
+                Log.i(TAG, "is_tox_started:==============================")
+                Log.i(TAG, "is_tox_started=" + is_tox_started)
+                Log.i(TAG, "is_tox_started:==============================")
                 is_tox_started = true
                 if (!old_is_tox_started) {
                     init_tox_callbacks()
@@ -35,7 +33,7 @@ class TrifaToxService {
                 // --------------- bootstrap ---------------
                 if (!old_is_tox_started) {
                     TRIFAGlobals.bootstrapping = true
-                    i(TAG, "bootrapping:set to true")
+                    Log.i(TAG, "bootrapping:set to true")
                     bootstrap_me()
                 }
 
@@ -43,7 +41,7 @@ class TrifaToxService {
                 // --------------- bootstrap ---------------
                 // --------------- bootstrap ---------------
                 var tox_iteration_interval_ms = tox_iteration_interval()
-                i(TAG, "tox_iteration_interval_ms=$tox_iteration_interval_ms")
+                Log.i(TAG, "tox_iteration_interval_ms=$tox_iteration_interval_ms")
                 tox_iterate()
                 // ------- MAIN TOX LOOP ---------------------------------------------------------------
                 // ------- MAIN TOX LOOP ---------------------------------------------------------------
@@ -84,6 +82,7 @@ class TrifaToxService {
                     e.printStackTrace()
                 }
                 update_savedata_file_wrapper()
+                is_tox_started = false
                 set_tox_running_state("stopped")
             }
         }
@@ -95,7 +94,7 @@ class TrifaToxService {
         var ToxServiceThread: Thread? = null
         var stop_me = false
         var is_tox_started = false
-        var TOX_SERVICE_STARTED = false
+        public var TOX_SERVICE_STARTED = false
         var last_resend_pending_messages0_ms: Long = -1
         var last_resend_pending_messages1_ms: Long = -1
         var last_resend_pending_messages2_ms: Long = -1
@@ -105,7 +104,7 @@ class TrifaToxService {
 
         // ------------------------------
         fun bootstrap_me() {
-            i(TAG, "bootstrap_me")
+            Log.i(TAG, "bootstrap_me")
 
             // ----- UDP ------
             if (PREF__udp_enabled == 1) {
@@ -336,8 +335,9 @@ class TrifaToxService {
         // --------------- JNI ---------------
         // --------------- JNI ---------------
         // --------------- JNI ---------------
+        @Suppress("UNUSED_PARAMETER")
         @JvmStatic fun logger(level: Int, text: String?) {
-            i(TAG, text!!)
+            Log.i(TAG, text!!)
         }
 
         @JvmStatic fun safe_string(`in`: ByteArray?): String {
@@ -347,12 +347,12 @@ class TrifaToxService {
                 out = String(`in`!!, charset("UTF-8")) // Best way to decode using "UTF-8"
             } catch (e: Exception) {
                 e.printStackTrace()
-                i(TAG, "safe_string:EE:" + e.message)
+                Log.i(TAG, "safe_string:EE:" + e.message)
                 try {
                     out = String(`in`!!)
                 } catch (e2: Exception) {
                     e2.printStackTrace()
-                    i(TAG, "safe_string:EE2:" + e2.message)
+                    Log.i(TAG, "safe_string:EE2:" + e2.message)
                 }
             }
 

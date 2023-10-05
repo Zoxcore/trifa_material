@@ -1,7 +1,6 @@
 package com.zoffcc.applications.trifa
 
 import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
-import com.zoffcc.applications.trifa.Log.i
 import com.zoffcc.applications.trifa.TRIFAGlobals.LOWER_NGC_VIDEO_BITRATE
 import com.zoffcc.applications.trifa.TRIFAGlobals.LOWER_NGC_VIDEO_QUANTIZER
 import com.zoffcc.applications.trifa.TRIFAGlobals.NGC_AUDIO_BITRATE
@@ -10,6 +9,7 @@ import java.nio.ByteBuffer
 import java.util.*
 import java.util.concurrent.Semaphore
 
+@Suppress("UNUSED_PARAMETER")
 class MainActivity {
     val nativeLibAPI: String?
         external get
@@ -61,20 +61,24 @@ class MainActivity {
                 e.printStackTrace()
             }
             val locale = Locale.getDefault()
-            i(TAG, locale.displayCountry)
-            i(TAG, locale.displayLanguage)
-            i(TAG, locale.displayName)
-            i(TAG, locale.isO3Country)
-            i(TAG, locale.isO3Language)
-            i(TAG, locale.language)
-            i(TAG, locale.country)
+            Log.i(TAG, locale.displayCountry)
+            Log.i(TAG, locale.displayLanguage)
+            Log.i(TAG, locale.displayName)
+            Log.i(TAG, locale.isO3Country)
+            Log.i(TAG, locale.isO3Language)
+            Log.i(TAG, locale.language)
+            Log.i(TAG, locale.country)
             try {
                 Thread.currentThread().name = "t_main"
             } catch (e: Exception) {
             }
-            i(TAG, "java.library.path:" + System.getProperty("java.library.path"))
-            i(TAG, "loaded:c-toxcore:v" + tox_version_major() + "." + tox_version_minor() + "." + tox_version_patch())
-            i(TAG, "loaded:jni-c-toxcore:v" + jnictoxcore_version())
+            Log.i(TAG, "java.library.path:" + System.getProperty("java.library.path"))
+            Log.i(TAG, "loaded:c-toxcore:v" + tox_version_major() + "." + tox_version_minor() + "." + tox_version_patch())
+            Log.i(TAG, "loaded:jni-c-toxcore:v" + jnictoxcore_version())
+
+            Log.i(TAG, "tox_service_fg:" + tox_service_fg)
+            Log.i(TAG, "native_lib_loaded:" + native_lib_loaded)
+            Log.i(TAG, "MainActivity:" + this)
 
             tox_service_fg = TrifaToxService()
 
@@ -82,7 +86,7 @@ class MainActivity {
                 var ORBOT_PROXY_HOST = ""
                 var ORBOT_PROXY_PORT: Long = 0
                 app_files_directory = "." + File.separator
-                i(TAG, "init:PREF__udp_enabled=$PREF__udp_enabled")
+                Log.i(TAG, "init:PREF__udp_enabled=$PREF__udp_enabled")
                 init(
                     app_files_directory, PREF__udp_enabled, PREF__local_discovery_enabled, PREF__orbot_enabled_to_int,
                     ORBOT_PROXY_HOST, ORBOT_PROXY_PORT, password_hash, PREF__ipv6_enabled, PREF__force_udp_only,
@@ -94,45 +98,44 @@ class MainActivity {
                 tox_service_fg!!.tox_thread_start_fg()
             }
 
-            MainActivity()
             val my_tox_id_temp = get_my_toxid()
-            i(TAG, "MyToxID:$my_tox_id_temp")
+            Log.i(TAG, "MyToxID:$my_tox_id_temp")
             try {
                 Thread.currentThread().name = "t_main"
-            } catch (e: Exception) {
-            }
+            } catch (_: Exception) {}
         }
 
         init {
-            val resourcesDir = File(System.getProperty("compose.application.resources.dir"))
-            System.out.println("XXXXX1:" + resourcesDir)
-            System.out.println("XXXXX1.1:OS:" + OperatingSystem.getCurrent())
-            System.out.println("XXXXX1.2:OS:" + OperatingSystem.getName())
-            System.out.println("XXXXX1.3:OS:" + OperatingSystem.getArchitecture())
-            var libFile = File(resourcesDir, "libjni-c-toxcore.so")
-            if (OperatingSystem.getCurrent() == OperatingSystem.LINUX)
-            {
-                libFile = File(resourcesDir, "libjni-c-toxcore.so")
-            } else if (OperatingSystem.getCurrent() == OperatingSystem.WINDOWS) {
-                libFile = File(resourcesDir, "jni-c-toxcore.dll")
-            } else if (OperatingSystem.getCurrent() == OperatingSystem.MACOS) {
-                libFile = File(resourcesDir, "libjni-c-toxcore.jnilib")
-            } else {
-                System.out.println("XXXXX1.1:OS:Unknown operating system:EXIT")
-                System.exit(3)
-            }
-            // var libFile = File("./jni_/libjni-c-toxcore.so");
-            System.out.println("XXXXX2:" + libFile + " " + libFile.canonicalPath)
+            if (!MainActivity.native_lib_loaded) {
+                val resourcesDir = File(System.getProperty("compose.application.resources.dir"))
+                System.out.println("XXXXX1:" + resourcesDir)
+                System.out.println("XXXXX1.1:OS:" + OperatingSystem.getCurrent())
+                System.out.println("XXXXX1.2:OS:" + OperatingSystem.getName())
+                System.out.println("XXXXX1.3:OS:" + OperatingSystem.getArchitecture())
+                var libFile = File(resourcesDir, "libjni-c-toxcore.so")
+                if (OperatingSystem.getCurrent() == OperatingSystem.LINUX) {
+                    libFile = File(resourcesDir, "libjni-c-toxcore.so")
+                } else if (OperatingSystem.getCurrent() == OperatingSystem.WINDOWS) {
+                    libFile = File(resourcesDir, "jni-c-toxcore.dll")
+                } else if (OperatingSystem.getCurrent() == OperatingSystem.MACOS) {
+                    libFile = File(resourcesDir, "libjni-c-toxcore.jnilib")
+                } else {
+                    System.out.println("XXXXX1.1:OS:Unknown operating system:EXIT")
+                    System.exit(3)
+                }
+                // var libFile = File("./jni_/libjni-c-toxcore.so");
+                System.out.println("XXXXX2:" + libFile + " " + libFile.canonicalPath)
 
-            try {
-                System.load(libFile.canonicalPath)
-                MainActivity.native_lib_loaded = true
-                Log.i(TAG, "successfully loaded native library")
-            } catch (e: UnsatisfiedLinkError) {
-                MainActivity.native_lib_loaded = false
-                Log.i(TAG, "loadLibrary jni-c-toxcore failed!")
-                e.printStackTrace()
-                System.exit(4)
+                try {
+                    System.load(libFile.canonicalPath)
+                    MainActivity.native_lib_loaded = true
+                    Log.i(TAG, "successfully loaded native library")
+                } catch (e: UnsatisfiedLinkError) {
+                    MainActivity.native_lib_loaded = false
+                    Log.i(TAG, "loadLibrary jni-c-toxcore failed!")
+                    e.printStackTrace()
+                    System.exit(4)
+                }
             }
         }
 
@@ -693,6 +696,13 @@ class MainActivity {
         @JvmStatic fun android_tox_callback_self_connection_status_cb_method(a_TOX_CONNECTION: Int) {
             Log.i(TAG, "android_tox_callback_self_connection_status_cb_method: " + a_TOX_CONNECTION)
             update_savedata_file_wrapper()
+            if (a_TOX_CONNECTION == ToxVars.TOX_CONNECTION.TOX_CONNECTION_TCP.value) {
+                set_tox_online_state("tcp")
+            } else if (a_TOX_CONNECTION == ToxVars.TOX_CONNECTION.TOX_CONNECTION_UDP.value) {
+                set_tox_online_state("udp")
+            } else {
+                set_tox_online_state("offline")
+            }
         }
         @JvmStatic fun android_tox_callback_friend_name_cb_method(friend_number: Long, friend_name: String?, length: Long) {}
         @JvmStatic fun android_tox_callback_friend_status_message_cb_method(
@@ -820,7 +830,7 @@ class MainActivity {
         ) {
             if (CTOXCORE_NATIVE_LOGGING)
             {
-                i(TAG, "C-TOXCORE:" + ToxVars.TOX_LOG_LEVEL.value_str(a_TOX_LOG_LEVEL) + ":file=" + file + ":linenum=" +
+                Log.i(TAG, "C-TOXCORE:" + ToxVars.TOX_LOG_LEVEL.value_str(a_TOX_LOG_LEVEL) + ":file=" + file + ":linenum=" +
                         line + ":func=" + function + ":msg=" + message);
             }
         }

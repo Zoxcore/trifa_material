@@ -1,6 +1,5 @@
 package com.zoffcc.applications.trifa
 
-import com.zoffcc.applications.trifa.Log.i
 import com.zoffcc.applications.trifa.MainActivity.Companion.update_savedata_file
 
 object HelperGeneric {
@@ -13,7 +12,7 @@ object HelperGeneric {
             update_savedata_file(password_hash_2)
             val end_timestamp = System.currentTimeMillis()
             MainActivity.semaphore_tox_savedata!!.release()
-            i(TAG, "update_savedata_file() took:" + (end_timestamp - start_timestamp).toFloat() / 1000f + "s")
+            Log.i(TAG, "update_savedata_file() took:" + (end_timestamp - start_timestamp).toFloat() / 1000f + "s")
         } catch (e: InterruptedException) {
             MainActivity.semaphore_tox_savedata!!.release()
             e.printStackTrace()

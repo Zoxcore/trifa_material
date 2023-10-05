@@ -1,7 +1,7 @@
 package com.zoffcc.applications.trifa
 
 object TRIFAGlobals {
-    var bootstrapping = false
+    public var bootstrapping = false
     const val HIGHER_NGC_VIDEO_BITRATE = 400
     const val LOWER_NGC_VIDEO_BITRATE = 90
     const val NGC_AUDIO_BITRATE = 8000
