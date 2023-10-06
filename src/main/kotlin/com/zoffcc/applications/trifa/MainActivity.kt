@@ -1,14 +1,20 @@
 package com.zoffcc.applications.trifa
 
+import com.zoffcc.applications.trifa.HelperFriend.send_friend_msg_receipt_v2_wrapper
+import com.zoffcc.applications.trifa.HelperGeneric.bytesToHex
 import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
 import com.zoffcc.applications.trifa.TRIFAGlobals.LOWER_NGC_VIDEO_BITRATE
 import com.zoffcc.applications.trifa.TRIFAGlobals.LOWER_NGC_VIDEO_QUANTIZER
 import com.zoffcc.applications.trifa.TRIFAGlobals.NGC_AUDIO_BITRATE
+import com.zoffcc.applications.trifa.ToxVars.TOX_HASH_LENGTH
 import set_tox_online_state
 import java.io.File
 import java.nio.ByteBuffer
 import java.util.*
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.Semaphore
+
 
 @Suppress("UNUSED_PARAMETER")
 class MainActivity {
@@ -34,6 +40,7 @@ class MainActivity {
         var PREF__ipv6_enabled = 1
         var PREF__force_udp_only = 0
 
+        var incoming_messages_queue: BlockingQueue<String> = LinkedBlockingQueue()
         //
         var PREF__ngc_video_bitrate: Int = LOWER_NGC_VIDEO_BITRATE // ~600 kbits/s -> ~60 kbytes/s
         var PREF__ngc_video_max_quantizer: Int =
@@ -937,6 +944,29 @@ class MainActivity {
                 TAG,
                 "android_tox_callback_friend_message_cb_method: fn=" + friend_number + " friend_message=" + friend_message
             )
+
+            var msgV3hash_hex_string: String? = null
+            if (msgV3hash_bin != null) {
+                msgV3hash_hex_string = bytesToHex(msgV3hash_bin, 0, msgV3hash_bin.size)
+            }
+
+            if (message_type == ToxVars.TOX_MESSAGE_TYPE.TOX_MESSAGE_TYPE_HIGH_LEVEL_ACK.value) {
+                return
+            }
+
+            if (msgV3hash_hex_string != null)
+            {
+                HelperMessage.send_msgv3_high_level_ack(friend_number, msgV3hash_hex_string);
+                try {
+                    incoming_messages_queue.offer("msgv3:"+friend_message)
+                } catch (_ : Exception) {}
+            }
+            else
+            {
+                try {
+                    incoming_messages_queue.offer("msgv1:"+friend_message)
+                } catch (_ : Exception) {}
+            }
         }
 
         @JvmStatic
@@ -953,6 +983,30 @@ class MainActivity {
                 TAG,
                 "android_tox_callback_friend_message_v2_cb_method: fn=" + friend_number + " friend_message=" + friend_message
             )
+
+            val msg_type = 1
+            val raw_message_buf = ByteBuffer.allocateDirect(raw_message_length.toInt())
+            raw_message_buf.put(raw_message, 0, raw_message_length.toInt())
+            val msg_id_buffer = ByteBuffer.allocateDirect(TOX_HASH_LENGTH)
+            tox_messagev2_get_message_id(raw_message_buf, msg_id_buffer)
+            val ts_sec = tox_messagev2_get_ts_sec(raw_message_buf)
+            val ts_ms = tox_messagev2_get_ts_ms(raw_message_buf)
+
+            val msg_id_buffer_compat = ByteBufferCompat(msg_id_buffer)
+            val msg_id_as_hex_string: String? = msg_id_buffer_compat.array()?.let {
+                bytesToHex(
+                    it, msg_id_buffer_compat.arrayOffset(),
+                    msg_id_buffer_compat.limit()
+                )
+            }
+            Log.i(TAG, "TOX_FILE_KIND_MESSAGEV2_SEND:MSGv2HASH:2=" + msg_id_as_hex_string);
+
+            try {
+                incoming_messages_queue.offer("msgv2:"+friend_message)
+            } catch (_ : Exception) {}
+
+            val pin_timestamp = System.currentTimeMillis()
+            send_friend_msg_receipt_v2_wrapper(friend_number, msg_type, msg_id_buffer, (pin_timestamp / 1000));
         }
 
         @JvmStatic
@@ -984,6 +1038,16 @@ class MainActivity {
             ts_sec: Long,
             msg_id: ByteArray?
         ) {
+            val msg_id_buffer = ByteBuffer.allocateDirect(TOX_HASH_LENGTH)
+            msg_id_buffer.put(msg_id, 0, TOX_HASH_LENGTH)
+            val msg_id_buffer_compat = ByteBufferCompat(msg_id_buffer)
+
+            val message_id_hash_as_hex_string = bytesToHex(
+                msg_id_buffer_compat.array()!!,
+                msg_id_buffer_compat.arrayOffset(),
+                msg_id_buffer_compat.limit()
+            )
+            Log.i(TAG, "receipt_message_v2_cb:MSGv2HASH:2=" + message_id_hash_as_hex_string);
         }
 
         @JvmStatic
