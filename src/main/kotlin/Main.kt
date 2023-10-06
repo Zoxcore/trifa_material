@@ -108,6 +108,7 @@ fun App() {
             }
         }
     }
+    ChatAppWithScaffold()
 }
 
 fun set_tox_running_state(new_state: String) {

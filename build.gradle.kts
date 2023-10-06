@@ -22,6 +22,11 @@ dependencies {
     // With compose.desktop.common you will also lose @Preview functionality
     implementation(compose.desktop.currentOs)
     implementation("com.russhwolf:multiplatform-settings-no-arg:1.0.0")
+    implementation(compose.ui)
+    implementation(compose.foundation)
+    implementation(compose.material)
+    @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+    implementation(compose.components.resources)
 }
 
 compose.desktop {
