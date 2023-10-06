@@ -8,6 +8,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.init_tox_callbacks
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_iterate
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_iteration_interval
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_kill
+import set_tox_running_state
 
 class TrifaToxService {
     fun tox_thread_start_fg() {
@@ -336,11 +337,13 @@ class TrifaToxService {
         // --------------- JNI ---------------
         // --------------- JNI ---------------
         @Suppress("UNUSED_PARAMETER")
-        @JvmStatic fun logger(level: Int, text: String?) {
+        @JvmStatic
+        fun logger(level: Int, text: String?) {
             Log.i(TAG, text!!)
         }
 
-        @JvmStatic fun safe_string(`in`: ByteArray?): String {
+        @JvmStatic
+        fun safe_string(`in`: ByteArray?): String {
             // Log.i(TAG, "safe_string:in=" + in);
             var out = ""
             try {
