@@ -1,22 +1,15 @@
+import java.text.SimpleDateFormat
+import java.util.*
+
+
+val df_date_time_long = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+
 fun timeToString(timestampMs: Long): String {
-    val seconds = timestampMs
-    val minutes = seconds / 1000 / 60
-    val hours = minutes / 24
-
-    val m = minutes % 60
-    val h = hours % 24
-
-    val mm = if (m < 10) {
-        "0$m"
-    } else {
-        m.toString()
+    return try {
+        df_date_time_long.format(Date(timestampMs))
+    } catch (e: Exception) {
+        "1970-02-02 12:00:01"
     }
-    val hh = if (h < 10) {
-        "0$h"
-    } else {
-        h.toString()
-    }
-    return "$hh:$mm"
 }
 
 fun timestampMs(): Long {
