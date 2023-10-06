@@ -1,9 +1,9 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
-    kotlin("jvm") version "1.9.10"
-    // kotlin("multiplatform") version "1.9.10"
-    id("org.jetbrains.compose") version "1.5.1"
+    kotlin("jvm")
+    // kotlin("multiplatform")
+    id("org.jetbrains.compose")
 }
 
 group = "com.zoffcc.applications.trifa_material"
@@ -21,6 +21,7 @@ dependencies {
     // (in a separate module for demo project and in testMain).
     // With compose.desktop.common you will also lose @Preview functionality
     implementation(compose.desktop.currentOs)
+    implementation("com.russhwolf:multiplatform-settings-no-arg:1.0.0")
 }
 
 compose.desktop {
@@ -35,7 +36,7 @@ compose.desktop {
     }
 
     application {
-        mainClass = "com.zoffcc.applications.trifa.MainKt"
+        mainClass = "MainKt"
         // jvmArgs += listOf("-Xmx2G")
         // args += listOf("-customArgument")
 

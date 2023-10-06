@@ -1,5 +1,3 @@
-package com.zoffcc.applications.trifa
-
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -9,10 +7,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
+import com.russhwolf.settings.Settings
+import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity.Companion.main_init
+import com.zoffcc.applications.trifa.TrifaToxService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
@@ -20,6 +22,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
+import java.lang.Exception
 
 private const val TAG = "trifa.Main.kt"
 
@@ -28,6 +31,8 @@ var start_button_text_wrapper = "stopped"
 
 var online_button_text_wrapper = "offline"
 var online_button_color_wrapper = Color.White.toArgb()
+
+val settings: Settings = Settings()
 
 @Composable
 @Preview
@@ -128,67 +133,138 @@ fun set_tox_online_state(new_state: String) {
 }
 
 fun main() = application(exitProcessOnExit = true) {
-    var isOpen by remember { mutableStateOf(true) }
-    var isAskingToClose by remember { mutableStateOf(false) }
-    val state = rememberWindowState()
+    var showIntroScreen by remember { mutableStateOf(true) }
+    try {
+        val tmp = settings.getBooleanOrNull("main.show_intro_screen")
+        if (tmp == false) {
+            showIntroScreen = false
+        }
+    } catch (_: Exception) {}
 
-    if (isOpen) {
-        Window(
-            onCloseRequest = { isAskingToClose = true },
-            title = "TRIfA",
-            state = state
-        ) {
-            if (isAskingToClose) {
-                Dialog(
-                    onCloseRequest = { isAskingToClose = false },
-                    title = i18n("Close TRIfA ?"),
-                ) {
-                    Button(
-                        onClick = {
-                            if (tox_running_state_wrapper == "running") {
-                                set_tox_running_state("stopping ...")
-                                TrifaToxService.stop_me = true
-                                runBlocking(Dispatchers.Default) {
-                                    Log.i(TAG, "waiting to shutdown ...");
-                                    while (tox_running_state_wrapper != "stopped") {
-                                        delay(100)
-                                        Log.i(TAG, "waiting ...");
+    if (showIntroScreen)
+    {
+        // ----------- intro screen -----------
+        // ----------- intro screen -----------
+        // ----------- intro screen -----------
+        var isOpen by remember { mutableStateOf(true) }
+        var isAskingToClose by remember { mutableStateOf(false) }
+
+        if (isOpen) {
+            Window(
+                onCloseRequest = { isAskingToClose = true },
+                title = "TRIfA Material - Welcome"
+            )
+            {
+                Text("Welcome to TRIfA Material")
+                Button(onClick = {
+                    settings.putBoolean("main.show_intro_screen", false)
+                    showIntroScreen = false
+                    isOpen = false
+                }) {
+                }
+                if (isAskingToClose) {
+                    isOpen = false
+                }
+            }
+        }
+        // ----------- intro screen -----------
+        // ----------- intro screen -----------
+        // ----------- intro screen -----------
+    }
+    else
+    {
+        // ----------- main app screen -----------
+        // ----------- main app screen -----------
+        // ----------- main app screen -----------
+        var isOpen by remember { mutableStateOf(true) }
+        var isAskingToClose by remember { mutableStateOf(false) }
+        var state = rememberWindowState()
+        var x_ = Dp(0.0f)
+        var y_ = Dp(0.0f)
+        var w_ = Dp(0.0f)
+        var h_ = Dp(0.0f)
+        var error = 0
+        try {
+            x_ = settings.getString("main.window.position.x", "").toFloat().dp
+            y_ = settings.getString("main.window.position.y", "").toFloat().dp
+            w_ = settings.getString("main.window.size.width", "").toFloat().dp
+            h_ = settings.getString("main.window.size.height", "").toFloat().dp
+        } catch (_: Exception) {
+            error = 1
+        }
+
+        if (error == 0) {
+            val wpos = WindowPosition(x = x_, y = y_)
+            val wsize = DpSize(w_, h_)
+            state = rememberWindowState(position = wpos, size = wsize)
+        }
+
+        if (isOpen) {
+            Window(
+                onCloseRequest = { isAskingToClose = true },
+                title = "TRIfA",
+                state = state
+            ) {
+                if (isAskingToClose) {
+                    Dialog(
+                        onCloseRequest = { isAskingToClose = false },
+                        title = i18n("Close TRIfA ?"),
+                    ) {
+                        Button(
+                            onClick = {
+                                if (tox_running_state_wrapper == "running") {
+                                    set_tox_running_state("stopping ...")
+                                    TrifaToxService.stop_me = true
+                                    runBlocking(Dispatchers.Default) {
+                                        Log.i(TAG, "waiting to shutdown ...");
+                                        while (tox_running_state_wrapper != "stopped") {
+                                            delay(100)
+                                            Log.i(TAG, "waiting ...");
+                                        }
+                                        Log.i(TAG, "closing application");
+                                        isOpen = false
                                     }
+                                } else {
                                     Log.i(TAG, "closing application");
                                     isOpen = false
                                 }
-                            } else {
-                                Log.i(TAG, "closing application");
-                                isOpen = false
                             }
+                        ) {
+                            Text(i18n("Yes"))
                         }
-                    ) {
-                        Text(i18n("Yes"))
                     }
                 }
-            }
 
-            LaunchedEffect(state) {
-                snapshotFlow { state.size }
-                    .onEach(::onWindowResize)
-                    .launchIn(this)
+                LaunchedEffect(state) {
+                    snapshotFlow { state.size }
+                        .onEach(::onWindowResize)
+                        .launchIn(this)
 
-                snapshotFlow { state.position }
-                    .filter { it.isSpecified }
-                    .onEach(::onWindowRelocate)
-                    .launchIn(this)
+                    snapshotFlow { state.position }
+                        .filter { it.isSpecified }
+                        .onEach(::onWindowRelocate)
+                        .launchIn(this)
+                }
+                App()
             }
-            App()
         }
+
+        // ----------- main app screen -----------
+        // ----------- main app screen -----------
+        // ----------- main app screen -----------
     }
 }
 
 @Suppress("UNUSED_PARAMETER")
 private fun onWindowResize(size: DpSize) {
     // println("onWindowResize $size")
+    settings.putString("main.window.size.width", size.width.value.toString())
+    settings.putString("main.window.size.height", size.height.value.toString())
 }
 
 @Suppress("UNUSED_PARAMETER")
 private fun onWindowRelocate(position: WindowPosition) {
     // println("onWindowRelocate $position")
+    settings.putString("main.window.position.x", position.x.value.toString())
+    settings.putString("main.window.position.y", position.y.value.toString())
 }

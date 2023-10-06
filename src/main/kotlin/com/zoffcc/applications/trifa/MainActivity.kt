@@ -4,6 +4,7 @@ import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
 import com.zoffcc.applications.trifa.TRIFAGlobals.LOWER_NGC_VIDEO_BITRATE
 import com.zoffcc.applications.trifa.TRIFAGlobals.LOWER_NGC_VIDEO_QUANTIZER
 import com.zoffcc.applications.trifa.TRIFAGlobals.NGC_AUDIO_BITRATE
+import set_tox_online_state
 import java.io.File
 import java.nio.ByteBuffer
 import java.util.*
@@ -17,9 +18,11 @@ class MainActivity {
     companion object {
         private const val TAG = "trifa.MainActivity"
         const val Version = "0.99.0"
+
         // --------- global config ---------
         // --------- global config ---------
         const val CTOXCORE_NATIVE_LOGGING = true // set "false" for release builds
+
         // --------- global config ---------
         // --------- global config ---------
         var native_lib_loaded = false
@@ -30,6 +33,7 @@ class MainActivity {
         var PREF__local_discovery_enabled = 1
         var PREF__ipv6_enabled = 1
         var PREF__force_udp_only = 0
+
         //
         var PREF__ngc_video_bitrate: Int = LOWER_NGC_VIDEO_BITRATE // ~600 kbits/s -> ~60 kbytes/s
         var PREF__ngc_video_max_quantizer: Int =
@@ -43,6 +47,7 @@ class MainActivity {
         // !!!!!! DEBUG !!!!!! change to real password later !!!!!!
         //
         var password_hash = """passXY!7$9%"""
+
         //
         // !!!!!! DEBUG !!!!!! change to real password later !!!!!!
         // !!!!!! DEBUG !!!!!! change to real password later !!!!!!
@@ -73,7 +78,10 @@ class MainActivity {
             } catch (e: Exception) {
             }
             Log.i(TAG, "java.library.path:" + System.getProperty("java.library.path"))
-            Log.i(TAG, "loaded:c-toxcore:v" + tox_version_major() + "." + tox_version_minor() + "." + tox_version_patch())
+            Log.i(
+                TAG,
+                "loaded:c-toxcore:v" + tox_version_major() + "." + tox_version_minor() + "." + tox_version_patch()
+            )
             Log.i(TAG, "loaded:jni-c-toxcore:v" + jnictoxcore_version())
 
             Log.i(TAG, "tox_service_fg:" + tox_service_fg)
@@ -102,7 +110,8 @@ class MainActivity {
             Log.i(TAG, "MyToxID:$my_tox_id_temp")
             try {
                 Thread.currentThread().name = "t_main"
-            } catch (_: Exception) {}
+            } catch (_: Exception) {
+            }
         }
 
         init {
@@ -142,7 +151,8 @@ class MainActivity {
         // -------- native methods --------
         // -------- native methods --------
         // -------- native methods --------
-        @JvmStatic external fun init(
+        @JvmStatic
+        external fun init(
             data_dir: String?,
             udp_enabled: Int,
             local_discovery_enabled: Int,
@@ -164,18 +174,28 @@ class MainActivity {
         val nativeLibTOXGITHASH: String?
             external get
 
-        @JvmStatic external fun update_savedata_file(tox_encrypt_passphrase_hash: String?)
-        @JvmStatic external fun get_my_toxid(): String
-        @JvmStatic external fun add_tcp_relay_single(ip: String?, key_hex: String?, port: Long): Int
-        @JvmStatic external fun bootstrap_single(ip: String?, key_hex: String?, port: Long): Int
-        @JvmStatic external fun tox_self_get_connection_status(): Int
-        @JvmStatic external fun init_tox_callbacks()
-        @JvmStatic external fun tox_iteration_interval(): Long
-        @JvmStatic external fun tox_iterate(): Long
+        @JvmStatic
+        external fun update_savedata_file(tox_encrypt_passphrase_hash: String?)
+        @JvmStatic
+        external fun get_my_toxid(): String
+        @JvmStatic
+        external fun add_tcp_relay_single(ip: String?, key_hex: String?, port: Long): Int
+        @JvmStatic
+        external fun bootstrap_single(ip: String?, key_hex: String?, port: Long): Int
+        @JvmStatic
+        external fun tox_self_get_connection_status(): Int
+        @JvmStatic
+        external fun init_tox_callbacks()
+        @JvmStatic
+        external fun tox_iteration_interval(): Long
+        @JvmStatic
+        external fun tox_iterate(): Long
 
         // ----------- TRIfA internal -----------
-        @JvmStatic external fun jni_iterate_group_audio(delta_new: Int, want_ms_output: Int): Int
-        @JvmStatic external fun jni_iterate_videocall_audio(
+        @JvmStatic
+        external fun jni_iterate_group_audio(delta_new: Int, want_ms_output: Int): Int
+        @JvmStatic
+        external fun jni_iterate_videocall_audio(
             delta_new: Int,
             want_ms_output: Int,
             channels: Int,
@@ -183,7 +203,8 @@ class MainActivity {
             send_emtpy_buffer: Int
         ): Int
 
-        @JvmStatic external fun crgb2yuv(
+        @JvmStatic
+        external fun crgb2yuv(
             rgba_buf: ByteBuffer?,
             yuv_buf: ByteBuffer?,
             w_yuv: Int,
@@ -194,48 +215,88 @@ class MainActivity {
 
         // ------------------------------
 
-        @JvmStatic external fun tox_set_do_not_sync_av(do_not_sync_av: Int)
-        @JvmStatic external fun tox_set_onion_active(active: Int)
+        @JvmStatic
+        external fun tox_set_do_not_sync_av(do_not_sync_av: Int)
+        @JvmStatic
+        external fun tox_set_onion_active(active: Int)
 
         // ----------- TRIfA internal -----------
-        @JvmStatic external fun tox_kill(): Long
-        @JvmStatic external fun exit()
-        @JvmStatic external fun tox_friend_send_message(friendnum: Long, a_TOX_MESSAGE_TYPE: Int, message: String?): Long
-        @JvmStatic external fun tox_version_major(): Long
-        @JvmStatic external fun tox_version_minor(): Long
-        @JvmStatic external fun tox_version_patch(): Long
-        @JvmStatic external fun jnictoxcore_version(): String
-        @JvmStatic external fun libavutil_version(): String?
-        @JvmStatic external fun libopus_version(): String?
-        @JvmStatic external fun libsodium_version(): String?
-        @JvmStatic external fun tox_max_filename_length(): Long
-        @JvmStatic external fun tox_file_id_length(): Long
-        @JvmStatic external fun tox_max_message_length(): Long
-        @JvmStatic external fun tox_friend_add(toxid_str: String?, message: String?): Long
-        @JvmStatic external fun tox_friend_add_norequest(public_key_str: String?): Long
-        @JvmStatic external fun tox_self_get_friend_list_size(): Long
-        @JvmStatic external fun tox_self_set_nospam(nospam: Long) // this actually needs an "uint32_t" which is an unsigned 32bit integer value
-        @JvmStatic external fun tox_self_get_nospam(): Long // this actually returns an "uint32_t" which is an unsigned 32bit integer value
-        @JvmStatic external fun tox_friend_by_public_key(friend_public_key_string: String?): Long
-        @JvmStatic external fun tox_friend_get_public_key(friend_number: Long): String?
-        @JvmStatic external fun tox_friend_get_capabilities(friend_number: Long): Long
-        @JvmStatic external fun tox_self_get_friend_list(): LongArray?
-        @JvmStatic external fun tox_self_set_name(name: String?): Int
-        @JvmStatic external fun tox_self_set_status_message(status_message: String?): Int
-        @JvmStatic external fun tox_self_set_status(a_TOX_USER_STATUS: Int)
-        @JvmStatic external fun tox_self_set_typing(friend_number: Long, typing: Int): Int
-        @JvmStatic external fun tox_friend_get_connection_status(friend_number: Long): Int
-        @JvmStatic external fun tox_friend_delete(friend_number: Long): Int
-        @JvmStatic external fun tox_self_get_name(): String?
-        @JvmStatic external fun tox_self_get_name_size(): Long
-        @JvmStatic external fun tox_self_get_status_message_size(): Long
-        @JvmStatic external fun tox_self_get_status_message(): String?
-        @JvmStatic external fun tox_friend_send_lossless_packet(friend_number: Long, data: ByteArray?, data_length: Int): Int
-        @JvmStatic external fun tox_file_control(friend_number: Long, file_number: Long, a_TOX_FILE_CONTROL: Int): Int
-        @JvmStatic external fun tox_hash(hash_buffer: ByteBuffer?, data_buffer: ByteBuffer?, data_length: Long): Int
-        @JvmStatic external fun tox_file_seek(friend_number: Long, file_number: Long, position: Long): Int
-        @JvmStatic external fun tox_file_get_file_id(friend_number: Long, file_number: Long, file_id_buffer: ByteBuffer?): Int
-        @JvmStatic external fun tox_file_send(
+        @JvmStatic
+        external fun tox_kill(): Long
+        @JvmStatic
+        external fun exit()
+        @JvmStatic
+        external fun tox_friend_send_message(friendnum: Long, a_TOX_MESSAGE_TYPE: Int, message: String?): Long
+        @JvmStatic
+        external fun tox_version_major(): Long
+        @JvmStatic
+        external fun tox_version_minor(): Long
+        @JvmStatic
+        external fun tox_version_patch(): Long
+        @JvmStatic
+        external fun jnictoxcore_version(): String
+        @JvmStatic
+        external fun libavutil_version(): String?
+        @JvmStatic
+        external fun libopus_version(): String?
+        @JvmStatic
+        external fun libsodium_version(): String?
+        @JvmStatic
+        external fun tox_max_filename_length(): Long
+        @JvmStatic
+        external fun tox_file_id_length(): Long
+        @JvmStatic
+        external fun tox_max_message_length(): Long
+        @JvmStatic
+        external fun tox_friend_add(toxid_str: String?, message: String?): Long
+        @JvmStatic
+        external fun tox_friend_add_norequest(public_key_str: String?): Long
+        @JvmStatic
+        external fun tox_self_get_friend_list_size(): Long
+        @JvmStatic
+        external fun tox_self_set_nospam(nospam: Long) // this actually needs an "uint32_t" which is an unsigned 32bit integer value
+        @JvmStatic
+        external fun tox_self_get_nospam(): Long // this actually returns an "uint32_t" which is an unsigned 32bit integer value
+        @JvmStatic
+        external fun tox_friend_by_public_key(friend_public_key_string: String?): Long
+        @JvmStatic
+        external fun tox_friend_get_public_key(friend_number: Long): String?
+        @JvmStatic
+        external fun tox_friend_get_capabilities(friend_number: Long): Long
+        @JvmStatic
+        external fun tox_self_get_friend_list(): LongArray?
+        @JvmStatic
+        external fun tox_self_set_name(name: String?): Int
+        @JvmStatic
+        external fun tox_self_set_status_message(status_message: String?): Int
+        @JvmStatic
+        external fun tox_self_set_status(a_TOX_USER_STATUS: Int)
+        @JvmStatic
+        external fun tox_self_set_typing(friend_number: Long, typing: Int): Int
+        @JvmStatic
+        external fun tox_friend_get_connection_status(friend_number: Long): Int
+        @JvmStatic
+        external fun tox_friend_delete(friend_number: Long): Int
+        @JvmStatic
+        external fun tox_self_get_name(): String?
+        @JvmStatic
+        external fun tox_self_get_name_size(): Long
+        @JvmStatic
+        external fun tox_self_get_status_message_size(): Long
+        @JvmStatic
+        external fun tox_self_get_status_message(): String?
+        @JvmStatic
+        external fun tox_friend_send_lossless_packet(friend_number: Long, data: ByteArray?, data_length: Int): Int
+        @JvmStatic
+        external fun tox_file_control(friend_number: Long, file_number: Long, a_TOX_FILE_CONTROL: Int): Int
+        @JvmStatic
+        external fun tox_hash(hash_buffer: ByteBuffer?, data_buffer: ByteBuffer?, data_length: Long): Int
+        @JvmStatic
+        external fun tox_file_seek(friend_number: Long, file_number: Long, position: Long): Int
+        @JvmStatic
+        external fun tox_file_get_file_id(friend_number: Long, file_number: Long, file_id_buffer: ByteBuffer?): Int
+        @JvmStatic
+        external fun tox_file_send(
             friend_number: Long,
             kind: Long,
             file_size: Long,
@@ -244,7 +305,8 @@ class MainActivity {
             filename_length: Long
         ): Long
 
-        @JvmStatic external fun tox_file_send_chunk(
+        @JvmStatic
+        external fun tox_file_send_chunk(
             friend_number: Long,
             file_number: Long,
             position: Long,
@@ -255,8 +317,10 @@ class MainActivity {
         // --------------- Message V2 -------------
         // --------------- Message V2 -------------
         // --------------- Message V2 -------------
-        @JvmStatic external fun tox_messagev2_size(text_length: Long, type: Long, alter_type: Long): Long
-        @JvmStatic external fun tox_messagev2_wrap(
+        @JvmStatic
+        external fun tox_messagev2_size(text_length: Long, type: Long, alter_type: Long): Long
+        @JvmStatic
+        external fun tox_messagev2_wrap(
             text_length: Long,
             type: Long,
             alter_type: Long,
@@ -267,10 +331,14 @@ class MainActivity {
             msgid_buffer: ByteBuffer?
         ): Int
 
-        @JvmStatic external fun tox_messagev2_get_message_id(raw_message_buffer: ByteBuffer?, msgid_buffer: ByteBuffer?): Int
-        @JvmStatic external fun tox_messagev2_get_ts_sec(raw_message_buffer: ByteBuffer?): Long
-        @JvmStatic external fun tox_messagev2_get_ts_ms(raw_message_buffer: ByteBuffer?): Long
-        @JvmStatic external fun tox_messagev2_get_message_text(
+        @JvmStatic
+        external fun tox_messagev2_get_message_id(raw_message_buffer: ByteBuffer?, msgid_buffer: ByteBuffer?): Int
+        @JvmStatic
+        external fun tox_messagev2_get_ts_sec(raw_message_buffer: ByteBuffer?): Long
+        @JvmStatic
+        external fun tox_messagev2_get_ts_ms(raw_message_buffer: ByteBuffer?): Long
+        @JvmStatic
+        external fun tox_messagev2_get_message_text(
             raw_message_buffer: ByteBuffer?,
             raw_message_len: Long,
             is_alter_msg: Int,
@@ -278,15 +346,19 @@ class MainActivity {
             message_text_buffer: ByteBuffer?
         ): Long
 
-        @JvmStatic external fun tox_messagev2_get_sync_message_pubkey(raw_message_buffer: ByteBuffer?): String?
-        @JvmStatic external fun tox_messagev2_get_sync_message_type(raw_message_buffer: ByteBuffer?): Long
-        @JvmStatic external fun tox_util_friend_send_msg_receipt_v2(
+        @JvmStatic
+        external fun tox_messagev2_get_sync_message_pubkey(raw_message_buffer: ByteBuffer?): String?
+        @JvmStatic
+        external fun tox_messagev2_get_sync_message_type(raw_message_buffer: ByteBuffer?): Long
+        @JvmStatic
+        external fun tox_util_friend_send_msg_receipt_v2(
             friend_number: Long,
             ts_sec: Long,
             msgid_buffer: ByteBuffer?
         ): Int
 
-        @JvmStatic external fun tox_util_friend_send_message_v2(
+        @JvmStatic
+        external fun tox_util_friend_send_message_v2(
             friend_number: Long,
             type: Int,
             ts_sec: Long,
@@ -297,7 +369,8 @@ class MainActivity {
             msgid_back_buffer: ByteBuffer?
         ): Long
 
-        @JvmStatic external fun tox_util_friend_resend_message_v2(
+        @JvmStatic
+        external fun tox_util_friend_resend_message_v2(
             friend_number: Long,
             raw_message_buffer: ByteBuffer?,
             raw_msg_len: Long
@@ -309,8 +382,10 @@ class MainActivity {
         // --------------- Message V3 -------------
         // --------------- Message V3 -------------
         // --------------- Message V3 -------------
-        @JvmStatic external fun tox_messagev3_get_new_message_id(hash_buffer: ByteBuffer?): Int
-        @JvmStatic external fun tox_messagev3_friend_send_message(
+        @JvmStatic
+        external fun tox_messagev3_get_new_message_id(hash_buffer: ByteBuffer?): Int
+        @JvmStatic
+        external fun tox_messagev3_friend_send_message(
             friendnum: Long,
             a_TOX_MESSAGE_TYPE: Int,
             message: String?,
@@ -324,41 +399,63 @@ class MainActivity {
         // --------------- Conference -------------
         // --------------- Conference -------------
         // --------------- Conference -------------
-        @JvmStatic external fun tox_conference_join(friend_number: Long, cookie_buffer: ByteBuffer?, cookie_length: Long): Long
-        @JvmStatic external fun tox_conference_peer_count(conference_number: Long): Long
-        @JvmStatic external fun tox_conference_peer_get_name_size(conference_number: Long, peer_number: Long): Long
-        @JvmStatic external fun tox_conference_peer_get_name(conference_number: Long, peer_number: Long): String?
-        @JvmStatic external fun tox_conference_peer_get_public_key(conference_number: Long, peer_number: Long): String?
-        @JvmStatic external fun tox_conference_offline_peer_count(conference_number: Long): Long
-        @JvmStatic external fun tox_conference_offline_peer_get_name_size(conference_number: Long, offline_peer_number: Long): Long
-        @JvmStatic external fun tox_conference_offline_peer_get_name(conference_number: Long, offline_peer_number: Long): String?
-        @JvmStatic external fun tox_conference_offline_peer_get_public_key(
+        @JvmStatic
+        external fun tox_conference_join(friend_number: Long, cookie_buffer: ByteBuffer?, cookie_length: Long): Long
+        @JvmStatic
+        external fun tox_conference_peer_count(conference_number: Long): Long
+        @JvmStatic
+        external fun tox_conference_peer_get_name_size(conference_number: Long, peer_number: Long): Long
+        @JvmStatic
+        external fun tox_conference_peer_get_name(conference_number: Long, peer_number: Long): String?
+        @JvmStatic
+        external fun tox_conference_peer_get_public_key(conference_number: Long, peer_number: Long): String?
+        @JvmStatic
+        external fun tox_conference_offline_peer_count(conference_number: Long): Long
+        @JvmStatic
+        external fun tox_conference_offline_peer_get_name_size(conference_number: Long, offline_peer_number: Long): Long
+        @JvmStatic
+        external fun tox_conference_offline_peer_get_name(conference_number: Long, offline_peer_number: Long): String?
+        @JvmStatic
+        external fun tox_conference_offline_peer_get_public_key(
             conference_number: Long,
             offline_peer_number: Long
         ): String?
 
-        @JvmStatic external fun tox_conference_offline_peer_get_last_active(
+        @JvmStatic
+        external fun tox_conference_offline_peer_get_last_active(
             conference_number: Long,
             offline_peer_number: Long
         ): Long
 
-        @JvmStatic external fun tox_conference_peer_number_is_ours(conference_number: Long, peer_number: Long): Int
-        @JvmStatic external fun tox_conference_get_title_size(conference_number: Long): Long
-        @JvmStatic external fun tox_conference_get_title(conference_number: Long): String?
-        @JvmStatic external fun tox_conference_get_type(conference_number: Long): Int
-        @JvmStatic external fun tox_conference_send_message(
+        @JvmStatic
+        external fun tox_conference_peer_number_is_ours(conference_number: Long, peer_number: Long): Int
+        @JvmStatic
+        external fun tox_conference_get_title_size(conference_number: Long): Long
+        @JvmStatic
+        external fun tox_conference_get_title(conference_number: Long): String?
+        @JvmStatic
+        external fun tox_conference_get_type(conference_number: Long): Int
+        @JvmStatic
+        external fun tox_conference_send_message(
             conference_number: Long,
             a_TOX_MESSAGE_TYPE: Int,
             message: String?
         ): Int
 
-        @JvmStatic external fun tox_conference_delete(conference_number: Long): Int
-        @JvmStatic external fun tox_conference_get_chatlist_size(): Long
-        @JvmStatic external fun tox_conference_get_chatlist(): LongArray?
-        @JvmStatic external fun tox_conference_get_id(conference_number: Long, cookie_buffer: ByteBuffer?): Int
-        @JvmStatic external fun tox_conference_new(): Int
-        @JvmStatic external fun tox_conference_invite(friend_number: Long, conference_number: Long): Int
-        @JvmStatic external fun tox_conference_set_title(conference_number: Long, title: String?): Int
+        @JvmStatic
+        external fun tox_conference_delete(conference_number: Long): Int
+        @JvmStatic
+        external fun tox_conference_get_chatlist_size(): Long
+        @JvmStatic
+        external fun tox_conference_get_chatlist(): LongArray?
+        @JvmStatic
+        external fun tox_conference_get_id(conference_number: Long, cookie_buffer: ByteBuffer?): Int
+        @JvmStatic
+        external fun tox_conference_new(): Int
+        @JvmStatic
+        external fun tox_conference_invite(friend_number: Long, conference_number: Long): Int
+        @JvmStatic
+        external fun tox_conference_set_title(conference_number: Long, title: String?): Int
         // --------------- Conference -------------
         // --------------- Conference -------------
         // --------------- Conference -------------
@@ -385,7 +482,8 @@ class MainActivity {
          * @param my_peer_name              The name of the peer creating the group.
          * @return group_number on success, UINT32_MAX on failure.
          */
-        @JvmStatic external fun tox_group_new(a_TOX_GROUP_PRIVACY_STATE: Int, group_name: String?, my_peer_name: String?): Long
+        @JvmStatic
+        external fun tox_group_new(a_TOX_GROUP_PRIVACY_STATE: Int, group_name: String?, my_peer_name: String?): Long
 
         /**
          * Joins a group chat with specified Chat ID.
@@ -400,48 +498,78 @@ class MainActivity {
          * @param my_peer_name   The name of the peer joining the group.
          * @return group_number on success, UINT32_MAX on failure.
          */
-        @JvmStatic external fun tox_group_join(
+        @JvmStatic
+        external fun tox_group_join(
             chat_id_buffer: ByteBuffer?,
             chat_id_length: Long,
             my_peer_name: String?,
             password: String?
         ): Long
 
-        @JvmStatic external fun tox_group_leave(group_number: Long, part_message: String?): Int
-        @JvmStatic external fun tox_group_self_get_peer_id(group_number: Long): Long
-        @JvmStatic external fun tox_group_self_set_name(group_number: Long, my_peer_name: String?): Int
-        @JvmStatic external fun tox_group_self_get_public_key(group_number: Long): String?
-        @JvmStatic external fun tox_group_self_get_role(group_number: Long): Int
-        @JvmStatic external fun tox_group_peer_get_role(group_number: Long, peer_id: Long): Int
-        @JvmStatic external fun tox_group_get_chat_id(group_number: Long, chat_id_buffer: ByteBuffer?): Int
-        @JvmStatic external fun tox_group_get_number_groups(): Long
-        @JvmStatic external fun tox_group_get_grouplist(): LongArray?
-        @JvmStatic external fun tox_group_peer_count(group_number: Long): Long
-        @JvmStatic external fun tox_group_get_peer_limit(group_number: Long): Int
-        @JvmStatic external fun tox_group_founder_set_peer_limit(group_number: Long, max_peers: Int): Int
-        @JvmStatic external fun tox_group_offline_peer_count(group_number: Long): Long
-        @JvmStatic external fun tox_group_get_peerlist(group_number: Long): LongArray?
-        @JvmStatic external fun tox_group_by_chat_id(chat_id_buffer: ByteBuffer?): Long
-        @JvmStatic external fun tox_group_get_privacy_state(group_number: Long): Int
-        @JvmStatic external fun tox_group_mod_kick_peer(group_number: Long, peer_id: Long): Int
-        @JvmStatic external fun tox_group_mod_set_role(group_number: Long, peer_id: Long, a_Tox_Group_Role: Int): Int
-        @JvmStatic external fun tox_group_peer_get_public_key(group_number: Long, peer_id: Long): String?
-        @JvmStatic external fun tox_group_peer_by_public_key(group_number: Long, peer_public_key_string: String?): Long
-        @JvmStatic external fun tox_group_peer_get_name(group_number: Long, peer_id: Long): String?
-        @JvmStatic external fun tox_group_get_name(group_number: Long): String?
-        @JvmStatic external fun tox_group_get_topic(group_number: Long): String?
-        @JvmStatic external fun tox_group_peer_get_connection_status(group_number: Long, peer_id: Long): Int
-        @JvmStatic external fun tox_group_invite_friend(group_number: Long, friend_number: Long): Int
-        @JvmStatic external fun tox_group_is_connected(group_number: Long): Int
-        @JvmStatic external fun tox_group_reconnect(group_number: Long): Int
-        @JvmStatic external fun tox_group_send_custom_packet(
+        @JvmStatic
+        external fun tox_group_leave(group_number: Long, part_message: String?): Int
+        @JvmStatic
+        external fun tox_group_self_get_peer_id(group_number: Long): Long
+        @JvmStatic
+        external fun tox_group_self_set_name(group_number: Long, my_peer_name: String?): Int
+        @JvmStatic
+        external fun tox_group_self_get_public_key(group_number: Long): String?
+        @JvmStatic
+        external fun tox_group_self_get_role(group_number: Long): Int
+        @JvmStatic
+        external fun tox_group_peer_get_role(group_number: Long, peer_id: Long): Int
+        @JvmStatic
+        external fun tox_group_get_chat_id(group_number: Long, chat_id_buffer: ByteBuffer?): Int
+        @JvmStatic
+        external fun tox_group_get_number_groups(): Long
+        @JvmStatic
+        external fun tox_group_get_grouplist(): LongArray?
+        @JvmStatic
+        external fun tox_group_peer_count(group_number: Long): Long
+        @JvmStatic
+        external fun tox_group_get_peer_limit(group_number: Long): Int
+        @JvmStatic
+        external fun tox_group_founder_set_peer_limit(group_number: Long, max_peers: Int): Int
+        @JvmStatic
+        external fun tox_group_offline_peer_count(group_number: Long): Long
+        @JvmStatic
+        external fun tox_group_get_peerlist(group_number: Long): LongArray?
+        @JvmStatic
+        external fun tox_group_by_chat_id(chat_id_buffer: ByteBuffer?): Long
+        @JvmStatic
+        external fun tox_group_get_privacy_state(group_number: Long): Int
+        @JvmStatic
+        external fun tox_group_mod_kick_peer(group_number: Long, peer_id: Long): Int
+        @JvmStatic
+        external fun tox_group_mod_set_role(group_number: Long, peer_id: Long, a_Tox_Group_Role: Int): Int
+        @JvmStatic
+        external fun tox_group_peer_get_public_key(group_number: Long, peer_id: Long): String?
+        @JvmStatic
+        external fun tox_group_peer_by_public_key(group_number: Long, peer_public_key_string: String?): Long
+        @JvmStatic
+        external fun tox_group_peer_get_name(group_number: Long, peer_id: Long): String?
+        @JvmStatic
+        external fun tox_group_get_name(group_number: Long): String?
+        @JvmStatic
+        external fun tox_group_get_topic(group_number: Long): String?
+        @JvmStatic
+        external fun tox_group_peer_get_connection_status(group_number: Long, peer_id: Long): Int
+        @JvmStatic
+        external fun tox_group_invite_friend(group_number: Long, friend_number: Long): Int
+        @JvmStatic
+        external fun tox_group_is_connected(group_number: Long): Int
+        @JvmStatic
+        external fun tox_group_reconnect(group_number: Long): Int
+        @JvmStatic
+        external fun tox_group_send_custom_packet(
             group_number: Long,
             lossless: Int,
             data: ByteArray?,
             data_length: Int
         ): Int
 
-        @JvmStatic external fun tox_group_send_custom_private_packet(
+        @JvmStatic
+        external fun tox_group_send_custom_private_packet(
             group_number: Long,
             peer_id: Long,
             lossless: Int,
@@ -467,7 +595,8 @@ class MainActivity {
          * containing the message text.
          * @return message_id on success. return < 0 on error.
          */
-        @JvmStatic external fun tox_group_send_message(group_number: Long, a_TOX_MESSAGE_TYPE: Int, message: String?): Long
+        @JvmStatic
+        external fun tox_group_send_message(group_number: Long, a_TOX_MESSAGE_TYPE: Int, message: String?): Long
 
         /**
          * Send a text chat message to the specified peer in the specified group.
@@ -487,7 +616,8 @@ class MainActivity {
          * containing the message text.
          * @return true on success.
          */
-        @JvmStatic external fun tox_group_send_private_message(
+        @JvmStatic
+        external fun tox_group_send_private_message(
             group_number: Long,
             peer_id: Long,
             a_TOX_MESSAGE_TYPE: Int,
@@ -513,7 +643,8 @@ class MainActivity {
          * containing the message text.
          * @return 0 on success. return < 0 on error.
          */
-        @JvmStatic external fun tox_group_send_private_message_by_peerpubkey(
+        @JvmStatic
+        external fun tox_group_send_private_message_by_peerpubkey(
             group_number: Long,
             peer_public_key_string: String?,
             a_TOX_MESSAGE_TYPE: Int,
@@ -529,7 +660,8 @@ class MainActivity {
          * @param password           The password required to join the group. Set to NULL if no password is required.
          * @return the group_number on success, UINT32_MAX on failure.
          */
-        @JvmStatic external fun tox_group_invite_accept(
+        @JvmStatic
+        external fun tox_group_invite_accept(
             friend_number: Long,
             invite_data_buffer: ByteBuffer?,
             invite_data_length: Long,
@@ -543,28 +675,38 @@ class MainActivity {
         // --------------- AV -------------
         // --------------- AV -------------
         // --------------- AV -------------
-        @JvmStatic external fun toxav_answer(friendnum: Long, audio_bit_rate: Long, video_bit_rate: Long): Int
-        @JvmStatic external fun toxav_iteration_interval(): Long
-        @JvmStatic external fun toxav_call(friendnum: Long, audio_bit_rate: Long, video_bit_rate: Long): Int
-        @JvmStatic external fun toxav_bit_rate_set(friendnum: Long, audio_bit_rate: Long, video_bit_rate: Long): Int
-        @JvmStatic external fun toxav_call_control(friendnum: Long, a_TOXAV_CALL_CONTROL: Int): Int
-        @JvmStatic external fun toxav_video_send_frame_uv_reversed(friendnum: Long, frame_width_px: Int, frame_height_px: Int): Int
-        @JvmStatic external fun toxav_video_send_frame(friendnum: Long, frame_width_px: Int, frame_height_px: Int): Int
-        @JvmStatic external fun toxav_video_send_frame_age(
+        @JvmStatic
+        external fun toxav_answer(friendnum: Long, audio_bit_rate: Long, video_bit_rate: Long): Int
+        @JvmStatic
+        external fun toxav_iteration_interval(): Long
+        @JvmStatic
+        external fun toxav_call(friendnum: Long, audio_bit_rate: Long, video_bit_rate: Long): Int
+        @JvmStatic
+        external fun toxav_bit_rate_set(friendnum: Long, audio_bit_rate: Long, video_bit_rate: Long): Int
+        @JvmStatic
+        external fun toxav_call_control(friendnum: Long, a_TOXAV_CALL_CONTROL: Int): Int
+        @JvmStatic
+        external fun toxav_video_send_frame_uv_reversed(friendnum: Long, frame_width_px: Int, frame_height_px: Int): Int
+        @JvmStatic
+        external fun toxav_video_send_frame(friendnum: Long, frame_width_px: Int, frame_height_px: Int): Int
+        @JvmStatic
+        external fun toxav_video_send_frame_age(
             friendnum: Long,
             frame_width_px: Int,
             frame_height_px: Int,
             age_ms: Int
         ): Int
 
-        @JvmStatic external fun toxav_video_send_frame_h264(
+        @JvmStatic
+        external fun toxav_video_send_frame_h264(
             friendnum: Long,
             frame_width_px: Int,
             frame_height_px: Int,
             data_len: Long
         ): Int
 
-        @JvmStatic external fun toxav_video_send_frame_h264_age(
+        @JvmStatic
+        external fun toxav_video_send_frame_h264_age(
             friendnum: Long,
             frame_width_px: Int,
             frame_height_px: Int,
@@ -572,21 +714,28 @@ class MainActivity {
             age_ms: Int
         ): Int
 
-        @JvmStatic external fun toxav_option_set(friendnum: Long, a_TOXAV_OPTIONS_OPTION: Long, value: Long): Int
-        @JvmStatic external fun set_av_call_status(status: Int)
-        @JvmStatic external fun set_audio_play_volume_percent(volume_percent: Int)
+        @JvmStatic
+        external fun toxav_option_set(friendnum: Long, a_TOXAV_OPTIONS_OPTION: Long, value: Long): Int
+        @JvmStatic
+        external fun set_av_call_status(status: Int)
+        @JvmStatic
+        external fun set_audio_play_volume_percent(volume_percent: Int)
 
         // buffer is for incoming video (call)
-        @JvmStatic external fun set_JNI_video_buffer(buffer: ByteBuffer?, frame_width_px: Int, frame_height_px: Int): Long
+        @JvmStatic
+        external fun set_JNI_video_buffer(buffer: ByteBuffer?, frame_width_px: Int, frame_height_px: Int): Long
 
         // buffer2 is for sending video (call)
-        @JvmStatic external fun set_JNI_video_buffer2(buffer2: ByteBuffer?, frame_width_px: Int, frame_height_px: Int)
+        @JvmStatic
+        external fun set_JNI_video_buffer2(buffer2: ByteBuffer?, frame_width_px: Int, frame_height_px: Int)
 
         // audio_buffer is for sending audio (group and call)
-        @JvmStatic external fun set_JNI_audio_buffer(audio_buffer: ByteBuffer?)
+        @JvmStatic
+        external fun set_JNI_audio_buffer(audio_buffer: ByteBuffer?)
 
         // audio_buffer2 is for incoming audio (group and call)
-        @JvmStatic external fun set_JNI_audio_buffer2(audio_buffer2: ByteBuffer?)
+        @JvmStatic
+        external fun set_JNI_audio_buffer2(audio_buffer2: ByteBuffer?)
 
         /**
          * Send an audio frame to a friend.
@@ -607,7 +756,8 @@ class MainActivity {
          * @param sampling_rate Audio sampling rate used in this frame. Valid sampling
          * rates are 8000, 12000, 16000, 24000, or 48000.
          */
-        @JvmStatic external fun toxav_audio_send_frame(
+        @JvmStatic
+        external fun toxav_audio_send_frame(
             friend_number: Long,
             sample_count: Long,
             channels: Int,
@@ -623,8 +773,12 @@ class MainActivity {
         // -------- called by AV native methods --------
         // -------- called by AV native methods --------
         // -------- called by AV native methods --------
-        @JvmStatic fun android_toxav_callback_call_cb_method(friend_number: Long, audio_enabled: Int, video_enabled: Int) {}
-        @JvmStatic fun android_toxav_callback_video_receive_frame_cb_method(
+        @JvmStatic
+        fun android_toxav_callback_call_cb_method(friend_number: Long, audio_enabled: Int, video_enabled: Int) {
+        }
+
+        @JvmStatic
+        fun android_toxav_callback_video_receive_frame_cb_method(
             friend_number: Long,
             frame_width_px: Long,
             frame_height_px: Long,
@@ -634,15 +788,20 @@ class MainActivity {
         ) {
         }
 
-        @JvmStatic fun android_toxav_callback_call_state_cb_method(friend_number: Long, a_TOXAV_FRIEND_CALL_STATE: Int) {}
-        @JvmStatic fun android_toxav_callback_bit_rate_status_cb_method(
+        @JvmStatic
+        fun android_toxav_callback_call_state_cb_method(friend_number: Long, a_TOXAV_FRIEND_CALL_STATE: Int) {
+        }
+
+        @JvmStatic
+        fun android_toxav_callback_bit_rate_status_cb_method(
             friend_number: Long,
             audio_bit_rate: Long,
             video_bit_rate: Long
         ) {
         }
 
-        @JvmStatic fun android_toxav_callback_audio_receive_frame_cb_method(
+        @JvmStatic
+        fun android_toxav_callback_audio_receive_frame_cb_method(
             friend_number: Long,
             sample_count: Long,
             channels: Int,
@@ -650,7 +809,8 @@ class MainActivity {
         ) {
         }
 
-        @JvmStatic fun android_toxav_callback_audio_receive_frame_pts_cb_method(
+        @JvmStatic
+        fun android_toxav_callback_audio_receive_frame_pts_cb_method(
             friend_number: Long,
             sample_count: Long,
             channels: Int,
@@ -659,7 +819,8 @@ class MainActivity {
         ) {
         }
 
-        @JvmStatic fun android_toxav_callback_video_receive_frame_pts_cb_method(
+        @JvmStatic
+        fun android_toxav_callback_video_receive_frame_pts_cb_method(
             friend_number: Long,
             frame_width_px: Long,
             frame_height_px: Long,
@@ -670,8 +831,12 @@ class MainActivity {
         ) {
         }
 
-        @JvmStatic fun android_toxav_callback_video_receive_frame_h264_cb_method(friend_number: Long, buf_size: Long) {}
-        @JvmStatic fun android_toxav_callback_group_audio_receive_frame_cb_method(
+        @JvmStatic
+        fun android_toxav_callback_video_receive_frame_h264_cb_method(friend_number: Long, buf_size: Long) {
+        }
+
+        @JvmStatic
+        fun android_toxav_callback_group_audio_receive_frame_cb_method(
             conference_number: Long,
             peer_number: Long,
             sample_count: Long,
@@ -680,7 +845,8 @@ class MainActivity {
         ) {
         }
 
-        @JvmStatic fun android_toxav_callback_call_comm_cb_method(
+        @JvmStatic
+        fun android_toxav_callback_call_comm_cb_method(
             friend_number: Long,
             a_TOXAV_CALL_COMM_INFO: Long,
             comm_number: Long
@@ -693,7 +859,8 @@ class MainActivity {
         // -------- called by native methods --------
         // -------- called by native methods --------
         // -------- called by native methods --------
-        @JvmStatic fun android_tox_callback_self_connection_status_cb_method(a_TOX_CONNECTION: Int) {
+        @JvmStatic
+        fun android_tox_callback_self_connection_status_cb_method(a_TOX_CONNECTION: Int) {
             Log.i(TAG, "android_tox_callback_self_connection_status_cb_method: " + a_TOX_CONNECTION)
             update_savedata_file_wrapper()
             if (a_TOX_CONNECTION == ToxVars.TOX_CONNECTION.TOX_CONNECTION_TCP.value) {
@@ -704,29 +871,50 @@ class MainActivity {
                 set_tox_online_state("offline")
             }
         }
-        @JvmStatic fun android_tox_callback_friend_name_cb_method(friend_number: Long, friend_name: String?, length: Long) {}
-        @JvmStatic fun android_tox_callback_friend_status_message_cb_method(
+
+        @JvmStatic
+        fun android_tox_callback_friend_name_cb_method(friend_number: Long, friend_name: String?, length: Long) {
+        }
+
+        @JvmStatic
+        fun android_tox_callback_friend_status_message_cb_method(
             friend_number: Long,
             status_message: String?,
             length: Long
         ) {
         }
 
-        @JvmStatic fun android_tox_callback_friend_lossless_packet_cb_method(
+        @JvmStatic
+        fun android_tox_callback_friend_lossless_packet_cb_method(
             friend_number: Long,
             data: ByteArray?,
             length: Long
         ) {
         }
 
-        @JvmStatic fun android_tox_callback_friend_status_cb_method(friend_number: Long, a_TOX_USER_STATUS: Int) {}
-        @JvmStatic fun android_tox_callback_friend_connection_status_cb_method(friend_number: Long, a_TOX_CONNECTION: Int) {
-            Log.i(TAG, "android_tox_callback_friend_connection_status_cb_method: fn=" + friend_number + " " + a_TOX_CONNECTION)
+        @JvmStatic
+        fun android_tox_callback_friend_status_cb_method(friend_number: Long, a_TOX_USER_STATUS: Int) {
+        }
+
+        @JvmStatic
+        fun android_tox_callback_friend_connection_status_cb_method(friend_number: Long, a_TOX_CONNECTION: Int) {
+            Log.i(
+                TAG,
+                "android_tox_callback_friend_connection_status_cb_method: fn=" + friend_number + " " + a_TOX_CONNECTION
+            )
             update_savedata_file_wrapper()
         }
-        @JvmStatic fun android_tox_callback_friend_typing_cb_method(friend_number: Long, typing: Int) {}
-        @JvmStatic fun android_tox_callback_friend_read_receipt_cb_method(friend_number: Long, message_id: Long) {}
-        @JvmStatic fun android_tox_callback_friend_request_cb_method(
+
+        @JvmStatic
+        fun android_tox_callback_friend_typing_cb_method(friend_number: Long, typing: Int) {
+        }
+
+        @JvmStatic
+        fun android_tox_callback_friend_read_receipt_cb_method(friend_number: Long, message_id: Long) {
+        }
+
+        @JvmStatic
+        fun android_tox_callback_friend_request_cb_method(
             friend_public_key: String?,
             friend_request_message: String?,
             length: Long
@@ -736,7 +924,8 @@ class MainActivity {
             update_savedata_file_wrapper()
         }
 
-        @JvmStatic fun android_tox_callback_friend_message_cb_method(
+        @JvmStatic
+        fun android_tox_callback_friend_message_cb_method(
             friend_number: Long,
             message_type: Int,
             friend_message: String?,
@@ -744,10 +933,14 @@ class MainActivity {
             msgV3hash_bin: ByteArray?,
             message_timestamp: Long
         ) {
-            Log.i(TAG, "android_tox_callback_friend_message_cb_method: fn=" + friend_number + " friend_message=" + friend_message)
+            Log.i(
+                TAG,
+                "android_tox_callback_friend_message_cb_method: fn=" + friend_number + " friend_message=" + friend_message
+            )
         }
 
-        @JvmStatic fun android_tox_callback_friend_message_v2_cb_method(
+        @JvmStatic
+        fun android_tox_callback_friend_message_v2_cb_method(
             friend_number: Long,
             friend_message: String?,
             length: Long,
@@ -756,10 +949,14 @@ class MainActivity {
             raw_message: ByteArray?,
             raw_message_length: Long
         ) {
-            Log.i(TAG, "android_tox_callback_friend_message_v2_cb_method: fn=" + friend_number + " friend_message=" + friend_message)
+            Log.i(
+                TAG,
+                "android_tox_callback_friend_message_v2_cb_method: fn=" + friend_number + " friend_message=" + friend_message
+            )
         }
 
-        @JvmStatic fun android_tox_callback_friend_sync_message_v2_cb_method(
+        @JvmStatic
+        fun android_tox_callback_friend_sync_message_v2_cb_method(
             friend_number: Long,
             ts_sec: Long,
             ts_ms: Long,
@@ -770,7 +967,8 @@ class MainActivity {
         ) {
         }
 
-        @JvmStatic fun sync_messagev2_send(
+        @JvmStatic
+        fun sync_messagev2_send(
             friend_number: Long,
             raw_data: ByteArray?,
             raw_data_length: Long,
@@ -780,21 +978,24 @@ class MainActivity {
         ) {
         }
 
-        @JvmStatic fun android_tox_callback_friend_read_receipt_message_v2_cb_method(
+        @JvmStatic
+        fun android_tox_callback_friend_read_receipt_message_v2_cb_method(
             friend_number: Long,
             ts_sec: Long,
             msg_id: ByteArray?
         ) {
         }
 
-        @JvmStatic fun android_tox_callback_file_recv_control_cb_method(
+        @JvmStatic
+        fun android_tox_callback_file_recv_control_cb_method(
             friend_number: Long,
             file_number: Long,
             a_TOX_FILE_CONTROL: Int
         ) {
         }
 
-        @JvmStatic fun android_tox_callback_file_chunk_request_cb_method(
+        @JvmStatic
+        fun android_tox_callback_file_chunk_request_cb_method(
             friend_number: Long,
             file_number: Long,
             position: Long,
@@ -802,7 +1003,8 @@ class MainActivity {
         ) {
         }
 
-        @JvmStatic fun android_tox_callback_file_recv_cb_method(
+        @JvmStatic
+        fun android_tox_callback_file_recv_cb_method(
             friend_number: Long,
             file_number: Long,
             a_TOX_FILE_KIND: Int,
@@ -812,7 +1014,8 @@ class MainActivity {
         ) {
         }
 
-        @JvmStatic fun android_tox_callback_file_recv_chunk_cb_method(
+        @JvmStatic
+        fun android_tox_callback_file_recv_chunk_cb_method(
             friend_number: Long,
             file_number: Long,
             position: Long,
@@ -821,17 +1024,20 @@ class MainActivity {
         ) {
         }
 
-        @JvmStatic fun android_tox_log_cb_method(
+        @JvmStatic
+        fun android_tox_log_cb_method(
             a_TOX_LOG_LEVEL: Int,
             file: String?,
             line: Long,
             function: String?,
             message: String?
         ) {
-            if (CTOXCORE_NATIVE_LOGGING)
-            {
-                Log.i(TAG, "C-TOXCORE:" + ToxVars.TOX_LOG_LEVEL.value_str(a_TOX_LOG_LEVEL) + ":file=" + file + ":linenum=" +
-                        line + ":func=" + function + ":msg=" + message);
+            if (CTOXCORE_NATIVE_LOGGING) {
+                Log.i(
+                    TAG,
+                    "C-TOXCORE:" + ToxVars.TOX_LOG_LEVEL.value_str(a_TOX_LOG_LEVEL) + ":file=" + file + ":linenum=" +
+                            line + ":func=" + function + ":msg=" + message
+                );
             }
         }
 
@@ -841,7 +1047,8 @@ class MainActivity {
         // -------- called by native Conference methods --------
         // -------- called by native Conference methods --------
         // -------- called by native Conference methods --------
-        @JvmStatic fun android_tox_callback_conference_invite_cb_method(
+        @JvmStatic
+        fun android_tox_callback_conference_invite_cb_method(
             friend_number: Long,
             a_TOX_CONFERENCE_TYPE: Int,
             cookie_buffer: ByteArray?,
@@ -849,8 +1056,12 @@ class MainActivity {
         ) {
         }
 
-        @JvmStatic fun android_tox_callback_conference_connected_cb_method(conference_number: Long) {}
-        @JvmStatic fun android_tox_callback_conference_message_cb_method(
+        @JvmStatic
+        fun android_tox_callback_conference_connected_cb_method(conference_number: Long) {
+        }
+
+        @JvmStatic
+        fun android_tox_callback_conference_message_cb_method(
             conference_number: Long,
             peer_number: Long,
             a_TOX_MESSAGE_TYPE: Int,
@@ -859,7 +1070,8 @@ class MainActivity {
         ) {
         }
 
-        @JvmStatic fun android_tox_callback_conference_title_cb_method(
+        @JvmStatic
+        fun android_tox_callback_conference_title_cb_method(
             conference_number: Long,
             peer_number: Long,
             title: String?,
@@ -867,7 +1079,8 @@ class MainActivity {
         ) {
         }
 
-        @JvmStatic fun android_tox_callback_conference_peer_name_cb_method(
+        @JvmStatic
+        fun android_tox_callback_conference_peer_name_cb_method(
             conference_number: Long,
             peer_number: Long,
             name: String?,
@@ -875,8 +1088,12 @@ class MainActivity {
         ) {
         }
 
-        @JvmStatic fun android_tox_callback_conference_peer_list_changed_cb_method(conference_number: Long) {}
-        @JvmStatic fun android_tox_callback_conference_namelist_change_cb_method(
+        @JvmStatic
+        fun android_tox_callback_conference_peer_list_changed_cb_method(conference_number: Long) {
+        }
+
+        @JvmStatic
+        fun android_tox_callback_conference_namelist_change_cb_method(
             conference_number: Long,
             peer_number: Long,
             a_TOX_CONFERENCE_STATE_CHANGE: Int
@@ -889,7 +1106,8 @@ class MainActivity {
         // -------- called by native new Group methods --------
         // -------- called by native new Group methods --------
         // -------- called by native new Group methods --------
-        @JvmStatic fun android_tox_callback_group_message_cb_method(
+        @JvmStatic
+        fun android_tox_callback_group_message_cb_method(
             group_number: Long,
             peer_id: Long,
             a_TOX_MESSAGE_TYPE: Int,
@@ -899,7 +1117,8 @@ class MainActivity {
         ) {
         }
 
-        @JvmStatic fun android_tox_callback_group_private_message_cb_method(
+        @JvmStatic
+        fun android_tox_callback_group_private_message_cb_method(
             group_number: Long,
             peer_id: Long,
             a_TOX_MESSAGE_TYPE: Int,
@@ -908,8 +1127,12 @@ class MainActivity {
         ) {
         }
 
-        @JvmStatic fun android_tox_callback_group_privacy_state_cb_method(group_number: Long, a_TOX_GROUP_PRIVACY_STATE: Int) {}
-        @JvmStatic fun android_tox_callback_group_invite_cb_method(
+        @JvmStatic
+        fun android_tox_callback_group_privacy_state_cb_method(group_number: Long, a_TOX_GROUP_PRIVACY_STATE: Int) {
+        }
+
+        @JvmStatic
+        fun android_tox_callback_group_invite_cb_method(
             friend_number: Long,
             invite_data: ByteArray?,
             invite_data_length: Long,
@@ -917,18 +1140,32 @@ class MainActivity {
         ) {
         }
 
-        @JvmStatic fun android_tox_callback_group_peer_join_cb_method(group_number: Long, peer_id: Long) {}
-        @JvmStatic fun android_tox_callback_group_peer_exit_cb_method(
+        @JvmStatic
+        fun android_tox_callback_group_peer_join_cb_method(group_number: Long, peer_id: Long) {
+        }
+
+        @JvmStatic
+        fun android_tox_callback_group_peer_exit_cb_method(
             group_number: Long,
             peer_id: Long,
             a_Tox_Group_Exit_Type: Int
         ) {
         }
 
-        @JvmStatic fun android_tox_callback_group_peer_name_cb_method(group_number: Long, peer_id: Long) {}
-        @JvmStatic fun android_tox_callback_group_join_fail_cb_method(group_number: Long, a_Tox_Group_Join_Fail: Int) {}
-        @JvmStatic fun android_tox_callback_group_self_join_cb_method(group_number: Long) {}
-        @JvmStatic fun android_tox_callback_group_moderation_cb_method(
+        @JvmStatic
+        fun android_tox_callback_group_peer_name_cb_method(group_number: Long, peer_id: Long) {
+        }
+
+        @JvmStatic
+        fun android_tox_callback_group_join_fail_cb_method(group_number: Long, a_Tox_Group_Join_Fail: Int) {
+        }
+
+        @JvmStatic
+        fun android_tox_callback_group_self_join_cb_method(group_number: Long) {
+        }
+
+        @JvmStatic
+        fun android_tox_callback_group_moderation_cb_method(
             group_number: Long,
             source_peer_id: Long,
             target_peer_id: Long,
@@ -936,13 +1173,15 @@ class MainActivity {
         ) {
         }
 
-        @JvmStatic fun android_tox_callback_group_connection_status_cb_method(
+        @JvmStatic
+        fun android_tox_callback_group_connection_status_cb_method(
             group_number: Long,
             a_TOX_GROUP_CONNECTION_STATUS: Int
         ) {
         }
 
-        @JvmStatic fun android_tox_callback_group_topic_cb_method(
+        @JvmStatic
+        fun android_tox_callback_group_topic_cb_method(
             group_number: Long,
             peer_id: Long,
             topic: String?,
@@ -950,7 +1189,8 @@ class MainActivity {
         ) {
         }
 
-        @JvmStatic fun android_tox_callback_group_custom_packet_cb_method(
+        @JvmStatic
+        fun android_tox_callback_group_custom_packet_cb_method(
             group_number: Long,
             peer_id: Long,
             data: ByteArray?,
@@ -958,7 +1198,8 @@ class MainActivity {
         ) {
         }
 
-        @JvmStatic fun android_tox_callback_group_custom_private_packet_cb_method(
+        @JvmStatic
+        fun android_tox_callback_group_custom_private_packet_cb_method(
             group_number: Long,
             peer_id: Long,
             data: ByteArray?,
