@@ -2,14 +2,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ProvideTextStyle
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
-import androidx.compose.material.lightColors
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -19,6 +12,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.trifa.Log
+import com.zoffcc.applications.trifa.MainActivity
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_send_message
+import com.zoffcc.applications.trifa.ToxVars.TOX_MESSAGE_TYPE
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
@@ -79,6 +75,16 @@ fun ChatApp(displayTextField: Boolean = true) {
                     }
                     if (displayTextField) {
                         SendMessage { text ->
+                            // !!!!! DEBUG DEBUG !!!!!
+                            // !!!!! DEBUG DEBUG !!!!!
+                            // !!!!! DEBUG DEBUG !!!!!
+                            // send it to tox friend "0" (zero)
+                            tox_friend_send_message(
+                                0, TOX_MESSAGE_TYPE.TOX_MESSAGE_TYPE_NORMAL.value, text
+                            )
+                            // !!!!! DEBUG DEBUG !!!!!
+                            // !!!!! DEBUG DEBUG !!!!!
+                            // !!!!! DEBUG DEBUG !!!!!
                             store.send(
                                 Action.SendMessage(
                                     Message(myUser, timeMs = timestampMs(), text)
@@ -90,23 +96,27 @@ fun ChatApp(displayTextField: Boolean = true) {
             }
         }
     }
+
     LaunchedEffect(Unit) {
-        var lastFriend = friends.random()
-        var lastMessage = friendMessages.random()
         while (!closing_application) {
-            val thisFriend = lastFriend
-            val thisMessage = friendMessages.random()
-            lastFriend = thisFriend
-            lastMessage = thisMessage
-            store.send(
-                Action.SendMessage(
-                    message = Message(
-                        user = thisFriend,
-                        timeMs = timestampMs(),
-                        text = thisMessage
+            val thisFriend = friends.random()
+            var thisMessage: String? = null
+            try {
+                thisMessage = MainActivity.incoming_messages_queue.poll()
+            } catch (_: Exception) {
+            }
+
+            if (thisMessage != null) {
+                store.send(
+                    Action.SendMessage(
+                        message = Message(
+                            user = thisFriend,
+                            timeMs = timestampMs(),
+                            text = thisMessage
+                        )
                     )
                 )
-            )
+            }
             delay(100)
         }
         Log.i(TAG, "endless loop ended");
