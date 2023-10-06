@@ -31,6 +31,8 @@ var start_button_text_wrapper = "stopped"
 var online_button_text_wrapper = "offline"
 var online_button_color_wrapper = Color.White.toArgb()
 
+var closing_application = false
+
 val settings: Settings = Settings()
 
 @Composable
@@ -227,11 +229,13 @@ fun main() = application(exitProcessOnExit = true) {
                                             Log.i(TAG, "waiting ...");
                                         }
                                         Log.i(TAG, "closing application");
+                                        closing_application = true
                                         isOpen = false
                                     }
                                 } else {
                                     Log.i(TAG, "closing application");
                                     isOpen = false
+                                    closing_application = true
                                 }
                             }
                         ) {

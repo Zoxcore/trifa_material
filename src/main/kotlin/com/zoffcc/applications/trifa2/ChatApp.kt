@@ -18,17 +18,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.sp
+import com.zoffcc.applications.trifa.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 
+private const val TAG = "trifa.Chatapp"
+
 val myUser = User("Me", picture = null)
 val friends = listOf(
-    User("Alex", picture = "stock1.jpg"),
-    User("Casey", picture = "stock2.jpg"),
+    // User("Alex", picture = "stock1.jpg"),
+    // User("Casey", picture = "stock2.jpg"),
     User("Sam", picture = "stock3.jpg")
+    // User("Lora", picture = "stock4.jpg")
 )
 val friendMessages = listOf(
     "How's everybody doing today?",
@@ -89,11 +93,9 @@ fun ChatApp(displayTextField: Boolean = true) {
     LaunchedEffect(Unit) {
         var lastFriend = friends.random()
         var lastMessage = friendMessages.random()
-        while (true) {
-            val thisFriend = friends.random()
+        while (!closing_application) {
+            val thisFriend = lastFriend
             val thisMessage = friendMessages.random()
-            if(thisFriend == lastFriend) continue
-            if(thisMessage == lastMessage) continue
             lastFriend = thisFriend
             lastMessage = thisMessage
             store.send(
@@ -105,8 +107,9 @@ fun ChatApp(displayTextField: Boolean = true) {
                     )
                 )
             )
-            delay(5000)
+            delay(100)
         }
+        Log.i(TAG, "endless loop ended");
     }
 }
 
