@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
-import java.lang.Exception
 
 private const val TAG = "trifa.Main.kt"
 
@@ -44,71 +43,78 @@ fun App() {
     var online_button_color by remember { mutableStateOf(Color.White.toArgb()) }
 
     MaterialTheme {
-        Row(Modifier.fillMaxSize(), Arrangement.spacedBy(5.dp)) {
-            Button(onClick = {
-                if (tox_running_state == "running") {
-                    tox_running_state = "stopping ..."
-                    start_button_text = tox_running_state
-                    tox_running_state_wrapper = tox_running_state
-                    start_button_text_wrapper = start_button_text
-                    Log.i(TAG, "----> tox_running_state = $tox_running_state_wrapper");
-                    Thread {
-                        Log.i(TAG, "waiting to stop ...");
-                        while (tox_running_state_wrapper != "stopped") {
-                            Thread.sleep(100)
-                            Log.i(TAG, "waiting ...");
+        Scaffold() {
+            Column(Modifier.fillMaxSize()) {
+                Row(Modifier.wrapContentHeight(), Arrangement.spacedBy(5.dp)) {
+                    Button(onClick = {
+                        if (tox_running_state == "running") {
+                            tox_running_state = "stopping ..."
+                            start_button_text = tox_running_state
+                            tox_running_state_wrapper = tox_running_state
+                            start_button_text_wrapper = start_button_text
+                            Log.i(TAG, "----> tox_running_state = $tox_running_state_wrapper");
+                            Thread {
+                                Log.i(TAG, "waiting to stop ...");
+                                while (tox_running_state_wrapper != "stopped") {
+                                    Thread.sleep(100)
+                                    Log.i(TAG, "waiting ...");
+                                }
+                                Log.i(TAG, "is stopped now");
+                                tox_running_state = tox_running_state_wrapper
+                                start_button_text = "start"
+                            }.start()
+                            TrifaToxService.stop_me = true
+                        } else if (tox_running_state == "stopped") {
+                            TrifaToxService.stop_me = false
+                            tox_running_state = "starting ..."
+                            start_button_text = tox_running_state
+                            tox_running_state_wrapper = tox_running_state
+                            start_button_text_wrapper = start_button_text
+                            Log.i(TAG, "----> tox_running_state = $tox_running_state_wrapper");
+                            Thread {
+                                Log.i(TAG, "waiting to startup ...");
+                                while (tox_running_state_wrapper != "running") {
+                                    Thread.sleep(100)
+                                    Log.i(TAG, "waiting ...");
+                                }
+                                Log.i(TAG, "is started now");
+                                tox_running_state = tox_running_state_wrapper
+                                start_button_text = "stop"
+                            }.start()
+                            TrifaToxService.stop_me = false
+                            main_init()
                         }
-                        Log.i(TAG, "is stopped now");
-                        tox_running_state = tox_running_state_wrapper
-                        start_button_text = "start"
-                    }.start()
-                    TrifaToxService.stop_me = true
-                } else if (tox_running_state == "stopped") {
-                    TrifaToxService.stop_me = false
-                    tox_running_state = "starting ..."
-                    start_button_text = tox_running_state
-                    tox_running_state_wrapper = tox_running_state
-                    start_button_text_wrapper = start_button_text
-                    Log.i(TAG, "----> tox_running_state = $tox_running_state_wrapper");
-                    Thread {
-                        Log.i(TAG, "waiting to startup ...");
-                        while (tox_running_state_wrapper != "running") {
-                            Thread.sleep(100)
-                            Log.i(TAG, "waiting ...");
-                        }
-                        Log.i(TAG, "is started now");
-                        tox_running_state = tox_running_state_wrapper
-                        start_button_text = "stop"
-                    }.start()
-                    TrifaToxService.stop_me = false
-                    main_init()
-                }
-            }) {
-                Text(start_button_text)
-            }
-
-            Button(onClick = {},
-                colors = ButtonDefaults.buttonColors(),
-                enabled = true) {
-                Icon(
-                    Icons.Filled.Add, contentDescription = online_button_text,
-                    modifier = Modifier.size(ButtonDefaults.IconSize))
-                Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                Text(online_button_text)
-
-                Thread {
-                    while (true) {
-                        Thread.sleep(100)
-                        if (online_button_text != online_button_text_wrapper) {
-                            online_button_text = online_button_text_wrapper
-                            // online_button_color = online_button_color_wrapper
-                        }
+                    }) {
+                        Text(start_button_text)
                     }
-                }.start()
+                    Button(
+                        onClick = {},
+                        colors = ButtonDefaults.buttonColors(),
+                        enabled = true
+                    ) {
+                        Icon(
+                            Icons.Filled.Add, contentDescription = online_button_text,
+                            modifier = Modifier.size(ButtonDefaults.IconSize)
+                        )
+                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                        Text(online_button_text)
+
+                        Thread {
+                            while (true) {
+                                Thread.sleep(100)
+                                if (online_button_text != online_button_text_wrapper) {
+                                    online_button_text = online_button_text_wrapper
+                                    // online_button_color = online_button_color_wrapper
+                                }
+                            }
+                        }.start()
+                    }
+                }
+                ChatAppWithScaffold()
             }
         }
     }
-    ChatAppWithScaffold()
+
 }
 
 fun set_tox_running_state(new_state: String) {
@@ -140,10 +146,10 @@ fun main() = application(exitProcessOnExit = true) {
         if (tmp == false) {
             showIntroScreen = false
         }
-    } catch (_: Exception) {}
+    } catch (_: Exception) {
+    }
 
-    if (showIntroScreen)
-    {
+    if (showIntroScreen) {
         // ----------- intro screen -----------
         // ----------- intro screen -----------
         // ----------- intro screen -----------
@@ -171,9 +177,7 @@ fun main() = application(exitProcessOnExit = true) {
         // ----------- intro screen -----------
         // ----------- intro screen -----------
         // ----------- intro screen -----------
-    }
-    else
-    {
+    } else {
         // ----------- main app screen -----------
         // ----------- main app screen -----------
         // ----------- main app screen -----------
