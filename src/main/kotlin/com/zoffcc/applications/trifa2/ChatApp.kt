@@ -48,6 +48,7 @@ val store = CoroutineScope(SupervisorJob()).createStore()
 fun ChatAppWithScaffold(displayTextField: Boolean = true) {
     Theme {
         Scaffold(
+            drawerContent = { Button(onClick = {}){} },
             topBar = {
                 TopAppBar(
                     title = { Text("Tox Chat") },
