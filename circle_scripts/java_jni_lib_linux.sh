@@ -68,7 +68,10 @@ export JAVADIR2=$(cat /tmp/xx2)
 echo "JAVADIR1:""$JAVADIR1"
 echo "JAVADIR2:""$JAVADIR2"
 
-export CFLAGS=" -fPIC -std=gnu99 -I$_INST_/include/ -L$_INST_/lib -fstack-protector-all "
+
+FLAGS_ASAN='-fsanitize=address -fno-omit-frame-pointer' # -static-libasan'
+CFLAGS_ADDON='-O2 -g -fPIC'
+CFLAGS_MORE="--param=ssp-buffer-size=1 -fstack-protector-all -std=gnu99 -I$_INST_/include/ -L$_INST_/lib"
 
 # if [ "$1""x" == "localx" ]; then
 #     export CFLAGS=" $CFLAGS -pg "
@@ -77,7 +80,8 @@ export CFLAGS=" -fPIC -std=gnu99 -I$_INST_/include/ -L$_INST_/lib -fstack-protec
 gcc $CFLAGS \
 -Wall \
 -DJAVA_LINUX \
-$C_FLAGS $CXX_FLAGS $LD_FLAGS \
+-DNOGLOBALVARS \
+$CFLAGS_ADDON $CFLAGS_MORE \
 -D_FILE_OFFSET_BITS=64 -D__USE_GNU=1 \
 -I$JAVADIR1/ \
 -I$JAVADIR2/ \

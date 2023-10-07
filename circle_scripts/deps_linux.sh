@@ -28,9 +28,21 @@ export MAKEFLAGS
 WGET_OPTIONS="--timeout=10"
 export WGET_OPTIONS
 
-export CXXFLAGS="$CXXFLAGS -fPIC"
-export CFLAGS="$CFLAGS -fPIC"
+FLAGS_ASAN='-fsanitize=address -fno-omit-frame-pointer' # -static-libasan'
+CXXFLAGS_ADDON='-O2 -g -fPIC'
+CFLAGS_ADDON='-O2 -g -fPIC'
+CFLAGS_MORE='--param=ssp-buffer-size=1 -fstack-protector-all'
 # ----------- config ------------
+
+
+# ------- deps verisions ---------
+NASM_VERSION="nasm-2.16.01"
+FFMPEG_VERSION="n6.0"
+OPUS_VERSION="v1.4"
+SODIUM_VERSION="1.0.19"
+VPX_VERSION="v1.13.1"
+_X264_VERSION_="baee400fa9ced6f5481a728138fed6e867b0ff7f"
+# ------- deps verisions ---------
 
 
 
@@ -39,7 +51,6 @@ if [ 1 == 1 ]; then
 
 cd "$_SRC_"
 
-FFMPEG_VERSION=n6.0
 FFMPEG_FILENAME="$FFMPEG_VERSION.tar.gz"
 rm -f "ffmpeg"*.tar.*
 wget $WGET_OPTIONS "https://github.com/FFmpeg/FFmpeg/archive/refs/tags/$FFMPEG_FILENAME" -O "ffmpeg_""$FFMPEG_FILENAME"
@@ -55,7 +66,9 @@ export LDFLAGS=" "
 # libavcodec.a(h264_qpel_10bit.o): relocation R_X86_64_PC32 against symbol `ff_pw_1023' can not be used when making a shared object; recompile with -fPIC
 #
 
-  ./configure  \
+  export CXXFLAGS=${CXXFLAGS_ADDON}
+  export CFLAGS=${CFLAGS_ADDON}
+  ./configure \
               --enable-gpl \
               --prefix="$_INST_" \
               --disable-asm \
@@ -105,6 +118,9 @@ export LDFLAGS=" "
   make -j || exit 1
   make install
 
+  unset CXXFLAGS
+  unset CFLAGS
+
 cd "$_HOME_"
 
 fi
@@ -116,7 +132,7 @@ if [ 1 == 1 ]; then
 
 cd "$_SRC_"
 
-OPUS_VERSION=v1.4
+
 OPUS_FILENAME="$OPUS_VERSION.tar.gz"
 rm -f "opus"*.tar.gz
 wget $WGET_OPTIONS "https://github.com/xiph/opus/archive/refs/tags/$OPUS_FILENAME" -O "opus_""$OPUS_FILENAME"
@@ -125,7 +141,9 @@ rm -f "opus"*.tar.gz
 cd opus*/
 
   ./autogen.sh
-  CFLAGS="-O2 -g -fPIC" ./configure \
+  export CXXFLAGS=${CXXFLAGS_ADDON}
+  export CFLAGS=${CFLAGS_ADDON}
+  ./configure \
                                --prefix="$_INST_" \
                                --disable-shared \
                                --enable-static \
@@ -134,6 +152,8 @@ cd opus*/
                                --disable-doc || exit 1
   make || exit 1
   make install
+  unset CXXFLAGS
+  unset CFLAGS
 
 cd "$_HOME_"
 
@@ -147,14 +167,15 @@ if [ 1 == 1 ]; then
 
 cd "$_SRC_"
 
-SODIUM_VERSION=1.0.18
 SODIUM_FILENAME="libsodium-$SODIUM_VERSION.tar.gz"
 rm -f libsodium-*.tar.gz
 wget $WGET_OPTIONS "https://download.libsodium.org/libsodium/releases/$SODIUM_FILENAME" -O "$SODIUM_FILENAME"
 tar -xf "$SODIUM_FILENAME"
 cd libsodium*/
 
-  CFLAGS="-O2 -g -fPIC" ./configure \
+  export CXXFLAGS=${CXXFLAGS_ADDON}
+  export CFLAGS=${CFLAGS_ADDON}
+  ./configure \
               --prefix="$_INST_" \
               --disable-shared \
               --enable-static \
@@ -162,6 +183,8 @@ cd libsodium*/
 
   make || exit 1
   make install
+  unset CXXFLAGS
+  unset CFLAGS
 
 cd "$_HOME_"
 
@@ -174,15 +197,17 @@ if [ 1 == 1 ]; then
 
 cd "$_SRC_"
 
-VPX_VERSION=v1.8.0
-VPX_FILENAME="libvpx-$VPX_VERSION.tar.gz"
-rm -f libvpx-*.tar.gz
-wget $WGET_OPTIONS "https://github.com/webmproject/libvpx/archive/$VPX_VERSION.tar.gz" -O "$VPX_FILENAME"
+
+VPX_FILENAME="$VPX_VERSION.tar.gz"
+
+rm -f *.tar.gz
+wget $WGET_OPTIONS "https://github.com/webmproject/libvpx/archive/refs/tags/""$VPX_VERSION"".tar.gz" -O "$VPX_FILENAME"
 tar -xf "$VPX_FILENAME"
 cd libvpx*/
 
-
-  CFLAGS="-O2 -g -fPIC" ./configure \
+  export CXXFLAGS=${CXXFLAGS_ADDON}
+  export CFLAGS=${CFLAGS_ADDON}
+  ./configure \
                                          --prefix="$_INST_" \
                                          --disable-shared \
                                          --size-limit=16384x16384 \
@@ -199,6 +224,8 @@ cd libvpx*/
 
   make || exit 1
   make install
+  unset CXXFLAGS
+  unset CFLAGS
 
 cd "$_HOME_"
 
@@ -216,7 +243,7 @@ cd "$_SRC_"
     rm -Rf nasm
     git clone http://repo.or.cz/nasm.git
     cd nasm/
-    git checkout nasm-2.13.03
+    git checkout "$NASM_VERSION"
 
     ./autogen.sh
     ./configure --prefix=/
@@ -245,12 +272,13 @@ if [ 1 == 1 ]; then
 cd "$_SRC_"
 
 git clone https://code.videolan.org/videolan/x264.git
-_X264_VERSION_="1771b556ee45207f8711744ccbd5d42a3949b14c"
 cd x264/
 
   git checkout "$_X264_VERSION_"
 
-  CFLAGS="-O2 -g -fPIC" ./configure \
+  export CXXFLAGS=${CXXFLAGS_ADDON}
+  export CFLAGS=${CFLAGS_ADDON}
+  ./configure \
                                          --prefix="$_INST_" \
                                          --disable-opencl \
                                          --enable-static \
@@ -260,6 +288,8 @@ cd x264/
 
   make || exit 1
   make install
+  unset CXXFLAGS
+  unset CFLAGS
 
 cd "$_HOME_"
 
@@ -291,8 +321,10 @@ cat toxcore/tox.h | grep 'TOX_GIT_COMMIT_HASH'
 # ------ set c-toxcore git commit hash ------
 
 autoreconf -fi
+
 ./configure \
-    CFLAGS=" -O3 -g -fPIC -fstack-protector-all -DTOX_CAPABILITIES_ACTIVE $LOGG " \
+     CXXFLAGS="$CXXFLAGS_ADDON" \
+     CFLAGS="-fPIC $CFLAGS_ADDON $CFLAGS_MORE -DTOX_CAPABILITIES_ACTIVE $LOGG" \
     --prefix="$_INST_" \
     --disable-soname-versions \
     --disable-shared \
@@ -301,6 +333,8 @@ autoreconf -fi
 
     make || exit 1
     make install
+  unset CXXFLAGS
+  unset CFLAGS
 
 cd "$_HOME_"
 
