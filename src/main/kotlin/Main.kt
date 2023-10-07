@@ -7,6 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -22,6 +23,11 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
+import androidx.compose.material.icons.filled.FormatSize
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 
 private const val TAG = "trifa.Main.kt"
 
@@ -34,6 +40,7 @@ var online_button_color_wrapper = Color.White.toArgb()
 var closing_application = false
 
 val settings: Settings = Settings()
+val HEADER_SIZE = 56.dp
 
 @Composable
 @Preview
@@ -43,6 +50,18 @@ fun App() {
 
     var online_button_text by remember { mutableStateOf("offline") }
     var online_button_color by remember { mutableStateOf(Color.White.toArgb()) }
+
+    var uiscale_default = LocalDensity.current.density
+
+    try {
+        val tmp = settings.getFloatOrNull("main.ui_scale_factor")
+        if (tmp != null) {
+            uiscale_default = tmp
+        }
+    } catch (_: Exception) {
+    }
+
+    var ui_scale by remember { mutableStateOf(uiscale_default) }
 
     MaterialTheme {
         Scaffold() {
@@ -112,6 +131,39 @@ fun App() {
                         }.start()
                     }
                 }
+
+                DetailItem(
+                    label = i18n("UI Scale"),
+                    description = "${i18n("current_value:")}: " + " " +
+                            ui_scale + ", " +
+                            i18n("drag Slider to change")
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.width(200.dp)
+                    ) {
+                        Icon(Icons.Default.FormatSize, null, Modifier.scale(0.7f))
+                        Slider(
+                            value = ui_scale ?: LocalDensity.current.density,
+                            onValueChange = {
+                                ui_scale = it
+                                settings.putFloat("main.ui_scale_factor", ui_scale)
+                                Log.i(TAG, "density: $ui_scale")
+                                            },
+                            onValueChangeFinished = { },
+                            valueRange = 1f..3f,
+                            steps = 3,
+                            // todo: without setting the width explicitly,
+                            //  the slider takes up the whole remaining space
+                            modifier = Modifier.width(150.dp)
+                        )
+                        Icon(Icons.Default.FormatSize, null)
+                    }
+                }
+
+
+
                 ChatAppWithScaffold()
             }
         }
@@ -276,4 +328,25 @@ private fun onWindowRelocate(position: WindowPosition) {
     // println("onWindowRelocate $position")
     settings.putString("main.window.position.x", position.x.value.toString())
     settings.putString("main.window.position.y", position.y.value.toString())
+}
+
+@Composable
+fun DetailItem(
+    label: String,
+    description: String,
+    setting: @Composable (RowScope.() -> Unit),
+) = Row(
+    Modifier
+        .fillMaxWidth().height(HEADER_SIZE).padding(horizontal = 16.dp)
+        .semantics(mergeDescendants = true) {
+            // it would be nicer to derive the contentDescriptions from the descendants automatically
+            // which is currently not supported in Compose for Desktop
+            // see https://github.com/JetBrains/compose-jb/issues/2111
+            contentDescription = description
+        },
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.SpaceBetween
+) {
+    Text(label)
+    setting()
 }
