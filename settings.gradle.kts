@@ -1,8 +1,8 @@
 pluginManagement {
     repositories {
+        gradlePluginPortal()
         mavenCentral()
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-        gradlePluginPortal()
         google()
     }
 
@@ -12,7 +12,7 @@ pluginManagement {
         val multiplatformVersion = extra["multiplatform.version"] as String
 
         kotlin("jvm").version(kotlinVersion)
-        kotlin("multiplatform").version(kotlinVersion)
+        kotlin("multiplatform").version(multiplatformVersion)
         id("org.jetbrains.compose").version(composeVersion)
     }
 }

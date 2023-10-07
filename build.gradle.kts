@@ -1,4 +1,5 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.de.undercouch.gradle.tasks.download.Download
 
 plugins {
     kotlin("jvm")
@@ -7,7 +8,8 @@ plugins {
 }
 
 group = "com.zoffcc.applications.trifa_material"
-version = "1.0.0-SNAPSHOT"
+version = "1.0.0"
+val appName = "trifa_material"
 
 repositories {
     mavenCentral()
@@ -21,9 +23,11 @@ dependencies {
     // (in a separate module for demo project and in testMain).
     // With compose.desktop.common you will also lose @Preview functionality
     implementation(compose.desktop.currentOs)
+    implementation(compose.desktop.common)
     implementation(compose.ui)
     implementation(compose.foundation)
     implementation(compose.material)
+    @Suppress("OPT_IN_IS_NOT_ENABLED")
     @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
     implementation(compose.components.resources)
     //
@@ -48,21 +52,31 @@ compose.desktop {
         // args += listOf("-customArgument")
 
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "trifa_material"
-            packageVersion = "1.0.0"
+            targetFormats(
+                TargetFormat.Dmg,
+                TargetFormat.Msi, TargetFormat.Exe,
+                TargetFormat.Deb, TargetFormat.Rpm, TargetFormat.AppImage
+            )
+
+            packageName = appName
+            packageVersion = "${project.version}"
+            println("packageVersion=$packageVersion")
             description = "TRIfA Material App"
             copyright = "© 2023 Zoff. All rights reserved."
             vendor = "Zoxcore"
             licenseFile.set(project.file("LICENSE"))
+            println("licenseFile=" + project.file("LICENSE"))
             appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
 
             val iconsRoot = project.file("resources")
+            println("iconsRoot=$iconsRoot")
             macOS {
+                println("iconFile=" + iconsRoot.resolve("icon-mac.icns"))
                 iconFile.set(iconsRoot.resolve("icon-mac.icns"))
             }
             windows {
                 iconFile.set(iconsRoot.resolve("icon-windows.ico"))
+                println("iconFile=" + iconsRoot.resolve("icon-windows.ico"))
                 menuGroup = "TRIfA Material"
                 // see https://wixtoolset.org/documentation/manual/v3/howtos/general/generate_guids.html
                 // and https://www.guidgen.com/
@@ -70,8 +84,48 @@ compose.desktop {
             }
             linux {
                 iconFile.set(iconsRoot.resolve("icon-linux.png"))
+                println("iconFile=" + iconsRoot.resolve("icon-linux.png"))
             }
         }
     }
 }
 
+val appImageTool = project.file("deps/appimagetool.AppImage")
+val linuxAppDir = project.file("build/compose/binaries/main/app")
+val desktopFile = project.file("resources/trifa_material.desktop")
+val linuxIconFile = project.file("resources/icon-linux.png")
+
+tasks {
+    val downloadAppImageBuilder by registering(Download::class) {
+        src("https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage")
+        dest(appImageTool)
+        overwrite(false)
+        doFirst {
+            exec {
+                commandLine("mkdir", "-p", "deps/")
+            }
+        }
+        doLast {
+            exec {
+                commandLine("chmod", "+x", "deps/appimagetool.AppImage")
+            }
+        }
+    }
+
+    val copyAppimageDesktopfile by registering(Exec::class) {
+        commandLine("cp", "-v", desktopFile, linuxAppDir)
+    }
+
+    val copyAppimageIconfile by registering(Exec::class) {
+        commandLine("cp", "-v", linuxIconFile, "${linuxAppDir}/${appName}")
+    }
+
+    val executeAppImageBuilder by registering(Exec::class) {
+        dependsOn(downloadAppImageBuilder)
+        // dependsOn(copyBuildToPackaging)
+        dependsOn(copyAppimageDesktopfile)
+        dependsOn(copyAppimageIconfile)
+        environment("ARCH", "x86_64")
+        commandLine(appImageTool, linuxAppDir, "$appName-${project.version}.AppImage")
+    }
+}
