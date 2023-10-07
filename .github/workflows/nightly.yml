@@ -88,8 +88,13 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: trifa-material_nightly.???
-          path: trifa-material_nightly.???
+          name: trifa-material_nightly.deb
+          path: trifa-material_nightly.deb
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: trifa-material_nightly.rpm
+          path: trifa-material_nightly.rpm
       - name: Upload to nightly release
         uses: ncipollo/release-action@v1
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
@@ -101,7 +106,7 @@ jobs:
           prerelease: true
           replacesArtifacts: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "trifa-material_nightly.deb"
+          artifacts: "trifa-material_nightly.deb,trifa-material_nightly.rpm"
 
 
   build-macos-nightly-artifact:
@@ -201,11 +206,17 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
           cp -v ./build/compose/binaries/main/msi/trifa*material*.msi trifa-material_nightly.msi
+          cp -v ./build/compose/binaries/main/exe/trifa_material-*.exe trifa-material_nightly.exe
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: trifa-material_nightly.msi
           path: trifa-material_nightly.msi
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: trifa-material_nightly.exe
+          path: trifa-material_nightly.exe
       - name: Upload to nightly release
         uses: ncipollo/release-action@v1
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
@@ -217,6 +228,6 @@ jobs:
           prerelease: true
           replacesArtifacts: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "trifa-material_nightly.msi"
+          artifacts: "trifa-material_nightly.msi,trifa-material_nightly.exe"
 
 
