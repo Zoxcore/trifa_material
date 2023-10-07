@@ -65,15 +65,19 @@ compose.desktop {
             println("licenseFile=" + project.file("LICENSE"))
             appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
 
+            targetFormats(
+                TargetFormat.Msi, TargetFormat.Exe,
+                TargetFormat.Dmg,
+                TargetFormat.Deb, TargetFormat.Rpm
+            ) // , TargetFormat.AppImage)
+
             val iconsRoot = project.file("resources")
             println("iconsRoot=$iconsRoot")
             macOS {
-                targetFormats(TargetFormat.Dmg)
                 println("iconFile=" + iconsRoot.resolve("icon-mac.icns"))
                 iconFile.set(iconsRoot.resolve("icon-mac.icns"))
             }
             windows {
-                targetFormats(TargetFormat.Msi, TargetFormat.Exe)
                 iconFile.set(iconsRoot.resolve("icon-windows.ico"))
                 println("iconFile=" + iconsRoot.resolve("icon-windows.ico"))
                 menuGroup = "TRIfA Material"
@@ -82,7 +86,6 @@ compose.desktop {
                 upgradeUuid = "7774da26-11dd-4ea4-bd08-f4950d252504"
             }
             linux {
-                targetFormats(TargetFormat.Deb, TargetFormat.Rpm, TargetFormat.AppImage)
                 iconFile.set(iconsRoot.resolve("icon-linux.png"))
                 println("iconFile=" + iconsRoot.resolve("icon-linux.png"))
             }

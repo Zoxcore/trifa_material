@@ -52,6 +52,7 @@ jobs:
           sudo DEBIAN_FRONTEND=noninteractive \
           apt-get install -y --no-install-recommends \
           ca-certificates \
+          rpm \
           openjdk-17-jdk \
           openjdk-17-jdk-headless
 
@@ -70,20 +71,25 @@ jobs:
         run:  id;pwd;ls -al;./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64 packageUberJarForCurrentOS
 
       - name: check jar
-        run:  id;pwd;ls -hal ./build/compose/jars/trifa_material-linux-x64-1.0.0.jar
+        run:  id;pwd;ls -hal ./build/compose/jars/trifa_material-linux-x64-*.jar
 
       - name: check deb
-        run:  id;pwd;ls -hal ./build/compose/binaries/main/deb/trifa-material_1.0.0-1_amd64.deb
+        run:  id;pwd;ls -hal ./build/compose/binaries/main/deb/trifa-material_*-1_amd64.deb
+
+      - name: check rpm
+        run:  id;pwd;ls -hal ./build/compose/binaries/main/rpm/trifa_material-*.x86_64.rpm
+
 
       - name: Rename artifact for nightly upload
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
           cp -v ./build/compose/binaries/main/deb/trifa-material_*_amd64.deb trifa-material_nightly.deb
+          cp -v ./build/compose/binaries/main/rpm/trifa_material-*.x86_64.rpm trifa-material_nightly.rpm
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: trifa-material_nightly.deb
-          path: trifa-material_nightly.deb
+          name: trifa-material_nightly.???
+          path: trifa-material_nightly.???
       - name: Upload to nightly release
         uses: ncipollo/release-action@v1
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
