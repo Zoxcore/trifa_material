@@ -9,7 +9,7 @@ echo "$_HOME_"
 cd "$_HOME_" || exit
 
 
-build_for='ubuntu:18.04
+build_for='ubuntu:20.04
 '
 
 
@@ -77,7 +77,7 @@ pkgs_Ubuntu_18_04="
     gdb
     nano
     yasm
-    openjdk-11-jdk-headless
+    openjdk-17-jdk-headless
 "
 
 pkgs_Ubuntu_20_04="$pkgs_Ubuntu_18_04"
