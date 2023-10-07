@@ -21,12 +21,14 @@ dependencies {
     // (in a separate module for demo project and in testMain).
     // With compose.desktop.common you will also lose @Preview functionality
     implementation(compose.desktop.currentOs)
-    implementation("com.russhwolf:multiplatform-settings-no-arg:1.0.0")
     implementation(compose.ui)
     implementation(compose.foundation)
     implementation(compose.material)
     @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
     implementation(compose.components.resources)
+    //
+    implementation("com.russhwolf:multiplatform-settings-no-arg:1.0.0")
+    implementation(compose.materialIconsExtended)
 }
 
 compose.desktop {
