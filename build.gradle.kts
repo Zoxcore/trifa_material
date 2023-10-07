@@ -1,3 +1,4 @@
+import org.gradle.internal.impldep.org.codehaus.plexus.util.Os
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.de.undercouch.gradle.tasks.download.Download
 
@@ -25,8 +26,10 @@ dependencies {
     implementation(compose.desktop.currentOs)
     implementation(compose.desktop.common)
     implementation(compose.ui)
+    implementation(compose.runtime)
     implementation(compose.foundation)
     implementation(compose.material)
+    implementation(compose.material3)
     @Suppress("OPT_IN_IS_NOT_ENABLED")
     @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
     implementation(compose.components.resources)
@@ -52,12 +55,6 @@ compose.desktop {
         // args += listOf("-customArgument")
 
         nativeDistributions {
-            targetFormats(
-                TargetFormat.Dmg,
-                TargetFormat.Msi, TargetFormat.Exe,
-                TargetFormat.Deb, TargetFormat.Rpm, TargetFormat.AppImage
-            )
-
             packageName = appName
             packageVersion = "${project.version}"
             println("packageVersion=$packageVersion")
@@ -71,10 +68,12 @@ compose.desktop {
             val iconsRoot = project.file("resources")
             println("iconsRoot=$iconsRoot")
             macOS {
+                targetFormats(TargetFormat.Dmg)
                 println("iconFile=" + iconsRoot.resolve("icon-mac.icns"))
                 iconFile.set(iconsRoot.resolve("icon-mac.icns"))
             }
             windows {
+                targetFormats(TargetFormat.Msi, TargetFormat.Exe)
                 iconFile.set(iconsRoot.resolve("icon-windows.ico"))
                 println("iconFile=" + iconsRoot.resolve("icon-windows.ico"))
                 menuGroup = "TRIfA Material"
@@ -83,6 +82,7 @@ compose.desktop {
                 upgradeUuid = "7774da26-11dd-4ea4-bd08-f4950d252504"
             }
             linux {
+                targetFormats(TargetFormat.Deb, TargetFormat.Rpm, TargetFormat.AppImage)
                 iconFile.set(iconsRoot.resolve("icon-linux.png"))
                 println("iconFile=" + iconsRoot.resolve("icon-linux.png"))
             }
@@ -113,10 +113,12 @@ tasks {
     }
 
     val copyAppimageDesktopfile by registering(Exec::class) {
+        environment("ARCH", "x86_64")
         commandLine("cp", "-v", desktopFile, linuxAppDir)
     }
 
     val copyAppimageIconfile by registering(Exec::class) {
+        environment("ARCH", "x86_64")
         commandLine("cp", "-v", linuxIconFile, "${linuxAppDir}/${appName}")
     }
 
