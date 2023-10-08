@@ -16,17 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.briarproject.briar.desktop.ui
+package org.briarproject.briar.desktop.contact
 
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.Divider
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-
-@Composable
-fun VerticalDivider(modifier: Modifier = Modifier) {
-    Divider(color = Color.LightGray, modifier = modifier.fillMaxHeight().width(1.dp))
+interface ContactListItem {
+    val displayName: String
+    val timestamp: Long
+    val uniqueId: ByteArray
 }
