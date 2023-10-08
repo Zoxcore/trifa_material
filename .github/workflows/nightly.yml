@@ -231,3 +231,229 @@ jobs:
           artifacts: "trifa-material_nightly.msi,trifa-material_nightly.exe"
 
 
+
+  macos-test:
+    runs-on: macos-11
+    if: ${{ true }}
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v3
+    - name: install cliclick
+      run:  brew install cliclick
+
+    - name: install wget
+      run:  brew install wget
+
+    - name: install sendkeys
+      run:  brew install socsieng/tap/sendkeys
+
+    - name: macos-version1
+      run: sw_vers -productVersion
+
+    - name: macos-version2
+      run: system_profiler SPSoftwareDataType
+
+    - name: csrutil-status
+      run: csrutil status || exit 0
+
+    - name: notifications_off_01
+      run: launchctl unload -w /System/Library/LaunchAgents/com.apple.notificationcenterui.plist || exit 0
+
+    - name: notifications_off_02
+      run: killall NotificationCenter || exit 0
+
+    - name: startup-app
+      run: |
+           pwd
+           ls -al /Users/runner/
+           _HOME_="/Users/runner/"
+           /usr/libexec/java_home -v 17
+           export JAVA_HOME=$(/usr/libexec/java_home -v17)
+           ./gradlew assemble
+           cliclick -m verbose m:12,34
+           screencapture -T 1 -x -t png /Users/runner/screen01.png &
+           screencapture -T 2 -x -t png /Users/runner/screen02.png &
+           screencapture -T 3 -x -t png /Users/runner/screen03.png &
+           screencapture -T 10 -x -t png /Users/runner/screen04.png &
+           screencapture -T 25 -x -t png /Users/runner/screen05.png &
+           screencapture -T 50 -x -t png /Users/runner/screen06.png &
+           screencapture -T 60 -x -t png /Users/runner/screen07.png &
+           screencapture -T 90 -x -t png /Users/runner/screen09.png &
+           screencapture -T 110 -x -t png /Users/runner/screen10.png &
+           screencapture -T 200 -x -t png /Users/runner/screenshot-macos.png &
+           screencapture -T 230 -x -t png /Users/runner/screen12.png &
+           screencapture -T 300 -x -t png /Users/runner/screen13.png &
+           pwd
+           ls -al
+           ./gradlew run > trifa.log 2>&1 &
+           pwd
+           sleep 20
+           sleep 1
+           cliclick -m verbose c:706,608
+           sleep 60
+           sleep 90
+           sleep 120
+           pwd
+           ls -al /Users/runner/
+
+    - name: upload-screenshots
+      uses: actions/upload-artifact@v3
+      with:
+        name: screenshot-macos
+        path: |
+          /Users/runner/screen*.png
+
+    - name: Upload to nightly release
+      uses: ncipollo/release-action@v1
+      if: github.ref == 'refs/heads/master'
+      with:
+        allowUpdates: true
+        tag: nightly
+        omitBodyDuringUpdate: true
+        omitNameDuringUpdate: true
+        prerelease: true
+        replacesArtifacts: true
+        token: ${{ secrets.GITHUB_TOKEN }}
+        artifacts: "screenshot-macos.png"
+
+  linux-ub20-test:
+    runs-on: ubuntu-20.04
+    if: ${{ true }}
+    permissions:
+      contents: write
+    steps:
+        - uses: actions/checkout@v3
+        - name: os version
+          run:  uname -a
+
+        - name: install deps
+          run: |
+               sudo apt-get update
+               sudo apt-get install openjdk-17-jdk-headless openjdk-17-jdk
+               sudo apt-get install imagemagick
+               sudo apt-get install xdotool xclip
+               sudo apt-get install x11-apps x11-utils
+               sudo apt-get install xvfb
+
+        - name: create runscript
+          run: |
+               printf '#!/bin/bash\n' > /tmp/a.sh
+               printf 'xclock -digital -geometry 300x45+100+600 &\n' >> /tmp/a.sh
+               printf '/home/runner/work/trifa_material/trifa_material/gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64/ run &\n' >> /tmp/a.sh
+               printf 'sleep 3\n' >> /tmp/a.sh
+               printf 'xwininfo -id $(xdotool getactivewindow)\n' >> /tmp/a.sh
+               printf 'xdotool mousemove 512 386 click 1\n' >> /tmp/a.sh
+               printf 'sleep 120\n' >> /tmp/a.sh
+               printf 'import -window root /tmp/screenshot-linux.png\n' >> /tmp/a.sh
+               cat /tmp/a.sh
+               chmod a+rx /tmp/a.sh
+
+        - name: startup-app
+          run: |
+               pwd
+               ./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64/ assemble
+               xvfb-run --server-args="-screen 0 1024x768x24" --auto-servernum /tmp/a.sh
+               cp -av /tmp/screenshot-linux.png screenshot-linux.png
+
+        - name: upload-screenshots
+          uses: actions/upload-artifact@v3
+          with:
+            name: screenshot-linux
+            path: /tmp/screenshot-linux.png
+
+        - name: Upload to nightly release
+          uses: ncipollo/release-action@v1
+          if: github.ref == 'refs/heads/master'
+          with:
+            allowUpdates: true
+            tag: nightly
+            omitBodyDuringUpdate: true
+            omitNameDuringUpdate: true
+            prerelease: true
+            replacesArtifacts: true
+            token: ${{ secrets.GITHUB_TOKEN }}
+            artifacts: "screenshot-linux.png"
+
+
+  windows-test:
+    runs-on: windows-latest
+    if: ${{ true }}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Display the path
+        run: echo %PATH%
+        shell: cmd
+
+      - name: java-version
+        run: set -x ; "$JAVA_HOME_17_X64/bin/java.exe" -version
+        shell: bash
+
+      - name: compile-app
+        run: |
+          ./gradlew.bat -Dorg.gradle.java.home=C:\hostedtoolcache\windows\Java_Temurin-Hotspot_jdk\17.0.8-101\x64 assemble
+        shell: cmd
+
+      - name: startup-app
+        shell: pwsh
+        run: |
+          [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
+          [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
+          Start-Sleep -Seconds 30
+          Start-Process -FilePath 'C:\Windows\System32\cmd.exe' -WorkingDirectory "D:\a\trifa_material\trifa_material" -ArgumentList '/c', 'D:\a\trifa_material\trifa_material\gradlew.bat', "-Dorg.gradle.java.home=C:\hostedtoolcache\windows\Java_Temurin-Hotspot_jdk\17.0.8-101\x64", "run" -windowstyle Maximized
+          Start-Sleep -Seconds 20
+          Start-Sleep -Seconds 8
+          $signature=@'
+          [DllImport("user32.dll",CharSet=CharSet.Auto,CallingConvention=CallingConvention.StdCall)]
+          public static extern void mouse_event(long dwFlags, long dx, long dy, long cButtons, long dwExtraInfo);
+          '@
+          $SendMouseClick = Add-Type -memberDefinition $signature -name "Win32MouseEventNew" -namespace Win32Functions -passThru
+          $x = 650
+          $y = 544
+          [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point($x, $y)
+          sleep -Seconds 01
+          $SendMouseClick::mouse_event(0x00000002, 0, 0, 0, 0);
+          $SendMouseClick::mouse_event(0x00000004, 0, 0, 0, 0);
+          Start-Sleep -Seconds 180
+
+      - name: capture-screen
+        shell: pwsh
+        run: |
+          Add-Type -AssemblyName System.Windows.Forms
+          Add-Type -AssemblyName System.Drawing
+          $Screen = [System.Windows.Forms.SystemInformation]::VirtualScreen
+          $Width  = $Screen.Width
+          $Height = $Screen.Height
+          $Left   = $Screen.Left
+          $Top    = $Screen.Top
+          $bitmap  = New-Object System.Drawing.Bitmap $Width, $Height
+          $graphic = [System.Drawing.Graphics]::FromImage($bitmap)
+          $graphic.CopyFromScreen($Left, $Top, 0, 0, $bitmap.Size)
+          $bitmap.Save("D:\a\trifa_material\trifa_material\screenshot-windows.png")
+          Write-Output "Screenshot saved to:"
+          Write-Output D:\a\trifa_material\trifa_material\screenshot-windows.png
+
+      - name: upload-screenshots
+        uses: actions/upload-artifact@v3
+        with:
+          name: screenshot-windows
+          path: |
+            D:\a\trifa_material\trifa_material\screenshot-windows.png
+
+      - name: Upload to nightly release
+        uses: ncipollo/release-action@v1
+        if: github.ref == 'refs/heads/master'
+        with:
+          allowUpdates: true
+          tag: nightly
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          prerelease: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "screenshot-windows.png"
+
+
+
