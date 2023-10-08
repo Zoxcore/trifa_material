@@ -290,7 +290,7 @@ jobs:
            pwd
            sleep 20
            sleep 1
-           cliclick -m verbose c:706,608
+           cliclick -m verbose c:77,124
            sleep 60
            sleep 90
            sleep 120
@@ -340,11 +340,11 @@ jobs:
         - name: create runscript
           run: |
                printf '#!/bin/bash\n' > /tmp/a.sh
-               printf 'xclock -digital -geometry 300x45+100+600 &\n' >> /tmp/a.sh
+               printf 'xclock -digital -geometry 300x45+100+688 &\n' >> /tmp/a.sh
                printf '/home/runner/work/trifa_material/trifa_material/gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64/ run &\n' >> /tmp/a.sh
                printf 'sleep 3\n' >> /tmp/a.sh
                printf 'xwininfo -id $(xdotool getactivewindow)\n' >> /tmp/a.sh
-               printf 'xdotool mousemove 512 386 click 1\n' >> /tmp/a.sh
+               printf 'xdotool mousemove 78 70 click 1\n' >> /tmp/a.sh
                printf 'sleep 120\n' >> /tmp/a.sh
                printf 'import -window root /tmp/screenshot-linux.png\n' >> /tmp/a.sh
                cat /tmp/a.sh
@@ -411,8 +411,8 @@ jobs:
           public static extern void mouse_event(long dwFlags, long dx, long dy, long cButtons, long dwExtraInfo);
           '@
           $SendMouseClick = Add-Type -memberDefinition $signature -name "Win32MouseEventNew" -namespace Win32Functions -passThru
-          $x = 650
-          $y = 544
+          $x = 84
+          $y = 104
           [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point($x, $y)
           sleep -Seconds 01
           $SendMouseClick::mouse_event(0x00000002, 0, 0, 0, 0);
