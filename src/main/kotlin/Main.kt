@@ -3,18 +3,24 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.*
-import com.russhwolf.settings.Settings
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity.Companion.main_init
+import com.zoffcc.applications.trifa.PrefsSettings
 import com.zoffcc.applications.trifa.TrifaToxService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -23,11 +29,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
-import androidx.compose.material.icons.filled.FormatSize
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
+import java.util.prefs.Preferences
 
 private const val TAG = "trifa.Main.kt"
 
@@ -38,8 +40,9 @@ var online_button_text_wrapper = "offline"
 var online_button_color_wrapper = Color.White.toArgb()
 
 var closing_application = false
+private val prefs: Preferences =
+    Preferences.userNodeForPackage(com.zoffcc.applications.trifa.PrefsSettings::class.java)
 
-val settings: Settings = Settings()
 val HEADER_SIZE = 56.dp
 
 @Composable
@@ -51,12 +54,14 @@ fun App() {
     var online_button_text by remember { mutableStateOf("offline") }
     var online_button_color by remember { mutableStateOf(Color.White.toArgb()) }
 
+    Log.i(TAG, "CCCC:" + PrefsSettings::class.java)
+
     var uiscale_default = LocalDensity.current.density
 
     try {
-        val tmp = settings.getFloatOrNull("main.ui_scale_factor")
+        val tmp = prefs.get("main.ui_scale_factor", null)
         if (tmp != null) {
-            uiscale_default = tmp
+            uiscale_default = tmp.toFloat()
         }
     } catch (_: Exception) {
     }
@@ -148,9 +153,9 @@ fun App() {
                             value = ui_scale ?: LocalDensity.current.density,
                             onValueChange = {
                                 ui_scale = it
-                                settings.putFloat("main.ui_scale_factor", ui_scale)
+                                prefs.putFloat("main.ui_scale_factor", ui_scale)
                                 Log.i(TAG, "density: $ui_scale")
-                                            },
+                            },
                             onValueChangeFinished = { },
                             valueRange = 1f..3f,
                             steps = 3,
@@ -201,12 +206,13 @@ fun main() = application(exitProcessOnExit = true) {
 private fun MainAppStart() {
     var showIntroScreen by remember { mutableStateOf(true) }
     try {
-        val tmp = settings.getBooleanOrNull("main.show_intro_screen")
+        val tmp = prefs.getBoolean("main.show_intro_screen", true)
         if (tmp == false) {
             showIntroScreen = false
         }
     } catch (_: Exception) {
     }
+    // showIntroScreen = true
 
     if (showIntroScreen) {
         // ----------- intro screen -----------
@@ -221,15 +227,24 @@ private fun MainAppStart() {
                 title = "TRIfA Material - Welcome"
             )
             {
-                Text("Welcome to TRIfA Material")
-                Button(onClick = {
-                    settings.putBoolean("main.show_intro_screen", false)
-                    showIntroScreen = false
-                    isOpen = false
-                }) {
-                }
-                if (isAskingToClose) {
-                    isOpen = false
+                Column(Modifier.fillMaxSize()) {
+                    Button(onClick = {
+                        prefs.putBoolean("main.show_intro_screen", false)
+                        showIntroScreen = false
+                        isOpen = false
+                    }) {
+                        Text("Start TRIfA")
+                    }
+                    Text(
+                        text = "\n    Welcome to TRIfA Material \n\n    A Tox Client for Desktop",
+                        style = MaterialTheme.typography.body1.copy(
+                            fontSize = 22.sp,
+                        ),
+                    )
+
+                    if (isAskingToClose) {
+                        isOpen = false
+                    }
                 }
             }
         }
@@ -249,10 +264,10 @@ private fun MainAppStart() {
         var h_ = Dp(0.0f)
         var error = 0
         try {
-            x_ = settings.getString("main.window.position.x", "").toFloat().dp
-            y_ = settings.getString("main.window.position.y", "").toFloat().dp
-            w_ = settings.getString("main.window.size.width", "").toFloat().dp
-            h_ = settings.getString("main.window.size.height", "").toFloat().dp
+            x_ = prefs.get("main.window.position.x", "").toFloat().dp
+            y_ = prefs.get("main.window.position.y", "").toFloat().dp
+            w_ = prefs.get("main.window.size.width", "").toFloat().dp
+            h_ = prefs.get("main.window.size.height", "").toFloat().dp
         } catch (_: Exception) {
             error = 1
         }
@@ -324,15 +339,15 @@ private fun MainAppStart() {
 @Suppress("UNUSED_PARAMETER")
 private fun onWindowResize(size: DpSize) {
     // println("onWindowResize $size")
-    settings.putString("main.window.size.width", size.width.value.toString())
-    settings.putString("main.window.size.height", size.height.value.toString())
+    prefs.put("main.window.size.width", size.width.value.toString())
+    prefs.put("main.window.size.height", size.height.value.toString())
 }
 
 @Suppress("UNUSED_PARAMETER")
 private fun onWindowRelocate(position: WindowPosition) {
     // println("onWindowRelocate $position")
-    settings.putString("main.window.position.x", position.x.value.toString())
-    settings.putString("main.window.position.y", position.y.value.toString())
+    prefs.put("main.window.position.x", position.x.value.toString())
+    prefs.put("main.window.position.y", position.y.value.toString())
 }
 
 @Composable
