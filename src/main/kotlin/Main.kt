@@ -28,6 +28,9 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
+import org.briarproject.briar.desktop.contact.ContactItem
+import org.briarproject.briar.desktop.contact.ContactList
+import org.briarproject.briar.desktop.contact.ContactListItem
 import org.briarproject.briar.desktop.navigation.BriarSidebar
 import org.briarproject.briar.desktop.ui.VerticalDivider
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
@@ -46,6 +49,7 @@ private val prefs: Preferences =
     Preferences.userNodeForPackage(com.zoffcc.applications.trifa.PrefsSettings::class.java)
 
 val HEADER_SIZE = 56.dp
+val COLUMN_WIDTH = 180.dp
 
 @Composable
 @Preview
@@ -171,7 +175,25 @@ fun App() {
                             Icon(Icons.Default.FormatSize, null)
                         }
                     }
-                    ChatAppWithScaffold()
+
+                    var contacts = ArrayList<ContactListItem>()
+                    for (i in 1..1) {
+                        if (i.mod(2) == 0) {
+                            val f1 = ContactItem(true)
+                            contacts.add(f1)
+                        } else {
+                            val f1 = ContactItem(false)
+                            contacts.add(f1)
+                        }
+                    }
+
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        ContactList(
+                            contacts
+                        )
+                        VerticalDivider()
+                        ChatAppWithScaffold()
+                    }
                 }
             }
         }

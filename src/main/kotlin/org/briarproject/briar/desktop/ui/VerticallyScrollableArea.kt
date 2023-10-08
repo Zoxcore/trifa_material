@@ -18,15 +18,27 @@
 
 package org.briarproject.briar.desktop.ui
 
+import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.Divider
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment.Companion.CenterEnd
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 
 @Composable
-fun VerticalDivider(modifier: Modifier = Modifier) {
-    Divider(color = Color.LightGray, modifier = modifier.fillMaxHeight().width(1.dp))
+fun VerticallyScrollableArea(
+    modifier: Modifier = Modifier,
+    content: @Composable (scrollState: LazyListState) -> Unit,
+) = Box(modifier) {
+    val scrollState = rememberLazyListState()
+
+    content(scrollState)
+
+    VerticalScrollbar(
+        adapter = rememberScrollbarAdapter(scrollState),
+        modifier = Modifier.align(CenterEnd).fillMaxHeight()
+    )
 }
