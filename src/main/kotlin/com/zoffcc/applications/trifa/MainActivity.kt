@@ -958,13 +958,13 @@ class MainActivity {
             {
                 HelperMessage.send_msgv3_high_level_ack(friend_number, msgV3hash_hex_string);
                 try {
-                    incoming_messages_queue.offer("msgv3:"+friend_message)
+                    incoming_messages_queue.offer(friend_message) // ("msgv3:"+friend_message)
                 } catch (_ : Exception) {}
             }
             else
             {
                 try {
-                    incoming_messages_queue.offer("msgv1:"+friend_message)
+                    incoming_messages_queue.offer(friend_message) // ("msgv1:"+friend_message)
                 } catch (_ : Exception) {}
             }
         }
