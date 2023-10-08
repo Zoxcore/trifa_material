@@ -1,5 +1,7 @@
 # TRIfA Material
 
+<img src="https://github.com/Zoxcore/trifa_material/releases/download/nightly/screenshot-windows.png" width="90%">
+
 ## Build Status
 
 **Github:** [![Android CI](https://github.com/Zoxcore/trifa_material/workflows/Nightly/badge.svg)](https://github.com/Zoxcore/trifa_material/actions?query=workflow%3A%22Nightly%22)
