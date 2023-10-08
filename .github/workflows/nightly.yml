@@ -296,6 +296,7 @@ jobs:
            sleep 120
            pwd
            ls -al /Users/runner/
+           cp -v /Users/runner/screenshot-macos.png /Users/runner/work/trifa_material/trifa_material/screenshot-macos.png
 
     - name: upload-screenshots
       uses: actions/upload-artifact@v3
