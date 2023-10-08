@@ -342,9 +342,11 @@ jobs:
                printf '#!/bin/bash\n' > /tmp/a.sh
                printf 'xclock -digital -geometry 300x45+100+688 &\n' >> /tmp/a.sh
                printf '/home/runner/work/trifa_material/trifa_material/gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64/ run &\n' >> /tmp/a.sh
-               printf 'sleep 3\n' >> /tmp/a.sh
+               printf 'sleep 20\n' >> /tmp/a.sh
                printf 'xwininfo -id $(xdotool getactivewindow)\n' >> /tmp/a.sh
-               printf 'xdotool mousemove 78 70 click 1\n' >> /tmp/a.sh
+               printf 'xdotool mousemove --sync 80 74 click 1\n' >> /tmp/a.sh
+               printf 'sleep 2\n' >> /tmp/a.sh
+               printf 'xdotool mousemove --sync 80 74 click 1\n' >> /tmp/a.sh
                printf 'sleep 120\n' >> /tmp/a.sh
                printf 'import -window root /tmp/screenshot-linux.png\n' >> /tmp/a.sh
                cat /tmp/a.sh
