@@ -25,22 +25,7 @@ private const val TAG = "trifa.Chatapp"
 
 val myUser = User("Me", picture = null)
 val friends = listOf(
-    // User("Alex", picture = "stock1.jpg"),
-    // User("Casey", picture = "stock2.jpg"),
-    User("Sam", picture = "stock3.jpg")
-    // User("Lora", picture = "stock4.jpg")
-)
-val friendMessages = listOf(
-    "How's everybody doing today?",
-    "I've been meaning to chat!",
-    "When do we hang out next? 😋",
-    "We really need to catch up!",
-    "It's been too long!",
-    "I can't\nbelieve\nit! 😱",
-    "Did you see that ludicrous\ndisplay last night?",
-    "We should meet up in person!",
-    "How about a round of pinball?",
-    "I'd love to:\n🍔 Eat something\n🎥 Watch a movie, maybe?\nWDYT?"
+    User("Friend", picture = "friend_avatar.png")
 )
 val store = CoroutineScope(SupervisorJob()).createStore()
 

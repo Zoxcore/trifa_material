@@ -1002,7 +1002,7 @@ class MainActivity {
             Log.i(TAG, "TOX_FILE_KIND_MESSAGEV2_SEND:MSGv2HASH:2=" + msg_id_as_hex_string);
 
             try {
-                incoming_messages_queue.offer("msgv2:"+friend_message)
+                incoming_messages_queue.offer(friend_message) // ("msgv2:"+friend_message)
             } catch (_ : Exception) {}
 
             val pin_timestamp = System.currentTimeMillis()
