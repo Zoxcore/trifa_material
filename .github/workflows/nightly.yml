@@ -272,8 +272,6 @@ jobs:
            export JAVA_HOME=$(/usr/libexec/java_home -v17)
            ./gradlew assemble
            cliclick -m verbose m:12,34
-           sleep 2
-           cliclick -m verbose m:12,34
            screencapture -T 1 -x -t png /Users/runner/screen01.png &
            screencapture -T 2 -x -t png /Users/runner/screen02.png &
            screencapture -T 3 -x -t png /Users/runner/screen03.png &
@@ -291,7 +289,8 @@ jobs:
            ./gradlew run > trifa.log 2>&1 &
            pwd
            sleep 20
-           sleep 1
+           cliclick -m verbose c:77,124
+           sleep 2
            cliclick -m verbose c:77,124
            sleep 60
            sleep 90
@@ -419,8 +418,10 @@ jobs:
           $y = 104
           [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point($x, $y)
           sleep -Seconds 02
+          $SendMouseClick::mouse_event(0x00000002, 0, 0, 0, 0);
+          $SendMouseClick::mouse_event(0x00000004, 0, 0, 0, 0);
+          sleep -Seconds 02
           [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point($x, $y)
-          sleep -Seconds 01
           $SendMouseClick::mouse_event(0x00000002, 0, 0, 0, 0);
           $SendMouseClick::mouse_event(0x00000004, 0, 0, 0, 0);
           Start-Sleep -Seconds 180
