@@ -194,6 +194,11 @@ fun set_tox_online_state(new_state: String) {
 }
 
 fun main() = application(exitProcessOnExit = true) {
+    MainAppStart()
+}
+
+@Composable
+private fun MainAppStart() {
     var showIntroScreen by remember { mutableStateOf(true) }
     try {
         val tmp = settings.getBooleanOrNull("main.show_intro_screen")
