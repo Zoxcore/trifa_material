@@ -1,5 +1,7 @@
 package com.zoffcc.applications.trifa
 
+import Message
+import User
 import com.zoffcc.applications.trifa.HelperFriend.send_friend_msg_receipt_v2_wrapper
 import com.zoffcc.applications.trifa.HelperGeneric.bytesToHex
 import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
@@ -7,7 +9,10 @@ import com.zoffcc.applications.trifa.TRIFAGlobals.LOWER_NGC_VIDEO_BITRATE
 import com.zoffcc.applications.trifa.TRIFAGlobals.LOWER_NGC_VIDEO_QUANTIZER
 import com.zoffcc.applications.trifa.TRIFAGlobals.NGC_AUDIO_BITRATE
 import com.zoffcc.applications.trifa.ToxVars.TOX_HASH_LENGTH
+import myUser
 import set_tox_online_state
+import store
+import timestampMs
 import java.io.File
 import java.nio.ByteBuffer
 import java.util.*
@@ -958,13 +963,37 @@ class MainActivity {
             {
                 HelperMessage.send_msgv3_high_level_ack(friend_number, msgV3hash_hex_string);
                 try {
-                    incoming_messages_queue.offer(friend_message) // ("msgv3:"+friend_message)
+                    // ("msgv3:"+friend_message)
+                    val toxpk = tox_friend_get_public_key(friend_number)
+                    val friend_user = User("Friend " + friend_number, picture = "friend_avatar.png", toxpk = toxpk)
+                    store.send(
+                        Action.SendMessage(
+                            message = Message(
+                                user = friend_user,
+                                timeMs = timestampMs(),
+                                text = friend_message!!,
+                                toxpk = toxpk
+                            )
+                        )
+                    )
                 } catch (_ : Exception) {}
             }
             else
             {
                 try {
-                    incoming_messages_queue.offer(friend_message) // ("msgv1:"+friend_message)
+                    // ("msgv1:"+friend_message)
+                    val toxpk = tox_friend_get_public_key(friend_number)
+                    val friend_user = User("Friend " + friend_number, picture = "friend_avatar.png", toxpk = toxpk)
+                    store.send(
+                        Action.SendMessage(
+                            message = Message(
+                                user = friend_user,
+                                timeMs = timestampMs(),
+                                text = friend_message!!,
+                                toxpk = toxpk
+                            )
+                        )
+                    )
                 } catch (_ : Exception) {}
             }
         }
@@ -1002,7 +1031,19 @@ class MainActivity {
             Log.i(TAG, "TOX_FILE_KIND_MESSAGEV2_SEND:MSGv2HASH:2=" + msg_id_as_hex_string);
 
             try {
-                incoming_messages_queue.offer(friend_message) // ("msgv2:"+friend_message)
+                val toxpk = tox_friend_get_public_key(friend_number)
+                val friend_user = User("Friend " + friend_number, picture = "friend_avatar.png", toxpk = toxpk)
+                store.send(
+                    Action.SendMessage(
+                        message = Message(
+                            user = friend_user,
+                            timeMs = timestampMs(),
+                            text = friend_message!!,
+                            toxpk = toxpk
+                        )
+                    )
+                )
+                // incoming_messages_queue.offer(friend_message) // ("msgv2:"+friend_message)
             } catch (_ : Exception) {}
 
             val pin_timestamp = System.currentTimeMillis()
