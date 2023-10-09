@@ -4,29 +4,22 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.sp
-import com.zoffcc.applications.trifa.Log
-import com.zoffcc.applications.trifa.MainActivity
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_send_message
 import com.zoffcc.applications.trifa.ToxVars.TOX_MESSAGE_TYPE
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 
 private const val TAG = "trifa.Chatapp"
 
-val myUser = User("Me", picture = null)
-val friends = listOf(
-    User("Friend", picture = "friend_avatar.png")
-)
+val myUser = User("Me", picture = null, toxpk = null)
 val store = CoroutineScope(SupervisorJob()).createStore()
 
 @Composable
@@ -72,7 +65,7 @@ fun ChatApp(displayTextField: Boolean = true) {
                             // !!!!! DEBUG DEBUG !!!!!
                             store.send(
                                 Action.SendMessage(
-                                    Message(myUser, timeMs = timestampMs(), text)
+                                    Message(myUser, timeMs = timestampMs(), text, toxpk = myUser.toxpk)
                                 )
                             )
                         }
@@ -80,31 +73,6 @@ fun ChatApp(displayTextField: Boolean = true) {
                 }
             }
         }
-    }
-
-    LaunchedEffect(Unit) {
-        while (!closing_application) {
-            val thisFriend = friends.random()
-            var thisMessage: String? = null
-            try {
-                thisMessage = MainActivity.incoming_messages_queue.poll()
-            } catch (_: Exception) {
-            }
-
-            if (thisMessage != null) {
-                store.send(
-                    Action.SendMessage(
-                        message = Message(
-                            user = thisFriend,
-                            timeMs = timestampMs(),
-                            text = thisMessage
-                        )
-                    )
-                )
-            }
-            delay(100)
-        }
-        Log.i(TAG, "endless loop ended");
     }
 }
 
