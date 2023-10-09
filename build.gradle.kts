@@ -54,6 +54,10 @@ compose.desktop {
         // jvmArgs += listOf("-Xmx2G")
         // args += listOf("-customArgument")
 
+        buildTypes.release.proguard {
+            optimize.set(false)
+        }
+
         nativeDistributions {
             packageName = appName
             packageVersion = "${project.version}"
