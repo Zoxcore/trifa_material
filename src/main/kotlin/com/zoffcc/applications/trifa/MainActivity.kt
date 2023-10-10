@@ -128,6 +128,9 @@ class MainActivity {
 
             try {
                 PrintWriter("toxid.txt", "UTF-8").use { out -> out.write(my_tox_id_temp) }
+                Log.i(TAG, "writing toxid to: "
+                        + File(".").canonicalPath +
+                        File.separator + "toxid.txt")
             } catch (_: Exception) {
             }
         }
