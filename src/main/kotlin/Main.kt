@@ -6,11 +6,13 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.window.Tray
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
@@ -20,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.*
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity.Companion.main_init
+import com.zoffcc.applications.trifa.OperatingSystem
 import com.zoffcc.applications.trifa.PrefsSettings
 import com.zoffcc.applications.trifa.TrifaToxService
 import kotlinx.coroutines.Dispatchers
@@ -189,7 +192,8 @@ fun App() {
 
                     Row(modifier = Modifier.fillMaxWidth()) {
                         ContactList(
-                            contacts
+                            contactList = contacts
+                            // isSelected =
                         )
                         VerticalDivider()
                         ChatAppWithScaffold()
@@ -224,6 +228,16 @@ fun set_tox_online_state(new_state: String) {
 }
 
 fun main() = application(exitProcessOnExit = true) {
+    /*
+    if ((OperatingSystem.getCurrent() == OperatingSystem.WINDOWS)
+        || (OperatingSystem.getCurrent() == OperatingSystem.MACOS)
+    ) {
+        val appIcon = painterResource("icon-linux.png")
+        Tray(
+            icon = appIcon,
+        )
+    }
+    */
     MainAppStart()
 }
 
@@ -239,6 +253,7 @@ private fun MainAppStart() {
     }
     // showIntroScreen = true
 
+    val appIcon = painterResource("icon-linux.png")
     if (showIntroScreen) {
         // ----------- intro screen -----------
         // ----------- intro screen -----------
@@ -249,7 +264,8 @@ private fun MainAppStart() {
         if (isOpen) {
             Window(
                 onCloseRequest = { isAskingToClose = true },
-                title = "TRIfA Material - Welcome"
+                title = "TRIfA Material - Welcome",
+                icon = appIcon
             )
             {
                 Column(Modifier.fillMaxSize()) {
@@ -307,6 +323,7 @@ private fun MainAppStart() {
             Window(
                 onCloseRequest = { isAskingToClose = true },
                 title = "TRIfA",
+                icon = appIcon,
                 state = state
             ) {
                 if (isAskingToClose) {

@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
@@ -58,8 +59,7 @@ fun ListItemView(
                         .semantics {
                             contentDescription = if (selected) i18n("access.list.selected.yes")
                             else i18n("access.list.selected.no")
-                            // todo: stateDescription apparently not used
-                            // stateDescription = if (selected) "selected" else "not selected"
+                            stateDescription = if (selected) "selected" else "not selected"
                         }
                         .selectable(selected, onClick = onSelect, role = Role.Button)
                 } else Modifier
