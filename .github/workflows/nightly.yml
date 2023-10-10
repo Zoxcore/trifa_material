@@ -263,6 +263,15 @@ jobs:
     - name: notifications_off_02
       run: killall NotificationCenter || exit 0
 
+    - name: download tester
+      shell: bash
+      run: |
+           curl -L https://github.com/zoff99/java_tox_tester/archive/refs/heads/master.zip -o master.zip
+           unzip master.zip
+           ls -al java_tox_tester-master/
+           java -version
+           javac -version
+
     - name: startup-app
       run: |
            pwd
@@ -291,8 +300,13 @@ jobs:
            sleep 20
            cliclick -m verbose c:77,124
            sleep 2
-           cliclick -m verbose c:77,124
-           sleep 60
+           cliclick -m verbose c:139,124
+           sleep 2
+           cat /Users/runner/work/trifa_material/trifa_material/toxid.txt;echo
+           cd /Users/runner/work/trifa_material/trifa_material/java_tox_tester-master/
+           ./do_compile.sh
+           ./do_run.sh $(cat /Users/runner/work/trifa_material/trifa_material/toxid.txt) >/dev/null 2>/dev/null &
+           sleep 58
            sleep 90
            sleep 120
            pwd
@@ -338,6 +352,15 @@ jobs:
                sudo apt-get install x11-apps x11-utils
                sudo apt-get install xvfb
 
+        - name: download tester
+          shell: bash
+          run: |
+               curl -L https://github.com/zoff99/java_tox_tester/archive/refs/heads/master.zip -o master.zip
+               unzip master.zip
+               ls -al java_tox_tester-master/
+               java -version
+               javac -version
+
         - name: create runscript
           run: |
                printf '#!/bin/bash\n' > /tmp/a.sh
@@ -347,8 +370,14 @@ jobs:
                printf 'xwininfo -id $(xdotool getactivewindow)\n' >> /tmp/a.sh
                printf 'xdotool mousemove --sync 80 74 click 1\n' >> /tmp/a.sh
                printf 'sleep 2\n' >> /tmp/a.sh
-               printf 'xdotool mousemove --sync 80 74 click 1\n' >> /tmp/a.sh
-               printf 'sleep 120\n' >> /tmp/a.sh
+               printf 'xdotool mousemove --sync 140 74 click 1\n' >> /tmp/a.sh
+               printf 'pwd\n' >> /tmp/a.sh
+               printf 'sleep 5\n' >> /tmp/a.sh
+               printf 'ls -ratl\n' >> /tmp/a.sh
+               printf 'cat /home/runner/work/trifa_material/trifa_material/toxid.txt;echo\n' >> /tmp/a.sh
+               printf 'cd /home/runner/work/trifa_material/trifa_material/java_tox_tester-master/\n' >> /tmp/a.sh
+               printf './do_run.sh $(cat /home/runner/work/trifa_material/trifa_material/toxid.txt) >/dev/null 2>/dev/null &\n' >> /tmp/a.sh
+               printf 'sleep 180\n' >> /tmp/a.sh
                printf 'import -window root /tmp/screenshot-linux.png\n' >> /tmp/a.sh
                cat /tmp/a.sh
                chmod a+rx /tmp/a.sh
@@ -356,6 +385,7 @@ jobs:
         - name: startup-app
           run: |
                pwd
+               ls -al
                ./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64/ assemble
                xvfb-run --server-args="-screen 0 1024x768x24" --auto-servernum /tmp/a.sh
                cp -av /tmp/screenshot-linux.png screenshot-linux.png
@@ -395,6 +425,15 @@ jobs:
         run: set -x ; "$JAVA_HOME_17_X64/bin/java.exe" -version
         shell: bash
 
+      - name: download tester
+        shell: bash
+        run: |
+             curl -L https://github.com/zoff99/java_tox_tester/archive/refs/heads/master.zip -o master.zip
+             unzip master.zip
+             ls -al java_tox_tester-master/
+             java -version
+             javac -version
+
       - name: compile-app
         run: |
           ./gradlew.bat -Dorg.gradle.java.home=C:\hostedtoolcache\windows\Java_Temurin-Hotspot_jdk\17.0.8-101\x64 assemble
@@ -421,10 +460,21 @@ jobs:
           $SendMouseClick::mouse_event(0x00000002, 0, 0, 0, 0);
           $SendMouseClick::mouse_event(0x00000004, 0, 0, 0, 0);
           sleep -Seconds 02
+          $x = 146
+          $y = 104
           [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point($x, $y)
           $SendMouseClick::mouse_event(0x00000002, 0, 0, 0, 0);
           $SendMouseClick::mouse_event(0x00000004, 0, 0, 0, 0);
-          Start-Sleep -Seconds 180
+          Start-Sleep -Seconds 2
+
+      - name: start tester
+        shell: bash
+        run: |
+          cat toxid.txt;echo
+          cd java_tox_tester-master
+          bash -x ./do_compile.sh
+          ./do_run.sh $(cat ../toxid.txt) &
+          sleep 180
 
       - name: capture-screen
         shell: pwsh
