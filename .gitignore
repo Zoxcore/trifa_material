@@ -4,3 +4,4 @@ build/
 savedata.tox
 bin/
 deps/
+toxid.txt
