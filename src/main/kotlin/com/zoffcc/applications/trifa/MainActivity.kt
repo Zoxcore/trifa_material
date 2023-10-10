@@ -1,5 +1,6 @@
 package com.zoffcc.applications.trifa
 
+import Action
 import Message
 import User
 import com.zoffcc.applications.trifa.HelperFriend.send_friend_msg_receipt_v2_wrapper
@@ -9,11 +10,11 @@ import com.zoffcc.applications.trifa.TRIFAGlobals.LOWER_NGC_VIDEO_BITRATE
 import com.zoffcc.applications.trifa.TRIFAGlobals.LOWER_NGC_VIDEO_QUANTIZER
 import com.zoffcc.applications.trifa.TRIFAGlobals.NGC_AUDIO_BITRATE
 import com.zoffcc.applications.trifa.ToxVars.TOX_HASH_LENGTH
-import myUser
 import set_tox_online_state
 import store
 import timestampMs
 import java.io.File
+import java.io.PrintWriter
 import java.nio.ByteBuffer
 import java.util.*
 import java.util.concurrent.BlockingQueue
@@ -122,6 +123,11 @@ class MainActivity {
             Log.i(TAG, "MyToxID:$my_tox_id_temp")
             try {
                 Thread.currentThread().name = "t_main"
+            } catch (_: Exception) {
+            }
+
+            try {
+                PrintWriter("toxid.txt", "UTF-8").use { out -> out.write(my_tox_id_temp) }
             } catch (_: Exception) {
             }
         }
