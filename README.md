@@ -1,6 +1,6 @@
 # TRIfA Material
 
-<img src="https://github.com/Zoxcore/trifa_material/releases/download/nightly/screenshot-windows.png" width="90%">
+<img src="https://github.com/Zoxcore/trifa_material/releases/download/nightly/screenshot-macos.png" width="90%">
 
 Automated screenshots:<br>
 <img src="https://github.com/Zoxcore/trifa_material/releases/download/nightly/screenshot-macos.png" height="200"></a>
