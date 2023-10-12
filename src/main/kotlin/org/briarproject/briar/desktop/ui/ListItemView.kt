@@ -65,13 +65,6 @@ fun ListItemView(
                 } else Modifier
             )
     ) {
-        if (multiSelectWithCheckbox) {
-            Checkbox(
-                checked = selected ?: false,
-                onCheckedChange = { onSelect() },
-                enabled = selected != null,
-            )
-        }
         content()
     }
     HorizontalDivider(Modifier.padding(start = dividerOffsetFromStart))

@@ -5,9 +5,14 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__udp_enabled
 import com.zoffcc.applications.trifa.MainActivity.Companion.add_tcp_relay_single_wrapper
 import com.zoffcc.applications.trifa.MainActivity.Companion.bootstrap_single_wrapper
 import com.zoffcc.applications.trifa.MainActivity.Companion.init_tox_callbacks
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_name
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_iterate
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_iteration_interval
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_kill
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_friend_list
+import contactstore
+import org.briarproject.briar.desktop.contact.ContactItem
 import set_tox_running_state
 
 class TrifaToxService {
@@ -28,6 +33,8 @@ class TrifaToxService {
                 }
                 // ------ correct startup order ------
 
+                clear_friend()
+                load_friends()
 
                 // --------------- bootstrap ---------------
                 // --------------- bootstrap ---------------
@@ -85,6 +92,7 @@ class TrifaToxService {
                 update_savedata_file_wrapper()
                 is_tox_started = false
                 set_tox_running_state("stopped")
+                clear_friend()
             }
         }
         (ToxServiceThread as Thread).start()
@@ -364,5 +372,33 @@ class TrifaToxService {
         } // --------------- JNI ---------------
         // --------------- JNI ---------------
         // --------------- JNI ---------------
+    }
+
+    fun clear_friend() {
+        try {
+            contactstore.clear()
+        } catch (_: Exception) {
+        }
+    }
+
+    fun load_friends() {
+        tox_self_get_friend_list()?.forEach {
+            Log.i(TAG, "friend:" + it)
+            var fname = tox_friend_get_name(it)
+            if (fname == null)
+            {
+                fname = "Friend"
+            }
+            try {
+                contactstore.add(
+                    item = ContactItem(
+                        name = fname,
+                        isConnected = 0,
+                        pubkey = tox_friend_get_public_key(it)!!
+                    )
+                )
+            } catch (_: Exception) {
+            }
+        }
     }
 }

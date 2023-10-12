@@ -1,7 +1,7 @@
 package org.briarproject.briar.desktop.contact
 
-import COLUMN_WIDTH
-import HEADER_SIZE
+import CONTACT_COLUMN_WIDTH
+import TOP_HEADER_SIZE
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,17 +13,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.zoffcc.applications.trifa.StateContacts
 import org.briarproject.briar.desktop.ui.ListItemView
 import org.briarproject.briar.desktop.ui.VerticallyScrollableArea
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 
 @Composable
 fun ContactList(
-    contactList: List<ContactListItem>,
-    // isSelected: (ContactListItem) -> Boolean,
-    // selectContact: (ContactListItem) -> Unit,
+    contactList: StateContacts,
+    isSelected: String?,
+    selectContact: ContactItem?,
 ) = Column(
-    modifier = Modifier.fillMaxHeight().width(COLUMN_WIDTH).background(Color.Transparent),
+    modifier = Modifier.fillMaxHeight().width(CONTACT_COLUMN_WIDTH).background(Color.Transparent),
 ) {
     VerticallyScrollableArea(modifier = Modifier.fillMaxSize()) { scrollState ->
         LazyColumn(
@@ -35,21 +36,20 @@ fun ContactList(
                 .selectableGroup()
         ) {
             items(
-                items = contactList,
-                key = { item -> item.uniqueId },
+                items = contactList.contacts,
+                key = { item -> item.pubkey },
                 contentType = { item -> item::class }
             ) { item ->
                 ListItemView(
-                    // onSelect = { selectContact(item) },
+                    // onSelect = {},
                     // selected = isSelected(item),
                     // let divider start at horizontal position of text
                     dividerOffsetFromStart = (16 + 36 + 12).dp,
                 ) {
                     val modifier = Modifier
-                        .heightIn(min = HEADER_SIZE)
+                        .heightIn(min = TOP_HEADER_SIZE)
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
-                        // makes sure that ConnectionIndicator and Delete button are aligned with AddContact button
                         .padding(start = 16.dp, end = 4.dp)
 
                     when (item) {

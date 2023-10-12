@@ -18,35 +18,19 @@
 
 package org.briarproject.briar.desktop.contact
 
+import kotlin.random.Random
+
 data class ContactItem(
-    val id: ContactId,
-    private val name: String,
-    val isConnected: Boolean,
-) : ContactListItem {
-    override val displayName = "Friend"
-    override val timestamp: Long
-        get() = -1
-    override val uniqueId: ByteArray
-        get() = ByteArray(4)
+    val name: String,
+    val isConnected: Int,
+    val pubkey: String
+) {
+    fun updateName(n: String) =
+        copy(name = n)
 
-    constructor(
-        isConnected: Boolean,
-    ) : this(
-        id = ContactId(),
-        name = "Friend",
-        isConnected = isConnected,
-    )
+    fun updatePubkey(p: String) =
+        copy(pubkey = p)
 
-    fun updateTimestampAndUnread(timestamp: Long, read: Boolean) =
-        copy()
-
-    fun updateIsConnected(c: Boolean) =
+    fun updateIsConnected(c: Int) =
         copy(isConnected = c)
-
-    fun updateFromMessagesRead(c: Int) =
-        copy()
-}
-
-class ContactId {
-
 }

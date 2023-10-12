@@ -28,14 +28,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.zoffcc.applications.trifa.ToxVars.TOX_CONNECTION
+
+val notConnectedColor: Color = Color.Transparent
+val connectedColor: Color = Color.Green
+val connectedTCPColor: Color = Color.Yellow
 
 @Composable
 fun ConnectionIndicator(
     modifier: Modifier = Modifier.size(16.dp),
-    isConnected: Boolean,
-    notConnectedColor: Color = Color.Transparent,
+    isConnected: Int,
 ) = Box(
     modifier = modifier
         .border(1.dp, Color.Black, CircleShape)
-        .background(if (isConnected) MaterialTheme.colors.secondary else notConnectedColor, CircleShape)
+        .background(getConnectionColor(isConnected), CircleShape)
 )
+
+fun getConnectionColor(connection_status : Int): Color {
+    return when(connection_status) {
+        TOX_CONNECTION.TOX_CONNECTION_TCP.value -> connectedTCPColor
+        TOX_CONNECTION.TOX_CONNECTION_UDP.value -> connectedColor
+        else -> notConnectedColor
+    }
+}
