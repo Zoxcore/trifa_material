@@ -6,7 +6,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.window.Tray
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
@@ -22,7 +21,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.*
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity.Companion.main_init
-import com.zoffcc.applications.trifa.OperatingSystem
 import com.zoffcc.applications.trifa.PrefsSettings
 import com.zoffcc.applications.trifa.TrifaToxService
 import kotlinx.coroutines.Dispatchers
@@ -33,7 +31,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
 import org.briarproject.briar.desktop.contact.ContactItem
 import org.briarproject.briar.desktop.contact.ContactList
-import org.briarproject.briar.desktop.contact.ContactListItem
 import org.briarproject.briar.desktop.navigation.BriarSidebar
 import org.briarproject.briar.desktop.ui.VerticalDivider
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
@@ -51,8 +48,8 @@ var closing_application = false
 private val prefs: Preferences =
     Preferences.userNodeForPackage(com.zoffcc.applications.trifa.PrefsSettings::class.java)
 
-val HEADER_SIZE = 56.dp
-val COLUMN_WIDTH = 180.dp
+val TOP_HEADER_SIZE = 56.dp
+val CONTACT_COLUMN_WIDTH = 230.dp
 
 @Composable
 @Preview
@@ -179,6 +176,7 @@ fun App() {
                         }
                     }
 
+                    /*
                     var contacts = ArrayList<ContactListItem>()
                     for (i in 1..1) {
                         if (i.mod(2) == 0) {
@@ -189,11 +187,13 @@ fun App() {
                             contacts.add(f1)
                         }
                     }
-
+                    */
+                    val contacts by contactstore.stateFlow.collectAsState()
                     Row(modifier = Modifier.fillMaxWidth()) {
                         ContactList(
-                            contactList = contacts
-                            // isSelected =
+                            contactList = contacts,
+                            isSelected = null,
+                            selectContact = null
                         )
                         VerticalDivider()
                         ChatAppWithScaffold()
@@ -399,7 +399,7 @@ fun DetailItem(
     setting: @Composable (RowScope.() -> Unit),
 ) = Row(
     Modifier
-        .fillMaxWidth().height(HEADER_SIZE).padding(horizontal = 16.dp)
+        .fillMaxWidth().height(TOP_HEADER_SIZE).padding(horizontal = 16.dp)
         .semantics(mergeDescendants = true) {
             // it would be nicer to derive the contentDescriptions from the descendants automatically
             // which is currently not supported in Compose for Desktop

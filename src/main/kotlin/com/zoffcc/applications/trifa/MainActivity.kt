@@ -10,6 +10,8 @@ import com.zoffcc.applications.trifa.TRIFAGlobals.LOWER_NGC_VIDEO_BITRATE
 import com.zoffcc.applications.trifa.TRIFAGlobals.LOWER_NGC_VIDEO_QUANTIZER
 import com.zoffcc.applications.trifa.TRIFAGlobals.NGC_AUDIO_BITRATE
 import com.zoffcc.applications.trifa.ToxVars.TOX_HASH_LENGTH
+import contactstore
+import org.briarproject.briar.desktop.contact.ContactItem
 import set_tox_online_state
 import store
 import timestampMs
@@ -282,6 +284,8 @@ class MainActivity {
         external fun tox_friend_by_public_key(friend_public_key_string: String?): Long
         @JvmStatic
         external fun tox_friend_get_public_key(friend_number: Long): String?
+        @JvmStatic
+        external fun  tox_friend_get_name(friend_number: Long): String?
         @JvmStatic
         external fun tox_friend_get_capabilities(friend_number: Long): Long
         @JvmStatic
@@ -895,6 +899,16 @@ class MainActivity {
 
         @JvmStatic
         fun android_tox_callback_friend_name_cb_method(friend_number: Long, friend_name: String?, length: Long) {
+            try {
+                contactstore.update(
+                    item = ContactItem(
+                        name = friend_name!!,
+                        isConnected = tox_friend_get_connection_status(friend_number),
+                        pubkey = tox_friend_get_public_key(friend_number)!!
+                    )
+                )
+            } catch (_: Exception) {
+            }
         }
 
         @JvmStatic
@@ -903,6 +917,21 @@ class MainActivity {
             status_message: String?,
             length: Long
         ) {
+            try {
+                var fname = tox_friend_get_name(friend_number)
+                if (fname == null)
+                {
+                    fname = "Friend"
+                }
+                contactstore.update(
+                    item = ContactItem(
+                        name = fname,
+                        isConnected = tox_friend_get_connection_status(friend_number),
+                        pubkey = tox_friend_get_public_key(friend_number)!!
+                    )
+                )
+            } catch (_: Exception) {
+            }
         }
 
         @JvmStatic
@@ -924,6 +953,21 @@ class MainActivity {
                 "android_tox_callback_friend_connection_status_cb_method: fn=" + friend_number + " " + a_TOX_CONNECTION
             )
             update_savedata_file_wrapper()
+            try {
+                var fname = tox_friend_get_name(friend_number)
+                if (fname == null)
+                {
+                    fname = "Friend"
+                }
+                contactstore.update(
+                    item = ContactItem(
+                        name = fname,
+                        isConnected = tox_friend_get_connection_status(friend_number),
+                        pubkey = tox_friend_get_public_key(friend_number)!!
+                    )
+                )
+            } catch (_: Exception) {
+            }
         }
 
         @JvmStatic

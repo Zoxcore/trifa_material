@@ -10,8 +10,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.sp
+import com.zoffcc.applications.trifa.ContactStore
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_send_message
 import com.zoffcc.applications.trifa.ToxVars.TOX_MESSAGE_TYPE
+import com.zoffcc.applications.trifa.createContactStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import org.jetbrains.compose.resources.ExperimentalResourceApi
@@ -21,6 +23,7 @@ private const val TAG = "trifa.Chatapp"
 
 val myUser = User("Me", picture = null, toxpk = null)
 val store = CoroutineScope(SupervisorJob()).createStore()
+val contactstore = CoroutineScope(SupervisorJob()).createContactStore()
 
 @Composable
 fun ChatAppWithScaffold(displayTextField: Boolean = true) {

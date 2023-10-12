@@ -18,6 +18,7 @@
 
 package org.briarproject.briar.desktop.contact
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.material.MaterialTheme
@@ -27,6 +28,7 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Alignment.Companion.Start
 import androidx.compose.ui.Alignment.Companion.Top
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.unit.dp
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
@@ -44,7 +46,7 @@ fun ContactItemView(
 ) {
     Row(
         verticalAlignment = CenterVertically,
-        horizontalArrangement = spacedBy(12.dp),
+        horizontalArrangement = spacedBy(0.dp),
         modifier = Modifier.weight(1f, fill = true),
     ) {
         Box(Modifier.align(Top).padding(vertical = 8.dp)) {
@@ -59,7 +61,7 @@ fun ContactItemView(
         )
     }
     ConnectionIndicator(
-        modifier = Modifier.padding(16.dp).requiredSize(16.dp),
+        modifier = Modifier.padding(end = 5.dp).requiredSize(16.dp),
         isConnected = contactItem.isConnected
     )
 }
@@ -67,14 +69,12 @@ fun ContactItemView(
 @Composable
 private fun ContactItemViewInfo(contactItem: ContactItem) = Column(
     horizontalAlignment = Start,
+    modifier = Modifier.padding(start = 6.dp)
 ) {
-    Spacer(Modifier.weight(1f, fill = true))
     Text(
-        text = contactItem.displayName,
+        text = contactItem.name,
         style = MaterialTheme.typography.body1,
-        maxLines = 3,
+        maxLines = 1,
         overflow = Ellipsis,
     )
-    // Spacer(Modifier.weight(1f, fill = true).heightIn(min = 4.dp))
-    // Spacer(Modifier.height(4.dp))
 }
