@@ -377,7 +377,7 @@ jobs:
                printf 'cat /home/runner/work/trifa_material/trifa_material/toxid.txt;echo\n' >> /tmp/a.sh
                printf 'cd /home/runner/work/trifa_material/trifa_material/java_tox_tester-master/\n' >> /tmp/a.sh
                printf './do_run.sh $(cat /home/runner/work/trifa_material/trifa_material/toxid.txt) >/dev/null 2>/dev/null &\n' >> /tmp/a.sh
-               printf 'sleep 220\n' >> /tmp/a.sh
+               printf 'sleep 250\n' >> /tmp/a.sh
                printf 'import -window root /tmp/screenshot-linux.png\n' >> /tmp/a.sh
                cat /tmp/a.sh
                chmod a+rx /tmp/a.sh
