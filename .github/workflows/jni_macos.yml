@@ -1,0 +1,80 @@
+name: JNI Lib
+
+on:
+  push:
+    paths-ignore:
+     - 'README.md'
+     - 'CHANGELOG.md'
+     - '.github/workflows/nightly.yml'
+  pull_request:
+    paths-ignore:
+     - 'README.md'
+     - 'CHANGELOG.md'
+     - '.github/workflows/nightly.yml'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: dummy
+        default: dummy
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+
+  build-macos-nightly-artifact:
+    name: Nightly Artifact macOS Build
+    runs-on: macos-11
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: install deps
+        run:  brew install git automake yasm nasm
+
+      - name: build deps
+        run:  |
+          ls -al
+          id
+          pwd
+          ./circle_scripts/deps_macos.sh
+
+      - name: build jni lib
+        run:  |
+          ls -al
+          id
+          pwd
+          ./circle_scripts/java_jni_lib_macos.sh norun
+
+      - name: sha hash of jni lib
+        run:  |
+          sha256sum /Users/runner/ToxAndroidRefImpl/jni-c-toxcore/libjni-c-toxcore.jnilib || echo "ignore"
+          shasum -a 256 /Users/runner/ToxAndroidRefImpl/jni-c-toxcore/libjni-c-toxcore.jnilib || echo "ignore"
+
+      - name: Rename artifact for nightly upload
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: |
+          pwd
+          cp -v /Users/runner/ToxAndroidRefImpl/jni-c-toxcore/libjni-c-toxcore.jnilib libjni-c-toxcore.jnilib
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: libjni-c-toxcore.jnilib
+          path: libjni-c-toxcore.jnilib
+      - name: Upload to nightly release
+        uses: ncipollo/release-action@v1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        with:
+          allowUpdates: true
+          tag: nightly
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          prerelease: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "libjni-c-toxcore.jnilib"
+
+
+
