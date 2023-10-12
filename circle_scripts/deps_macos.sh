@@ -39,18 +39,27 @@ export CFLAGS="$CFLAGS -fPIC"
 
 type sudo
 
+# ------- deps verisions ---------
+NASM_VERSION="nasm-2.14.02"
+YASM_VERSION="1.3.0"
+FFMPEG_VERSION="n6.0"
+OPUS_VERSION="v1.4"
+SODIUM_VERSION="1.0.19"
+VPX_VERSION="v1.13.1"
+_X264_VERSION_="baee400fa9ced6f5481a728138fed6e867b0ff7f"
+# ------- deps verisions ---------
 
 # ---------- ffmpeg ---------
 if [ 1 == 1 ]; then
 
 cd "$_SRC_"
 
-FFMPEG_VERSION=4.1.3
-FFMPEG_FILENAME="ffmpeg-$FFMPEG_VERSION.tar.xz"
-rm -f ffmpeg-*.tar.xz
-wget $WGET_OPTIONS "https://www.ffmpeg.org/releases/$FFMPEG_FILENAME" -O "$FFMPEG_FILENAME"
-tar -xf "$FFMPEG_FILENAME"
-cd ffmpeg-4.1.3/
+FFMPEG_FILENAME="$FFMPEG_VERSION.tar.gz"
+rm -f "ffmpeg"*.tar.*
+wget $WGET_OPTIONS "https://github.com/FFmpeg/FFmpeg/archive/refs/tags/$FFMPEG_FILENAME" -O "ffmpeg_""$FFMPEG_FILENAME"
+tar -xf "ffmpeg_""$FFMPEG_FILENAME"
+rm -f "ffmpeg"*.tar.*
+cd *mpeg*/
 
 export LDFLAGS=" "
 
@@ -77,7 +86,6 @@ export LDFLAGS=" "
               --disable-podpages \
               --disable-sdl2 \
               --disable-avfilter \
-              --disable-avresample \
               --disable-filters \
               --disable-iconv \
               --disable-network \
@@ -88,7 +96,6 @@ export LDFLAGS=" "
               --disable-dct \
               --disable-dwt \
               --disable-lsp \
-              --disable-lzo \
               --disable-mdct \
               --disable-rdft \
               --disable-fft \
@@ -127,13 +134,14 @@ if [ 1 == 1 ]; then
 
 cd "$_SRC_"
 
-OPUS_VERSION=1.3.1
-OPUS_FILENAME="opus-$OPUS_VERSION.tar.gz"
-rm -f opus-*.tar.gz
-wget $WGET_OPTIONS "https://archive.mozilla.org/pub/opus/$OPUS_FILENAME" -O "$OPUS_FILENAME"
-tar -xf "$OPUS_FILENAME"
+OPUS_FILENAME="$OPUS_VERSION.tar.gz"
+rm -f "opus"*.tar.gz
+wget $WGET_OPTIONS "https://github.com/xiph/opus/archive/refs/tags/$OPUS_FILENAME" -O "opus_""$OPUS_FILENAME"
+tar -xf "opus_""$OPUS_FILENAME"
+rm -f "opus"*.tar.gz
 cd opus*/
 
+  ./autogen.sh
   CFLAGS="-O2 -g -fPIC" ./configure \
                                --prefix="$_INST_" \
                                --disable-shared \
@@ -156,7 +164,6 @@ if [ 1 == 1 ]; then
 
 cd "$_SRC_"
 
-SODIUM_VERSION=1.0.18
 SODIUM_FILENAME="libsodium-$SODIUM_VERSION.tar.gz"
 rm -f libsodium-*.tar.gz
 wget $WGET_OPTIONS "https://download.libsodium.org/libsodium/releases/$SODIUM_FILENAME" -O "$SODIUM_FILENAME"
@@ -184,7 +191,6 @@ cd "$_SRC_"
 
     export PATH=$ORIGPATH
 
-YASM_VERSION=1.3.0
 YASM_FILENAME="yasm-$YASM_VERSION.tar.gz"
 rm -f yasm-*.tar.gz
 wget $WGET_OPTIONS "https://github.com/yasm/yasm/releases/download/v1.3.0/$YASM_FILENAME" -O "$YASM_FILENAME"
@@ -215,10 +221,10 @@ if [ 1 == 1 ]; then
 
 cd "$_SRC_"
 
-VPX_VERSION=v1.8.0
-VPX_FILENAME="libvpx-$VPX_VERSION.tar.gz"
-rm -f libvpx-*.tar.gz
-wget $WGET_OPTIONS "https://github.com/webmproject/libvpx/archive/$VPX_VERSION.tar.gz" -O "$VPX_FILENAME"
+VPX_FILENAME="$VPX_VERSION.tar.gz"
+
+rm -f *.tar.gz
+wget $WGET_OPTIONS "https://github.com/webmproject/libvpx/archive/refs/tags/""$VPX_VERSION"".tar.gz" -O "$VPX_FILENAME"
 tar -xf "$VPX_FILENAME"
 cd libvpx*/
 
@@ -262,8 +268,7 @@ cd "$_SRC_"
     rm -Rf nasm
     git clone http://repo.or.cz/nasm.git
     cd nasm/
-    # git checkout nasm-2.13.03
-    git checkout nasm-2.14.02
+    git checkout "$NASM_VERSION"
 
     set -x
     ./autogen.sh
@@ -299,7 +304,6 @@ if [ 1 == 1 ]; then
 cd "$_SRC_"
 
 git clone https://code.videolan.org/videolan/x264.git
-_X264_VERSION_="1771b556ee45207f8711744ccbd5d42a3949b14c"
 cd x264/
 
   git checkout "$_X264_VERSION_"

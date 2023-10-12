@@ -123,6 +123,9 @@ otool -L libjni-c-toxcore.jnilib
 pwd
 file libjni-c-toxcore.jnilib
 
+pwd
+find . -name libjni-c-toxcore.jnilib
+
 
 if [ -e /usr/bin/nasm ]; then
     pwd
