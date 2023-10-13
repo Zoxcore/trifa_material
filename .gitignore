@@ -5,3 +5,4 @@ savedata.tox
 bin/
 deps/
 toxid.txt
+main.db

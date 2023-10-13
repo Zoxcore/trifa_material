@@ -3,9 +3,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,6 +17,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -25,6 +27,7 @@ import androidx.compose.ui.window.*
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity.Companion.main_init
 import com.zoffcc.applications.trifa.PrefsSettings
+import com.zoffcc.applications.trifa.StateContacts
 import com.zoffcc.applications.trifa.TrifaToxService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -32,9 +35,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
-import org.briarproject.briar.desktop.contact.ContactItem
 import org.briarproject.briar.desktop.contact.ContactList
-import org.briarproject.briar.desktop.contact.getConnectionColor
 import org.briarproject.briar.desktop.navigation.BriarSidebar
 import org.briarproject.briar.desktop.ui.VerticalDivider
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
@@ -61,9 +62,6 @@ fun App() {
     var start_button_text by remember { mutableStateOf("start") }
     var tox_running_state: String by remember { mutableStateOf("stopped") }
 
-    var online_button_text by remember { mutableStateOf("offline") }
-    var online_button_color by remember { mutableStateOf(Color.White.toArgb()) }
-
     Log.i(TAG, "CCCC:" + PrefsSettings::class.java)
 
     var uiscale_default = LocalDensity.current.density
@@ -75,8 +73,6 @@ fun App() {
         }
     } catch (_: Exception) {
     }
-
-    var ui_scale by remember { mutableStateOf(uiscale_default) }
 
     MaterialTheme {
         Scaffold() {
@@ -126,74 +122,34 @@ fun App() {
                         }) {
                             Text(start_button_text)
                         }
+                        var online_button_text by remember { mutableStateOf("offline") }
                         Button( // self connection state button
                             onClick = {},
                             colors = ButtonDefaults.buttonColors(),
                             enabled = false
                         ) {
                             Box(
-                                modifier = Modifier.size(16.dp).
-                                    border(1.dp, Color.Black, CircleShape)
-                                    .background(Color(online_button_color_wrapper),
-                                        CircleShape)
+                                modifier = Modifier.size(16.dp).border(1.dp, Color.Black, CircleShape)
+                                    .background(
+                                        Color(online_button_color_wrapper),
+                                        CircleShape
+                                    )
                             )
                             Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                             Text(getOnlineButtonText(online_button_text))
-
                             Thread {
                                 while (true) {
-                                    Thread.sleep(100)
+                                    Thread.sleep(200)
                                     if (online_button_text != online_button_text_wrapper) {
                                         online_button_text = online_button_text_wrapper
-                                        // online_button_color = online_button_color_wrapper
                                     }
                                 }
                             }.start()
                         }
                     }
-
-                    DetailItem(
-                        label = i18n("UI Scale"),
-                        description = "${i18n("current_value:")}: " + " " +
-                                ui_scale + ", " +
-                                i18n("drag Slider to change")
-                    ) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(2.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.width(200.dp)
-                        ) {
-                            Icon(Icons.Default.FormatSize, null, Modifier.scale(0.7f))
-                            Slider(
-                                value = ui_scale ?: LocalDensity.current.density,
-                                onValueChange = {
-                                    ui_scale = it
-                                    prefs.putFloat("main.ui_scale_factor", ui_scale)
-                                    Log.i(TAG, "density: $ui_scale")
-                                },
-                                onValueChangeFinished = { },
-                                valueRange = 1f..3f,
-                                steps = 3,
-                                // todo: without setting the width explicitly,
-                                //  the slider takes up the whole remaining space
-                                modifier = Modifier.width(150.dp)
-                            )
-                            Icon(Icons.Default.FormatSize, null)
-                        }
-                    }
-
-                    /*
-                    var contacts = ArrayList<ContactListItem>()
-                    for (i in 1..1) {
-                        if (i.mod(2) == 0) {
-                            val f1 = ContactItem(true)
-                            contacts.add(f1)
-                        } else {
-                            val f1 = ContactItem(false)
-                            contacts.add(f1)
-                        }
-                    }
-                    */
+                    SaveDataPath()
+                    ToxIDTextField()
+                    // UIScaleSlider(uiscale_default)
                     val contacts by contactstore.stateFlow.collectAsState()
                     Row(modifier = Modifier.fillMaxWidth()) {
                         ContactList(
@@ -211,8 +167,88 @@ fun App() {
 
 }
 
+@Composable
+private fun UIScaleSlider(uiscale_default: Float) {
+    var ui_scale by remember { mutableStateOf(uiscale_default) }
+    DetailItem(
+        label = i18n("UI Scale"),
+        description = "${i18n("current_value:")}: " + " " +
+                ui_scale + ", " +
+                i18n("drag Slider to change")
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.width(200.dp)
+        ) {
+            Icon(Icons.Default.FormatSize, null, Modifier.scale(0.7f))
+            Slider(
+                value = ui_scale ?: LocalDensity.current.density,
+                onValueChange = {
+                    ui_scale = it
+                    prefs.putFloat("main.ui_scale_factor", ui_scale)
+                    Log.i(TAG, "density: $ui_scale")
+                },
+                onValueChangeFinished = { },
+                valueRange = 1f..3f,
+                steps = 3,
+                // todo: without setting the width explicitly,
+                //  the slider takes up the whole remaining space
+                modifier = Modifier.width(150.dp)
+            )
+            Icon(Icons.Default.FormatSize, null)
+        }
+    }
+}
+
+@Composable
+private fun ToxIDTextField() {
+    val toxdata by toxdatastore.stateFlow.collectAsState()
+    TextField(
+        enabled = true,
+        readOnly = true,
+        singleLine = true,
+        textStyle = TextStyle(fontSize = 18.sp),
+        modifier = Modifier.width(500.dp),
+        colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White),
+        keyboardOptions = KeyboardOptions(
+            capitalization = KeyboardCapitalization.None,
+            autoCorrect = false,
+        ),
+        value = toxdata.mytoxid,
+        placeholder = {
+            Text("my ToxID ...")
+        },
+        onValueChange = {
+        }
+    )
+}
+
+@Composable
+private fun SaveDataPath() {
+    val savepathdata by savepathstore.stateFlow.collectAsState()
+    TextField(
+        enabled = savepathdata.savePathEnabled,
+        singleLine = true,
+        textStyle = TextStyle(fontSize = 18.sp),
+        modifier = Modifier.width(500.dp),
+        colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White),
+        keyboardOptions = KeyboardOptions(
+            capitalization = KeyboardCapitalization.None,
+            autoCorrect = false,
+        ),
+        value = savepathdata.savePath,
+        placeholder = {
+            Text("save file path ...")
+        },
+        onValueChange = {
+            savepathstore.updatePath(it)
+        }
+    )
+}
+
 fun getOnlineButtonText(text_in: String): String {
-    return when(text_in) {
+    return when (text_in) {
         "udp" -> "UDP"
         "tcp" -> "TCP"
         else -> "offline"
@@ -415,4 +451,12 @@ fun DetailItem(
 ) {
     Text(label)
     setting()
+}
+
+fun unlock_data_dir_input() {
+    savepathstore.updateEnabled(true)
+}
+
+fun lock_data_dir_input() {
+    savepathstore.updateEnabled(false)
 }
