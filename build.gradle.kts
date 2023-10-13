@@ -34,8 +34,10 @@ dependencies {
     @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
     implementation(compose.components.resources)
     //
-    implementation("com.russhwolf:multiplatform-settings:1.0.0")
     implementation(compose.materialIconsExtended)
+    //
+    //
+    implementation("org.xerial:sqlite-jdbc:3.42.0.0")
 }
 
 compose.desktop {

@@ -14,6 +14,8 @@ import com.zoffcc.applications.trifa.ContactStore
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_send_message
 import com.zoffcc.applications.trifa.ToxVars.TOX_MESSAGE_TYPE
 import com.zoffcc.applications.trifa.createContactStore
+import com.zoffcc.applications.trifa.createSavepathStore
+import com.zoffcc.applications.trifa.createToxDataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import org.jetbrains.compose.resources.ExperimentalResourceApi
@@ -24,6 +26,8 @@ private const val TAG = "trifa.Chatapp"
 val myUser = User("Me", picture = null, toxpk = null)
 val store = CoroutineScope(SupervisorJob()).createStore()
 val contactstore = CoroutineScope(SupervisorJob()).createContactStore()
+val savepathstore = CoroutineScope(SupervisorJob()).createSavepathStore()
+val toxdatastore  = CoroutineScope(SupervisorJob()).createToxDataStore()
 
 @Composable
 fun ChatAppWithScaffold(displayTextField: Boolean = true) {

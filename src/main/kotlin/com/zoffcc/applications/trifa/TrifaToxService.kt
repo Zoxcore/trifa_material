@@ -1,5 +1,6 @@
 package com.zoffcc.applications.trifa
 
+import com.zoffcc.applications.sorm.OrmaDatabase.init
 import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__udp_enabled
 import com.zoffcc.applications.trifa.MainActivity.Companion.add_tcp_relay_single_wrapper
@@ -14,12 +15,16 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_friend_
 import contactstore
 import org.briarproject.briar.desktop.contact.ContactItem
 import set_tox_running_state
+import toxdatastore
+import unlock_data_dir_input
 
 class TrifaToxService {
     fun tox_thread_start_fg() {
         Log.i(TAG, "tox_thread_start_fg")
         ToxServiceThread = object : Thread() {
             override fun run() {
+
+                com.zoffcc.applications.sorm.OrmaDatabase.init()
 
                 // ------ correct startup order ------
                 val old_is_tox_started = is_tox_started
@@ -93,6 +98,12 @@ class TrifaToxService {
                 is_tox_started = false
                 set_tox_running_state("stopped")
                 clear_friend()
+                com.zoffcc.applications.sorm.OrmaDatabase.shutdown()
+                unlock_data_dir_input()
+                try {
+                    toxdatastore.updateToxID("")
+                } catch (_: Exception) {
+                }
             }
         }
         (ToxServiceThread as Thread).start()
@@ -385,8 +396,7 @@ class TrifaToxService {
         tox_self_get_friend_list()?.forEach {
             Log.i(TAG, "friend:" + it)
             var fname = tox_friend_get_name(it)
-            if (fname == null)
-            {
+            if (fname == null) {
                 fname = "Friend"
             }
             try {
