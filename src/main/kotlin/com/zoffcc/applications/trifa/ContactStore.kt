@@ -9,7 +9,8 @@ import kotlinx.coroutines.launch
 import org.briarproject.briar.desktop.contact.ContactItem
 
 data class StateContacts(
-    val contacts: List<ContactItem> = emptyList()
+    val contacts: List<ContactItem> = emptyList(),
+    val selectedContact: String? = null
 )
 
 const val TAG = "trifa.ContactsStore"
@@ -17,6 +18,7 @@ const val TAG = "trifa.ContactsStore"
 interface ContactStore {
     fun add(item: ContactItem)
     fun remove(item: ContactItem)
+    fun select(pubkey: String?)
     fun clear()
     fun update(item: ContactItem)
     val stateFlow: StateFlow<StateContacts>
@@ -70,6 +72,16 @@ fun CoroutineScope.createContactStore(): ContactStore {
             }
         }
 
+        override fun select(pubkey: String?) {
+            launch {
+                mutableStateFlow.value =
+                    state.copy(
+                        contacts = state.contacts,
+                        selectedContact = pubkey
+                    )
+            }
+        }
+
         override fun update(item: ContactItem) {
             launch {
                 var update_item: ContactItem? = null
@@ -81,12 +93,14 @@ fun CoroutineScope.createContactStore(): ContactStore {
                 if (update_item != null) {
                     mutableStateFlow.value =
                         state.copy(
-                            contacts = (state.contacts + item - update_item!!)
+                            contacts = (state.contacts + item - update_item!!),
+                            selectedContact = state.selectedContact
                         )
                 } else {
                     mutableStateFlow.value =
                         state.copy(
-                            contacts = (state.contacts + item)
+                            contacts = (state.contacts + item),
+                            selectedContact = state.selectedContact
                         )
                 }
             }
@@ -96,7 +110,8 @@ fun CoroutineScope.createContactStore(): ContactStore {
             launch {
                 mutableStateFlow.value =
                     state.copy(
-                        contacts = emptyList()
+                        contacts = emptyList(),
+                        selectedContact = null
                     )
             }
         }

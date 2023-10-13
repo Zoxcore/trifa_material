@@ -162,6 +162,8 @@ public class TRIFAGlobals
     static final int FT_IMAGE_THUMBNAIL_WIDTH = 200;
     static final int FT_IMAGE_THUMBNAIL_HEIGHT = 90;
 
+    public static final Color COLOR_SELECTED_TOX_FRIEND = new Color(0x33cc00ff, true);
+
     public static enum TRIFA_FT_DIRECTION
     {
         TRIFA_FT_DIRECTION_INCOMING(0), TRIFA_FT_DIRECTION_OUTGOING(1);

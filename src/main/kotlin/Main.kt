@@ -154,8 +154,6 @@ fun App() {
                     Row(modifier = Modifier.fillMaxWidth()) {
                         ContactList(
                             contactList = contacts,
-                            isSelected = null,
-                            selectContact = null
                         )
                         VerticalDivider()
                         ChatAppWithScaffold()
