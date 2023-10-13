@@ -1,5 +1,8 @@
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -31,6 +34,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
 import org.briarproject.briar.desktop.contact.ContactItem
 import org.briarproject.briar.desktop.contact.ContactList
+import org.briarproject.briar.desktop.contact.getConnectionColor
 import org.briarproject.briar.desktop.navigation.BriarSidebar
 import org.briarproject.briar.desktop.ui.VerticalDivider
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
@@ -81,7 +85,7 @@ fun App() {
                 VerticalDivider()
                 Column(Modifier.fillMaxSize()) {
                     Row(Modifier.wrapContentHeight(), Arrangement.spacedBy(5.dp)) {
-                        Button(onClick = {
+                        Button(modifier = Modifier.width(140.dp), onClick = { // start/stop tox button
                             if (tox_running_state == "running") {
                                 tox_running_state = "stopping ..."
                                 start_button_text = tox_running_state
@@ -122,17 +126,19 @@ fun App() {
                         }) {
                             Text(start_button_text)
                         }
-                        Button(
+                        Button( // self connection state button
                             onClick = {},
                             colors = ButtonDefaults.buttonColors(),
-                            enabled = true
+                            enabled = false
                         ) {
-                            Icon(
-                                Icons.Filled.Add, contentDescription = online_button_text,
-                                modifier = Modifier.size(ButtonDefaults.IconSize)
+                            Box(
+                                modifier = Modifier.size(16.dp).
+                                    border(1.dp, Color.Black, CircleShape)
+                                    .background(Color(online_button_color_wrapper),
+                                        CircleShape)
                             )
                             Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                            Text(online_button_text)
+                            Text(getOnlineButtonText(online_button_text))
 
                             Thread {
                                 while (true) {
@@ -205,6 +211,14 @@ fun App() {
 
 }
 
+fun getOnlineButtonText(text_in: String): String {
+    return when(text_in) {
+        "udp" -> "UDP"
+        "tcp" -> "TCP"
+        else -> "offline"
+    }
+}
+
 fun set_tox_running_state(new_state: String) {
     tox_running_state_wrapper = new_state
     start_button_text_wrapper = tox_running_state_wrapper
@@ -228,16 +242,6 @@ fun set_tox_online_state(new_state: String) {
 }
 
 fun main() = application(exitProcessOnExit = true) {
-    /*
-    if ((OperatingSystem.getCurrent() == OperatingSystem.WINDOWS)
-        || (OperatingSystem.getCurrent() == OperatingSystem.MACOS)
-    ) {
-        val appIcon = painterResource("icon-linux.png")
-        Tray(
-            icon = appIcon,
-        )
-    }
-    */
     MainAppStart()
 }
 
