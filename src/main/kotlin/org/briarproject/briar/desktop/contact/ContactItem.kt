@@ -18,8 +18,6 @@
 
 package org.briarproject.briar.desktop.contact
 
-import kotlin.random.Random
-
 data class ContactItem(
     val name: String,
     val isConnected: Int,
