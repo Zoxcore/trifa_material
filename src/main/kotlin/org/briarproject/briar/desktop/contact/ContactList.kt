@@ -14,6 +14,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.zoffcc.applications.trifa.StateContacts
+import contactstore
 import org.briarproject.briar.desktop.ui.ListItemView
 import org.briarproject.briar.desktop.ui.VerticallyScrollableArea
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
@@ -21,8 +22,6 @@ import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 @Composable
 fun ContactList(
     contactList: StateContacts,
-    isSelected: String?,
-    selectContact: ContactItem?,
 ) = Column(
     modifier = Modifier.fillMaxHeight().width(CONTACT_COLUMN_WIDTH).background(Color.Transparent),
 ) {
@@ -41,8 +40,8 @@ fun ContactList(
                 contentType = { item -> item::class }
             ) { item ->
                 ListItemView(
-                    // onSelect = {},
-                    // selected = isSelected(item),
+                    onSelect = { contactstore.select(item.pubkey) },
+                    selected = (contactList.selectedContact == item.pubkey),
                     // let divider start at horizontal position of text
                     dividerOffsetFromStart = (16 + 36 + 12).dp,
                 ) {
@@ -51,18 +50,14 @@ fun ContactList(
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
                         .padding(start = 16.dp, end = 4.dp)
-
-                    when (item) {
-                        is ContactItem -> {
-                            ContactItemView(
-                                contactItem = item,
-                                modifier = modifier
-                            )
-                        }
-                    }
+                    ContactItemView(
+                        contactItem = item,
+                        modifier = modifier
+                    )
                 }
             }
         }
     }
 }
+
 

@@ -36,6 +36,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.zoffcc.applications.trifa.TRIFAGlobals
+import com.zoffcc.applications.trifa.TRIFAGlobals.COLOR_SELECTED_TOX_FRIEND
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 
 @Composable
@@ -43,11 +45,15 @@ fun ListItemView(
     selected: Boolean? = null,
     onSelect: () -> Unit = {},
     dividerOffsetFromStart: Dp = 0.dp,
-    multiSelectWithCheckbox: Boolean = false,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) = Column(modifier.fillMaxWidth()) {
-    val bgColor = if (selected != null && selected) Color.Blue else Color.Transparent
+    val bgColor = if (selected != null && selected) Color(
+        COLOR_SELECTED_TOX_FRIEND.red,
+        COLOR_SELECTED_TOX_FRIEND.green,
+        COLOR_SELECTED_TOX_FRIEND.blue,
+        COLOR_SELECTED_TOX_FRIEND.alpha
+    ) else Color.Transparent
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
