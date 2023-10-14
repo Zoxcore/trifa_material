@@ -59,6 +59,7 @@ import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity.Companion.main_init
 import com.zoffcc.applications.trifa.PrefsSettings
 import com.zoffcc.applications.trifa.TrifaToxService
+import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
@@ -204,8 +205,16 @@ fun load_message_for_friend(selectedContactPubkey: String?)
 {
     if (selectedContactPubkey != null)
     {
-        val friend_user = User("Friend", picture = "friend_avatar.png", toxpk = selectedContactPubkey)
-        store.send(Action.ReceiveMessage(message = UIMessage(user = friend_user, timeMs = timestampMs(), text = friend_message!!, toxpk = selectedContactPubkey)))
+        try
+        {
+            val messages = orma!!.selectFromMessage().tox_friendpubkeyEq(selectedContactPubkey.uppercase()).orderBySent_timestampAsc().toList()
+            messages.forEach() {
+                val friend_user = User("Friend", picture = "friend_avatar.png", toxpk = selectedContactPubkey)
+                store.send(Action.ReceiveMessage(message = UIMessage(user = friend_user, timeMs = it.rcvd_timestamp, text = it.text, toxpk = selectedContactPubkey)))
+            }
+        } catch (e: Exception)
+        {
+        }
     }
 }
 
