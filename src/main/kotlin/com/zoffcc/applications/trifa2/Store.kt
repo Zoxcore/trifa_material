@@ -5,18 +5,22 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 
-interface Store {
+interface Store
+{
     fun send(action: Action)
     val stateFlow: StateFlow<State>
     val state get() = stateFlow.value
 }
 
-fun CoroutineScope.createStore(): Store {
+fun CoroutineScope.createStore(): Store
+{
     val mutableStateFlow = MutableStateFlow(State())
     val channel: Channel<Action> = Channel(Channel.UNLIMITED)
 
-    return object : Store {
-        init {
+    return object : Store
+    {
+        init
+        {
             launch {
                 channel.consumeAsFlow().collect { action ->
                     mutableStateFlow.value = chatReducer(mutableStateFlow.value, action)
@@ -24,13 +28,17 @@ fun CoroutineScope.createStore(): Store {
             }
         }
 
-        override fun send(action: Action) {
+        override fun send(action: Action)
+        {
             launch {
-                if (action is Action.ReceiveMessage) {
-                    if (contactstore.state.selectedContactPubkey == action.message.toxpk) {
+                if (action is Action.ReceiveMessage)
+                {
+                    if (contactstore.state.selectedContactPubkey == action.message.toxpk)
+                    {
                         channel.send(action)
                     }
-                } else {
+                } else
+                {
                     channel.send(action)
                 }
             }

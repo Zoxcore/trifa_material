@@ -1,13 +1,40 @@
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Slider
+import androidx.compose.material.Text
+import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FormatSize
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -23,9 +50,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.*
-import com.zoffcc.applications.trifa.*
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPosition
+import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
+import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity.Companion.main_init
+import com.zoffcc.applications.trifa.PrefsSettings
+import com.zoffcc.applications.trifa.TrifaToxService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
@@ -39,36 +72,34 @@ import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import java.util.prefs.Preferences
 
 private const val TAG = "trifa.Main.kt"
-
 var tox_running_state_wrapper = "start"
 var start_button_text_wrapper = "stopped"
-
 var online_button_text_wrapper = "offline"
 var online_button_color_wrapper = Color.White.toArgb()
-
 var closing_application = false
-private val prefs: Preferences =
-    Preferences.userNodeForPackage(com.zoffcc.applications.trifa.PrefsSettings::class.java)
-
+private val prefs: Preferences = Preferences.userNodeForPackage(com.zoffcc.applications.trifa.PrefsSettings::class.java)
 val TOP_HEADER_SIZE = 56.dp
 val CONTACT_COLUMN_WIDTH = 230.dp
 
 @Composable
 @Preview
-fun App() {
+fun App()
+{
     var start_button_text by remember { mutableStateOf("start") }
     var tox_running_state: String by remember { mutableStateOf("stopped") }
 
     Log.i(TAG, "CCCC:" + PrefsSettings::class.java)
-
     var uiscale_default = LocalDensity.current.density
 
-    try {
+    try
+    {
         val tmp = prefs.get("main.ui_scale_factor", null)
-        if (tmp != null) {
+        if (tmp != null)
+        {
             uiscale_default = tmp.toFloat()
         }
-    } catch (_: Exception) {
+    } catch (_: Exception)
+    {
     }
 
     MaterialTheme {
@@ -79,7 +110,8 @@ fun App() {
                 Column(Modifier.fillMaxSize()) {
                     Row(Modifier.wrapContentHeight(), Arrangement.spacedBy(5.dp)) {
                         Button(modifier = Modifier.width(140.dp), onClick = { // start/stop tox button
-                            if (tox_running_state == "running") {
+                            if (tox_running_state == "running")
+                            {
                                 tox_running_state = "stopping ..."
                                 start_button_text = tox_running_state
                                 tox_running_state_wrapper = tox_running_state
@@ -87,7 +119,8 @@ fun App() {
                                 Log.i(TAG, "----> tox_running_state = $tox_running_state_wrapper");
                                 Thread {
                                     Log.i(TAG, "waiting to stop ...");
-                                    while (tox_running_state_wrapper != "stopped") {
+                                    while (tox_running_state_wrapper != "stopped")
+                                    {
                                         Thread.sleep(100)
                                         Log.i(TAG, "waiting ...");
                                     }
@@ -96,7 +129,8 @@ fun App() {
                                     start_button_text = "start"
                                 }.start()
                                 TrifaToxService.stop_me = true
-                            } else if (tox_running_state == "stopped") {
+                            } else if (tox_running_state == "stopped")
+                            {
                                 TrifaToxService.stop_me = false
                                 tox_running_state = "starting ..."
                                 start_button_text = tox_running_state
@@ -105,7 +139,8 @@ fun App() {
                                 Log.i(TAG, "----> tox_running_state = $tox_running_state_wrapper");
                                 Thread {
                                     Log.i(TAG, "waiting to startup ...");
-                                    while (tox_running_state_wrapper != "running") {
+                                    while (tox_running_state_wrapper != "running")
+                                    {
                                         Thread.sleep(100)
                                         Log.i(TAG, "waiting ...");
                                     }
@@ -121,43 +156,40 @@ fun App() {
                         }
                         var online_button_text by remember { mutableStateOf("offline") }
                         Button( // self connection state button
-                            onClick = {},
-                            colors = ButtonDefaults.buttonColors(),
-                            enabled = false
-                        ) {
-                            Box(
-                                modifier = Modifier.size(16.dp).border(1.dp, Color.Black, CircleShape)
-                                    .background(
-                                        Color(online_button_color_wrapper),
-                                        CircleShape
-                                    )
-                            )
+                            onClick = {}, colors = ButtonDefaults.buttonColors(), enabled = false) {
+                            Box(modifier = Modifier.size(16.dp).border(1.dp, Color.Black, CircleShape).background(Color(online_button_color_wrapper), CircleShape))
                             Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                             Text(getOnlineButtonText(online_button_text))
                             Thread {
-                                while (true) {
-                                    try {
+                                while (true)
+                                {
+                                    try
+                                    {
                                         Thread.sleep(200)
-                                        if (online_button_text != online_button_text_wrapper) {
+                                        if (online_button_text != online_button_text_wrapper)
+                                        {
                                             online_button_text = online_button_text_wrapper
                                         }
-                                    } catch (_: Exception) {
+                                    } catch (_: Exception)
+                                    {
                                     }
                                 }
                             }.start()
                         }
                     }
                     SaveDataPath()
-                    ToxIDTextField()
-                    // UIScaleSlider(uiscale_default)
+                    ToxIDTextField() // UIScaleSlider(uiscale_default)
                     val contacts by contactstore.stateFlow.collectAsState()
                     Row(modifier = Modifier.fillMaxWidth()) {
                         ContactList(contactList = contacts)
                         VerticalDivider()
-                        if (contacts.selectedContactPubkey == null) {
+                        if (contacts.selectedContactPubkey == null)
+                        {
                             ExplainerChat()
-                        } else {
+                        } else
+                        {
                             store.send(Action.Clear(0))
+                            load_message_for_friend(contacts.selectedContactPubkey)
                             ChatAppWithScaffold(contactList = contacts)
                         }
                     }
@@ -168,111 +200,93 @@ fun App() {
 
 }
 
+fun load_message_for_friend(selectedContactPubkey: String?)
+{
+    if (selectedContactPubkey != null)
+    {
+        val friend_user = User("Friend", picture = "friend_avatar.png", toxpk = selectedContactPubkey)
+        store.send(Action.ReceiveMessage(message = UIMessage(user = friend_user, timeMs = timestampMs(), text = friend_message!!, toxpk = selectedContactPubkey)))
+    }
+}
+
 @Composable
-private fun UIScaleSlider(uiscale_default: Float) {
+private fun UIScaleSlider(uiscale_default: Float)
+{
     var ui_scale by remember { mutableStateOf(uiscale_default) }
-    DetailItem(
-        label = i18n("UI Scale"),
-        description = "${i18n("current_value:")}: " + " " +
-                ui_scale + ", " +
-                i18n("drag Slider to change")
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(2.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.width(200.dp)
-        ) {
+    DetailItem(label = i18n("UI Scale"), description = "${i18n("current_value:")}: " + " " + ui_scale + ", " + i18n("drag Slider to change")) {
+        Row(horizontalArrangement = Arrangement.spacedBy(2.dp), verticalAlignment = Alignment.CenterVertically, modifier = Modifier.width(200.dp)) {
             Icon(Icons.Default.FormatSize, null, Modifier.scale(0.7f))
-            Slider(
-                value = ui_scale ?: LocalDensity.current.density,
-                onValueChange = {
-                    ui_scale = it
-                    prefs.putFloat("main.ui_scale_factor", ui_scale)
-                    Log.i(TAG, "density: $ui_scale")
-                },
-                onValueChangeFinished = { },
-                valueRange = 1f..3f,
-                steps = 3,
-                // todo: without setting the width explicitly,
+            Slider(value = ui_scale ?: LocalDensity.current.density, onValueChange = {
+                ui_scale = it
+                prefs.putFloat("main.ui_scale_factor", ui_scale)
+                Log.i(TAG, "density: $ui_scale")
+            }, onValueChangeFinished = { }, valueRange = 1f..3f, steps = 3, // todo: without setting the width explicitly,
                 //  the slider takes up the whole remaining space
-                modifier = Modifier.width(150.dp)
-            )
+                modifier = Modifier.width(150.dp))
             Icon(Icons.Default.FormatSize, null)
         }
     }
 }
 
 @Composable
-private fun ToxIDTextField() {
+private fun ToxIDTextField()
+{
     val toxdata by toxdatastore.stateFlow.collectAsState()
-    TextField(
-        enabled = true,
-        readOnly = true,
-        singleLine = true,
-        textStyle = TextStyle(fontSize = 18.sp),
-        modifier = Modifier.width(500.dp),
-        colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White),
-        keyboardOptions = KeyboardOptions(
-            capitalization = KeyboardCapitalization.None,
-            autoCorrect = false,
-        ),
-        value = toxdata.mytoxid,
-        placeholder = {
-            Text("my ToxID ...")
-        },
-        onValueChange = {
-        }
-    )
+    TextField(enabled = true, readOnly = true, singleLine = true, textStyle = TextStyle(fontSize = 18.sp), modifier = Modifier.width(500.dp), colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White), keyboardOptions = KeyboardOptions(
+        capitalization = KeyboardCapitalization.None,
+        autoCorrect = false,
+    ), value = toxdata.mytoxid, placeholder = {
+        Text("my ToxID ...")
+    }, onValueChange = {})
 }
 
 @Composable
-private fun SaveDataPath() {
+private fun SaveDataPath()
+{
     val savepathdata by savepathstore.stateFlow.collectAsState()
-    TextField(
-        enabled = savepathdata.savePathEnabled,
-        singleLine = true,
-        textStyle = TextStyle(fontSize = 18.sp),
-        modifier = Modifier.width(500.dp),
-        colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White),
-        keyboardOptions = KeyboardOptions(
-            capitalization = KeyboardCapitalization.None,
-            autoCorrect = false,
-        ),
-        value = savepathdata.savePath,
-        placeholder = {
-            Text("save file path ...")
-        },
-        onValueChange = {
-            savepathstore.updatePath(it)
-        }
-    )
+    TextField(enabled = savepathdata.savePathEnabled, singleLine = true, textStyle = TextStyle(fontSize = 18.sp), modifier = Modifier.width(500.dp), colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White), keyboardOptions = KeyboardOptions(
+        capitalization = KeyboardCapitalization.None,
+        autoCorrect = false,
+    ), value = savepathdata.savePath, placeholder = {
+        Text("save file path ...")
+    }, onValueChange = {
+        savepathstore.updatePath(it)
+    })
 }
 
-fun getOnlineButtonText(text_in: String): String {
-    return when (text_in) {
+fun getOnlineButtonText(text_in: String): String
+{
+    return when (text_in)
+    {
         "udp" -> "UDP"
         "tcp" -> "TCP"
         else -> "offline"
     }
 }
 
-fun set_tox_running_state(new_state: String) {
+fun set_tox_running_state(new_state: String)
+{
     tox_running_state_wrapper = new_state
     start_button_text_wrapper = tox_running_state_wrapper
     Log.i(TAG, "----> tox_running_state = $tox_running_state_wrapper");
-    if (tox_running_state_wrapper == "stopped") {
+    if (tox_running_state_wrapper == "stopped")
+    {
         online_button_color_wrapper = Color.White.toArgb()
         online_button_text_wrapper = "offline"
     }
 }
 
-fun set_tox_online_state(new_state: String) {
+fun set_tox_online_state(new_state: String)
+{
     online_button_text_wrapper = new_state
-    if (online_button_text_wrapper == "udp") {
+    if (online_button_text_wrapper == "udp")
+    {
         online_button_color_wrapper = Color.Green.toArgb()
-    } else if (online_button_text_wrapper == "tcp") {
+    } else if (online_button_text_wrapper == "tcp")
+    {
         online_button_color_wrapper = Color.Yellow.toArgb()
-    } else {
+    } else
+    {
         online_button_color_wrapper = Color.Red.toArgb()
     }
     Log.i(TAG, "----> tox_online_state = $online_button_text_wrapper");
@@ -283,32 +297,30 @@ fun main() = application(exitProcessOnExit = true) {
 }
 
 @Composable
-private fun MainAppStart() {
+private fun MainAppStart()
+{
     var showIntroScreen by remember { mutableStateOf(true) }
-    try {
+    try
+    {
         val tmp = prefs.getBoolean("main.show_intro_screen", true)
-        if (tmp == false) {
+        if (tmp == false)
+        {
             showIntroScreen = false
         }
-    } catch (_: Exception) {
-    }
-    // showIntroScreen = true
-
+    } catch (_: Exception)
+    {
+    } // showIntroScreen = true
     val appIcon = painterResource("icon-linux.png")
-    if (showIntroScreen) {
-        // ----------- intro screen -----------
+    if (showIntroScreen)
+    { // ----------- intro screen -----------
         // ----------- intro screen -----------
         // ----------- intro screen -----------
         var isOpen by remember { mutableStateOf(true) }
         var isAskingToClose by remember { mutableStateOf(false) }
 
-        if (isOpen) {
-            Window(
-                onCloseRequest = { isAskingToClose = true },
-                title = "TRIfA Material - Welcome",
-                icon = appIcon
-            )
-            {
+        if (isOpen)
+        {
+            Window(onCloseRequest = { isAskingToClose = true }, title = "TRIfA Material - Welcome", icon = appIcon) {
                 Column(Modifier.fillMaxSize()) {
                     Button(onClick = {
                         prefs.putBoolean("main.show_intro_screen", false)
@@ -324,17 +336,17 @@ private fun MainAppStart() {
                         ),
                     )
 
-                    if (isAskingToClose) {
+                    if (isAskingToClose)
+                    {
                         isOpen = false
                     }
                 }
             }
-        }
+        } // ----------- intro screen -----------
         // ----------- intro screen -----------
         // ----------- intro screen -----------
-        // ----------- intro screen -----------
-    } else {
-        // ----------- main app screen -----------
+    } else
+    { // ----------- main app screen -----------
         // ----------- main app screen -----------
         // ----------- main app screen -----------
         var isOpen by remember { mutableStateOf(true) }
@@ -345,90 +357,84 @@ private fun MainAppStart() {
         var w_ = Dp(0.0f)
         var h_ = Dp(0.0f)
         var error = 0
-        try {
+        try
+        {
             x_ = prefs.get("main.window.position.x", "").toFloat().dp
             y_ = prefs.get("main.window.position.y", "").toFloat().dp
             w_ = prefs.get("main.window.size.width", "").toFloat().dp
             h_ = prefs.get("main.window.size.height", "").toFloat().dp
-        } catch (_: Exception) {
+        } catch (_: Exception)
+        {
             error = 1
         }
 
-        if (error == 0) {
+        if (error == 0)
+        {
             val wpos = WindowPosition(x = x_, y = y_)
             val wsize = DpSize(w_, h_)
             state = rememberWindowState(position = wpos, size = wsize)
         }
 
-        if (isOpen) {
-            Window(
-                onCloseRequest = { isAskingToClose = true },
-                title = "TRIfA",
-                icon = appIcon,
-                state = state
-            ) {
-                if (isAskingToClose) {
+        if (isOpen)
+        {
+            Window(onCloseRequest = { isAskingToClose = true }, title = "TRIfA", icon = appIcon, state = state) {
+                if (isAskingToClose)
+                {
                     Dialog(
                         onCloseRequest = { isAskingToClose = false },
                         title = i18n("Close TRIfA ?"),
                     ) {
-                        Button(
-                            onClick = {
-                                if (tox_running_state_wrapper == "running") {
-                                    set_tox_running_state("stopping ...")
-                                    TrifaToxService.stop_me = true
-                                    runBlocking(Dispatchers.Default) {
-                                        Log.i(TAG, "waiting to shutdown ...");
-                                        while (tox_running_state_wrapper != "stopped") {
-                                            delay(100)
-                                            Log.i(TAG, "waiting ...");
-                                        }
-                                        Log.i(TAG, "closing application");
-                                        closing_application = true
-                                        isOpen = false
+                        Button(onClick = {
+                            if (tox_running_state_wrapper == "running")
+                            {
+                                set_tox_running_state("stopping ...")
+                                TrifaToxService.stop_me = true
+                                runBlocking(Dispatchers.Default) {
+                                    Log.i(TAG, "waiting to shutdown ...");
+                                    while (tox_running_state_wrapper != "stopped")
+                                    {
+                                        delay(100)
+                                        Log.i(TAG, "waiting ...");
                                     }
-                                } else {
                                     Log.i(TAG, "closing application");
-                                    isOpen = false
                                     closing_application = true
+                                    isOpen = false
                                 }
+                            } else
+                            {
+                                Log.i(TAG, "closing application");
+                                isOpen = false
+                                closing_application = true
                             }
-                        ) {
+                        }) {
                             Text(i18n("Yes"))
                         }
                     }
                 }
 
                 LaunchedEffect(state) {
-                    snapshotFlow { state.size }
-                        .onEach(::onWindowResize)
-                        .launchIn(this)
+                    snapshotFlow { state.size }.onEach(::onWindowResize).launchIn(this)
 
-                    snapshotFlow { state.position }
-                        .filter { it.isSpecified }
-                        .onEach(::onWindowRelocate)
-                        .launchIn(this)
+                    snapshotFlow { state.position }.filter { it.isSpecified }.onEach(::onWindowRelocate).launchIn(this)
                 }
                 App()
             }
-        }
-
-        // ----------- main app screen -----------
+        } // ----------- main app screen -----------
         // ----------- main app screen -----------
         // ----------- main app screen -----------
     }
 }
 
 @Suppress("UNUSED_PARAMETER")
-private fun onWindowResize(size: DpSize) {
-    // println("onWindowResize $size")
+private fun onWindowResize(size: DpSize)
+{ // println("onWindowResize $size")
     prefs.put("main.window.size.width", size.width.value.toString())
     prefs.put("main.window.size.height", size.height.value.toString())
 }
 
 @Suppress("UNUSED_PARAMETER")
-private fun onWindowRelocate(position: WindowPosition) {
-    // println("onWindowRelocate $position")
+private fun onWindowRelocate(position: WindowPosition)
+{ // println("onWindowRelocate $position")
     prefs.put("main.window.position.x", position.x.value.toString())
     prefs.put("main.window.position.y", position.y.value.toString())
 }
@@ -438,26 +444,21 @@ fun DetailItem(
     label: String,
     description: String,
     setting: @Composable (RowScope.() -> Unit),
-) = Row(
-    Modifier
-        .fillMaxWidth().height(TOP_HEADER_SIZE).padding(horizontal = 16.dp)
-        .semantics(mergeDescendants = true) {
-            // it would be nicer to derive the contentDescriptions from the descendants automatically
-            // which is currently not supported in Compose for Desktop
-            // see https://github.com/JetBrains/compose-jb/issues/2111
-            contentDescription = description
-        },
-    verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.SpaceBetween
-) {
+) = Row(Modifier.fillMaxWidth().height(TOP_HEADER_SIZE).padding(horizontal = 16.dp).semantics(mergeDescendants = true) { // it would be nicer to derive the contentDescriptions from the descendants automatically
+    // which is currently not supported in Compose for Desktop
+    // see https://github.com/JetBrains/compose-jb/issues/2111
+    contentDescription = description
+}, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
     Text(label)
     setting()
 }
 
-fun unlock_data_dir_input() {
+fun unlock_data_dir_input()
+{
     savepathstore.updateEnabled(true)
 }
 
-fun lock_data_dir_input() {
+fun lock_data_dir_input()
+{
     savepathstore.updateEnabled(false)
 }

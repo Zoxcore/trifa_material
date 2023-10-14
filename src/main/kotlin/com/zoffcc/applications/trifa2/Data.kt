@@ -1,8 +1,7 @@
 import androidx.compose.ui.graphics.Color
 import kotlin.random.Random
-import kotlin.random.nextInt
 
-data class Message private constructor(
+data class UIMessage private constructor(
     val user: User,
     val timeMs: Long,
     val text: String,
