@@ -1,22 +1,32 @@
 package com.zoffcc.applications.trifa
 
-import Action
+import MessageAction
+import UIGroupMessage
 import UIMessage
 import User
+import com.zoffcc.applications.sorm.GroupMessage
 import com.zoffcc.applications.trifa.HelperFriend.send_friend_msg_receipt_v2_wrapper
 import com.zoffcc.applications.trifa.HelperGeneric.bytesToHex
 import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
+import com.zoffcc.applications.trifa.HelperGroup.fourbytes_of_long_to_hex
+import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
+import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupnum__wrapper
+import com.zoffcc.applications.trifa.TRIFAGlobals.GROUP_ID_LENGTH
 import com.zoffcc.applications.trifa.TRIFAGlobals.LOWER_NGC_VIDEO_BITRATE
 import com.zoffcc.applications.trifa.TRIFAGlobals.LOWER_NGC_VIDEO_QUANTIZER
 import com.zoffcc.applications.trifa.TRIFAGlobals.NGC_AUDIO_BITRATE
 import com.zoffcc.applications.trifa.TRIFAGlobals.TRIFA_MSG_TYPE
+import com.zoffcc.applications.trifa.TRIFAGlobals.UINT32_MAX_JAVA
 import com.zoffcc.applications.trifa.ToxVars.TOX_HASH_LENGTH
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import contactstore
+import groupmessagestore
+import groupstore
 import lock_data_dir_input
+import messagestore
 import org.briarproject.briar.desktop.contact.ContactItem
+import org.briarproject.briar.desktop.contact.GroupItem
 import set_tox_online_state
-import store
 import timestampMs
 import toxdatastore
 import java.io.File
@@ -482,6 +492,7 @@ class MainActivity
 
         @JvmStatic
         external fun tox_conference_set_title(conference_number: Long, title: String?): Int // --------------- Conference ------------- // --------------- Conference ------------- // --------------- Conference ------------- // --------------- new Groups ------------- // --------------- new Groups ------------- // --------------- new Groups -------------
+
         /**
          * Creates a new group chat.
          *
@@ -945,7 +956,7 @@ class MainActivity
                     val toxpk = tox_friend_get_public_key(friend_number)
                     received_message_to_db(toxpk, message_timestamp, friend_message)
                     val friend_user = User("Friend " + friend_number, picture = "friend_avatar.png", toxpk = toxpk)
-                    store.send(Action.ReceiveMessage(message = UIMessage(user = friend_user, timeMs = timestampMs(), text = friend_message!!, toxpk = toxpk)))
+                    messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(user = friend_user, timeMs = timestampMs(), text = friend_message!!, toxpk = toxpk)))
                 } catch (_: Exception)
                 {
                 }
@@ -956,7 +967,7 @@ class MainActivity
                     val toxpk = tox_friend_get_public_key(friend_number)
                     received_message_to_db(toxpk, message_timestamp, friend_message)
                     val friend_user = User("Friend " + friend_number, picture = "friend_avatar.png", toxpk = toxpk)
-                    store.send(Action.ReceiveMessage(message = UIMessage(user = friend_user, timeMs = timestampMs(), text = friend_message!!, toxpk = toxpk)))
+                    messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(user = friend_user, timeMs = timestampMs(), text = friend_message!!, toxpk = toxpk)))
                 } catch (_: Exception)
                 {
                 }
@@ -971,8 +982,7 @@ class MainActivity
             val raw_message_buf = ByteBuffer.allocateDirect(raw_message_length.toInt())
             raw_message_buf.put(raw_message, 0, raw_message_length.toInt())
             val msg_id_buffer = ByteBuffer.allocateDirect(TOX_HASH_LENGTH)
-            tox_messagev2_get_message_id(raw_message_buf, msg_id_buffer)
-            // val ts_sec = tox_messagev2_get_ts_sec(raw_message_buf)
+            tox_messagev2_get_message_id(raw_message_buf, msg_id_buffer) // val ts_sec = tox_messagev2_get_ts_sec(raw_message_buf)
             // val ts_ms = tox_messagev2_get_ts_ms(raw_message_buf)
             val msg_id_buffer_compat = ByteBufferCompat(msg_id_buffer)
             val msg_id_as_hex_string: String? = msg_id_buffer_compat.array()?.let {
@@ -986,7 +996,7 @@ class MainActivity
                 val message_timestamp = ts_sec * 1000
                 received_message_to_db(toxpk, message_timestamp, friend_message)
                 val friend_user = User("Friend " + friend_number, picture = "friend_avatar.png", toxpk = toxpk)
-                store.send(Action.ReceiveMessage(message = UIMessage(user = friend_user, timeMs = timestampMs(), text = friend_message!!, toxpk = toxpk)))
+                messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(user = friend_user, timeMs = timestampMs(), text = friend_message!!, toxpk = toxpk)))
             } catch (_: Exception)
             {
             }
@@ -1093,6 +1103,26 @@ class MainActivity
         @JvmStatic
         fun android_tox_callback_group_message_cb_method(group_number: Long, peer_id: Long, a_TOX_MESSAGE_TYPE: Int, message_orig: String?, length: Long, message_id: Long)
         {
+            val res = tox_group_self_get_peer_id(group_number)
+            if (res == peer_id)
+            {
+                // do not process our own sent group messages (again)
+                return
+            }
+
+            val group_id = tox_group_by_groupnum__wrapper(group_number).lowercase()
+            val tox_peerpk = tox_group_peer_get_public_key(group_number, peer_id)!!.uppercase()
+            val message_timestamp = System.currentTimeMillis()
+            received_groupmessage_to_db(tox_peerpk = tox_peerpk!!, groupid = group_id,
+                message_timestamp = message_timestamp,
+                group_message = message_orig,
+                message_id = message_id)
+
+            val peer_user = User("Friend", picture = "friend_avatar.png", toxpk = tox_peerpk.uppercase())
+
+            groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage
+                (UIGroupMessage(peer_user, timeMs = message_timestamp, message_orig!!,
+                toxpk = tox_peerpk, groupId = group_id!!.lowercase())))
         }
 
         @JvmStatic
@@ -1103,51 +1133,83 @@ class MainActivity
         @JvmStatic
         fun android_tox_callback_group_privacy_state_cb_method(group_number: Long, a_TOX_GROUP_PRIVACY_STATE: Int)
         {
+            update_savedata_file_wrapper()
         }
 
         @JvmStatic
         fun android_tox_callback_group_invite_cb_method(friend_number: Long, invite_data: ByteArray?, invite_data_length: Long, group_name: String?)
         {
+            val invite_data_buf_wrapped = ByteBuffer.allocateDirect(invite_data_length.toInt())
+            invite_data_buf_wrapped.put(invite_data, 0, invite_data_length.toInt())
+            invite_data_buf_wrapped.rewind()
+            val new_group_num = tox_group_invite_accept(friend_number, invite_data_buf_wrapped, invite_data_length, RandomNameGenerator.getFullName(Random()), null)
+            update_savedata_file_wrapper()
+
+            if (new_group_num >= 0 && new_group_num < UINT32_MAX_JAVA)
+            {
+                try
+                {
+                    val group_identifier: String = bytesToHex(Arrays.copyOfRange(invite_data, 0, GROUP_ID_LENGTH), 0, GROUP_ID_LENGTH).lowercase()
+                    val new_privacy_state = tox_group_get_privacy_state(new_group_num)
+                    groupstore.add(item = GroupItem(name = group_name!!, isConnected = 0, groupId = group_identifier, privacyState = new_privacy_state))
+                } catch (_: Exception)
+                {
+                }
+            }
         }
 
         @JvmStatic
         fun android_tox_callback_group_peer_join_cb_method(group_number: Long, peer_id: Long)
         {
+            update_savedata_file_wrapper()
         }
 
         @JvmStatic
         fun android_tox_callback_group_peer_exit_cb_method(group_number: Long, peer_id: Long, a_Tox_Group_Exit_Type: Int)
         {
+            update_savedata_file_wrapper()
         }
 
         @JvmStatic
         fun android_tox_callback_group_peer_name_cb_method(group_number: Long, peer_id: Long)
         {
+            update_savedata_file_wrapper()
         }
 
         @JvmStatic
         fun android_tox_callback_group_join_fail_cb_method(group_number: Long, a_Tox_Group_Join_Fail: Int)
         {
+            update_savedata_file_wrapper()
         }
 
         @JvmStatic
         fun android_tox_callback_group_self_join_cb_method(group_number: Long)
         {
+            update_savedata_file_wrapper()
         }
 
         @JvmStatic
         fun android_tox_callback_group_moderation_cb_method(group_number: Long, source_peer_id: Long, target_peer_id: Long, a_Tox_Group_Mod_Event: Int)
         {
+            update_savedata_file_wrapper()
         }
 
         @JvmStatic
         fun android_tox_callback_group_connection_status_cb_method(group_number: Long, a_TOX_GROUP_CONNECTION_STATUS: Int)
         {
+            try
+            {
+                // groupstore.update(item = GroupItem(name = group_name!!, isConnected = 0, groupId = group_identifier, privacyState = new_privacy_state))
+            } catch (_: Exception)
+            {
+            }
+            update_savedata_file_wrapper()
         }
 
         @JvmStatic
         fun android_tox_callback_group_topic_cb_method(group_number: Long, peer_id: Long, topic: String?, topic_length: Long)
         {
+            update_savedata_file_wrapper()
         }
 
         @JvmStatic
@@ -1184,8 +1246,7 @@ class MainActivity
             if (message_timestamp > 0)
             {
                 m.rcvd_timestamp = message_timestamp
-            }
-            else
+            } else
             {
                 m.rcvd_timestamp = System.currentTimeMillis()
             }
@@ -1217,8 +1278,7 @@ class MainActivity
             if (message_timestamp > 0)
             {
                 m.sent_timestamp = message_timestamp
-            }
-            else
+            } else
             {
                 m.sent_timestamp = System.currentTimeMillis()
             }
@@ -1233,6 +1293,61 @@ class MainActivity
             try
             {
                 row_id = orma!!.insertIntoMessage(m)
+            } catch (e: Exception)
+            {
+            }
+        }
+
+        fun received_groupmessage_to_db(tox_peerpk: String, groupid: String, message_timestamp: Long, group_message: String?, message_id: Long)
+        {
+            val message_id_hex = fourbytes_of_long_to_hex(message_id)
+            val m = GroupMessage()
+            m.is_new = false
+            m.tox_group_peer_pubkey = tox_peerpk
+            m.direction = 0 // msg received
+            m.TOX_MESSAGE_TYPE = 0
+            m.read = false
+            m.tox_group_peername = null
+            m.private_message = 0
+            m.group_identifier = groupid.lowercase()
+            m.TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value
+            m.rcvd_timestamp = System.currentTimeMillis()
+            m.sent_timestamp = System.currentTimeMillis()
+            m.text = group_message
+            m.message_id_tox = message_id_hex
+            m.was_synced = false
+            var row_id: Long = -1
+            try
+            {
+                row_id = orma!!.insertIntoGroupMessage(m)
+            } catch (e: Exception)
+            {
+            }
+        }
+
+        fun sent_groupmessage_to_db(groupid: String, message_timestamp: Long, group_message: String?, message_id: Long)
+        {
+            val message_id_hex = fourbytes_of_long_to_hex(message_id)
+            val m = com.zoffcc.applications.sorm.GroupMessage()
+            m.is_new = false
+            m.tox_group_peer_pubkey = tox_group_self_get_public_key(
+                tox_group_by_groupid__wrapper(groupid))!!.uppercase()
+            m.direction = 1 // msg sent
+            m.TOX_MESSAGE_TYPE = 0
+            m.read = true
+            m.tox_group_peername = null;
+            m.private_message = 0;
+            m.group_identifier = groupid;
+            m.TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value
+            m.sent_timestamp = System.currentTimeMillis();
+            m.rcvd_timestamp = System.currentTimeMillis(); // since we do not have anything better assume "now"
+            m.text = group_message;
+            m.was_synced = false;
+            m.message_id_tox = message_id_hex
+            var row_id: Long = -1
+            try
+            {
+                row_id = orma!!.insertIntoGroupMessage(m)
             } catch (e: Exception)
             {
             }

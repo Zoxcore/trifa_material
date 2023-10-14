@@ -67,7 +67,13 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
 import org.briarproject.briar.desktop.contact.ContactList
+import org.briarproject.briar.desktop.contact.GroupList
 import org.briarproject.briar.desktop.navigation.BriarSidebar
+import org.briarproject.briar.desktop.ui.AboutScreen
+import org.briarproject.briar.desktop.ui.ExplainerChat
+import org.briarproject.briar.desktop.ui.ExplainerGroup
+import org.briarproject.briar.desktop.ui.UiMode
+import org.briarproject.briar.desktop.ui.UiPlaceholder
 import org.briarproject.briar.desktop.ui.VerticalDivider
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import java.util.prefs.Preferences
@@ -106,7 +112,8 @@ fun App()
     MaterialTheme {
         Scaffold() {
             Row {
-                BriarSidebar()
+                var uiMode by remember { mutableStateOf(UiMode.CONTACTS) }
+                BriarSidebar(uiMode = uiMode, setUiMode = {uiMode = it})
                 VerticalDivider()
                 Column(Modifier.fillMaxSize()) {
                     Row(Modifier.wrapContentHeight(), Arrangement.spacedBy(5.dp)) {
@@ -180,20 +187,53 @@ fun App()
                     }
                     SaveDataPath()
                     ToxIDTextField() // UIScaleSlider(uiscale_default)
-                    val contacts by contactstore.stateFlow.collectAsState()
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        ContactList(contactList = contacts)
-                        VerticalDivider()
-                        if (contacts.selectedContactPubkey == null)
+
+                    when (uiMode)
+                    {
+                        UiMode.CONTACTS ->
                         {
-                            ExplainerChat()
-                        } else
-                        {
-                            store.send(Action.Clear(0))
-                            load_message_for_friend(contacts.selectedContactPubkey)
-                            ChatAppWithScaffold(contactList = contacts)
+                            val contacts by contactstore.stateFlow.collectAsState()
+                            Row(modifier = Modifier.fillMaxWidth()) {
+                                ContactList(contactList = contacts)
+                                VerticalDivider()
+                                if (contacts.selectedContactPubkey == null)
+                                {
+                                    ExplainerChat()
+                                } else
+                                {
+                                    messagestore.send(MessageAction.Clear(0))
+                                    load_messages_for_friend(contacts.selectedContactPubkey)
+                                    ChatAppWithScaffold(contactList = contacts)
+                                }
+                            }
                         }
+                        UiMode.GROUPS ->
+                        {
+                            val groups by groupstore.stateFlow.collectAsState()
+                            Row(modifier = Modifier.fillMaxWidth()) {
+                                GroupList(groupList = groups)
+                                VerticalDivider()
+                                if (groups.selectedGroupId == null)
+                                {
+                                    ExplainerGroup()
+                                } else
+                                {
+                                    groupmessagestore.send(GroupMessageAction.ClearGroup(0))
+                                    load_groupmessages_for_friend(groups.selectedGroupId)
+                                    GroupAppWithScaffold(groupList = groups)
+                                }
+                            }
+                        }
+
+
+                        UiMode.ABOUT -> AboutScreen()
+                        /*
+                        UiMode.SETTINGS -> TODO()
+
+                         */
+                        else -> UiPlaceholder()
                     }
+
                 }
             }
         }
@@ -201,7 +241,7 @@ fun App()
 
 }
 
-fun load_message_for_friend(selectedContactPubkey: String?)
+fun load_messages_for_friend(selectedContactPubkey: String?)
 {
     if (selectedContactPubkey != null)
     {
@@ -215,11 +255,45 @@ fun load_message_for_friend(selectedContactPubkey: String?)
                     0 ->
                     {
                         val friend_user = User("Friend", picture = "friend_avatar.png", toxpk = selectedContactPubkey)
-                        store.send(Action.ReceiveMessage(message = UIMessage(user = friend_user, timeMs = it.rcvd_timestamp, text = it.text, toxpk = selectedContactPubkey)))
+                        messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(user = friend_user, timeMs = it.rcvd_timestamp, text = it.text, toxpk = selectedContactPubkey)))
                     }
                     1 ->
                     {
-                        store.send(Action.SendMessage(UIMessage(myUser, timeMs = it.sent_timestamp, it.text, toxpk = myUser.toxpk)))
+                        messagestore.send(MessageAction.SendMessage(UIMessage(myUser, timeMs = it.sent_timestamp, it.text, toxpk = myUser.toxpk)))
+                    }
+                    else -> {}
+                }
+            }
+        } catch (e: Exception)
+        {
+        }
+    }
+}
+
+fun load_groupmessages_for_friend(selectedGroupId: String?)
+{
+    if (selectedGroupId != null)
+    {
+        try
+        {
+            val messages = orma!!.selectFromGroupMessage().group_identifierEq(selectedGroupId)
+                .orderBySent_timestampAsc().toList()
+            messages.forEach() {
+                // 0 -> msg received, 1 -> msg sent
+                when (it.direction)
+                {
+                    0 ->
+                    {
+                        val friend_user = User("Friend", picture = "friend_avatar.png", toxpk = it.tox_group_peer_pubkey.uppercase())
+                        groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage
+                            (groupmessage = UIGroupMessage(user = friend_user,
+                            timeMs = it.rcvd_timestamp, text = it.text, toxpk = it.tox_group_peer_pubkey.uppercase(), groupId = it.group_identifier.lowercase())))
+                    }
+                    1 ->
+                    {
+                        groupmessagestore.send(GroupMessageAction.SendGroupMessage
+                        (UIGroupMessage(myUser, timeMs = it.sent_timestamp,
+                            text = it.text, toxpk = myUser.toxpk, groupId = it.group_identifier.lowercase())))
                     }
                     else -> {}
                 }

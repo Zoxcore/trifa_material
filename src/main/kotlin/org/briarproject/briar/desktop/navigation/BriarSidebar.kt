@@ -18,7 +18,6 @@
 
 package org.briarproject.briar.desktop.navigation
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -35,9 +34,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Satellite
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,58 +43,44 @@ import androidx.compose.ui.unit.dp
 import org.briarproject.briar.desktop.navigation.SidebarButtonState.None
 import org.briarproject.briar.desktop.navigation.SidebarButtonState.UnreadMessages
 import org.briarproject.briar.desktop.navigation.SidebarButtonState.Warning
+import org.briarproject.briar.desktop.ui.UiMode
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 
 val SIDEBAR_WIDTH = 56.dp
 
 @Composable
 fun BriarSidebar(
-) {
+    uiMode: UiMode,
+    setUiMode: (UiMode) -> Unit,
+)
+{
     @Composable
     fun BriarSidebarButton(
+        mode: UiMode,
         messageCount: Int = 0,
     ) = BriarSidebarButton(
-        selected = false,
-        onClick = {},
-        icon = Icons.Filled.Add,
+        selected = uiMode == mode,
+        onClick = { setUiMode(mode) },
+        icon = mode.icon,
         contentDescription = "",
         sideBarButtonState = if (messageCount == 0) None else UnreadMessages(messageCount),
     )
 
     Column(
-        modifier = Modifier
-            .width(SIDEBAR_WIDTH).fillMaxHeight()
-            .padding(vertical = 4.dp)
-            .selectableGroup(),
+        modifier = Modifier.width(SIDEBAR_WIDTH).fillMaxHeight().padding(vertical = 4.dp).selectableGroup(),
         verticalArrangement = spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        // profile button
+    ) { // profile button
         Spacer(Modifier.height(4.dp))
-        /*
-        BriarSidebarButton(UiMode.CONTACTS, messageCount.privateMessages)
-        if (configuration.shouldEnablePrivateGroups())
-            BriarSidebarButton(UiMode.GROUPS, messageCount.privateGroupMessages)
-        if (configuration.shouldEnableForums()) BriarSidebarButton(UiMode.FORUMS, messageCount.forumPosts)
-        if (configuration.shouldEnableBlogs()) BriarSidebarButton(UiMode.BLOGS, messageCount.blogPosts)
-
-        Spacer(Modifier.weight(1f))
-
-        if (configuration.shouldEnableTransportSettings()) BriarSidebarButton(UiMode.TRANSPORTS)
-        BriarSidebarButton(
-            selected = uiMode == UiMode.MAILBOX,
-            onClick = { setUiMode(UiMode.MAILBOX) },
-            icon = UiMode.MAILBOX.icon,
-            contentDescription = i18n(UiMode.MAILBOX.contentDescriptionKey),
-            sideBarButtonState = if (hasMailboxProblem) Warning else None,
-        )
+        BriarSidebarButton(UiMode.CONTACTS)
+        BriarSidebarButton(UiMode.GROUPS)
         BriarSidebarButton(UiMode.SETTINGS)
         BriarSidebarButton(UiMode.ABOUT)
-        */
     }
 }
 
-sealed class SidebarButtonState {
+sealed class SidebarButtonState
+{
     object None : SidebarButtonState()
     class UnreadMessages(val messageCount: Int) : SidebarButtonState()
     object Warning : SidebarButtonState()
@@ -112,24 +95,24 @@ fun BriarSidebarButton(
     sideBarButtonState: SidebarButtonState,
 ) = BadgedBox(
     badge = {
-        if (sideBarButtonState is UnreadMessages && sideBarButtonState.messageCount > 0) {
+        if (sideBarButtonState is UnreadMessages && sideBarButtonState.messageCount > 0)
+        {
             Badge(
                 modifier = Modifier.offset((-12).dp, 12.dp),
                 backgroundColor = MaterialTheme.colors.secondary,
             )
-        } else if (sideBarButtonState is Warning) {
-            Icon(
-                Icons.Default.Error,
-                i18n("mailbox.status.problem"),
-                modifier = Modifier.offset((-12).dp, 12.dp).size(16.dp),
-                tint = MaterialTheme.colors.error
-            )
+        } else if (sideBarButtonState is Warning)
+        {
+            Icon(Icons.Default.Error, i18n("mailbox.status.problem"), modifier = Modifier.offset((-12).dp, 12.dp).size(16.dp), tint = MaterialTheme.colors.error)
         }
     },
 ) {
     val tint = if (selected) MaterialTheme.colors.primary else MaterialTheme.colors.onSurface
     IconButton(
-        content = {},
-        onClick = onClick
+        icon = icon,
+        iconSize = 30.dp,
+        iconTint = tint,
+        contentDescription = contentDescription,
+        onClick = onClick,
     )
 }
