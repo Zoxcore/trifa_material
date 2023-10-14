@@ -8,15 +8,25 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.bootstrap_single_wra
 import com.zoffcc.applications.trifa.MainActivity.Companion.init_tox_callbacks
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_name
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_public_key
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_chat_id
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_grouplist
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_name
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_number_groups
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_privacy_state
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_is_connected
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_iterate
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_iteration_interval
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_kill
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_friend_list
+import com.zoffcc.applications.trifa.TRIFAGlobals.GROUP_ID_LENGTH
 import contactstore
+import groupstore
 import org.briarproject.briar.desktop.contact.ContactItem
+import org.briarproject.briar.desktop.contact.GroupItem
 import set_tox_running_state
 import toxdatastore
 import unlock_data_dir_input
+import java.nio.ByteBuffer
 
 class TrifaToxService
 {
@@ -40,7 +50,9 @@ class TrifaToxService
                     update_savedata_file_wrapper()
                 } // ------ correct startup order ------
                 clear_friend()
-                load_friends() // --------------- bootstrap ---------------
+                load_friends()
+                clear_group()
+                load_groups() // --------------- bootstrap ---------------
                 // --------------- bootstrap ---------------
                 // --------------- bootstrap ---------------
                 if (!old_is_tox_started)
@@ -242,6 +254,16 @@ class TrifaToxService
         }
     }
 
+    fun clear_group()
+    {
+        try
+        {
+            groupstore.clear()
+        } catch (_: Exception)
+        {
+        }
+    }
+
     fun load_friends()
     {
         tox_self_get_friend_list()?.forEach {
@@ -257,6 +279,38 @@ class TrifaToxService
             } catch (_: Exception)
             {
             }
+        }
+    }
+
+    fun load_groups()
+    {
+        val num_groups: Long = tox_group_get_number_groups()
+        val group_numbers = tox_group_get_grouplist()
+        val groupid_buf3: ByteBuffer = ByteBuffer.allocateDirect(GROUP_ID_LENGTH * 2)
+        var conf_ = 0
+        while (conf_ < num_groups)
+        {
+            groupid_buf3.clear()
+            if (tox_group_get_chat_id(group_numbers!![conf_], groupid_buf3) == 0)
+            {
+                val groupid_buffer = ByteArray(GROUP_ID_LENGTH)
+                groupid_buf3.get(groupid_buffer, 0, GROUP_ID_LENGTH)
+                val group_identifier: String = HelperGeneric.bytesToHex(groupid_buffer, 0, GROUP_ID_LENGTH).lowercase()
+                val is_connected: Int = tox_group_is_connected(conf_.toLong())
+                var group_name: String? = tox_group_get_name(group_numbers!![conf_])
+                if (group_name == null)
+                {
+                    group_name = ""
+                }
+                val new_privacy_state: Int = tox_group_get_privacy_state(group_numbers!![conf_])
+                try
+                {
+                    groupstore.add(item = GroupItem(name = group_name, isConnected = is_connected, groupId = group_identifier, privacyState = new_privacy_state))
+                } catch (_: Exception)
+                {
+                }
+            }
+            conf_++
         }
     }
 }

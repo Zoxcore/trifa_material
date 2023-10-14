@@ -39,52 +39,52 @@ public class GroupMessage
 
     @Column(indexed = true, helpers = Column.Helpers.ALL, defaultExpr = "")
     @Nullable
-    String message_id_tox = ""; // Tox Group Message_ID (4 bytes as hex string lowercase)
+    public String message_id_tox = ""; // Tox Group Message_ID (4 bytes as hex string lowercase)
 
     @Column(indexed = true, defaultExpr = "-1", helpers = Column.Helpers.ALL)
-    String group_identifier = "-1"; // f_key -> GroupDB.group_identifier
+    public String group_identifier = "-1"; // f_key -> GroupDB.group_identifier
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    String tox_group_peer_pubkey;
+    public String tox_group_peer_pubkey;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     @Nullable
-    int private_message = 0; // 0 -> message to group, 1 -> msg privately to/from peer
+    public int private_message = 0; // 0 -> message to group, 1 -> msg privately to/from peer
 
     @Column(indexed = true, defaultExpr = "", helpers = Column.Helpers.ALL)
     @Nullable
-    String tox_group_peername = ""; // saved for backup, when conference is offline!
+    public String tox_group_peername = ""; // saved for backup, when conference is offline!
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    int direction = 0; // 0 -> msg received, 1 -> msg sent
+    public int direction = 0; // 0 -> msg received, 1 -> msg sent
 
     @Column(indexed = true)
-    int TOX_MESSAGE_TYPE = 0; // 0 -> normal, 1 -> action
+    public int TOX_MESSAGE_TYPE = 0; // 0 -> normal, 1 -> action
 
     @Column(indexed = true, defaultExpr = "0")
-    int TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE_TEXT.value;
+    public int TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE_TEXT.value;
 
     @Column(helpers = Column.Helpers.ALL)
     @Nullable
-    long sent_timestamp = 0L;
+    public long sent_timestamp = 0L;
 
     @Column(indexed = true)
     @Nullable
-    long rcvd_timestamp = 0L;
+    public long rcvd_timestamp = 0L;
 
     @Column(helpers = Column.Helpers.ALL)
-    boolean read = false;
+    public boolean read = false;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    boolean is_new = true;
+    public boolean is_new = true;
 
     @Column(helpers = Column.Helpers.ALL)
     @Nullable
-    String text = null;
+    public String text = null;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     @Nullable
-    boolean was_synced = false;
+    public boolean was_synced = false;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     @Nullable

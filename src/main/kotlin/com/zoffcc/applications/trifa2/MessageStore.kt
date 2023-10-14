@@ -5,19 +5,19 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 
-interface Store
+interface MessageStore
 {
-    fun send(action: Action)
-    val stateFlow: StateFlow<State>
+    fun send(action: MessageAction)
+    val stateFlow: StateFlow<MessageState>
     val state get() = stateFlow.value
 }
 
-fun CoroutineScope.createStore(): Store
+fun CoroutineScope.createMessageStore(): MessageStore
 {
-    val mutableStateFlow = MutableStateFlow(State())
-    val channel: Channel<Action> = Channel(Channel.UNLIMITED)
+    val mutableStateFlow = MutableStateFlow(MessageState())
+    val channel: Channel<MessageAction> = Channel(Channel.UNLIMITED)
 
-    return object : Store
+    return object : MessageStore
     {
         init
         {
@@ -28,10 +28,10 @@ fun CoroutineScope.createStore(): Store
             }
         }
 
-        override fun send(action: Action)
+        override fun send(action: MessageAction)
         {
             launch {
-                if (action is Action.ReceiveMessage)
+                if (action is MessageAction.ReceiveMessage)
                 {
                     if (contactstore.state.selectedContactPubkey == action.message.toxpk)
                     {
@@ -44,6 +44,6 @@ fun CoroutineScope.createStore(): Store
             }
         }
 
-        override val stateFlow: StateFlow<State> = mutableStateFlow
+        override val stateFlow: StateFlow<MessageState> = mutableStateFlow
     }
 }

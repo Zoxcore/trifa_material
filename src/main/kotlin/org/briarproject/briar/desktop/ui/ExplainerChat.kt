@@ -1,3 +1,6 @@
+package org.briarproject.briar.desktop.ui
+
+import Theme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -11,10 +14,7 @@ import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 @Composable
 fun ExplainerChat() {
     Theme {
-        Explainer(
-            headline = i18n("No Contacts selected"),
-            text = i18n("Select a Contact to start chatting")
-        )
+        Explainer(headline = i18n("No Contacts selected"), text = i18n("Select a Contact to start chatting"))
     }
 }
 
