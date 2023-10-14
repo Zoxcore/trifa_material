@@ -209,8 +209,20 @@ fun load_message_for_friend(selectedContactPubkey: String?)
         {
             val messages = orma!!.selectFromMessage().tox_friendpubkeyEq(selectedContactPubkey.uppercase()).orderBySent_timestampAsc().toList()
             messages.forEach() {
-                val friend_user = User("Friend", picture = "friend_avatar.png", toxpk = selectedContactPubkey)
-                store.send(Action.ReceiveMessage(message = UIMessage(user = friend_user, timeMs = it.rcvd_timestamp, text = it.text, toxpk = selectedContactPubkey)))
+                // 0 -> msg received, 1 -> msg sent
+                when (it.direction)
+                {
+                    0 ->
+                    {
+                        val friend_user = User("Friend", picture = "friend_avatar.png", toxpk = selectedContactPubkey)
+                        store.send(Action.ReceiveMessage(message = UIMessage(user = friend_user, timeMs = it.rcvd_timestamp, text = it.text, toxpk = selectedContactPubkey)))
+                    }
+                    1 ->
+                    {
+                        store.send(Action.SendMessage(UIMessage(myUser, timeMs = it.sent_timestamp, it.text, toxpk = myUser.toxpk)))
+                    }
+                    else -> {}
+                }
             }
         } catch (e: Exception)
         {
