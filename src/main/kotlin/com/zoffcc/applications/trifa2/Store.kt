@@ -26,7 +26,13 @@ fun CoroutineScope.createStore(): Store {
 
         override fun send(action: Action) {
             launch {
-                channel.send(action)
+                if (action is Action.ReceiveMessage) {
+                    if (contactstore.state.selectedContactPubkey == action.message.toxpk) {
+                        channel.send(action)
+                    }
+                } else {
+                    channel.send(action)
+                }
             }
         }
 

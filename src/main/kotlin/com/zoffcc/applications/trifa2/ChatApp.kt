@@ -11,11 +11,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.trifa.*
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_send_message
 import com.zoffcc.applications.trifa.ToxVars.TOX_MESSAGE_TYPE
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
-import org.briarproject.briar.desktop.contact.ContactItem
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 
@@ -39,14 +39,14 @@ fun ChatAppWithScaffold(displayTextField: Boolean = true, contactList: StateCont
                     backgroundColor = MaterialTheme.colors.background,
                 )
             }) {
-            ChatApp(displayTextField = displayTextField)
+            ChatApp(displayTextField = displayTextField, contactList.selectedContactPubkey)
         }
     }
 }
 
 @OptIn(ExperimentalResourceApi::class)
 @Composable
-fun ChatApp(displayTextField: Boolean = true) {
+fun ChatApp(displayTextField: Boolean = true, selectedContactPubkey: String?) {
     val state by store.stateFlow.collectAsState()
     Theme {
         Surface {
@@ -65,16 +65,11 @@ fun ChatApp(displayTextField: Boolean = true) {
                     }
                     if (displayTextField) {
                         SendMessage { text ->
-                            // !!!!! DEBUG DEBUG !!!!!
-                            // !!!!! DEBUG DEBUG !!!!!
-                            // !!!!! DEBUG DEBUG !!!!!
-                            // send it to tox friend "0" (zero)
+                            Log.i(TAG,"selectedContactPubkey=" + selectedContactPubkey)
+                            val friend_num = tox_friend_by_public_key(selectedContactPubkey)
                             tox_friend_send_message(
-                                0, TOX_MESSAGE_TYPE.TOX_MESSAGE_TYPE_NORMAL.value, text
+                                friend_num, TOX_MESSAGE_TYPE.TOX_MESSAGE_TYPE_NORMAL.value, text
                             )
-                            // !!!!! DEBUG DEBUG !!!!!
-                            // !!!!! DEBUG DEBUG !!!!!
-                            // !!!!! DEBUG DEBUG !!!!!
                             store.send(
                                 Action.SendMessage(
                                     Message(myUser, timeMs = timestampMs(), text, toxpk = myUser.toxpk)

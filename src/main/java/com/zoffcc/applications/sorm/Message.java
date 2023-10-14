@@ -46,16 +46,16 @@ public class Message
     long message_id = -1; // ID given from toxcore!!
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    String tox_friendpubkey;
+    public String tox_friendpubkey;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    int direction = 0; // 0 -> msg received, 1 -> msg sent
+    public int direction = 0; // 0 -> msg received, 1 -> msg sent
 
     @Column(indexed = true)
-    int TOX_MESSAGE_TYPE = 0; // 0 -> normal, 1 -> action
+    public int TOX_MESSAGE_TYPE = 0; // 0 -> normal, 1 -> action
 
     @Column(indexed = true, defaultExpr = "0")
-    int TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE_TEXT.value;
+    public int TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE_TEXT.value;
 
     @Column(indexed = true, defaultExpr = "1", helpers = Column.Helpers.ALL)
     int state = TOX_FILE_CONTROL_PAUSE.value;
@@ -74,32 +74,32 @@ public class Message
 
     @Column(helpers = Column.Helpers.ALL, defaultExpr = "0")
     @Nullable
-    long sent_timestamp = 0L;
+    public long sent_timestamp = 0L;
 
     @Column(helpers = Column.Helpers.ALL, defaultExpr = "0")
     @Nullable
-    long sent_timestamp_ms = 0L;
+    public long sent_timestamp_ms = 0L;
 
     @Column(indexed = true, defaultExpr = "0")
     @Nullable
-    long rcvd_timestamp = 0L;
+    public long rcvd_timestamp = 0L;
 
     @Column(indexed = true, defaultExpr = "0")
     @Nullable
-    long rcvd_timestamp_ms = 0L;
+    public long rcvd_timestamp_ms = 0L;
 
     @Column(helpers = Column.Helpers.ALL)
-    boolean read = false;
+    public boolean read = false;
 
     @Column(indexed = true, defaultExpr = "0", helpers = Column.Helpers.ALL)
     int send_retries = 0;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    boolean is_new = true;
+    public boolean is_new = true;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     @Nullable
-    String text = null;
+    public String text = null;
 
     @Column(helpers = Column.Helpers.ALL)
     @Nullable
@@ -114,7 +114,7 @@ public class Message
     String raw_msgv2_bytes = null; // used for MessageV2 Messages! and otherwise NULL
 
     @Column(indexed = true, defaultExpr = "0")
-    int msg_version; // 0 -> old Message, 1 -> for MessageV2 Message
+    public int msg_version; // 0 -> old Message, 1 -> for MessageV2 Message
 
     @Column(indexed = true, defaultExpr = "2")
     int resend_count; // 2 -> do not resend msg anymore, 0 or 1 -> resend count
@@ -127,11 +127,11 @@ public class Message
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     @Nullable
-    String msg_idv3_hash = null; // 32byte hash, used for MessageV3 Messages! and otherwise NULL
+    public String msg_idv3_hash = null; // 32byte hash, used for MessageV3 Messages! and otherwise NULL
 
     @Column(helpers = Column.Helpers.ALL)
     @Nullable
-    int sent_push = 0;
+    public int sent_push = 0;
 
     @Column(helpers = Column.Helpers.ALL, defaultExpr = "0")
     @Nullable
