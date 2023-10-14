@@ -140,9 +140,6 @@ jobs:
               $JAVA_HOME/bin/javac -version
               ls -al /usr/local/Cellar/openjdk/
 
-      - name: xcode fix
-        run:  sudo xcode-select --reset
-
       - name: build package
         run:  |
           ls -al
