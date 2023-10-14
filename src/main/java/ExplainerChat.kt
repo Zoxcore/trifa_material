@@ -31,7 +31,7 @@ fun Explainer(headline: String, text: String, content: @Composable () -> Unit = 
         Text(
             text = headline,
             modifier = Modifier.padding(top = 16.dp, bottom = 4.dp),
-            style = MaterialTheme.typography.h3
+            style = MaterialTheme.typography.h4
         )
         Text(
             text = text,
