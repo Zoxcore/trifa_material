@@ -1,16 +1,6 @@
 name: JNI Lib
 
 on:
-  push:
-    paths-ignore:
-     - 'README.md'
-     - 'CHANGELOG.md'
-     - '.github/workflows/nightly.yml'
-  pull_request:
-    paths-ignore:
-     - 'README.md'
-     - 'CHANGELOG.md'
-     - '.github/workflows/nightly.yml'
   workflow_dispatch:
     inputs:
       version:
