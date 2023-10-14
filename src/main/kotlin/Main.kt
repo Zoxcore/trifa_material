@@ -157,6 +157,7 @@ fun App() {
                         if (contacts.selectedContactPubkey == null) {
                             ExplainerChat()
                         } else {
+                            store.send(Action.Clear(0))
                             ChatAppWithScaffold(contactList = contacts)
                         }
                     }

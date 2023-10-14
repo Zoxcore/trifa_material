@@ -1,4 +1,5 @@
-.idea/
+.idea/*
+!.idea/codeStyles
 build/
 .gradle/
 savedata.tox
@@ -6,4 +7,3 @@ bin/
 deps/
 toxid.txt
 main.db
-!.idea/codeStyles/*
