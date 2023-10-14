@@ -1172,14 +1172,14 @@ class MainActivity
             return add_tcp_relay_single(ip, key_hex, port.toLong())
         }
 
-        private fun received_message_to_db(toxpk: String?, message_timestamp: Long, friend_message: String?)
+        fun received_message_to_db(toxpk: String?, message_timestamp: Long, friend_message: String?)
         {
             val m = com.zoffcc.applications.sorm.Message()
             m.is_new = false
             m.tox_friendpubkey = toxpk
             m.direction = 0 // msg received
             m.TOX_MESSAGE_TYPE = 0
-            m.read = false
+            m.read = true
             m.TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value
             if (message_timestamp > 0)
             {
@@ -1192,6 +1192,39 @@ class MainActivity
             m.rcvd_timestamp_ms = 0
             m.sent_timestamp = message_timestamp
             m.sent_timestamp_ms = 0
+            m.text = friend_message
+            m.msg_version = 0
+            m.msg_idv3_hash = ""
+            m.sent_push = 0
+            var row_id: Long = -1
+            try
+            {
+                row_id = orma!!.insertIntoMessage(m)
+            } catch (e: Exception)
+            {
+            }
+        }
+
+        fun sent_message_to_db(toxpk: String?, message_timestamp: Long, friend_message: String?)
+        {
+            val m = com.zoffcc.applications.sorm.Message()
+            m.is_new = false
+            m.tox_friendpubkey = toxpk
+            m.direction = 1 // msg sent
+            m.TOX_MESSAGE_TYPE = 0
+            m.read = false
+            m.TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value
+            if (message_timestamp > 0)
+            {
+                m.sent_timestamp = message_timestamp
+            }
+            else
+            {
+                m.sent_timestamp = System.currentTimeMillis()
+            }
+            m.sent_timestamp_ms = 0
+            m.rcvd_timestamp = 0
+            m.rcvd_timestamp_ms = 0
             m.text = friend_message
             m.msg_version = 0
             m.msg_idv3_hash = ""
