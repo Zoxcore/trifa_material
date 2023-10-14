@@ -18,6 +18,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.trifa.Log
+import com.zoffcc.applications.trifa.MainActivity
+import com.zoffcc.applications.trifa.MainActivity.Companion.get_my_toxid
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_send_message
 import com.zoffcc.applications.trifa.StateContacts
@@ -70,10 +72,16 @@ fun ChatApp(displayTextField: Boolean = true, selectedContactPubkey: String?)
                     if (displayTextField)
                     {
                         SendMessage { text ->
-                            Log.i(TAG, "selectedContactPubkey=" + selectedContactPubkey)
+                            //
+                            // Log.i(TAG, "selectedContactPubkey=" + selectedContactPubkey)
                             val friend_num = tox_friend_by_public_key(selectedContactPubkey)
-                            tox_friend_send_message(friend_num, TOX_MESSAGE_TYPE.TOX_MESSAGE_TYPE_NORMAL.value, text)
-                            store.send(Action.SendMessage(UIMessage(myUser, timeMs = timestampMs(), text, toxpk = myUser.toxpk)))
+                            val timestamp = System.currentTimeMillis()
+                            val res = tox_friend_send_message(friend_num, TOX_MESSAGE_TYPE.TOX_MESSAGE_TYPE_NORMAL.value, text)
+                            if (res >= 0)
+                            {
+                                MainActivity.sent_message_to_db(selectedContactPubkey, timestamp, text)
+                                store.send(Action.SendMessage(UIMessage(myUser, timeMs = timestamp, text, toxpk = myUser.toxpk)))
+                            }
                         }
                     }
                 }
