@@ -3,6 +3,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -25,6 +26,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.zoffcc.applications.trifa.Log
+
+private const val TAG = "trifa.SendMessage"
 
 @Composable
 fun SendMessage(sendMessage: (String) -> Unit) {
@@ -45,7 +49,18 @@ fun SendMessage(sendMessage: (String) -> Unit) {
             Text("Type message...")
         },
         onValueChange = {
-            inputText = it
+            // ?? haXX0r ??
+            if (it == inputText + "\n")
+            {
+                // ?? haXX0r ??
+                // Log.i(TAG, "enter key pressed")
+                sendMessage(inputText)
+                inputText = ""
+            }
+            else
+            {
+                inputText = it
+            }
         },
         trailingIcon = {
             if (inputText.isNotEmpty()) {
