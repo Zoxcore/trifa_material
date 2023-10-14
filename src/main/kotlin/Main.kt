@@ -24,17 +24,15 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.*
-import com.zoffcc.applications.trifa.Log
+import com.zoffcc.applications.trifa.*
 import com.zoffcc.applications.trifa.MainActivity.Companion.main_init
-import com.zoffcc.applications.trifa.PrefsSettings
-import com.zoffcc.applications.trifa.StateContacts
-import com.zoffcc.applications.trifa.TrifaToxService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
+import org.briarproject.briar.desktop.contact.ContactItem
 import org.briarproject.briar.desktop.contact.ContactList
 import org.briarproject.briar.desktop.navigation.BriarSidebar
 import org.briarproject.briar.desktop.ui.VerticalDivider
@@ -139,9 +137,12 @@ fun App() {
                             Text(getOnlineButtonText(online_button_text))
                             Thread {
                                 while (true) {
-                                    Thread.sleep(200)
-                                    if (online_button_text != online_button_text_wrapper) {
-                                        online_button_text = online_button_text_wrapper
+                                    try {
+                                        Thread.sleep(200)
+                                        if (online_button_text != online_button_text_wrapper) {
+                                            online_button_text = online_button_text_wrapper
+                                        }
+                                    } catch (_: Exception) {
                                     }
                                 }
                             }.start()
