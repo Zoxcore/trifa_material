@@ -10,7 +10,8 @@ import org.briarproject.briar.desktop.contact.ContactItem
 
 data class StateContacts(
     val contacts: List<ContactItem> = emptyList(),
-    val selectedContact: String? = null
+    val selectedContactPubkey: String? = null,
+    val selectedContact: ContactItem? = null
 )
 
 const val TAG = "trifa.ContactsStore"
@@ -74,10 +75,22 @@ fun CoroutineScope.createContactStore(): ContactStore {
 
         override fun select(pubkey: String?) {
             launch {
+                var wanted_contact_item: ContactItem? = null
+                state.contacts.forEach {
+                    if (pubkey == it.pubkey) {
+                        wanted_contact_item = it
+                    }
+                }
+                var used_pubkey = pubkey
+                if (wanted_contact_item == null)
+                {
+                    used_pubkey = null
+                }
                 mutableStateFlow.value =
                     state.copy(
                         contacts = state.contacts,
-                        selectedContact = pubkey
+                        selectedContactPubkey = used_pubkey,
+                        selectedContact = wanted_contact_item
                     )
             }
         }
@@ -94,12 +107,14 @@ fun CoroutineScope.createContactStore(): ContactStore {
                     mutableStateFlow.value =
                         state.copy(
                             contacts = (state.contacts + item - update_item!!),
+                            selectedContactPubkey = state.selectedContactPubkey,
                             selectedContact = state.selectedContact
                         )
                 } else {
                     mutableStateFlow.value =
                         state.copy(
                             contacts = (state.contacts + item),
+                            selectedContactPubkey = state.selectedContactPubkey,
                             selectedContact = state.selectedContact
                         )
                 }
@@ -111,6 +126,7 @@ fun CoroutineScope.createContactStore(): ContactStore {
                 mutableStateFlow.value =
                     state.copy(
                         contacts = emptyList(),
+                        selectedContactPubkey = null,
                         selectedContact = null
                     )
             }

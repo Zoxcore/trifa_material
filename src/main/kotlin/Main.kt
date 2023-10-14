@@ -32,7 +32,6 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
-import org.briarproject.briar.desktop.contact.ContactItem
 import org.briarproject.briar.desktop.contact.ContactList
 import org.briarproject.briar.desktop.navigation.BriarSidebar
 import org.briarproject.briar.desktop.ui.VerticalDivider
@@ -153,11 +152,13 @@ fun App() {
                     // UIScaleSlider(uiscale_default)
                     val contacts by contactstore.stateFlow.collectAsState()
                     Row(modifier = Modifier.fillMaxWidth()) {
-                        ContactList(
-                            contactList = contacts,
-                        )
+                        ContactList(contactList = contacts)
                         VerticalDivider()
-                        ChatAppWithScaffold()
+                        if (contacts.selectedContactPubkey == null) {
+                            ExplainerChat()
+                        } else {
+                            ChatAppWithScaffold(contactList = contacts)
+                        }
                     }
                 }
             }

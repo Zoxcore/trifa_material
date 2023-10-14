@@ -41,9 +41,7 @@ fun ContactList(
             ) { item ->
                 ListItemView(
                     onSelect = { contactstore.select(item.pubkey) },
-                    selected = (contactList.selectedContact == item.pubkey),
-                    // let divider start at horizontal position of text
-                    dividerOffsetFromStart = (16 + 36 + 12).dp,
+                    selected = (contactList.selectedContactPubkey == item.pubkey)
                 ) {
                     val modifier = Modifier
                         .heightIn(min = TOP_HEADER_SIZE)
