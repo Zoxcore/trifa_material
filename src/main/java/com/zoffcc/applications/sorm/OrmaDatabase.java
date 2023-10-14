@@ -17,7 +17,7 @@ import static com.zoffcc.applications.trifa.MainActivity.PREF__database_files_di
 public class OrmaDatabase
 {
     private static final String TAG = "trifa.OrmaDatabase";
-    final static boolean ORMA_TRACE = false; // set "false" for release builds
+    final static boolean ORMA_TRACE = true; // set "false" for release builds
 
     private static final String CREATE_DB_FILE_SHA256SUM = "GE/avgqgDL4L1v35QvL2DIXdFMVOVKm8Ic8hG7v1BeA=";
     static Connection sqldb = null;
