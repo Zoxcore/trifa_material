@@ -146,7 +146,7 @@ jobs:
           id
           pwd
           export JAVA_HOME=$(/usr/libexec/java_home -v17)
-          ./gradlew packageDistributionForCurrentOS
+          ./gradlew packageDistributionForCurrentOS || cat /Users/runner/work/trifa_material/trifa_material/build/compose/logs/createDistributable/codesign-2*txt
 
       - name: Rename artifact for nightly upload
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
