@@ -307,6 +307,7 @@ jobs:
            ./do_compile.sh
            ./do_run.sh $(cat /Users/runner/work/trifa_material/trifa_material/toxid.txt) >/dev/null 2>/dev/null &
            sleep 58
+           cliclick -m verbose c:195,296
            sleep 90
            sleep 120
            pwd
@@ -475,6 +476,24 @@ jobs:
           bash -x ./do_compile.sh
           ./do_run.sh $(cat ../toxid.txt) &
           sleep 180
+
+      - name: startup-app
+        shell: pwsh
+        run: |
+          [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
+          [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
+          $signature=@'
+          [DllImport("user32.dll",CharSet=CharSet.Auto,CallingConvention=CallingConvention.StdCall)]
+          public static extern void mouse_event(long dwFlags, long dx, long dy, long cButtons, long dwExtraInfo);
+          '@
+          $SendMouseClick = Add-Type -memberDefinition $signature -name "Win32MouseEventNew" -namespace Win32Functions -passThru
+          $x = 215
+          $y = 276
+          [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point($x, $y)
+          sleep -Seconds 02
+          $SendMouseClick::mouse_event(0x00000002, 0, 0, 0, 0);
+          $SendMouseClick::mouse_event(0x00000004, 0, 0, 0, 0);
+          sleep -Seconds 02
 
       - name: capture-screen
         shell: pwsh
