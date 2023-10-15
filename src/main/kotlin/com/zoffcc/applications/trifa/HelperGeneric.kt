@@ -7,6 +7,11 @@ import java.nio.charset.StandardCharsets
 object HelperGeneric {
     private const val TAG = "trifa.Hlp.Generic"
     val hexArray = "0123456789ABCDEF".toCharArray()
+    const val PUBKEY_SHORT_LEN = 6
+
+    fun PubkeyShort(pubkey: String) : String {
+        return pubkey.take(PUBKEY_SHORT_LEN)
+    }
 
     fun bytesToHex(bytes: ByteArray, start: Int, len: Int): String {
         val hexChars = CharArray(len * 2)

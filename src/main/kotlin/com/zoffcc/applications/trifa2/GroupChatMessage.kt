@@ -51,7 +51,7 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage) 
                 }
                 Spacer(Modifier.size(2.dp))
                 Column {
-                    GroupTriangle(true, ChatColors.OTHERS_MESSAGE)
+                    GroupTriangle(true, ChatColorsConfig.OTHERS_MESSAGE)
                 }
             }
 
@@ -65,7 +65,7 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage) 
                             if (!isMyMessage) 0.dp else 10.dp
                         )
                     )
-                        .background(color = if (!isMyMessage) ChatColors.OTHERS_MESSAGE else ChatColors.MY_MESSAGE)
+                        .background(color = if (!isMyMessage) ChatColorsConfig.OTHERS_MESSAGE else ChatColorsConfig.MY_MESSAGE)
                         .padding(start = 10.dp, top = 5.dp, end = 10.dp, bottom = 5.dp),
                 ) {
                     Column {
@@ -99,7 +99,7 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage) 
                                 text = timeToString(groupmessage.timeMs),
                                 textAlign = TextAlign.End,
                                 style = MaterialTheme.typography.subtitle1.copy(fontSize = 10.sp),
-                                color = ChatColors.TIME_TEXT
+                                color = ChatColorsConfig.TIME_TEXT
                             )
                         }
                     }
@@ -108,7 +108,7 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage) 
             }
             if(isMyMessage) {
                 Column {
-                    Triangle(false, ChatColors.MY_MESSAGE)
+                    Triangle(false, ChatColorsConfig.MY_MESSAGE)
                 }
             }
         }

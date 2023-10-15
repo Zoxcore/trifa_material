@@ -6,6 +6,7 @@ import UIMessage
 import User
 import com.zoffcc.applications.sorm.GroupMessage
 import com.zoffcc.applications.trifa.HelperFriend.send_friend_msg_receipt_v2_wrapper
+import com.zoffcc.applications.trifa.HelperGeneric.PubkeyShort
 import com.zoffcc.applications.trifa.HelperGeneric.bytesToHex
 import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
 import com.zoffcc.applications.trifa.HelperGroup.fourbytes_of_long_to_hex
@@ -953,9 +954,11 @@ class MainActivity
                 HelperMessage.send_msgv3_high_level_ack(friend_number, msgV3hash_hex_string);
                 try
                 { // ("msgv3:"+friend_message)
-                    val toxpk = tox_friend_get_public_key(friend_number)
+                    val toxpk = tox_friend_get_public_key(friend_number)!!.uppercase()
                     received_message_to_db(toxpk, message_timestamp, friend_message)
-                    val friend_user = User("Friend " + friend_number, picture = "friend_avatar.png", toxpk = toxpk)
+                    val friendnum = tox_friend_by_public_key(toxpk)
+                    val fname = tox_friend_get_name(friendnum)
+                    val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk)
                     messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(user = friend_user, timeMs = timestampMs(), text = friend_message!!, toxpk = toxpk)))
                 } catch (_: Exception)
                 {
@@ -966,7 +969,9 @@ class MainActivity
                 { // ("msgv1:"+friend_message)
                     val toxpk = tox_friend_get_public_key(friend_number)
                     received_message_to_db(toxpk, message_timestamp, friend_message)
-                    val friend_user = User("Friend " + friend_number, picture = "friend_avatar.png", toxpk = toxpk)
+                    val friendnum = tox_friend_by_public_key(toxpk)
+                    val fname = tox_friend_get_name(friendnum)
+                    val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk)
                     messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(user = friend_user, timeMs = timestampMs(), text = friend_message!!, toxpk = toxpk)))
                 } catch (_: Exception)
                 {
@@ -995,7 +1000,9 @@ class MainActivity
                 val toxpk = tox_friend_get_public_key(friend_number)
                 val message_timestamp = ts_sec * 1000
                 received_message_to_db(toxpk, message_timestamp, friend_message)
-                val friend_user = User("Friend " + friend_number, picture = "friend_avatar.png", toxpk = toxpk)
+                val friendnum = tox_friend_by_public_key(toxpk)
+                val fname = tox_friend_get_name(friendnum)
+                val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk)
                 messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(user = friend_user, timeMs = timestampMs(), text = friend_message!!, toxpk = toxpk)))
             } catch (_: Exception)
             {
@@ -1105,24 +1112,18 @@ class MainActivity
         {
             val res = tox_group_self_get_peer_id(group_number)
             if (res == peer_id)
-            {
-                // do not process our own sent group messages (again)
+            { // do not process our own sent group messages (again)
                 return
             }
-
             val group_id = tox_group_by_groupnum__wrapper(group_number).lowercase()
             val tox_peerpk = tox_group_peer_get_public_key(group_number, peer_id)!!.uppercase()
             val message_timestamp = System.currentTimeMillis()
-            received_groupmessage_to_db(tox_peerpk = tox_peerpk!!, groupid = group_id,
-                message_timestamp = message_timestamp,
-                group_message = message_orig,
-                message_id = message_id)
+            received_groupmessage_to_db(tox_peerpk = tox_peerpk!!, groupid = group_id, message_timestamp = message_timestamp, group_message = message_orig, message_id = message_id)
+            val peernum = tox_group_peer_by_public_key(group_number, tox_peerpk)
+            val fname = tox_group_peer_get_name(group_number, peernum)
+            val peer_user = User(fname + " / " + PubkeyShort(tox_peerpk), picture = "friend_avatar.png", toxpk = tox_peerpk.uppercase(), color = ColorProvider.getColor(true, tox_peerpk.uppercase()))
 
-            val peer_user = User("Friend", picture = "friend_avatar.png", toxpk = tox_peerpk.uppercase())
-
-            groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage
-                (UIGroupMessage(peer_user, timeMs = message_timestamp, message_orig!!,
-                toxpk = tox_peerpk, groupId = group_id!!.lowercase())))
+            groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(UIGroupMessage(peer_user, timeMs = message_timestamp, message_orig!!, toxpk = tox_peerpk, groupId = group_id!!.lowercase())))
         }
 
         @JvmStatic
@@ -1198,8 +1199,7 @@ class MainActivity
         fun android_tox_callback_group_connection_status_cb_method(group_number: Long, a_TOX_GROUP_CONNECTION_STATUS: Int)
         {
             try
-            {
-                // groupstore.update(item = GroupItem(name = group_name!!, isConnected = 0, groupId = group_identifier, privacyState = new_privacy_state))
+            { // groupstore.update(item = GroupItem(name = group_name!!, isConnected = 0, groupId = group_identifier, privacyState = new_privacy_state))
             } catch (_: Exception)
             {
             }
@@ -1301,13 +1301,16 @@ class MainActivity
         fun received_groupmessage_to_db(tox_peerpk: String, groupid: String, message_timestamp: Long, group_message: String?, message_id: Long)
         {
             val message_id_hex = fourbytes_of_long_to_hex(message_id)
+            val groupnum = tox_group_by_groupid__wrapper(groupid)
+            val peernum = tox_group_peer_by_public_key(groupnum, tox_peerpk)
+            val peername = tox_group_peer_get_name(groupnum, peernum)
             val m = GroupMessage()
             m.is_new = false
             m.tox_group_peer_pubkey = tox_peerpk
             m.direction = 0 // msg received
             m.TOX_MESSAGE_TYPE = 0
             m.read = false
-            m.tox_group_peername = null
+            m.tox_group_peername = peername
             m.private_message = 0
             m.group_identifier = groupid.lowercase()
             m.TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value
@@ -1328,14 +1331,16 @@ class MainActivity
         fun sent_groupmessage_to_db(groupid: String, message_timestamp: Long, group_message: String?, message_id: Long)
         {
             val message_id_hex = fourbytes_of_long_to_hex(message_id)
+            val groupnum = tox_group_by_groupid__wrapper(groupid)
+            val peernum = tox_group_self_get_peer_id(groupnum)
+            val peername = tox_group_peer_get_name(groupnum, peernum)
             val m = com.zoffcc.applications.sorm.GroupMessage()
             m.is_new = false
-            m.tox_group_peer_pubkey = tox_group_self_get_public_key(
-                tox_group_by_groupid__wrapper(groupid))!!.uppercase()
+            m.tox_group_peer_pubkey = tox_group_self_get_public_key(tox_group_by_groupid__wrapper(groupid))!!.uppercase()
             m.direction = 1 // msg sent
             m.TOX_MESSAGE_TYPE = 0
             m.read = true
-            m.tox_group_peername = null;
+            m.tox_group_peername = peername
             m.private_message = 0;
             m.group_identifier = groupid;
             m.TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value

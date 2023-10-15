@@ -1,4 +1,5 @@
 import androidx.compose.ui.graphics.Color
+import com.zoffcc.applications.trifa.ChatColors
 import kotlin.random.Random
 
 data class UIMessage private constructor(
@@ -30,12 +31,14 @@ data class User(
 )
 
 object ColorProvider {
-    val colors = mutableListOf(
-        0xFFEA3468,
-        0xFFB634EA,
-        0xFF349BEA,
-    )
-    fun getColor(): Color {
-        return Color(colors[0])
+    fun getColor(isGroupPeer: Boolean = false, peer_pubkey : String? = null): Color {
+        return when(isGroupPeer)
+        {
+            false -> Color(0xFFEA3468)
+            true ->
+            {
+                Color(ChatColors.get_ngc_peer_color(peer_pubkey))
+            }
+        }
     }
 }

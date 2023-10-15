@@ -55,8 +55,11 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import com.zoffcc.applications.trifa.HelperGeneric.PubkeyShort
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity.Companion.main_init
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_name
 import com.zoffcc.applications.trifa.PrefsSettings
 import com.zoffcc.applications.trifa.TrifaToxService
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
@@ -113,7 +116,7 @@ fun App()
         Scaffold() {
             Row {
                 var uiMode by remember { mutableStateOf(UiMode.CONTACTS) }
-                BriarSidebar(uiMode = uiMode, setUiMode = {uiMode = it})
+                BriarSidebar(uiMode = uiMode, setUiMode = { uiMode = it })
                 VerticalDivider()
                 Column(Modifier.fillMaxSize()) {
                     Row(Modifier.wrapContentHeight(), Arrangement.spacedBy(5.dp)) {
@@ -187,7 +190,6 @@ fun App()
                     }
                     SaveDataPath()
                     ToxIDTextField() // UIScaleSlider(uiscale_default)
-
                     when (uiMode)
                     {
                         UiMode.CONTACTS ->
@@ -224,16 +226,12 @@ fun App()
                                 }
                             }
                         }
-
-
-                        UiMode.ABOUT -> AboutScreen()
-                        /*
+                        UiMode.ABOUT -> AboutScreen()/*
                         UiMode.SETTINGS -> TODO()
 
                          */
                         else -> UiPlaceholder()
                     }
-
                 }
             }
         }
@@ -248,20 +246,23 @@ fun load_messages_for_friend(selectedContactPubkey: String?)
         try
         {
             val messages = orma!!.selectFromMessage().tox_friendpubkeyEq(selectedContactPubkey.uppercase()).orderBySent_timestampAsc().toList()
-            messages.forEach() {
-                // 0 -> msg received, 1 -> msg sent
+            messages.forEach() { // 0 -> msg received, 1 -> msg sent
                 when (it.direction)
                 {
                     0 ->
                     {
-                        val friend_user = User("Friend", picture = "friend_avatar.png", toxpk = selectedContactPubkey)
-                        messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(user = friend_user, timeMs = it.rcvd_timestamp, text = it.text, toxpk = selectedContactPubkey)))
+                        val friendnum = tox_friend_by_public_key(it.tox_friendpubkey.uppercase())
+                        val fname = tox_friend_get_name(friendnum)
+                        val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = selectedContactPubkey, color = ColorProvider.getColor(false))
+                        messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(user = friend_user, timeMs = it.rcvd_timestamp, text = it.text, toxpk = it.tox_friendpubkey.uppercase())))
                     }
                     1 ->
                     {
                         messagestore.send(MessageAction.SendMessage(UIMessage(myUser, timeMs = it.sent_timestamp, it.text, toxpk = myUser.toxpk)))
                     }
-                    else -> {}
+                    else ->
+                    {
+                    }
                 }
             }
         } catch (e: Exception)
@@ -276,26 +277,22 @@ fun load_groupmessages_for_friend(selectedGroupId: String?)
     {
         try
         {
-            val messages = orma!!.selectFromGroupMessage().group_identifierEq(selectedGroupId)
-                .orderBySent_timestampAsc().toList()
-            messages.forEach() {
-                // 0 -> msg received, 1 -> msg sent
+            val messages = orma!!.selectFromGroupMessage().group_identifierEq(selectedGroupId).orderBySent_timestampAsc().toList()
+            messages.forEach() { // 0 -> msg received, 1 -> msg sent
                 when (it.direction)
                 {
                     0 ->
                     {
-                        val friend_user = User("Friend", picture = "friend_avatar.png", toxpk = it.tox_group_peer_pubkey.uppercase())
-                        groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage
-                            (groupmessage = UIGroupMessage(user = friend_user,
-                            timeMs = it.rcvd_timestamp, text = it.text, toxpk = it.tox_group_peer_pubkey.uppercase(), groupId = it.group_identifier.lowercase())))
+                        val friend_user = User(it.tox_group_peername + " / " + PubkeyShort(it.tox_group_peer_pubkey), picture = "friend_avatar.png", toxpk = it.tox_group_peer_pubkey.uppercase(), color = ColorProvider.getColor(true, it.tox_group_peer_pubkey.uppercase()))
+                        groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(groupmessage = UIGroupMessage(user = friend_user, timeMs = it.rcvd_timestamp, text = it.text, toxpk = it.tox_group_peer_pubkey.uppercase(), groupId = it.group_identifier.lowercase())))
                     }
                     1 ->
                     {
-                        groupmessagestore.send(GroupMessageAction.SendGroupMessage
-                        (UIGroupMessage(myUser, timeMs = it.sent_timestamp,
-                            text = it.text, toxpk = myUser.toxpk, groupId = it.group_identifier.lowercase())))
+                        groupmessagestore.send(GroupMessageAction.SendGroupMessage(UIGroupMessage(myUser, timeMs = it.sent_timestamp, text = it.text, toxpk = myUser.toxpk, groupId = it.group_identifier.lowercase())))
                     }
-                    else -> {}
+                    else ->
+                    {
+                    }
                 }
             }
         } catch (e: Exception)
