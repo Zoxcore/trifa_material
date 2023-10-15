@@ -2,7 +2,6 @@ package com.zoffcc.applications.trifa
 
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Modifier
@@ -10,6 +9,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.loadSvgPainter
 import androidx.compose.ui.res.loadXmlImageVector
 import androidx.compose.ui.unit.Density
@@ -17,12 +17,10 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.update_savedata_file
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.xml.sax.InputSource
-import java.io.BufferedInputStream
 import java.io.File
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
-import kotlin.reflect.KFunction1
 
 object HelperGeneric {
     private const val TAG = "trifa.Hlp.Generic"
@@ -90,6 +88,15 @@ object HelperGeneric {
     }
 
     fun update_savedata_file_wrapper() {
+        var callerMethodName = ""
+        try {
+            val stacktrace = Thread.currentThread().stackTrace
+            val e = stacktrace[2]
+            callerMethodName = " called from:" + e.methodName
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
         try {
             MainActivity.semaphore_tox_savedata!!.acquire()
             val password_hash_2 = MainActivity.password_hash
@@ -97,7 +104,7 @@ object HelperGeneric {
             update_savedata_file(password_hash_2)
             val end_timestamp = System.currentTimeMillis()
             MainActivity.semaphore_tox_savedata!!.release()
-            Log.i(TAG, "update_savedata_file() took:" + (end_timestamp - start_timestamp).toFloat() / 1000f + "s")
+            Log.i(TAG, "update_savedata_file()" + callerMethodName + " took:" + (end_timestamp - start_timestamp).toFloat() / 1000f + "s")
         } catch (e: InterruptedException) {
             MainActivity.semaphore_tox_savedata!!.release()
             e.printStackTrace()
