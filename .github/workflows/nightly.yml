@@ -114,7 +114,7 @@ jobs:
     runs-on: macos-11
     needs: update-nightly-tag
     if: |
-      always() &&
+      false &&
       (needs.update-nightly-tag.result == 'success' ||
         needs.update-nightly-tag.result == 'skipped')
     permissions:
