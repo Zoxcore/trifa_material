@@ -79,6 +79,7 @@ import org.briarproject.briar.desktop.ui.UiMode
 import org.briarproject.briar.desktop.ui.UiPlaceholder
 import org.briarproject.briar.desktop.ui.VerticalDivider
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
+import java.awt.Toolkit
 import java.util.prefs.Preferences
 
 private const val TAG = "trifa.Main.kt"
@@ -385,6 +386,31 @@ fun set_tox_online_state(new_state: String)
 }
 
 fun main() = application(exitProcessOnExit = true) {
+    try
+    { // HINT: show proper name in MacOS Menubar
+        // https://alvinalexander.com/java/java-application-name-mac-menu-bar-menubar-class-name/
+        System.setProperty("com.apple.mrj.application.apple.menu.about.name", "TRIfA - Material")
+        System.setProperty("apple.awt.application.name", "TRIfA - Material")
+        System.setProperty("apple.laf.useScreenMenuBar", "true")
+    } catch (e: java.lang.Exception)
+    {
+        e.printStackTrace()
+    }
+
+    try
+    { // set "StartupWMClass" for Java Swing applications
+        //
+        // https://stackoverflow.com/a/29218320
+        //
+        val xToolkit: Toolkit = Toolkit.getDefaultToolkit()
+        var awtAppClassNameField: java.lang.reflect.Field? = null
+        awtAppClassNameField = xToolkit.javaClass.getDeclaredField("awtAppClassName")
+        awtAppClassNameField.isAccessible = true
+        awtAppClassNameField[xToolkit] = "normal_trifa_material" // this needs to be exactly the same String as "StartupWMClass" in the "*.desktop" file
+    } catch (e: Exception)
+    { // e.printStackTrace()
+    }
+
     MainAppStart()
 }
 
