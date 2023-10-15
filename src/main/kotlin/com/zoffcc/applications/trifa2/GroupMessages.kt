@@ -12,6 +12,8 @@ import androidx.compose.ui.Alignment.Companion.CenterEnd
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
@@ -64,6 +66,7 @@ fun PeerPic(user: User) {
         modifier = Modifier.size(imageSize.dp).clip(CircleShape),
         contentScale = ContentScale.Crop,
         painter = painter,
-        contentDescription = "Peer picture"
+        contentDescription = "Peer picture",
+        colorFilter = ColorFilter.tint(user.color, BlendMode.Modulate)
     )
 }
