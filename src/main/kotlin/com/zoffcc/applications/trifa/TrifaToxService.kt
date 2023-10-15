@@ -135,7 +135,7 @@ class TrifaToxService
         var ToxServiceThread: Thread? = null
         var stop_me = false
         var is_tox_started = false
-        var orma: OrmaDatabase? = null
+        public var orma: OrmaDatabase? = null
         public var TOX_SERVICE_STARTED = false
         var last_resend_pending_messages0_ms: Long = -1
         var last_resend_pending_messages1_ms: Long = -1

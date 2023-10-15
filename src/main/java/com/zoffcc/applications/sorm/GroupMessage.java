@@ -88,7 +88,23 @@ public class GroupMessage
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     @Nullable
-    String msg_id_hash = null; // 32byte hash
+    public String msg_id_hash = null; // 32byte hash
+
+    @Column(indexed = true, helpers = Column.Helpers.ALL)
+    @Nullable
+    public String path_name = null;
+
+    @Column(indexed = true, helpers = Column.Helpers.ALL)
+    @Nullable
+    public String file_name = null;
+
+    @Column(indexed = true, helpers = Column.Helpers.ALL)
+    @Nullable
+    public String filename_fullpath = null;
+
+    @Column(indexed = true, helpers = Column.Helpers.ALL)
+    @Nullable
+    public long filesize = 0L;
 
     static GroupMessage deep_copy(GroupMessage in)
     {
@@ -109,6 +125,10 @@ public class GroupMessage
         out.tox_group_peername = in.tox_group_peername;
         out.was_synced = in.was_synced;
         out.msg_id_hash = in.msg_id_hash;
+        out.path_name = in.path_name;
+        out.file_name = in.file_name;
+        out.filename_fullpath = in.filename_fullpath;
+        out.filesize = in.filesize;
 
         return out;
     }
@@ -120,7 +140,8 @@ public class GroupMessage
                 ", tox_peerpubkey=" + "*tox_peerpubkey*" + ", private_message=" + private_message + ", direction=" +
                 direction + ", TRIFA_MESSAGE_TYPE=" + TRIFA_MESSAGE_TYPE + ", TOX_MESSAGE_TYPE=" + TOX_MESSAGE_TYPE +
                 ", sent_timestamp=" + sent_timestamp + ", rcvd_timestamp=" + rcvd_timestamp + ", read=" + read +
-                ", text=" + "xxxxxx" + ", is_new=" + is_new + ", was_synced=" + was_synced;
+                ", text=" + "xxxxxx" + ", is_new=" + is_new + ", was_synced=" + was_synced + ", path_name=" + path_name +
+                ", file_name=" + file_name + ", filename_fullpath=" + filename_fullpath + ", filesize=" + filesize;
     }
 
     String sql_start = "";
@@ -158,7 +179,10 @@ public class GroupMessage
                 out.text = rs.getString("text");
                 out.was_synced = rs.getBoolean("was_synced");
                 out.msg_id_hash = rs.getString("msg_id_hash");
-
+                out.path_name = rs.getString("path_name");
+                out.file_name = rs.getString("file_name");
+                out.filename_fullpath = rs.getString("filename_fullpath");
+                out.filesize = rs.getLong("filesize");
                 list.add(out);
             }
 
@@ -202,7 +226,11 @@ public class GroupMessage
                     "is_new,"	+
                     "text,"	+
                     "was_synced,"+
-                    "msg_id_hash"+
+                    "msg_id_hash,"+
+                    "path_name,"	+
+                    "file_name,"	+
+                    "filename_fullpath,"	+
+                    "filesize"	+
                     ")" +
                     "values" +
                     "(" +
@@ -220,7 +248,11 @@ public class GroupMessage
                     "'"+b(this.is_new)+"'," +
                     "'"+s(this.text)+"'," +
                     "'"+b(this.was_synced)+"'," +
-                    "'"+s(this.msg_id_hash)+"'" +
+                    "'"+s(this.msg_id_hash)+"'," +
+                    "'"+s(this.path_name)+"'," +
+                    "'"+s(this.file_name)+"'," +
+                    "'"+s(this.filename_fullpath)+"'," +
+                    "'"+s(this.filesize)+"'" +
                     ")";
 
             if (ORMA_TRACE)

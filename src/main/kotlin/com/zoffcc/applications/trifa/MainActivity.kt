@@ -1,5 +1,7 @@
 package com.zoffcc.applications.trifa
 
+import ColorProvider
+import GroupMessageAction
 import MessageAction
 import UIGroupMessage
 import UIMessage
@@ -10,6 +12,7 @@ import com.zoffcc.applications.trifa.HelperGeneric.PubkeyShort
 import com.zoffcc.applications.trifa.HelperGeneric.bytesToHex
 import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
 import com.zoffcc.applications.trifa.HelperGroup.fourbytes_of_long_to_hex
+import com.zoffcc.applications.trifa.HelperGroup.handle_incoming_group_file
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupnum__wrapper
 import com.zoffcc.applications.trifa.TRIFAGlobals.GROUP_ID_LENGTH
@@ -19,6 +22,7 @@ import com.zoffcc.applications.trifa.TRIFAGlobals.NGC_AUDIO_BITRATE
 import com.zoffcc.applications.trifa.TRIFAGlobals.TRIFA_MSG_TYPE
 import com.zoffcc.applications.trifa.TRIFAGlobals.UINT32_MAX_JAVA
 import com.zoffcc.applications.trifa.ToxVars.TOX_HASH_LENGTH
+import com.zoffcc.applications.trifa.ToxVars.TOX_MAX_NGC_FILE_AND_HEADER_SIZE
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import contactstore
 import groupmessagestore
@@ -1123,7 +1127,7 @@ class MainActivity
             val fname = tox_group_peer_get_name(group_number, peernum)
             val peer_user = User(fname + " / " + PubkeyShort(tox_peerpk), picture = "friend_avatar.png", toxpk = tox_peerpk.uppercase(), color = ColorProvider.getColor(true, tox_peerpk.uppercase()))
 
-            groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(UIGroupMessage(peer_user, timeMs = message_timestamp, message_orig!!, toxpk = tox_peerpk, groupId = group_id!!.lowercase())))
+            groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(UIGroupMessage(peer_user, timeMs = message_timestamp, message_orig!!, toxpk = tox_peerpk, groupId = group_id!!.lowercase(), trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
         }
 
         @JvmStatic
@@ -1214,7 +1218,95 @@ class MainActivity
 
         @JvmStatic
         fun android_tox_callback_group_custom_packet_cb_method(group_number: Long, peer_id: Long, data: ByteArray?, length: Long)
-        {
+        { // check for correct signature of packets
+            val header_ngc_audio_v1 = (6 + 1 + 1 + 1 + 1).toLong()
+            val header_ngc_video_v1 = (6 + 1 + 1 + 1 + 1 + 1).toLong()
+            val header_ngc_video_v2 = (6 + 1 + 1 + 1 + 1 + 1 + 2 + 1).toLong()
+            val header_ngc_histsync_and_files = (6 + 1 + 1 + 32 + 4 + 255).toLong()
+            if (length <= TOX_MAX_NGC_FILE_AND_HEADER_SIZE && length >= header_ngc_histsync_and_files + 1)
+            { // @formatter:off
+                /*
+                | what      | Length in bytes| Contents                                           |
+                |------     |--------        |------------------                                  |
+                | magic     |       6        |  0x667788113435                                    |
+                | version   |       1        |  0x01                                              |
+                | pkt id    |       1        |  0x11
+                 */
+                // @formatter:on
+                if (data!![0] == 0x66.toByte() && data[1] == 0x77.toByte() && data[2] == 0x88.toByte() && data[3] == 0x11.toByte() && data[4] == 0x34.toByte() && data[5] == 0x35.toByte())
+                {
+                    if (data[6] == 0x1.toByte() && data[7] == 0x11.toByte())
+                    {
+                        val group_id = tox_group_by_groupnum__wrapper(group_number)
+                        val tox_peerpk = tox_group_peer_get_public_key(group_number, peer_id)!!.uppercase(Locale.getDefault());
+                        val peernum = tox_group_peer_by_public_key(group_number, tox_peerpk)
+                        val fname = tox_group_peer_get_name(group_number, peernum)
+                        val msg_timestamp = System.currentTimeMillis()
+                        val incoming_group_file_meta_data = handle_incoming_group_file(group_number, peer_id, data, length, header_ngc_histsync_and_files)
+
+                        if (incoming_group_file_meta_data != null)
+                        {
+                            val peer_user = User(fname + " / " + PubkeyShort(tox_peerpk), picture = "friend_avatar.png", toxpk = tox_peerpk.uppercase(), color = ColorProvider.getColor(true, tox_peerpk.uppercase()))
+                            groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(UIGroupMessage(peer_user, timeMs = msg_timestamp, incoming_group_file_meta_data.message_text, toxpk = tox_peerpk, groupId = group_id!!.lowercase(), trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value, filename_fullpath = incoming_group_file_meta_data.path_name + incoming_group_file_meta_data.file_name)))
+                        }
+                    } else
+                    { // Log.i(TAG, "group_custom_packet_cb:wrong signature 2");
+                    }
+                } else
+                { // Log.i(TAG, "group_custom_packet_cb:wrong signature 1");
+                }
+            }
+
+            if (length <= TOX_MAX_NGC_FILE_AND_HEADER_SIZE && length >= header_ngc_video_v1 + 1)
+            { // @formatter:off
+                /*
+                | what      | Length in bytes| Contents                                           |
+                |------     |--------        |------------------                                  |
+                | magic     |       6        |  0x667788113435                                    |
+                | version   |       1        |  0x01                                              |
+                | pkt id    |       1        |  0x21
+                 */
+                // @formatter:on
+                if (data!![0] == 0x66.toByte() && data[1] == 0x77.toByte() && data[2] == 0x88.toByte() && data[3] == 0x11.toByte() && data[4] == 0x34.toByte() && data[5] == 0x35.toByte())
+                { // byte 640 and 480. LOL
+                    if (data[6] == 0x01.toByte() && data[7] == 0x21.toByte() && data[8] == 480.toByte() && data[9] == 640.toByte() && data[10] == 1.toByte())
+                    { // disable ngc video version 1 -----------
+                    } else if (data[6] == 0x02.toByte() && data[7] == 0x21.toByte() && data[8] == 480.toByte() && data[9] == 640.toByte() && data[10] == 1.toByte() && length >= header_ngc_video_v2 + 1)
+                    { // Log.i(TAG, "group_custom_packet_cb:video_v2");
+                        //*****//show_ngc_incoming_video_frame_v2(group_number, peer_id, data, length)
+                    } else
+                    { // Log.i(TAG, "group_custom_packet_cb:wrong signature 2");
+                    }
+                } else
+                { // Log.i(TAG, "group_custom_packet_cb:wrong signature 1");
+                }
+            }
+
+            if (length <= TOX_MAX_NGC_FILE_AND_HEADER_SIZE && length >= header_ngc_audio_v1 + 1)
+            { // @formatter:off
+                /*
+                | what          | Length in bytes| Contents                                           |
+                |------         |--------        |------------------                                  |
+                | magic         |       6        |  0x667788113435                                    |
+                | version       |       1        |  0x01                                              |
+                | pkt id        |       1        |  0x31                                              |
+                | audio channels|       1        |  uint8_t always 1 (for MONO)                       |
+                | sampling freq |       1        |  uint8_t always 48 (for 48kHz)                     |
+                | data          |[1, 1363]       |  *uint8_t  bytes, zero not allowed!                |
+                 */
+                // @formatter:on
+                if (data!![0] == 0x66.toByte() && data[1] == 0x77.toByte() && data[2] == 0x88.toByte() && data[3] == 0x11.toByte() && data[4] == 0x34.toByte() && data[5] == 0x35.toByte())
+                {
+                    if (data[6] == 0x01.toByte() && data[7] == 0x31.toByte() && data[8] == 1.toByte() && data[9] == 48.toByte())
+                    { //*****//play_ngc_incoming_audio_frame(group_number, peer_id, data, length)
+                    } else
+                    {
+                    }
+                } else
+                {
+                }
+            }
+
         }
 
         @JvmStatic
