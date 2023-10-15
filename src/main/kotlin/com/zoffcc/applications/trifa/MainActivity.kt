@@ -1196,7 +1196,7 @@ class MainActivity
         @JvmStatic
         fun android_tox_callback_group_moderation_cb_method(group_number: Long, source_peer_id: Long, target_peer_id: Long, a_Tox_Group_Mod_Event: Int)
         {
-            update_savedata_file_wrapper()
+            // ** this happens non stop, so don't save here ** // update_savedata_file_wrapper()
         }
 
         @JvmStatic
