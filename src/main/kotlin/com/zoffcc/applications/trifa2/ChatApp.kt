@@ -148,8 +148,8 @@ fun Theme(content: @Composable () -> Unit)
 {
     MaterialTheme(
         colors = lightColors(
-            surface = Color(ChatColors.SURFACE),
-            background = Color(ChatColors.TOP_GRADIENT.last()),
+            surface = Color(ChatColorsConfig.SURFACE),
+            background = Color(ChatColorsConfig.TOP_GRADIENT.last()),
         ),
     ) {
         ProvideTextStyle(LocalTextStyle.current.copy(letterSpacing = 0.sp)) {
