@@ -55,7 +55,8 @@ compose.desktop {
         mainClass = "MainKt"
         // jvmArgs += listOf("-Xmx2G")
         // args += listOf("-customArgument")
-        // jvmArgs += listOf("-Dcom.apple.mrj.application.apple.menu.about.name=\"TRIfA - Material\" -Dapple.awt.application.name=\"TRIfA - Material\"")
+        jvmArgs += listOf("-Dcom.apple.mrj.application.apple.menu.about.name=TRIfA")
+        jvmArgs += listOf("-Dapple.awt.application.name=TRIfA")
 
         buildTypes.release.proguard {
             optimize.set(false)
