@@ -49,9 +49,9 @@ class TrifaToxService
                     init_tox_callbacks()
                     update_savedata_file_wrapper()
                 } // ------ correct startup order ------
-                clear_friend()
+                clear_friends()
                 load_friends()
-                clear_group()
+                clear_groups()
                 load_groups() // --------------- bootstrap ---------------
                 // --------------- bootstrap ---------------
                 // --------------- bootstrap ---------------
@@ -114,7 +114,8 @@ class TrifaToxService
                 update_savedata_file_wrapper()
                 is_tox_started = false
                 set_tox_running_state("stopped")
-                clear_friend()
+                clear_friends()
+                clear_groups()
                 com.zoffcc.applications.sorm.OrmaDatabase.shutdown()
                 unlock_data_dir_input()
                 try
@@ -244,7 +245,7 @@ class TrifaToxService
         } // --------------- JNI --------------- // --------------- JNI --------------- // --------------- JNI ---------------
     }
 
-    fun clear_friend()
+    fun clear_friends()
     {
         try
         {
@@ -254,7 +255,7 @@ class TrifaToxService
         }
     }
 
-    fun clear_group()
+    fun clear_groups()
     {
         try
         {
