@@ -6,20 +6,26 @@ data class UIGroupMessage private constructor(
     val text: String,
     val id: Long,
     val toxpk: String?,
-    val groupId: String
+    val groupId: String,
+    val trifaMsgType: Int,
+    val filename_fullpath: String?
 ) {
     constructor(
         user: User,
         timeMs: Long,
         text: String,
         toxpk: String?,
-        groupId: String
+        groupId: String,
+        trifaMsgType: Int,
+        filename_fullpath: String?
     ) : this(
         user = user,
         timeMs = timeMs,
         text = text,
         id = Random.nextLong(),
         toxpk = toxpk,
-        groupId = groupId
+        groupId = groupId,
+        trifaMsgType = trifaMsgType,
+        filename_fullpath = filename_fullpath
     )
 }

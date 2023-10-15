@@ -19,7 +19,7 @@ public class OrmaDatabase
     private static final String TAG = "trifa.OrmaDatabase";
     final static boolean ORMA_TRACE = false; // set "false" for release builds
 
-    private static final String CREATE_DB_FILE_SHA256SUM = "GE/avgqgDL4L1v35QvL2DIXdFMVOVKm8Ic8hG7v1BeA=";
+    private static final String CREATE_DB_FILE_SHA256SUM = "HJC9IOw3S0l53MKJOLXV1iUCWaglwXLyW9gncs52wds=";
     static Connection sqldb = null;
     static int current_db_version = 0;
 
@@ -501,7 +501,51 @@ public class OrmaDatabase
             }
         }
 
-        final int new_db_version = 10;
+        if (current_db_version < 11)
+        {
+            try
+            {
+                final String update_001 = "alter table GroupMessage add path_name TEXT DEFAULT NULL;" + "\n" +
+                "CREATE INDEX index_path_name_on_GroupMessage ON GroupMessage (path_name);";
+                run_multi_sql(update_001);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+            try
+            {
+            final String update_002 = "alter table GroupMessage add file_name TEXT DEFAULT NULL;" + "\n" +
+                "CREATE INDEX index_file_name_on_GroupMessage ON GroupMessage (file_name);";
+                run_multi_sql(update_002);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+            try
+            {
+                final String update_003 = "alter table GroupMessage add filename_fullpath TEXT DEFAULT NULL;" + "\n" +
+                "CREATE INDEX index_filename_fullpath_on_GroupMessage ON GroupMessage (filename_fullpath);";
+                run_multi_sql(update_003);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+            try
+            {
+                final String update_004 = "alter table GroupMessage add filesize INTEGER NOT NULL DEFAULT 0;" + "\n" +
+                "CREATE INDEX index_filesize_on_GroupMessage ON GroupMessage (filesize);";
+                run_multi_sql(update_004);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+        final int new_db_version = 11;
         set_new_db_version(new_db_version);
         // return the updated DB VERSION
         return new_db_version;

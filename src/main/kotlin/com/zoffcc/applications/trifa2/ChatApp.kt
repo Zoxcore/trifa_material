@@ -24,6 +24,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_send_mess
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_send_message
 import com.zoffcc.applications.trifa.StateContacts
 import com.zoffcc.applications.trifa.StateGroups
+import com.zoffcc.applications.trifa.TRIFAGlobals
 import com.zoffcc.applications.trifa.ToxVars
 import com.zoffcc.applications.trifa.ToxVars.TOX_MESSAGE_TYPE
 import com.zoffcc.applications.trifa.createContactStore
@@ -133,7 +134,8 @@ fun GroupApp(displayTextField: Boolean = true, selectedGroupId: String?)
                             if (message_id >= 0)
                             {
                                 MainActivity.sent_groupmessage_to_db(groupid = selectedGroupId, message_timestamp =  timestamp, group_message = text, message_id = message_id )
-                                groupmessagestore.send(GroupMessageAction.SendGroupMessage(UIGroupMessage(myUser, timeMs = timestamp, text, toxpk = myUser.toxpk, groupId = selectedGroupId!!.lowercase())))
+                                groupmessagestore.send(GroupMessageAction.SendGroupMessage(UIGroupMessage(myUser, timeMs = timestamp, text, toxpk = myUser.toxpk, groupId = selectedGroupId!!.lowercase(),
+                                    trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
                             }
                         }
                     }
