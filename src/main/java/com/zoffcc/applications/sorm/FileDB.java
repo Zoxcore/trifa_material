@@ -36,28 +36,28 @@ public class FileDB
     private static final String TAG = "DB.FileDB";
 
     @PrimaryKey(autoincrement = true, auto = true)
-    long id;
+    public long id;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    int kind = TOX_FILE_KIND_DATA.value;
+    public int kind = TOX_FILE_KIND_DATA.value;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    int direction = TRIFA_FT_DIRECTION_INCOMING.value;
+    public int direction = TRIFA_FT_DIRECTION_INCOMING.value;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    String tox_public_key_string = "";
+    public String tox_public_key_string = "";
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    String path_name = "";
+    public String path_name = "";
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    String file_name = "";
+    public String file_name = "";
 
     @Column(defaultExpr = "-1", indexed = true, helpers = Column.Helpers.ALL)
-    long filesize = -1;
+    public long filesize = -1;
 
     @Column(indexed = true, defaultExpr = "true", helpers = Column.Helpers.ALL)
-    boolean is_in_VFS = true;
+    public boolean is_in_VFS = true;
 
     static FileDB deep_copy(FileDB in)
     {

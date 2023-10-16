@@ -20,7 +20,7 @@ public class OrmaDatabase
     final static boolean ORMA_TRACE = false; // set "false" for release builds
 
     private static final String CREATE_DB_FILE_SHA256SUM = "HJC9IOw3S0l53MKJOLXV1iUCWaglwXLyW9gncs52wds=";
-    static Connection sqldb = null;
+    public static Connection sqldb = null;
     static int current_db_version = 0;
 
     public OrmaDatabase()

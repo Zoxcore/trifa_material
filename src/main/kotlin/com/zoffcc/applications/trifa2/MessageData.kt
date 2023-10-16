@@ -7,19 +7,25 @@ data class UIMessage private constructor(
     val timeMs: Long,
     val text: String,
     val id: Long,
-    val toxpk: String?
+    val toxpk: String?,
+    val trifaMsgType: Int,
+    val filename_fullpath: String?
 ) {
     constructor(
         user: User,
         timeMs: Long,
         text: String,
-        toxpk: String?
+        toxpk: String?,
+        trifaMsgType: Int,
+        filename_fullpath: String?
     ) : this(
         user = user,
         timeMs = timeMs,
         text = text,
         id = Random.nextLong(),
-        toxpk = toxpk
+        toxpk = toxpk,
+        trifaMsgType = trifaMsgType,
+        filename_fullpath = filename_fullpath
     )
 }
 

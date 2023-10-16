@@ -37,49 +37,49 @@ public class Filetransfer
     private static final String TAG = "DB.Filetransfer";
 
     @PrimaryKey(autoincrement = true, auto = true)
-    long id; // unique ID!!
+    public long id; // unique ID!!
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    String tox_public_key_string = "";
+    public String tox_public_key_string = "";
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    int direction = TRIFA_FT_DIRECTION_INCOMING.value;
+    public int direction = TRIFA_FT_DIRECTION_INCOMING.value;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    long file_number = -1; // given from toxcore!!
+    public long file_number = -1; // given from toxcore!!
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    int kind = TOX_FILE_KIND_DATA.value;
+    public int kind = TOX_FILE_KIND_DATA.value;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    int state = TOX_FILE_CONTROL_PAUSE.value;
+    public int state = TOX_FILE_CONTROL_PAUSE.value;
 
     @Column(indexed = true, defaultExpr = "false", helpers = Column.Helpers.ALL)
-    boolean ft_accepted = false;
+    public boolean ft_accepted = false;
 
     @Column(indexed = true, defaultExpr = "false", helpers = Column.Helpers.ALL)
-    boolean ft_outgoing_started = false;
+    public boolean ft_outgoing_started = false;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    String path_name = "";
+    public String path_name = "";
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    String file_name = "";
+    public String file_name = "";
 
     @Column(defaultExpr = "false")
-    boolean fos_open = false;
+    public boolean fos_open = false;
 
     @Column(defaultExpr = "-1")
-    long filesize = -1;
+    public long filesize = -1;
 
     @Column(defaultExpr = "0")
-    long current_position = 0;
+    public long current_position = 0;
 
     @Column(indexed = true, defaultExpr = "-1")
-    long message_id; // f_key -> Message.id
+    public long message_id; // f_key -> Message.id
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    String tox_file_id_hex = "";
+    public String tox_file_id_hex = "";
 
     static Filetransfer deep_copy(Filetransfer in)
     {
