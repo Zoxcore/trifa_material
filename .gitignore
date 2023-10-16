@@ -9,3 +9,4 @@ toxid.txt
 main.db
 _BACKUP/
 datadir/
+tempdir/
