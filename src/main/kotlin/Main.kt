@@ -258,11 +258,11 @@ fun load_messages_for_friend(selectedContactPubkey: String?)
                         val friendnum = tox_friend_by_public_key(it.tox_friendpubkey.uppercase())
                         val fname = tox_friend_get_name(friendnum)
                         val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = selectedContactPubkey, color = ColorProvider.getColor(false))
-                        messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(user = friend_user, timeMs = it.rcvd_timestamp, text = it.text, toxpk = it.tox_friendpubkey.uppercase())))
+                        messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(user = friend_user, timeMs = it.rcvd_timestamp, text = it.text, toxpk = it.tox_friendpubkey.uppercase(), trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
                     }
                     1 ->
                     {
-                        messagestore.send(MessageAction.SendMessage(UIMessage(myUser, timeMs = it.sent_timestamp, it.text, toxpk = myUser.toxpk)))
+                        messagestore.send(MessageAction.SendMessage(UIMessage(myUser, timeMs = it.sent_timestamp, it.text, toxpk = myUser.toxpk, trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
                     }
                     else ->
                     {

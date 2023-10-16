@@ -40,10 +40,10 @@ public class Message
     private static final String TAG = "DB.Message";
 
     @PrimaryKey(autoincrement = true, auto = true)
-    long id; // uniqe message id!!
+    public long id; // uniqe message id!!
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    long message_id = -1; // ID given from toxcore!!
+    public long message_id = -1; // ID given from toxcore!!
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     public String tox_friendpubkey;
@@ -58,19 +58,19 @@ public class Message
     public int TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE_TEXT.value;
 
     @Column(indexed = true, defaultExpr = "1", helpers = Column.Helpers.ALL)
-    int state = TOX_FILE_CONTROL_PAUSE.value;
+    public int state = TOX_FILE_CONTROL_PAUSE.value;
 
     @Column(indexed = true, defaultExpr = "false", helpers = Column.Helpers.ALL)
-    boolean ft_accepted = false;
+    public boolean ft_accepted = false;
 
     @Column(indexed = true, defaultExpr = "false", helpers = Column.Helpers.ALL)
-    boolean ft_outgoing_started = false;
+    public boolean ft_outgoing_started = false;
 
     @Column(indexed = true, defaultExpr = "-1")
-    long filedb_id; // f_key -> FileDB.id
+    public long filedb_id; // f_key -> FileDB.id
 
     @Column(indexed = true, defaultExpr = "-1")
-    long filetransfer_id; // f_key -> Filetransfer.id
+    public long filetransfer_id; // f_key -> Filetransfer.id
 
     @Column(helpers = Column.Helpers.ALL, defaultExpr = "0")
     @Nullable
@@ -92,7 +92,7 @@ public class Message
     public boolean read = false;
 
     @Column(indexed = true, defaultExpr = "0", helpers = Column.Helpers.ALL)
-    int send_retries = 0;
+    public int send_retries = 0;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     public boolean is_new = true;
@@ -103,27 +103,27 @@ public class Message
 
     @Column(helpers = Column.Helpers.ALL)
     @Nullable
-    String filename_fullpath = null;
+    public String filename_fullpath = null;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     @Nullable
-    String msg_id_hash = null; // 32byte hash, used for MessageV2 Messages! and otherwise NULL
+    public String msg_id_hash = null; // 32byte hash, used for MessageV2 Messages! and otherwise NULL
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     @Nullable
-    String raw_msgv2_bytes = null; // used for MessageV2 Messages! and otherwise NULL
+    public String raw_msgv2_bytes = null; // used for MessageV2 Messages! and otherwise NULL
 
     @Column(indexed = true, defaultExpr = "0")
     public int msg_version; // 0 -> old Message, 1 -> for MessageV2 Message
 
     @Column(indexed = true, defaultExpr = "2")
-    int resend_count; // 2 -> do not resend msg anymore, 0 or 1 -> resend count
+    public int resend_count; // 2 -> do not resend msg anymore, 0 or 1 -> resend count
 
     @Column(indexed = true, defaultExpr = "false", helpers = Column.Helpers.ALL)
-    boolean ft_outgoing_queued = false;
+    public boolean ft_outgoing_queued = false;
 
     @Column(indexed = true, defaultExpr = "false", helpers = Column.Helpers.ALL)
-    boolean msg_at_relay = false;
+    public boolean msg_at_relay = false;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     @Nullable
@@ -135,7 +135,7 @@ public class Message
 
     @Column(helpers = Column.Helpers.ALL, defaultExpr = "0")
     @Nullable
-    int filetransfer_kind = TOX_FILE_KIND_DATA.value;
+    public int filetransfer_kind = TOX_FILE_KIND_DATA.value;
 
     // ------- SWING UI elements ------- //
     JButton _swing_ok = null;

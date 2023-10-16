@@ -102,7 +102,7 @@ fun ChatApp(displayTextField: Boolean = true, selectedContactPubkey: String?)
                             if (res >= 0)
                             {
                                 MainActivity.sent_message_to_db(selectedContactPubkey, timestamp, text)
-                                messagestore.send(MessageAction.SendMessage(UIMessage(myUser, timeMs = timestamp, text, toxpk = myUser.toxpk)))
+                                messagestore.send(MessageAction.SendMessage(UIMessage(myUser, timeMs = timestamp, text, toxpk = myUser.toxpk, trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
                             }
                         }
                     }
