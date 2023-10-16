@@ -61,6 +61,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.main_init
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_name
 import com.zoffcc.applications.trifa.PrefsSettings
+import com.zoffcc.applications.trifa.RandomNameGenerator
 import com.zoffcc.applications.trifa.TRIFAGlobals
 import com.zoffcc.applications.trifa.TrifaToxService
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
@@ -81,6 +82,7 @@ import org.briarproject.briar.desktop.ui.UiPlaceholder
 import org.briarproject.briar.desktop.ui.VerticalDivider
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import java.awt.Toolkit
+import java.util.*
 import java.util.prefs.Preferences
 
 private const val TAG = "trifa.Main.kt"
@@ -423,6 +425,7 @@ fun main() = application(exitProcessOnExit = true) {
 private fun MainAppStart()
 {
     var showIntroScreen by remember { mutableStateOf(true) }
+    var inputTextToxSelfName by remember { mutableStateOf(RandomNameGenerator.getFullName(Random())) }
     try
     {
         val tmp = prefs.getBoolean("main.show_intro_screen", true)
@@ -432,7 +435,8 @@ private fun MainAppStart()
         }
     } catch (_: Exception)
     {
-    } // showIntroScreen = true
+    }
+    // showIntroScreen = true
     val appIcon = painterResource("icon-linux.png")
     if (showIntroScreen)
     { // ----------- intro screen -----------
@@ -458,6 +462,23 @@ private fun MainAppStart()
                             fontSize = 22.sp,
                         ),
                     )
+                    Text(
+                        modifier = Modifier.padding(top = 90.dp).align(Alignment.CenterHorizontally).width(400.dp),
+                        text = "Choose a Name:",
+                        style = MaterialTheme.typography.body1.copy(
+                            fontSize = 15.sp,
+                        ),
+                    )
+                    TextField(enabled = true,
+                        modifier = Modifier.padding(top = 3.dp).align(Alignment.CenterHorizontally).width(400.dp).border(width = 1.dp, color = Color.Gray),
+                        readOnly = false,
+                        singleLine = true,
+                        textStyle = TextStyle(fontSize = 18.sp),
+                        colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White),
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.None,autoCorrect = false),
+                        value = inputTextToxSelfName,
+                        placeholder = {   Text("") },
+                        onValueChange = {inputTextToxSelfName = it})
 
                     if (isAskingToClose)
                     {
