@@ -1,5 +1,8 @@
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +41,8 @@ import com.zoffcc.applications.trifa.HelperFiletransfer
 import com.zoffcc.applications.trifa.HelperGeneric
 import com.zoffcc.applications.trifa.HelperGeneric.AsyncImage
 import com.zoffcc.applications.trifa.HelperGeneric.loadImageBitmap
+import com.zoffcc.applications.trifa.HelperOSFile
+import com.zoffcc.applications.trifa.HelperOSFile.show_containing_dir_in_explorer
 import com.zoffcc.applications.trifa.TRIFAGlobals
 import java.io.File
 
@@ -52,6 +57,7 @@ fun GroupTriangle(risingToTheRight: Boolean, background: Color) {
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage) {
     Box(
@@ -118,12 +124,18 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage) 
                                         loadImageBitmap(File(groupmessage.filename_fullpath))
                                     }, painterFor = { remember { BitmapPainter(it) } },
                                         contentDescription = "Image",
-                                        modifier = Modifier.size(IMAGE_PREVIEW_SIZE))
+                                        modifier = Modifier.size(IMAGE_PREVIEW_SIZE).
+                                        combinedClickable(
+                                            onClick = { HelperOSFile.show_containing_dir_in_explorer(groupmessage.filename_fullpath) },
+                                            onLongClick = {}))
                                 }
                                 else
                                 {
                                     Icon(
-                                        modifier = Modifier.size(IMAGE_PREVIEW_SIZE),
+                                        modifier = Modifier.size(IMAGE_PREVIEW_SIZE).
+                                        combinedClickable(
+                                            onClick = { show_containing_dir_in_explorer(groupmessage.filename_fullpath) },
+                                            onLongClick = {}),
                                         imageVector = Icons.Default.Attachment,
                                         contentDescription = "File",
                                         tint = MaterialTheme.colors.primary

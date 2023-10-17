@@ -1,5 +1,7 @@
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.trifa.HelperFiletransfer.check_filename_is_image
 import com.zoffcc.applications.trifa.HelperGeneric
+import com.zoffcc.applications.trifa.HelperOSFile
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.TRIFAGlobals.TRIFA_MSG_TYPE
 import java.io.File
@@ -55,6 +58,7 @@ fun Triangle(risingToTheRight: Boolean, background: Color) {
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage) {
     val TAG = "trifa.ChatMessage"
@@ -123,12 +127,18 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage) {
                                         HelperGeneric.loadImageBitmap(File(message.filename_fullpath))
                                     }, painterFor = { remember { BitmapPainter(it) } },
                                         contentDescription = "Image",
-                                        modifier = Modifier.size(IMAGE_PREVIEW_SIZE))
+                                        modifier = Modifier.size(IMAGE_PREVIEW_SIZE).
+                                        combinedClickable(
+                                            onClick = { HelperOSFile.show_containing_dir_in_explorer(message.filename_fullpath) },
+                                            onLongClick = {}))
                                 }
                                 else
                                 {
                                     Icon(
-                                        modifier = Modifier.size(IMAGE_PREVIEW_SIZE),
+                                        modifier = Modifier.size(IMAGE_PREVIEW_SIZE).
+                                        combinedClickable(
+                                            onClick = { HelperOSFile.show_containing_dir_in_explorer(message.filename_fullpath) },
+                                            onLongClick = {}),
                                         imageVector = Icons.Default.Attachment,
                                         contentDescription = "File",
                                         tint = MaterialTheme.colors.primary
