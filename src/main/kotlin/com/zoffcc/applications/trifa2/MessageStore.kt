@@ -8,7 +8,7 @@ import kotlinx.coroutines.launch
 interface MessageStore
 {
     fun send(action: MessageAction)
-    val stateFlow: StateFlow<MessageState>
+    val stateFlow: MutableStateFlow<MessageState>
     val state get() = stateFlow.value
 }
 
@@ -44,6 +44,6 @@ fun CoroutineScope.createMessageStore(): MessageStore
             }
         }
 
-        override val stateFlow: StateFlow<MessageState> = mutableStateFlow
+        override val stateFlow: MutableStateFlow<MessageState> = mutableStateFlow
     }
 }

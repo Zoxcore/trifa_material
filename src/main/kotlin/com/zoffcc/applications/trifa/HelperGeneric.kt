@@ -1,6 +1,12 @@
 package com.zoffcc.applications.trifa
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Attachment
+import androidx.compose.material.icons.filled.Downloading
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
@@ -13,6 +19,7 @@ import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.loadSvgPainter
 import androidx.compose.ui.res.loadXmlImageVector
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
 import com.zoffcc.applications.trifa.MainActivity.Companion.update_savedata_file
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -122,10 +129,9 @@ object HelperGeneric {
         val image: T? by produceState<T?>(null) {
             value = withContext(Dispatchers.IO) {
                 try {
+                    // DEBUG -> to test lazy loading of images // Thread.sleep(1000)
                     load()
-                } catch (e: IOException) {
-                    // instead of printing to console, you can also write this to log,
-                    // or show some error placeholder
+                } catch (e: Exception) {
                     e.printStackTrace()
                     null
                 }
@@ -138,6 +144,15 @@ object HelperGeneric {
                 contentDescription = contentDescription,
                 contentScale = contentScale,
                 modifier = modifier
+            )
+        }
+        else
+        {
+            Icon(
+                modifier = modifier,
+                imageVector = Icons.Default.Downloading,
+                contentDescription = "loading ...",
+                tint = MaterialTheme.colors.primary
             )
         }
     }

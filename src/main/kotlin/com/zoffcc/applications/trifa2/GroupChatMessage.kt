@@ -10,8 +10,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Attachment
+import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -29,6 +33,8 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoffcc.applications.trifa.HelperFiletransfer
+import com.zoffcc.applications.trifa.HelperGeneric
 import com.zoffcc.applications.trifa.HelperGeneric.AsyncImage
 import com.zoffcc.applications.trifa.HelperGeneric.loadImageBitmap
 import com.zoffcc.applications.trifa.TRIFAGlobals
@@ -100,12 +106,35 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage) 
                         )
                         if (groupmessage.trifaMsgType == TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value)
                         {
-                            AsyncImage(
-                                load = { loadImageBitmap(File(groupmessage.filename_fullpath)) },
-                                painterFor = { remember { BitmapPainter(it) } },
-                                contentDescription = "Sample",
-                                modifier = Modifier.width(200.dp)
-                            )
+                            if (groupmessage.filename_fullpath != null)
+                            {
+                                if (HelperFiletransfer.check_filename_is_image(groupmessage.filename_fullpath))
+                                {
+                                    AsyncImage(load = {
+                                        loadImageBitmap(File(groupmessage.filename_fullpath))
+                                    }, painterFor = { remember { BitmapPainter(it) } },
+                                        contentDescription = "Image",
+                                        modifier = Modifier.size(IMAGE_PREVIEW_SIZE))
+                                }
+                                else
+                                {
+                                    Icon(
+                                        modifier = Modifier.size(IMAGE_PREVIEW_SIZE),
+                                        imageVector = Icons.Default.Attachment,
+                                        contentDescription = "File",
+                                        tint = MaterialTheme.colors.primary
+                                    )
+                                }
+                            }
+                            else
+                            {
+                                Icon(
+                                    modifier = Modifier.size(IMAGE_PREVIEW_SIZE),
+                                    imageVector = Icons.Default.BrokenImage,
+                                    contentDescription = "failed",
+                                    tint = MaterialTheme.colors.primary
+                                )
+                            }
                         }
                         Spacer(Modifier.size(4.dp))
                         Row(
