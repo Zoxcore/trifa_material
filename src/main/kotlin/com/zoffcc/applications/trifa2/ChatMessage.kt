@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -101,13 +102,16 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage) {
                             }
                         }
                         Spacer(Modifier.size(3.dp))
-                        Text(
-                            text = message.text,
-                            style = MaterialTheme.typography.body1.copy(
-                                fontSize = 18.sp,
-                                letterSpacing = 0.sp
+                        SelectionContainer()
+                        {
+                            Text(
+                                text = message.text,
+                                style = MaterialTheme.typography.body1.copy(
+                                    fontSize = 18.sp,
+                                    letterSpacing = 0.sp
+                                )
                             )
-                        )
+                        }
                         // Log.i(TAG, "message.trifaMsgType = " + message.trifaMsgType + " " + message.filename_fullpath)
                         if (message.trifaMsgType == TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value)
                         {
