@@ -22,10 +22,15 @@ public class HelperMessage {
         }
         ByteBuffer hash_bytes = HelperGeneric.hexstring_to_bytebuffer(msgV3hash_hex_string);
 
-        long t_sec = (System.currentTimeMillis() / 1000);
-        long res = MainActivity.tox_messagev3_friend_send_message(friend_number,
-                TOX_MESSAGE_TYPE_HIGH_LEVEL_ACK.value,
-                "_", hash_bytes, t_sec);
+
+        if (hash_bytes == null) {
+            return;
+        } else {
+            long t_sec = (System.currentTimeMillis() / 1000);
+            long res = MainActivity.tox_messagev3_friend_send_message(friend_number,
+                    TOX_MESSAGE_TYPE_HIGH_LEVEL_ACK.value,
+                    "_", hash_bytes, t_sec);
+        }
     }
 
     public static long get_message_id_from_filetransfer_id_and_friendnum(long filetransfer_id, long friend_number)
