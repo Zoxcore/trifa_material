@@ -132,7 +132,7 @@ object HelperGeneric {
                     // DEBUG -> to test lazy loading of images // Thread.sleep(1000)
                     load()
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    // e.printStackTrace()
                     null
                 }
             }

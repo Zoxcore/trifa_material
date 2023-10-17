@@ -24,7 +24,8 @@ internal fun Messages(messages: List<UIMessage>) {
     val listState = rememberLazyListState()
     if (messages.isNotEmpty()) {
         LaunchedEffect(messages.last()) {
-            listState.animateScrollToItem(messages.lastIndex, scrollOffset = 2)
+            // listState.animateScrollToItem(messages.lastIndex, scrollOffset = 2)
+            listState.scrollToItem(messages.lastIndex, scrollOffset = 2)
         }
     }
     Box(Modifier.fillMaxSize()) {
