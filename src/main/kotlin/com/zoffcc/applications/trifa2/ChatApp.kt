@@ -19,6 +19,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
 import com.zoffcc.applications.trifa.MainActivity
+import com.zoffcc.applications.trifa.MainActivity.Companion.sent_message_to_db
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_send_message
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_send_message
@@ -101,8 +102,8 @@ fun ChatApp(displayTextField: Boolean = true, selectedContactPubkey: String?)
                             val res = tox_friend_send_message(friend_num, TOX_MESSAGE_TYPE.TOX_MESSAGE_TYPE_NORMAL.value, text)
                             if (res >= 0)
                             {
-                                MainActivity.sent_message_to_db(selectedContactPubkey, timestamp, text)
-                                messagestore.send(MessageAction.SendMessage(UIMessage(myUser, timeMs = timestamp, text, toxpk = myUser.toxpk, trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
+                                val msg_id_db = sent_message_to_db(selectedContactPubkey, timestamp, text)
+                                messagestore.send(MessageAction.SendMessage(UIMessage(msgDatabaseId = msg_id_db, user = myUser, timeMs = timestamp, text = text, toxpk = myUser.toxpk, trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
                             }
                         }
                     }

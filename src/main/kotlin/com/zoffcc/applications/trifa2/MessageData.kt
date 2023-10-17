@@ -5,10 +5,11 @@ import kotlin.random.Random
 data class UIMessage private constructor(
     val user: User,
     val timeMs: Long,
-    val text: String,
+    var text: String,
     val id: Long,
     val toxpk: String?,
     val trifaMsgType: Int,
+    val msgDatabaseId: Long,
     val filename_fullpath: String?
 ) {
     constructor(
@@ -17,12 +18,14 @@ data class UIMessage private constructor(
         text: String,
         toxpk: String?,
         trifaMsgType: Int,
+        msgDatabaseId: Long,
         filename_fullpath: String?
     ) : this(
         user = user,
         timeMs = timeMs,
         text = text,
-        id = Random.nextLong(),
+        id = msgDatabaseId,
+        msgDatabaseId = msgDatabaseId,
         toxpk = toxpk,
         trifaMsgType = trifaMsgType,
         filename_fullpath = filename_fullpath

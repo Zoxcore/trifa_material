@@ -23,6 +23,8 @@ import com.zoffcc.applications.trifa.HelperGroup.fourbytes_of_long_to_hex
 import com.zoffcc.applications.trifa.HelperGroup.handle_incoming_group_file
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupnum__wrapper
+import com.zoffcc.applications.trifa.HelperMessage.update_single_message_from_ftid
+import com.zoffcc.applications.trifa.HelperMessage.update_single_message_from_messge_id
 import com.zoffcc.applications.trifa.TRIFAGlobals.AVATAR_INCOMING_MAX_BYTE_SIZE
 import com.zoffcc.applications.trifa.TRIFAGlobals.GROUP_ID_LENGTH
 import com.zoffcc.applications.trifa.TRIFAGlobals.LOWER_NGC_VIDEO_BITRATE
@@ -978,11 +980,11 @@ class MainActivity
                 try
                 { // ("msgv3:"+friend_message)
                     val toxpk = tox_friend_get_public_key(friend_number)!!.uppercase()
-                    received_message_to_db(toxpk, message_timestamp, friend_message)
+                    val msg_id_db = received_message_to_db(toxpk, message_timestamp, friend_message)
                     val friendnum = tox_friend_by_public_key(toxpk)
                     val fname = tox_friend_get_name(friendnum)
                     val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk)
-                    messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(user = friend_user, timeMs = timestampMs(), text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
+                    messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(msgDatabaseId =  msg_id_db, user = friend_user, timeMs = timestampMs(), text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
                 } catch (_: Exception)
                 {
                 }
@@ -991,11 +993,11 @@ class MainActivity
                 try
                 { // ("msgv1:"+friend_message)
                     val toxpk = tox_friend_get_public_key(friend_number)
-                    received_message_to_db(toxpk, message_timestamp, friend_message)
+                    val msg_id_db = received_message_to_db(toxpk, message_timestamp, friend_message)
                     val friendnum = tox_friend_by_public_key(toxpk)
                     val fname = tox_friend_get_name(friendnum)
                     val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk)
-                    messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(user = friend_user, timeMs = timestampMs(), text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
+                    messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(msgDatabaseId =  msg_id_db,user = friend_user, timeMs = timestampMs(), text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
                 } catch (_: Exception)
                 {
                 }
@@ -1022,11 +1024,11 @@ class MainActivity
             {
                 val toxpk = tox_friend_get_public_key(friend_number)
                 val message_timestamp = ts_sec * 1000
-                received_message_to_db(toxpk, message_timestamp, friend_message)
+                val msg_id_db = received_message_to_db(toxpk, message_timestamp, friend_message)
                 val friendnum = tox_friend_by_public_key(toxpk)
                 val fname = tox_friend_get_name(friendnum)
                 val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk)
-                messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(user = friend_user, timeMs = timestampMs(), text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
+                messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(msgDatabaseId = msg_id_db, user = friend_user, timeMs = timestampMs(), text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
             } catch (_: Exception)
             {
             }
@@ -1236,7 +1238,7 @@ class MainActivity
                 val friendnum = tox_friend_by_public_key(friend_pk)
                 val fname = tox_friend_get_name(friendnum)
                 val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = friend_pk)
-                messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(user = friend_user, timeMs = timestampMs(), text = m.text, toxpk = friend_pk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value, filename_fullpath = null)))
+                messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(msgDatabaseId = new_msg_id, user = friend_user, timeMs = timestampMs(), text = m.text, toxpk = friend_pk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value, filename_fullpath = null)))
             }
             Log.i(TAG, "file_recv:incoming regular file:999")
         }
@@ -1267,7 +1269,7 @@ class MainActivity
                 return
             }
 
-            if (length == 0L)
+            if (length == 0L) // FT finished
             {
                 try
                 {
@@ -1298,7 +1300,7 @@ class MainActivity
                         {
                             if (f.id != -1L)
                             {
-                                //*xxxxxxx*//HelperMessage.update_single_message_from_messge_id(msg_id, true)
+                                update_single_message_from_messge_id(msg_id, true)
                                 Log.i(TAG, "update FT ----==========>>> file DONE " + VFS_FILE_DIR + "/" + f.tox_public_key_string + "/" + f.file_name)
                             }
                         } catch (e: java.lang.Exception)
@@ -1342,7 +1344,7 @@ class MainActivity
                                 {
                                     if (f.id != -1L)
                                     {
-                                        //**// HelperMessage.update_single_message_from_ftid(f.id, true)
+                                        update_single_message_from_ftid(f.id, true)
                                         Log.i(TAG, "update FT ----==========>>> file pos=" + position + " " + VFS_FILE_DIR + "/" + f.tox_public_key_string + "/" + f.file_name)
                                     }
                                 } catch (e: java.lang.Exception)
@@ -1354,16 +1356,17 @@ class MainActivity
                     {
                         if ((f.current_position + UPDATE_MESSAGE_PROGRESS_AFTER_BYTES) < position)
                         {
-                            f.current_position = position // Log.i(TAG, "file_recv_chunk:filesize==:2:" + f.filesize);
+                            f.current_position = position
                             HelperFiletransfer.update_filetransfer_db_current_position(f)
                             if (f.kind != ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_AVATAR.value)
-                            { // update_all_messages_global(false);
+                            {
                                 try
                                 {
                                     if (f.id != -1L)
                                     {
                                         //**// HelperMessage.update_single_message_from_ftid(f.id, true)
                                         Log.i(TAG, "update FT ----==========>>> file pos=" + position + " " + VFS_FILE_DIR + "/" + f.tox_public_key_string + "/" + f.file_name)
+                                        update_single_message_from_ftid(f.id, true)
 
                                     }
                                 } catch (e: java.lang.Exception)
@@ -1373,8 +1376,7 @@ class MainActivity
                         }
                     }
                 } catch (e: java.lang.Exception)
-                { // e.printStackTrace();
-                    // Log.i(TAG, "file_recv_chunk:EE1:" + e.getMessage());
+                {
                 }
             }
         }
@@ -1650,7 +1652,7 @@ class MainActivity
             return add_tcp_relay_single(ip, key_hex, port.toLong())
         }
 
-        fun received_message_to_db(toxpk: String?, message_timestamp: Long, friend_message: String?)
+        fun received_message_to_db(toxpk: String?, message_timestamp: Long, friend_message: String?): Long
         {
             val m = com.zoffcc.applications.sorm.Message()
             m.is_new = false
@@ -1680,9 +1682,11 @@ class MainActivity
             } catch (e: Exception)
             {
             }
+
+            return row_id
         }
 
-        fun sent_message_to_db(toxpk: String?, message_timestamp: Long, friend_message: String?)
+        fun sent_message_to_db(toxpk: String?, message_timestamp: Long, friend_message: String?): Long
         {
             val m = com.zoffcc.applications.sorm.Message()
             m.is_new = false
@@ -1712,9 +1716,11 @@ class MainActivity
             } catch (e: Exception)
             {
             }
+
+            return row_id
         }
 
-        fun received_groupmessage_to_db(tox_peerpk: String, groupid: String, message_timestamp: Long, group_message: String?, message_id: Long)
+        fun received_groupmessage_to_db(tox_peerpk: String, groupid: String, message_timestamp: Long, group_message: String?, message_id: Long): Long
         {
             val message_id_hex = fourbytes_of_long_to_hex(message_id)
             val groupnum = tox_group_by_groupid__wrapper(groupid)
@@ -1742,9 +1748,11 @@ class MainActivity
             } catch (e: Exception)
             {
             }
+
+            return row_id
         }
 
-        fun sent_groupmessage_to_db(groupid: String, message_timestamp: Long, group_message: String?, message_id: Long)
+        fun sent_groupmessage_to_db(groupid: String, message_timestamp: Long, group_message: String?, message_id: Long): Long
         {
             val message_id_hex = fourbytes_of_long_to_hex(message_id)
             val groupnum = tox_group_by_groupid__wrapper(groupid)
@@ -1772,6 +1780,14 @@ class MainActivity
             } catch (e: Exception)
             {
             }
+
+            return row_id
+        }
+
+        @JvmStatic fun modify_message(message: Message)
+        {
+            Log.i(TAG, "modify_message m=" + message)
+            messagestore.send(MessageAction.UpdateMessage(message))
         }
     }
 }

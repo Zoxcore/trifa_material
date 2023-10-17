@@ -94,6 +94,7 @@ var closing_application = false
 private val prefs: Preferences = Preferences.userNodeForPackage(com.zoffcc.applications.trifa.PrefsSettings::class.java)
 val TOP_HEADER_SIZE = 56.dp
 val CONTACT_COLUMN_WIDTH = 230.dp
+val IMAGE_PREVIEW_SIZE = 140.dp
 
 @Composable
 @Preview
@@ -258,11 +259,11 @@ fun load_messages_for_friend(selectedContactPubkey: String?)
                         val friendnum = tox_friend_by_public_key(it.tox_friendpubkey.uppercase())
                         val fname = tox_friend_get_name(friendnum)
                         val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = selectedContactPubkey, color = ColorProvider.getColor(false))
-                        messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(user = friend_user, timeMs = it.rcvd_timestamp, text = it.text, toxpk = it.tox_friendpubkey.uppercase(), trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
+                        messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(msgDatabaseId = it.id, user = friend_user, timeMs = it.rcvd_timestamp, text = it.text, toxpk = it.tox_friendpubkey.uppercase(), trifaMsgType = it.TRIFA_MESSAGE_TYPE, filename_fullpath = it.filename_fullpath)))
                     }
                     1 ->
                     {
-                        messagestore.send(MessageAction.SendMessage(UIMessage(myUser, timeMs = it.sent_timestamp, it.text, toxpk = myUser.toxpk, trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
+                        messagestore.send(MessageAction.SendMessage(UIMessage(msgDatabaseId = it.id, user = myUser, timeMs = it.sent_timestamp, text = it.text, toxpk = myUser.toxpk, trifaMsgType = it.TRIFA_MESSAGE_TYPE, filename_fullpath = it.filename_fullpath)))
                     }
                     else ->
                     {

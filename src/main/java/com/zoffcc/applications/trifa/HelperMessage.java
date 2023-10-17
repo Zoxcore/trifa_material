@@ -5,6 +5,7 @@ import com.zoffcc.applications.sorm.Message;
 import java.nio.ByteBuffer;
 import java.util.List;
 
+import static com.zoffcc.applications.trifa.MainActivity.modify_message;
 import static com.zoffcc.applications.trifa.MainActivity.tox_friend_get_public_key;
 import static com.zoffcc.applications.trifa.ToxVars.TOX_HASH_LENGTH;
 import static com.zoffcc.applications.trifa.ToxVars.TOX_MESSAGE_TYPE.TOX_MESSAGE_TYPE_HIGH_LEVEL_ACK;
@@ -154,6 +155,65 @@ public class HelperMessage {
         {
             e.printStackTrace();
             Log.i(TAG, "set_message_filedb_from_friendnum_and_filenum:EE:" + e.getMessage());
+        }
+    }
+
+    public static void update_single_message_from_messge_id(final long message_id, final boolean force)
+    {
+        try
+        {
+            Thread t = new Thread()
+            {
+                @Override
+                public void run()
+                {
+                    if (message_id != -1)
+                    {
+                        try
+                        {
+                            Message m = TrifaToxService.Companion.getOrma().selectFromMessage().idEq(message_id).orderByIdDesc().toList().get(0);
+
+                            if (m.id != -1)
+                            {
+                                // if (force)
+                                {
+                                    modify_message(m);
+                                }
+                            }
+                        }
+                        catch (Exception e2)
+                        {
+                        }
+                    }
+                }
+            };
+            t.start();
+        }
+        catch (Exception e)
+        {
+            // e.printStackTrace();
+        }
+    }
+
+    public static void update_single_message_from_ftid(final long filetransfer_id, final boolean force)
+    {
+        try
+        {
+            Message m = TrifaToxService.Companion.getOrma().selectFromMessage().
+                    filetransfer_idEq(filetransfer_id).
+                    orderByIdDesc().toList().get(0);
+
+            if (m.id != -1)
+            {
+                // if (force)
+                {
+                    modify_message(m);
+                }
+            }
+        }
+        catch (Exception e2)
+        {
+            e2.printStackTrace();
         }
     }
 
