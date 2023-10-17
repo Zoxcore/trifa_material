@@ -89,7 +89,7 @@ object HelperGeneric {
             ret.rewind()
             return ret
         } catch (e: Exception) {
-            e.printStackTrace()
+            // e.printStackTrace()
         }
         return null
     }

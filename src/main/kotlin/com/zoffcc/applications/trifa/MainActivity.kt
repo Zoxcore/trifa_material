@@ -980,11 +980,16 @@ class MainActivity
                 try
                 { // ("msgv3:"+friend_message)
                     val toxpk = tox_friend_get_public_key(friend_number)!!.uppercase()
-                    val msg_id_db = received_message_to_db(toxpk, message_timestamp, friend_message)
+                    var timestamp_wrap: Long = message_timestamp * 1000
+                    if (timestamp_wrap == 0L)
+                    {
+                        timestamp_wrap = System.currentTimeMillis()
+                    }
+                    val msg_id_db = received_message_to_db(toxpk, timestamp_wrap, friend_message)
                     val friendnum = tox_friend_by_public_key(toxpk)
                     val fname = tox_friend_get_name(friendnum)
                     val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk)
-                    messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(msgDatabaseId =  msg_id_db, user = friend_user, timeMs = timestampMs(), text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
+                    messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(msgDatabaseId =  msg_id_db, user = friend_user, timeMs = timestamp_wrap, text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
                 } catch (_: Exception)
                 {
                 }
@@ -993,11 +998,16 @@ class MainActivity
                 try
                 { // ("msgv1:"+friend_message)
                     val toxpk = tox_friend_get_public_key(friend_number)
-                    val msg_id_db = received_message_to_db(toxpk, message_timestamp, friend_message)
+                    var timestamp_wrap: Long = message_timestamp * 1000
+                    if (timestamp_wrap == 0L)
+                    {
+                        timestamp_wrap = System.currentTimeMillis()
+                    }
+                    val msg_id_db = received_message_to_db(toxpk, timestamp_wrap, friend_message)
                     val friendnum = tox_friend_by_public_key(toxpk)
                     val fname = tox_friend_get_name(friendnum)
                     val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk)
-                    messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(msgDatabaseId =  msg_id_db,user = friend_user, timeMs = timestampMs(), text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
+                    messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(msgDatabaseId =  msg_id_db,user = friend_user, timeMs = timestamp_wrap, text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
                 } catch (_: Exception)
                 {
                 }
@@ -1028,7 +1038,7 @@ class MainActivity
                 val friendnum = tox_friend_by_public_key(toxpk)
                 val fname = tox_friend_get_name(friendnum)
                 val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk)
-                messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(msgDatabaseId = msg_id_db, user = friend_user, timeMs = timestampMs(), text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
+                messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(msgDatabaseId = msg_id_db, user = friend_user, timeMs = message_timestamp, text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
             } catch (_: Exception)
             {
             }
