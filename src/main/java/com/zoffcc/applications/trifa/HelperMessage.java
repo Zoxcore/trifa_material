@@ -1,12 +1,12 @@
 package com.zoffcc.applications.trifa;
 
+import com.zoffcc.applications.sorm.Filetransfer;
 import com.zoffcc.applications.sorm.Message;
 
 import java.nio.ByteBuffer;
 import java.util.List;
 
-import static com.zoffcc.applications.trifa.MainActivity.modify_message;
-import static com.zoffcc.applications.trifa.MainActivity.tox_friend_get_public_key;
+import static com.zoffcc.applications.trifa.MainActivity.*;
 import static com.zoffcc.applications.trifa.ToxVars.TOX_HASH_LENGTH;
 import static com.zoffcc.applications.trifa.ToxVars.TOX_MESSAGE_TYPE.TOX_MESSAGE_TYPE_HIGH_LEVEL_ACK;
 
@@ -163,56 +163,42 @@ public class HelperMessage {
         }
     }
 
-    public static void update_single_message_from_messge_id(final long message_id, final boolean force)
+    public static void update_single_message_from_messge_id(final long message_id, final long file_size, final boolean force)
     {
-        try
+        if (message_id != -1)
         {
-            Thread t = new Thread()
+            try
             {
-                @Override
-                public void run()
-                {
-                    if (message_id != -1)
-                    {
-                        try
-                        {
-                            Message m = TrifaToxService.Companion.getOrma().selectFromMessage().idEq(message_id).orderByIdDesc().toList().get(0);
+                Message m = TrifaToxService.Companion.getOrma().selectFromMessage().
+                        idEq(message_id).orderByIdDesc().toList().get(0);
 
-                            if (m.id != -1)
-                            {
-                                // if (force)
-                                {
-                                    modify_message(m);
-                                }
-                            }
-                        }
-                        catch (Exception e2)
-                        {
-                        }
+                if (m.id != -1)
+                {
+                    // if (force)
+                    {
+                        modify_message_with_finished_ft(m, file_size);
                     }
                 }
-            };
-            t.start();
-        }
-        catch (Exception e)
-        {
-            // e.printStackTrace();
+            }
+            catch (Exception e2)
+            {
+            }
         }
     }
 
-    public static void update_single_message_from_ftid(final long filetransfer_id, final boolean force)
+    public static void update_single_message_from_ftid(final Filetransfer ft, final boolean force)
     {
         try
         {
             Message m = TrifaToxService.Companion.getOrma().selectFromMessage().
-                    filetransfer_idEq(filetransfer_id).
+                    filetransfer_idEq(ft.id).
                     orderByIdDesc().toList().get(0);
 
             if (m.id != -1)
             {
                 // if (force)
                 {
-                    modify_message(m);
+                    modify_message_with_ft(m, ft);
                 }
             }
         }

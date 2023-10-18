@@ -1,7 +1,6 @@
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 
@@ -34,6 +33,24 @@ fun CoroutineScope.createMessageStore(): MessageStore
                 if (action is MessageAction.ReceiveMessage)
                 {
                     if (contactstore.state.selectedContactPubkey == action.message.toxpk)
+                    {
+                        channel.send(action)
+                    }
+                } else if (action is MessageAction.UpdateMessage)
+                {
+                    if (contactstore.state.selectedContactPubkey == action.message_db.tox_friendpubkey)
+                    {
+                        channel.send(action)
+                    }
+                } else if (action is MessageAction.ReceiveMessagesBulk)
+                {
+                    if (contactstore.state.selectedContactPubkey == action.toxpk)
+                    {
+                        channel.send(action)
+                    }
+                } else if (action is MessageAction.SendMessagesBulk)
+                {
+                    if (contactstore.state.selectedContactPubkey == action.toxpk)
                     {
                         channel.send(action)
                     }

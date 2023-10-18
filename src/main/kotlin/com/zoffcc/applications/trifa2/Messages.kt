@@ -24,8 +24,14 @@ internal fun Messages(messages: List<UIMessage>) {
     val listState = rememberLazyListState()
     if (messages.isNotEmpty()) {
         LaunchedEffect(messages.last()) {
-            // listState.animateScrollToItem(messages.lastIndex, scrollOffset = 2)
-            listState.scrollToItem(messages.lastIndex, scrollOffset = 2)
+            try
+            {
+                // listState.animateScrollToItem(messages.lastIndex, scrollOffset = 0)
+                listState.scrollToItem(messages.lastIndex, scrollOffset = 2)
+            }
+            catch (e : Exception)
+            {
+            }
         }
     }
     Box(Modifier.fillMaxSize()) {
@@ -36,7 +42,7 @@ internal fun Messages(messages: List<UIMessage>) {
         ) {
             item { Spacer(Modifier.size(20.dp)) }
             items(messages, key = { it.id }) {
-                ChatMessage(isMyMessage = it.user == myUser, it)
+                ChatMessage(isMyMessage = (it.user == myUser), it)
             }
             item {
                 Box(Modifier.height(70.dp))

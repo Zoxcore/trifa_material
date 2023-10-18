@@ -44,6 +44,7 @@ import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import contactstore
 import groupmessagestore
 import groupstore
+import kotlinx.coroutines.DelicateCoroutinesApi
 import lock_data_dir_input
 import messagestore
 import org.briarproject.briar.desktop.contact.ContactItem
@@ -962,7 +963,7 @@ class MainActivity
         @JvmStatic
         fun android_tox_callback_friend_message_cb_method(friend_number: Long, message_type: Int, friend_message: String?, length: Long, msgV3hash_bin: ByteArray?, message_timestamp: Long)
         {
-            Log.i(TAG, "android_tox_callback_friend_message_cb_method: fn=" + friend_number + " friend_message=" + friend_message)
+            // Log.i(TAG, "android_tox_callback_friend_message_cb_method: fn=" + friend_number + " friend_message=" + friend_message)
             var msgV3hash_hex_string: String? = null
             if (msgV3hash_bin != null)
             {
@@ -989,7 +990,7 @@ class MainActivity
                     val friendnum = tox_friend_by_public_key(toxpk)
                     val fname = tox_friend_get_name(friendnum)
                     val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk)
-                    messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(msgDatabaseId =  msg_id_db, user = friend_user, timeMs = timestamp_wrap, text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
+                    messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(msgDatabaseId = msg_id_db, user = friend_user, timeMs = timestamp_wrap, text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
                 } catch (_: Exception)
                 {
                 }
@@ -1007,7 +1008,7 @@ class MainActivity
                     val friendnum = tox_friend_by_public_key(toxpk)
                     val fname = tox_friend_get_name(friendnum)
                     val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk)
-                    messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(msgDatabaseId =  msg_id_db,user = friend_user, timeMs = timestamp_wrap, text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
+                    messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(msgDatabaseId = msg_id_db, user = friend_user, timeMs = timestamp_wrap, text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
                 } catch (_: Exception)
                 {
                 }
@@ -1063,7 +1064,7 @@ class MainActivity
             msg_id_buffer.put(msg_id, 0, TOX_HASH_LENGTH)
             val msg_id_buffer_compat = ByteBufferCompat(msg_id_buffer)
             val message_id_hash_as_hex_string = bytesToHex(msg_id_buffer_compat.array()!!, msg_id_buffer_compat.arrayOffset(), msg_id_buffer_compat.limit())
-            Log.i(TAG, "receipt_message_v2_cb:MSGv2HASH:2=" + message_id_hash_as_hex_string);
+            // Log.i(TAG, "receipt_message_v2_cb:MSGv2HASH:2=" + message_id_hash_as_hex_string);
         }
 
         @JvmStatic
@@ -1310,7 +1311,7 @@ class MainActivity
                         {
                             if (f.id != -1L)
                             {
-                                update_single_message_from_messge_id(msg_id, true)
+                                update_single_message_from_messge_id(msg_id, f.filesize, true)
                                 Log.i(TAG, "update FT ----==========>>> file DONE " + VFS_FILE_DIR + "/" + f.tox_public_key_string + "/" + f.file_name)
                             }
                         } catch (e: java.lang.Exception)
@@ -1354,7 +1355,7 @@ class MainActivity
                                 {
                                     if (f.id != -1L)
                                     {
-                                        update_single_message_from_ftid(f.id, true)
+                                        update_single_message_from_ftid(f, true)
                                         Log.i(TAG, "update FT ----==========>>> file pos=" + position + " " + VFS_FILE_DIR + "/" + f.tox_public_key_string + "/" + f.file_name)
                                     }
                                 } catch (e: java.lang.Exception)
@@ -1373,10 +1374,9 @@ class MainActivity
                                 try
                                 {
                                     if (f.id != -1L)
-                                    {
-                                        //**// HelperMessage.update_single_message_from_ftid(f.id, true)
+                                    { //**// HelperMessage.update_single_message_from_ftid(f.id, true)
                                         Log.i(TAG, "update FT ----==========>>> file pos=" + position + " " + VFS_FILE_DIR + "/" + f.tox_public_key_string + "/" + f.file_name)
-                                        update_single_message_from_ftid(f.id, true)
+                                        update_single_message_from_ftid(f, true)
 
                                     }
                                 } catch (e: java.lang.Exception)
@@ -1447,6 +1447,7 @@ class MainActivity
         // -------- called by native new Group methods --------
         // -------- called by native new Group methods --------
         // -------- called by native new Group methods --------
+        @OptIn(DelicateCoroutinesApi::class)
         @JvmStatic
         fun android_tox_callback_group_message_cb_method(group_number: Long, peer_id: Long, a_TOX_MESSAGE_TYPE: Int, message_orig: String?, length: Long, message_id: Long)
         {
@@ -1455,6 +1456,7 @@ class MainActivity
             { // do not process our own sent group messages (again)
                 return
             }
+
             val group_id = tox_group_by_groupnum__wrapper(group_number).lowercase()
             val tox_peerpk = tox_group_peer_get_public_key(group_number, peer_id)!!.uppercase()
             val message_timestamp = System.currentTimeMillis()
@@ -1462,7 +1464,6 @@ class MainActivity
             val peernum = tox_group_peer_by_public_key(group_number, tox_peerpk)
             val fname = tox_group_peer_get_name(group_number, peernum)
             val peer_user = User(fname + " / " + PubkeyShort(tox_peerpk), picture = "friend_avatar.png", toxpk = tox_peerpk.uppercase(), color = ColorProvider.getColor(true, tox_peerpk.uppercase()))
-
             groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(UIGroupMessage(peer_user, timeMs = message_timestamp, message_orig!!, toxpk = tox_peerpk, groupId = group_id!!.lowercase(), trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
         }
 
@@ -1794,10 +1795,15 @@ class MainActivity
             return row_id
         }
 
-        @JvmStatic fun modify_message(message: Message)
+        @JvmStatic fun modify_message_with_ft(message: Message, filetransfer: Filetransfer)
         {
-            Log.i(TAG, "modify_message m=" + message)
-            messagestore.send(MessageAction.UpdateMessage(message))
+            messagestore.send(MessageAction.UpdateMessage(message, filetransfer))
+        }
+
+        @JvmStatic fun modify_message_with_finished_ft(message: Message, file_size: Long)
+        {
+            Log.i(TAG, "modify_message:filename_fullpath=" + message.filename_fullpath)
+            messagestore.send(MessageAction.UpdateMessage(message, Filetransfer().filesize(file_size)))
         }
     }
 }

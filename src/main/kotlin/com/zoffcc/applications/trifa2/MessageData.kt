@@ -10,6 +10,8 @@ data class UIMessage private constructor(
     val toxpk: String?,
     val trifaMsgType: Int,
     val msgDatabaseId: Long,
+    val filesize: Long = 0L,
+    val currentfilepos: Long = 0L,
     val filename_fullpath: String?
 ) {
     constructor(
@@ -19,6 +21,8 @@ data class UIMessage private constructor(
         toxpk: String?,
         trifaMsgType: Int,
         msgDatabaseId: Long,
+        filesize: Long = 0L,
+        currentfilepos: Long = 0L,
         filename_fullpath: String?
     ) : this(
         user = user,
@@ -28,6 +32,8 @@ data class UIMessage private constructor(
         msgDatabaseId = msgDatabaseId,
         toxpk = toxpk,
         trifaMsgType = trifaMsgType,
+        filesize = filesize,
+        currentfilepos = currentfilepos,
         filename_fullpath = filename_fullpath
     )
 }
