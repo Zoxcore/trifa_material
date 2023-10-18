@@ -1,6 +1,7 @@
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,8 +24,13 @@ import androidx.compose.material.icons.filled.Downloading
 import androidx.compose.material.icons.filled.FileDownloadDone
 import androidx.compose.material.icons.filled.OfflineBolt
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,6 +52,7 @@ import com.zoffcc.applications.trifa.HelperOSFile
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.TRIFAGlobals.TRIFA_MSG_TYPE
 import java.io.File
+import kotlin.random.Random
 
 @Composable
 fun Triangle(risingToTheRight: Boolean, background: Color) {
@@ -58,13 +65,20 @@ fun Triangle(risingToTheRight: Boolean, background: Color) {
     )
 }
 
+fun randomColor() = Color(
+    Random.nextInt(256),
+    Random.nextInt(256),
+    Random.nextInt(256),
+    alpha = 255
+)
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage) {
     val TAG = "trifa.ChatMessage"
     Box(
         modifier = Modifier.fillMaxWidth(),
-        contentAlignment = if (isMyMessage) Alignment.CenterEnd else Alignment.CenterStart
+        contentAlignment = if (isMyMessage) Alignment.CenterEnd else Alignment.CenterStart,
     ) {
 
         Row(verticalAlignment = Alignment.Bottom) {
@@ -116,43 +130,52 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage) {
                                 )
                             )
                         }
-                        // Log.i(TAG, "message.trifaMsgType = " + message.trifaMsgType + " " + message.filename_fullpath)
                         if (message.trifaMsgType == TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value)
                         {
-                            if (message.filename_fullpath != null)
+                            if ((message.filesize > 0.0f) && (message.currentfilepos < message.filesize))
                             {
-                                if (check_filename_is_image(message.filename_fullpath))
+                                LinearProgressIndicator(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    progress = (message.currentfilepos.toFloat() / message.filesize.toFloat())
+                                )
+                            }
+                            else
+                            {
+                                if (message.filename_fullpath != null)
                                 {
-                                    HelperGeneric.AsyncImage(load = {
-                                        HelperGeneric.loadImageBitmap(File(message.filename_fullpath))
-                                    }, painterFor = { remember { BitmapPainter(it) } },
-                                        contentDescription = "Image",
-                                        modifier = Modifier.size(IMAGE_PREVIEW_SIZE).
-                                        combinedClickable(
-                                            onClick = { HelperOSFile.show_containing_dir_in_explorer(message.filename_fullpath) },
-                                            onLongClick = {}))
+                                    if (check_filename_is_image(message.filename_fullpath))
+                                    {
+                                        HelperGeneric.AsyncImage(load = {
+                                            HelperGeneric.loadImageBitmap(File(message.filename_fullpath))
+                                        }, painterFor = { remember { BitmapPainter(it) } },
+                                            contentDescription = "Image",
+                                            modifier = Modifier.size(IMAGE_PREVIEW_SIZE).
+                                            combinedClickable(
+                                                onClick = { HelperOSFile.show_containing_dir_in_explorer(message.filename_fullpath) },
+                                                onLongClick = {}))
+                                    }
+                                    else
+                                    {
+                                        Icon(
+                                            modifier = Modifier.size(IMAGE_PREVIEW_SIZE).
+                                            combinedClickable(
+                                                onClick = { HelperOSFile.show_containing_dir_in_explorer(message.filename_fullpath) },
+                                                onLongClick = {}),
+                                            imageVector = Icons.Default.Attachment,
+                                            contentDescription = "File",
+                                            tint = MaterialTheme.colors.primary
+                                        )
+                                    }
                                 }
                                 else
                                 {
                                     Icon(
-                                        modifier = Modifier.size(IMAGE_PREVIEW_SIZE).
-                                        combinedClickable(
-                                            onClick = { HelperOSFile.show_containing_dir_in_explorer(message.filename_fullpath) },
-                                            onLongClick = {}),
-                                        imageVector = Icons.Default.Attachment,
-                                        contentDescription = "File",
+                                        modifier = Modifier.size(IMAGE_PREVIEW_SIZE),
+                                        imageVector = Icons.Default.BrokenImage,
+                                        contentDescription = "failed",
                                         tint = MaterialTheme.colors.primary
                                     )
                                 }
-                            }
-                            else
-                            {
-                                Icon(
-                                    modifier = Modifier.size(IMAGE_PREVIEW_SIZE),
-                                    imageVector = Icons.Default.BrokenImage,
-                                    contentDescription = "failed",
-                                    tint = MaterialTheme.colors.primary
-                                )
                             }
                         }
                         Spacer(Modifier.size(4.dp))

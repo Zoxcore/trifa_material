@@ -30,8 +30,14 @@ internal fun GroupMessages(groupmessages: List<UIGroupMessage>) {
     val listState = rememberLazyListState()
     if (groupmessages.isNotEmpty()) {
         LaunchedEffect(groupmessages.last()) {
-            // listState.animateScrollToItem(groupmessages.lastIndex, scrollOffset = 2)
-            listState.scrollToItem(groupmessages.lastIndex, scrollOffset = 2)
+            try
+            {
+                // listState.animateScrollToItem(groupmessages.lastIndex, scrollOffset = 0)
+                listState.scrollToItem(groupmessages.lastIndex, scrollOffset = 2)
+            }
+            catch (e : Exception)
+            {
+            }
         }
     }
     Box(Modifier.fillMaxSize()) {

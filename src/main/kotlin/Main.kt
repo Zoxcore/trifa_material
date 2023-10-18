@@ -84,6 +84,7 @@ import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import java.awt.Toolkit
 import java.util.*
 import java.util.prefs.Preferences
+import kotlin.collections.ArrayList
 
 private const val TAG = "trifa.Main.kt"
 var tox_running_state_wrapper = "start"
@@ -250,7 +251,9 @@ fun load_messages_for_friend(selectedContactPubkey: String?)
     {
         try
         {
-            val messages = orma!!.selectFromMessage().tox_friendpubkeyEq(selectedContactPubkey.uppercase()).orderBySent_timestampAsc().toList()
+            val toxk = selectedContactPubkey.uppercase()
+            val uimessages = ArrayList<UIMessage>()
+            val messages = orma!!.selectFromMessage().tox_friendpubkeyEq(toxk).orderBySent_timestampAsc().toList()
             messages.forEach() { // 0 -> msg received, 1 -> msg sent
                 when (it.direction)
                 {
@@ -259,19 +262,21 @@ fun load_messages_for_friend(selectedContactPubkey: String?)
                         val friendnum = tox_friend_by_public_key(it.tox_friendpubkey.uppercase())
                         val fname = tox_friend_get_name(friendnum)
                         val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = selectedContactPubkey, color = ColorProvider.getColor(false))
-                        messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(msgDatabaseId = it.id, user = friend_user, timeMs = it.rcvd_timestamp, text = it.text, toxpk = it.tox_friendpubkey.uppercase(), trifaMsgType = it.TRIFA_MESSAGE_TYPE, filename_fullpath = it.filename_fullpath)))
+                        uimessages.add(UIMessage(msgDatabaseId = it.id, user = friend_user, timeMs = it.rcvd_timestamp, text = it.text, toxpk = it.tox_friendpubkey.uppercase(), trifaMsgType = it.TRIFA_MESSAGE_TYPE, filename_fullpath = it.filename_fullpath))
                     }
                     1 ->
                     {
-                        messagestore.send(MessageAction.SendMessage(UIMessage(msgDatabaseId = it.id, user = myUser, timeMs = it.sent_timestamp, text = it.text, toxpk = myUser.toxpk, trifaMsgType = it.TRIFA_MESSAGE_TYPE, filename_fullpath = it.filename_fullpath)))
+                        uimessages.add(UIMessage(msgDatabaseId = it.id, user = myUser, timeMs = it.sent_timestamp, text = it.text, toxpk = myUser.toxpk, trifaMsgType = it.TRIFA_MESSAGE_TYPE, filename_fullpath = it.filename_fullpath))
                     }
                     else ->
                     {
                     }
                 }
             }
+            messagestore.send(MessageAction.ReceiveMessagesBulk(uimessages, toxk))
         } catch (e: Exception)
         {
+            e.printStackTrace()
         }
     }
 }
