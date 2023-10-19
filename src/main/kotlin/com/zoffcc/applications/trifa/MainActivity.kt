@@ -37,6 +37,7 @@ import com.zoffcc.applications.trifa.TRIFAGlobals.UPDATE_MESSAGE_PROGRESS_AFTER_
 import com.zoffcc.applications.trifa.TRIFAGlobals.UPDATE_MESSAGE_PROGRESS_SMALL_FILE_IS_LESS_THAN_BYTES
 import com.zoffcc.applications.trifa.TRIFAGlobals.VFS_FILE_DIR
 import com.zoffcc.applications.trifa.TRIFAGlobals.VFS_TMP_FILE_DIR
+import com.zoffcc.applications.trifa.TRIFAGlobals.global_last_activity_outgoung_ft_ts
 import com.zoffcc.applications.trifa.ToxVars.TOX_FILE_ID_LENGTH
 import com.zoffcc.applications.trifa.ToxVars.TOX_HASH_LENGTH
 import com.zoffcc.applications.trifa.ToxVars.TOX_MAX_NGC_FILE_AND_HEADER_SIZE
@@ -1135,6 +1136,7 @@ class MainActivity
         @JvmStatic
         fun android_tox_callback_file_chunk_request_cb_method(friend_number: Long, file_number: Long, position: Long, length: Long)
         {
+            global_last_activity_outgoung_ft_ts = System.currentTimeMillis();
         }
 
         @JvmStatic
@@ -1257,6 +1259,7 @@ class MainActivity
         @JvmStatic
         fun android_tox_callback_file_recv_chunk_cb_method(friend_number: Long, file_number: Long, position: Long, data: ByteArray?, length: Long)
         {
+            global_last_activity_outgoung_ft_ts = System.currentTimeMillis();
             val friend_pk = tox_friend_get_public_key(friend_number)
             var f: Filetransfer? = null
 
