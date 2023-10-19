@@ -19,6 +19,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_iteration_interv
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_kill
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_friend_list
 import com.zoffcc.applications.trifa.TRIFAGlobals.GROUP_ID_LENGTH
+import com.zoffcc.applications.trifa.TRIFAGlobals.global_last_activity_outgoung_ft_ts
 import contactstore
 import groupstore
 import org.briarproject.briar.desktop.contact.ContactItem
@@ -75,7 +76,16 @@ class TrifaToxService
                 {
                     try
                     {
-                        sleep(tox_iteration_interval_ms)
+
+                        if ((global_last_activity_outgoung_ft_ts > -1) && ((global_last_activity_outgoung_ft_ts + 200) > System.currentTimeMillis()))
+                        {
+                            // HINT: iterate much faster if there are active filetransfers
+                            sleep(0, 250)
+                        }
+                        else
+                        {
+                            sleep(tox_iteration_interval_ms)
+                        }
                     } catch (e: InterruptedException)
                     {
                         e.printStackTrace()
