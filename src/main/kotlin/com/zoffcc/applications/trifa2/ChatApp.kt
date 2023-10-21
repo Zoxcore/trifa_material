@@ -2,6 +2,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ProvideTextStyle
@@ -16,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
 import com.zoffcc.applications.trifa.MainActivity
@@ -56,6 +58,7 @@ fun ChatAppWithScaffold(displayTextField: Boolean = true, contactList: StateCont
                     contactList.selectedContact?.let { Text(it.name) }
                 },
                 backgroundColor = MaterialTheme.colors.background,
+                modifier = Modifier.height(40.dp)
             )
         }) {
             ChatApp(displayTextField = displayTextField, contactList.selectedContactPubkey, ui_scale)
@@ -73,6 +76,7 @@ fun GroupAppWithScaffold(displayTextField: Boolean = true, groupList: StateGroup
                     groupList.selectedGroup?.let { Text(it.name) }
                 },
                 backgroundColor = MaterialTheme.colors.background,
+                modifier = Modifier.height(40.dp)
             )
         }) {
             GroupApp(displayTextField = displayTextField, groupList.selectedGroupId, ui_scale)
