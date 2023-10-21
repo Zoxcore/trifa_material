@@ -206,18 +206,21 @@ fun App()
                         }
                     }
                     SaveDataPath()
-                    ToxIDTextField()
-                    DetailItem(label = i18n("UI Scale"), description = "${i18n("current_value:")}: " + " " + ui_scale + ", " + i18n("drag Slider to change")) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(2.dp), verticalAlignment = Alignment.CenterVertically, modifier = Modifier.width(200.dp)) {
-                            Icon(Icons.Default.FormatSize, null, Modifier.scale(0.7f))
-                            Slider(value = ui_scale, onValueChange = {
-                                ui_scale = it
-                                prefs.putFloat("main.ui_scale_factor", ui_scale)
-                                Log.i(TAG, "density: $ui_scale")
-                            }, onValueChangeFinished = { }, valueRange = 0.6f..3f, steps = 6, // todo: without setting the width explicitly,
-                                //  the slider takes up the whole remaining space
-                                modifier = Modifier.width(150.dp))
-                            Icon(Icons.Default.FormatSize, null)
+                    Row(Modifier.wrapContentHeight(), Arrangement.spacedBy(5.dp)) {
+                        ToxIDTextField()
+                        Spacer(Modifier.size(100.dp))
+                        DetailItem(label = i18n("UI Scale"), description = "${i18n("current_value:")}: " + " " + ui_scale + ", " + i18n("drag Slider to change")) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(2.dp), verticalAlignment = Alignment.CenterVertically, modifier = Modifier.width(200.dp)) {
+                                Icon(Icons.Default.FormatSize, null, Modifier.scale(0.7f))
+                                Slider(value = ui_scale, onValueChange = {
+                                    ui_scale = it
+                                    prefs.putFloat("main.ui_scale_factor", ui_scale)
+                                    Log.i(TAG, "density: $ui_scale")
+                                }, onValueChangeFinished = { }, valueRange = 0.6f..3f, steps = 6, // todo: without setting the width explicitly,
+                                    //  the slider takes up the whole remaining space
+                                    modifier = Modifier.width(150.dp))
+                                Icon(Icons.Default.FormatSize, null)
+                            }
                         }
                     }
                     when (uiMode)
