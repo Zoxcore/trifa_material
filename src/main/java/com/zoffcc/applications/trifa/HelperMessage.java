@@ -88,11 +88,11 @@ public class HelperMessage {
         }
     }
 
-    public static void set_message_state_from_id(long message_id, int state)
+    public static void set_message_state_from_id(long mid, int state)
     {
         try
         {
-            TrifaToxService.Companion.getOrma().updateMessage().idEq(message_id).state(state).execute();
+            TrifaToxService.Companion.getOrma().updateMessage().idEq(mid).state(state).execute();
             // Log.i(TAG, "set_message_state_from_id:message_id=" + message_id + " state=" + state);
         }
         catch (Exception e)
@@ -124,11 +124,11 @@ public class HelperMessage {
         }
     }
 
-    public static void set_message_filedb_from_id(long message_id, long filedb_id)
+    public static void set_message_filedb_from_id(long mid, long filedb_id)
     {
         try
         {
-            TrifaToxService.Companion.getOrma().updateMessage().idEq(message_id).filedb_id(filedb_id).execute();
+            TrifaToxService.Companion.getOrma().updateMessage().idEq(mid).filedb_id(filedb_id).execute();
             // Log.i(TAG, "set_message_filedb_from_id:message_id=" + message_id + " filedb_id=" + filedb_id);
         }
         catch (Exception e)
@@ -163,14 +163,14 @@ public class HelperMessage {
         }
     }
 
-    public static void update_single_message_from_messge_id(final long message_id, final long file_size, final boolean force)
+    public static void update_single_message_from_messge_id(final long mid, final long file_size, final boolean force)
     {
-        if (message_id != -1)
+        if (mid != -1)
         {
             try
             {
                 Message m = TrifaToxService.Companion.getOrma().selectFromMessage().
-                        idEq(message_id).orderByIdDesc().toList().get(0);
+                        idEq(mid).orderByIdDesc().toList().get(0);
 
                 if (m.id != -1)
                 {
@@ -208,4 +208,16 @@ public class HelperMessage {
         }
     }
 
+    public static void set_message_queueing_from_id(long mid, boolean ft_outgoing_queued)
+    {
+        try
+        {
+            TrifaToxService.Companion.getOrma().updateMessage().idEq(mid).ft_outgoing_queued(ft_outgoing_queued).execute();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            Log.i(TAG, "set_message_start_queueing_from_id:EE:" + e.getMessage());
+        }
+    }
 }

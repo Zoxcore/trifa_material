@@ -59,7 +59,7 @@ fun GroupTriangle(risingToTheRight: Boolean, background: Color) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage) {
+inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, ui_scale: Float) {
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = if (isMyMessage) Alignment.CenterEnd else Alignment.CenterStart
@@ -68,7 +68,7 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage) 
         Row(verticalAlignment = Alignment.Bottom) {
             if (!isMyMessage) {
                 Column {
-                    PeerPic(groupmessage.user)
+                    PeerPic(groupmessage.user, ui_scale)
                 }
                 Spacer(Modifier.size(2.dp))
                 Column {
@@ -109,7 +109,7 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage) 
                             Text(
                                 text = groupmessage.text,
                                 style = MaterialTheme.typography.body1.copy(
-                                    fontSize = 18.sp,
+                                    fontSize = ((14.0 * ui_scale) as Double).sp,
                                     letterSpacing = 0.sp
                                 )
                             )
@@ -124,7 +124,7 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage) 
                                         loadImageBitmap(File(groupmessage.filename_fullpath))
                                     }, painterFor = { remember { BitmapPainter(it) } },
                                         contentDescription = "Image",
-                                        modifier = Modifier.size(IMAGE_PREVIEW_SIZE).
+                                        modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp).
                                         combinedClickable(
                                             onClick = { HelperOSFile.show_containing_dir_in_explorer(groupmessage.filename_fullpath) },
                                             onLongClick = {}))
@@ -132,7 +132,7 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage) 
                                 else
                                 {
                                     Icon(
-                                        modifier = Modifier.size(IMAGE_PREVIEW_SIZE).
+                                        modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp).
                                         combinedClickable(
                                             onClick = { show_containing_dir_in_explorer(groupmessage.filename_fullpath) },
                                             onLongClick = {}),
@@ -145,7 +145,7 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage) 
                             else
                             {
                                 Icon(
-                                    modifier = Modifier.size(IMAGE_PREVIEW_SIZE),
+                                    modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp),
                                     imageVector = Icons.Default.BrokenImage,
                                     contentDescription = "failed",
                                     tint = MaterialTheme.colors.primary

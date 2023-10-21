@@ -30,6 +30,7 @@ fun CoroutineScope.createMessageStore(): MessageStore
         override fun send(action: MessageAction)
         {
             launch {
+                global_semaphore_messagelist_ui.acquire()
                 if (action is MessageAction.ReceiveMessage)
                 {
                     if (contactstore.state.selectedContactPubkey == action.message.toxpk)
@@ -58,6 +59,7 @@ fun CoroutineScope.createMessageStore(): MessageStore
                 {
                     channel.send(action)
                 }
+                global_semaphore_messagelist_ui.release()
             }
         }
 

@@ -1,10 +1,10 @@
 package com.zoffcc.applications.trifa
 
+import com.zoffcc.applications.sorm.ConferenceMessage
+import global_semaphore_contactlist_ui
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 import org.briarproject.briar.desktop.contact.ContactItem
 
@@ -26,7 +26,7 @@ interface ContactStore
 fun CoroutineScope.createContactStore(): ContactStore
 {
     val mutableStateFlow = MutableStateFlow(StateContacts())
-    val channel: Channel<ContactItem> = Channel(Channel.UNLIMITED)
+    // val channel: Channel<ContactItem> = Channel(Channel.UNLIMITED)
 
     return object : ContactStore
     {
@@ -34,16 +34,17 @@ fun CoroutineScope.createContactStore(): ContactStore
 
         init
         {
-            launch {
-                channel.consumeAsFlow().collect { item ->
-                    mutableStateFlow.value = state.copy(contacts = (state.contacts + item))
-                }
-            }
+            //launch {
+            //    channel.consumeAsFlow().collect { item ->
+            //        mutableStateFlow.value = state.copy(contacts = (state.contacts + item))
+            //    }
+            //}
         }
 
         override fun add(item: ContactItem)
         {
             launch {
+                global_semaphore_contactlist_ui.acquire()
                 var found = false
                 state.contacts.forEach {
                     if (item.pubkey == it.pubkey)
@@ -53,27 +54,60 @@ fun CoroutineScope.createContactStore(): ContactStore
                 }
                 if (!found)
                 {
-                    channel.send(item)
+                    var new_contacts: ArrayList<ContactItem> = ArrayList()
+                    new_contacts.addAll(state.contacts)
+                    new_contacts.forEach { item2 ->
+                        if (item2.pubkey == item.pubkey)
+                        {
+                            new_contacts.remove(item2)
+                        }
+                    }
+                    new_contacts.add(item)
+                    mutableStateFlow.value = state.copy(contacts = new_contacts)
                 }
+                global_semaphore_contactlist_ui.release()
             }
         }
 
         override fun remove(item: ContactItem)
         {
             launch {
-                var found = false
+                global_semaphore_contactlist_ui.acquire()
+                var sel_pubkey = state.selectedContactPubkey
+                var sel_item = state.selectedContact
+                var new_contacts: ArrayList<ContactItem> = ArrayList()
+                new_contacts.addAll(state.contacts)
+                var to_remove_item: ContactItem? = null
                 state.contacts.forEach {
                     if (item.pubkey == it.pubkey)
                     {
-                        mutableStateFlow.value = state.copy(contacts = (state.contacts - item))
+                        if (state.selectedContactPubkey == it.pubkey)
+                        {
+                            sel_pubkey = null
+                            sel_item = null
+                        }
+                        new_contacts.forEach { item2 ->
+                            if (item2.pubkey == it.pubkey)
+                            {
+                                to_remove_item = item2
+                            }
+                        }
                     }
                 }
+                if (to_remove_item != null)
+                {
+                    new_contacts.remove(to_remove_item)
+                }
+                mutableStateFlow.value = state.copy(contacts = new_contacts,
+                    selectedContact = sel_item, selectedContactPubkey = sel_pubkey)
+                global_semaphore_contactlist_ui.release()
             }
         }
 
         override fun select(pubkey: String?)
         {
             launch {
+                global_semaphore_contactlist_ui.acquire()
                 var wanted_contact_item: ContactItem? = null
                 state.contacts.forEach {
                     if (pubkey == it.pubkey)
@@ -87,12 +121,14 @@ fun CoroutineScope.createContactStore(): ContactStore
                     used_pubkey = null
                 }
                 mutableStateFlow.value = state.copy(contacts = state.contacts, selectedContactPubkey = used_pubkey, selectedContact = wanted_contact_item)
+                global_semaphore_contactlist_ui.release()
             }
         }
 
         override fun update(item: ContactItem)
         {
             launch {
+                global_semaphore_contactlist_ui.acquire()
                 var update_item: ContactItem? = null
                 state.contacts.forEach {
                     if (item.pubkey == it.pubkey)
@@ -102,18 +138,35 @@ fun CoroutineScope.createContactStore(): ContactStore
                 }
                 if (update_item != null)
                 {
-                    mutableStateFlow.value = state.copy(contacts = (state.contacts + item - update_item!!), selectedContactPubkey = state.selectedContactPubkey, selectedContact = state.selectedContact)
+                    var new_contacts: ArrayList<ContactItem> = ArrayList()
+                    new_contacts.addAll(state.contacts)
+                    var to_remove_item: ContactItem? = null
+                    new_contacts.forEach { item2 ->
+                        if (item2.pubkey == update_item!!.pubkey)
+                        {
+                            to_remove_item = item2
+                        }
+                    }
+                    if (to_remove_item != null)
+                    {
+                        new_contacts.remove(to_remove_item)
+                    }
+                    new_contacts.add(item)
+                    mutableStateFlow.value = state.copy(contacts = new_contacts, selectedContactPubkey = state.selectedContactPubkey, selectedContact = state.selectedContact)
                 } else
                 {
                     mutableStateFlow.value = state.copy(contacts = (state.contacts + item), selectedContactPubkey = state.selectedContactPubkey, selectedContact = state.selectedContact)
                 }
+                global_semaphore_contactlist_ui.release()
             }
         }
 
         override fun clear()
         {
             launch {
+                global_semaphore_contactlist_ui.acquire()
                 mutableStateFlow.value = state.copy(contacts = emptyList(), selectedContactPubkey = null, selectedContact = null)
+                global_semaphore_contactlist_ui.release()
             }
         }
     }

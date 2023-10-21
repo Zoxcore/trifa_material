@@ -40,7 +40,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -67,13 +66,11 @@ import com.zoffcc.applications.trifa.TrifaToxService
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.briarproject.briar.desktop.contact.ContactList
 import org.briarproject.briar.desktop.contact.GroupList
@@ -88,8 +85,8 @@ import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import java.awt.Toolkit
 import java.util.*
 import java.util.concurrent.Executors
+import java.util.concurrent.Semaphore
 import java.util.prefs.Preferences
-import kotlin.collections.ArrayList
 
 private const val TAG = "trifa.Main.kt"
 var tox_running_state_wrapper = "start"
@@ -100,8 +97,14 @@ var closing_application = false
 private val prefs: Preferences = Preferences.userNodeForPackage(com.zoffcc.applications.trifa.PrefsSettings::class.java)
 val TOP_HEADER_SIZE = 56.dp
 val CONTACT_COLUMN_WIDTH = 230.dp
-val IMAGE_PREVIEW_SIZE = 140.dp
+val IMAGE_PREVIEW_SIZE = 70f
+val AVATAR_SIZE = 40f
+val MAX_AVATAR_SIZE = 70f
 val ImageloaderDispatcher = Executors.newFixedThreadPool(5).asCoroutineDispatcher()
+var global_semaphore_contactlist_ui = Semaphore(1)
+var global_semaphore_grouplist_ui = Semaphore(1)
+var global_semaphore_messagelist_ui = Semaphore(1)
+var global_semaphore_groupmessagelist_ui = Semaphore(1)
 
 @OptIn(DelicateCoroutinesApi::class)
 @Composable
@@ -110,16 +113,17 @@ fun App()
 {
     var start_button_text by remember { mutableStateOf("start") }
     var tox_running_state: String by remember { mutableStateOf("stopped") }
+    var ui_scale by remember { mutableStateOf(1.0f) }
 
     Log.i(TAG, "CCCC:" + PrefsSettings::class.java)
-    var uiscale_default = LocalDensity.current.density
+    ui_scale = 1.0f
 
     try
     {
         val tmp = prefs.get("main.ui_scale_factor", null)
         if (tmp != null)
         {
-            uiscale_default = tmp.toFloat()
+            ui_scale = tmp.toFloat()
         }
     } catch (_: Exception)
     {
@@ -202,7 +206,20 @@ fun App()
                         }
                     }
                     SaveDataPath()
-                    ToxIDTextField() // UIScaleSlider(uiscale_default)
+                    ToxIDTextField()
+                    DetailItem(label = i18n("UI Scale"), description = "${i18n("current_value:")}: " + " " + ui_scale + ", " + i18n("drag Slider to change")) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(2.dp), verticalAlignment = Alignment.CenterVertically, modifier = Modifier.width(200.dp)) {
+                            Icon(Icons.Default.FormatSize, null, Modifier.scale(0.7f))
+                            Slider(value = ui_scale, onValueChange = {
+                                ui_scale = it
+                                prefs.putFloat("main.ui_scale_factor", ui_scale)
+                                Log.i(TAG, "density: $ui_scale")
+                            }, onValueChangeFinished = { }, valueRange = 0.6f..3f, steps = 6, // todo: without setting the width explicitly,
+                                //  the slider takes up the whole remaining space
+                                modifier = Modifier.width(150.dp))
+                            Icon(Icons.Default.FormatSize, null)
+                        }
+                    }
                     when (uiMode)
                     {
                         UiMode.CONTACTS ->
@@ -217,10 +234,10 @@ fun App()
                                 } else
                                 {
                                     messagestore.send(MessageAction.Clear(0))
-                                    GlobalScope.launch {
+                                    //GlobalScope.launch {
                                         load_messages_for_friend(contacts.selectedContactPubkey)
-                                    }
-                                    ChatAppWithScaffold(contactList = contacts)
+                                    //}
+                                    ChatAppWithScaffold(contactList = contacts, ui_scale = ui_scale)
                                 }
                             }
                         }
@@ -236,10 +253,10 @@ fun App()
                                 } else
                                 {
                                     groupmessagestore.send(GroupMessageAction.ClearGroup(0))
-                                    GlobalScope.launch {
+                                    //GlobalScope.launch {
                                         load_groupmessages_for_friend(groups.selectedGroupId)
-                                    }
-                                    GroupAppWithScaffold(groupList = groups)
+                                    //}
+                                    GroupAppWithScaffold(groupList = groups, ui_scale = ui_scale)
                                 }
                             }
                         }
@@ -322,25 +339,6 @@ fun load_groupmessages_for_friend(selectedGroupId: String?)
             }
         } catch (e: Exception)
         {
-        }
-    }
-}
-
-@Composable
-private fun UIScaleSlider(uiscale_default: Float)
-{
-    var ui_scale by remember { mutableStateOf(uiscale_default) }
-    DetailItem(label = i18n("UI Scale"), description = "${i18n("current_value:")}: " + " " + ui_scale + ", " + i18n("drag Slider to change")) {
-        Row(horizontalArrangement = Arrangement.spacedBy(2.dp), verticalAlignment = Alignment.CenterVertically, modifier = Modifier.width(200.dp)) {
-            Icon(Icons.Default.FormatSize, null, Modifier.scale(0.7f))
-            Slider(value = ui_scale ?: LocalDensity.current.density, onValueChange = {
-                ui_scale = it
-                prefs.putFloat("main.ui_scale_factor", ui_scale)
-                Log.i(TAG, "density: $ui_scale")
-            }, onValueChangeFinished = { }, valueRange = 1f..3f, steps = 3, // todo: without setting the width explicitly,
-                //  the slider takes up the whole remaining space
-                modifier = Modifier.width(150.dp))
-            Icon(Icons.Default.FormatSize, null)
         }
     }
 }
@@ -609,7 +607,7 @@ fun DetailItem(
     // which is currently not supported in Compose for Desktop
     // see https://github.com/JetBrains/compose-jb/issues/2111
     contentDescription = description
-}, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+}, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.End) {
     Text(label)
     setting()
 }

@@ -1,7 +1,5 @@
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,26 +9,19 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.BrokenImage
-import androidx.compose.material.icons.filled.Downloading
-import androidx.compose.material.icons.filled.FileDownloadDone
-import androidx.compose.material.icons.filled.OfflineBolt
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,13 +35,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.trifa.HelperFiletransfer.check_filename_is_image
 import com.zoffcc.applications.trifa.HelperGeneric
+import com.zoffcc.applications.trifa.HelperGeneric.cancel_ft_from_ui
 import com.zoffcc.applications.trifa.HelperOSFile
-import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.TRIFAGlobals.TRIFA_MSG_TYPE
+import org.briarproject.briar.desktop.utils.InternationalizationUtils
 import java.io.File
 import kotlin.random.Random
 
@@ -74,7 +67,7 @@ fun randomColor() = Color(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage) {
+inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float) {
     val TAG = "trifa.ChatMessage"
     Box(
         modifier = Modifier.fillMaxWidth(),
@@ -84,7 +77,7 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage) {
         Row(verticalAlignment = Alignment.Bottom) {
             if (!isMyMessage) {
                 Column {
-                    UserPic(message.user)
+                    UserPic(message.user, ui_scale)
                 }
                 Spacer(Modifier.size(2.dp))
                 Column {
@@ -125,7 +118,7 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage) {
                             Text(
                                 text = message.text,
                                 style = MaterialTheme.typography.body1.copy(
-                                    fontSize = 18.sp,
+                                    fontSize = ((14.0 * ui_scale) as Double).sp,
                                     letterSpacing = 0.sp
                                 )
                             )
@@ -138,6 +131,19 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage) {
                                     modifier = Modifier.fillMaxWidth(),
                                     progress = (message.currentfilepos.toFloat() / message.filesize.toFloat())
                                 )
+                                Column (modifier = Modifier.fillMaxWidth()) {
+                                    Spacer(Modifier.size(10.dp).align(Alignment.Start))
+                                    IconButton(
+                                        icon = Icons.Filled.Cancel,
+                                        iconTint = Color.Red,
+                                        iconSize = 30.dp,
+                                        modifier = Modifier.align(Alignment.Start),
+                                        contentDescription = "cancel",
+                                        onClick = {
+                                            cancel_ft_from_ui(message)
+                                        }
+                                    )
+                                }
                             }
                             else
                             {
@@ -149,7 +155,7 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage) {
                                             HelperGeneric.loadImageBitmap(File(message.filename_fullpath))
                                         }, painterFor = { remember { BitmapPainter(it) } },
                                             contentDescription = "Image",
-                                            modifier = Modifier.size(IMAGE_PREVIEW_SIZE).
+                                            modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp).
                                             combinedClickable(
                                                 onClick = { HelperOSFile.show_containing_dir_in_explorer(message.filename_fullpath) },
                                                 onLongClick = {}))
@@ -157,7 +163,7 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage) {
                                     else
                                     {
                                         Icon(
-                                            modifier = Modifier.size(IMAGE_PREVIEW_SIZE).
+                                            modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp).
                                             combinedClickable(
                                                 onClick = { HelperOSFile.show_containing_dir_in_explorer(message.filename_fullpath) },
                                                 onLongClick = {}),
@@ -170,7 +176,7 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage) {
                                 else
                                 {
                                     Icon(
-                                        modifier = Modifier.size(IMAGE_PREVIEW_SIZE),
+                                        modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp),
                                         imageVector = Icons.Default.BrokenImage,
                                         contentDescription = "failed",
                                         tint = MaterialTheme.colors.primary

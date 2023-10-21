@@ -26,7 +26,7 @@ import org.jetbrains.compose.resources.painterResource
 import java.io.File
 
 @Composable
-internal fun GroupMessages(groupmessages: List<UIGroupMessage>) {
+internal fun GroupMessages(groupmessages: List<UIGroupMessage>, ui_scale: Float) {
     val listState = rememberLazyListState()
     if (groupmessages.isNotEmpty()) {
         LaunchedEffect(groupmessages.last()) {
@@ -48,7 +48,7 @@ internal fun GroupMessages(groupmessages: List<UIGroupMessage>) {
         ) {
             item { Spacer(Modifier.size(20.dp)) }
             items(groupmessages, key = { it.id }) {
-                GroupChatMessage(isMyMessage = it.user == myUser, it)
+                GroupChatMessage(isMyMessage = it.user == myUser, it, ui_scale)
             }
             item {
                 Box(Modifier.height(70.dp))
@@ -63,8 +63,8 @@ internal fun GroupMessages(groupmessages: List<UIGroupMessage>) {
 
 @OptIn(ExperimentalResourceApi::class)
 @Composable
-fun PeerPic(user: User) {
-    val imageSize = 48f
+fun PeerPic(user: User, ui_scale: Float) {
+    val imageSize = (calc_avatar_size(AVATAR_SIZE * ui_scale) as Float)
     val painter = user.picture?.let {
         painterResource(it)
     } ?: object : Painter() {
