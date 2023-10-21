@@ -10,3 +10,4 @@ main.db
 _BACKUP/
 datadir/
 tempdir/
+main.db-journal
