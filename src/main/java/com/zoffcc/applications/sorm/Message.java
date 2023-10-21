@@ -338,7 +338,7 @@ public class Message
                     "?," +
                     "?" +
                     ")";
-            insert_pstmt = sqldb.prepareStatement(insert_pstmt_sql, Statement.RETURN_GENERATED_KEYS);
+            insert_pstmt = sqldb.prepareStatement(insert_pstmt_sql);
 
             insert_pstmt.clearParameters();
 
@@ -379,7 +379,8 @@ public class Message
 
             orma_semaphore_lastrowid_on_insert.acquire();
             insert_pstmt.executeUpdate();
-            ret = get_last_rowid_pstmt(insert_pstmt);
+            insert_pstmt.close();
+            ret = get_last_rowid_pstmt();
             orma_semaphore_lastrowid_on_insert.release();
         }
         catch (Exception e)

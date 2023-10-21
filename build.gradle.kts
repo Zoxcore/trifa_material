@@ -37,7 +37,7 @@ dependencies {
     implementation(compose.materialIconsExtended)
     //
     //
-    implementation("org.xerial:sqlite-jdbc:3.42.0.0")
+    implementation("org.xerial:sqlite-jdbc:3.43.2.1")
 }
 
 compose.desktop {
