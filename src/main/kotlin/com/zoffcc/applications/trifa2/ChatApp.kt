@@ -47,7 +47,7 @@ val savepathstore = CoroutineScope(SupervisorJob()).createSavepathStore()
 val toxdatastore = CoroutineScope(SupervisorJob()).createToxDataStore()
 
 @Composable
-fun ChatAppWithScaffold(displayTextField: Boolean = true, contactList: StateContacts)
+fun ChatAppWithScaffold(displayTextField: Boolean = true, contactList: StateContacts, ui_scale: Float)
 {
     Theme {
         Scaffold(topBar = {
@@ -58,13 +58,13 @@ fun ChatAppWithScaffold(displayTextField: Boolean = true, contactList: StateCont
                 backgroundColor = MaterialTheme.colors.background,
             )
         }) {
-            ChatApp(displayTextField = displayTextField, contactList.selectedContactPubkey)
+            ChatApp(displayTextField = displayTextField, contactList.selectedContactPubkey, ui_scale)
         }
     }
 }
 
 @Composable
-fun GroupAppWithScaffold(displayTextField: Boolean = true, groupList: StateGroups)
+fun GroupAppWithScaffold(displayTextField: Boolean = true, groupList: StateGroups, ui_scale: Float)
 {
     Theme {
         Scaffold(topBar = {
@@ -75,14 +75,14 @@ fun GroupAppWithScaffold(displayTextField: Boolean = true, groupList: StateGroup
                 backgroundColor = MaterialTheme.colors.background,
             )
         }) {
-            GroupApp(displayTextField = displayTextField, groupList.selectedGroupId)
+            GroupApp(displayTextField = displayTextField, groupList.selectedGroupId, ui_scale)
         }
     }
 }
 
 @OptIn(ExperimentalResourceApi::class)
 @Composable
-fun ChatApp(displayTextField: Boolean = true, selectedContactPubkey: String?)
+fun ChatApp(displayTextField: Boolean = true, selectedContactPubkey: String?, ui_scale: Float)
 {
     val state by messagestore.stateFlow.collectAsState()
     Theme {
@@ -91,7 +91,7 @@ fun ChatApp(displayTextField: Boolean = true, selectedContactPubkey: String?)
                 Image(painterResource("background.jpg"), modifier = Modifier.fillMaxSize(), contentDescription = null, contentScale = ContentScale.Crop)
                 Column(modifier = Modifier.fillMaxSize()) {
                     Box(Modifier.weight(1f)) {
-                        Messages(state.messages)
+                        Messages(state.messages, ui_scale)
                     }
                     if (displayTextField)
                     {
@@ -115,7 +115,7 @@ fun ChatApp(displayTextField: Boolean = true, selectedContactPubkey: String?)
 
 @OptIn(ExperimentalResourceApi::class)
 @Composable
-fun GroupApp(displayTextField: Boolean = true, selectedGroupId: String?)
+fun GroupApp(displayTextField: Boolean = true, selectedGroupId: String?, ui_scale: Float)
 {
     val state by groupmessagestore.stateFlow.collectAsState()
     Theme {
@@ -124,7 +124,7 @@ fun GroupApp(displayTextField: Boolean = true, selectedGroupId: String?)
                 Image(painterResource("background.jpg"), modifier = Modifier.fillMaxSize(), contentDescription = null, contentScale = ContentScale.Crop)
                 Column(modifier = Modifier.fillMaxSize()) {
                     Box(Modifier.weight(1f)) {
-                        GroupMessages(state.groupmessages)
+                        GroupMessages(state.groupmessages, ui_scale = ui_scale)
                     }
                     if (displayTextField)
                     {

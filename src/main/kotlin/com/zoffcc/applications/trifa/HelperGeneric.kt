@@ -1,12 +1,11 @@
 package com.zoffcc.applications.trifa
 
 import ImageloaderDispatcher
+import UIMessage
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.Downloading
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,13 +19,23 @@ import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.loadSvgPainter
 import androidx.compose.ui.res.loadXmlImageVector
 import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.dp
+import com.zoffcc.applications.sorm.Message
+import com.zoffcc.applications.trifa.HelperFiletransfer.get_filetransfer_filenum_from_id
+import com.zoffcc.applications.trifa.HelperFiletransfer.set_filetransfer_state_from_id
+import com.zoffcc.applications.trifa.HelperFriend.delete_friend
+import com.zoffcc.applications.trifa.HelperFriend.delete_friend_all_filetransfers
+import com.zoffcc.applications.trifa.HelperFriend.delete_friend_all_messages
+import com.zoffcc.applications.trifa.HelperMessage.set_message_queueing_from_id
+import com.zoffcc.applications.trifa.HelperMessage.set_message_state_from_id
+import com.zoffcc.applications.trifa.MainActivity.Companion.modify_message_with_ft
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_file_control
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_delete
 import com.zoffcc.applications.trifa.MainActivity.Companion.update_savedata_file
-import kotlinx.coroutines.Dispatchers
+import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import kotlinx.coroutines.withContext
 import org.xml.sax.InputSource
 import java.io.File
-import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 
@@ -37,6 +46,44 @@ object HelperGeneric {
 
     fun PubkeyShort(pubkey: String) : String {
         return pubkey.take(PUBKEY_SHORT_LEN)
+    }
+
+    fun cancel_ft_from_ui(uimessage: UIMessage)
+    {
+        Log.i(TAG, "cancel_ft_from_ui:001")
+        try
+        {
+            val msg: Message? = orma!!.selectFromMessage().idEq(uimessage.msgDatabaseId)
+                .tox_friendpubkeyEq(uimessage.toxpk)
+                .toList().get(0)
+            if (msg != null)
+            {
+                set_message_queueing_from_id(msg.id, false) // cancel FT
+                // cancel FT
+                tox_file_control(tox_friend_by_public_key(msg.tox_friendpubkey), get_filetransfer_filenum_from_id(msg.filetransfer_id), ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_CANCEL.value)
+                set_filetransfer_state_from_id(msg.filetransfer_id, ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_CANCEL.value)
+                set_message_state_from_id(msg.id, ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_CANCEL.value) // update message view
+                // update message view
+                modify_message_with_ft(msg, null)
+            }
+        }
+        catch(e: Exception)
+        {
+            e.printStackTrace()
+        }
+    }
+
+    fun delete_friend_wrapper(friend_pubkey: String)
+    {
+        val friend_num_temp: Long = tox_friend_by_public_key(friend_pubkey)
+        delete_friend_all_filetransfers(friend_pubkey)
+        delete_friend_all_messages(friend_pubkey)
+        delete_friend(friend_pubkey)
+        if (friend_num_temp > -1)
+        {
+            tox_friend_delete(friend_num_temp)
+            update_savedata_file_wrapper()
+        }
     }
 
     fun bytesToHex(bytes: ByteArray, start: Int, len: Int): String {

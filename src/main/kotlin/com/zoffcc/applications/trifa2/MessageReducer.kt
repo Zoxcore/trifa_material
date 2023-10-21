@@ -53,7 +53,7 @@ fun chatReducer(state: MessageState, action: MessageAction): MessageState = when
     {
         val TAG = "UpdateMessage"
         val item_position = state.messages.binarySearchBy(action.message_db.id) { it.id }
-        Log.i(TAG, "item_position = " + item_position)
+        // Log.i(TAG, "item_position = " + item_position)
         val item = state.messages[item_position]
         if (action.filetransfer_db != null)
         {
@@ -65,7 +65,8 @@ fun chatReducer(state: MessageState, action: MessageAction): MessageState = when
         }
         else
         {
-            state.messages[item_position] = item.copy()
+            Log.i(TAG, "UpdateMessage:ft=null");
+            state.messages[item_position] = item.copy(filename_fullpath = null, currentfilepos = 0, filesize = 0)
         }
         state.copy(messages = state.messages)
     }

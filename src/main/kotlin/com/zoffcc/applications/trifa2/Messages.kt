@@ -20,7 +20,7 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-internal fun Messages(messages: List<UIMessage>) {
+internal fun Messages(messages: List<UIMessage>, ui_scale: Float) {
     val listState = rememberLazyListState()
     if (messages.isNotEmpty()) {
         LaunchedEffect(messages.last()) {
@@ -42,7 +42,7 @@ internal fun Messages(messages: List<UIMessage>) {
         ) {
             item { Spacer(Modifier.size(20.dp)) }
             items(messages, key = { it.id }) {
-                ChatMessage(isMyMessage = (it.user == myUser), it)
+                ChatMessage(isMyMessage = (it.user == myUser), it, ui_scale)
             }
             item {
                 Box(Modifier.height(70.dp))
@@ -55,11 +55,19 @@ internal fun Messages(messages: List<UIMessage>) {
     }
 }
 
+fun calc_avatar_size(avatar_size: Float): Float
+{
+    if (avatar_size > MAX_AVATAR_SIZE)
+    {
+        return MAX_AVATAR_SIZE
+    }
+    return avatar_size
+}
 
 @OptIn(ExperimentalResourceApi::class)
 @Composable
-fun UserPic(user: User) {
-    val imageSize = 48f
+fun UserPic(user: User, ui_scale: Float) {
+    val imageSize = ((calc_avatar_size(AVATAR_SIZE * ui_scale)) as Float)
     val painter = user.picture?.let {
         painterResource(it)
     } ?: object : Painter() {

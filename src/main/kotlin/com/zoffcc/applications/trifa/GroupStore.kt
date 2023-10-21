@@ -1,5 +1,6 @@
 package com.zoffcc.applications.trifa
 
+import global_semaphore_grouplist_ui
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,7 +27,7 @@ fun CoroutineScope.createGroupStore(): GroupStore
     val TAG = "trifa.GroupStore"
 
     val mutableStateFlow = MutableStateFlow(StateGroups())
-    val channel_group_list: Channel<GroupItem> = Channel(Channel.UNLIMITED)
+    // val channel_group_list: Channel<GroupItem> = Channel(Channel.UNLIMITED)
 
     return object : GroupStore
     {
@@ -34,16 +35,17 @@ fun CoroutineScope.createGroupStore(): GroupStore
 
         init
         {
-            launch {
-                channel_group_list.consumeAsFlow().collect { item ->
-                    mutableStateFlow.value = state.copy(groups = (state.groups + item))
-                }
-            }
+            //launch {
+            //    channel_group_list.consumeAsFlow().collect { item ->
+            //        mutableStateFlow.value = state.copy(groups = (state.groups + item))
+            //    }
+            //}
         }
 
         override fun add(item: GroupItem)
         {
             launch {
+                global_semaphore_grouplist_ui.acquire()
                 var found = false
                 state.groups.forEach {
                     if (item.groupId == it.groupId)
@@ -53,14 +55,16 @@ fun CoroutineScope.createGroupStore(): GroupStore
                 }
                 if (!found)
                 {
-                    channel_group_list.send(item)
+                    mutableStateFlow.value = state.copy(groups = (state.groups + item))
                 }
+                global_semaphore_grouplist_ui.release()
             }
         }
 
         override fun remove(item: GroupItem)
         {
             launch {
+                global_semaphore_grouplist_ui.acquire()
                 var found = false
                 state.groups.forEach {
                     if (item.groupId == it.groupId)
@@ -68,12 +72,14 @@ fun CoroutineScope.createGroupStore(): GroupStore
                         mutableStateFlow.value = state.copy(groups = (state.groups - item))
                     }
                 }
+                global_semaphore_grouplist_ui.release()
             }
         }
 
         override fun select(groupId: String?)
         {
             launch {
+                global_semaphore_grouplist_ui.acquire()
                 var wanted_group_item: GroupItem? = null
                 state.groups.forEach {
                     if (groupId == it.groupId)
@@ -87,12 +93,14 @@ fun CoroutineScope.createGroupStore(): GroupStore
                     used_groupid = null
                 }
                 mutableStateFlow.value = state.copy(groups = state.groups, selectedGroupId = used_groupid, selectedGroup = wanted_group_item)
+                global_semaphore_grouplist_ui.release()
             }
         }
 
         override fun update(item: GroupItem)
         {
             launch {
+                global_semaphore_grouplist_ui.acquire()
                 var update_item: GroupItem? = null
                 state.groups.forEach {
                     if (item.groupId == it.groupId)
@@ -107,13 +115,16 @@ fun CoroutineScope.createGroupStore(): GroupStore
                 {
                     mutableStateFlow.value = state.copy(groups = (state.groups + item), selectedGroupId = state.selectedGroupId, selectedGroup = state.selectedGroup)
                 }
+                global_semaphore_grouplist_ui.release()
             }
         }
 
         override fun clear()
         {
             launch {
+                global_semaphore_grouplist_ui.acquire()
                 mutableStateFlow.value = state.copy(groups = emptyList(), selectedGroupId = null, selectedGroup = null)
+                global_semaphore_grouplist_ui.release()
             }
         }
     }

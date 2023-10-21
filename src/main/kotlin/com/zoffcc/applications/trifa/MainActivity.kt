@@ -960,7 +960,13 @@ class MainActivity
         fun android_tox_callback_friend_request_cb_method(friend_public_key: String?, friend_request_message: String?, length: Long)
         {
             Log.i(TAG, "android_tox_callback_friend_request_cb_method: friend_public_key=" + friend_public_key)
-            tox_friend_add_norequest(friend_public_key)
+            val new_friendnumber = tox_friend_add_norequest(friend_public_key)
+            try
+            {
+                contactstore.add(item = ContactItem(name = "new Friend #" + new_friendnumber, isConnected = 0, pubkey = friend_public_key!!))
+            } catch (_: Exception)
+            {
+            }
             update_savedata_file_wrapper()
         }
 
@@ -1334,37 +1340,41 @@ class MainActivity
             {
                 try
                 {
-                    try
-                    {
-                        val fos = RandomAccessFile(f.path_name + "/" + f.file_name, "rw")
-                        if (f.kind == ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_FTV2.value)
+                    GlobalScope.launch(Dispatchers.IO) {
+                        try
                         {
-                            fos.seek(position)
-                            fos.write(Arrays.copyOfRange(data, TOX_FILE_ID_LENGTH, data!!.size))
-                            fos.close()
-                        } else
+                            val fos = RandomAccessFile(f.path_name + "/" + f.file_name, "rw")
+                            if (f.kind == ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_FTV2.value)
+                            {
+                                fos.seek(position)
+                                fos.write(Arrays.copyOfRange(data, TOX_FILE_ID_LENGTH, data!!.size))
+                                fos.close()
+                            } else
+                            {
+                                fos.seek(position)
+                                fos.write(data)
+                                fos.close()
+                            }
+                        } catch (ex: java.lang.Exception)
                         {
-                            fos.seek(position)
-                            fos.write(data)
-                            fos.close()
                         }
-                    } catch (ex: java.lang.Exception)
-                    {
                     }
                     if (f.filesize < UPDATE_MESSAGE_PROGRESS_SMALL_FILE_IS_LESS_THAN_BYTES)
                     {
                         if ((f.current_position + UPDATE_MESSAGE_PROGRESS_AFTER_BYTES_SMALL_FILES) < position)
                         {
-                            f.current_position = position
-                            HelperFiletransfer.update_filetransfer_db_current_position(f)
-                            if (f.kind != ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_AVATAR.value)
-                            {
+                            GlobalScope.launch(Dispatchers.IO) {
                                 try
                                 {
-                                    if (f.id != -1L)
+                                    f.current_position = position
+                                    HelperFiletransfer.update_filetransfer_db_current_position(f)
+                                    if (f.kind != ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_AVATAR.value)
                                     {
-                                        update_single_message_from_ftid(f, true)
-                                        Log.i(TAG, "update FT ----==========>>> file pos=" + position + " " + VFS_FILE_DIR + "/" + f.tox_public_key_string + "/" + f.file_name)
+                                        if (f.id != -1L)
+                                        {
+                                            update_single_message_from_ftid(f, true)
+                                            // Log.i(TAG, "update FT ----==========>>> file pos=" + position + " " + VFS_FILE_DIR + "/" + f.tox_public_key_string + "/" + f.file_name)
+                                        }
                                     }
                                 } catch (e: java.lang.Exception)
                                 {
@@ -1375,17 +1385,19 @@ class MainActivity
                     {
                         if ((f.current_position + UPDATE_MESSAGE_PROGRESS_AFTER_BYTES) < position)
                         {
-                            f.current_position = position
-                            HelperFiletransfer.update_filetransfer_db_current_position(f)
-                            if (f.kind != ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_AVATAR.value)
-                            {
+                            GlobalScope.launch(Dispatchers.IO) {
                                 try
                                 {
-                                    if (f.id != -1L)
-                                    { //**// HelperMessage.update_single_message_from_ftid(f.id, true)
-                                        Log.i(TAG, "update FT ----==========>>> file pos=" + position + " " + VFS_FILE_DIR + "/" + f.tox_public_key_string + "/" + f.file_name)
-                                        update_single_message_from_ftid(f, true)
+                                    f.current_position = position
+                                    HelperFiletransfer.update_filetransfer_db_current_position(f)
+                                    if (f.kind != ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_AVATAR.value)
+                                    {
+                                        if (f.id != -1L)
+                                        { //**// HelperMessage.update_single_message_from_ftid(f.id, true)
+                                            // Log.i(TAG, "update FT ----==========>>> file pos=" + position + " " + VFS_FILE_DIR + "/" + f.tox_public_key_string + "/" + f.file_name)
+                                            update_single_message_from_ftid(f, true)
 
+                                        }
                                     }
                                 } catch (e: java.lang.Exception)
                                 {
@@ -1803,7 +1815,7 @@ class MainActivity
             return row_id
         }
 
-        @JvmStatic fun modify_message_with_ft(message: Message, filetransfer: Filetransfer)
+        @JvmStatic fun modify_message_with_ft(message: Message, filetransfer: Filetransfer?)
         {
             messagestore.send(MessageAction.UpdateMessage(message, filetransfer))
         }

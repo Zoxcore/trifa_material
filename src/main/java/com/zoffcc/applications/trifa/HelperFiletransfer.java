@@ -15,6 +15,7 @@ import java.util.Base64;
 import java.util.Random;
 
 import static com.zoffcc.applications.sorm.OrmaDatabase.sqldb;
+import static com.zoffcc.applications.trifa.HelperMessage.set_message_state_from_id;
 import static com.zoffcc.applications.trifa.MainActivity.*;
 import static com.zoffcc.applications.trifa.TRIFAGlobals.*;
 import static com.zoffcc.applications.trifa.TRIFAGlobals.TRIFA_FT_DIRECTION.TRIFA_FT_DIRECTION_INCOMING;
@@ -337,20 +338,6 @@ public class HelperFiletransfer {
         }
     }
 
-    public static void set_message_state_from_id(long message_id, int state)
-    {
-        try
-        {
-            TrifaToxService.Companion.getOrma().updateMessage().idEq(message_id).state(state).execute();
-            // Log.i(TAG, "set_message_state_from_id:message_id=" + message_id + " state=" + state);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            Log.i(TAG, "set_message_state_from_id:EE:" + e.getMessage());
-        }
-    }
-
     public static long get_filetransfer_filenum_from_id(long filetransfer_id)
     {
         try
@@ -589,7 +576,7 @@ public class HelperFiletransfer {
                     // delete tmp file
                     delete_filetransfer_tmpfile(friend_number, file_number);
                     // set state for FT in message
-                    HelperMessage.set_message_state_from_id(msg_id, TOX_FILE_CONTROL_CANCEL.value);
+                    set_message_state_from_id(msg_id, TOX_FILE_CONTROL_CANCEL.value);
                     // remove link to any message
                     set_filetransfer_for_message_from_friendnum_and_filenum(friend_number, file_number, -1);
                     // delete FT in DB
@@ -615,7 +602,7 @@ public class HelperFiletransfer {
                     long ft_id = get_filetransfer_id_from_friendnum_and_filenum(friend_number, file_number);
                     long msg_id = HelperMessage.get_message_id_from_filetransfer_id_and_friendnum(ft_id, friend_number);
                     set_filetransfer_state_from_id(ft_id, TOX_FILE_CONTROL_CANCEL.value);
-                    HelperMessage.set_message_state_from_id(msg_id, TOX_FILE_CONTROL_CANCEL.value);
+                    set_message_state_from_id(msg_id, TOX_FILE_CONTROL_CANCEL.value);
                     // delete tmp file
                     delete_filetransfer_tmpfile(friend_number, file_number);
                     // delete FT in DB
@@ -630,7 +617,7 @@ public class HelperFiletransfer {
                     long ft_id = get_filetransfer_id_from_friendnum_and_filenum(friend_number, file_number);
                     long msg_id = HelperMessage.get_message_id_from_filetransfer_id_and_friendnum(ft_id, friend_number);
                     // set state for FT in message
-                    HelperMessage.set_message_state_from_id(msg_id, TOX_FILE_CONTROL_CANCEL.value);
+                    set_message_state_from_id(msg_id, TOX_FILE_CONTROL_CANCEL.value);
                     // remove link to any message
                     set_filetransfer_for_message_from_friendnum_and_filenum(friend_number, file_number, -1);
                     // delete FT in DB
@@ -657,7 +644,7 @@ public class HelperFiletransfer {
 
                     if (msg_id > -1)
                     {
-                        HelperMessage.set_message_state_from_id(msg_id, TOX_FILE_CONTROL_CANCEL.value);
+                        set_message_state_from_id(msg_id, TOX_FILE_CONTROL_CANCEL.value);
                     }
 
                     // delete tmp file
