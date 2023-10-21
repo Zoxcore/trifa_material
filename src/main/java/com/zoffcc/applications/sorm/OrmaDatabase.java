@@ -93,19 +93,20 @@ public class OrmaDatabase
         return "__ERROR_IN_STRING__";
     }
 
-    public static long get_last_rowid_pstmt(java.sql.PreparedStatement statement)
+    public static long get_last_rowid_pstmt()
     {
         try
         {
             long ret = -1;
-
-            ResultSet rs = statement.getGeneratedKeys();
-            while (rs.next())
+            PreparedStatement lastrowid_pstmt = sqldb.prepareStatement("select last_insert_rowid() as lastrowid");
+            ResultSet rs = lastrowid_pstmt.executeQuery();
+            if (rs.next())
             {
-                ret = rs.getLong(1);
+                ret = rs.getLong("lastrowid");
             }
             rs.close();
-            // Log.i(TAG, "get_last_rowid:ret=" + ret);
+            lastrowid_pstmt.close();
+            // Log.i(TAG, "get_last_rowid_pstmt:ret=" + ret);
             return ret;
         }
         catch (Exception e)
