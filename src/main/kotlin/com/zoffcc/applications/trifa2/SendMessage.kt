@@ -2,6 +2,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -26,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.trifa.Log
 
 private const val TAG = "trifa.SendMessage"
@@ -37,7 +39,7 @@ fun SendMessage(sendMessage: (String) -> Unit) {
     TextField(
         modifier = Modifier.fillMaxWidth()
             .background(MaterialTheme.colors.background)
-            .padding(10.dp)
+            .padding(1.dp)
             .focusRequester(textFieldFocusRequester),
         colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White),
         keyboardOptions = KeyboardOptions(
@@ -46,7 +48,7 @@ fun SendMessage(sendMessage: (String) -> Unit) {
         ),
         value = inputText,
         placeholder = {
-            Text("Type message...")
+            Text(text = "Type message...", fontSize = 14.sp)
         },
         onValueChange = {
             // ?? haXX0r ??
