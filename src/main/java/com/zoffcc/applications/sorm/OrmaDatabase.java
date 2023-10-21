@@ -11,6 +11,7 @@ import java.security.MessageDigest;
 import java.sql.*;
 import java.util.Base64;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 import static com.zoffcc.applications.trifa.MainActivity.PREF__database_files_dir;
 
@@ -22,6 +23,7 @@ public class OrmaDatabase
     private static final String CREATE_DB_FILE_SHA256SUM = "HJC9IOw3S0l53MKJOLXV1iUCWaglwXLyW9gncs52wds=";
     public static Connection sqldb = null;
     static int current_db_version = 0;
+    static Semaphore orma_semaphore_lastrowid_on_insert = new Semaphore(1);
 
     public OrmaDatabase()
     {
@@ -578,7 +580,7 @@ public class OrmaDatabase
         catch (Exception e)
         {
             e.printStackTrace();
-            Log.i(TAG, "INIT:Error:" + e.getMessage());
+            Log.i(TAG, "INIT:R_Error:" + e.getMessage());
         }
 
         Log.i(TAG, "loaded:sqlite:" + get_current_sqlite_version());

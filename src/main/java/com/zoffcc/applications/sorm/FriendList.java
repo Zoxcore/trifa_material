@@ -289,8 +289,10 @@ public class FriendList
                 Log.i(TAG, "sql=" + sql_str);
             }
 
+            orma_semaphore_lastrowid_on_insert.acquire();
             statement.execute(sql_str);
             ret = get_last_rowid(statement);
+            orma_semaphore_lastrowid_on_insert.release();
             // @formatter:on
 
             try
@@ -303,6 +305,7 @@ public class FriendList
         }
         catch (Exception e)
         {
+            orma_semaphore_lastrowid_on_insert.release();
             throw new RuntimeException(e);
         }
 

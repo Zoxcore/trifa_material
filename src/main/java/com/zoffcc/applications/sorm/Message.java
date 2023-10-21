@@ -377,11 +377,14 @@ public class Message
                 Log.i(TAG, "sql=" + insert_pstmt);
             }
 
+            orma_semaphore_lastrowid_on_insert.acquire();
             insert_pstmt.executeUpdate();
             ret = get_last_rowid_pstmt(insert_pstmt);
+            orma_semaphore_lastrowid_on_insert.release();
         }
         catch (Exception e)
         {
+            orma_semaphore_lastrowid_on_insert.release();
             throw new RuntimeException(e);
         }
 
