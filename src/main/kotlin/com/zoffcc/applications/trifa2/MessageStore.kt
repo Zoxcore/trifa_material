@@ -42,7 +42,7 @@ fun CoroutineScope.createMessageStore(): MessageStore
                     {
                         channel.send(action)
                     }
-                } else if (action is MessageAction.ReceiveMessagesBulk)
+                } else if (action is MessageAction.ReceiveMessagesBulkWithClear)
                 {
                     if (contactstore.state.selectedContactPubkey == action.toxpk)
                     {

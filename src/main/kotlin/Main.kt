@@ -65,11 +65,15 @@ import com.zoffcc.applications.trifa.RandomNameGenerator
 import com.zoffcc.applications.trifa.TRIFAGlobals
 import com.zoffcc.applications.trifa.TrifaToxService
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.briarproject.briar.desktop.contact.ContactList
 import org.briarproject.briar.desktop.contact.GroupList
@@ -83,6 +87,7 @@ import org.briarproject.briar.desktop.ui.VerticalDivider
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import java.awt.Toolkit
 import java.util.*
+import java.util.concurrent.Executors
 import java.util.prefs.Preferences
 import kotlin.collections.ArrayList
 
@@ -96,7 +101,9 @@ private val prefs: Preferences = Preferences.userNodeForPackage(com.zoffcc.appli
 val TOP_HEADER_SIZE = 56.dp
 val CONTACT_COLUMN_WIDTH = 230.dp
 val IMAGE_PREVIEW_SIZE = 140.dp
+val ImageloaderDispatcher = Executors.newFixedThreadPool(5).asCoroutineDispatcher()
 
+@OptIn(DelicateCoroutinesApi::class)
 @Composable
 @Preview
 fun App()
@@ -210,7 +217,9 @@ fun App()
                                 } else
                                 {
                                     messagestore.send(MessageAction.Clear(0))
-                                    load_messages_for_friend(contacts.selectedContactPubkey)
+                                    GlobalScope.launch {
+                                        load_messages_for_friend(contacts.selectedContactPubkey)
+                                    }
                                     ChatAppWithScaffold(contactList = contacts)
                                 }
                             }
@@ -227,7 +236,9 @@ fun App()
                                 } else
                                 {
                                     groupmessagestore.send(GroupMessageAction.ClearGroup(0))
-                                    load_groupmessages_for_friend(groups.selectedGroupId)
+                                    GlobalScope.launch {
+                                        load_groupmessages_for_friend(groups.selectedGroupId)
+                                    }
                                     GroupAppWithScaffold(groupList = groups)
                                 }
                             }
@@ -273,7 +284,7 @@ fun load_messages_for_friend(selectedContactPubkey: String?)
                     }
                 }
             }
-            messagestore.send(MessageAction.ReceiveMessagesBulk(uimessages, toxk))
+            messagestore.send(MessageAction.ReceiveMessagesBulkWithClear(uimessages, toxk))
         } catch (e: Exception)
         {
             e.printStackTrace()
