@@ -1,5 +1,6 @@
 package com.zoffcc.applications.trifa
 
+import ImageloaderDispatcher
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
@@ -127,7 +128,7 @@ object HelperGeneric {
         contentScale: ContentScale = ContentScale.Fit,
     ) {
         val image: T? by produceState<T?>(null) {
-            value = withContext(Dispatchers.IO) {
+            value = withContext(ImageloaderDispatcher) {
                 try {
                     // DEBUG -> to test lazy loading of images // Thread.sleep(1000)
                     load()

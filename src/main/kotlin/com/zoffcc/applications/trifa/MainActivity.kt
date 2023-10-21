@@ -46,6 +46,9 @@ import contactstore
 import groupmessagestore
 import groupstore
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import lock_data_dir_input
 import messagestore
 import org.briarproject.briar.desktop.contact.ContactItem
@@ -976,42 +979,44 @@ class MainActivity
                 return
             }
 
-            if (msgV3hash_hex_string != null)
-            {
-                HelperMessage.send_msgv3_high_level_ack(friend_number, msgV3hash_hex_string);
-                try
-                { // ("msgv3:"+friend_message)
-                    val toxpk = tox_friend_get_public_key(friend_number)!!.uppercase()
-                    var timestamp_wrap: Long = message_timestamp * 1000
-                    if (timestamp_wrap == 0L)
-                    {
-                        timestamp_wrap = System.currentTimeMillis()
-                    }
-                    val msg_id_db = received_message_to_db(toxpk, timestamp_wrap, friend_message)
-                    val friendnum = tox_friend_by_public_key(toxpk)
-                    val fname = tox_friend_get_name(friendnum)
-                    val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk)
-                    messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(msgDatabaseId = msg_id_db, user = friend_user, timeMs = timestamp_wrap, text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
-                } catch (_: Exception)
+            GlobalScope.launch(Dispatchers.IO) {
+                if (msgV3hash_hex_string != null)
                 {
-                }
-            } else
-            {
-                try
-                { // ("msgv1:"+friend_message)
-                    val toxpk = tox_friend_get_public_key(friend_number)
-                    var timestamp_wrap: Long = message_timestamp * 1000
-                    if (timestamp_wrap == 0L)
+                    HelperMessage.send_msgv3_high_level_ack(friend_number, msgV3hash_hex_string);
+                    try
+                    { // ("msgv3:"+friend_message)
+                        val toxpk = tox_friend_get_public_key(friend_number)!!.uppercase()
+                        var timestamp_wrap: Long = message_timestamp * 1000
+                        if (timestamp_wrap == 0L)
+                        {
+                            timestamp_wrap = System.currentTimeMillis()
+                        }
+                        val msg_id_db = received_message_to_db(toxpk, timestamp_wrap, friend_message)
+                        val friendnum = tox_friend_by_public_key(toxpk)
+                        val fname = tox_friend_get_name(friendnum)
+                        val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk)
+                        messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(msgDatabaseId = msg_id_db, user = friend_user, timeMs = timestamp_wrap, text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
+                    } catch (_: Exception)
                     {
-                        timestamp_wrap = System.currentTimeMillis()
                     }
-                    val msg_id_db = received_message_to_db(toxpk, timestamp_wrap, friend_message)
-                    val friendnum = tox_friend_by_public_key(toxpk)
-                    val fname = tox_friend_get_name(friendnum)
-                    val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk)
-                    messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(msgDatabaseId = msg_id_db, user = friend_user, timeMs = timestamp_wrap, text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
-                } catch (_: Exception)
+                } else
                 {
+                    try
+                    { // ("msgv1:"+friend_message)
+                        val toxpk = tox_friend_get_public_key(friend_number)
+                        var timestamp_wrap: Long = message_timestamp * 1000
+                        if (timestamp_wrap == 0L)
+                        {
+                            timestamp_wrap = System.currentTimeMillis()
+                        }
+                        val msg_id_db = received_message_to_db(toxpk, timestamp_wrap, friend_message)
+                        val friendnum = tox_friend_by_public_key(toxpk)
+                        val fname = tox_friend_get_name(friendnum)
+                        val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk)
+                        messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(msgDatabaseId = msg_id_db, user = friend_user, timeMs = timestamp_wrap, text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
+                    } catch (_: Exception)
+                    {
+                    }
                 }
             }
         }

@@ -9,7 +9,7 @@ sealed interface MessageAction
 {
     data class SendMessagesBulk(val messages: List<UIMessage>, val toxpk: String) : MessageAction
     data class SendMessage(val message: UIMessage) : MessageAction
-    data class ReceiveMessagesBulk(val messages: List<UIMessage>, val toxpk: String) : MessageAction
+    data class ReceiveMessagesBulkWithClear(val messages: List<UIMessage>, val toxpk: String) : MessageAction
     data class ReceiveMessage(val message: UIMessage) : MessageAction
     data class UpdateMessage(val message_db: Message, val filetransfer_db: Filetransfer?) : MessageAction
     data class Clear(val dummy: Int) : MessageAction
@@ -32,10 +32,10 @@ fun chatReducer(state: MessageState, action: MessageAction): MessageState = when
         m.takeLast(maxMessages)
         state.copy(messages = state.messages)
     }
-    is MessageAction.ReceiveMessagesBulk ->
+    is MessageAction.ReceiveMessagesBulkWithClear ->
     {
-        val m = state.messages
-        state.copy(messages = (m + action.messages).toMutableStateList())
+        state.messages.clear()
+        state.copy(messages = (action.messages).toMutableStateList())
     }
     is MessageAction.ReceiveMessage ->
     {
