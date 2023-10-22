@@ -62,6 +62,12 @@ fun GroupSendMessage(sendGroupMessage: (String) -> Unit) {
                         inputText = ""
                         true
                     }
+                    (!it.isMetaPressed && !it.isAltPressed && !it.isCtrlPressed && !it.isShiftPressed && it.key == Key.Enter && it.type == KeyEventType.KeyDown) -> {
+                        true
+                    }
+                    (!it.isMetaPressed && !it.isAltPressed && !it.isCtrlPressed && !it.isShiftPressed && it.key == Key.NumPadEnter && it.type == KeyEventType.KeyDown) -> {
+                        true
+                    }
                     else -> false
                 }
             },
