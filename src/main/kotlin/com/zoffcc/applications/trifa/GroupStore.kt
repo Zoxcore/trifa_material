@@ -2,11 +2,10 @@ package com.zoffcc.applications.trifa
 
 import global_semaphore_grouplist_ui
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
+import org.briarproject.briar.desktop.contact.ContactItem
 import org.briarproject.briar.desktop.contact.GroupItem
 
 data class StateGroups(val groups: List<GroupItem> = emptyList(), val selectedGroupId: String? = null, val selectedGroup: GroupItem? = null)
@@ -55,7 +54,16 @@ fun CoroutineScope.createGroupStore(): GroupStore
                 }
                 if (!found)
                 {
-                    mutableStateFlow.value = state.copy(groups = (state.groups + item))
+                    var new_groups: ArrayList<GroupItem> = ArrayList()
+                    new_groups.addAll(state.groups)
+                    new_groups.forEach { item2 ->
+                        if (item2.groupId == item.groupId)
+                        {
+                            new_groups.remove(item2)
+                        }
+                    }
+                    new_groups.add(item)
+                    mutableStateFlow.value = state.copy(groups = new_groups)
                 }
                 global_semaphore_grouplist_ui.release()
             }
@@ -65,13 +73,33 @@ fun CoroutineScope.createGroupStore(): GroupStore
         {
             launch {
                 global_semaphore_grouplist_ui.acquire()
-                var found = false
+                var sel_groupid = state.selectedGroupId
+                var sel_item = state.selectedGroup
+                var new_groups: ArrayList<GroupItem> = ArrayList()
+                new_groups.addAll(state.groups)
+                var to_remove_item: GroupItem? = null
                 state.groups.forEach {
                     if (item.groupId == it.groupId)
                     {
-                        mutableStateFlow.value = state.copy(groups = (state.groups - item))
+                        if (state.selectedGroupId == it.groupId)
+                        {
+                            sel_groupid = null
+                            sel_item = null
+                        }
+                        new_groups.forEach { item2 ->
+                            if (item2.groupId == it.groupId)
+                            {
+                                to_remove_item = item2
+                            }
+                        }
                     }
                 }
+                if (to_remove_item != null)
+                {
+                    new_groups.remove(to_remove_item)
+                }
+                mutableStateFlow.value = state.copy(groups = new_groups,
+                    selectedGroup = sel_item, selectedGroupId = sel_groupid)
                 global_semaphore_grouplist_ui.release()
             }
         }
@@ -110,7 +138,21 @@ fun CoroutineScope.createGroupStore(): GroupStore
                 }
                 if (update_item != null)
                 {
-                    mutableStateFlow.value = state.copy(groups = (state.groups + item - update_item!!), selectedGroupId = state.selectedGroupId, selectedGroup = state.selectedGroup)
+                    var new_groups: ArrayList<GroupItem> = ArrayList()
+                    new_groups.addAll(state.groups)
+                    var to_remove_item: GroupItem? = null
+                    new_groups.forEach { item2 ->
+                        if (item2.groupId == update_item!!.groupId)
+                        {
+                            to_remove_item = item2
+                        }
+                    }
+                    if (to_remove_item != null)
+                    {
+                        new_groups.remove(to_remove_item)
+                    }
+                    new_groups.add(item)
+                    mutableStateFlow.value = state.copy(groups = new_groups, selectedGroupId = state.selectedGroupId, selectedGroup = state.selectedGroup)
                 } else
                 {
                     mutableStateFlow.value = state.copy(groups = (state.groups + item), selectedGroupId = state.selectedGroupId, selectedGroup = state.selectedGroup)

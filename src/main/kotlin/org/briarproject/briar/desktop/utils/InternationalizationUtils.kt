@@ -48,7 +48,7 @@ object InternationalizationUtils {
             val resourceBundle = createResourceBundle()
             resourceBundle.getString(key)
         } catch (e: MissingResourceException) {
-            Log.i(TAG, "Missing string resource for key '$key'" )
+            // Log.i(TAG, "Missing string resource for key '$key'" )
             key
         }
 
