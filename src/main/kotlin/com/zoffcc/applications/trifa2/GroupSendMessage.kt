@@ -24,6 +24,15 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusTarget
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isAltPressed
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isMetaPressed
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -40,7 +49,22 @@ fun GroupSendMessage(sendGroupMessage: (String) -> Unit) {
         modifier = Modifier.fillMaxWidth()
             .background(MaterialTheme.colors.background)
             .padding(1.dp)
-            .focusRequester(textFieldFocusRequester),
+            .focusRequester(textFieldFocusRequester)
+            .onPreviewKeyEvent {
+                when {
+                    (!it.isMetaPressed && !it.isAltPressed && !it.isCtrlPressed && !it.isShiftPressed && it.key == Key.Enter && it.type == KeyEventType.KeyUp) -> {
+                        sendGroupMessage(inputText)
+                        inputText = ""
+                        true
+                    }
+                    (!it.isMetaPressed && !it.isAltPressed && !it.isCtrlPressed && !it.isShiftPressed && it.key == Key.NumPadEnter && it.type == KeyEventType.KeyUp) -> {
+                        sendGroupMessage(inputText)
+                        inputText = ""
+                        true
+                    }
+                    else -> false
+                }
+            },
         colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White),
         keyboardOptions = KeyboardOptions(
             capitalization = KeyboardCapitalization.None,
@@ -51,18 +75,7 @@ fun GroupSendMessage(sendGroupMessage: (String) -> Unit) {
             Text(text = "Type Group Message...", fontSize = 14.sp)
         },
         onValueChange = {
-            // ?? haXX0r ??
-            if (it == inputText + "\n")
-            {
-                // ?? haXX0r ??
-                // Log.i(TAG, "enter key pressed")
-                sendGroupMessage(inputText)
-                inputText = ""
-            }
-            else
-            {
-                inputText = it
-            }
+            inputText = it
         },
         trailingIcon = {
             if (inputText.isNotEmpty()) {
