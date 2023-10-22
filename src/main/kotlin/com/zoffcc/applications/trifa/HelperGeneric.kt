@@ -25,12 +25,17 @@ import com.zoffcc.applications.trifa.HelperFiletransfer.set_filetransfer_state_f
 import com.zoffcc.applications.trifa.HelperFriend.delete_friend
 import com.zoffcc.applications.trifa.HelperFriend.delete_friend_all_filetransfers
 import com.zoffcc.applications.trifa.HelperFriend.delete_friend_all_messages
+import com.zoffcc.applications.trifa.HelperGroup.delete_group
+import com.zoffcc.applications.trifa.HelperGroup.delete_group_all_messages
+import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
 import com.zoffcc.applications.trifa.HelperMessage.set_message_queueing_from_id
 import com.zoffcc.applications.trifa.HelperMessage.set_message_state_from_id
 import com.zoffcc.applications.trifa.MainActivity.Companion.modify_message_with_ft
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_file_control
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_delete
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_by_chat_id
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_leave
 import com.zoffcc.applications.trifa.MainActivity.Companion.update_savedata_file
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import kotlinx.coroutines.withContext
@@ -70,6 +75,18 @@ object HelperGeneric {
         catch(e: Exception)
         {
             e.printStackTrace()
+        }
+    }
+
+    fun delete_group_wrapper(group_id: String)
+    {
+        val group_num_temp: Long = tox_group_by_groupid__wrapper(group_id)
+        delete_group_all_messages(group_id)
+        delete_group(group_id)
+        if (group_num_temp > -1)
+        {
+            tox_group_leave(group_num_temp, "quit")
+            update_savedata_file_wrapper()
         }
     }
 

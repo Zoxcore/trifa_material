@@ -283,4 +283,30 @@ public class HelperGroup {
         }
         return null;
     }
+
+    static void delete_group_all_messages(final String group_identifier)
+    {
+        try
+        {
+            TrifaToxService.Companion.getOrma().deleteFromGroupMessage().group_identifierEq(group_identifier.toLowerCase()).execute();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            Log.i(TAG, "group_conference_all_messages:EE:" + e.getMessage());
+        }
+    }
+
+    static void delete_group(final String group_identifier)
+    {
+        try
+        {
+            TrifaToxService.Companion.getOrma().deleteFromGroupDB().group_identifierEq(group_identifier.toLowerCase()).execute();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            Log.i(TAG, "delete_group:EE:" + e.getMessage());
+        }
+    }
 }

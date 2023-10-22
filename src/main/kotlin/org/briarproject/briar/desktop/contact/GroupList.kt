@@ -2,6 +2,8 @@ package org.briarproject.briar.desktop.contact
 
 import CONTACT_COLUMN_WIDTH
 import TOP_HEADER_SIZE
+import androidx.compose.foundation.ContextMenuArea
+import androidx.compose.foundation.ContextMenuItem
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,10 +15,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.zoffcc.applications.trifa.HelperGeneric
 import com.zoffcc.applications.trifa.StateContacts
 import com.zoffcc.applications.trifa.StateGroups
 import contactstore
 import groupstore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.briarproject.briar.desktop.ui.ListItemView
 import org.briarproject.briar.desktop.ui.VerticallyScrollableArea
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
@@ -50,10 +56,22 @@ fun GroupList(
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
                         .padding(start = 16.dp, end = 4.dp)
-                    GroupItemView(
-                        groupItem = item,
-                        modifier = modifier
-                    )
+                    ContextMenuArea(items = {
+                        listOf(
+                            ContextMenuItem("delete") {
+                                groupstore.remove(item = GroupItem(privacyState = 0, name = "", isConnected = 0, groupId = item.groupId))
+                                GlobalScope.launch(Dispatchers.IO) {
+                                    HelperGeneric.delete_group_wrapper(item.groupId)
+                                }
+                                // delete a group including all messages
+                            },
+                        )
+                    }) {
+                        GroupItemView(
+                            groupItem = item,
+                            modifier = modifier
+                        )
+                    }
                 }
             }
         }
