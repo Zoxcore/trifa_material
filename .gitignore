@@ -11,3 +11,4 @@ _BACKUP/
 datadir/
 tempdir/
 main.db-journal
+savedata.tox__backup
