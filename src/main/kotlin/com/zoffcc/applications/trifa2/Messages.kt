@@ -27,7 +27,7 @@ internal fun Messages(messages: List<UIMessage>, ui_scale: Float) {
             try
             {
                 // listState.animateScrollToItem(messages.lastIndex, scrollOffset = 0)
-                listState.scrollToItem(messages.lastIndex, scrollOffset = 2)
+                listState.scrollToItem(messages.lastIndex)
             }
             catch (e : Exception)
             {
