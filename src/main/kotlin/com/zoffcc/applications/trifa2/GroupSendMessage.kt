@@ -52,20 +52,26 @@ fun GroupSendMessage(sendGroupMessage: (String) -> Unit) {
             .focusRequester(textFieldFocusRequester)
             .onPreviewKeyEvent {
                 when {
-                    (!it.isMetaPressed && !it.isAltPressed && !it.isCtrlPressed && !it.isShiftPressed && it.key == Key.Enter && it.type == KeyEventType.KeyUp) -> {
-                        sendGroupMessage(inputText)
-                        inputText = ""
-                        true
-                    }
-                    (!it.isMetaPressed && !it.isAltPressed && !it.isCtrlPressed && !it.isShiftPressed && it.key == Key.NumPadEnter && it.type == KeyEventType.KeyUp) -> {
-                        sendGroupMessage(inputText)
-                        inputText = ""
-                        true
-                    }
                     (!it.isMetaPressed && !it.isAltPressed && !it.isCtrlPressed && !it.isShiftPressed && it.key == Key.Enter && it.type == KeyEventType.KeyDown) -> {
+                        if (inputText.isNotEmpty())
+                        {
+                            sendGroupMessage(inputText)
+                            inputText = ""
+                        }
                         true
                     }
                     (!it.isMetaPressed && !it.isAltPressed && !it.isCtrlPressed && !it.isShiftPressed && it.key == Key.NumPadEnter && it.type == KeyEventType.KeyDown) -> {
+                        if (inputText.isNotEmpty())
+                        {
+                            sendGroupMessage(inputText)
+                            inputText = ""
+                        }
+                        true
+                    }
+                    (!it.isMetaPressed && !it.isAltPressed && !it.isCtrlPressed && !it.isShiftPressed && it.key == Key.Enter && it.type == KeyEventType.KeyUp) -> {
+                        true
+                    }
+                    (!it.isMetaPressed && !it.isAltPressed && !it.isCtrlPressed && !it.isShiftPressed && it.key == Key.NumPadEnter && it.type == KeyEventType.KeyUp) -> {
                         true
                     }
                     else -> false
