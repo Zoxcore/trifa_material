@@ -14,7 +14,7 @@ defaults:
 jobs:
   build-macos-nightly-artifact:
     name: Nightly Artifact macOS Build
-    runs-on: macos-latest
+    runs-on: macos-11
     if: |
       true
     permissions:
