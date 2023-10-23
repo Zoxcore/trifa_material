@@ -72,12 +72,14 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
+import org.briarproject.briar.desktop.SettingDetails
 import org.briarproject.briar.desktop.contact.ContactList
 import org.briarproject.briar.desktop.contact.GroupList
 import org.briarproject.briar.desktop.navigation.BriarSidebar
 import org.briarproject.briar.desktop.ui.AboutScreen
 import org.briarproject.briar.desktop.ui.ExplainerChat
 import org.briarproject.briar.desktop.ui.ExplainerGroup
+import org.briarproject.briar.desktop.ui.HorizontalDivider
 import org.briarproject.briar.desktop.ui.UiMode
 import org.briarproject.briar.desktop.ui.UiPlaceholder
 import org.briarproject.briar.desktop.ui.VerticalDivider
@@ -94,8 +96,9 @@ var start_button_text_wrapper = "stopped"
 var online_button_text_wrapper = "offline"
 var online_button_color_wrapper = Color.White.toArgb()
 var closing_application = false
-private val prefs: Preferences = Preferences.userNodeForPackage(com.zoffcc.applications.trifa.PrefsSettings::class.java)
+val global_prefs: Preferences = Preferences.userNodeForPackage(com.zoffcc.applications.trifa.PrefsSettings::class.java)
 val TOP_HEADER_SIZE = 56.dp
+val SETTINGS_HEADER_SIZE = 56.dp
 val CONTACT_COLUMN_WIDTH = 230.dp
 val IMAGE_PREVIEW_SIZE = 70f
 val AVATAR_SIZE = 40f
@@ -120,7 +123,7 @@ fun App()
 
     try
     {
-        val tmp = prefs.get("main.ui_scale_factor", null)
+        val tmp = global_prefs.get("main.ui_scale_factor", null)
         if (tmp != null)
         {
             ui_scale = tmp.toFloat()
@@ -212,7 +215,7 @@ fun App()
                             Icon(Icons.Default.FormatSize, null, Modifier.scale(0.7f))
                             Slider(value = ui_scale, onValueChange = {
                                 ui_scale = it
-                                prefs.putFloat("main.ui_scale_factor", ui_scale)
+                                global_prefs.putFloat("main.ui_scale_factor", ui_scale)
                                 Log.i(TAG, "density: $ui_scale")
                             }, onValueChangeFinished = { }, valueRange = 0.6f..3f, steps = 6, // todo: without setting the width explicitly,
                                 //  the slider takes up the whole remaining space
@@ -220,6 +223,7 @@ fun App()
                             Icon(Icons.Default.FormatSize, null)
                         }
                     }
+                    HorizontalDivider(modifier = Modifier.fillMaxWidth())
                     when (uiMode)
                     {
                         UiMode.CONTACTS ->
@@ -260,10 +264,8 @@ fun App()
                                 }
                             }
                         }
-                        UiMode.ABOUT -> AboutScreen()/*
-                        UiMode.SETTINGS -> TODO()
-
-                         */
+                        UiMode.ABOUT -> AboutScreen()
+                        UiMode.SETTINGS -> SettingDetails()
                         else -> UiPlaceholder()
                     }
                 }
@@ -443,7 +445,7 @@ private fun MainAppStart()
     var inputTextToxSelfName by remember { mutableStateOf(RandomNameGenerator.getFullName(Random())) }
     try
     {
-        val tmp = prefs.getBoolean("main.show_intro_screen", true)
+        val tmp = global_prefs.getBoolean("main.show_intro_screen", true)
         if (tmp == false)
         {
             showIntroScreen = false
@@ -465,7 +467,7 @@ private fun MainAppStart()
             Window(onCloseRequest = { isAskingToClose = true }, title = "TRIfA Material - Welcome", icon = appIcon) {
                 Column(Modifier.fillMaxSize()) {
                     Button(onClick = {
-                        prefs.putBoolean("main.show_intro_screen", false)
+                        global_prefs.putBoolean("main.show_intro_screen", false)
                         showIntroScreen = false
                         isOpen = false
                     }) {
@@ -518,10 +520,10 @@ private fun MainAppStart()
         var error = 0
         try
         {
-            x_ = prefs.get("main.window.position.x", "").toFloat().dp
-            y_ = prefs.get("main.window.position.y", "").toFloat().dp
-            w_ = prefs.get("main.window.size.width", "").toFloat().dp
-            h_ = prefs.get("main.window.size.height", "").toFloat().dp
+            x_ = global_prefs.get("main.window.position.x", "").toFloat().dp
+            y_ = global_prefs.get("main.window.position.y", "").toFloat().dp
+            w_ = global_prefs.get("main.window.size.width", "").toFloat().dp
+            h_ = global_prefs.get("main.window.size.height", "").toFloat().dp
         } catch (_: Exception)
         {
             error = 1
@@ -587,15 +589,15 @@ private fun MainAppStart()
 @Suppress("UNUSED_PARAMETER")
 private fun onWindowResize(size: DpSize)
 { // println("onWindowResize $size")
-    prefs.put("main.window.size.width", size.width.value.toString())
-    prefs.put("main.window.size.height", size.height.value.toString())
+    global_prefs.put("main.window.size.width", size.width.value.toString())
+    global_prefs.put("main.window.size.height", size.height.value.toString())
 }
 
 @Suppress("UNUSED_PARAMETER")
 private fun onWindowRelocate(position: WindowPosition)
 { // println("onWindowRelocate $position")
-    prefs.put("main.window.position.x", position.x.value.toString())
-    prefs.put("main.window.position.y", position.y.value.toString())
+    global_prefs.put("main.window.position.x", position.x.value.toString())
+    global_prefs.put("main.window.position.y", position.y.value.toString())
 }
 
 @Composable

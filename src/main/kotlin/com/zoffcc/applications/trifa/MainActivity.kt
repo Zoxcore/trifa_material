@@ -6,6 +6,10 @@ import MessageAction
 import UIGroupMessage
 import UIMessage
 import User
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import com.zoffcc.applications.sorm.FileDB
 import com.zoffcc.applications.sorm.Filetransfer
 import com.zoffcc.applications.sorm.GroupMessage
@@ -43,6 +47,7 @@ import com.zoffcc.applications.trifa.ToxVars.TOX_HASH_LENGTH
 import com.zoffcc.applications.trifa.ToxVars.TOX_MAX_NGC_FILE_AND_HEADER_SIZE
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import contactstore
+import global_prefs
 import groupmessagestore
 import groupstore
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -154,6 +159,45 @@ class MainActivity
             Log.i(TAG, "MainActivity:" + this)
 
             tox_service_fg = TrifaToxService()
+
+            var udp_mode_int = 1
+            try
+            {
+                if (!global_prefs.getBoolean("tox.settings.udp", true))
+                {
+                    udp_mode_int = 0
+                }
+            } catch (_: Exception)
+            {
+            }
+            PREF__udp_enabled = udp_mode_int
+            Log.i(TAG, "PREF__udp_enabled:" + PREF__udp_enabled)
+
+            var local_discovery_int = 1
+            try
+            {
+                if (!global_prefs.getBoolean("tox.settings.local_lan_discovery", true))
+                {
+                    local_discovery_int = 0
+                }
+            } catch (_: Exception)
+            {
+            }
+            PREF__local_discovery_enabled = local_discovery_int
+            Log.i(TAG, "PREF__local_discovery_enabled:" + PREF__local_discovery_enabled)
+
+            var ipv6_mode_int = 1
+            try
+            {
+                if (!global_prefs.getBoolean("tox.settings.ipv6", true))
+                {
+                    ipv6_mode_int = 0
+                }
+            } catch (_: Exception)
+            {
+            }
+            PREF__ipv6_enabled = ipv6_mode_int
+            Log.i(TAG, "PREF__ipv6_enabled:" + PREF__ipv6_enabled)
 
             lock_data_dir_input()
 
