@@ -33,9 +33,11 @@ import androidx.compose.ui.Alignment.Companion.Start
 import androidx.compose.ui.Alignment.Companion.Top
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.trifa.HelperGroup
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_peer_count
 import com.zoffcc.applications.trifa.ToxVars
@@ -61,11 +63,11 @@ fun GroupItemView(
         )
     }
     ConnectionIndicator(
-        modifier = Modifier.padding(end = 5.dp).requiredSize(16.dp),
+        modifier = Modifier.padding(end = 1.dp).requiredSize(16.dp),
         isConnected = if (groupItem.isConnected == 0) 0 else 2
     )
     PeerCountCircle(
-        modifier = Modifier.padding(end = 5.dp).requiredSize(30.dp),
+        modifier = Modifier.padding(end = 1.dp).requiredSize(28.dp),
         peerCount = (tox_group_peer_count(HelperGroup.tox_group_by_groupid__wrapper(groupItem.groupId)))
     )
 }
@@ -80,7 +82,10 @@ fun PeerCountCircle(
         .background(Color.LightGray, CircleShape)
 )
 {
-    Text(text = "" + peerCount, modifier = Modifier.align(Alignment.Center))
+    Text(text = "" + peerCount,
+        modifier = Modifier.align(Alignment.Center),
+        style = TextStyle(fontSize = 12.sp)
+    )
 }
 
 @Composable
