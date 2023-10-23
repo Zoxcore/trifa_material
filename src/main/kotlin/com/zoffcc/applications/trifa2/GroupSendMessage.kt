@@ -14,6 +14,7 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -110,4 +111,7 @@ fun GroupSendMessage(sendGroupMessage: (String) -> Unit) {
             }
         }
     ).run {  }
+    LaunchedEffect(Unit) {
+        textFieldFocusRequester.requestFocus()
+    }
 }
