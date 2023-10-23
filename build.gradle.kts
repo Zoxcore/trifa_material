@@ -60,6 +60,8 @@ compose.desktop {
 
         buildTypes.release.proguard {
             optimize.set(false)
+            obfuscate.set(false)
+            configurationFiles.from("proguard-rules.pro")
         }
 
         nativeDistributions {
