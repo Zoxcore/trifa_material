@@ -63,6 +63,7 @@ fun CoroutineScope.createGroupStore(): GroupStore
                         }
                     }
                     new_groups.add(item)
+                    new_groups.sortBy { it.groupId }
                     mutableStateFlow.value = state.copy(groups = new_groups)
                 }
                 global_semaphore_grouplist_ui.release()
@@ -98,6 +99,7 @@ fun CoroutineScope.createGroupStore(): GroupStore
                 {
                     new_groups.remove(to_remove_item)
                 }
+                new_groups.sortBy { it.groupId }
                 mutableStateFlow.value = state.copy(groups = new_groups,
                     selectedGroup = sel_item, selectedGroupId = sel_groupid)
                 global_semaphore_grouplist_ui.release()
@@ -152,6 +154,7 @@ fun CoroutineScope.createGroupStore(): GroupStore
                         new_groups.remove(to_remove_item)
                     }
                     new_groups.add(item)
+                    new_groups.sortBy { it.groupId }
                     mutableStateFlow.value = state.copy(groups = new_groups, selectedGroupId = state.selectedGroupId, selectedGroup = state.selectedGroup)
                 } else
                 {

@@ -63,6 +63,7 @@ fun CoroutineScope.createContactStore(): ContactStore
                         }
                     }
                     new_contacts.add(item)
+                    new_contacts.sortBy { it.pubkey }
                     mutableStateFlow.value = state.copy(contacts = new_contacts)
                 }
                 global_semaphore_contactlist_ui.release()
@@ -98,6 +99,7 @@ fun CoroutineScope.createContactStore(): ContactStore
                 {
                     new_contacts.remove(to_remove_item)
                 }
+                new_contacts.sortBy { it.pubkey }
                 mutableStateFlow.value = state.copy(contacts = new_contacts,
                     selectedContact = sel_item, selectedContactPubkey = sel_pubkey)
                 global_semaphore_contactlist_ui.release()
@@ -152,6 +154,7 @@ fun CoroutineScope.createContactStore(): ContactStore
                         new_contacts.remove(to_remove_item)
                     }
                     new_contacts.add(item)
+                    new_contacts.sortBy { it.pubkey }
                     mutableStateFlow.value = state.copy(contacts = new_contacts, selectedContactPubkey = state.selectedContactPubkey, selectedContact = state.selectedContact)
                 } else
                 {
