@@ -1539,6 +1539,16 @@ class MainActivity
         @JvmStatic
         fun android_tox_callback_group_privacy_state_cb_method(group_number: Long, a_TOX_GROUP_PRIVACY_STATE: Int)
         {
+            try
+            {
+                val new_privacy_state = a_TOX_GROUP_PRIVACY_STATE
+                val group_id = tox_group_by_groupnum__wrapper(group_number)
+                val group_name = tox_group_get_name(group_number)
+                val group_connection_status = tox_group_is_connected(group_number)
+                groupstore.update(item = GroupItem(name = group_name!!, isConnected = group_connection_status, groupId = group_id, privacyState = new_privacy_state))
+            } catch (_: Exception)
+            {
+            }
             update_savedata_file_wrapper()
         }
 
@@ -1567,6 +1577,16 @@ class MainActivity
         @JvmStatic
         fun android_tox_callback_group_peer_join_cb_method(group_number: Long, peer_id: Long)
         {
+            try
+            {
+                val new_privacy_state = tox_group_get_privacy_state(group_number)
+                val group_id = tox_group_by_groupnum__wrapper(group_number)
+                val group_name = tox_group_get_name(group_number)
+                val group_connection_status = tox_group_is_connected(group_number)
+                groupstore.update(item = GroupItem(name = group_name!!, isConnected = group_connection_status, groupId = group_id, privacyState = new_privacy_state))
+            } catch (_: Exception)
+            {
+            }
             update_savedata_file_wrapper()
         }
 
@@ -1585,12 +1605,32 @@ class MainActivity
         @JvmStatic
         fun android_tox_callback_group_join_fail_cb_method(group_number: Long, a_Tox_Group_Join_Fail: Int)
         {
+            try
+            {
+                val new_privacy_state = tox_group_get_privacy_state(group_number)
+                val group_id = tox_group_by_groupnum__wrapper(group_number)
+                val group_name = tox_group_get_name(group_number)
+                val group_connection_status = tox_group_is_connected(group_number)
+                groupstore.update(item = GroupItem(name = group_name!!, isConnected = group_connection_status, groupId = group_id, privacyState = new_privacy_state))
+            } catch (_: Exception)
+            {
+            }
             update_savedata_file_wrapper()
         }
 
         @JvmStatic
         fun android_tox_callback_group_self_join_cb_method(group_number: Long)
         {
+            try
+            {
+                val new_privacy_state = tox_group_get_privacy_state(group_number)
+                val group_id = tox_group_by_groupnum__wrapper(group_number)
+                val group_name = tox_group_get_name(group_number)
+                val group_connection_status = tox_group_is_connected(group_number)
+                groupstore.update(item = GroupItem(name = group_name!!, isConnected = group_connection_status, groupId = group_id, privacyState = new_privacy_state))
+            } catch (_: Exception)
+            {
+            }
             update_savedata_file_wrapper()
         }
 
@@ -1604,7 +1644,11 @@ class MainActivity
         fun android_tox_callback_group_connection_status_cb_method(group_number: Long, a_TOX_GROUP_CONNECTION_STATUS: Int)
         {
             try
-            { // groupstore.update(item = GroupItem(name = group_name!!, isConnected = 0, groupId = group_identifier, privacyState = new_privacy_state))
+            {
+                val new_privacy_state = tox_group_get_privacy_state(group_number)
+                val group_id = tox_group_by_groupnum__wrapper(group_number)
+                val group_name = tox_group_get_name(group_number)
+                groupstore.update(item = GroupItem(name = group_name!!, isConnected = a_TOX_GROUP_CONNECTION_STATUS, groupId = group_id, privacyState = new_privacy_state))
             } catch (_: Exception)
             {
             }

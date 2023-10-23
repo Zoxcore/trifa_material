@@ -18,17 +18,27 @@
 
 package org.briarproject.briar.desktop.contact
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement.spacedBy
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Alignment.Companion.Start
 import androidx.compose.ui.Alignment.Companion.Top
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.unit.dp
+import com.zoffcc.applications.trifa.HelperGroup
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_peer_count
+import com.zoffcc.applications.trifa.ToxVars
 
 @Composable
 fun GroupItemView(
@@ -52,8 +62,25 @@ fun GroupItemView(
     }
     ConnectionIndicator(
         modifier = Modifier.padding(end = 5.dp).requiredSize(16.dp),
-        isConnected = groupItem.isConnected
+        isConnected = if (groupItem.isConnected == 0) 0 else 2
     )
+    PeerCountCircle(
+        modifier = Modifier.padding(end = 5.dp).requiredSize(30.dp),
+        peerCount = (tox_group_peer_count(HelperGroup.tox_group_by_groupid__wrapper(groupItem.groupId)))
+    )
+}
+
+@Composable
+fun PeerCountCircle(
+    modifier: Modifier = Modifier.size(25.dp),
+    peerCount: Long,
+) = Box(
+    modifier = modifier
+        .border(1.dp, Color.Black, CircleShape)
+        .background(Color.LightGray, CircleShape)
+)
+{
+    Text(text = "" + peerCount, modifier = Modifier.align(Alignment.Center))
 }
 
 @Composable
