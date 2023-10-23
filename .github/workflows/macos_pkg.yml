@@ -6,13 +6,22 @@ on:
       version:
         description: dummy
         default: dummy
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
-  macos:
-    name: Package on macOS
+  build-macos-nightly-artifact:
+    name: Nightly Artifact macOS Build
     runs-on: macos-latest
+    if: |
+      true
+    permissions:
+      contents: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+
       - name: Install Java
         uses: actions/setup-java@v3
         with:
@@ -20,19 +29,42 @@ jobs:
           java-version: |
             11
             17
-      - name: Set up cache
-        uses: actions/cache@v3
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-      - name: Build
-        run: ./gradlew packageReleaseDmg  || cat /Users/runner/work/trifa_material/trifa_material/build/compose/logs/createDistributable/codesign-2*txt
-      - name: Upload artifacts
+
+      - name: test java1
+        run:  |
+              type java
+              java -version || exit 0
+              /usr/libexec/java_home -V
+              /usr/libexec/java_home -v 17
+              export JAVA_HOME=$(/usr/libexec/java_home -v17)
+              java -version
+              $JAVA_HOME/bin/java -version
+              $JAVA_HOME/bin/javac -version
+              ls -al /usr/local/Cellar/openjdk/
+      - name: build package
+        run:  |
+          ls -al
+          id
+          pwd
+          ./gradlew packageDistributionForCurrentOS || cat /Users/runner/work/trifa_material/trifa_material/build/compose/logs/createDistributable/codesign-2*txt
+      - name: Rename artifact for nightly upload
+        if: github.ref == 'refs/heads/master'
+        run: |
+          cp -v /Users/runner/work/trifa_material/trifa_material/build/compose/binaries/main/dmg/trifa_material-*.dmg trifa-material_nightly.dmg
+      - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          path: |
-            /Users/runner/work/trifa_material/trifa_material/build/compose/binaries/main/dmg/trifa_material-*.dmg
-
-
+          name: trifa-material_nightly.dmg
+          path: trifa-material_nightly.dmg
+      - name: Upload to nightly release
+        uses: ncipollo/release-action@v1
+        if: github.ref == 'refs/heads/master'
+        with:
+          allowUpdates: true
+          tag: nightly
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          prerelease: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "trifa-material_nightly.dmg"
