@@ -1,18 +1,6 @@
 name: macOS Nightly
 
 on:
-  push:
-    paths-ignore:
-     - 'README.md'
-     - 'CHANGELOG.md'
-     - '.github/workflows/nightly.yml'
-     - '.github/workflows/macos_pkg.yml'
-  pull_request:
-    paths-ignore:
-     - 'README.md'
-     - 'CHANGELOG.md'
-     - '.github/workflows/nightly.yml'
-     - '.github/workflows/macos_pkg.yml'
   workflow_dispatch:
     inputs:
       version:

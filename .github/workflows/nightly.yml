@@ -113,10 +113,10 @@ jobs:
 
   build-macos-nightly-artifact:
     name: Nightly Artifact macOS Build
-    runs-on: macos-11
-    needs: update-nightly-tag
+    runs-on: macos-latest
+    needs: [update-nightly-tag]
     if: |
-      false &&
+      always() &&
       (needs.update-nightly-tag.result == 'success' ||
         needs.update-nightly-tag.result == 'skipped')
     permissions:
@@ -124,11 +124,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: install cliclick
-        run:  brew install cliclick
-
-      - name: install deps
-        run:  brew install git
+      - name: Install Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: |
+            11
+            17
 
       - name: test java1
         run:  |
@@ -141,15 +143,12 @@ jobs:
               $JAVA_HOME/bin/java -version
               $JAVA_HOME/bin/javac -version
               ls -al /usr/local/Cellar/openjdk/
-
       - name: build package
         run:  |
           ls -al
           id
           pwd
-          export JAVA_HOME=$(/usr/libexec/java_home -v17)
           ./gradlew packageDistributionForCurrentOS || cat /Users/runner/work/trifa_material/trifa_material/build/compose/logs/createDistributable/codesign-2*txt
-
       - name: Rename artifact for nightly upload
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
