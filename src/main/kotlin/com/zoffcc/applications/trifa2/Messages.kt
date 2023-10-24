@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import com.zoffcc.applications.trifa.Log
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 
@@ -23,11 +24,15 @@ import org.jetbrains.compose.resources.painterResource
 internal fun Messages(messages: List<UIMessage>, ui_scale: Float) {
     val listState = rememberLazyListState()
     if (messages.isNotEmpty()) {
-        LaunchedEffect(messages.last()) {
+        LaunchedEffect(messages.last().msgDatabaseId) {
             try
             {
-                // listState.animateScrollToItem(messages.lastIndex, scrollOffset = 0)
-                listState.scrollToItem(messages.lastIndex)
+                //Log.i(com.zoffcc.applications.trifa.TAG, "listState.canScrollForward=" + listState.canScrollForward
+                //+ " messages.lastIndex=" + messages.lastIndex + " messages.size=" + messages.size)
+                //if (listState.canScrollForward)
+                //{ // listState.animateScrollToItem(messages.lastIndex, scrollOffset = 0)
+                    listState.scrollToItem(messages.lastIndex, 20000)
+                //}
             }
             catch (e : Exception)
             {
@@ -41,6 +46,7 @@ internal fun Messages(messages: List<UIMessage>, ui_scale: Float) {
             state = listState,
         ) {
             item { Spacer(Modifier.size(20.dp)) }
+            Log.i(com.zoffcc.applications.trifa.TAG, "LazyColumn --> draw")
             items(messages, key = { it.id }) {
                 ChatMessage(isMyMessage = (it.user == myUser), it, ui_scale)
             }

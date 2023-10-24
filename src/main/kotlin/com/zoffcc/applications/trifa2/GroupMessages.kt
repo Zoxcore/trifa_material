@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import com.zoffcc.applications.trifa.Log
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 import java.io.File
@@ -29,11 +30,11 @@ import java.io.File
 internal fun GroupMessages(groupmessages: List<UIGroupMessage>, ui_scale: Float) {
     val listState = rememberLazyListState()
     if (groupmessages.isNotEmpty()) {
-        LaunchedEffect(groupmessages.last()) {
+        LaunchedEffect(groupmessages.last().id, groupmessages.last().toxpk) {
             try
             {
                 // listState.animateScrollToItem(groupmessages.lastIndex, scrollOffset = 0)
-                listState.scrollToItem(groupmessages.lastIndex)
+                listState.scrollToItem(groupmessages.lastIndex, 2000)
             }
             catch (e : Exception)
             {
