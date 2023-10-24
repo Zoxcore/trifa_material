@@ -1,6 +1,9 @@
 package org.briarproject.briar.desktop.contact
 
 import CONTACT_COLUMN_WIDTH
+import GROUPITEM_HEIGHT
+import GROUPS_COLUMN_WIDTH
+import GROUP_PEER_COLUMN_WIDTH
 import TOP_HEADER_SIZE
 import androidx.compose.foundation.ContextMenuArea
 import androidx.compose.foundation.ContextMenuItem
@@ -31,7 +34,7 @@ import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 fun GroupList(
     groupList: StateGroups,
 ) = Column(
-    modifier = Modifier.fillMaxHeight().width(CONTACT_COLUMN_WIDTH).background(Color.Transparent),
+    modifier = Modifier.fillMaxHeight().width(GROUPS_COLUMN_WIDTH).background(Color.Transparent),
 ) {
     VerticallyScrollableArea(modifier = Modifier.fillMaxSize()) { scrollState ->
         LazyColumn(
@@ -52,7 +55,7 @@ fun GroupList(
                     selected = (groupList.selectedGroupId == item.groupId)
                 ) {
                     val modifier = Modifier
-                        .heightIn(min = TOP_HEADER_SIZE)
+                        .heightIn(min = GROUPITEM_HEIGHT)
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
                         .padding(start = 16.dp, end = 4.dp)

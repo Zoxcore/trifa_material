@@ -49,6 +49,7 @@ import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import contactstore
 import global_prefs
 import groupmessagestore
+import grouppeerstore
 import groupstore
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -58,6 +59,7 @@ import lock_data_dir_input
 import messagestore
 import org.briarproject.briar.desktop.contact.ContactItem
 import org.briarproject.briar.desktop.contact.GroupItem
+import org.briarproject.briar.desktop.contact.GroupPeerItem
 import set_tox_online_state
 import timestampMs
 import toxdatastore
@@ -1579,6 +1581,25 @@ class MainActivity
         {
             try
             {
+                val group_id = tox_group_by_groupnum__wrapper(group_number)
+                if (groupstore.stateFlow.value.selectedGroupId == group_id)
+                {
+                    val peer_pubkey = tox_group_peer_get_public_key(group_number, peer_id)
+                    var peer_name = tox_group_peer_get_name(group_number, peer_id)
+                    val peer_connection_status = tox_group_peer_get_connection_status(group_number, peer_id)
+                    val peer_role = tox_group_peer_get_role(group_number, peer_id)
+                    if ((peer_name == null) || (peer_name.length < 1))
+                    {
+                        peer_name = "peer " + peer_id
+                    }
+                    grouppeerstore.update(item = GroupPeerItem(groupID = group_id, name = peer_name, connectionStatus = peer_connection_status, pubkey = peer_pubkey!!, peerRole = peer_role))
+                }
+            } catch (_: Exception)
+            {
+            }
+
+            try
+            {
                 val new_privacy_state = tox_group_get_privacy_state(group_number)
                 val group_id = tox_group_by_groupnum__wrapper(group_number)
                 val group_name = tox_group_get_name(group_number)
@@ -1593,12 +1614,44 @@ class MainActivity
         @JvmStatic
         fun android_tox_callback_group_peer_exit_cb_method(group_number: Long, peer_id: Long, a_Tox_Group_Exit_Type: Int)
         {
+            try
+            {
+                val group_id = tox_group_by_groupnum__wrapper(group_number)
+                if (groupstore.stateFlow.value.selectedGroupId == group_id)
+                {
+                    val peer_pubkey = tox_group_peer_get_public_key(group_number, peer_id)
+                    grouppeerstore.remove(item = GroupPeerItem(
+                        groupID = group_id, name = "",
+                        connectionStatus = 0, pubkey = peer_pubkey!!,
+                        peerRole = 2))
+                }
+            } catch (_: Exception)
+            {
+            }
             update_savedata_file_wrapper()
         }
 
         @JvmStatic
         fun android_tox_callback_group_peer_name_cb_method(group_number: Long, peer_id: Long)
         {
+            try
+            {
+                val group_id = tox_group_by_groupnum__wrapper(group_number)
+                if (groupstore.stateFlow.value.selectedGroupId == group_id)
+                {
+                    val peer_pubkey = tox_group_peer_get_public_key(group_number, peer_id)
+                    var peer_name = tox_group_peer_get_name(group_number, peer_id)
+                    val peer_connection_status = tox_group_peer_get_connection_status(group_number, peer_id)
+                    val peer_role = tox_group_peer_get_role(group_number, peer_id)
+                    if ((peer_name == null) || (peer_name.length < 1))
+                    {
+                        peer_name = "peer " + peer_id
+                    }
+                    grouppeerstore.update(item = GroupPeerItem(groupID = group_id, name = peer_name, connectionStatus = peer_connection_status, pubkey = peer_pubkey!!, peerRole = peer_role))
+                }
+            } catch (_: Exception)
+            {
+            }
             update_savedata_file_wrapper()
         }
 

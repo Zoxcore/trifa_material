@@ -12,8 +12,14 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_chat_i
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_grouplist
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_name
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_number_groups
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_peerlist
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_privacy_state
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_is_connected
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_peer_count
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_peer_get_connection_status
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_peer_get_name
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_peer_get_public_key
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_peer_get_role
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_iterate
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_iteration_interval
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_kill
@@ -21,9 +27,11 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_friend_
 import com.zoffcc.applications.trifa.TRIFAGlobals.GROUP_ID_LENGTH
 import com.zoffcc.applications.trifa.TRIFAGlobals.global_last_activity_outgoung_ft_ts
 import contactstore
+import grouppeerstore
 import groupstore
 import org.briarproject.briar.desktop.contact.ContactItem
 import org.briarproject.briar.desktop.contact.GroupItem
+import org.briarproject.briar.desktop.contact.GroupPeerItem
 import set_tox_running_state
 import toxdatastore
 import unlock_data_dir_input
@@ -253,6 +261,43 @@ class TrifaToxService
             } // Log.i(TAG, "safe_string:out=" + out);
             return out
         } // --------------- JNI --------------- // --------------- JNI --------------- // --------------- JNI ---------------
+
+        fun clear_grouppeers()
+        {
+            try
+            {
+                grouppeerstore.clear()
+            } catch (_: Exception)
+            {
+            }
+        }
+
+        fun load_grouppeers(groupID: String)
+        {
+            val groupnum = HelperGroup.tox_group_by_groupid__wrapper(groupID)
+            val num_peers: Long = tox_group_peer_count(groupnum)
+            val group_peerlist = tox_group_get_peerlist(groupnum)
+            if (num_peers > 0)
+            {
+                group_peerlist!!.forEach {
+                    val peer_pubkey = tox_group_peer_get_public_key(groupnum, it)
+                    val peer_name = tox_group_peer_get_name(groupnum, it)
+                    val peer_connection_status = tox_group_peer_get_connection_status(groupnum, it)
+                    val peer_role = tox_group_peer_get_role(groupnum, it)
+                    try
+                    {
+                        grouppeerstore.add(item = GroupPeerItem(
+                            name = if (peer_name != null) peer_name else ("peer " + it),
+                            connectionStatus = peer_connection_status,
+                            pubkey = peer_pubkey!!,
+                            peerRole = peer_role,
+                            groupID = groupID))
+                    } catch (_: Exception)
+                    {
+                    }
+                }
+            }
+        }
     }
 
     fun clear_friends()
@@ -324,4 +369,5 @@ class TrifaToxService
             conf_++
         }
     }
+
 }

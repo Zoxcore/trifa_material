@@ -60,10 +60,13 @@ import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity.Companion.main_init
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_name
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_chat_id
 import com.zoffcc.applications.trifa.PrefsSettings
 import com.zoffcc.applications.trifa.RandomNameGenerator
 import com.zoffcc.applications.trifa.TRIFAGlobals
 import com.zoffcc.applications.trifa.TrifaToxService
+import com.zoffcc.applications.trifa.TrifaToxService.Companion.clear_grouppeers
+import com.zoffcc.applications.trifa.TrifaToxService.Companion.load_grouppeers
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -78,6 +81,7 @@ import kotlinx.coroutines.runBlocking
 import org.briarproject.briar.desktop.SettingDetails
 import org.briarproject.briar.desktop.contact.ContactList
 import org.briarproject.briar.desktop.contact.GroupList
+import org.briarproject.briar.desktop.contact.GroupPeerList
 import org.briarproject.briar.desktop.navigation.BriarSidebar
 import org.briarproject.briar.desktop.ui.AboutScreen
 import org.briarproject.briar.desktop.ui.ExplainerChat
@@ -101,13 +105,19 @@ var online_button_color_wrapper = Color.White.toArgb()
 var closing_application = false
 val global_prefs: Preferences = Preferences.userNodeForPackage(com.zoffcc.applications.trifa.PrefsSettings::class.java)
 val TOP_HEADER_SIZE = 56.dp
+val CONTACTITEM_HEIGHT = 50.dp
+val GROUPITEM_HEIGHT = 50.dp
+val GROUP_PEER_HEIGHT = 33.dp
 val SETTINGS_HEADER_SIZE = 56.dp
 val CONTACT_COLUMN_WIDTH = 230.dp
+val GROUPS_COLUMN_WIDTH = 200.dp
+val GROUP_PEER_COLUMN_WIDTH = 180.dp
 val IMAGE_PREVIEW_SIZE = 70f
 val AVATAR_SIZE = 40f
 val MAX_AVATAR_SIZE = 70f
 val ImageloaderDispatcher = Executors.newFixedThreadPool(5).asCoroutineDispatcher()
 var global_semaphore_contactlist_ui = Semaphore(1)
+var global_semaphore_grouppeerlist_ui = Semaphore(1)
 var global_semaphore_grouplist_ui = Semaphore(1)
 var global_semaphore_messagelist_ui = Semaphore(1)
 var global_semaphore_groupmessagelist_ui = Semaphore(1)
@@ -256,8 +266,16 @@ fun App()
                         {
                             val groupfocusRequester = remember { FocusRequester() }
                             val groups by groupstore.stateFlow.collectAsState()
+                            val grouppeers by grouppeerstore.stateFlow.collectAsState()
                             Row(modifier = Modifier.fillMaxWidth()) {
                                 GroupList(groupList = groups)
+                                VerticalDivider()
+                                clear_grouppeers()
+                                if (groups.selectedGroupId != null)
+                                {
+                                    load_grouppeers(groups.selectedGroupId!!)
+                                }
+                                GroupPeerList(grouppeerList = grouppeers)
                                 VerticalDivider()
                                 if (groups.selectedGroupId == null)
                                 {
