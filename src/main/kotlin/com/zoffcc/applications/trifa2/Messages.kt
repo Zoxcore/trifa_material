@@ -45,13 +45,13 @@ internal fun Messages(messages: List<UIMessage>, ui_scale: Float) {
             verticalArrangement = Arrangement.spacedBy(8.dp),
             state = listState,
         ) {
-            item { Spacer(Modifier.size(20.dp)) }
-            Log.i(com.zoffcc.applications.trifa.TAG, "LazyColumn --> draw")
+            item { Spacer(Modifier.size(SPACE_BEFORE_FIRST_MESSAGE)) }
+            // Log.i(com.zoffcc.applications.trifa.TAG, "LazyColumn --> draw")
             items(messages, key = { it.id }) {
                 ChatMessage(isMyMessage = (it.user == myUser), it, ui_scale)
             }
             item {
-                Box(Modifier.height(70.dp))
+                Box(Modifier.height(SPACE_AFTER_LAST_MESSAGE))
             }
         }
         VerticalScrollbar(
