@@ -1,10 +1,9 @@
 package org.briarproject.briar.desktop.contact
 
-import CONTACTITEM_HEIGHT
 import CONTACT_COLUMN_WIDTH
+import GROUP_PEER_COLUMN_WIDTH
+import GROUP_PEER_HEIGHT
 import TOP_HEADER_SIZE
-import androidx.compose.foundation.ContextMenuArea
-import androidx.compose.foundation.ContextMenuItem
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,61 +15,45 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import com.zoffcc.applications.trifa.HelperGeneric.delete_friend_wrapper
-import com.zoffcc.applications.trifa.StateContacts
-import contactstore
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import com.zoffcc.applications.trifa.StateGroupPeers
+import grouppeerstore
 import org.briarproject.briar.desktop.ui.ListItemView
 import org.briarproject.briar.desktop.ui.VerticallyScrollableArea
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 
 @Composable
-fun ContactList(
-    contactList: StateContacts,
+fun GroupPeerList(
+    grouppeerList: StateGroupPeers,
 ) = Column(
-    modifier = Modifier.fillMaxHeight().width(CONTACT_COLUMN_WIDTH).background(Color.Transparent),
+    modifier = Modifier.fillMaxHeight().width(GROUP_PEER_COLUMN_WIDTH).background(Color.Transparent),
 ) {
     VerticallyScrollableArea(modifier = Modifier.fillMaxSize()) { scrollState ->
         LazyColumn(
             state = scrollState,
             modifier = Modifier
                 .semantics {
-                    contentDescription = i18n("access.contact.list")
+                    contentDescription = i18n("access.grouppeer.list")
                 }
                 .selectableGroup()
         ) {
             items(
-                items = contactList.contacts,
+                items = grouppeerList.grouppeers,
                 key = { item -> item.pubkey },
                 contentType = { item -> item::class }
             ) { item ->
                 ListItemView(
-                    onSelect = { contactstore.select(item.pubkey) },
-                    selected = (contactList.selectedContactPubkey == item.pubkey)
+                    onSelect = { grouppeerstore.select(item.pubkey) },
+                    selected = (grouppeerList.selectedGrouppeerPubkey == item.pubkey)
                 ) {
                     val modifier = Modifier
-                        .heightIn(min = CONTACTITEM_HEIGHT)
+                        .heightIn(min = GROUP_PEER_HEIGHT)
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
                         .padding(start = 16.dp, end = 4.dp)
-                    ContextMenuArea(items = {
-                        listOf(
-                            ContextMenuItem("delete") {
-                                contactstore.remove(item = ContactItem(name = "", isConnected = 0, pubkey = item.pubkey))
-                                GlobalScope.launch(Dispatchers.IO) {
-                                    delete_friend_wrapper(item.pubkey)
-                                }
-                                 // delete a contact including all messages
-                            },
-                        )
-                    }) {
-                        ContactItemView(
-                            contactItem = item,
+                        GrouppeerItemView(
+                            grouppeerItem = item,
                             modifier = modifier
                         )
-                    }
                 }
             }
         }

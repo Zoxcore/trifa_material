@@ -32,6 +32,7 @@ import com.zoffcc.applications.trifa.TRIFAGlobals
 import com.zoffcc.applications.trifa.ToxVars
 import com.zoffcc.applications.trifa.ToxVars.TOX_MESSAGE_TYPE
 import com.zoffcc.applications.trifa.createContactStore
+import com.zoffcc.applications.trifa.createGroupPeerStore
 import com.zoffcc.applications.trifa.createGroupStore
 import com.zoffcc.applications.trifa.createSavepathStore
 import com.zoffcc.applications.trifa.createToxDataStore
@@ -45,6 +46,7 @@ val myUser = User("Me", picture = null, toxpk = null)
 val messagestore = CoroutineScope(SupervisorJob()).createMessageStore()
 val groupmessagestore = CoroutineScope(SupervisorJob()).createGroupMessageStore()
 val contactstore = CoroutineScope(SupervisorJob()).createContactStore()
+val grouppeerstore = CoroutineScope(SupervisorJob()).createGroupPeerStore()
 val groupstore = CoroutineScope(SupervisorJob()).createGroupStore()
 val savepathstore = CoroutineScope(SupervisorJob()).createSavepathStore()
 val toxdatastore = CoroutineScope(SupervisorJob()).createToxDataStore()
