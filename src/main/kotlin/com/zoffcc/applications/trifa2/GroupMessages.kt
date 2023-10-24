@@ -47,12 +47,12 @@ internal fun GroupMessages(groupmessages: List<UIGroupMessage>, ui_scale: Float)
             verticalArrangement = Arrangement.spacedBy(8.dp),
             state = listState
         ) {
-            item { Spacer(Modifier.size(20.dp)) }
+            item { Spacer(Modifier.size(SPACE_BEFORE_FIRST_MESSAGE)) }
             items(groupmessages, key = { it.id }) {
                 GroupChatMessage(isMyMessage = it.user == myUser, it, ui_scale)
             }
             item {
-                Box(Modifier.height(70.dp))
+                Box(Modifier.height(SPACE_AFTER_LAST_MESSAGE))
             }
         }
         VerticalScrollbar(
