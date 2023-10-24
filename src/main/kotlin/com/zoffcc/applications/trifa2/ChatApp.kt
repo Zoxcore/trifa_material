@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -49,7 +50,7 @@ val savepathstore = CoroutineScope(SupervisorJob()).createSavepathStore()
 val toxdatastore = CoroutineScope(SupervisorJob()).createToxDataStore()
 
 @Composable
-fun ChatAppWithScaffold(displayTextField: Boolean = true, contactList: StateContacts, ui_scale: Float)
+fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolean = true, contactList: StateContacts, ui_scale: Float)
 {
     Theme {
         Scaffold(topBar = {
@@ -61,13 +62,13 @@ fun ChatAppWithScaffold(displayTextField: Boolean = true, contactList: StateCont
                 modifier = Modifier.height(40.dp)
             )
         }) {
-            ChatApp(displayTextField = displayTextField, contactList.selectedContactPubkey, ui_scale)
+            ChatApp(focusRequester = focusRequester, displayTextField = displayTextField, contactList.selectedContactPubkey, ui_scale)
         }
     }
 }
 
 @Composable
-fun GroupAppWithScaffold(displayTextField: Boolean = true, groupList: StateGroups, ui_scale: Float)
+fun GroupAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolean = true, groupList: StateGroups, ui_scale: Float)
 {
     Theme {
         Scaffold(topBar = {
@@ -79,14 +80,14 @@ fun GroupAppWithScaffold(displayTextField: Boolean = true, groupList: StateGroup
                 modifier = Modifier.height(40.dp)
             )
         }) {
-            GroupApp(displayTextField = displayTextField, groupList.selectedGroupId, ui_scale)
+            GroupApp(focusRequester = focusRequester, displayTextField = displayTextField, groupList.selectedGroupId, ui_scale)
         }
     }
 }
 
 @OptIn(ExperimentalResourceApi::class)
 @Composable
-fun ChatApp(displayTextField: Boolean = true, selectedContactPubkey: String?, ui_scale: Float)
+fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, selectedContactPubkey: String?, ui_scale: Float)
 {
     val state by messagestore.stateFlow.collectAsState()
     Theme {
@@ -99,7 +100,7 @@ fun ChatApp(displayTextField: Boolean = true, selectedContactPubkey: String?, ui
                     }
                     if (displayTextField)
                     {
-                        SendMessage { text -> //
+                        SendMessage (focusRequester) { text -> //
                             // Log.i(TAG, "selectedContactPubkey=" + selectedContactPubkey)
                             val friend_num = tox_friend_by_public_key(selectedContactPubkey)
                             val timestamp = System.currentTimeMillis()
@@ -119,7 +120,7 @@ fun ChatApp(displayTextField: Boolean = true, selectedContactPubkey: String?, ui
 
 @OptIn(ExperimentalResourceApi::class)
 @Composable
-fun GroupApp(displayTextField: Boolean = true, selectedGroupId: String?, ui_scale: Float)
+fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, selectedGroupId: String?, ui_scale: Float)
 {
     val state by groupmessagestore.stateFlow.collectAsState()
     Theme {
@@ -132,7 +133,7 @@ fun GroupApp(displayTextField: Boolean = true, selectedGroupId: String?, ui_scal
                     }
                     if (displayTextField)
                     {
-                        GroupSendMessage { text ->
+                        GroupSendMessage (focusRequester) { text ->
                             val timestamp = System.currentTimeMillis()
                             val groupnum: Long = tox_group_by_groupid__wrapper(selectedGroupId!!)
                             val message_id: Long = tox_group_send_message(groupnum, ToxVars.TOX_MESSAGE_TYPE.TOX_MESSAGE_TYPE_NORMAL.value, text)

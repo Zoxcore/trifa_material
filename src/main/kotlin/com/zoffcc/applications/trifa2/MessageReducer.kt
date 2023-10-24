@@ -23,30 +23,35 @@ fun chatReducer(state: MessageState, action: MessageAction): MessageState = when
     is MessageAction.SendMessagesBulk ->
     {
         val m = state.messages
+        Log.i(com.zoffcc.applications.trifa.TAG, "MessageAction.SendMessagesBulk")
         state.copy(messages = (m + action.messages).toMutableStateList())
     }
     is MessageAction.SendMessage ->
     {
-        val m = state.messages
-        m.add(action.message)
-        m.takeLast(maxMessages)
-        state.copy(messages = state.messages)
+        // val m = state.messages
+        // m.add(action.message)
+        // m.takeLast(maxMessages)
+        Log.i(com.zoffcc.applications.trifa.TAG, "MessageAction.SendMessage")
+        state.copy(messages = (state.messages + action.message).takeLast(maxMessages).toMutableStateList())
     }
     is MessageAction.ReceiveMessagesBulkWithClear ->
     {
-        state.messages.clear()
+        // state.messages.clear()
+        Log.i(com.zoffcc.applications.trifa.TAG, "MessageAction.ReceiveMessagesBulkWithClear")
         state.copy(messages = (action.messages).toMutableStateList())
     }
     is MessageAction.ReceiveMessage ->
     {
-        val m = state.messages
-        m.add(action.message)
-        m.takeLast(maxMessages)
-        state.copy(messages = state.messages)
+        // val m = state.messages
+        // m.add(action.message)
+        // m.takeLast(maxMessages)
+        Log.i(com.zoffcc.applications.trifa.TAG, "MessageAction.ReceiveMessage")
+        state.copy(messages = (state.messages + action.message).takeLast(maxMessages).toMutableStateList())
     }
     is MessageAction.Clear ->
     {
-        state.messages.clear()
+        // state.messages.clear()
+        Log.i(com.zoffcc.applications.trifa.TAG, "MessageAction.Clear")
         state.copy(mutableStateListOf())
     }
     is MessageAction.UpdateMessage ->
@@ -68,11 +73,13 @@ fun chatReducer(state: MessageState, action: MessageAction): MessageState = when
         catch (e: Exception)
         {
         }
+        Log.i(com.zoffcc.applications.trifa.TAG, "MessageAction.UpdateMessage")
         state.copy(messages = state.messages)
     }
     else ->
     {
-        state.messages.clear()
+        // state.messages.clear()
+        Log.i(com.zoffcc.applications.trifa.TAG, "MessageAction.Default -> Clear")
         state.copy(mutableStateListOf())
     }
 }

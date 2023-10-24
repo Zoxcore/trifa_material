@@ -38,6 +38,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.painterResource
@@ -66,11 +67,13 @@ import com.zoffcc.applications.trifa.TrifaToxService
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.briarproject.briar.desktop.SettingDetails
 import org.briarproject.briar.desktop.contact.ContactList
@@ -228,6 +231,7 @@ fun App()
                     {
                         UiMode.CONTACTS ->
                         {
+                            val focusRequester = remember { FocusRequester() }
                             val contacts by contactstore.stateFlow.collectAsState()
                             Row(modifier = Modifier.fillMaxWidth()) {
                                 ContactList(contactList = contacts)
@@ -241,12 +245,16 @@ fun App()
                                     //GlobalScope.launch {
                                         load_messages_for_friend(contacts.selectedContactPubkey)
                                     //}
-                                    ChatAppWithScaffold(contactList = contacts, ui_scale = ui_scale)
+                                    ChatAppWithScaffold(focusRequester = focusRequester, contactList = contacts, ui_scale = ui_scale)
+                                    LaunchedEffect(contacts.selectedContactPubkey) {
+                                        focusRequester.requestFocus()
+                                    }
                                 }
                             }
                         }
                         UiMode.GROUPS ->
                         {
+                            val groupfocusRequester = remember { FocusRequester() }
                             val groups by groupstore.stateFlow.collectAsState()
                             Row(modifier = Modifier.fillMaxWidth()) {
                                 GroupList(groupList = groups)
@@ -260,7 +268,10 @@ fun App()
                                     //GlobalScope.launch {
                                         load_groupmessages_for_friend(groups.selectedGroupId)
                                     //}
-                                    GroupAppWithScaffold(groupList = groups, ui_scale = ui_scale)
+                                    GroupAppWithScaffold(focusRequester = groupfocusRequester, groupList = groups, ui_scale = ui_scale)
+                                    LaunchedEffect(groups.selectedGroupId) {
+                                        groupfocusRequester.requestFocus()
+                                    }
                                 }
                             }
                         }
@@ -303,6 +314,8 @@ fun load_messages_for_friend(selectedContactPubkey: String?)
                     }
                 }
             }
+            // Thread.sleep(4000)
+            // Log.i(TAG, "LLLLLLLLLLLLLL")
             messagestore.send(MessageAction.ReceiveMessagesBulkWithClear(uimessages, toxk))
         } catch (e: Exception)
         {
