@@ -55,7 +55,9 @@ fun CoroutineScope.createGroupPeerStore(): GroupPeerStore
                         }
                     }
                     new_peers.add(item)
-                    new_peers.sortBy { it.pubkey }
+                    val self_group_pubkey = MainActivity.tox_group_self_get_public_key(
+                        HelperGroup.tox_group_by_groupid__wrapper(item.groupID.lowercase()))
+                    new_peers = getListWithGroupingAndSorting(new_peers, self_group_pubkey)
                     mutableStateFlow.value = state.copy(grouppeers = new_peers)
                 }
                 global_semaphore_grouppeerlist_ui.release()
@@ -91,7 +93,9 @@ fun CoroutineScope.createGroupPeerStore(): GroupPeerStore
                 {
                     new_peers.remove(to_remove_item)
                 }
-                new_peers.sortBy { it.pubkey }
+                val self_group_pubkey = MainActivity.tox_group_self_get_public_key(
+                    HelperGroup.tox_group_by_groupid__wrapper(item.groupID.lowercase()))
+                new_peers = getListWithGroupingAndSorting(new_peers, self_group_pubkey)
                 mutableStateFlow.value = state.copy(grouppeers = new_peers,
                     selectedGrouppeer = sel_item, selectedGrouppeerPubkey = sel_pubkey)
                 global_semaphore_grouppeerlist_ui.release()
@@ -147,7 +151,9 @@ fun CoroutineScope.createGroupPeerStore(): GroupPeerStore
                         new_peers.remove(to_remove_item)
                     }
                     new_peers.add(item)
-                    new_peers.sortBy { it.pubkey }
+                    val self_group_pubkey = MainActivity.tox_group_self_get_public_key(
+                        HelperGroup.tox_group_by_groupid__wrapper(item.groupID.lowercase()))
+                    new_peers = getListWithGroupingAndSorting(new_peers, self_group_pubkey)
                     mutableStateFlow.value = state.copy(grouppeers = new_peers,
                         selectedGrouppeerPubkey = state.selectedGrouppeerPubkey,
                         selectedGrouppeer = state.selectedGrouppeer)
@@ -171,4 +177,18 @@ fun CoroutineScope.createGroupPeerStore(): GroupPeerStore
             }
         }
     }
+}
+
+val rolesOrder = mapOf(0 to 0, 1 to 1, 2 to 2, 3 to 3)
+
+fun getListWithGroupingAndSorting(peerlist: ArrayList<GroupPeerItem>, self_group_pubkey: String?)
+    : ArrayList<GroupPeerItem>
+{
+    val selfOrder = mapOf(true to 0, false to 1)
+    return ArrayList(peerlist.sortedWith(
+        compareBy<GroupPeerItem> { selfOrder[it.pubkey == self_group_pubkey] }.
+        thenBy { rolesOrder[it.peerRole] }.
+        thenByDescending { it.pubkey }
+    )
+    )
 }
