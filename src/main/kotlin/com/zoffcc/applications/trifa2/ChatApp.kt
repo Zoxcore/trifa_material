@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
@@ -17,6 +18,8 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachFile
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -28,14 +31,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.AwtWindow
+import com.zoffcc.applications.ffmpegav.AVActivity
+import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_get_video_in_devices
+import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_init
+import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_set_video_capture_callback
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity
 import com.zoffcc.applications.trifa.MainActivity.Companion.sent_message_to_db
+import com.zoffcc.applications.trifa.MainActivity.Companion.set_JNI_video_buffer2
+import com.zoffcc.applications.trifa.MainActivity.Companion.set_av_call_status
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_send_message
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_send_message
+import com.zoffcc.applications.trifa.MainActivity.Companion.toxav_call
+import com.zoffcc.applications.trifa.MainActivity.Companion.toxav_video_send_frame_age
 import com.zoffcc.applications.trifa.StateContacts
 import com.zoffcc.applications.trifa.StateGroups
 import com.zoffcc.applications.trifa.TRIFAGlobals
@@ -51,8 +61,7 @@ import kotlinx.coroutines.SupervisorJob
 import org.briarproject.briar.desktop.utils.ImagePicker.pickImageUsingDialog
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
-import java.awt.FileDialog
-import java.awt.Frame
+import java.nio.ByteBuffer
 
 private const val TAG = "trifa.Chatapp"
 val myUser = User("Me", picture = null, toxpk = null)
@@ -74,7 +83,94 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
                     contactList.selectedContact?.let { Text(it.name) }
                 },
                 backgroundColor = MaterialTheme.colors.background,
-                modifier = Modifier.height(40.dp)
+                modifier = Modifier.height(40.dp),
+                actions = {
+                    IconButton(onClick = {/* Do Something*/ }) {
+                        Icon(Icons.Filled.Call, null)
+                    }
+                    IconButton(onClick = {
+                        // video call button pressed
+                        val friendnum = tox_friend_by_public_key(contactList.selectedContactPubkey)
+                        set_av_call_status(1)
+                        val call_res = toxav_call(friendnum,16, 2500)
+                        println("toxav call_res: $call_res")
+                        val res = ffmpegav_init()
+                        println("ffmpeg init: $res")
+                        val video_in_devices = ffmpegav_get_video_in_devices()
+                        println("ffmpeg video in devices: " + video_in_devices.size)
+
+                        val capture_video_width = 1280
+                        val capture_video_height = 720
+                        var video_buffer_2 : ByteBuffer? = null
+
+                        for (i in video_in_devices.indices)
+                        {
+                            if (video_in_devices[i] != null)
+                            {
+                                println("ffmpeg video in device #" + i + ": " + video_in_devices[i])
+                                if (i == 1)
+                                {
+                                    val res_vd = AVActivity.ffmpegav_open_video_in_device(
+                                        video_in_devices[i],
+                                        capture_video_width,
+                                        capture_video_height,
+                                        ":0.0", 20)
+                                    println("ffmpeg open video capture device: $res_vd")
+                                }
+                            }
+                        }
+
+                        val frame_width_px1 = capture_video_width
+                        val frame_height_px1 = capture_video_height
+                        val buffer_size_in_bytes1 = (frame_width_px1 * frame_height_px1 * 3) / 2
+                        val video_buffer_1 = ByteBuffer.allocateDirect(buffer_size_in_bytes1)
+                        AVActivity.ffmpegav_set_JNI_video_buffer(video_buffer_1, frame_width_px1, frame_height_px1)
+                        val frame_width_px2 = capture_video_width
+                        val frame_height_px2 = capture_video_height
+                        val y_size = frame_width_px2 * frame_height_px2
+                        val u_size = (frame_width_px2 * frame_height_px2 / 4)
+                        val v_size = (frame_width_px2 * frame_height_px2 / 4)
+                        val video_buffer_2_y = ByteBuffer.allocateDirect(y_size)
+                        val video_buffer_2_u = ByteBuffer.allocateDirect(u_size)
+                        val video_buffer_2_v = ByteBuffer.allocateDirect(v_size)
+                        AVActivity.ffmpegav_set_JNI_video_buffer2(video_buffer_2_y, video_buffer_2_u, video_buffer_2_v,
+                            frame_width_px2, frame_height_px2)
+
+                        ffmpegav_set_video_capture_callback(object : AVActivity.video_capture_callback
+                        {
+                            override fun onSuccess(width: Long, height: Long, pts: Long)
+                            {
+                                com.zoffcc.applications.ffmpegav.Log.i(TAG, "ffmpeg open video capture onSuccess: $width $height $pts")
+                                val frame_width_px: Int = width.toInt()
+                                val frame_height_px: Int = height.toInt()
+                                val buffer_size_in_bytes3 = (frame_width_px * frame_height_px * 1.5f).toInt()
+                                if ((video_buffer_2 == null) || (frame_width_px != frame_width_px2) || (frame_height_px != frame_height_px2))
+                                {
+                                    video_buffer_2 = ByteBuffer.allocateDirect(buffer_size_in_bytes3)
+                                    set_JNI_video_buffer2(video_buffer_2, frame_width_px, frame_height_px)
+                                }
+                                video_buffer_2!!.rewind()
+                                video_buffer_2_y.rewind()
+                                video_buffer_2_u.rewind()
+                                video_buffer_2_v.rewind()
+                                video_buffer_2!!.put(video_buffer_2_y)
+                                video_buffer_2!!.put(video_buffer_2_u)
+                                video_buffer_2!!.put(video_buffer_2_v)
+                                toxav_video_send_frame_age(friendnum = friendnum,
+                                    frame_width_px = width.toInt(),
+                                    frame_height_px = height.toInt(),
+                                    age_ms = 0)
+                            }
+                            override fun onError()
+                            {
+                            }
+                        })
+
+                        AVActivity.ffmpegav_start_video_in_capture()
+                    }) {
+                        Icon(Icons.Filled.Videocam, null)
+                    }
+                }
             )
         }) {
             ChatApp(focusRequester = focusRequester, displayTextField = displayTextField, contactList.selectedContactPubkey, ui_scale)
