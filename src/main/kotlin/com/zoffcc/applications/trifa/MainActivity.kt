@@ -6,10 +6,11 @@ import MessageAction
 import UIGroupMessage
 import UIMessage
 import User
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import com.zoffcc.applications.ffmpegav.AVActivity
+import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_get_video_in_devices
+import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_init
+import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_libavutil_version
+import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_loadjni
 import com.zoffcc.applications.sorm.FileDB
 import com.zoffcc.applications.sorm.Filetransfer
 import com.zoffcc.applications.sorm.GroupMessage
@@ -275,6 +276,54 @@ class MainActivity
                     e.printStackTrace()
                     System.exit(4)
                 }
+
+                val libdir2: String = resourcesDir.path
+                System.out.println("XXXXX7:" + libdir2)
+                ffmpegav_loadjni(libdir2)
+/*
+                println("libavutil version: " + ffmpegav_libavutil_version())
+                val res = ffmpegav_init()
+                println("ffmpeg init: $res")
+                val video_in_devices = ffmpegav_get_video_in_devices()
+                println("ffmpeg video in devices: " + video_in_devices.size)
+
+                for (i in video_in_devices.indices)
+                {
+                    if (video_in_devices[i] != null)
+                    {
+                        println("ffmpeg video in device #" + i + ": " + video_in_devices[i])
+                        if (i == 1)
+                        {
+                            val res_vd = AVActivity.ffmpegav_open_video_in_device(video_in_devices[i], 640 / 2, 480 / 2, ":0.0", 15)
+                            println("ffmpeg open video capture device: $res_vd")
+                        }
+                    }
+                }
+                val frame_width_px1 = 640
+                val frame_height_px1 = 480
+                val buffer_size_in_bytes1 = (frame_width_px1 * frame_height_px1 * 3) / 2
+                val video_buffer_1 = ByteBuffer.allocateDirect(buffer_size_in_bytes1)
+                AVActivity.ffmpegav_set_JNI_video_buffer(video_buffer_1, frame_width_px1, frame_height_px1)
+                val frame_width_px2 = 640
+                val frame_height_px2 = 480
+                val buffer_size_in_bytes2 = (frame_width_px2 * frame_height_px2 * 3) / 2
+                val video_buffer_2_y = ByteBuffer.allocateDirect(buffer_size_in_bytes2)
+                val video_buffer_2_u = ByteBuffer.allocateDirect(buffer_size_in_bytes2)
+                val video_buffer_2_v = ByteBuffer.allocateDirect(buffer_size_in_bytes2)
+                AVActivity.ffmpegav_set_JNI_video_buffer2(video_buffer_2_y, video_buffer_2_u, video_buffer_2_v,
+                    frame_width_px2, frame_height_px2)
+
+                AVActivity.ffmpegav_start_video_in_capture()
+                try
+                {
+                    Thread.sleep((1 * 1000).toLong())
+                } catch (e: java.lang.Exception)
+                {
+                }
+                AVActivity.ffmpegav_stop_video_in_capture()
+                val res_vclose = AVActivity.ffmpegav_close_video_in_device()
+                println("ffmpeg open close capture device: $res_vclose")
+*/
             }
         }
 

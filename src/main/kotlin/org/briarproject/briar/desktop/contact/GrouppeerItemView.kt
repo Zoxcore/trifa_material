@@ -18,19 +18,30 @@
 
 package org.briarproject.briar.desktop.contact
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement.spacedBy
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Alignment.Companion.Start
 import androidx.compose.ui.Alignment.Companion.Top
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun GrouppeerItemView(
@@ -48,13 +59,14 @@ fun GrouppeerItemView(
         horizontalArrangement = spacedBy(0.dp),
         modifier = Modifier.weight(1f, fill = true),
     ) {
-        //Box(Modifier.align(Top).padding(vertical = 8.dp)) {
-            // ProfileCircle(36.dp, contactItem)
+        Box(Modifier.align(Top).padding(vertical = 8.dp)) {
+            GroupPeerItemRoleCircle(Modifier.size(15.dp), grouppeerItem)
             //NumberBadge(
             //    num = contactItem.unread,
             //    modifier = Modifier.align(TopEnd).offset(6.dp, (-6).dp)
             //)
-        //}
+        }
+        Spacer(Modifier.width(2.dp))
         GrouppeerItemViewInfo(
             grouppeerItem = grouppeerItem,
         )
@@ -65,23 +77,59 @@ fun GrouppeerItemView(
     )
 }
 
+@Composable
+fun GroupPeerItemRoleCircle(
+    modifier: Modifier = Modifier.size(10.dp),
+    grouppeerItem: GroupPeerItem,
+) = Box(
+    modifier = modifier
+        .border(1.dp, Color.Black, CircleShape)
+        .background(GroupPeerRoleAsBgColor(grouppeerItem.peerRole), CircleShape)
+)
+{
+    Text(text = "" + GroupPeerRoleAsStringShort(grouppeerItem.peerRole),
+        modifier = Modifier.align(Alignment.Center),
+        style = TextStyle(fontSize = 10.sp)
+    )
+}
+
 fun GroupPeerRoleAsStringShort(peerRole: Int) : String
 {
-    if (peerRole == 0)
+    if (peerRole == 0) // Founder
     {
         return "*"
     }
-    else if (peerRole == 1)
+    else if (peerRole == 1) // Moderator
     {
         return "@"
     }
-    else if (peerRole == 2)
+    else if (peerRole == 2) // User
     {
         return ""
     }
-    else
+    else // Observer (muted)
     {
         return "~"
+    }
+}
+
+fun GroupPeerRoleAsBgColor(peerRole: Int) : Color
+{
+    if (peerRole == 0) // Founder
+    {
+        return Color.Magenta
+    }
+    else if (peerRole == 1) // Moderator
+    {
+        return Color.Green
+    }
+    else if (peerRole == 2) // User
+    {
+        return Color.Transparent
+    }
+    else // Observer (muted)
+    {
+        return Color.Blue
     }
 }
 
@@ -91,7 +139,7 @@ private fun GrouppeerItemViewInfo(grouppeerItem: GroupPeerItem) = Column(
     modifier = Modifier.padding(start = 0.dp)
 ) {
     Text(
-        text = GroupPeerRoleAsStringShort(grouppeerItem.peerRole) + grouppeerItem.name,
+        text = grouppeerItem.name,
         style = TextStyle(fontSize = 15.sp),
         maxLines = 1,
         overflow = Ellipsis,

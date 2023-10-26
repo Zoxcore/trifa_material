@@ -58,7 +58,7 @@ fun GroupList(
                         .heightIn(min = GROUPITEM_HEIGHT)
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
-                        .padding(start = 16.dp, end = 4.dp)
+                        .padding(start = 3.dp, end = 3.dp)
                     ContextMenuArea(items = {
                         listOf(
                             ContextMenuItem("delete") {

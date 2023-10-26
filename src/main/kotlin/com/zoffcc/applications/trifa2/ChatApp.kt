@@ -1,8 +1,13 @@
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.IconButton
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ProvideTextStyle
@@ -10,17 +15,22 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.AwtWindow
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
+import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity
 import com.zoffcc.applications.trifa.MainActivity.Companion.sent_message_to_db
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
@@ -38,8 +48,11 @@ import com.zoffcc.applications.trifa.createSavepathStore
 import com.zoffcc.applications.trifa.createToxDataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import org.briarproject.briar.desktop.utils.ImagePicker.pickImageUsingDialog
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
+import java.awt.FileDialog
+import java.awt.Frame
 
 private const val TAG = "trifa.Chatapp"
 val myUser = User("Me", picture = null, toxpk = null)
@@ -100,18 +113,39 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                     Box(Modifier.weight(1f)) {
                         Messages(state.messages, ui_scale)
                     }
-                    if (displayTextField)
-                    {
-                        SendMessage (focusRequester) { text -> //
-                            // Log.i(TAG, "selectedContactPubkey=" + selectedContactPubkey)
-                            val friend_num = tox_friend_by_public_key(selectedContactPubkey)
-                            val timestamp = System.currentTimeMillis()
-                            val res = tox_friend_send_message(friend_num, TOX_MESSAGE_TYPE.TOX_MESSAGE_TYPE_NORMAL.value, text)
-                            if (res >= 0)
-                            {
-                                val msg_id_db = sent_message_to_db(selectedContactPubkey, timestamp, text)
-                                messagestore.send(MessageAction.SendMessage(UIMessage(msgDatabaseId = msg_id_db, user = myUser, timeMs = timestamp, text = text, toxpk = myUser.toxpk, trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
+                    Row(modifier = Modifier.fillMaxWidth().height(MESAGE_INPUT_LINE_HEIGHT)) {
+                        if (displayTextField)
+                        {
+                            Box(Modifier.weight(1f)) {
+                                SendMessage(focusRequester) { text -> //
+                                    // Log.i(TAG, "selectedContactPubkey=" + selectedContactPubkey)
+                                    val friend_num = tox_friend_by_public_key(selectedContactPubkey)
+                                    val timestamp = System.currentTimeMillis()
+                                    val res = tox_friend_send_message(friend_num, TOX_MESSAGE_TYPE.TOX_MESSAGE_TYPE_NORMAL.value, text)
+                                    if (res >= 0)
+                                    {
+                                        val msg_id_db = sent_message_to_db(selectedContactPubkey, timestamp, text)
+                                        messagestore.send(MessageAction.SendMessage(UIMessage(msgDatabaseId = msg_id_db, user = myUser, timeMs = timestamp, text = text, toxpk = myUser.toxpk, trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
+                                    }
+                                }
                             }
+                        }
+                        Box(Modifier.width(40.dp).height(MESAGE_INPUT_LINE_HEIGHT).
+                        background(MaterialTheme.colors.background)) {
+                            // val LocalWindowScope = staticCompositionLocalOf<FrameWindowScope?> { null }
+                            // val windowScope = LocalWindowScope.current!!
+                            IconButton(
+                                icon = Icons.Filled.AttachFile,
+                                iconTint = Color.DarkGray,
+                                iconSize = 25.dp,
+                                modifier = Modifier.width(40.dp).align(Alignment.Center),
+                                contentDescription = "send File",
+                                onClick = {
+                                    pickImageUsingDialog(onCloseRequest = {
+                                        Log.i(TAG, "pickImageUsingDialog:result=$it")
+                                    })
+                                }
+                            )
                         }
                     }
                 }
