@@ -11,6 +11,8 @@ import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_get_video_in_devices
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_init
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_libavutil_version
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_loadjni
+import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_set_video_capture_callback
+import com.zoffcc.applications.ffmpegav.AVActivity.video_capture_callback
 import com.zoffcc.applications.sorm.FileDB
 import com.zoffcc.applications.sorm.Filetransfer
 import com.zoffcc.applications.sorm.GroupMessage
@@ -280,7 +282,8 @@ class MainActivity
                 val libdir2: String = resourcesDir.path
                 System.out.println("XXXXX7:" + libdir2)
                 ffmpegav_loadjni(libdir2)
-/*
+
+                /*
                 println("libavutil version: " + ffmpegav_libavutil_version())
                 val res = ffmpegav_init()
                 println("ffmpeg init: $res")
@@ -299,6 +302,18 @@ class MainActivity
                         }
                     }
                 }
+
+                ffmpegav_set_video_capture_callback(object : video_capture_callback
+                {
+                    override fun onSuccess(width: Long, height: Long, pts: Long)
+                    {
+                        com.zoffcc.applications.ffmpegav.Log.i(TAG, "ffmpeg open video capture onSuccess: $width $height $pts")
+                    }
+                    override fun onError()
+                    {
+                    }
+                })
+
                 val frame_width_px1 = 640
                 val frame_height_px1 = 480
                 val buffer_size_in_bytes1 = (frame_width_px1 * frame_height_px1 * 3) / 2
@@ -323,7 +338,7 @@ class MainActivity
                 AVActivity.ffmpegav_stop_video_in_capture()
                 val res_vclose = AVActivity.ffmpegav_close_video_in_device()
                 println("ffmpeg open close capture device: $res_vclose")
-*/
+                */
             }
         }
 
