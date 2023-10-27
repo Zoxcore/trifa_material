@@ -22,6 +22,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Slider
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
@@ -35,11 +36,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameMillis
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.awt.SwingPanel
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
@@ -56,6 +62,7 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.zoffcc.applications.trifa.HelperGeneric.PubkeyShort
+import com.zoffcc.applications.trifa.JPictureBox
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity.Companion.main_init
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
@@ -63,6 +70,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_name
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_chat_id
 import com.zoffcc.applications.trifa.PrefsSettings
 import com.zoffcc.applications.trifa.RandomNameGenerator
+import com.zoffcc.applications.trifa.SingleComponentAspectRatioKeeperLayout
 import com.zoffcc.applications.trifa.TRIFAGlobals
 import com.zoffcc.applications.trifa.TrifaToxService
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.clear_grouppeers
@@ -91,11 +99,16 @@ import org.briarproject.briar.desktop.ui.UiMode
 import org.briarproject.briar.desktop.ui.UiPlaceholder
 import org.briarproject.briar.desktop.ui.VerticalDivider
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
+import java.awt.Component
 import java.awt.Toolkit
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.Semaphore
 import java.util.prefs.Preferences
+import javax.swing.BoxLayout
+import javax.swing.ImageIcon
+import javax.swing.JButton
+import javax.swing.JPanel
 
 private const val TAG = "trifa.Main.kt"
 var tox_running_state_wrapper = "start"
@@ -155,77 +168,90 @@ fun App()
                 BriarSidebar(uiMode = uiMode, setUiMode = { uiMode = it })
                 VerticalDivider()
                 Column(Modifier.fillMaxSize()) {
-                    Row(Modifier.wrapContentHeight(), Arrangement.spacedBy(5.dp)) {
-                        Button(modifier = Modifier.width(140.dp), onClick = { // start/stop tox button
-                            if (tox_running_state == "running")
-                            {
-                                tox_running_state = "stopping ..."
-                                start_button_text = tox_running_state
-                                tox_running_state_wrapper = tox_running_state
-                                start_button_text_wrapper = start_button_text
-                                Log.i(TAG, "----> tox_running_state = $tox_running_state_wrapper");
-                                Thread {
-                                    Log.i(TAG, "waiting to stop ...");
-                                    while (tox_running_state_wrapper != "stopped")
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Column() {
+                            Row(Modifier.wrapContentHeight(), Arrangement.spacedBy(5.dp)) {
+                                Button(modifier = Modifier.width(140.dp), onClick = { // start/stop tox button
+                                    if (tox_running_state == "running")
                                     {
-                                        Thread.sleep(100)
-                                        Log.i(TAG, "waiting ...");
+                                        tox_running_state = "stopping ..."
+                                        start_button_text = tox_running_state
+                                        tox_running_state_wrapper = tox_running_state
+                                        start_button_text_wrapper = start_button_text
+                                        Log.i(TAG, "----> tox_running_state = $tox_running_state_wrapper");
+                                        Thread {
+                                            Log.i(TAG, "waiting to stop ...");
+                                            while (tox_running_state_wrapper != "stopped")
+                                            {
+                                                Thread.sleep(100)
+                                                Log.i(TAG, "waiting ...");
+                                            }
+                                            Log.i(TAG, "is stopped now");
+                                            tox_running_state = tox_running_state_wrapper
+                                            start_button_text = "start"
+                                        }.start()
+                                        TrifaToxService.stop_me = true
+                                    } else if (tox_running_state == "stopped")
+                                    {
+                                        TrifaToxService.stop_me = false
+                                        tox_running_state = "starting ..."
+                                        start_button_text = tox_running_state
+                                        tox_running_state_wrapper = tox_running_state
+                                        start_button_text_wrapper = start_button_text
+                                        Log.i(TAG, "----> tox_running_state = $tox_running_state_wrapper");
+                                        Thread {
+                                            Log.i(TAG, "waiting to startup ...");
+                                            while (tox_running_state_wrapper != "running")
+                                            {
+                                                Thread.sleep(100)
+                                                Log.i(TAG, "waiting ...");
+                                            }
+                                            Log.i(TAG, "is started now");
+                                            tox_running_state = tox_running_state_wrapper
+                                            start_button_text = "stop"
+                                        }.start()
+                                        TrifaToxService.stop_me = false
+                                        main_init()
                                     }
-                                    Log.i(TAG, "is stopped now");
-                                    tox_running_state = tox_running_state_wrapper
-                                    start_button_text = "start"
-                                }.start()
-                                TrifaToxService.stop_me = true
-                            } else if (tox_running_state == "stopped")
-                            {
-                                TrifaToxService.stop_me = false
-                                tox_running_state = "starting ..."
-                                start_button_text = tox_running_state
-                                tox_running_state_wrapper = tox_running_state
-                                start_button_text_wrapper = start_button_text
-                                Log.i(TAG, "----> tox_running_state = $tox_running_state_wrapper");
-                                Thread {
-                                    Log.i(TAG, "waiting to startup ...");
-                                    while (tox_running_state_wrapper != "running")
-                                    {
-                                        Thread.sleep(100)
-                                        Log.i(TAG, "waiting ...");
-                                    }
-                                    Log.i(TAG, "is started now");
-                                    tox_running_state = tox_running_state_wrapper
-                                    start_button_text = "stop"
-                                }.start()
-                                TrifaToxService.stop_me = false
-                                main_init()
-                            }
-                        }) {
-                            Text(start_button_text)
-                        }
-                        var online_button_text by remember { mutableStateOf("offline") }
-                        Button( // self connection state button
-                            onClick = {}, colors = ButtonDefaults.buttonColors(), enabled = false) {
-                            Box(modifier = Modifier.size(16.dp).border(1.dp, Color.Black, CircleShape).background(Color(online_button_color_wrapper), CircleShape))
-                            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                            Text(getOnlineButtonText(online_button_text))
-                            Thread {
-                                while (true)
-                                {
-                                    try
-                                    {
-                                        Thread.sleep(200)
-                                        if (online_button_text != online_button_text_wrapper)
-                                        {
-                                            online_button_text = online_button_text_wrapper
-                                        }
-                                    } catch (_: Exception)
-                                    {
-                                    }
+                                }) {
+                                    Text(start_button_text)
                                 }
-                            }.start()
+                                var online_button_text by remember { mutableStateOf("offline") }
+                                Button( // self connection state button
+                                    onClick = {}, colors = ButtonDefaults.buttonColors(), enabled = false) {
+                                    Box(modifier = Modifier.size(16.dp).border(1.dp, Color.Black, CircleShape).background(Color(online_button_color_wrapper), CircleShape))
+                                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                                    Text(getOnlineButtonText(online_button_text))
+                                    Thread {
+                                        while (true)
+                                        {
+                                            try
+                                            {
+                                                Thread.sleep(200)
+                                                if (online_button_text != online_button_text_wrapper)
+                                                {
+                                                    online_button_text = online_button_text_wrapper
+                                                }
+                                            } catch (_: Exception)
+                                            {
+                                            }
+                                        }
+                                    }.start()
+                                }
+                            }
+                            SaveDataPath()
+                            ToxIDTextField()
                         }
+                        SwingPanel(
+                            background = Color.Green,
+                            modifier = Modifier.size(400.dp, 200.dp),
+                            factory = {
+                                JPanel(SingleComponentAspectRatioKeeperLayout(),true).apply {
+                                    add(JPictureBox.videoinbox)
+                                }
+                            }
+                        )
                     }
-                    SaveDataPath()
-                    ToxIDTextField()
                     DetailItem(label = i18n("UI Scale"), description = "${i18n("current_value:")}: " + " " + ui_scale + ", " + i18n("drag Slider to change")) {
                         Row(horizontalArrangement = Arrangement.spacedBy(2.dp), verticalAlignment = Alignment.CenterVertically, modifier = Modifier.width(200.dp)) {
                             Icon(Icons.Default.FormatSize, null, Modifier.scale(0.7f))
@@ -656,4 +682,17 @@ fun unlock_data_dir_input()
 fun lock_data_dir_input()
 {
     savepathstore.updateEnabled(false)
+}
+
+
+fun actionButton(
+    text: String,
+    action: () -> Unit
+): JButton
+{
+    val button = JButton(text)
+    button.alignmentX = Component.CENTER_ALIGNMENT
+    button.addActionListener { action() }
+
+    return button
 }
