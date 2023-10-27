@@ -8,9 +8,14 @@ public class AVActivity {
     public static native String ffmpegav_libavutil_version();
     public static native int ffmpegav_init();
     public static native String[] ffmpegav_get_video_in_devices();
+    public static native String[] ffmpegav_get_audio_in_devices();
     public static native int ffmpegav_open_video_in_device(String deviceformat, int wanted_width, int wanted_height, String x11_display_num, int fps);
+    public static native int ffmpegav_open_audio_in_device(String deviceformat);
     public static native int ffmpegav_start_video_in_capture();
+    public static native int ffmpegav_start_audio_in_capture();
     public static native int ffmpegav_stop_video_in_capture();
+    public static native int ffmpegav_stop_audio_in_capture();
+    public static native int ffmpegav_close_audio_in_device();
     public static native int ffmpegav_close_video_in_device();
 
     public static interface video_capture_callback {
@@ -18,6 +23,12 @@ public class AVActivity {
         void onError();
     }
     static video_capture_callback video_capture_callback_function = null;
+
+    public static interface audio_capture_callback {
+        void onSuccess(long read_bytes, int out_samples, int out_channels, int out_sample_rate, long pts);
+        void onError();
+    }
+    static audio_capture_callback audio_capture_callback_function = null;
 
     // buffer is for playing video
     public static native long ffmpegav_set_JNI_video_buffer(java.nio.ByteBuffer buffer, int frame_width_px, int frame_height_px);
@@ -36,7 +47,22 @@ public class AVActivity {
     public static void ffmpegav_callback_video_capture_frame_pts_cb_method(long width, long height, long pts)
     {
         Log.i(TAG, "capture video frame w: " + width + " h: " + height + " pts: " + pts);
-        video_capture_callback_function.onSuccess(width, height, pts);
+        if (video_capture_callback_function != null) {
+            video_capture_callback_function.onSuccess(width, height, pts);
+        }
+    }
+
+    public static void ffmpegav_set_audio_capture_callback(audio_capture_callback callback)
+    {
+        audio_capture_callback_function = callback;
+    }
+
+    public static void ffmpegav_callback_audio_capture_frame_pts_cb_method(long read_bytes, int out_samples, int out_channels, int out_sample_rate, long pts)
+    {
+        Log.i(TAG, "capture audio frame bytes: " + read_bytes + " samples: " + out_samples + " channels: " + out_channels + " sample_rate: " + out_sample_rate);
+        if (audio_capture_callback_function != null) {
+            audio_capture_callback_function.onSuccess(read_bytes, out_samples, out_channels, out_sample_rate, pts);
+        }
     }
 
     /**
@@ -162,6 +188,7 @@ public class AVActivity {
         Log.i(TAG, "libavutil version: " + ffmpegav_libavutil_version());
         final int res = ffmpegav_init();
         Log.i(TAG, "ffmpeg init: " + res);
+
         final String[] video_in_devices = ffmpegav_get_video_in_devices();
         Log.i(TAG, "ffmpeg video in devices: " + video_in_devices.length);
         for (int i=0;i<video_in_devices.length;i++)
@@ -177,10 +204,35 @@ public class AVActivity {
             }
         }
 
+        final String[] audio_in_devices = ffmpegav_get_audio_in_devices();
+        Log.i(TAG, "ffmpeg audio in devices: " + audio_in_devices.length);
+        for (int i=0;i<audio_in_devices.length;i++)
+        {
+            if (audio_in_devices[i] != null)
+            {
+                Log.i(TAG, "ffmpeg audio in device #"+i+": " + audio_in_devices[i]);
+                if (i == 1)
+                {
+                    final int res_ad = ffmpegav_open_audio_in_device(audio_in_devices[i]);
+                    Log.i(TAG, "ffmpeg open audio capture device: " + res_ad);
+                }
+            }
+        }
+
         ffmpegav_set_video_capture_callback(new video_capture_callback() {
             @Override
             public void onSuccess(long width, long height, long pts) {
                 Log.i(TAG, "ffmpeg open video capture onSuccess:" + width + " " + height + " " + pts);
+            }
+            @Override
+            public void onError() {
+            }
+        });
+
+        ffmpegav_set_audio_capture_callback(new audio_capture_callback() {
+            @Override
+            public void onSuccess(long read_bytes, int out_samples, int out_channels, int out_sample_rate, long pts) {
+                Log.i(TAG, "ffmpeg open audio capture onSuccess:" + read_bytes + " " + out_samples + " " + out_channels + " " + out_sample_rate + " " + pts);
             }
             @Override
             public void onError() {
@@ -201,7 +253,12 @@ public class AVActivity {
         final java.nio.ByteBuffer video_buffer_2_v = java.nio.ByteBuffer.allocateDirect(buffer_size_in_bytes2);
         ffmpegav_set_JNI_video_buffer2(video_buffer_2_y, video_buffer_2_u, video_buffer_2_v, frame_width_px2, frame_height_px2);
 
+        final int audio_buffer_size_in_bytes2 = 8000;
+        final java.nio.ByteBuffer audio_buffer_2 = java.nio.ByteBuffer.allocateDirect(audio_buffer_size_in_bytes2);
+        ffmpegav_set_JNI_audio_buffer2(audio_buffer_2);
+
         ffmpegav_start_video_in_capture();
+        ffmpegav_start_audio_in_capture();
         try
         {
             Thread.sleep(1 * 1000);
@@ -209,10 +266,15 @@ public class AVActivity {
         catch(Exception e)
         {
         }
+        ffmpegav_stop_audio_in_capture();
         ffmpegav_stop_video_in_capture();
 
+
+        final int res_aclose = ffmpegav_close_audio_in_device();
+        Log.i(TAG, "ffmpeg open close audio capture device: " + res_aclose);
+
         final int res_vclose = ffmpegav_close_video_in_device();
-        Log.i(TAG, "ffmpeg open close capture device: " + res_vclose);
+        Log.i(TAG, "ffmpeg open close video capture device: " + res_vclose);
     }
 }
 

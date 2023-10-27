@@ -92,7 +92,7 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
                         // video call button pressed
                         val friendnum = tox_friend_by_public_key(contactList.selectedContactPubkey)
                         set_av_call_status(1)
-                        val call_res = toxav_call(friendnum,16, 2500)
+                        val call_res = toxav_call(friendnum,16, 2000)
                         println("toxav call_res: $call_res")
                         val res = ffmpegav_init()
                         println("ffmpeg init: $res")
@@ -140,7 +140,7 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
                         {
                             override fun onSuccess(width: Long, height: Long, pts: Long)
                             {
-                                com.zoffcc.applications.ffmpegav.Log.i(TAG, "ffmpeg open video capture onSuccess: $width $height $pts")
+                                // com.zoffcc.applications.ffmpegav.Log.i(TAG, "ffmpeg open video capture onSuccess: $width $height $pts")
                                 val frame_width_px: Int = width.toInt()
                                 val frame_height_px: Int = height.toInt()
                                 val buffer_size_in_bytes3 = (frame_width_px * frame_height_px * 1.5f).toInt()

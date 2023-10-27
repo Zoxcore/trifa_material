@@ -6,13 +6,7 @@ import MessageAction
 import UIGroupMessage
 import UIMessage
 import User
-import com.zoffcc.applications.ffmpegav.AVActivity
-import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_get_video_in_devices
-import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_init
-import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_libavutil_version
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_loadjni
-import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_set_video_capture_callback
-import com.zoffcc.applications.ffmpegav.AVActivity.video_capture_callback
 import com.zoffcc.applications.sorm.FileDB
 import com.zoffcc.applications.sorm.Filetransfer
 import com.zoffcc.applications.sorm.GroupMessage
@@ -49,6 +43,8 @@ import com.zoffcc.applications.trifa.ToxVars.TOX_FILE_ID_LENGTH
 import com.zoffcc.applications.trifa.ToxVars.TOX_HASH_LENGTH
 import com.zoffcc.applications.trifa.ToxVars.TOX_MAX_NGC_FILE_AND_HEADER_SIZE
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
+import com.zoffcc.applications.trifa.VideoInFrame.new_video_in_frame
+import com.zoffcc.applications.trifa.VideoInFrame.setup_video_in_resolution
 import contactstore
 import global_prefs
 import groupmessagestore
@@ -112,6 +108,9 @@ class MainActivity
         @JvmField public var PREF__auto_accept_image = true
         @JvmField var PREF__auto_accept_video = true
         @JvmField var PREF__auto_accept_all_upto = true
+        //
+        var video_buffer_1: ByteBuffer? = null
+        var buffer_size_in_bytes = 0
 
         @JvmField
         var PREF__database_files_dir = "."
@@ -282,63 +281,6 @@ class MainActivity
                 val libdir2: String = resourcesDir.path
                 System.out.println("XXXXX7:" + libdir2)
                 ffmpegav_loadjni(libdir2)
-
-                /*
-                println("libavutil version: " + ffmpegav_libavutil_version())
-                val res = ffmpegav_init()
-                println("ffmpeg init: $res")
-                val video_in_devices = ffmpegav_get_video_in_devices()
-                println("ffmpeg video in devices: " + video_in_devices.size)
-
-                for (i in video_in_devices.indices)
-                {
-                    if (video_in_devices[i] != null)
-                    {
-                        println("ffmpeg video in device #" + i + ": " + video_in_devices[i])
-                        if (i == 1)
-                        {
-                            val res_vd = AVActivity.ffmpegav_open_video_in_device(video_in_devices[i], 640 / 2, 480 / 2, ":0.0", 15)
-                            println("ffmpeg open video capture device: $res_vd")
-                        }
-                    }
-                }
-
-                ffmpegav_set_video_capture_callback(object : video_capture_callback
-                {
-                    override fun onSuccess(width: Long, height: Long, pts: Long)
-                    {
-                        com.zoffcc.applications.ffmpegav.Log.i(TAG, "ffmpeg open video capture onSuccess: $width $height $pts")
-                    }
-                    override fun onError()
-                    {
-                    }
-                })
-
-                val frame_width_px1 = 640
-                val frame_height_px1 = 480
-                val buffer_size_in_bytes1 = (frame_width_px1 * frame_height_px1 * 3) / 2
-                val video_buffer_1 = ByteBuffer.allocateDirect(buffer_size_in_bytes1)
-                AVActivity.ffmpegav_set_JNI_video_buffer(video_buffer_1, frame_width_px1, frame_height_px1)
-                val frame_width_px2 = 640
-                val frame_height_px2 = 480
-                val buffer_size_in_bytes2 = (frame_width_px2 * frame_height_px2 * 3) / 2
-                val video_buffer_2_y = ByteBuffer.allocateDirect(buffer_size_in_bytes2)
-                val video_buffer_2_u = ByteBuffer.allocateDirect(buffer_size_in_bytes2)
-                val video_buffer_2_v = ByteBuffer.allocateDirect(buffer_size_in_bytes2)
-                AVActivity.ffmpegav_set_JNI_video_buffer2(video_buffer_2_y, video_buffer_2_u, video_buffer_2_v,
-                    frame_width_px2, frame_height_px2)
-
-                AVActivity.ffmpegav_start_video_in_capture()
-                try
-                {
-                    Thread.sleep((1 * 1000).toLong())
-                } catch (e: java.lang.Exception)
-                {
-                }
-                AVActivity.ffmpegav_stop_video_in_capture()
-                val res_vclose = AVActivity.ffmpegav_close_video_in_device()
-                println("ffmpeg open close capture device: $res_vclose")
-                */
             }
         }
 
@@ -936,6 +878,35 @@ class MainActivity
         @JvmStatic
         fun android_toxav_callback_video_receive_frame_cb_method(friend_number: Long, frame_width_px: Long, frame_height_px: Long, ystride: Long, ustride: Long, vstride: Long)
         {
+            if ((contactstore.state.selectedContactPubkey == null)
+                || (contactstore.state.selectedContactPubkey != tox_friend_get_public_key(friend_number)))
+            {
+                // it's not the currently selected friend, so do not play the video frame
+                return
+            }
+
+            val y_layer_size = Math.max(frame_width_px, Math.abs(ystride)).toInt() * frame_height_px.toInt()
+            val u_layer_size = Math.max(frame_width_px / 2, Math.abs(ustride)).toInt() * (frame_height_px.toInt() / 2)
+            val v_layer_size = Math.max(frame_width_px / 2, Math.abs(vstride)).toInt() * (frame_height_px.toInt() / 2)
+            val frame_width_px1 = Math.max(frame_width_px, Math.abs(ystride)).toInt()
+            val frame_height_px1 = frame_height_px.toInt()
+            buffer_size_in_bytes = y_layer_size + v_layer_size + u_layer_size
+            if (video_buffer_1 == null) {
+                Log.i(TAG, "android_toxav_callback_video_receive_frame_cb_method:11:1")
+                video_buffer_1 = ByteBuffer.allocateDirect(buffer_size_in_bytes)
+                set_JNI_video_buffer(video_buffer_1, frame_width_px1, frame_height_px1)
+                setup_video_in_resolution(frame_width_px1, frame_height_px1, buffer_size_in_bytes)
+                Log.i(TAG, "android_toxav_callback_video_receive_frame_cb_method:11:2")
+            } else {
+                if (VideoInFrame.width != frame_width_px1 || VideoInFrame.height != frame_height_px1) {
+                    Log.i(TAG, "android_toxav_callback_video_receive_frame_cb_method:22:1")
+                    video_buffer_1 = ByteBuffer.allocateDirect(buffer_size_in_bytes)
+                    set_JNI_video_buffer(video_buffer_1, frame_width_px1, frame_height_px1)
+                    setup_video_in_resolution(frame_width_px1, frame_height_px1, buffer_size_in_bytes)
+                    Log.i(TAG, "android_toxav_callback_video_receive_frame_cb_method:22:2")
+                }
+            }
+            new_video_in_frame(video_buffer_1, frame_width_px1, frame_height_px1)
         }
 
         @JvmStatic
@@ -961,6 +932,8 @@ class MainActivity
         @JvmStatic
         fun android_toxav_callback_video_receive_frame_pts_cb_method(friend_number: Long, frame_width_px: Long, frame_height_px: Long, ystride: Long, ustride: Long, vstride: Long, pts: Long)
         {
+            android_toxav_callback_video_receive_frame_cb_method(friend_number, frame_width_px, frame_height_px, ystride,
+                ustride, vstride);
         }
 
         @JvmStatic
