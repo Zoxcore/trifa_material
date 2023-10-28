@@ -68,8 +68,8 @@ public class TRIFAGlobals
     final static int HIGHER_NGC_VIDEO_QUANTIZER = 38; // higher here means "higer video quality" which is a lower q value!
     final static int LOWER_NGC_VIDEO_QUANTIZER = 51;
 
-    static int GLOBAL_VIDEO_BITRATE = NORMAL_GLOBAL_VIDEO_BITRATE; // this works nice: 2500;
-    static int GLOBAL_AUDIO_BITRATE = NORMAL_GLOBAL_AUDIO_BITRATE; // allowed values: (xx>=6) && (xx<=510)
+    public static int GLOBAL_VIDEO_BITRATE = NORMAL_GLOBAL_VIDEO_BITRATE; // this works nice: 2500;
+    public static int GLOBAL_AUDIO_BITRATE = NORMAL_GLOBAL_AUDIO_BITRATE; // allowed values: (xx>=6) && (xx<=510)
 
     static final String GENERIC_TOR_USERAGENT = "Mozilla/5.0 (Windows NT 6.1; rv:60.0) Gecko/20100101 Firefox/60.0";
     static final int PUSH_URL_TRIGGER_AGAIN_MAX_COUNT = 8;

@@ -33,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.ffmpegav.AVActivity
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_close_video_in_device
-import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_get_video_in_devices
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_init
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_set_video_capture_callback
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_stop_video_in_capture
@@ -41,9 +40,9 @@ import com.zoffcc.applications.trifa.AVState
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity
+import com.zoffcc.applications.trifa.MainActivity.Companion.on_call_ended_actions
 import com.zoffcc.applications.trifa.MainActivity.Companion.sent_message_to_db
 import com.zoffcc.applications.trifa.MainActivity.Companion.set_JNI_video_buffer2
-import com.zoffcc.applications.trifa.MainActivity.Companion.set_av_call_status
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_send_message
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_send_message
@@ -55,8 +54,8 @@ import com.zoffcc.applications.trifa.StateGroups
 import com.zoffcc.applications.trifa.TRIFAGlobals
 import com.zoffcc.applications.trifa.ToxVars
 import com.zoffcc.applications.trifa.ToxVars.TOX_MESSAGE_TYPE
-import com.zoffcc.applications.trifa.VideoInFrame
 import com.zoffcc.applications.trifa.VideoOutFrame
+import com.zoffcc.applications.trifa.createAVStateStore
 import com.zoffcc.applications.trifa.createContactStore
 import com.zoffcc.applications.trifa.createGroupPeerStore
 import com.zoffcc.applications.trifa.createGroupStore
@@ -78,9 +77,10 @@ val grouppeerstore = CoroutineScope(SupervisorJob()).createGroupPeerStore()
 val groupstore = CoroutineScope(SupervisorJob()).createGroupStore()
 val savepathstore = CoroutineScope(SupervisorJob()).createSavepathStore()
 val toxdatastore = CoroutineScope(SupervisorJob()).createToxDataStore()
+val avstatestore = CoroutineScope(SupervisorJob()).createAVStateStore()
 
 @Composable
-fun ChatAppWithScaffold(av_state: AVState, focusRequester: FocusRequester, displayTextField: Boolean = true, contactList: StateContacts, ui_scale: Float)
+fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolean = true, contactList: StateContacts, ui_scale: Float)
 {
     Theme {
         Scaffold(topBar = {
@@ -96,112 +96,36 @@ fun ChatAppWithScaffold(av_state: AVState, focusRequester: FocusRequester, displ
                     }
                     IconButton(onClick = {
                         // video call button pressed
-                        val friendnum = tox_friend_by_public_key(contactList.selectedContactPubkey)
+                        val friendpubkey = contactList.selectedContactPubkey
+                        val friendnum = tox_friend_by_public_key(friendpubkey)
                         // set_av_call_status(1)
 
-                        if (av_state.calling_state == AVState.CALL_STATUS.CALL_CALLING)
+                        if (avstatestore.state.calling_state == AVState.CALL_STATUS.CALL_CALLING)
                         {
                             ffmpegav_stop_video_in_capture()
                             ffmpegav_close_video_in_device()
                             toxav_call_control(friendnum, ToxVars.TOXAV_CALL_CONTROL.TOXAV_CALL_CONTROL_CANCEL.value)
-                            av_state.calling_state = AVState.CALL_STATUS.CALL_NONE
-                            VideoOutFrame.clear_video_out_frame()
-                            VideoInFrame.clear_video_in_frame()
+                            on_call_ended_actions()
+                            println("toxav: ret 001")
                             return@IconButton
                         }
 
-                        val call_res = toxav_call(friendnum,16, 2000)
+                        val call_res = toxav_call(friendnum, TRIFAGlobals.GLOBAL_AUDIO_BITRATE.toLong(), TRIFAGlobals.GLOBAL_VIDEO_BITRATE.toLong())
                         println("toxav call_res: $call_res")
-                        if (call_res == 0)
+                        if (call_res == 1)
                         {
-                            av_state.calling_state = AVState.CALL_STATUS.CALL_OUTGOING
-                            av_state.calling_state = AVState.CALL_STATUS.CALL_CALLING
+                            avstatestore.state.calling_state = AVState.CALL_STATUS.CALL_CALLING
+                            avstatestore.state.call_with_friend_pubkey = friendpubkey
+                            println("toxav: set 003")
                         }
                         else
                         {
-                            av_state.calling_state = AVState.CALL_STATUS.CALL_NONE
-                            VideoOutFrame.clear_video_out_frame()
-                            VideoInFrame.clear_video_in_frame()
+                            on_call_ended_actions()
+                            println("toxav: ret 002")
                             return@IconButton
                         }
-                        println("________________________")
-                        if (!av_state.ffmpeg_init_done)
-                        {
-                            val res = ffmpegav_init()
-                            println("ffmpeg init: $res")
-                            av_state.ffmpeg_init_done = true
-                        }
-                        val video_in_device = av_state.video_in_device
-                        val video_in_source = av_state.video_in_source
-                        val capture_video_width = 1280
-                        val capture_video_height = 720
-                        var video_buffer_2 : ByteBuffer? = null
 
-                        if ((video_in_device != null) && (video_in_device != ""))
-                        {
-                            if ((video_in_source != null) && (video_in_source != ""))
-                            {
-                                println("ffmpeg video in device: " + video_in_device + " " + video_in_source)
-                                val res_vd = AVActivity.ffmpegav_open_video_in_device(
-                                    video_in_device,
-                                    video_in_source,
-                                    capture_video_width,
-                                    capture_video_height,
-                                    20)
-                                println("ffmpeg open video capture device: $res_vd")
-                            }
-                        }
-
-                        val frame_width_px1 = capture_video_width
-                        val frame_height_px1 = capture_video_height
-                        val buffer_size_in_bytes1 = (frame_width_px1 * frame_height_px1 * 3) / 2
-                        val video_buffer_1 = ByteBuffer.allocateDirect(buffer_size_in_bytes1)
-                        AVActivity.ffmpegav_set_JNI_video_buffer(video_buffer_1, frame_width_px1, frame_height_px1)
-                        val frame_width_px2 = capture_video_width
-                        val frame_height_px2 = capture_video_height
-                        val y_size = frame_width_px2 * frame_height_px2
-                        val u_size = (frame_width_px2 * frame_height_px2 / 4)
-                        val v_size = (frame_width_px2 * frame_height_px2 / 4)
-                        val video_buffer_2_y = ByteBuffer.allocateDirect(y_size)
-                        val video_buffer_2_u = ByteBuffer.allocateDirect(u_size)
-                        val video_buffer_2_v = ByteBuffer.allocateDirect(v_size)
-                        AVActivity.ffmpegav_set_JNI_video_buffer2(video_buffer_2_y, video_buffer_2_u, video_buffer_2_v,
-                            frame_width_px2, frame_height_px2)
-
-                        ffmpegav_set_video_capture_callback(object : AVActivity.video_capture_callback
-                        {
-                            override fun onSuccess(width: Long, height: Long, pts: Long)
-                            {
-                                // com.zoffcc.applications.ffmpegav.Log.i(TAG, "ffmpeg open video capture onSuccess: $width $height $pts")
-                                val frame_width_px: Int = width.toInt()
-                                val frame_height_px: Int = height.toInt()
-                                val buffer_size_in_bytes3 = (frame_width_px * frame_height_px * 1.5f).toInt()
-                                if ((video_buffer_2 == null) || (frame_width_px != frame_width_px2) || (frame_height_px != frame_height_px2))
-                                {
-                                    video_buffer_2 = ByteBuffer.allocateDirect(buffer_size_in_bytes3)
-                                    set_JNI_video_buffer2(video_buffer_2, frame_width_px, frame_height_px)
-                                    VideoOutFrame.setup_video_out_resolution(frame_width_px, frame_height_px, buffer_size_in_bytes3)
-                                }
-                                video_buffer_2!!.rewind()
-                                video_buffer_2_y.rewind()
-                                video_buffer_2_u.rewind()
-                                video_buffer_2_v.rewind()
-                                video_buffer_2!!.put(video_buffer_2_y)
-                                video_buffer_2!!.put(video_buffer_2_u)
-                                video_buffer_2!!.put(video_buffer_2_v)
-                                toxav_video_send_frame_age(friendnum = friendnum,
-                                    frame_width_px = width.toInt(),
-                                    frame_height_px = height.toInt(),
-                                    age_ms = 0)
-
-                                video_buffer_2!!.rewind()
-                                VideoOutFrame.new_video_out_frame(video_buffer_2, frame_width_px, frame_height_px)
-                            }
-                            override fun onError()
-                            {
-                            }
-                        })
-                        AVActivity.ffmpegav_start_video_in_capture()
+                        start_outgoing_video(friendpubkey!!)
                     }) {
                         Icon(Icons.Filled.Videocam, null)
                     }
@@ -213,8 +137,85 @@ fun ChatAppWithScaffold(av_state: AVState, focusRequester: FocusRequester, displ
     }
 }
 
+fun start_outgoing_video(friendpubkey: String)
+{
+    if (friendpubkey == null)
+    {
+        println("start_outgoing_video: friend pubkey is null!! ERROR !!");
+        return
+    }
+    println("___________start_outgoing_video_____________")
+    if (!avstatestore.state.ffmpeg_init_done)
+    {
+        val res = ffmpegav_init()
+        println("ffmpeg init: $res")
+        avstatestore.state.ffmpeg_init_done = true
+    }
+    val video_in_device = avstatestore.state.video_in_device
+    val video_in_source = avstatestore.state.video_in_source
+    var video_buffer_2: ByteBuffer? = null
+
+    if ((video_in_device != null) && (video_in_device != ""))
+    {
+        if ((video_in_source != null) && (video_in_source != ""))
+        {
+            println("ffmpeg video in device: " + video_in_device + " " + video_in_source)
+            val res_vd = AVActivity.ffmpegav_open_video_in_device(video_in_device, video_in_source, CAPTURE_VIDEO_WIDTH, CAPTURE_VIDEO_HEIGHT, 20)
+            println("ffmpeg open video capture device: $res_vd")
+        }
+    }
+    val frame_width_px1 = CAPTURE_VIDEO_WIDTH
+    val frame_height_px1 = CAPTURE_VIDEO_HEIGHT
+    val buffer_size_in_bytes1 = (frame_width_px1 * frame_height_px1 * 3) / 2
+    val video_buffer_1 = ByteBuffer.allocateDirect(buffer_size_in_bytes1)
+    AVActivity.ffmpegav_set_JNI_video_buffer(video_buffer_1, frame_width_px1, frame_height_px1)
+    val frame_width_px2 = CAPTURE_VIDEO_WIDTH
+    val frame_height_px2 = CAPTURE_VIDEO_HEIGHT
+    val y_size = frame_width_px2 * frame_height_px2
+    val u_size = (frame_width_px2 * frame_height_px2 / 4)
+    val v_size = (frame_width_px2 * frame_height_px2 / 4)
+    val video_buffer_2_y = ByteBuffer.allocateDirect(y_size)
+    val video_buffer_2_u = ByteBuffer.allocateDirect(u_size)
+    val video_buffer_2_v = ByteBuffer.allocateDirect(v_size)
+    AVActivity.ffmpegav_set_JNI_video_buffer2(video_buffer_2_y, video_buffer_2_u, video_buffer_2_v, frame_width_px2, frame_height_px2)
+
+    ffmpegav_set_video_capture_callback(object : AVActivity.video_capture_callback
+    {
+        override fun onSuccess(width: Long, height: Long, pts: Long)
+        { // com.zoffcc.applications.ffmpegav.Log.i(TAG, "ffmpeg open video capture onSuccess: $width $height $pts")
+            val frame_width_px: Int = width.toInt()
+            val frame_height_px: Int = height.toInt()
+            val buffer_size_in_bytes3 = (frame_width_px * frame_height_px * 1.5f).toInt()
+            if ((video_buffer_2 == null) || (frame_width_px != frame_width_px2) || (frame_height_px != frame_height_px2))
+            {
+                video_buffer_2 = ByteBuffer.allocateDirect(buffer_size_in_bytes3)
+                set_JNI_video_buffer2(video_buffer_2, frame_width_px, frame_height_px)
+                VideoOutFrame.setup_video_out_resolution(frame_width_px, frame_height_px, buffer_size_in_bytes3)
+            }
+            video_buffer_2!!.rewind()
+            video_buffer_2_y.rewind()
+            video_buffer_2_u.rewind()
+            video_buffer_2_v.rewind()
+            video_buffer_2!!.put(video_buffer_2_y)
+            video_buffer_2!!.put(video_buffer_2_u)
+            video_buffer_2!!.put(video_buffer_2_v)
+            // can we cache that? what if a friend gets deleted while in a call? and the friend number changes?
+            val friendnum = tox_friend_by_public_key(friendpubkey)
+            toxav_video_send_frame_age(friendnum = friendnum, frame_width_px = width.toInt(), frame_height_px = height.toInt(), age_ms = 0)
+
+            video_buffer_2!!.rewind()
+            VideoOutFrame.new_video_out_frame(video_buffer_2, frame_width_px, frame_height_px)
+        }
+
+        override fun onError()
+        {
+        }
+    })
+    AVActivity.ffmpegav_start_video_in_capture()
+}
+
 @Composable
-fun GroupAppWithScaffold(av_state: AVState, focusRequester: FocusRequester, displayTextField: Boolean = true, groupList: StateGroups, ui_scale: Float)
+fun GroupAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolean = true, groupList: StateGroups, ui_scale: Float)
 {
     Theme {
         Scaffold(topBar = {
