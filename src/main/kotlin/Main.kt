@@ -61,7 +61,6 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.zoffcc.applications.ffmpegav.AVActivity
-import com.zoffcc.applications.trifa.AVState
 import com.zoffcc.applications.trifa.HelperGeneric.PubkeyShort
 import com.zoffcc.applications.trifa.JPictureBox
 import com.zoffcc.applications.trifa.JPictureBoxOut
@@ -129,6 +128,8 @@ val AVATAR_SIZE = 40f
 val MAX_AVATAR_SIZE = 70f
 val SPACE_AFTER_LAST_MESSAGE = 2.dp
 val SPACE_BEFORE_FIRST_MESSAGE = 10.dp
+val CAPTURE_VIDEO_WIDTH = 640 // 1280
+val CAPTURE_VIDEO_HEIGHT = 480 // 720
 val ImageloaderDispatcher = Executors.newFixedThreadPool(5).asCoroutineDispatcher()
 var global_semaphore_contactlist_ui = Semaphore(1)
 var global_semaphore_grouppeerlist_ui = Semaphore(1)
@@ -144,7 +145,6 @@ fun App()
     var start_button_text by remember { mutableStateOf("start") }
     var tox_running_state: String by remember { mutableStateOf("stopped") }
     var ui_scale by remember { mutableStateOf(1.0f) }
-    val av_state by remember { mutableStateOf(AVState(1)) }
 
     Log.i(TAG, "CCCC:" + PrefsSettings::class.java)
     ui_scale = 1.0f
@@ -267,16 +267,16 @@ fun App()
                         val audio_in_sources by remember { mutableStateOf(ArrayList<String>()) }
                         var video_in_devices by remember { mutableStateOf(ArrayList<String>()) }
                         val video_in_sources by remember { mutableStateOf(ArrayList<String>()) }
-                        av_state.audio_in_device
+                        avstatestore.state.audio_in_device
                         Column {
-                            Text("audio in: " + av_state.audio_in_device + " " + av_state.audio_in_source)
+                            Text("audio in: " + avstatestore.state.audio_in_device + " " + avstatestore.state.audio_in_source)
                             Box {
                                 IconButton(onClick = {
-                                    if (!av_state.ffmpeg_init_done)
+                                    if (!avstatestore.state.ffmpeg_init_done)
                                     {
                                         val res = AVActivity.ffmpegav_init()
                                         println("ffmpeg init: $res")
-                                        av_state.ffmpeg_init_done = true
+                                        avstatestore.state.ffmpeg_init_done = true
                                     }
                                     val audio_in_devices_get = AVActivity.ffmpegav_get_audio_in_devices()
                                     println("ffmpeg audio in devices: " + audio_in_devices_get.size)
@@ -295,7 +295,7 @@ fun App()
                                         audio_in_devices.forEach() {
                                             if (it != null)
                                             {
-                                                DropdownMenuItem(onClick = { av_state.audio_in_source = "";audio_in_sources.clear(); av_state.audio_in_device = it;expanded_a = false }) {
+                                                DropdownMenuItem(onClick = { avstatestore.state.audio_in_source = "";audio_in_sources.clear(); avstatestore.state.audio_in_device = it;expanded_a = false }) {
                                                     Text(""+it)
                                                 }
                                             }
@@ -303,9 +303,9 @@ fun App()
                                     }
                                     DropdownMenuItem(
                                         onClick = {
-                                            av_state.audio_in_source = ""
+                                            avstatestore.state.audio_in_source = ""
                                             audio_in_sources.clear()
-                                            av_state.audio_in_device = ""
+                                            avstatestore.state.audio_in_device = ""
                                             expanded_a = false
                                         })
                                     {
@@ -315,16 +315,16 @@ fun App()
                             }
                             Box {
                                 IconButton(onClick = {
-                                    if ((av_state.audio_in_device != null) && (av_state.audio_in_device != ""))
+                                    if ((avstatestore.state.audio_in_device != null) && (avstatestore.state.audio_in_device != ""))
                                     {
-                                        if (!av_state.ffmpeg_init_done)
+                                        if (!avstatestore.state.ffmpeg_init_done)
                                         {
                                             val res = AVActivity.ffmpegav_init()
                                             println("ffmpeg init: $res")
-                                            av_state.ffmpeg_init_done = true
+                                            avstatestore.state.ffmpeg_init_done = true
                                         }
                                         var audio_in_sources_get: Array<String> = emptyArray()
-                                        val tmp = AVActivity.ffmpegav_get_in_sources(av_state.audio_in_device)
+                                        val tmp = AVActivity.ffmpegav_get_in_sources(avstatestore.state.audio_in_device)
                                         if (tmp == null)
                                         {
                                             audio_in_sources_get = emptyArray()
@@ -353,7 +353,7 @@ fun App()
                                         audio_in_sources.forEach() {
                                             if (it != null)
                                             {
-                                                DropdownMenuItem(onClick = { av_state.audio_in_source = it;expanded_as = false }) {
+                                                DropdownMenuItem(onClick = { avstatestore.state.audio_in_source = it;expanded_as = false }) {
                                                     Text(""+it)
                                                 }
                                             }
@@ -361,7 +361,7 @@ fun App()
                                     }
                                     DropdownMenuItem(
                                         onClick = {
-                                            av_state.audio_in_source = ""
+                                            avstatestore.state.audio_in_source = ""
                                             expanded_as = false
                                         })
                                     {
@@ -371,14 +371,14 @@ fun App()
                             }
 
 
-                            Text("video in: " + av_state.video_in_device + " " + av_state.video_in_source)
+                            Text("video in: " + avstatestore.state.video_in_device + " " + avstatestore.state.video_in_source)
                             Box {
                                 IconButton(onClick = {
-                                    if (!av_state.ffmpeg_init_done)
+                                    if (!avstatestore.state.ffmpeg_init_done)
                                     {
                                         val res = AVActivity.ffmpegav_init()
                                         println("ffmpeg init: $res")
-                                        av_state.ffmpeg_init_done = true
+                                        avstatestore.state.ffmpeg_init_done = true
                                     }
                                     val video_in_devices_get = AVActivity.ffmpegav_get_video_in_devices()
                                     println("ffmpeg video in devices: " + video_in_devices_get.size)
@@ -397,7 +397,7 @@ fun App()
                                         video_in_devices.forEach() {
                                             if (it != null)
                                             {
-                                                DropdownMenuItem(onClick = { av_state.video_in_source = "";video_in_sources.clear(); av_state.video_in_device = it;expanded_v = false }) {
+                                                DropdownMenuItem(onClick = { avstatestore.state.video_in_source = "";video_in_sources.clear(); avstatestore.state.video_in_device = it;expanded_v = false }) {
                                                     Text("" + it)
                                                 }
                                             }
@@ -405,9 +405,9 @@ fun App()
                                     }
                                     DropdownMenuItem(
                                         onClick = {
-                                            av_state.video_in_source = ""
+                                            avstatestore.state.video_in_source = ""
                                             video_in_sources.clear()
-                                            av_state.video_in_device = ""
+                                            avstatestore.state.video_in_device = ""
                                             expanded_v = false
                                         })
                                     {
@@ -417,16 +417,16 @@ fun App()
                             }
                             Box {
                                 IconButton(onClick = {
-                                    if ((av_state.video_in_device != null) && (av_state.video_in_device != ""))
+                                    if ((avstatestore.state.video_in_device != null) && (avstatestore.state.video_in_device != ""))
                                     {
-                                        if (!av_state.ffmpeg_init_done)
+                                        if (!avstatestore.state.ffmpeg_init_done)
                                         {
                                             val res = AVActivity.ffmpegav_init()
                                             println("ffmpeg init: $res")
-                                            av_state.ffmpeg_init_done = true
+                                            avstatestore.state.ffmpeg_init_done = true
                                         }
                                         var video_in_sources_get: Array<String> = emptyArray()
-                                        if (av_state.video_in_device == "video4linux2,v4l2")
+                                        if (avstatestore.state.video_in_device == "video4linux2,v4l2")
                                         {
                                             val tmp = AVActivity.ffmpegav_get_in_sources("v4l2")
                                             if (tmp == null)
@@ -440,7 +440,7 @@ fun App()
                                         }
                                         else
                                         {
-                                            val tmp = AVActivity.ffmpegav_get_in_sources(av_state.video_in_device)
+                                            val tmp = AVActivity.ffmpegav_get_in_sources(avstatestore.state.video_in_device)
                                             if (tmp == null)
                                             {
                                                 video_in_sources_get = emptyArray()
@@ -450,8 +450,8 @@ fun App()
                                                 video_in_sources_get = tmp
                                             }
                                         }
-                                        Log.i(TAG, "video_in_device=" + av_state.video_in_device)
-                                        if (av_state.video_in_device == "x11grab")
+                                        Log.i(TAG, "video_in_device=" + avstatestore.state.video_in_device)
+                                        if (avstatestore.state.video_in_device == "x11grab")
                                         {
                                             video_in_sources_get += listOf(":0.0", ":1.0", ":2.0", ":3.0")
                                         }
@@ -475,7 +475,7 @@ fun App()
                                         video_in_sources.forEach() {
                                             if (it != null)
                                             {
-                                                DropdownMenuItem(onClick = { av_state.video_in_source = it;expanded_vs = false }) {
+                                                DropdownMenuItem(onClick = { avstatestore.state.video_in_source = it;expanded_vs = false }) {
                                                     Text(""+it)
                                                 }
                                             }
@@ -483,7 +483,7 @@ fun App()
                                     }
                                     DropdownMenuItem(
                                         onClick = {
-                                            av_state.video_in_source = ""
+                                            avstatestore.state.video_in_source = ""
                                             expanded_vs = false
                                         })
                                     {
@@ -525,7 +525,7 @@ fun App()
                                     //GlobalScope.launch {
                                         load_messages_for_friend(contacts.selectedContactPubkey)
                                     //}
-                                    ChatAppWithScaffold(av_state = av_state, focusRequester = focusRequester, contactList = contacts, ui_scale = ui_scale)
+                                    ChatAppWithScaffold(focusRequester = focusRequester, contactList = contacts, ui_scale = ui_scale)
                                     LaunchedEffect(contacts.selectedContactPubkey) {
                                         focusRequester.requestFocus()
                                     }
@@ -556,7 +556,7 @@ fun App()
                                     //GlobalScope.launch {
                                         load_groupmessages_for_friend(groups.selectedGroupId)
                                     //}
-                                    GroupAppWithScaffold(av_state = av_state, focusRequester = groupfocusRequester, groupList = groups, ui_scale = ui_scale)
+                                    GroupAppWithScaffold(focusRequester = groupfocusRequester, groupList = groups, ui_scale = ui_scale)
                                     LaunchedEffect(groups.selectedGroupId) {
                                         groupfocusRequester.requestFocus()
                                     }

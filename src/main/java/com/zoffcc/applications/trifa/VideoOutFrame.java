@@ -210,9 +210,7 @@ public class VideoOutFrame {
 
                     // if (Callstate.state != 0)
                     {
-                        final long tt2 = System.currentTimeMillis();
                         ImageIcon i = new ImageIcon(imageOut);
-                        Log.i(TAG, "new_video_in_frame:007:" + (System.currentTimeMillis() - tt2) + " ms");
                         try
                         {
                             if (i != null)

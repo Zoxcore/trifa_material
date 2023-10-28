@@ -1,5 +1,10 @@
 package com.zoffcc.applications.trifa
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import org.briarproject.briar.desktop.contact.ContactItem
+
 data class AVState(val a: Int)
 {
     enum class CALL_STATUS {
@@ -29,8 +34,25 @@ data class AVState(val a: Int)
     var calling_state = CALL_STATUS.CALL_NONE
     var calling_vstate = CALLVIDEO.CALLVIDEO_NONE
     var calling_astate = CALLAUDIO.CALLAUDIO_NONE
+    var call_with_friend_pubkey: String? = null
 
     init
     {
+    }
+}
+
+interface AVStateStore
+{
+    val stateFlow: StateFlow<AVState>
+    val state get() = stateFlow.value
+}
+
+fun CoroutineScope.createAVStateStore(): AVStateStore
+{
+    val mutableStateFlow = MutableStateFlow(AVState(1))
+
+    return object : AVStateStore
+    {
+        override val stateFlow: StateFlow<AVState> = mutableStateFlow
     }
 }

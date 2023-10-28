@@ -6,6 +6,8 @@ import MessageAction
 import UIGroupMessage
 import UIMessage
 import User
+import avstatestore
+import com.zoffcc.applications.ffmpegav.AVActivity
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_loadjni
 import com.zoffcc.applications.sorm.FileDB
 import com.zoffcc.applications.sorm.Filetransfer
@@ -27,6 +29,8 @@ import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupnum__wrapper
 import com.zoffcc.applications.trifa.HelperMessage.update_single_message_from_ftid
 import com.zoffcc.applications.trifa.HelperMessage.update_single_message_from_messge_id
 import com.zoffcc.applications.trifa.TRIFAGlobals.AVATAR_INCOMING_MAX_BYTE_SIZE
+import com.zoffcc.applications.trifa.TRIFAGlobals.GLOBAL_AUDIO_BITRATE
+import com.zoffcc.applications.trifa.TRIFAGlobals.GLOBAL_VIDEO_BITRATE
 import com.zoffcc.applications.trifa.TRIFAGlobals.GROUP_ID_LENGTH
 import com.zoffcc.applications.trifa.TRIFAGlobals.LOWER_NGC_VIDEO_BITRATE
 import com.zoffcc.applications.trifa.TRIFAGlobals.LOWER_NGC_VIDEO_QUANTIZER
@@ -60,6 +64,7 @@ import org.briarproject.briar.desktop.contact.ContactItem
 import org.briarproject.briar.desktop.contact.GroupItem
 import org.briarproject.briar.desktop.contact.GroupPeerItem
 import set_tox_online_state
+import start_outgoing_video
 import timestampMs
 import toxdatastore
 import java.io.File
@@ -84,7 +89,7 @@ class MainActivity
 
         // --------- global config ---------
         // --------- global config ---------
-        const val CTOXCORE_NATIVE_LOGGING = true // set "false" for release builds
+        const val CTOXCORE_NATIVE_LOGGING = false // set "false" for release builds
 
         // --------- global config ---------
         // --------- global config ---------
@@ -873,16 +878,40 @@ class MainActivity
         @JvmStatic
         fun android_toxav_callback_call_cb_method(friend_number: Long, audio_enabled: Int, video_enabled: Int)
         {
+            if (avstatestore.state.calling_state != AVState.CALL_STATUS.CALL_NONE)
+            {
+                // we are already in some other call state, maybe with another friend
+                return
+            }
+
+            if (avstatestore.state.call_with_friend_pubkey != null)
+            {
+                // we have some call with a friend already
+                return
+            }
+            val call_answer = toxav_answer(friend_number, GLOBAL_AUDIO_BITRATE.toLong(), GLOBAL_VIDEO_BITRATE.toLong())
+            if (call_answer == 1)
+            {
+                avstatestore.state.call_with_friend_pubkey = tox_friend_get_public_key(friend_number)
+                avstatestore.state.calling_state = AVState.CALL_STATUS.CALL_CALLING
+                start_outgoing_video(avstatestore.state.call_with_friend_pubkey!!)
+            }
         }
 
         @JvmStatic
         fun android_toxav_callback_video_receive_frame_cb_method(friend_number: Long, frame_width_px: Long, frame_height_px: Long, ystride: Long, ustride: Long, vstride: Long)
         {
-            if ((contactstore.state.selectedContactPubkey == null)
-                || (contactstore.state.selectedContactPubkey != tox_friend_get_public_key(friend_number)))
+            if ((avstatestore.state.call_with_friend_pubkey == null)
+                || (avstatestore.state.call_with_friend_pubkey != tox_friend_get_public_key(friend_number)))
             {
                 // it's not the currently selected friend, so do not play the video frame
                 return
+            }
+
+            if (avstatestore.state.calling_state != AVState.CALL_STATUS.CALL_CALLING)
+            {
+                // we are not in a call, ignore incoming video frames
+                return;
             }
 
             val y_layer_size = Math.max(frame_width_px, Math.abs(ystride)).toInt() * frame_height_px.toInt()
@@ -909,27 +938,60 @@ class MainActivity
             new_video_in_frame(video_buffer_1, frame_width_px1, frame_height_px1)
         }
 
+        @OptIn(DelicateCoroutinesApi::class)
         @JvmStatic
         fun android_toxav_callback_call_state_cb_method(friend_number: Long, a_TOXAV_FRIEND_CALL_STATE: Int)
         {
             GlobalScope.launch {
                 try
                 {
-                    if (
-                        (a_TOXAV_FRIEND_CALL_STATE == ToxVars.TOXAV_FRIEND_CALL_STATE.TOXAV_FRIEND_CALL_STATE_ERROR.value) ||
-                        (a_TOXAV_FRIEND_CALL_STATE == ToxVars.TOXAV_FRIEND_CALL_STATE.TOXAV_FRIEND_CALL_STATE_FINISHED.value) ||
-                        (a_TOXAV_FRIEND_CALL_STATE == ToxVars.TOXAV_FRIEND_CALL_STATE.TOXAV_FRIEND_CALL_STATE_NONE.value)
-                        )
+                    if ((avstatestore.state.call_with_friend_pubkey == null) ||
+                        (avstatestore.state.call_with_friend_pubkey != tox_friend_get_public_key(friend_number)))
                     {
-                        Thread.sleep(100)
-                        VideoOutFrame.clear_video_out_frame()
-                        VideoInFrame.clear_video_in_frame()
+                        // not the friend we are in a call with. so ignore callback
+                        return@launch
                     }
-                } catch (e: Exception)
+
+                    if (a_TOXAV_FRIEND_CALL_STATE and ToxVars.TOXAV_FRIEND_CALL_STATE.TOXAV_FRIEND_CALL_STATE_SENDING_A.value +
+                        ToxVars.TOXAV_FRIEND_CALL_STATE.TOXAV_FRIEND_CALL_STATE_SENDING_V.value
+                        + ToxVars.TOXAV_FRIEND_CALL_STATE.TOXAV_FRIEND_CALL_STATE_ACCEPTING_A.value +
+                        ToxVars.TOXAV_FRIEND_CALL_STATE.TOXAV_FRIEND_CALL_STATE_ACCEPTING_V.value > 0)
+                    {
+                        Log.i(TAG, "toxav_call_state:from=$friend_number call starting")
+                    } else if (a_TOXAV_FRIEND_CALL_STATE and ToxVars.TOXAV_FRIEND_CALL_STATE.TOXAV_FRIEND_CALL_STATE_FINISHED.value > 0)
+                    {
+                        Log.i(TAG, "toxav_call_state:from=$friend_number call ending(1)")
+                        AVActivity.ffmpegav_stop_video_in_capture()
+                        AVActivity.ffmpegav_close_video_in_device()
+                        on_call_ended_actions()
+                    } else if (avstatestore.state.calling_state != AVState.CALL_STATUS.CALL_NONE &&
+                        a_TOXAV_FRIEND_CALL_STATE == ToxVars.TOXAV_FRIEND_CALL_STATE.TOXAV_FRIEND_CALL_STATE_NONE.value)
+                    {
+                        Log.i(TAG, "toxav_call_state:from=$friend_number call ending(2)")
+                        AVActivity.ffmpegav_stop_video_in_capture()
+                        AVActivity.ffmpegav_close_video_in_device()
+                        on_call_ended_actions()
+                    } else if (a_TOXAV_FRIEND_CALL_STATE and ToxVars.TOXAV_FRIEND_CALL_STATE.TOXAV_FRIEND_CALL_STATE_ERROR.value > 0)
+                    {
+                        Log.i(TAG, "toxav_call_state:from=$friend_number call ERROR(3)")
+                        AVActivity.ffmpegav_stop_video_in_capture()
+                        AVActivity.ffmpegav_close_video_in_device()
+                        on_call_ended_actions()
+                    }
+                } catch (_: Exception)
                 {
                 }
             }
 
+        }
+
+        fun on_call_ended_actions()
+        {
+            avstatestore.state.calling_state = AVState.CALL_STATUS.CALL_NONE
+            avstatestore.state.call_with_friend_pubkey = null
+            Thread.sleep(100)
+            VideoOutFrame.clear_video_out_frame()
+            VideoInFrame.clear_video_in_frame()
         }
 
         @JvmStatic
