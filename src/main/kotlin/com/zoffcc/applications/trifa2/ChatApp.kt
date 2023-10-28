@@ -32,9 +32,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.ffmpegav.AVActivity
+import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_close_video_in_device
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_get_video_in_devices
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_init
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_set_video_capture_callback
+import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_stop_video_in_capture
+import com.zoffcc.applications.trifa.AVState
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity
@@ -45,12 +48,15 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_send_message
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_send_message
 import com.zoffcc.applications.trifa.MainActivity.Companion.toxav_call
+import com.zoffcc.applications.trifa.MainActivity.Companion.toxav_call_control
 import com.zoffcc.applications.trifa.MainActivity.Companion.toxav_video_send_frame_age
 import com.zoffcc.applications.trifa.StateContacts
 import com.zoffcc.applications.trifa.StateGroups
 import com.zoffcc.applications.trifa.TRIFAGlobals
 import com.zoffcc.applications.trifa.ToxVars
 import com.zoffcc.applications.trifa.ToxVars.TOX_MESSAGE_TYPE
+import com.zoffcc.applications.trifa.VideoInFrame
+import com.zoffcc.applications.trifa.VideoOutFrame
 import com.zoffcc.applications.trifa.createContactStore
 import com.zoffcc.applications.trifa.createGroupPeerStore
 import com.zoffcc.applications.trifa.createGroupStore
@@ -74,7 +80,7 @@ val savepathstore = CoroutineScope(SupervisorJob()).createSavepathStore()
 val toxdatastore = CoroutineScope(SupervisorJob()).createToxDataStore()
 
 @Composable
-fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolean = true, contactList: StateContacts, ui_scale: Float)
+fun ChatAppWithScaffold(av_state: AVState, focusRequester: FocusRequester, displayTextField: Boolean = true, contactList: StateContacts, ui_scale: Float)
 {
     Theme {
         Scaffold(topBar = {
@@ -91,33 +97,58 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
                     IconButton(onClick = {
                         // video call button pressed
                         val friendnum = tox_friend_by_public_key(contactList.selectedContactPubkey)
-                        set_av_call_status(1)
+                        // set_av_call_status(1)
+
+                        if (av_state.calling_state == AVState.CALL_STATUS.CALL_CALLING)
+                        {
+                            ffmpegav_stop_video_in_capture()
+                            ffmpegav_close_video_in_device()
+                            toxav_call_control(friendnum, ToxVars.TOXAV_CALL_CONTROL.TOXAV_CALL_CONTROL_CANCEL.value)
+                            av_state.calling_state = AVState.CALL_STATUS.CALL_NONE
+                            VideoOutFrame.clear_video_out_frame()
+                            VideoInFrame.clear_video_in_frame()
+                            return@IconButton
+                        }
+
                         val call_res = toxav_call(friendnum,16, 2000)
                         println("toxav call_res: $call_res")
-                        val res = ffmpegav_init()
-                        println("ffmpeg init: $res")
-                        val video_in_devices = ffmpegav_get_video_in_devices()
-                        println("ffmpeg video in devices: " + video_in_devices.size)
-
+                        if (call_res == 0)
+                        {
+                            av_state.calling_state = AVState.CALL_STATUS.CALL_OUTGOING
+                            av_state.calling_state = AVState.CALL_STATUS.CALL_CALLING
+                        }
+                        else
+                        {
+                            av_state.calling_state = AVState.CALL_STATUS.CALL_NONE
+                            VideoOutFrame.clear_video_out_frame()
+                            VideoInFrame.clear_video_in_frame()
+                            return@IconButton
+                        }
+                        println("________________________")
+                        if (!av_state.ffmpeg_init_done)
+                        {
+                            val res = ffmpegav_init()
+                            println("ffmpeg init: $res")
+                            av_state.ffmpeg_init_done = true
+                        }
+                        val video_in_device = av_state.video_in_device
+                        val video_in_source = av_state.video_in_source
                         val capture_video_width = 1280
                         val capture_video_height = 720
                         var video_buffer_2 : ByteBuffer? = null
 
-                        for (i in video_in_devices.indices)
+                        if ((video_in_device != null) && (video_in_device != ""))
                         {
-                            if (video_in_devices[i] != null)
+                            if ((video_in_source != null) && (video_in_source != ""))
                             {
-                                println("ffmpeg video in device #" + i + ": " + video_in_devices[i])
-                                if (i == 1)
-                                {
-                                    val res_vd = AVActivity.ffmpegav_open_video_in_device(
-                                        ":0.0",
-                                        video_in_devices[i],
-                                        capture_video_width,
-                                        capture_video_height,
-                                        20)
-                                    println("ffmpeg open video capture device: $res_vd")
-                                }
+                                println("ffmpeg video in device: " + video_in_device + " " + video_in_source)
+                                val res_vd = AVActivity.ffmpegav_open_video_in_device(
+                                    video_in_device,
+                                    video_in_source,
+                                    capture_video_width,
+                                    capture_video_height,
+                                    20)
+                                println("ffmpeg open video capture device: $res_vd")
                             }
                         }
 
@@ -149,6 +180,7 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
                                 {
                                     video_buffer_2 = ByteBuffer.allocateDirect(buffer_size_in_bytes3)
                                     set_JNI_video_buffer2(video_buffer_2, frame_width_px, frame_height_px)
+                                    VideoOutFrame.setup_video_out_resolution(frame_width_px, frame_height_px, buffer_size_in_bytes3)
                                 }
                                 video_buffer_2!!.rewind()
                                 video_buffer_2_y.rewind()
@@ -161,12 +193,14 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
                                     frame_width_px = width.toInt(),
                                     frame_height_px = height.toInt(),
                                     age_ms = 0)
+
+                                video_buffer_2!!.rewind()
+                                VideoOutFrame.new_video_out_frame(video_buffer_2, frame_width_px, frame_height_px)
                             }
                             override fun onError()
                             {
                             }
                         })
-
                         AVActivity.ffmpegav_start_video_in_capture()
                     }) {
                         Icon(Icons.Filled.Videocam, null)
@@ -180,7 +214,7 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
 }
 
 @Composable
-fun GroupAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolean = true, groupList: StateGroups, ui_scale: Float)
+fun GroupAppWithScaffold(av_state: AVState, focusRequester: FocusRequester, displayTextField: Boolean = true, groupList: StateGroups, ui_scale: Float)
 {
     Theme {
         Scaffold(topBar = {

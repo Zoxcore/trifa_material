@@ -2,22 +2,23 @@ package com.zoffcc.applications.trifa;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Semaphore;
 
-public class VideoInFrame {
+public class VideoOutFrame {
     private static final String TAG = "trifa.VideoInFrame";
 
     public static int width = 640;
     public static int height = 480;
-    static byte[] imageInByte = null;
-    static BufferedImage imageIn = null;
-    final static Semaphore semaphore_video_in_convert = new Semaphore(1);
-    static int semaphore_video_in_convert_active_threads = 0;
-    static int semaphore_video_in_convert_max_active_threads = 1;
+    static byte[] imageOutByte = null;
+    static BufferedImage imageOut = null;
+    final static Semaphore semaphore_video_out_convert = new Semaphore(1);
+    static int semaphore_video_out_convert_active_threads = 0;
+    static int semaphore_video_out_convert_max_active_threads = 1;
 
-    public static void clear_video_in_frame()
+    public static void clear_video_out_frame()
     {
         try {
             Thread.sleep(300);
@@ -27,12 +28,12 @@ public class VideoInFrame {
         ImageIcon i = new ImageIcon(new BufferedImage(200, 200, BufferedImage.TYPE_INT_ARGB));
         try
         {
-            JPictureBox.videoinbox.setIcon(i);
+            JPictureBoxOut.videooutbox.setIcon(i);
             EventQueue.invokeLater(() -> {
                 try
                 {
-                    JPictureBox.videoinbox.revalidate();
-                    JPictureBox.videoinbox.repaint();
+                    JPictureBoxOut.videooutbox.revalidate();
+                    JPictureBoxOut.videooutbox.repaint();
                 }
                 catch (Exception e)
                 {
@@ -46,20 +47,20 @@ public class VideoInFrame {
         }
     }
 
-    public static void new_video_in_frame(ByteBuffer vbuf, int w, int h)
+    public static void new_video_out_frame(ByteBuffer vbuf, int w, int h)
     {
         try
         {
-            semaphore_video_in_convert.acquire();
-            if (semaphore_video_in_convert_active_threads >= semaphore_video_in_convert_max_active_threads)
+            semaphore_video_out_convert.acquire();
+            if (semaphore_video_out_convert_active_threads >= semaphore_video_out_convert_max_active_threads)
             {
-                semaphore_video_in_convert.release();
+                semaphore_video_out_convert.release();
                 //Log.i(TAG,
                 //      "semaphore_video_in_convert_active_threads:" + semaphore_video_in_convert_active_threads + " " +
                 //      semaphore_video_in_convert_max_active_threads);
                 return;
             }
-            semaphore_video_in_convert.release();
+            semaphore_video_out_convert.release();
         }
         catch (Exception e)
         {
@@ -68,7 +69,7 @@ public class VideoInFrame {
         try
         {
             vbuf.rewind();
-            vbuf.get(imageInByte, 0, imageInByte.length);
+            vbuf.get(imageOutByte, 0, imageOutByte.length);
 
             final Thread paint_thread = new Thread()
             {
@@ -77,9 +78,9 @@ public class VideoInFrame {
                 {
                     try
                     {
-                        semaphore_video_in_convert.acquire();
-                        semaphore_video_in_convert_active_threads++;
-                        semaphore_video_in_convert.release();
+                        semaphore_video_out_convert.acquire();
+                        semaphore_video_out_convert_active_threads++;
+                        semaphore_video_out_convert.release();
                     }
                     catch (Exception e)
                     {
@@ -107,8 +108,8 @@ public class VideoInFrame {
                                     {
                                         try
                                         {
-                                            rColor = getRGBFromStream(i, j, w, h, imageInByte);
-                                            imageIn.setRGB(i, j, rColor);
+                                            rColor = getRGBFromStream(i, j, w, h, imageOutByte);
+                                            imageOut.setRGB(i, j, rColor);
                                         }
                                         catch (Exception e)
                                         {
@@ -116,7 +117,7 @@ public class VideoInFrame {
                                             // e.printStackTrace();
                                             try
                                             {
-                                                imageIn.setRGB(i, j, 0);
+                                                imageOut.setRGB(i, j, 0);
                                             }
                                             catch (Exception e2)
                                             {
@@ -141,8 +142,8 @@ public class VideoInFrame {
                                     {
                                         try
                                         {
-                                            rColor = getRGBFromStream(i, j, w, h, imageInByte);
-                                            imageIn.setRGB(i, j, rColor);
+                                            rColor = getRGBFromStream(i, j, w, h, imageOutByte);
+                                            imageOut.setRGB(i, j, rColor);
                                         }
                                         catch (Exception e)
                                         {
@@ -150,7 +151,7 @@ public class VideoInFrame {
                                             // e.printStackTrace();
                                             try
                                             {
-                                                imageIn.setRGB(i, j, 0);
+                                                imageOut.setRGB(i, j, 0);
                                             }
                                             catch (Exception e2)
                                             {
@@ -175,8 +176,8 @@ public class VideoInFrame {
                                     {
                                         try
                                         {
-                                            rColor = getRGBFromStream(i, j, w, h, imageInByte);
-                                            imageIn.setRGB(i, j, rColor);
+                                            rColor = getRGBFromStream(i, j, w, h, imageOutByte);
+                                            imageOut.setRGB(i, j, rColor);
                                         }
                                         catch (Exception e)
                                         {
@@ -184,7 +185,7 @@ public class VideoInFrame {
                                             // e.printStackTrace();
                                             try
                                             {
-                                                imageIn.setRGB(i, j, 0);
+                                                imageOut.setRGB(i, j, 0);
                                             }
                                             catch (Exception e2)
                                             {
@@ -209,25 +210,20 @@ public class VideoInFrame {
 
                     // if (Callstate.state != 0)
                     {
-                        //final long tt2 = System.currentTimeMillis();
-                        javax.swing.ImageIcon i = new javax.swing.ImageIcon(imageIn);
-                        //Log.i(TAG, "new_video_in_frame:007:" + (System.currentTimeMillis() - tt2) + " ms");
+                        final long tt2 = System.currentTimeMillis();
+                        ImageIcon i = new ImageIcon(imageOut);
+                        Log.i(TAG, "new_video_in_frame:007:" + (System.currentTimeMillis() - tt2) + " ms");
                         try
                         {
                             if (i != null)
                             {
-                                final long tt3 = System.currentTimeMillis();
-                                JPictureBox.videoinbox.setIcon(i);
-                                //Log.i(TAG, "new_video_in_frame:008:" + (System.currentTimeMillis() - tt3) + " ms");
+                                JPictureBoxOut.videooutbox.setIcon(i);
                                 EventQueue.invokeLater(() -> {
                                     try
                                     {
                                         if (i != null)
                                         {
-                                            final long tt4 = System.currentTimeMillis();
-                                            JPictureBox.videoinbox.repaint();
-                                            //Log.i(TAG, "new_video_in_frame:009:" + (System.currentTimeMillis() - tt4) +
-                                            //           " ms");
+                                            JPictureBoxOut.videooutbox.repaint();
                                         }
                                     }
                                     catch (Exception e)
@@ -243,9 +239,9 @@ public class VideoInFrame {
 
                     try
                     {
-                        semaphore_video_in_convert.acquire();
-                        semaphore_video_in_convert_active_threads--;
-                        semaphore_video_in_convert.release();
+                        semaphore_video_out_convert.acquire();
+                        semaphore_video_out_convert_active_threads--;
+                        semaphore_video_out_convert.release();
                     }
                     catch (Exception e)
                     {
@@ -257,7 +253,7 @@ public class VideoInFrame {
         catch (Exception e)
         {
             e.printStackTrace();
-            Log.i(TAG, "new_video_in_frame:007:EE02:" + e.getMessage());
+            Log.i(TAG, "new_video_out_frame:007:EE02:" + e.getMessage());
         }
         // Log.i(TAG, "new_video_in_frame:099");
     }
@@ -312,20 +308,20 @@ public class VideoInFrame {
         return (0xff << 24) | (R << 16) | (G << 8) | B;
     }
 
-    public static void setup_video_in_resolution(int w, int h, int num_bytes)
+    public static void setup_video_out_resolution(int w, int h, int num_bytes)
     {
         Log.i(TAG, "w=" + w + " h=" + h + " num_bytes=" + num_bytes);
-        imageInByte = null;
-        imageInByte = new byte[num_bytes];
+        imageOutByte = null;
+        imageOutByte = new byte[num_bytes];
         Log.i(TAG, "w=" + w + " h=" + h + " len=" + (int) ((float) (w * h) * (float) (1.5)));
-        imageIn = null;
-        imageIn = new java.awt.image.BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        imageOut = null;
+        imageOut = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
         width = w;
         height = h;
 
-        JPictureBox.videoinbox.setSize(width, height);
-        JPictureBox.videoinbox.setPreferredSize(new Dimension(width, height));
-        JPictureBox.videoinbox.revalidate();
-        JPictureBox.videoinbox.repaint();
+        JPictureBoxOut.videooutbox.setSize(width, height);
+        JPictureBoxOut.videooutbox.setPreferredSize(new Dimension(width, height));
+        JPictureBoxOut.videooutbox.revalidate();
+        JPictureBoxOut.videooutbox.repaint();
     }
 }

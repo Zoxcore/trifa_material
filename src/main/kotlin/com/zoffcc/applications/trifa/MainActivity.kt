@@ -912,6 +912,24 @@ class MainActivity
         @JvmStatic
         fun android_toxav_callback_call_state_cb_method(friend_number: Long, a_TOXAV_FRIEND_CALL_STATE: Int)
         {
+            GlobalScope.launch {
+                try
+                {
+                    if (
+                        (a_TOXAV_FRIEND_CALL_STATE == ToxVars.TOXAV_FRIEND_CALL_STATE.TOXAV_FRIEND_CALL_STATE_ERROR.value) ||
+                        (a_TOXAV_FRIEND_CALL_STATE == ToxVars.TOXAV_FRIEND_CALL_STATE.TOXAV_FRIEND_CALL_STATE_FINISHED.value) ||
+                        (a_TOXAV_FRIEND_CALL_STATE == ToxVars.TOXAV_FRIEND_CALL_STATE.TOXAV_FRIEND_CALL_STATE_NONE.value)
+                        )
+                    {
+                        Thread.sleep(100)
+                        VideoOutFrame.clear_video_out_frame()
+                        VideoInFrame.clear_video_in_frame()
+                    }
+                } catch (e: Exception)
+                {
+                }
+            }
+
         }
 
         @JvmStatic

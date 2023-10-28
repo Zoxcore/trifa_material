@@ -47,7 +47,7 @@ public class AVActivity {
 
     public static void ffmpegav_callback_video_capture_frame_pts_cb_method(long width, long height, long pts)
     {
-        Log.i(TAG, "capture video frame w: " + width + " h: " + height + " pts: " + pts);
+        // Log.i(TAG, "capture video frame w: " + width + " h: " + height + " pts: " + pts);
         if (video_capture_callback_function != null) {
             video_capture_callback_function.onSuccess(width, height, pts);
         }
