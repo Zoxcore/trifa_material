@@ -18,16 +18,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Slider
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FormatSize
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -36,16 +39,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.runtime.withFrameMillis
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
@@ -61,13 +60,13 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import com.zoffcc.applications.ffmpegav.AVActivity
 import com.zoffcc.applications.trifa.HelperGeneric.PubkeyShort
 import com.zoffcc.applications.trifa.JPictureBox
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity.Companion.main_init
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_name
-import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_chat_id
 import com.zoffcc.applications.trifa.PrefsSettings
 import com.zoffcc.applications.trifa.RandomNameGenerator
 import com.zoffcc.applications.trifa.SingleComponentAspectRatioKeeperLayout
@@ -78,13 +77,11 @@ import com.zoffcc.applications.trifa.TrifaToxService.Companion.load_grouppeers
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.briarproject.briar.desktop.SettingDetails
 import org.briarproject.briar.desktop.contact.ContactList
@@ -105,10 +102,9 @@ import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.Semaphore
 import java.util.prefs.Preferences
-import javax.swing.BoxLayout
-import javax.swing.ImageIcon
 import javax.swing.JButton
 import javax.swing.JPanel
+import kotlin.collections.ArrayList
 
 private const val TAG = "trifa.Main.kt"
 var tox_running_state_wrapper = "start"
@@ -244,13 +240,195 @@ fun App()
                         }
                         SwingPanel(
                             background = Color.Green,
-                            modifier = Modifier.size(400.dp, 200.dp),
+                            modifier = Modifier.size(300.dp, 100.dp),
                             factory = {
                                 JPanel(SingleComponentAspectRatioKeeperLayout(),true).apply {
                                     add(JPictureBox.videoinbox)
                                 }
                             }
                         )
+                        var expanded_a by remember { mutableStateOf(false) }
+                        var expanded_v by remember { mutableStateOf(false) }
+                        var expanded_as by remember { mutableStateOf(false) }
+                        var expanded_vs by remember { mutableStateOf(false) }
+                        var audio_in_device by remember { mutableStateOf("") }
+                        val audio_in_devices by remember { mutableStateOf(ArrayList<String>()) }
+                        var audio_in_source by remember { mutableStateOf("") }
+                        val audio_in_sources by remember { mutableStateOf(ArrayList<String>()) }
+                        var video_in_device by remember { mutableStateOf("") }
+                        var video_in_devices by remember { mutableStateOf(ArrayList<String>()) }
+                        var video_in_source by remember { mutableStateOf("") }
+                        val video_in_sources by remember { mutableStateOf(ArrayList<String>()) }
+                        Column {
+                            Text("video in: " + audio_in_device + " " + audio_in_source)
+                            Box {
+                                IconButton(onClick = {
+                                    val res = AVActivity.ffmpegav_init()
+                                    println("ffmpeg init: $res")
+                                    val audio_in_devices_get = AVActivity.ffmpegav_get_audio_in_devices()
+                                    println("ffmpeg audio in devices: " + audio_in_devices_get.size)
+                                    audio_in_devices.clear()
+                                    audio_in_devices.addAll(audio_in_devices_get)
+                                    expanded_a = true
+                                }) {
+                                    Icon(Icons.Filled.Refresh, null)
+                                }
+                                DropdownMenu(
+                                    expanded = expanded_a,
+                                    onDismissRequest = { expanded_a = true },
+                                ) {
+                                    if (audio_in_devices.size > 0)
+                                    {
+                                        audio_in_devices.forEach() {
+                                            if (it != null)
+                                            {
+                                                DropdownMenuItem(onClick = { audio_in_source = "";audio_in_sources.clear(); audio_in_device = it;expanded_a = false }) {
+                                                    Text(""+it)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            Box {
+                                IconButton(onClick = {
+                                    if ((audio_in_device != null) && (audio_in_device != ""))
+                                    {
+                                        val res = AVActivity.ffmpegav_init()
+                                        println("ffmpeg init: $res")
+                                        var audio_in_sources_get: Array<String> = emptyArray()
+                                        val tmp = AVActivity.ffmpegav_get_in_sources(audio_in_device)
+                                        if (tmp == null)
+                                        {
+                                            audio_in_sources_get = emptyArray()
+                                        }
+                                        else
+                                        {
+                                            audio_in_sources_get = tmp
+                                        }
+                                        audio_in_sources.clear()
+                                        if (audio_in_sources_get.isNotEmpty())
+                                        {
+                                            println("ffmpeg audio in sources: " + audio_in_sources_get.size)
+                                            audio_in_sources.addAll(audio_in_sources_get)
+                                            expanded_as = true
+                                        }
+                                    }
+                                }) {
+                                    Icon(Icons.Filled.Refresh, null)
+                                }
+                                DropdownMenu(
+                                    expanded = expanded_as,
+                                    onDismissRequest = { expanded_as = true },
+                                ) {
+                                    if (audio_in_sources.size > 0)
+                                    {
+                                        audio_in_sources.forEach() {
+                                            if (it != null)
+                                            {
+                                                DropdownMenuItem(onClick = { audio_in_source = it;expanded_as = false }) {
+                                                    Text(""+it)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+
+
+
+
+                            Text("video in: " + video_in_device + " " + video_in_source)
+                            Box {
+                                IconButton(onClick = {
+                                    val res = AVActivity.ffmpegav_init()
+                                    println("ffmpeg init: $res")
+                                    val video_in_devices_get = AVActivity.ffmpegav_get_video_in_devices()
+                                    println("ffmpeg video in devices: " + video_in_devices_get.size)
+                                    video_in_devices.clear()
+                                    video_in_devices.addAll(video_in_devices_get)
+                                    expanded_v = true
+                                }) {
+                                    Icon(Icons.Filled.Refresh, null)
+                                }
+                                DropdownMenu(
+                                    expanded = expanded_v,
+                                    onDismissRequest = { expanded_v = true },
+                                ) {
+                                    if (video_in_devices.size > 0)
+                                    {
+                                        video_in_devices.forEach() {
+                                            if (it != null)
+                                            {
+                                                DropdownMenuItem(onClick = { video_in_source = "";video_in_sources.clear(); video_in_device = it;expanded_v = false }) {
+                                                    Text(""+it)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            Box {
+                                IconButton(onClick = {
+                                    if ((video_in_device != null) && (video_in_device != ""))
+                                    {
+                                        val res = AVActivity.ffmpegav_init()
+                                        println("ffmpeg init: $res")
+                                        var video_in_sources_get: Array<String> = emptyArray()
+                                        if (video_in_device == "video4linux2,v4l2")
+                                        {
+                                            val tmp = AVActivity.ffmpegav_get_in_sources("v4l2")
+                                            if (tmp == null)
+                                            {
+                                                video_in_sources_get = emptyArray()
+                                            }
+                                            else
+                                            {
+                                                video_in_sources_get = tmp
+                                            }
+                                        }
+                                        else
+                                        {
+                                            val tmp = AVActivity.ffmpegav_get_in_sources(video_in_device)
+                                            if (tmp == null)
+                                            {
+                                                video_in_sources_get = emptyArray()
+                                            }
+                                            else
+                                            {
+                                                video_in_sources_get = tmp
+                                            }
+                                        }
+                                        video_in_sources.clear()
+                                        if (video_in_sources_get.isNotEmpty())
+                                        {
+                                            println("ffmpeg video in sources: " + video_in_sources_get.size)
+                                            video_in_sources.addAll(video_in_sources_get)
+                                            expanded_vs = true
+                                        }
+                                    }
+                                }) {
+                                    Icon(Icons.Filled.Refresh, null)
+                                }
+                                DropdownMenu(
+                                    expanded = expanded_vs,
+                                    onDismissRequest = { expanded_vs = true },
+                                ) {
+                                    if (video_in_sources.size > 0)
+                                    {
+                                        video_in_sources.forEach() {
+                                            if (it != null)
+                                            {
+                                                DropdownMenuItem(onClick = { video_in_source = it;expanded_vs = false }) {
+                                                    Text(""+it)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                     DetailItem(label = i18n("UI Scale"), description = "${i18n("current_value:")}: " + " " + ui_scale + ", " + i18n("drag Slider to change")) {
                         Row(horizontalArrangement = Arrangement.spacedBy(2.dp), verticalAlignment = Alignment.CenterVertically, modifier = Modifier.width(200.dp)) {
