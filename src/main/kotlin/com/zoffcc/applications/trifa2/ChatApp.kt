@@ -111,10 +111,11 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
                                 if (i == 1)
                                 {
                                     val res_vd = AVActivity.ffmpegav_open_video_in_device(
+                                        ":0.0",
                                         video_in_devices[i],
                                         capture_video_width,
                                         capture_video_height,
-                                        ":0.0", 20)
+                                        20)
                                     println("ffmpeg open video capture device: $res_vd")
                                 }
                             }

@@ -9,8 +9,9 @@ public class AVActivity {
     public static native int ffmpegav_init();
     public static native String[] ffmpegav_get_video_in_devices();
     public static native String[] ffmpegav_get_audio_in_devices();
-    public static native int ffmpegav_open_video_in_device(String deviceformat, int wanted_width, int wanted_height, String x11_display_num, int fps);
-    public static native int ffmpegav_open_audio_in_device(String deviceformat);
+    public static native String[] ffmpegav_get_in_sources(String devicename);
+    public static native int ffmpegav_open_video_in_device(String deviceformat, String inputname, int wanted_width, int wanted_height, int fps);
+    public static native int ffmpegav_open_audio_in_device(String deviceformat, String inputname);
     public static native int ffmpegav_start_video_in_capture();
     public static native int ffmpegav_start_audio_in_capture();
     public static native int ffmpegav_stop_video_in_capture();
@@ -191,6 +192,25 @@ public class AVActivity {
 
         final String[] video_in_devices = ffmpegav_get_video_in_devices();
         Log.i(TAG, "ffmpeg video in devices: " + video_in_devices.length);
+
+
+        for (int i=0;i<video_in_devices.length;i++)
+        {
+            if (video_in_devices[i] != null)
+            {
+                final String[] video_in_sources = ffmpegav_get_in_sources(video_in_devices[i]);
+                if (video_in_sources != null)
+                {
+                    for (int j=0;j<video_in_sources.length;j++)
+                    {
+                        if (video_in_sources[j] != null)
+                        {
+                            Log.i(TAG, "ffmpeg video in source #"+i+": " + video_in_sources[j]);
+                        }
+                    }
+                }
+            }
+        }
         for (int i=0;i<video_in_devices.length;i++)
         {
             if (video_in_devices[i] != null)
@@ -198,11 +218,13 @@ public class AVActivity {
                 Log.i(TAG, "ffmpeg video in device #"+i+": " + video_in_devices[i]);
                 if (i == 1)
                 {
-                    final int res_vd = ffmpegav_open_video_in_device(video_in_devices[i], 640, 480, ":0.0", 15);
+                    final int res_vd = ffmpegav_open_video_in_device(video_in_devices[i],
+                            ":0.0", 640, 480, 15);
                     Log.i(TAG, "ffmpeg open video capture device: " + res_vd);
                 }
             }
         }
+
 
         final String[] audio_in_devices = ffmpegav_get_audio_in_devices();
         Log.i(TAG, "ffmpeg audio in devices: " + audio_in_devices.length);
@@ -210,10 +232,28 @@ public class AVActivity {
         {
             if (audio_in_devices[i] != null)
             {
+                final String[] audio_in_sources = ffmpegav_get_in_sources(audio_in_devices[i]);
+                if (audio_in_sources != null)
+                {
+                    for (int j=0;j<audio_in_sources.length;j++)
+                    {
+                        if (audio_in_sources[j] != null)
+                        {
+                            Log.i(TAG, "ffmpeg audio in source #"+i+": " + audio_in_sources[j]);
+                        }
+                    }
+                }
+            }
+        }
+        for (int i=0;i<audio_in_devices.length;i++)
+        {
+            if (audio_in_devices[i] != null)
+            {
                 Log.i(TAG, "ffmpeg audio in device #"+i+": " + audio_in_devices[i]);
                 if (i == 1)
                 {
-                    final int res_ad = ffmpegav_open_audio_in_device(audio_in_devices[i]);
+                    final int res_ad = ffmpegav_open_audio_in_device(audio_in_devices[i],
+                            "default");
                     Log.i(TAG, "ffmpeg open audio capture device: " + res_ad);
                 }
             }
@@ -261,7 +301,7 @@ public class AVActivity {
         ffmpegav_start_audio_in_capture();
         try
         {
-            Thread.sleep(1 * 1000);
+            Thread.sleep(300);
         }
         catch(Exception e)
         {
