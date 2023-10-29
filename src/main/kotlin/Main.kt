@@ -33,6 +33,7 @@ import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FormatSize
+import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -136,6 +137,8 @@ val CAPTURE_VIDEO_WIDTH = 640 // 1280
 val CAPTURE_VIDEO_HEIGHT = 480 // 720
 val VIDEO_IN_BOX_WIDTH_SMALL = 80.dp
 val VIDEO_IN_BOX_HEIGHT_SMALL = 80.dp
+val VIDEO_IN_BOX_WIDTH_FRACTION_SMALL = 0.5f
+val VIDEO_IN_BOX_WIDTH_FRACTION_BIG = 0.9f
 val VIDEO_IN_BOX_WIDTH_BIG = 800.dp
 val VIDEO_IN_BOX_HEIGHT_BIG = 800.dp
 val VIDEO_OUT_BOX_WIDTH_SMALL = 50.dp
@@ -180,10 +183,11 @@ fun App()
         Scaffold() {
             Row() {
                 var uiMode by remember { mutableStateOf(UiMode.CONTACTS) }
+                var main_top_tab_height by remember { mutableStateOf(MAIN_TOP_TAB_HEIGHT) }
                 BriarSidebar(uiMode = uiMode, setUiMode = { uiMode = it })
                 VerticalDivider()
                 Column(Modifier.fillMaxSize()) {
-                    Row(modifier = Modifier.fillMaxWidth().height(MAIN_TOP_TAB_HEIGHT)) {
+                    Row(modifier = Modifier.fillMaxWidth().height(main_top_tab_height)) {
                         Column() {
                             Row(Modifier.wrapContentHeight(), Arrangement.spacedBy(5.dp)) {
                                 Button(modifier = Modifier.width(140.dp), onClick = { // start/stop tox button
@@ -260,9 +264,10 @@ fun App()
                         var video_in_box_width by remember { mutableStateOf(VIDEO_IN_BOX_WIDTH_SMALL) }
                         var video_in_box_height by remember { mutableStateOf(VIDEO_IN_BOX_HEIGHT_SMALL) }
                         var video_in_box_small by remember { mutableStateOf(true)}
+                        var video_in_box_width_fraction by remember { mutableStateOf(VIDEO_IN_BOX_WIDTH_FRACTION_SMALL)}
                         SwingPanel(
                             background = Color.Green,
-                            modifier = Modifier.fillMaxWidth(0.5f)
+                            modifier = Modifier.fillMaxWidth(video_in_box_width_fraction)
                                 .fillMaxHeight(1.0f)
                                 .combinedClickable(onClick = {
                                     if (video_in_box_small)
@@ -283,6 +288,24 @@ fun App()
                                 }
                             }
                         )
+                        Icon(modifier = Modifier.combinedClickable(onClick = {
+                            if (video_in_box_small)
+                            {
+                                video_in_box_width = VIDEO_IN_BOX_WIDTH_BIG
+                                video_in_box_height = VIDEO_IN_BOX_HEIGHT_BIG
+                                main_top_tab_height = VIDEO_IN_BOX_HEIGHT_BIG
+                                video_in_box_width_fraction = VIDEO_IN_BOX_WIDTH_FRACTION_BIG
+                            }
+                            else
+                            {
+                                video_in_box_width = VIDEO_IN_BOX_WIDTH_SMALL
+                                video_in_box_height = VIDEO_IN_BOX_HEIGHT_SMALL
+                                main_top_tab_height = MAIN_TOP_TAB_HEIGHT
+                                video_in_box_width_fraction = VIDEO_IN_BOX_WIDTH_FRACTION_SMALL
+                            }
+                            video_in_box_small = video_in_box_small.not()
+                            Log.i(TAG, "update3: " + video_in_box_small)
+                        }), imageVector =  Icons.Default.Fullscreen, contentDescription =  "")
                         var video_out_box_width by remember { mutableStateOf(VIDEO_OUT_BOX_WIDTH_SMALL) }
                         var video_out_box_height by remember { mutableStateOf(VIDEO_OUT_BOX_HEIGHT_SMALL) }
                         var video_out_box_small by remember { mutableStateOf(true)}
@@ -300,7 +323,7 @@ fun App()
                                         video_out_box_width = VIDEO_OUT_BOX_WIDTH_SMALL
                                         video_out_box_height = VIDEO_OUT_BOX_HEIGHT_SMALL
                                     }
-                                    video_out_box_small != video_out_box_small
+                                    video_out_box_small = !video_out_box_small
                                     Log.i(TAG, "update1: " + video_out_box_small)
                                 }),
                             factory = {
