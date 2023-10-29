@@ -1,12 +1,15 @@
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -114,7 +117,7 @@ var online_button_text_wrapper = "offline"
 var online_button_color_wrapper = Color.White.toArgb()
 var closing_application = false
 val global_prefs: Preferences = Preferences.userNodeForPackage(com.zoffcc.applications.trifa.PrefsSettings::class.java)
-val TOP_HEADER_SIZE = 56.dp
+val UISCALE_ITEM_HEIGHT = 30.dp
 val CONTACTITEM_HEIGHT = 50.dp
 val GROUPITEM_HEIGHT = 50.dp
 val GROUP_PEER_HEIGHT = 33.dp
@@ -123,6 +126,7 @@ val CONTACT_COLUMN_WIDTH = 230.dp
 val GROUPS_COLUMN_WIDTH = 200.dp
 val GROUP_PEER_COLUMN_WIDTH = 180.dp
 val MESAGE_INPUT_LINE_HEIGHT = 55.dp
+val MAIN_TOP_TAB_HEIGHT = 160.dp
 val IMAGE_PREVIEW_SIZE = 70f
 val AVATAR_SIZE = 40f
 val MAX_AVATAR_SIZE = 70f
@@ -130,6 +134,18 @@ val SPACE_AFTER_LAST_MESSAGE = 2.dp
 val SPACE_BEFORE_FIRST_MESSAGE = 10.dp
 val CAPTURE_VIDEO_WIDTH = 640 // 1280
 val CAPTURE_VIDEO_HEIGHT = 480 // 720
+val VIDEO_IN_BOX_WIDTH_SMALL = 80.dp
+val VIDEO_IN_BOX_HEIGHT_SMALL = 80.dp
+val VIDEO_IN_BOX_WIDTH_BIG = 800.dp
+val VIDEO_IN_BOX_HEIGHT_BIG = 800.dp
+val VIDEO_OUT_BOX_WIDTH_SMALL = 50.dp
+val VIDEO_OUT_BOX_HEIGHT_SMALL = 50.dp
+val VIDEO_OUT_BOX_WIDTH_BIG = 500.dp
+val VIDEO_OUT_BOX_HEIGHT_BIG = 500.dp
+val SAVEDATA_PATH_WIDTH = 200.dp
+val SAVEDATA_PATH_HEIGHT = 50.dp
+val MYTOXID_WIDTH = 200.dp
+val MYTOXID_HEIGHT = 50.dp
 val ImageloaderDispatcher = Executors.newFixedThreadPool(5).asCoroutineDispatcher()
 var global_semaphore_contactlist_ui = Semaphore(1)
 var global_semaphore_grouppeerlist_ui = Semaphore(1)
@@ -137,7 +153,7 @@ var global_semaphore_grouplist_ui = Semaphore(1)
 var global_semaphore_messagelist_ui = Semaphore(1)
 var global_semaphore_groupmessagelist_ui = Semaphore(1)
 
-@OptIn(DelicateCoroutinesApi::class)
+@OptIn(DelicateCoroutinesApi::class, ExperimentalFoundationApi::class)
 @Composable
 @Preview
 fun App()
@@ -162,12 +178,12 @@ fun App()
 
     MaterialTheme {
         Scaffold() {
-            Row {
+            Row() {
                 var uiMode by remember { mutableStateOf(UiMode.CONTACTS) }
                 BriarSidebar(uiMode = uiMode, setUiMode = { uiMode = it })
                 VerticalDivider()
                 Column(Modifier.fillMaxSize()) {
-                    Row(modifier = Modifier.fillMaxWidth()) {
+                    Row(modifier = Modifier.fillMaxWidth().height(MAIN_TOP_TAB_HEIGHT)) {
                         Column() {
                             Row(Modifier.wrapContentHeight(), Arrangement.spacedBy(5.dp)) {
                                 Button(modifier = Modifier.width(140.dp), onClick = { // start/stop tox button
@@ -241,23 +257,58 @@ fun App()
                             SaveDataPath()
                             ToxIDTextField()
                         }
+                        var video_in_box_width by remember { mutableStateOf(VIDEO_IN_BOX_WIDTH_SMALL) }
+                        var video_in_box_height by remember { mutableStateOf(VIDEO_IN_BOX_HEIGHT_SMALL) }
+                        var video_in_box_small by remember { mutableStateOf(true)}
                         SwingPanel(
                             background = Color.Green,
-                            modifier = Modifier.size(300.dp, 100.dp),
+                            modifier = Modifier.fillMaxWidth(0.5f)
+                                .fillMaxHeight(1.0f)
+                                .combinedClickable(onClick = {
+                                    if (video_in_box_small)
+                                    {
+                                        video_in_box_width = VIDEO_IN_BOX_WIDTH_BIG
+                                        video_in_box_height = VIDEO_IN_BOX_HEIGHT_BIG
+                                    }
+                                    else
+                                    {
+                                        video_in_box_width = VIDEO_IN_BOX_WIDTH_SMALL
+                                        video_in_box_height = VIDEO_IN_BOX_HEIGHT_SMALL
+                                    }
+                                    video_in_box_small != video_in_box_small
+                                }),
                             factory = {
                                 JPanel(SingleComponentAspectRatioKeeperLayout(),true).apply {
                                     add(JPictureBox.videoinbox)
                                 }
                             }
                         )
+                        var video_out_box_width by remember { mutableStateOf(VIDEO_OUT_BOX_WIDTH_SMALL) }
+                        var video_out_box_height by remember { mutableStateOf(VIDEO_OUT_BOX_HEIGHT_SMALL) }
+                        var video_out_box_small by remember { mutableStateOf(true)}
                         SwingPanel(
                             background = Color.Green,
-                            modifier = Modifier.size(300.dp, 100.dp),
+                            modifier = Modifier.size(video_out_box_width, video_out_box_height)
+                                .combinedClickable(onClick = {
+                                    if (video_out_box_small)
+                                    {
+                                        video_out_box_width = VIDEO_OUT_BOX_WIDTH_BIG
+                                        video_out_box_height = VIDEO_OUT_BOX_HEIGHT_BIG
+                                    }
+                                    else
+                                    {
+                                        video_out_box_width = VIDEO_OUT_BOX_WIDTH_SMALL
+                                        video_out_box_height = VIDEO_OUT_BOX_HEIGHT_SMALL
+                                    }
+                                    video_out_box_small != video_out_box_small
+                                    Log.i(TAG, "update1: " + video_out_box_small)
+                                }),
                             factory = {
                                 JPanel(SingleComponentAspectRatioKeeperLayout(),true).apply {
                                     add(JPictureBoxOut.videooutbox)
                                 }
-                            }
+                            },
+                            update = {Log.i(TAG, "update2: " + video_out_box_small) }
                         )
                         var expanded_a by remember { mutableStateOf(false) }
                         var expanded_v by remember { mutableStateOf(false) }
@@ -269,7 +320,9 @@ fun App()
                         val video_in_sources by remember { mutableStateOf(ArrayList<String>()) }
                         avstatestore.state.audio_in_device
                         Column {
-                            Text("audio in: " + avstatestore.state.audio_in_device + " " + avstatestore.state.audio_in_source)
+                            Text(text = "audio in: " + avstatestore.state.audio_in_device + " " + avstatestore.state.audio_in_source
+                                , fontSize = 13.sp, modifier = Modifier.fillMaxWidth(),
+                                maxLines = 1)
                             Box {
                                 IconButton(onClick = {
                                     if (!avstatestore.state.ffmpeg_init_done)
@@ -283,7 +336,8 @@ fun App()
                                     audio_in_devices.clear()
                                     audio_in_devices.addAll(audio_in_devices_get)
                                     expanded_a = true
-                                }) {
+                                },
+                                    modifier = Modifier.size(16.dp)) {
                                     Icon(Icons.Filled.Refresh, null)
                                 }
                                 DropdownMenu(
@@ -341,7 +395,8 @@ fun App()
                                             expanded_as = true
                                         }
                                     }
-                                }) {
+                                },
+                                    modifier = Modifier.size(16.dp)) {
                                     Icon(Icons.Filled.Refresh, null)
                                 }
                                 DropdownMenu(
@@ -371,7 +426,9 @@ fun App()
                             }
 
 
-                            Text("video in: " + avstatestore.state.video_in_device + " " + avstatestore.state.video_in_source)
+                            Text("video in: " + avstatestore.state.video_in_device + " " + avstatestore.state.video_in_source
+                                , fontSize = 13.sp, modifier = Modifier.fillMaxWidth(),
+                                maxLines = 1)
                             Box {
                                 IconButton(onClick = {
                                     if (!avstatestore.state.ffmpeg_init_done)
@@ -385,7 +442,8 @@ fun App()
                                     video_in_devices.clear()
                                     video_in_devices.addAll(video_in_devices_get)
                                     expanded_v = true
-                                }) {
+                                },
+                                    modifier = Modifier.size(16.dp)) {
                                     Icon(Icons.Filled.Refresh, null)
                                 }
                                 DropdownMenu(
@@ -463,7 +521,8 @@ fun App()
                                             expanded_vs = true
                                         }
                                     }
-                                }) {
+                                },
+                                    modifier = Modifier.size(16.dp)) {
                                     Icon(Icons.Filled.Refresh, null)
                                 }
                                 DropdownMenu(
@@ -493,8 +552,13 @@ fun App()
                             }
                         }
                     }
-                    DetailItem(label = i18n("UI Scale"), description = "${i18n("current_value:")}: " + " " + ui_scale + ", " + i18n("drag Slider to change")) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(2.dp), verticalAlignment = Alignment.CenterVertically, modifier = Modifier.width(200.dp)) {
+                    UIScaleItem(
+                        label = i18n("UI Scale"),
+                        description = "${i18n("current_value:")}: "
+                                + " " + ui_scale + ", " + i18n("drag Slider to change")) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(2.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.width(200.dp)) {
                             Icon(Icons.Default.FormatSize, null, Modifier.scale(0.7f))
                             Slider(value = ui_scale, onValueChange = {
                                 ui_scale = it
@@ -650,11 +714,15 @@ fun load_groupmessages_for_friend(selectedGroupId: String?)
 private fun ToxIDTextField()
 {
     val toxdata by toxdatastore.stateFlow.collectAsState()
-    TextField(enabled = true, readOnly = true, singleLine = true, textStyle = TextStyle(fontSize = 18.sp), modifier = Modifier.width(500.dp), colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White), keyboardOptions = KeyboardOptions(
+    TextField(enabled = true, readOnly = true, singleLine = true,
+        textStyle = TextStyle(fontSize = 13.sp),
+        modifier = Modifier.width(MYTOXID_WIDTH).height(MYTOXID_HEIGHT).padding(0.dp),
+        colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White),
+        keyboardOptions = KeyboardOptions(
         capitalization = KeyboardCapitalization.None,
         autoCorrect = false,
     ), value = toxdata.mytoxid, placeholder = {
-        Text("my ToxID ...")
+        Text("my ToxID ...", fontSize = 13.sp)
     }, onValueChange = {})
 }
 
@@ -662,11 +730,15 @@ private fun ToxIDTextField()
 private fun SaveDataPath()
 {
     val savepathdata by savepathstore.stateFlow.collectAsState()
-    TextField(enabled = savepathdata.savePathEnabled, singleLine = true, textStyle = TextStyle(fontSize = 18.sp), modifier = Modifier.width(500.dp), colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White), keyboardOptions = KeyboardOptions(
+    TextField(enabled = savepathdata.savePathEnabled, singleLine = true,
+        textStyle = TextStyle(fontSize = 13.sp),
+        modifier = Modifier.width(SAVEDATA_PATH_WIDTH).height(SAVEDATA_PATH_HEIGHT).padding(0.dp),
+        colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White),
+        keyboardOptions = KeyboardOptions(
         capitalization = KeyboardCapitalization.None,
         autoCorrect = false,
     ), value = savepathdata.savePath, placeholder = {
-        Text("save file path ...")
+        Text("save file path ...", fontSize = 13.sp)
     }, onValueChange = {
         savepathstore.updatePath(it)
     })
@@ -902,11 +974,13 @@ private fun onWindowRelocate(position: WindowPosition)
 }
 
 @Composable
-fun DetailItem(
+fun UIScaleItem(
     label: String,
     description: String,
     setting: @Composable (RowScope.() -> Unit),
-) = Row(Modifier.fillMaxWidth().height(TOP_HEADER_SIZE).padding(horizontal = 16.dp).semantics(mergeDescendants = true) { // it would be nicer to derive the contentDescriptions from the descendants automatically
+) = Row(Modifier.fillMaxWidth().height(UISCALE_ITEM_HEIGHT)
+    .padding(horizontal = 16.dp).
+    semantics(mergeDescendants = true) { // it would be nicer to derive the contentDescriptions from the descendants automatically
     // which is currently not supported in Compose for Desktop
     // see https://github.com/JetBrains/compose-jb/issues/2111
     contentDescription = description
