@@ -32,9 +32,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.ffmpegav.AVActivity
+import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_close_audio_in_device
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_close_video_in_device
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_init
+import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_set_audio_capture_callback
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_set_video_capture_callback
+import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_stop_audio_in_capture
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_stop_video_in_capture
 import com.zoffcc.applications.trifa.AVState
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
@@ -42,11 +45,14 @@ import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity
 import com.zoffcc.applications.trifa.MainActivity.Companion.on_call_ended_actions
 import com.zoffcc.applications.trifa.MainActivity.Companion.sent_message_to_db
+import com.zoffcc.applications.trifa.MainActivity.Companion.set_JNI_audio_buffer
+import com.zoffcc.applications.trifa.MainActivity.Companion.set_JNI_audio_buffer2
 import com.zoffcc.applications.trifa.MainActivity.Companion.set_JNI_video_buffer2
 import com.zoffcc.applications.trifa.MainActivity.Companion.set_av_call_status
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_send_message
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_send_message
+import com.zoffcc.applications.trifa.MainActivity.Companion.toxav_audio_send_frame
 import com.zoffcc.applications.trifa.MainActivity.Companion.toxav_call
 import com.zoffcc.applications.trifa.MainActivity.Companion.toxav_call_control
 import com.zoffcc.applications.trifa.MainActivity.Companion.toxav_video_send_frame_age
@@ -103,6 +109,8 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
 
                         if (avstatestore.state.calling_state == AVState.CALL_STATUS.CALL_CALLING)
                         {
+                            ffmpegav_stop_audio_in_capture()
+                            ffmpegav_close_audio_in_device()
                             ffmpegav_stop_video_in_capture()
                             ffmpegav_close_video_in_device()
                             toxav_call_control(friendnum, ToxVars.TOXAV_CALL_CONTROL.TOXAV_CALL_CONTROL_CANCEL.value)
@@ -180,10 +188,58 @@ fun start_outgoing_video(friendpubkey: String)
     val video_buffer_2_v = ByteBuffer.allocateDirect(v_size)
     AVActivity.ffmpegav_set_JNI_video_buffer2(video_buffer_2_y, video_buffer_2_u, video_buffer_2_v, frame_width_px2, frame_height_px2)
 
+
+    val audio_in_device = avstatestore.state.audio_in_device
+    val audio_in_source = avstatestore.state.audio_in_source
+    var audio_buffer_2: ByteBuffer? = null
+
+    if ((audio_in_device != null) && (audio_in_device != ""))
+    {
+        if ((audio_in_source != null) && (audio_in_source != ""))
+        {
+            println("ffmpeg audio in device: " + audio_in_device + " " + audio_in_source)
+            val res_ad = AVActivity.ffmpegav_open_audio_in_device(audio_in_device, audio_in_source)
+            println("ffmpeg open audio capture device: $res_ad")
+        }
+    }
+
+    val buffer_size_in_bytes2 = 50000 // TODO: don't hardcode this
+    val audio_buffer_1 = ByteBuffer.allocateDirect(buffer_size_in_bytes2)
+    AVActivity.ffmpegav_set_JNI_audio_buffer2(audio_buffer_1)
+
+
+    ffmpegav_set_audio_capture_callback(object : AVActivity.audio_capture_callback
+    {
+        override fun onSuccess(read_bytes: Long, out_samples: Int, out_channels: Int, out_sample_rate: Int, pts: Long)
+        {
+            com.zoffcc.applications.ffmpegav.Log.i(TAG, "ffmpeg open audio capture onSuccess: $read_bytes $out_samples $out_channels $out_sample_rate $pts")
+            if ((audio_buffer_2 == null))
+            {
+                audio_buffer_2 = ByteBuffer.allocateDirect(buffer_size_in_bytes2)
+                set_JNI_audio_buffer(audio_buffer_2)
+            }
+            audio_buffer_2!!.rewind()
+            audio_buffer_2!!.put(audio_buffer_1)
+            // can we cache that? what if a friend gets deleted while in a call? and the friend number changes?
+            val friendnum = tox_friend_by_public_key(friendpubkey)
+            val tox_audio_res = toxav_audio_send_frame(
+                friend_number = friendnum,
+                sample_count = out_samples.toLong(),
+                channels = out_channels,
+                sampling_rate = out_sample_rate.toLong())
+            Log.i(TAG, "tox_audio_res=" + tox_audio_res)
+        }
+
+        override fun onError()
+        {
+        }
+    })
+
     ffmpegav_set_video_capture_callback(object : AVActivity.video_capture_callback
     {
         override fun onSuccess(width: Long, height: Long, pts: Long)
-        { // com.zoffcc.applications.ffmpegav.Log.i(TAG, "ffmpeg open video capture onSuccess: $width $height $pts")
+        {
+            // com.zoffcc.applications.ffmpegav.Log.i(TAG, "ffmpeg open video capture onSuccess: $width $height $pts")
             val frame_width_px: Int = width.toInt()
             val frame_height_px: Int = height.toInt()
             val buffer_size_in_bytes3 = (frame_width_px * frame_height_px * 1.5f).toInt()
@@ -213,6 +269,7 @@ fun start_outgoing_video(friendpubkey: String)
         }
     })
     AVActivity.ffmpegav_start_video_in_capture()
+    AVActivity.ffmpegav_start_audio_in_capture()
 }
 
 @Composable

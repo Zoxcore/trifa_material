@@ -89,7 +89,7 @@ class MainActivity
 
         // --------- global config ---------
         // --------- global config ---------
-        const val CTOXCORE_NATIVE_LOGGING = false // set "false" for release builds
+        const val CTOXCORE_NATIVE_LOGGING = true // set "false" for release builds
 
         // --------- global config ---------
         // --------- global config ---------
@@ -962,6 +962,8 @@ class MainActivity
                     } else if (a_TOXAV_FRIEND_CALL_STATE and ToxVars.TOXAV_FRIEND_CALL_STATE.TOXAV_FRIEND_CALL_STATE_FINISHED.value > 0)
                     {
                         Log.i(TAG, "toxav_call_state:from=$friend_number call ending(1)")
+                        AVActivity.ffmpegav_stop_audio_in_capture()
+                        AVActivity.ffmpegav_close_audio_in_device()
                         AVActivity.ffmpegav_stop_video_in_capture()
                         AVActivity.ffmpegav_close_video_in_device()
                         on_call_ended_actions()
@@ -969,12 +971,16 @@ class MainActivity
                         a_TOXAV_FRIEND_CALL_STATE == ToxVars.TOXAV_FRIEND_CALL_STATE.TOXAV_FRIEND_CALL_STATE_NONE.value)
                     {
                         Log.i(TAG, "toxav_call_state:from=$friend_number call ending(2)")
+                        AVActivity.ffmpegav_stop_audio_in_capture()
+                        AVActivity.ffmpegav_close_audio_in_device()
                         AVActivity.ffmpegav_stop_video_in_capture()
                         AVActivity.ffmpegav_close_video_in_device()
                         on_call_ended_actions()
                     } else if (a_TOXAV_FRIEND_CALL_STATE and ToxVars.TOXAV_FRIEND_CALL_STATE.TOXAV_FRIEND_CALL_STATE_ERROR.value > 0)
                     {
                         Log.i(TAG, "toxav_call_state:from=$friend_number call ERROR(3)")
+                        AVActivity.ffmpegav_stop_audio_in_capture()
+                        AVActivity.ffmpegav_close_audio_in_device()
                         AVActivity.ffmpegav_stop_video_in_capture()
                         AVActivity.ffmpegav_close_video_in_device()
                         on_call_ended_actions()
