@@ -892,6 +892,7 @@ class MainActivity
             val call_answer = toxav_answer(friend_number, GLOBAL_AUDIO_BITRATE.toLong(), GLOBAL_VIDEO_BITRATE.toLong())
             if (call_answer == 1)
             {
+                set_av_call_status(1)
                 avstatestore.state.call_with_friend_pubkey = tox_friend_get_public_key(friend_number)
                 avstatestore.state.calling_state = AVState.CALL_STATUS.CALL_CALLING
                 start_outgoing_video(avstatestore.state.call_with_friend_pubkey!!)
@@ -989,6 +990,7 @@ class MainActivity
         {
             avstatestore.state.calling_state = AVState.CALL_STATUS.CALL_NONE
             avstatestore.state.call_with_friend_pubkey = null
+            set_av_call_status(0)
             Thread.sleep(100)
             VideoOutFrame.clear_video_out_frame()
             VideoInFrame.clear_video_in_frame()
