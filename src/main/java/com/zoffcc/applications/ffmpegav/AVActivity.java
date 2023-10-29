@@ -5,6 +5,7 @@ public class AVActivity {
     private static final String TAG = "ffmpegav.AVActivity";
     static final String Version = "0.99.0";
 
+    public static native String ffmpegav_version();
     public static native String ffmpegav_libavutil_version();
     public static native int ffmpegav_init();
     public static native String[] ffmpegav_get_video_in_devices();
@@ -60,7 +61,7 @@ public class AVActivity {
 
     public static void ffmpegav_callback_audio_capture_frame_pts_cb_method(long read_bytes, int out_samples, int out_channels, int out_sample_rate, long pts)
     {
-        Log.i(TAG, "capture audio frame bytes: " + read_bytes + " samples: " + out_samples + " channels: " + out_channels + " sample_rate: " + out_sample_rate);
+        // Log.i(TAG, "capture audio frame bytes: " + read_bytes + " samples: " + out_samples + " channels: " + out_channels + " sample_rate: " + out_sample_rate);
         if (audio_capture_callback_function != null) {
             audio_capture_callback_function.onSuccess(read_bytes, out_samples, out_channels, out_sample_rate, pts);
         }
@@ -170,6 +171,7 @@ public class AVActivity {
         {
             System.load(linux_lib_filename);
             Log.i(TAG, "successfully loaded native library path: " + linux_lib_filename);
+            Log.i(TAG, "ffmpegav version: " + ffmpegav_version());
             return 0;
         }
         catch (java.lang.UnsatisfiedLinkError e)
@@ -187,12 +189,18 @@ public class AVActivity {
         } catch (Exception e) {
         }
         Log.i(TAG, "libavutil version: " + ffmpegav_libavutil_version());
+        Log.i(TAG, "ffmpegav version: " + ffmpegav_version());
         final int res = ffmpegav_init();
         Log.i(TAG, "ffmpeg init: " + res);
 
         final String[] video_in_devices = ffmpegav_get_video_in_devices();
         Log.i(TAG, "ffmpeg video in devices: " + video_in_devices.length);
 
+        String vdevice = "";
+        String vsource = "";
+
+        String adevice = "";
+        String asource = "";
 
         for (int i=0;i<video_in_devices.length;i++)
         {
@@ -218,6 +226,8 @@ public class AVActivity {
                 Log.i(TAG, "ffmpeg video in device #"+i+": " + video_in_devices[i]);
                 if (i == 1)
                 {
+                    vdevice = video_in_devices[i];
+                    vsource = ":0.0";
                     final int res_vd = ffmpegav_open_video_in_device(video_in_devices[i],
                             ":0.0", 640, 480, 15);
                     Log.i(TAG, "ffmpeg open video capture device: " + res_vd);
@@ -252,6 +262,8 @@ public class AVActivity {
                 Log.i(TAG, "ffmpeg audio in device #"+i+": " + audio_in_devices[i]);
                 if (i == 1)
                 {
+                    adevice = audio_in_devices[i];
+                    asource = "default";
                     final int res_ad = ffmpegav_open_audio_in_device(audio_in_devices[i],
                             "default");
                     Log.i(TAG, "ffmpeg open audio capture device: " + res_ad);
@@ -301,7 +313,7 @@ public class AVActivity {
         ffmpegav_start_audio_in_capture();
         try
         {
-            Thread.sleep(300);
+            Thread.sleep(1000);
         }
         catch(Exception e)
         {
@@ -315,6 +327,68 @@ public class AVActivity {
 
         final int res_vclose = ffmpegav_close_video_in_device();
         Log.i(TAG, "ffmpeg open close video capture device: " + res_vclose);
+
+        try
+        {
+            Thread.sleep(100);
+        }
+        catch(Exception e)
+        {
+        }
+
+        // -----------------------
+        // -----------------------
+        /*
+        final int res_vd2 = ffmpegav_open_video_in_device(vdevice,
+            vsource, 640, 480, 15);
+        Log.i(TAG, "ffmpeg open video capture device: " + res_vd2);
+
+        final int res_ad2 = ffmpegav_open_audio_in_device(adevice,
+            asource);
+        Log.i(TAG, "ffmpeg open audio capture device: " + res_ad2);
+        ffmpegav_start_video_in_capture();
+        ffmpegav_start_audio_in_capture();
+        try
+        {
+            Thread.sleep(1000);
+        }
+        catch(Exception e)
+        {
+        }
+        ffmpegav_stop_audio_in_capture();
+        ffmpegav_stop_video_in_capture();
+        ffmpegav_close_audio_in_device();
+        ffmpegav_close_video_in_device();
+        */
+        // -----------------------
+        // -----------------------
+
+
+        // -----------------------
+        // -----------------------
+        final int res_vd3 = ffmpegav_open_video_in_device("",
+                "", 640, 480, 15);
+        Log.i(TAG, "ffmpeg open video capture device: " + res_vd3);
+
+        final int res_ad3 = ffmpegav_open_audio_in_device("",
+                "");
+        Log.i(TAG, "ffmpeg open audio capture device: " + res_ad3);
+        ffmpegav_start_video_in_capture();
+        ffmpegav_start_audio_in_capture();
+        try
+        {
+            Thread.sleep(1000);
+        }
+        catch(Exception e)
+        {
+        }
+        ffmpegav_stop_audio_in_capture();
+        ffmpegav_stop_video_in_capture();
+        ffmpegav_close_audio_in_device();
+        ffmpegav_close_video_in_device();
+        // -----------------------
+        // -----------------------
+
     }
 }
 
