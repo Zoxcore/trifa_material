@@ -2,7 +2,6 @@ package org.briarproject.briar.desktop.contact
 
 import CONTACTITEM_HEIGHT
 import CONTACT_COLUMN_WIDTH
-import TOP_HEADER_SIZE
 import androidx.compose.foundation.ContextMenuArea
 import androidx.compose.foundation.ContextMenuItem
 import androidx.compose.foundation.background
