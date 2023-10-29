@@ -43,6 +43,7 @@ import com.zoffcc.applications.trifa.MainActivity
 import com.zoffcc.applications.trifa.MainActivity.Companion.on_call_ended_actions
 import com.zoffcc.applications.trifa.MainActivity.Companion.sent_message_to_db
 import com.zoffcc.applications.trifa.MainActivity.Companion.set_JNI_video_buffer2
+import com.zoffcc.applications.trifa.MainActivity.Companion.set_av_call_status
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_send_message
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_send_message
@@ -98,7 +99,7 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
                         // video call button pressed
                         val friendpubkey = contactList.selectedContactPubkey
                         val friendnum = tox_friend_by_public_key(friendpubkey)
-                        // set_av_call_status(1)
+                        set_av_call_status(1)
 
                         if (avstatestore.state.calling_state == AVState.CALL_STATUS.CALL_CALLING)
                         {
