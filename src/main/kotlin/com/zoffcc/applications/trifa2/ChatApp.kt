@@ -32,6 +32,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.ffmpegav.AVActivity
+import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_ByteBufferCompat
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_close_audio_in_device
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_close_video_in_device
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_init
@@ -46,7 +47,6 @@ import com.zoffcc.applications.trifa.MainActivity
 import com.zoffcc.applications.trifa.MainActivity.Companion.on_call_ended_actions
 import com.zoffcc.applications.trifa.MainActivity.Companion.sent_message_to_db
 import com.zoffcc.applications.trifa.MainActivity.Companion.set_JNI_audio_buffer
-import com.zoffcc.applications.trifa.MainActivity.Companion.set_JNI_audio_buffer2
 import com.zoffcc.applications.trifa.MainActivity.Companion.set_JNI_video_buffer2
 import com.zoffcc.applications.trifa.MainActivity.Companion.set_av_call_status
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
@@ -212,13 +212,27 @@ fun start_outgoing_video(friendpubkey: String)
     {
         override fun onSuccess(read_bytes: Long, out_samples: Int, out_channels: Int, out_sample_rate: Int, pts: Long)
         {
-            com.zoffcc.applications.ffmpegav.Log.i(TAG, "ffmpeg open audio capture onSuccess: $read_bytes $out_samples $out_channels $out_sample_rate $pts")
+            // Log.i(TAG, "ffmpeg open audio capture onSuccess: $read_bytes $out_samples $out_channels $out_sample_rate $pts")
             if ((audio_buffer_2 == null))
             {
                 audio_buffer_2 = ByteBuffer.allocateDirect(buffer_size_in_bytes2)
                 set_JNI_audio_buffer(audio_buffer_2)
             }
+
+            /* DEBUG ONLY ----------------------------
+            try
+            {
+                audio_buffer_1!!.rewind()
+                val audio_buffer_2_ = ffmpegav_ByteBufferCompat(audio_buffer_1)
+                Log.i(TAG, "audiobytes1:" + AVActivity.bytesToHex(audio_buffer_2_.array(), 0, 100))
+            } catch (e: Exception)
+            {
+                e.printStackTrace()
+            }
+            DEBUG ONLY ---------------------------- */
+
             audio_buffer_2!!.rewind()
+            audio_buffer_1!!.rewind()
             audio_buffer_2!!.put(audio_buffer_1)
             // can we cache that? what if a friend gets deleted while in a call? and the friend number changes?
             val friendnum = tox_friend_by_public_key(friendpubkey)
@@ -227,7 +241,19 @@ fun start_outgoing_video(friendpubkey: String)
                 sample_count = out_samples.toLong(),
                 channels = out_channels,
                 sampling_rate = out_sample_rate.toLong())
-            Log.i(TAG, "tox_audio_res=" + tox_audio_res)
+            // Log.i(TAG, "tox_audio_res=" + tox_audio_res)
+
+            /* DEBUG ONLY ----------------------------
+            try
+            {
+                audio_buffer_2!!.rewind()
+                val audio_buffer_2_ = ffmpegav_ByteBufferCompat(audio_buffer_2)
+                // Log.i(TAG, "audiobytes2:" + AVActivity.bytesToHex(audio_buffer_2_.array(), 0, 100))
+            } catch (e: Exception)
+            {
+                e.printStackTrace()
+            }
+            DEBUG ONLY ---------------------------- */
         }
 
         override fun onError()
@@ -239,7 +265,7 @@ fun start_outgoing_video(friendpubkey: String)
     {
         override fun onSuccess(width: Long, height: Long, pts: Long)
         {
-            // com.zoffcc.applications.ffmpegav.Log.i(TAG, "ffmpeg open video capture onSuccess: $width $height $pts")
+            // Log.i(TAG, "ffmpeg open video capture onSuccess: $width $height $pts")
             val frame_width_px: Int = width.toInt()
             val frame_height_px: Int = height.toInt()
             val buffer_size_in_bytes3 = (frame_width_px * frame_height_px * 1.5f).toInt()
