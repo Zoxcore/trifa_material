@@ -13,6 +13,9 @@ import com.zoffcc.applications.sorm.FileDB
 import com.zoffcc.applications.sorm.Filetransfer
 import com.zoffcc.applications.sorm.GroupMessage
 import com.zoffcc.applications.sorm.Message
+import com.zoffcc.applications.trifa.AudioSelectOutBox.semaphore_audio_out_convert
+import com.zoffcc.applications.trifa.AudioSelectOutBox.semaphore_audio_out_convert_active_threads
+import com.zoffcc.applications.trifa.AudioSelectOutBox.semaphore_audio_out_convert_max_active_threads
 import com.zoffcc.applications.trifa.HelperFiletransfer.check_auto_accept_incoming_filetransfer
 import com.zoffcc.applications.trifa.HelperFiletransfer.get_incoming_filetransfer_local_filename
 import com.zoffcc.applications.trifa.HelperFiletransfer.move_tmp_file_to_real_file
@@ -116,6 +119,7 @@ class MainActivity
         //
         var video_buffer_1: ByteBuffer? = null
         var buffer_size_in_bytes = 0
+        var _recBuffer: ByteBuffer? = null
 
         @JvmField
         var PREF__database_files_dir = "."
@@ -1010,11 +1014,110 @@ class MainActivity
         @JvmStatic
         fun android_toxav_callback_audio_receive_frame_cb_method(friend_number: Long, sample_count: Long, channels: Int, sampling_rate: Long)
         {
+            if ((avstatestore.state.call_with_friend_pubkey == null)
+                || (avstatestore.state.call_with_friend_pubkey != tox_friend_get_public_key(friend_number)))
+            {
+                // it's not the currently selected friend, so do not play the audio frame
+                return
+            }
+
+            if (avstatestore.state.calling_state != AVState.CALL_STATUS.CALL_CALLING)
+            {
+                // we are not in a call, ignore incoming audio frames
+                return
+            }
+
+            if ((sampling_rate.toInt() != AudioSelectOutBox.SAMPLE_RATE) ||
+                (channels != AudioSelectOutBox.CHANNELS) || (_recBuffer == null) ||
+                (sample_count.toInt() == 0))
+            {
+                Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:11:1");
+                _recBuffer = ByteBuffer.allocateDirect((10000 * 2 * channels));
+                set_JNI_audio_buffer2(_recBuffer)
+                AudioSelectOutBox.init()
+                AudioSelectOutBox.change_audio_format(sampling_rate.toInt(), channels)
+                Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:11:2");
+            }
+
+            if (sampling_rate.toInt() != AudioSelectOutBox.SAMPLE_RATE ||
+                channels != AudioSelectOutBox.CHANNELS)
+            {
+                Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:22:1:$sampling_rate".toString() + " " + AudioSelectOutBox.SAMPLE_RATE)
+                AudioSelectOutBox.change_audio_format(sampling_rate.toInt(), channels)
+                Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:22:2")
+            }
+
+            // HINT: this signals that the audio JNI buffer is not set yet
+            //       do NOT move this further up!!
+            if (sample_count.toInt() == 0)
+            {
+                Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:EE77:"
+                        + friend_number + " " + sample_count + " " + channels + " " + sampling_rate)
+                return
+            }
+
+            try
+            {
+                _recBuffer!!.rewind()
+                val want_bytes = (sample_count * 2 * channels).toInt()
+                val audio_out_byte_buffer = ByteArray(want_bytes)
+                _recBuffer!![audio_out_byte_buffer, 0, want_bytes]
+
+                try
+                {
+                    semaphore_audio_out_convert.acquire()
+                    if (semaphore_audio_out_convert_active_threads >= semaphore_audio_out_convert_max_active_threads)
+                    {
+                        Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:too many threads running")
+                        semaphore_audio_out_convert.release()
+                        return
+                    }
+                    semaphore_audio_out_convert.release()
+                } catch (e: java.lang.Exception)
+                {
+                    semaphore_audio_out_convert.release()
+                }
+
+                val t_audio_pcm_play = Thread{
+                    try
+                    {
+                        semaphore_audio_out_convert.acquire()
+                        semaphore_audio_out_convert_active_threads++
+                        semaphore_audio_out_convert.release()
+                    } catch (e: java.lang.Exception)
+                    {
+                        semaphore_audio_out_convert.release()
+                    }
+                    // HINT: this acutally plays incoming Audio
+                    // HINT: this may block!!
+                    try
+                    {
+                        AudioSelectOutBox.sourceDataLine.write(audio_out_byte_buffer, 0, want_bytes)
+                    } catch (e: java.lang.Exception)
+                    {
+                        Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:sourceDataLine.write:EE:" + e.message) // e.printStackTrace();
+                    }
+                    try
+                    {
+                        semaphore_audio_out_convert.acquire()
+                        semaphore_audio_out_convert_active_threads--
+                        semaphore_audio_out_convert.release()
+                    } catch (e: java.lang.Exception)
+                    {
+                        semaphore_audio_out_convert.release()
+                    }
+                }
+                t_audio_pcm_play.start()
+            }
+            catch(_: Exception)
+            {
+            }
         }
 
         @JvmStatic
         fun android_toxav_callback_audio_receive_frame_pts_cb_method(friend_number: Long, sample_count: Long, channels: Int, sampling_rate: Long, pts: Long)
         {
+            android_toxav_callback_audio_receive_frame_cb_method(friend_number, sample_count, channels, sampling_rate)
         }
 
         @JvmStatic
