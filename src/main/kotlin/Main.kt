@@ -401,7 +401,7 @@ fun App()
                                             avstatestore.state.ffmpeg_init_done = true
                                         }
                                         var audio_in_sources_get: Array<String> = emptyArray()
-                                        val tmp = AVActivity.ffmpegav_get_in_sources(avstatestore.state.audio_in_device)
+                                        val tmp = AVActivity.ffmpegav_get_in_sources(avstatestore.state.audio_in_device, 0)
                                         if (tmp == null)
                                         {
                                             audio_in_sources_get = emptyArray()
@@ -509,7 +509,7 @@ fun App()
                                         var video_in_sources_get: Array<String> = emptyArray()
                                         if (avstatestore.state.video_in_device == "video4linux2,v4l2")
                                         {
-                                            val tmp = AVActivity.ffmpegav_get_in_sources("v4l2")
+                                            val tmp = AVActivity.ffmpegav_get_in_sources("v4l2", 1)
                                             if (tmp == null)
                                             {
                                                 video_in_sources_get = emptyArray()
@@ -521,7 +521,7 @@ fun App()
                                         }
                                         else
                                         {
-                                            val tmp = AVActivity.ffmpegav_get_in_sources(avstatestore.state.video_in_device)
+                                            val tmp = AVActivity.ffmpegav_get_in_sources(avstatestore.state.video_in_device, 1)
                                             if (tmp == null)
                                             {
                                                 video_in_sources_get = emptyArray()

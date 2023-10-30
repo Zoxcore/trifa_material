@@ -10,7 +10,7 @@ public class AVActivity {
     public static native int ffmpegav_init();
     public static native String[] ffmpegav_get_video_in_devices();
     public static native String[] ffmpegav_get_audio_in_devices();
-    public static native String[] ffmpegav_get_in_sources(String devicename);
+    public static native String[] ffmpegav_get_in_sources(String devicename, int is_video);
     public static native int ffmpegav_open_video_in_device(String deviceformat, String inputname, int wanted_width, int wanted_height, int fps);
     public static native int ffmpegav_open_audio_in_device(String deviceformat, String inputname);
     public static native int ffmpegav_start_video_in_capture();
@@ -206,7 +206,7 @@ public class AVActivity {
         {
             if (video_in_devices[i] != null)
             {
-                final String[] video_in_sources = ffmpegav_get_in_sources(video_in_devices[i]);
+                final String[] video_in_sources = ffmpegav_get_in_sources(video_in_devices[i], 1);
                 if (video_in_sources != null)
                 {
                     for (int j=0;j<video_in_sources.length;j++)
@@ -242,7 +242,7 @@ public class AVActivity {
         {
             if (audio_in_devices[i] != null)
             {
-                final String[] audio_in_sources = ffmpegav_get_in_sources(audio_in_devices[i]);
+                final String[] audio_in_sources = ffmpegav_get_in_sources(audio_in_devices[i], 0);
                 if (audio_in_sources != null)
                 {
                     for (int j=0;j<audio_in_sources.length;j++)
