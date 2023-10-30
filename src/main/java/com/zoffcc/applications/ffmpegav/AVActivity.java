@@ -1,5 +1,7 @@
 package com.zoffcc.applications.ffmpegav;
 
+import java.nio.ByteBuffer;
+
 public class AVActivity {
 
     private static final String TAG = "ffmpegav.AVActivity";
@@ -19,6 +21,9 @@ public class AVActivity {
     public static native int ffmpegav_stop_audio_in_capture();
     public static native int ffmpegav_close_audio_in_device();
     public static native int ffmpegav_close_video_in_device();
+
+    final static int audio_buffer_size_in_bytes2 = 20000;
+    final static java.nio.ByteBuffer audio_buffer_2 = java.nio.ByteBuffer.allocateDirect(audio_buffer_size_in_bytes2);
 
     public static interface video_capture_callback {
         void onSuccess(long width, long height, long pts);
@@ -171,7 +176,6 @@ public class AVActivity {
         {
             System.load(linux_lib_filename);
             Log.i(TAG, "successfully loaded native library path: " + linux_lib_filename);
-            Log.i(TAG, "ffmpegav version: " + ffmpegav_version());
             return 0;
         }
         catch (java.lang.UnsatisfiedLinkError e)
@@ -271,26 +275,6 @@ public class AVActivity {
             }
         }
 
-        ffmpegav_set_video_capture_callback(new video_capture_callback() {
-            @Override
-            public void onSuccess(long width, long height, long pts) {
-                Log.i(TAG, "ffmpeg open video capture onSuccess:" + width + " " + height + " " + pts);
-            }
-            @Override
-            public void onError() {
-            }
-        });
-
-        ffmpegav_set_audio_capture_callback(new audio_capture_callback() {
-            @Override
-            public void onSuccess(long read_bytes, int out_samples, int out_channels, int out_sample_rate, long pts) {
-                Log.i(TAG, "ffmpeg open audio capture onSuccess:" + read_bytes + " " + out_samples + " " + out_channels + " " + out_sample_rate + " " + pts);
-            }
-            @Override
-            public void onError() {
-            }
-        });
-
         final int frame_width_px1 = 640;
         final int frame_height_px1 = 480;
         final int buffer_size_in_bytes1 = ((frame_width_px1 * frame_height_px1) * 3) / 2;
@@ -305,9 +289,38 @@ public class AVActivity {
         final java.nio.ByteBuffer video_buffer_2_v = java.nio.ByteBuffer.allocateDirect(buffer_size_in_bytes2);
         ffmpegav_set_JNI_video_buffer2(video_buffer_2_y, video_buffer_2_u, video_buffer_2_v, frame_width_px2, frame_height_px2);
 
-        final int audio_buffer_size_in_bytes2 = 8000;
-        final java.nio.ByteBuffer audio_buffer_2 = java.nio.ByteBuffer.allocateDirect(audio_buffer_size_in_bytes2);
+
         ffmpegav_set_JNI_audio_buffer2(audio_buffer_2);
+
+        ffmpegav_set_video_capture_callback(new video_capture_callback() {
+            @Override
+            public void onSuccess(long width, long height, long pts) {
+                Log.i(TAG, "ffmpeg open video capture onSuccess:" + width + " " + height + " " + pts);
+            }
+            @Override
+            public void onError() {
+            }
+        });
+
+        ffmpegav_set_audio_capture_callback(new audio_capture_callback() {
+            @Override
+            public void onSuccess(long read_bytes, int out_samples, int out_channels, int out_sample_rate, long pts) {
+                Log.i(TAG, "ffmpeg open audio capture onSuccess:" + read_bytes + " " + out_samples + " " + out_channels + " " + out_sample_rate + " " + pts);
+                try
+                {
+                    audio_buffer_2.rewind();
+                    final ffmpegav_ByteBufferCompat audio_buffer_2_ = new ffmpegav_ByteBufferCompat(audio_buffer_2);
+                    Log.i(TAG, "audiobytes:" + bytesToHex(audio_buffer_2_.array(), 0, 100));
+                }
+                catch(Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            @Override
+            public void onError() {
+            }
+        });
 
         ffmpegav_start_video_in_capture();
         ffmpegav_start_audio_in_capture();
@@ -389,6 +402,51 @@ public class AVActivity {
         // -----------------------
         // -----------------------
 
+    }
+
+    public static String bytesToHex(byte[] bytes, int start, int len)
+    {
+        final char[] hexArray = "0123456789ABCDEF".toCharArray();
+        char[] hexChars = new char[(len) * 2];
+        // System.out.println("blen=" + (len));
+
+        for (int j = start; j < (start + len); j++)
+        {
+            int v = bytes[j] & 0xFF;
+            hexChars[(j - start) * 2] = hexArray[v >>> 4];
+            hexChars[(j - start) * 2 + 1] = hexArray[v & 0x0F];
+        }
+
+        return new String(hexChars);
+    }
+
+    public static class ffmpegav_ByteBufferCompat
+    {
+        byte[] b = null;
+        ByteBuffer f = null;
+
+        public ffmpegav_ByteBufferCompat(ByteBuffer bf)
+        {
+            this.f = bf;
+            bf.rewind();
+            this.b = new byte[bf.remaining()];
+            bf.slice().get(this.b);
+        }
+
+        public byte[] array()
+        {
+            return b;
+        }
+
+        public int limit()
+        {
+            return this.f.limit();
+        }
+
+        public int arrayOffset()
+        {
+            return 0;
+        }
     }
 }
 
