@@ -13,6 +13,7 @@ import com.zoffcc.applications.sorm.FileDB
 import com.zoffcc.applications.sorm.Filetransfer
 import com.zoffcc.applications.sorm.GroupMessage
 import com.zoffcc.applications.sorm.Message
+import com.zoffcc.applications.trifa.AudioBar.audio_in_bar
 import com.zoffcc.applications.trifa.AudioBar.audio_out_bar
 import com.zoffcc.applications.trifa.AudioSelectOutBox.semaphore_audio_out_convert
 import com.zoffcc.applications.trifa.AudioSelectOutBox.semaphore_audio_out_convert_active_threads
@@ -1006,6 +1007,8 @@ class MainActivity
             Thread.sleep(100)
             VideoOutFrame.clear_video_out_frame()
             VideoInFrame.clear_video_in_frame()
+            AudioBar.set_cur_value(0, audio_in_bar)
+            AudioBar.set_cur_value(0, audio_out_bar)
         }
 
         @JvmStatic
