@@ -13,6 +13,7 @@ import com.zoffcc.applications.sorm.FileDB
 import com.zoffcc.applications.sorm.Filetransfer
 import com.zoffcc.applications.sorm.GroupMessage
 import com.zoffcc.applications.sorm.Message
+import com.zoffcc.applications.trifa.AudioBar.audio_out_bar
 import com.zoffcc.applications.trifa.AudioSelectOutBox.semaphore_audio_out_convert
 import com.zoffcc.applications.trifa.AudioSelectOutBox.semaphore_audio_out_convert_active_threads
 import com.zoffcc.applications.trifa.AudioSelectOutBox.semaphore_audio_out_convert_max_active_threads
@@ -116,6 +117,7 @@ class MainActivity
         @JvmField public var PREF__auto_accept_image = true
         @JvmField var PREF__auto_accept_video = true
         @JvmField var PREF__auto_accept_all_upto = true
+        const val AUDIO_VU_MIN_VALUE = -20f
         //
         var video_buffer_1: ByteBuffer? = null
         var buffer_size_in_bytes = 0
@@ -1106,6 +1108,20 @@ class MainActivity
                     {
                         semaphore_audio_out_convert.release()
                     }
+                    var global_audio_out_vu: Float = AUDIO_VU_MIN_VALUE
+                    if (sample_count > 0)
+                    {
+                        val vu_value = AudioBar.audio_vu(audio_out_byte_buffer, sample_count.toInt())
+                        global_audio_out_vu = if (vu_value > AUDIO_VU_MIN_VALUE)
+                        {
+                            vu_value
+                        } else
+                        {
+                            0f
+                        }
+                    }
+                    val global_audio_out_vu_ = global_audio_out_vu
+                    AudioBar.set_cur_value(global_audio_out_vu_.toInt(), audio_out_bar)
                 }
                 t_audio_pcm_play.start()
             }

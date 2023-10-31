@@ -32,7 +32,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.ffmpegav.AVActivity
-import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_ByteBufferCompat
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_close_audio_in_device
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_close_video_in_device
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_init
@@ -41,9 +40,13 @@ import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_set_video_capture_ca
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_stop_audio_in_capture
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_stop_video_in_capture
 import com.zoffcc.applications.trifa.AVState
+import com.zoffcc.applications.trifa.AudioBar
+import com.zoffcc.applications.trifa.AudioBar.audio_in_bar
+import com.zoffcc.applications.trifa.ByteBufferCompat
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity
+import com.zoffcc.applications.trifa.MainActivity.Companion.AUDIO_VU_MIN_VALUE
 import com.zoffcc.applications.trifa.MainActivity.Companion.on_call_ended_actions
 import com.zoffcc.applications.trifa.MainActivity.Companion.sent_message_to_db
 import com.zoffcc.applications.trifa.MainActivity.Companion.set_JNI_audio_buffer
@@ -242,6 +245,29 @@ fun start_outgoing_video(friendpubkey: String)
                 channels = out_channels,
                 sampling_rate = out_sample_rate.toLong())
             // Log.i(TAG, "tox_audio_res=" + tox_audio_res)
+            val sample_count_: Int = out_samples
+            val t_audio_bar_set: Thread = object : Thread()
+            {
+                override fun run()
+                {
+                    var global_audio_in_vu: Float = AUDIO_VU_MIN_VALUE
+                    if (sample_count_ > 0)
+                    {
+                        audio_buffer_1.rewind()
+                        val data_compat = ByteBufferCompat(audio_buffer_1)
+                        val vu_value: Float = AudioBar.audio_vu(data_compat.array(), sample_count_)
+                        global_audio_in_vu = if (vu_value > AUDIO_VU_MIN_VALUE)
+                        {
+                            vu_value
+                        } else
+                        {
+                            0f
+                        }
+                    }
+                    AudioBar.set_cur_value(global_audio_in_vu.toInt(), audio_in_bar)
+                }
+            }
+            t_audio_bar_set.start()
 
             /* DEBUG ONLY ----------------------------
             try

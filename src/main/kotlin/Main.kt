@@ -65,6 +65,7 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.zoffcc.applications.ffmpegav.AVActivity
+import com.zoffcc.applications.trifa.AudioBar
 import com.zoffcc.applications.trifa.HelperGeneric.PubkeyShort
 import com.zoffcc.applications.trifa.JPictureBox
 import com.zoffcc.applications.trifa.JPictureBoxOut
@@ -102,6 +103,7 @@ import org.briarproject.briar.desktop.ui.UiPlaceholder
 import org.briarproject.briar.desktop.ui.VerticalDivider
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import java.awt.Component
+import java.awt.LayoutManager
 import java.awt.Toolkit
 import java.util.*
 import java.util.concurrent.Executors
@@ -575,6 +577,25 @@ fun App()
                             }
                         }
                     }
+                    SwingPanel(
+                        modifier = Modifier.size(250.dp,5.dp),
+                        factory = {
+                            JPanel(SingleComponentAspectRatioKeeperLayout(), true).apply {
+                                add(AudioBar.audio_out_bar)
+                            }
+                        },
+                        update = { }
+                    )
+                    Spacer(modifier = Modifier.height(5.dp))
+                    SwingPanel(
+                        modifier = Modifier.size(250.dp,5.dp),
+                        factory = {
+                            JPanel(SingleComponentAspectRatioKeeperLayout(), true).apply {
+                                add(AudioBar.audio_in_bar)
+                            }
+                        },
+                        update = { }
+                    )
                     UIScaleItem(
                         label = i18n("UI Scale"),
                         description = "${i18n("current_value:")}: "
