@@ -32,16 +32,19 @@ public class AudioBar extends JPanel
     public static AudioBar audio_in_bar = new AudioBar();
     public static AudioBar audio_out_bar = new AudioBar();
 
+    private Color bg_color = Color.BLACK;
     private int cur_value = 0;
     private final int yellow_value = 75;
     private final int red_value = 85;
+    private final int default_width = 400;
+    private final int default_height = 10;
 
     AudioBar()
     {
         super();
         setDoubleBuffered(true);
-        setPreferredSize(new Dimension(300, 4));
-        setSize(300, 4);
+        setPreferredSize(new Dimension(default_width, default_height));
+        setSize(default_width, default_height);
         revalidate();
         repaint();
         set_cur_value(0, this);
@@ -51,7 +54,7 @@ public class AudioBar extends JPanel
     public void paint(Graphics g)
     {
         super.paint(g);
-        setBackground(Color.black);
+        setBackground(bg_color);
         int w = this.getWidth();
         int h = this.getHeight();
         if (cur_value > red_value)
@@ -81,12 +84,17 @@ public class AudioBar extends JPanel
         }
     }
 
+    public static void set_bar_bgcolor(int bgcolor, AudioBar c)
+    {
+        c.bg_color = new Color(bgcolor);
+        c.repaint();
+    }
+
     public static void set_cur_value(int value, AudioBar c)
     {
         if (c != null)
         {
             c.cur_value = value;
-            Log.i(TAG, "set_cur_value:*********AApaint*********");
             c.repaint();
         }
         else

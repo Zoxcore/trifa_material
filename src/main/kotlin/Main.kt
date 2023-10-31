@@ -66,6 +66,8 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.zoffcc.applications.ffmpegav.AVActivity
 import com.zoffcc.applications.trifa.AudioBar
+import com.zoffcc.applications.trifa.AudioBar.audio_in_bar
+import com.zoffcc.applications.trifa.AudioBar.audio_out_bar
 import com.zoffcc.applications.trifa.HelperGeneric.PubkeyShort
 import com.zoffcc.applications.trifa.JPictureBox
 import com.zoffcc.applications.trifa.JPictureBoxOut
@@ -577,21 +579,24 @@ fun App()
                             }
                         }
                     }
+                    val audio_bar_bgcolor = MaterialTheme.colors.background
                     SwingPanel(
-                        modifier = Modifier.size(250.dp,5.dp),
+                        modifier = Modifier.size(200.dp,5.dp),
                         factory = {
                             JPanel(SingleComponentAspectRatioKeeperLayout(), true).apply {
                                 add(AudioBar.audio_out_bar)
+                                AudioBar.set_bar_bgcolor(audio_bar_bgcolor.toArgb(), audio_out_bar)
                             }
                         },
                         update = { }
                     )
                     Spacer(modifier = Modifier.height(5.dp))
                     SwingPanel(
-                        modifier = Modifier.size(250.dp,5.dp),
+                        modifier = Modifier.size(200.dp,5.dp),
                         factory = {
                             JPanel(SingleComponentAspectRatioKeeperLayout(), true).apply {
                                 add(AudioBar.audio_in_bar)
+                                AudioBar.set_bar_bgcolor(audio_bar_bgcolor.toArgb(), audio_in_bar)
                             }
                         },
                         update = { }
