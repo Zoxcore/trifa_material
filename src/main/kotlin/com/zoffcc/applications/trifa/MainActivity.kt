@@ -7,7 +7,6 @@ import UIGroupMessage
 import UIMessage
 import User
 import avstatestore
-import com.zoffcc.applications.ffmpegav.AVActivity
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_loadjni
 import com.zoffcc.applications.sorm.FileDB
 import com.zoffcc.applications.sorm.Filetransfer
@@ -884,7 +883,7 @@ class MainActivity
         @JvmStatic
         fun android_toxav_callback_call_cb_method(friend_number: Long, audio_enabled: Int, video_enabled: Int)
         {
-            if (avstatestore.state.calling_state_get() != AVState.CALL_STATUS.CALL_NONE)
+            if (avstatestore.state.calling_state_get() != AVState.CALL_STATUS.CALL_STATUS_NONE)
             {
                 // we are already in some other call state, maybe with another friend
                 return
@@ -898,10 +897,9 @@ class MainActivity
             val call_answer = toxav_answer(friend_number, GLOBAL_AUDIO_BITRATE.toLong(), GLOBAL_VIDEO_BITRATE.toLong())
             if (call_answer == 1)
             {
-                set_av_call_status(1)
+                avstatestore.state.calling_state_set(AVState.CALL_STATUS.CALL_STATUS_CALLING)
                 avstatestore.state.call_with_friend_pubkey_set(tox_friend_get_public_key(friend_number))
-                avstatestore.state.calling_state_set(AVState.CALL_STATUS.CALL_CALLING)
-                avstatestore.state.start_outgoing_video(avstatestore.state.call_with_friend_pubkey_get()!!)
+                avstatestore.state.start_av_call()
             }
         }
 
@@ -915,7 +913,7 @@ class MainActivity
                 return
             }
 
-            if (avstatestore.state.calling_state_get() != AVState.CALL_STATUS.CALL_CALLING)
+            if (avstatestore.state.calling_state_get() != AVState.CALL_STATUS.CALL_STATUS_CALLING)
             {
                 // we are not in a call, ignore incoming video frames
                 return;
@@ -970,7 +968,7 @@ class MainActivity
                         Log.i(TAG, "toxav_call_state:from=$friend_number call ending(1)")
                         avstatestore.state.ffmpeg_devices_stop()
                         on_call_ended_actions()
-                    } else if (avstatestore.state.calling_state_get() != AVState.CALL_STATUS.CALL_NONE &&
+                    } else if (avstatestore.state.calling_state_get() != AVState.CALL_STATUS.CALL_STATUS_NONE &&
                         a_TOXAV_FRIEND_CALL_STATE == ToxVars.TOXAV_FRIEND_CALL_STATE.TOXAV_FRIEND_CALL_STATE_NONE.value)
                     {
                         Log.i(TAG, "toxav_call_state:from=$friend_number call ending(2)")
@@ -991,7 +989,7 @@ class MainActivity
 
         fun on_call_ended_actions()
         {
-            avstatestore.state.calling_state_set(AVState.CALL_STATUS.CALL_NONE)
+            avstatestore.state.calling_state_set(AVState.CALL_STATUS.CALL_STATUS_NONE)
             avstatestore.state.call_with_friend_pubkey_set(null)
             set_av_call_status(0)
             Thread.sleep(100)
@@ -1016,7 +1014,7 @@ class MainActivity
                 return
             }
 
-            if (avstatestore.state.calling_state_get() != AVState.CALL_STATUS.CALL_CALLING)
+            if (avstatestore.state.calling_state_get() != AVState.CALL_STATUS.CALL_STATUS_CALLING)
             {
                 // we are not in a call, ignore incoming audio frames
                 return
