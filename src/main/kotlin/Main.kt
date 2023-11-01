@@ -541,7 +541,7 @@ fun App()
                                         Log.i(TAG, "video_in_device=" + avstatestore.state.video_in_device)
                                         if (avstatestore.state.video_in_device == "x11grab")
                                         {
-                                            video_in_sources_get += listOf(":0.0", ":1.0", ":2.0", ":3.0")
+                                            video_in_sources_get += listOf(":0.0", ":1.0", ":2.0", ":3.0", ":4.0", ":5.0")
                                         }
                                         video_in_sources.clear()
                                         if (video_in_sources_get.isNotEmpty())
