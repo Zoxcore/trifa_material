@@ -50,6 +50,8 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -61,6 +63,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
@@ -960,7 +963,22 @@ private fun MainAppStart()
 
         if (isOpen)
         {
-            Window(onCloseRequest = { isAskingToClose = true }, title = "TRIfA", icon = appIcon, state = state) {
+            Window(onCloseRequest = { isAskingToClose = true }, title = "TRIfA",
+                icon = appIcon, state = state,
+                onKeyEvent = {
+                    when (it.key) {
+                        Key.F11 -> {
+                            state.placement = WindowPlacement.Fullscreen
+                            true
+                        }
+                        Key.Escape -> {
+                            state.placement = WindowPlacement.Floating
+                            true
+                        }
+                        else -> false
+                    }
+                }
+            ) {
                 if (isAskingToClose)
                 {
                     Dialog(
@@ -1047,7 +1065,6 @@ fun lock_data_dir_input()
 {
     savepathstore.updateEnabled(false)
 }
-
 
 fun actionButton(
     text: String,
