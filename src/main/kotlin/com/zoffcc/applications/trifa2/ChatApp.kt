@@ -31,35 +31,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zoffcc.applications.ffmpegav.AVActivity
-import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_set_audio_capture_callback
-import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_set_video_capture_callback
 import com.zoffcc.applications.trifa.AVState
-import com.zoffcc.applications.trifa.AudioBar
-import com.zoffcc.applications.trifa.AudioBar.audio_in_bar
-import com.zoffcc.applications.trifa.ByteBufferCompat
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity
-import com.zoffcc.applications.trifa.MainActivity.Companion.AUDIO_VU_MIN_VALUE
 import com.zoffcc.applications.trifa.MainActivity.Companion.on_call_ended_actions
 import com.zoffcc.applications.trifa.MainActivity.Companion.sent_message_to_db
-import com.zoffcc.applications.trifa.MainActivity.Companion.set_JNI_audio_buffer
-import com.zoffcc.applications.trifa.MainActivity.Companion.set_JNI_video_buffer2
-import com.zoffcc.applications.trifa.MainActivity.Companion.set_av_call_status
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_send_message
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_send_message
-import com.zoffcc.applications.trifa.MainActivity.Companion.toxav_audio_send_frame
 import com.zoffcc.applications.trifa.MainActivity.Companion.toxav_call
 import com.zoffcc.applications.trifa.MainActivity.Companion.toxav_call_control
-import com.zoffcc.applications.trifa.MainActivity.Companion.toxav_video_send_frame_age
 import com.zoffcc.applications.trifa.StateContacts
 import com.zoffcc.applications.trifa.StateGroups
 import com.zoffcc.applications.trifa.TRIFAGlobals
 import com.zoffcc.applications.trifa.ToxVars
 import com.zoffcc.applications.trifa.ToxVars.TOX_MESSAGE_TYPE
-import com.zoffcc.applications.trifa.VideoOutFrame
 import com.zoffcc.applications.trifa.createAVStateStore
 import com.zoffcc.applications.trifa.createContactStore
 import com.zoffcc.applications.trifa.createGroupPeerStore
@@ -71,7 +58,6 @@ import kotlinx.coroutines.SupervisorJob
 import org.briarproject.briar.desktop.utils.ImagePicker.pickImageUsingDialog
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
-import java.nio.ByteBuffer
 
 private const val TAG = "trifa.Chatapp"
 val myUser = User("Me", picture = null, toxpk = null)
@@ -103,9 +89,8 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
                         // video call button pressed
                         val friendpubkey = contactList.selectedContactPubkey
                         val friendnum = tox_friend_by_public_key(friendpubkey)
-                        set_av_call_status(1)
 
-                        if (avstatestore.state.calling_state_get() == AVState.CALL_STATUS.CALL_CALLING)
+                        if (avstatestore.state.calling_state_get() == AVState.CALL_STATUS.CALL_STATUS_CALLING)
                         {
                             avstatestore.state.ffmpeg_devices_stop()
                             toxav_call_control(friendnum, ToxVars.TOXAV_CALL_CONTROL.TOXAV_CALL_CONTROL_CANCEL.value)
@@ -116,20 +101,16 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
 
                         val call_res = toxav_call(friendnum, TRIFAGlobals.GLOBAL_AUDIO_BITRATE.toLong(), TRIFAGlobals.GLOBAL_VIDEO_BITRATE.toLong())
                         println("toxav call_res: $call_res")
-                        if (call_res == 1)
-                        {
-                            avstatestore.state.calling_state_set(AVState.CALL_STATUS.CALL_CALLING)
-                            avstatestore.state.call_with_friend_pubkey_set(friendpubkey)
-                            println("toxav: set 003")
-                        }
-                        else
+                        if (call_res != 1)
                         {
                             on_call_ended_actions()
                             println("toxav: ret 002")
                             return@IconButton
                         }
-
-                        avstatestore.state.start_outgoing_video(friendpubkey!!)
+                        avstatestore.state.calling_state_set(AVState.CALL_STATUS.CALL_STATUS_CALLING)
+                        avstatestore.state.call_with_friend_pubkey_set(friendpubkey)
+                        avstatestore.state.start_av_call()
+                        println("toxav: set 003")
                     }) {
                         Icon(Icons.Filled.Videocam, null)
                     }
