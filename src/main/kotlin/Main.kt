@@ -142,6 +142,7 @@ val SPACE_AFTER_LAST_MESSAGE = 2.dp
 val SPACE_BEFORE_FIRST_MESSAGE = 10.dp
 val CAPTURE_VIDEO_WIDTH = 640 // 1280
 val CAPTURE_VIDEO_HEIGHT = 480 // 720
+val CAPTURE_VIDEO_FPS = 20
 val VIDEO_IN_BOX_WIDTH_SMALL = 80.dp
 val VIDEO_IN_BOX_HEIGHT_SMALL = 80.dp
 val VIDEO_IN_BOX_WIDTH_FRACTION_SMALL = 0.5f
@@ -354,12 +355,7 @@ fun App()
                                 maxLines = 1)
                             Box {
                                 IconButton(onClick = {
-                                    if (!avstatestore.state.ffmpeg_init_done)
-                                    {
-                                        val res = AVActivity.ffmpegav_init()
-                                        println("ffmpeg init: $res")
-                                        avstatestore.state.ffmpeg_init_done = true
-                                    }
+                                    avstatestore.state.ffmpeg_init_do()
                                     val audio_in_devices_get = AVActivity.ffmpegav_get_audio_in_devices()
                                     println("ffmpeg audio in devices: " + audio_in_devices_get.size)
                                     audio_in_devices.clear()
@@ -400,12 +396,7 @@ fun App()
                                 IconButton(onClick = {
                                     if ((avstatestore.state.audio_in_device_get() != null) && (avstatestore.state.audio_in_device_get() != ""))
                                     {
-                                        if (!avstatestore.state.ffmpeg_init_done)
-                                        {
-                                            val res = AVActivity.ffmpegav_init()
-                                            println("ffmpeg init: $res")
-                                            avstatestore.state.ffmpeg_init_done = true
-                                        }
+                                        avstatestore.state.ffmpeg_init_do()
                                         var audio_in_sources_get: Array<String> = emptyArray()
                                         val tmp = AVActivity.ffmpegav_get_in_sources(avstatestore.state.audio_in_device_get(), 0)
                                         if (tmp == null)
@@ -460,12 +451,7 @@ fun App()
                                 maxLines = 1)
                             Box {
                                 IconButton(onClick = {
-                                    if (!avstatestore.state.ffmpeg_init_done)
-                                    {
-                                        val res = AVActivity.ffmpegav_init()
-                                        println("ffmpeg init: $res")
-                                        avstatestore.state.ffmpeg_init_done = true
-                                    }
+                                    avstatestore.state.ffmpeg_init_do()
                                     val video_in_devices_get = AVActivity.ffmpegav_get_video_in_devices()
                                     println("ffmpeg video in devices: " + video_in_devices_get.size)
                                     video_in_devices.clear()
@@ -506,12 +492,7 @@ fun App()
                                 IconButton(onClick = {
                                     if ((avstatestore.state.video_in_device_get() != null) && (avstatestore.state.video_in_device_get() != ""))
                                     {
-                                        if (!avstatestore.state.ffmpeg_init_done)
-                                        {
-                                            val res = AVActivity.ffmpegav_init()
-                                            println("ffmpeg init: $res")
-                                            avstatestore.state.ffmpeg_init_done = true
-                                        }
+                                        avstatestore.state.ffmpeg_init_do()
                                         var video_in_sources_get: Array<String> = emptyArray()
                                         if (avstatestore.state.video_in_device_get() == "video4linux2,v4l2")
                                         {
