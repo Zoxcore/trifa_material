@@ -348,9 +348,8 @@ fun App()
                         val audio_in_sources by remember { mutableStateOf(ArrayList<String>()) }
                         var video_in_devices by remember { mutableStateOf(ArrayList<String>()) }
                         val video_in_sources by remember { mutableStateOf(ArrayList<String>()) }
-                        avstatestore.state.audio_in_device
                         Column {
-                            Text(text = "audio in: " + avstatestore.state.audio_in_device + " " + avstatestore.state.audio_in_source
+                            Text(text = "audio in: " + avstatestore.state.audio_in_device_get() + " " + avstatestore.state.audio_in_source_get()
                                 , fontSize = 13.sp, modifier = Modifier.fillMaxWidth(),
                                 maxLines = 1)
                             Box {
@@ -379,7 +378,7 @@ fun App()
                                         audio_in_devices.forEach() {
                                             if (it != null)
                                             {
-                                                DropdownMenuItem(onClick = { avstatestore.state.audio_in_source = "";audio_in_sources.clear(); avstatestore.state.audio_in_device = it;expanded_a = false }) {
+                                                DropdownMenuItem(onClick = { avstatestore.state.audio_in_source_set("");audio_in_sources.clear(); avstatestore.state.audio_in_device_set(it);expanded_a = false }) {
                                                     Text(""+it)
                                                 }
                                             }
@@ -387,9 +386,9 @@ fun App()
                                     }
                                     DropdownMenuItem(
                                         onClick = {
-                                            avstatestore.state.audio_in_source = ""
+                                            avstatestore.state.audio_in_source_set("")
                                             audio_in_sources.clear()
-                                            avstatestore.state.audio_in_device = ""
+                                            avstatestore.state.audio_in_device_set("")
                                             expanded_a = false
                                         })
                                     {
@@ -399,7 +398,7 @@ fun App()
                             }
                             Box {
                                 IconButton(onClick = {
-                                    if ((avstatestore.state.audio_in_device != null) && (avstatestore.state.audio_in_device != ""))
+                                    if ((avstatestore.state.audio_in_device_get() != null) && (avstatestore.state.audio_in_device_get() != ""))
                                     {
                                         if (!avstatestore.state.ffmpeg_init_done)
                                         {
@@ -408,7 +407,7 @@ fun App()
                                             avstatestore.state.ffmpeg_init_done = true
                                         }
                                         var audio_in_sources_get: Array<String> = emptyArray()
-                                        val tmp = AVActivity.ffmpegav_get_in_sources(avstatestore.state.audio_in_device, 0)
+                                        val tmp = AVActivity.ffmpegav_get_in_sources(avstatestore.state.audio_in_device_get(), 0)
                                         if (tmp == null)
                                         {
                                             audio_in_sources_get = emptyArray()
@@ -438,7 +437,7 @@ fun App()
                                         audio_in_sources.forEach() {
                                             if (it != null)
                                             {
-                                                DropdownMenuItem(onClick = { avstatestore.state.audio_in_source = it;expanded_as = false }) {
+                                                DropdownMenuItem(onClick = { avstatestore.state.audio_in_source_set(it);expanded_as = false }) {
                                                     Text(""+it)
                                                 }
                                             }
@@ -446,7 +445,7 @@ fun App()
                                     }
                                     DropdownMenuItem(
                                         onClick = {
-                                            avstatestore.state.audio_in_source = ""
+                                            avstatestore.state.audio_in_source_set("")
                                             expanded_as = false
                                         })
                                     {
@@ -456,7 +455,7 @@ fun App()
                             }
 
 
-                            Text("video in: " + avstatestore.state.video_in_device + " " + avstatestore.state.video_in_source
+                            Text("video in: " + avstatestore.state.video_in_device_get() + " " + avstatestore.state.video_in_source_get()
                                 , fontSize = 13.sp, modifier = Modifier.fillMaxWidth(),
                                 maxLines = 1)
                             Box {
@@ -485,7 +484,7 @@ fun App()
                                         video_in_devices.forEach() {
                                             if (it != null)
                                             {
-                                                DropdownMenuItem(onClick = { avstatestore.state.video_in_source = "";video_in_sources.clear(); avstatestore.state.video_in_device = it;expanded_v = false }) {
+                                                DropdownMenuItem(onClick = { avstatestore.state.video_in_source_set("");video_in_sources.clear(); avstatestore.state.video_in_device_set(it);expanded_v = false }) {
                                                     Text("" + it)
                                                 }
                                             }
@@ -493,9 +492,9 @@ fun App()
                                     }
                                     DropdownMenuItem(
                                         onClick = {
-                                            avstatestore.state.video_in_source = ""
+                                            avstatestore.state.video_in_source_set("")
                                             video_in_sources.clear()
-                                            avstatestore.state.video_in_device = ""
+                                            avstatestore.state.video_in_device_set("")
                                             expanded_v = false
                                         })
                                     {
@@ -505,7 +504,7 @@ fun App()
                             }
                             Box {
                                 IconButton(onClick = {
-                                    if ((avstatestore.state.video_in_device != null) && (avstatestore.state.video_in_device != ""))
+                                    if ((avstatestore.state.video_in_device_get() != null) && (avstatestore.state.video_in_device_get() != ""))
                                     {
                                         if (!avstatestore.state.ffmpeg_init_done)
                                         {
@@ -514,7 +513,7 @@ fun App()
                                             avstatestore.state.ffmpeg_init_done = true
                                         }
                                         var video_in_sources_get: Array<String> = emptyArray()
-                                        if (avstatestore.state.video_in_device == "video4linux2,v4l2")
+                                        if (avstatestore.state.video_in_device_get() == "video4linux2,v4l2")
                                         {
                                             val tmp = AVActivity.ffmpegav_get_in_sources("v4l2", 1)
                                             if (tmp == null)
@@ -528,7 +527,7 @@ fun App()
                                         }
                                         else
                                         {
-                                            val tmp = AVActivity.ffmpegav_get_in_sources(avstatestore.state.video_in_device, 1)
+                                            val tmp = AVActivity.ffmpegav_get_in_sources(avstatestore.state.video_in_device_get(), 1)
                                             if (tmp == null)
                                             {
                                                 video_in_sources_get = emptyArray()
@@ -538,8 +537,8 @@ fun App()
                                                 video_in_sources_get = tmp
                                             }
                                         }
-                                        Log.i(TAG, "video_in_device=" + avstatestore.state.video_in_device)
-                                        if (avstatestore.state.video_in_device == "x11grab")
+                                        Log.i(TAG, "video_in_device=" + avstatestore.state.video_in_device_get())
+                                        if (avstatestore.state.video_in_device_get() == "x11grab")
                                         {
                                             video_in_sources_get += listOf(":0.0", ":1.0", ":2.0", ":3.0", ":4.0", ":5.0")
                                         }
@@ -564,7 +563,7 @@ fun App()
                                         video_in_sources.forEach() {
                                             if (it != null)
                                             {
-                                                DropdownMenuItem(onClick = { avstatestore.state.video_in_source = it;expanded_vs = false }) {
+                                                DropdownMenuItem(onClick = { avstatestore.state.video_in_source_set(it);expanded_vs = false }) {
                                                     Text(""+it)
                                                 }
                                             }
@@ -572,7 +571,7 @@ fun App()
                                     }
                                     DropdownMenuItem(
                                         onClick = {
-                                            avstatestore.state.video_in_source = ""
+                                            avstatestore.state.video_in_source_set("")
                                             expanded_vs = false
                                         })
                                     {
