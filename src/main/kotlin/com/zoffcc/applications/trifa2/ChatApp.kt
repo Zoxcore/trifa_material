@@ -163,8 +163,8 @@ fun start_outgoing_video(friendpubkey: String)
         println("ffmpeg init: $res")
         avstatestore.state.ffmpeg_init_done = true
     }
-    val video_in_device = avstatestore.state.video_in_device
-    val video_in_source = avstatestore.state.video_in_source
+    val video_in_device = avstatestore.state.video_in_device_get()
+    val video_in_source = avstatestore.state.video_in_source_get()
     var video_buffer_2: ByteBuffer? = null
 
     if ((video_in_device != null) && (video_in_device != ""))
@@ -192,8 +192,8 @@ fun start_outgoing_video(friendpubkey: String)
     AVActivity.ffmpegav_set_JNI_video_buffer2(video_buffer_2_y, video_buffer_2_u, video_buffer_2_v, frame_width_px2, frame_height_px2)
 
 
-    val audio_in_device = avstatestore.state.audio_in_device
-    val audio_in_source = avstatestore.state.audio_in_source
+    val audio_in_device = avstatestore.state.audio_in_device_get()
+    val audio_in_source = avstatestore.state.audio_in_source_get()
     var audio_buffer_2: ByteBuffer? = null
 
     if ((audio_in_device != null) && (audio_in_device != ""))
