@@ -112,7 +112,16 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
                         avstatestore.state.start_av_call()
                         println("toxav: set 003")
                     }) {
-                        Icon(Icons.Filled.Videocam, null)
+                        // TODO: make this actually work!
+                        if (avstatestore.state.calling_state_get() == AVState.CALL_STATUS.CALL_STATUS_CALLING)
+                        {
+                            Icon(imageVector = Icons.Filled.Videocam, contentDescription = null,
+                                tint = Color.Red)
+                        }
+                        else
+                        {
+                            Icon(imageVector = Icons.Filled.Videocam, contentDescription = null)
+                        }
                     }
                 }
             )
