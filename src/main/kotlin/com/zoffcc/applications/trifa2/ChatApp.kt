@@ -48,6 +48,7 @@ import com.zoffcc.applications.trifa.TRIFAGlobals
 import com.zoffcc.applications.trifa.ToxVars
 import com.zoffcc.applications.trifa.ToxVars.TOX_MESSAGE_TYPE
 import com.zoffcc.applications.trifa.createAVStateStore
+import com.zoffcc.applications.trifa.createAVStateStoreCallState
 import com.zoffcc.applications.trifa.createContactStore
 import com.zoffcc.applications.trifa.createGroupPeerStore
 import com.zoffcc.applications.trifa.createGroupStore
@@ -69,6 +70,7 @@ val groupstore = CoroutineScope(SupervisorJob()).createGroupStore()
 val savepathstore = CoroutineScope(SupervisorJob()).createSavepathStore()
 val toxdatastore = CoroutineScope(SupervisorJob()).createToxDataStore()
 val avstatestore = CoroutineScope(SupervisorJob()).createAVStateStore()
+val avstatestorecallstate = CoroutineScope(SupervisorJob()).createAVStateStoreCallState()
 
 @Composable
 fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolean = true, contactList: StateContacts, ui_scale: Float)
@@ -85,6 +87,7 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
                     IconButton(onClick = {/* Do Something*/ }) {
                         Icon(Icons.Filled.Call, null)
                     }
+                    val curren_callstate by avstatestorecallstate.stateFlow.collectAsState()
                     IconButton(onClick = {
                         // video call button pressed
                         val friendpubkey = contactList.selectedContactPubkey
@@ -112,10 +115,9 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
                         avstatestore.state.start_av_call()
                         println("toxav: set 003")
                     }) {
-                        // TODO: make this actually work!
-                        if (avstatestore.state.calling_state_get() == AVState.CALL_STATUS.CALL_STATUS_CALLING)
+                        if (curren_callstate.call_state == AVState.CALL_STATUS.CALL_STATUS_CALLING)
                         {
-                            Icon(imageVector = Icons.Filled.Videocam, contentDescription = null,
+                            Icon(imageVector = Icons.Filled.Videocam, contentDescription = "",
                                 tint = Color.Red)
                         }
                         else
