@@ -439,9 +439,9 @@ jobs:
              javac -version
 
       - name: compile-app
+        shell: bash
         run: |
-          ./gradlew.bat -Dorg.gradle.java.home=C:\hostedtoolcache\windows\Java_Temurin-Hotspot_jdk\17.0.9-9.1\x64 assemble
-        shell: cmd
+          ./gradlew.bat -Dorg.gradle.java.home="$JAVA_HOME_17" assemble
 
       - name: startup-app
         shell: pwsh
@@ -449,7 +449,7 @@ jobs:
           [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
           [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
           Start-Sleep -Seconds 30
-          Start-Process -FilePath 'C:\Windows\System32\cmd.exe' -WorkingDirectory "D:\a\trifa_material\trifa_material" -ArgumentList '/c', 'D:\a\trifa_material\trifa_material\gradlew.bat', "-Dorg.gradle.java.home=C:\hostedtoolcache\windows\Java_Temurin-Hotspot_jdk\17.0.9-9.1\x64", "run" -windowstyle Maximized
+          Start-Process -FilePath 'C:\Windows\System32\cmd.exe' -WorkingDirectory "D:\a\trifa_material\trifa_material" -ArgumentList '/c', 'D:\a\trifa_material\trifa_material\gradlew.bat', "-Dorg.gradle.java.home=C:\hostedtoolcache\windows\Java_Temurin-Hotspot_jdk\17.0.8-101\x64", "run" -windowstyle Maximized
           Start-Sleep -Seconds 20
           Start-Sleep -Seconds 8
           $signature=@'
