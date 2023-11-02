@@ -26,12 +26,11 @@ public class CustomSemaphore extends Semaphore {
 
     public void acquire(String sourcefile_line_) throws InterruptedException {
 
-        final String sourcefile_line_copy = sourcefile_line_;
         String callerMethodName = "";
 
-        if ((sourcefile_line_copy != null) && (sourcefile_line_copy.length() > 0))
+        if ((sourcefile_line_ != null) && (!sourcefile_line_.isEmpty()))
         {
-            callerMethodName = " called from:" + sourcefile_line_copy;
+            callerMethodName = " called from:" + sourcefile_line_;
         }
         else {
             try {
@@ -39,7 +38,7 @@ public class CustomSemaphore extends Semaphore {
                 // HINT: from kotlin this is just useless for now :-(
                 StackTraceElement element = stacktrace[2];
                 callerMethodName = " called from:" + element.getMethodName();
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
         }
 
@@ -53,11 +52,13 @@ public class CustomSemaphore extends Semaphore {
                     if (!acquired)
                     {
                         Log.i(TAG,""+SEM_ID + " " + "************* SEM:BLOCKING *************" + callerMethodName_final + " prev: " + prev_acquired_sourcefile_line);
+                        /*
                         while (acquired) {
                             Thread.sleep(WAIT_FOR_UNBLOCKING_MS);
                             Log.i(TAG,""+SEM_ID + " " + "!!!!!!!!!!!!! SEM:BLOCKING !!!!!!!!!!!!!" + callerMethodName_final + " prev: " + prev_acquired_sourcefile_line);
                         }
                         Log.i(TAG,""+SEM_ID + " " + "############# SEM:UN-BLOCKING ##########" + callerMethodName_final + " prev: " + prev_acquired_sourcefile_line);
+                         */
                     }
                 } catch (Exception e) {
                     if (LOGGING) e.printStackTrace();
@@ -68,7 +69,7 @@ public class CustomSemaphore extends Semaphore {
             if (LOGGING) e.printStackTrace();
         }
         super.acquire();
-        prev_acquired_sourcefile_line = sourcefile_line_copy;
+        prev_acquired_sourcefile_line = sourcefile_line_;
         acquired = true;
         if (LOGGING) Log.i(TAG, ""+SEM_ID + " " + "acquire:finish" + callerMethodName);
     }
