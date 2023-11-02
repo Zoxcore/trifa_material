@@ -46,7 +46,7 @@ data class AVState(val a: Int)
     private var calling_state = CALL_STATUS.CALL_STATUS_NONE
     private var devices_state = CALL_DEVICES_STATE.CALL_DEVICES_STATE_CLOSED
     private var call_with_friend_pubkey: String? = null
-    private var semaphore_avstate = Semaphore(1)
+    private var semaphore_avstate = CustomSemaphore(1)
 
     init
     {
@@ -58,7 +58,7 @@ data class AVState(val a: Int)
     fun ffmpeg_devices_stop()
     {
         val devices_state_copy: CALL_DEVICES_STATE
-        semaphore_avstate.acquire()
+        semaphore_avstate.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
         devices_state_copy = devices_state
         semaphore_avstate.release()
         if (devices_state_copy == CALL_DEVICES_STATE.CALL_DEVICES_STATE_ACTIVE)
@@ -68,7 +68,7 @@ data class AVState(val a: Int)
             AVActivity.ffmpegav_stop_video_in_capture()
             AVActivity.ffmpegav_close_video_in_device()
         }
-        semaphore_avstate.acquire()
+        semaphore_avstate.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
         devices_state = CALL_DEVICES_STATE.CALL_DEVICES_STATE_CLOSED
         semaphore_avstate.release()
     }

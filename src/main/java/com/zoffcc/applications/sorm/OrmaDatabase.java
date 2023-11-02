@@ -1,8 +1,6 @@
 package com.zoffcc.applications.sorm;
 
-import androidx.compose.ui.res.FileResourceLoader;
 import com.zoffcc.applications.trifa.Log;
-import com.zoffcc.applications.trifa.MainActivity;
 import com.zoffcc.applications.trifa.OperatingSystem;
 
 import java.io.*;

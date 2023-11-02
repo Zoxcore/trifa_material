@@ -14,7 +14,7 @@ public class VideoOutFrame {
     public static int height = 480;
     static byte[] imageOutByte = null;
     static BufferedImage imageOut = null;
-    final static Semaphore semaphore_video_out_convert = new Semaphore(1);
+    final static Semaphore semaphore_video_out_convert = new CustomSemaphore(1);
     static int semaphore_video_out_convert_active_threads = 0;
     static int semaphore_video_out_convert_max_active_threads = 1;
 

@@ -170,7 +170,7 @@ object HelperGeneric {
         }
 
         try {
-            MainActivity.semaphore_tox_savedata!!.acquire()
+            MainActivity.semaphore_tox_savedata!!.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
             val password_hash_2 = MainActivity.password_hash
             val start_timestamp = System.currentTimeMillis()
             update_savedata_file(password_hash_2)

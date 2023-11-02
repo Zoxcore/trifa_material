@@ -71,6 +71,7 @@ import com.zoffcc.applications.ffmpegav.AVActivity
 import com.zoffcc.applications.trifa.AudioBar
 import com.zoffcc.applications.trifa.AudioBar.audio_in_bar
 import com.zoffcc.applications.trifa.AudioBar.audio_out_bar
+import com.zoffcc.applications.trifa.CustomSemaphore
 import com.zoffcc.applications.trifa.HelperGeneric.PubkeyShort
 import com.zoffcc.applications.trifa.JPictureBox
 import com.zoffcc.applications.trifa.JPictureBoxOut
@@ -158,11 +159,11 @@ val SAVEDATA_PATH_HEIGHT = 50.dp
 val MYTOXID_WIDTH = 200.dp
 val MYTOXID_HEIGHT = 50.dp
 val ImageloaderDispatcher = Executors.newFixedThreadPool(5).asCoroutineDispatcher()
-var global_semaphore_contactlist_ui = Semaphore(1)
-var global_semaphore_grouppeerlist_ui = Semaphore(1)
-var global_semaphore_grouplist_ui = Semaphore(1)
-var global_semaphore_messagelist_ui = Semaphore(1)
-var global_semaphore_groupmessagelist_ui = Semaphore(1)
+var global_semaphore_contactlist_ui = CustomSemaphore(1)
+var global_semaphore_grouppeerlist_ui = CustomSemaphore(1)
+var global_semaphore_grouplist_ui = CustomSemaphore(1)
+var global_semaphore_messagelist_ui = CustomSemaphore(1)
+var global_semaphore_groupmessagelist_ui = CustomSemaphore(1)
 
 @OptIn(DelicateCoroutinesApi::class, ExperimentalFoundationApi::class)
 @Composable
