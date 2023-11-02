@@ -270,6 +270,7 @@ fun App()
                             SaveDataPath()
                             ToxIDTextField()
                         }
+                        Spacer(modifier = Modifier.width(5.dp))
                         var video_in_box_width by remember { mutableStateOf(VIDEO_IN_BOX_WIDTH_SMALL) }
                         var video_in_box_height by remember { mutableStateOf(VIDEO_IN_BOX_HEIGHT_SMALL) }
                         var video_in_box_small by remember { mutableStateOf(true)}
@@ -277,6 +278,7 @@ fun App()
                         SwingPanel(
                             background = Color.Green,
                             modifier = Modifier.fillMaxWidth(video_in_box_width_fraction)
+                                .padding(5.dp)
                                 .fillMaxHeight(1.0f)
                                 .combinedClickable(onClick = {
                                     if (video_in_box_small)
@@ -297,7 +299,8 @@ fun App()
                                 }
                             }
                         )
-                        Icon(modifier = Modifier.combinedClickable(onClick = {
+                        Icon(modifier = Modifier.padding(5.dp)
+                            .combinedClickable(onClick = {
                             if (video_in_box_small)
                             {
                                 video_in_box_width = VIDEO_IN_BOX_WIDTH_BIG
@@ -350,7 +353,7 @@ fun App()
                         val audio_in_sources by remember { mutableStateOf(ArrayList<String>()) }
                         var video_in_devices by remember { mutableStateOf(ArrayList<String>()) }
                         val video_in_sources by remember { mutableStateOf(ArrayList<String>()) }
-                        Column {
+                        Column(modifier = Modifier.padding(5.dp)) {
                             Text(text = "audio in: " + avstatestore.state.audio_in_device_get() + " " + avstatestore.state.audio_in_source_get()
                                 , fontSize = 13.sp, modifier = Modifier.fillMaxWidth(),
                                 maxLines = 1)
