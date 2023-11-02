@@ -55,6 +55,41 @@ data class AVState(val a: Int)
         ffmpeg_init_done_set(false)
     }
 
+    fun ffmpeg_devices_start()
+    {
+        val devices_state_copy: CALL_DEVICES_STATE
+        semaphore_avstate.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
+        devices_state_copy = devices_state
+        semaphore_avstate.release()
+        if (devices_state_copy == CALL_DEVICES_STATE.CALL_DEVICES_STATE_CLOSED)
+        {
+            if ((video_in_device != null) && (video_in_device != ""))
+            {
+                if ((video_in_source != null) && (video_in_source != ""))
+                {
+                    println("ffmpeg video in device: " + video_in_device + " " + video_in_source)
+                    val res_vd = AVActivity.ffmpegav_open_video_in_device(video_in_device, video_in_source,
+                        CAPTURE_VIDEO_WIDTH, CAPTURE_VIDEO_HEIGHT, CAPTURE_VIDEO_FPS)
+                    println("ffmpeg open video capture device: $res_vd")
+                }
+            }
+            if ((audio_in_device != null) && (audio_in_device != ""))
+            {
+                if ((audio_in_source != null) && (audio_in_source != ""))
+                {
+                    println("ffmpeg audio in device: " + audio_in_device + " " + audio_in_source)
+                    val res_ad = AVActivity.ffmpegav_open_audio_in_device(audio_in_device, audio_in_source)
+                    println("ffmpeg open audio capture device: $res_ad")
+                }
+            }
+            AVActivity.ffmpegav_start_video_in_capture()
+            AVActivity.ffmpegav_start_audio_in_capture()
+        }
+        semaphore_avstate.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
+        devices_state = CALL_DEVICES_STATE.CALL_DEVICES_STATE_ACTIVE
+        semaphore_avstate.release()
+    }
+
     fun ffmpeg_devices_stop()
     {
         val devices_state_copy: CALL_DEVICES_STATE
@@ -67,6 +102,10 @@ data class AVState(val a: Int)
             AVActivity.ffmpegav_close_audio_in_device()
             AVActivity.ffmpegav_stop_video_in_capture()
             AVActivity.ffmpegav_close_video_in_device()
+            AudioBar.set_cur_value(0, AudioBar.audio_in_bar)
+            AudioBar.set_cur_value(0, AudioBar.audio_out_bar)
+            VideoOutFrame.clear_video_out_frame()
+            VideoInFrame.clear_video_in_frame()
         }
         semaphore_avstate.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
         devices_state = CALL_DEVICES_STATE.CALL_DEVICES_STATE_CLOSED
@@ -133,6 +172,19 @@ data class AVState(val a: Int)
         return if (video_in_source == null) "" else video_in_source
     }
 
+    fun restart_devices()
+    {
+        val devices_state_copy: CALL_DEVICES_STATE
+        semaphore_avstate.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
+        devices_state_copy = devices_state
+        semaphore_avstate.release()
+        if (devices_state_copy == CALL_DEVICES_STATE.CALL_DEVICES_STATE_ACTIVE)
+        {
+            ffmpeg_devices_stop()
+            ffmpeg_devices_start()
+        }
+    }
+
     fun audio_in_device_set(value: String?)
     {
         if (value == null)
@@ -144,6 +196,7 @@ data class AVState(val a: Int)
             audio_in_device = value
         }
         save_device_information()
+        restart_devices()
     }
 
     fun audio_in_source_set(value: String?)
@@ -157,6 +210,7 @@ data class AVState(val a: Int)
             audio_in_source = value
         }
         save_device_information()
+        restart_devices()
     }
 
     fun video_in_device_set(value: String?)
@@ -170,6 +224,7 @@ data class AVState(val a: Int)
             video_in_device = value
         }
         save_device_information()
+        restart_devices()
     }
 
     fun video_in_source_set(value: String?)
@@ -183,6 +238,7 @@ data class AVState(val a: Int)
             video_in_source = value
         }
         save_device_information()
+        restart_devices()
     }
 
     fun load_device_information()
