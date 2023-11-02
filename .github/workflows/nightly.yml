@@ -425,8 +425,13 @@ jobs:
         run: echo %PATH%
         shell: cmd
 
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin' # See 'Supported distributions' for available options
+          java-version: '17'
+
       - name: java-version
-        run: set -x ; "$JAVA_HOME_17_X64/bin/java.exe" -version
+        run: java -version
         shell: bash
 
       - name: download tester
@@ -441,7 +446,7 @@ jobs:
       - name: compile-app
         shell: bash
         run: |
-          ./gradlew.bat -Dorg.gradle.java.home="$JAVA_HOME_17" assemble
+          ./gradlew.bat assemble
 
       - name: startup-app
         shell: pwsh
@@ -449,7 +454,7 @@ jobs:
           [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
           [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
           Start-Sleep -Seconds 30
-          Start-Process -FilePath 'C:\Windows\System32\cmd.exe' -WorkingDirectory "D:\a\trifa_material\trifa_material" -ArgumentList '/c', 'D:\a\trifa_material\trifa_material\gradlew.bat', "-Dorg.gradle.java.home=C:\hostedtoolcache\windows\Java_Temurin-Hotspot_jdk\17.0.8-101\x64", "run" -windowstyle Maximized
+          Start-Process -FilePath 'C:\Windows\System32\cmd.exe' -WorkingDirectory "D:\a\trifa_material\trifa_material" -ArgumentList '/c', 'D:\a\trifa_material\trifa_material\gradlew.bat', "run" -windowstyle Maximized
           Start-Sleep -Seconds 20
           Start-Sleep -Seconds 8
           $signature=@'
