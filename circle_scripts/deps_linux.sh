@@ -28,9 +28,8 @@ export MAKEFLAGS
 WGET_OPTIONS="--timeout=10"
 export WGET_OPTIONS
 
-FLAGS_ASAN='-fsanitize=address -fno-omit-frame-pointer' # -static-libasan'
-CXXFLAGS_ADDON='-O2 -g -fPIC'
-CFLAGS_ADDON='-O2 -g -fPIC'
+CXXFLAGS_ADDON='-O2 -g -fPIC -D_FORTIFY_SOURCE=2 -fstack-protector-strong'
+CFLAGS_ADDON='-O2 -g -fPIC -D_FORTIFY_SOURCE=2 -fstack-protector-strong'
 CFLAGS_MORE='--param=ssp-buffer-size=1 -fstack-protector-all'
 # ----------- config ------------
 
@@ -108,6 +107,8 @@ export LDFLAGS=" "
               --disable-demuxers \
               --disable-parsers \
               --disable-bsfs \
+              --disable-libxcb \
+              --disable-libxcb-shm \
               --enable-parser=h264 \
               --enable-decoder=h264 || exit 1
 
@@ -253,7 +254,7 @@ cd "$_SRC_"
     # seems man pages are not always built. but who needs those
     touch nasm.1
     touch ndisasm.1
-    make install
+    sudo make install
 
     type -a nasm
 

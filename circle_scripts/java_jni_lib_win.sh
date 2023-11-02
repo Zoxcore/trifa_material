@@ -41,17 +41,10 @@ echo "--------------"
 
 
 ## ---------------------------
-mkdir -p /root/work/
-cd /root/work/
 git clone https://github.com/zoff99/ToxAndroidRefImpl
-cd /root/work/ToxAndroidRefImpl/jni-c-toxcore/
+cp -v ToxAndroidRefImpl/jni-c-toxcore/*.c ./
 pwd
 ls -al
-
-
-if [ "$1""x" == "localx" ]; then
-    cp -av /c-toxcore/jni-c-toxcore.c jni-c-toxcore.c
-fi
 
 ## ---------------------------
 
@@ -63,18 +56,19 @@ echo "JAVADIR2------------------"
 find /usr -name 'jni_md.h'
 echo "JAVADIR2------------------"
 
-dirname $(find /usr -name 'jni.h' 2>/dev/null|grep -v 'libavcodec'|head -1) > /tmp/xx1
+dirname $(find /usr -name 'jni.h' 2>/dev/null|grep -v 'libavcodec'|grep -v 'android'|head -1) > /tmp/xx1
 dirname $(find /usr -name 'jni_md.h' 2>/dev/null|head -1) > /tmp/xx2
 export JAVADIR1=$(cat /tmp/xx1)
 export JAVADIR2=$(cat /tmp/xx2)
 echo "JAVADIR1:""$JAVADIR1"
 echo "JAVADIR2:""$JAVADIR2"
 
-export CFLAGS=" -fPIC -std=gnu99 -I$_INST_/include/ -L$_INST_/lib -fstack-protector-all "
+export CFLAGS=" -fPIC -D_FORTIFY_SOURCE=2 -std=gnu99 -I$_INST_/include/ -L$_INST_/lib -fstack-protector-all "
 
 x86_64-w64-mingw32-gcc-win32 $CFLAGS \
 -Wall -D_JNI_IMPLEMENTATION_ -Wl,-kill-at \
 -DJAVA_LINUX \
+-DNOGLOBALVARS \
 $C_FLAGS $CXX_FLAGS $LD_FLAGS \
 -D_FILE_OFFSET_BITS=64 -D__USE_GNU=1 \
 -I$JAVADIR1/ \
@@ -102,22 +96,11 @@ $_INST_/lib/libsodium.a \
 -lm \
 -o jni-c-toxcore.dll || exit 1
 
+sha256sum /home/runner/work/trifa_material/trifa_material/jni-c-toxcore.dll
 
 ls -al jni-c-toxcore.dll || exit 1
 pwd
 file jni-c-toxcore.dll
-cp -av jni-c-toxcore.dll /workspace/data/java_ref_client/app/src/main/java/ || exit 1
 
-# -------------- now compile the JNI lib ----------------------
-
-# --------- compile java example ---------
-cd /workspace/data/java_ref_client/app/src/main/java/
-javac com/zoffcc/applications/trifa/ToxVars.java
-javac com/zoffcc/applications/trifa/TRIFAGlobals.java
-javac com/zoffcc/applications/trifa/MainActivity.java
-javac com/zoffcc/applications/trifa/TrifaToxService.java
-# --------- package java example ---------
-cd /workspace/data/java_ref_client/app/src/main/java/
-tar -cvf /artefacts/install_win.tar com *.dll *.sh || tar -cvf ~/work/artefacts/install_win.tar com *.dll *.sh
 
 
