@@ -92,7 +92,7 @@ class MainActivity
 
         // --------- global config ---------
         // --------- global config ---------
-        const val CTOXCORE_NATIVE_LOGGING = true // set "false" for release builds
+        const val CTOXCORE_NATIVE_LOGGING = false // set "false" for release builds
 
         // --------- global config ---------
         // --------- global config ---------
@@ -1061,7 +1061,7 @@ class MainActivity
                     semaphore_audio_out_convert.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                     if (semaphore_audio_out_convert_active_threads >= semaphore_audio_out_convert_max_active_threads)
                     {
-                        Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:too many threads running")
+                        // Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:too many threads running")
                         semaphore_audio_out_convert.release()
                         return
                     }
