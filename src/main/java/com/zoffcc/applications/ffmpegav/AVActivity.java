@@ -231,9 +231,9 @@ public class AVActivity {
                 if (i == 1)
                 {
                     vdevice = video_in_devices[i];
-                    vsource = ":0.0";
-                    final int res_vd = ffmpegav_open_video_in_device(video_in_devices[i],
-                            ":0.0", 640, 480, 15);
+                    vsource = ":0";
+                    final int res_vd = ffmpegav_open_video_in_device(vdevice,
+                            vsource, 640, 480, 15);
                     Log.i(TAG, "ffmpeg open video capture device: " + res_vd);
                 }
             }
