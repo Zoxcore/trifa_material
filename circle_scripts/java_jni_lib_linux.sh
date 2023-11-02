@@ -39,17 +39,10 @@ echo "--------------"
 
 
 ## ---------------------------
-mkdir -p /root/work/
-cd /root/work/
 git clone https://github.com/zoff99/ToxAndroidRefImpl
-cd /root/work/ToxAndroidRefImpl/jni-c-toxcore/
+cp -v ToxAndroidRefImpl/jni-c-toxcore/*.c ./
 pwd
 ls -al
-
-
-if [ "$1""x" == "localx" ]; then
-    cp -av /c-toxcore/jni-c-toxcore.c jni-c-toxcore.c
-fi
 
 ## ---------------------------
 
@@ -61,7 +54,7 @@ echo "JAVADIR2------------------"
 find /usr -name 'jni_md.h'
 echo "JAVADIR2------------------"
 
-dirname $(find /usr -name 'jni.h' 2>/dev/null|grep -v 'libavcodec'|head -1) > /tmp/xx1
+dirname $(find /usr -name 'jni.h' 2>/dev/null|grep -v 'libavcodec'|grep -v 'android'|head -1) > /tmp/xx1
 dirname $(find /usr -name 'jni_md.h' 2>/dev/null|head -1) > /tmp/xx2
 export JAVADIR1=$(cat /tmp/xx1)
 export JAVADIR2=$(cat /tmp/xx2)
@@ -69,8 +62,7 @@ echo "JAVADIR1:""$JAVADIR1"
 echo "JAVADIR2:""$JAVADIR2"
 
 
-FLAGS_ASAN='-fsanitize=address -fno-omit-frame-pointer' # -static-libasan'
-CFLAGS_ADDON='-O2 -g -fPIC'
+CFLAGS_ADDON='-O2 -g -fPIC -D_FORTIFY_SOURCE=2'
 CFLAGS_MORE="--param=ssp-buffer-size=1 -fstack-protector-all -std=gnu99 -I$_INST_/include/ -L$_INST_/lib"
 
 # if [ "$1""x" == "localx" ]; then
@@ -105,9 +97,10 @@ $_INST_/lib/libsodium.a \
 -shared \
 -Wl,-soname,libjni-c-toxcore.so -o libjni-c-toxcore.so || exit 1
 
+sha256sum /home/runner/work/trifa_material/trifa_material/libjni-c-toxcore.so
+
 
 ls -al libjni-c-toxcore.so || exit 1
 pwd
 file libjni-c-toxcore.so
-cp -a libjni-c-toxcore.so /artefacts/ || exit 1
 

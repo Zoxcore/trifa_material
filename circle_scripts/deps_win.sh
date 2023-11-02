@@ -31,8 +31,8 @@ export WGET_OPTIONS
 ARCH="x86_64"
 export ARCH
 
-export CXXFLAGS_ADDON="-O2 -g -fPIC"
-export CFLAGS_ADDON="-O2 -g -fPIC"
+export CXXFLAGS_ADDON="-O2 -g -fPIC -D_FORTIFY_SOURCE=2 -fstack-protector-strong"
+export CFLAGS_ADDON="-O2 -g -fPIC -D_FORTIFY_SOURCE=2 -fstack-protector-strong"
 export CFLAGS_ADDON_MORE="--param=ssp-buffer-size=1 -fstack-protector-all"
 # ----------- config ------------
 
@@ -42,7 +42,7 @@ NASM_VERSION="nasm-2.16.01"
 FFMPEG_VERSION="n6.0"
 OPUS_VERSION="v1.4"
 SODIUM_VERSION="1.0.19"
-VPX_VERSION="v1.13.3"
+VPX_VERSION="v1.13.1"
 _X264_VERSION_="baee400fa9ced6f5481a728138fed6e867b0ff7f"
 # ------- deps verisions ---------
 
@@ -64,14 +64,16 @@ tar -xf "ffmpeg_""$FFMPEG_FILENAME"
 rm -f "ffmpeg"*.tar.*
 cd *mpeg*/
 
+  export CXXFLAGS=${CXXFLAGS_ADDON}
+  export CFLAGS=${CFLAGS_ADDON}
   ./configure --arch="$ARCH" \
               --enable-gpl \
               --prefix="$_INST_" \
               --target-os="mingw32" \
               --cross-prefix="$ARCH-w64-mingw32-" \
               --pkg-config="pkg-config" \
-              --extra-cflags="-static -O2 -g0" \
-              --extra-ldflags="-lm -static" \
+              --extra-cflags="-static -O2 -g0 $CFLAGS_ADDON" \
+              --extra-ldflags="-lm -static $CFLAGS_ADDON" \
               --pkg-config-flags="--static" \
               --disable-swscale \
               --disable-network \
@@ -117,6 +119,8 @@ cd *mpeg*/
 
   make -j || exit 1
   make install
+  unset CXXFLAGS
+  unset CFLAGS
 
 cd "$_HOME_"
 
@@ -137,7 +141,9 @@ rm -f "opus"*.tar.gz
 cd opus*/
 
   ./autogen.sh
-  CFLAGS="-O2 -g0" ./configure --host="$ARCH-w64-mingw32" \
+  export CXXFLAGS=${CXXFLAGS_ADDON}
+  export CFLAGS=${CFLAGS_ADDON}
+  ./configure --host="$ARCH-w64-mingw32" \
                                --prefix="$_INST_" \
                                --disable-shared \
                                --enable-static \
@@ -146,6 +152,8 @@ cd opus*/
                                --disable-doc || exit 1
   make || exit 1
   make install
+  unset CXXFLAGS
+  unset CFLAGS
 
 cd "$_HOME_"
 
@@ -165,6 +173,8 @@ wget $WGET_OPTIONS "https://download.libsodium.org/libsodium/releases/$SODIUM_FI
 tar -xf "$SODIUM_FILENAME"
 cd libsodium*/
 
+  export CXXFLAGS=${CXXFLAGS_ADDON}
+  export CFLAGS=${CFLAGS_ADDON}
   ./configure --host="$ARCH-w64-mingw32" \
               --prefix="$_INST_" \
               --disable-shared \
@@ -173,6 +183,8 @@ cd libsodium*/
 
   make || exit 1
   make install
+  unset CXXFLAGS
+  unset CFLAGS
 
 cd "$_HOME_"
 
@@ -185,13 +197,15 @@ if [ 1 == 1 ]; then
 
 cd "$_SRC_"
 
-VPX_FILENAME="libvpx-$VPX_VERSION.tar.gz"
-rm -f libvpx-*.tar.gz
-wget $WGET_OPTIONS "https://github.com/webmproject/libvpx/archive/$VPX_VERSION.tar.gz" -O "$VPX_FILENAME"
+VPX_FILENAME="$VPX_VERSION.tar.gz"
+
+rm -f *.tar.gz
+wget $WGET_OPTIONS "https://github.com/webmproject/libvpx/archive/refs/tags/""$VPX_VERSION"".tar.gz" -O "$VPX_FILENAME"
 tar -xf "$VPX_FILENAME"
 cd libvpx*/
 
-
+  export CXXFLAGS=${CXXFLAGS_ADDON}
+  export CFLAGS=${CFLAGS_ADDON}
   VPX_TARGET="x86_64-win64-gcc"
   CROSS="$ARCH-w64-mingw32-" ./configure --target="$VPX_TARGET" \
                                          --prefix="$_INST_" \
@@ -210,6 +224,8 @@ cd libvpx*/
 
   make || exit 1
   make install
+  unset CXXFLAGS
+  unset CFLAGS
 
 cd "$_HOME_"
 
@@ -237,7 +253,7 @@ cd "$_SRC_"
     # seems man pages are not always built. but who needs those
     touch nasm.1
     touch ndisasm.1
-    make install
+    sudo make install
 
     type -a nasm
 
@@ -261,6 +277,9 @@ cd x264/
   git checkout "$_X264_VERSION_"
        export CC=x86_64-w64-mingw32-gcc-win32
   export WINDRES=x86_64-w64-mingw32-windres
+
+  export CXXFLAGS=${CXXFLAGS_ADDON}
+  export CFLAGS=${CFLAGS_ADDON}
   CROSS="$ARCH-w64-mingw32-" ./configure --host="$ARCH-w64-mingw32" \
                                          --prefix="$_INST_" \
                                          --disable-opencl \
@@ -273,6 +292,8 @@ cd x264/
 
   make || exit 1
   make install
+  unset CXXFLAGS
+  unset CFLAGS
 
 cd "$_HOME_"
 
@@ -311,7 +332,8 @@ cat toxcore/tox.h | grep 'TOX_GIT_COMMIT_HASH'
 
 autoreconf -fi
 ./configure \
-    CFLAGS=" -O2 -g -DTOX_CAPABILITIES_ACTIVE " \
+    CXXFLAGS="$CXXFLAGS_ADDON" \
+    CFLAGS="-fPIC $CFLAGS_ADDON $CFLAGS_MORE -DTOX_CAPABILITIES_ACTIVE" \
     --prefix="$_INST_" \
     --disable-soname-versions \
     --host="$ARCH-w64-mingw32" \
@@ -321,7 +343,8 @@ autoreconf -fi
 
     export V=1 VERBOSE=1;make || exit 1
     make install
-
+    unset CXXFLAGS
+    unset CFLAGS
 cd "$_HOME_"
 
 # ---------- c-toxcore ---------
