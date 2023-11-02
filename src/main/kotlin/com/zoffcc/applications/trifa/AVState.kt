@@ -3,14 +3,18 @@ package com.zoffcc.applications.trifa
 import CAPTURE_VIDEO_FPS
 import CAPTURE_VIDEO_HEIGHT
 import CAPTURE_VIDEO_WIDTH
+import avstatestorecallstate
 import com.zoffcc.applications.ffmpegav.AVActivity
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_init
 import global_prefs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
 import java.util.concurrent.Semaphore
+
+data class AVStateCallState(val call_state: AVState.CALL_STATUS = AVState.CALL_STATUS.CALL_STATUS_NONE)
 
 data class AVState(val a: Int)
 {
@@ -43,7 +47,7 @@ data class AVState(val a: Int)
     private var audio_in_source = ""
     private var video_in_device = ""
     private var video_in_source = ""
-    private var calling_state = CALL_STATUS.CALL_STATUS_NONE
+    var calling_state = CALL_STATUS.CALL_STATUS_NONE
     private var devices_state = CALL_DEVICES_STATE.CALL_DEVICES_STATE_CLOSED
     private var call_with_friend_pubkey: String? = null
     private var semaphore_avstate = CustomSemaphore(1)
@@ -140,6 +144,7 @@ data class AVState(val a: Int)
     fun calling_state_set(value: CALL_STATUS)
     {
         calling_state = value
+        avstatestorecallstate.update(status = value)
     }
 
     fun ffmpeg_init_done_get(): Boolean
@@ -501,5 +506,28 @@ fun CoroutineScope.createAVStateStore(): AVStateStore
     return object : AVStateStore
     {
         override val stateFlow: StateFlow<AVState> = mutableStateFlow
+    }
+}
+
+interface AVStateStoreCallState
+{
+    val stateFlow: StateFlow<AVStateCallState>
+    val state get() = stateFlow.value
+    fun update(status: AVState.CALL_STATUS)
+}
+
+fun CoroutineScope.createAVStateStoreCallState(): AVStateStoreCallState
+{
+    val mutableStateFlow = MutableStateFlow(AVStateCallState())
+
+    return object : AVStateStoreCallState
+    {
+        override val stateFlow: StateFlow<AVStateCallState> = mutableStateFlow
+        override fun update(status: AVState.CALL_STATUS)
+        {
+            launch {
+                mutableStateFlow.value = state.copy(call_state = status)
+            }
+        }
     }
 }
