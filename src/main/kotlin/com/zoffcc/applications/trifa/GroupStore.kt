@@ -44,7 +44,7 @@ fun CoroutineScope.createGroupStore(): GroupStore
         override fun add(item: GroupItem)
         {
             launch {
-                global_semaphore_grouplist_ui.acquire()
+                global_semaphore_grouplist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var found = false
                 state.groups.forEach {
                     if (item.groupId == it.groupId)
@@ -73,7 +73,7 @@ fun CoroutineScope.createGroupStore(): GroupStore
         override fun remove(item: GroupItem)
         {
             launch {
-                global_semaphore_grouplist_ui.acquire()
+                global_semaphore_grouplist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var sel_groupid = state.selectedGroupId
                 var sel_item = state.selectedGroup
                 var new_groups: ArrayList<GroupItem> = ArrayList()
@@ -109,7 +109,7 @@ fun CoroutineScope.createGroupStore(): GroupStore
         override fun select(groupId: String?)
         {
             launch {
-                global_semaphore_grouplist_ui.acquire()
+                global_semaphore_grouplist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var wanted_group_item: GroupItem? = null
                 state.groups.forEach {
                     if (groupId == it.groupId)
@@ -130,7 +130,7 @@ fun CoroutineScope.createGroupStore(): GroupStore
         override fun update(item: GroupItem)
         {
             launch {
-                global_semaphore_grouplist_ui.acquire()
+                global_semaphore_grouplist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var update_item: GroupItem? = null
                 state.groups.forEach {
                     if (item.groupId == it.groupId)
@@ -167,7 +167,7 @@ fun CoroutineScope.createGroupStore(): GroupStore
         override fun clear()
         {
             launch {
-                global_semaphore_grouplist_ui.acquire()
+                global_semaphore_grouplist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 mutableStateFlow.value = state.copy(groups = emptyList(), selectedGroupId = null, selectedGroup = null)
                 global_semaphore_grouplist_ui.release()
             }

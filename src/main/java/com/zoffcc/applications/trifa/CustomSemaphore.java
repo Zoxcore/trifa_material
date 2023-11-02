@@ -1,0 +1,82 @@
+package com.zoffcc.applications.trifa;
+
+import java.util.Random;
+import java.util.concurrent.Semaphore;
+
+public class CustomSemaphore extends Semaphore {
+
+    private final static String TAG = "trifa.CstSemphr";
+
+    private final boolean LOGGING = false;
+    private boolean acquired = false;
+    private String prev_acquired_sourcefile_line = "";
+    private final int BLOCKING_THRESHOLD_MS = 500;
+    private final int WAIT_FOR_UNBLOCKING_MS = 1000;
+    private final long SEM_ID = new Random().nextLong();
+
+    public CustomSemaphore(int permits) {
+        super(permits);
+        if (LOGGING) Log.i(TAG, ""+SEM_ID + " " + "create");
+    }
+
+    @Override
+    public void acquire() throws InterruptedException {
+        acquire(null);
+    }
+
+    public void acquire(String sourcefile_line_) throws InterruptedException {
+
+        final String sourcefile_line_copy = sourcefile_line_;
+        String callerMethodName = "";
+
+        if ((sourcefile_line_copy != null) && (sourcefile_line_copy.length() > 0))
+        {
+            callerMethodName = " called from:" + sourcefile_line_copy;
+        }
+        else {
+            try {
+                final StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
+                // HINT: from kotlin this is just useless for now :-(
+                StackTraceElement element = stacktrace[2];
+                callerMethodName = " called from:" + element.getMethodName();
+            } catch (Exception e) {
+            }
+        }
+
+        if (LOGGING) Log.i(TAG, ""+SEM_ID + " " + "acquire:start" + callerMethodName);
+        acquired = false;
+        final String callerMethodName_final = callerMethodName;
+        try {
+            final Thread _t = new Thread(() -> {
+                try {
+                    Thread.sleep(BLOCKING_THRESHOLD_MS);
+                    if (!acquired)
+                    {
+                        Log.i(TAG,""+SEM_ID + " " + "************* SEM:BLOCKING *************" + callerMethodName_final + " prev: " + prev_acquired_sourcefile_line);
+                        while (acquired) {
+                            Thread.sleep(WAIT_FOR_UNBLOCKING_MS);
+                            Log.i(TAG,""+SEM_ID + " " + "!!!!!!!!!!!!! SEM:BLOCKING !!!!!!!!!!!!!" + callerMethodName_final + " prev: " + prev_acquired_sourcefile_line);
+                        }
+                        Log.i(TAG,""+SEM_ID + " " + "############# SEM:UN-BLOCKING ##########" + callerMethodName_final + " prev: " + prev_acquired_sourcefile_line);
+                    }
+                } catch (Exception e) {
+                    if (LOGGING) e.printStackTrace();
+                }
+            });
+            _t.start();
+        } catch (Exception e) {
+            if (LOGGING) e.printStackTrace();
+        }
+        super.acquire();
+        prev_acquired_sourcefile_line = sourcefile_line_copy;
+        acquired = true;
+        if (LOGGING) Log.i(TAG, ""+SEM_ID + " " + "acquire:finish" + callerMethodName);
+    }
+
+    @Override
+    public void release() {
+        if (LOGGING) Log.i(TAG, ""+SEM_ID + " " + "release:start");
+        super.release();
+        if (LOGGING) Log.i(TAG, ""+SEM_ID + " " + "release:finish");
+    }
+}

@@ -30,7 +30,7 @@ fun CoroutineScope.createMessageStore(): MessageStore
         override fun send(action: MessageAction)
         {
             launch {
-                global_semaphore_messagelist_ui.acquire()
+                global_semaphore_messagelist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 if (action is MessageAction.ReceiveMessage)
                 {
                     if (contactstore.state.selectedContactPubkey == action.message.toxpk)

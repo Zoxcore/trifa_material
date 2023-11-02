@@ -36,7 +36,7 @@ fun CoroutineScope.createGroupPeerStore(): GroupPeerStore
         override fun add(item: GroupPeerItem)
         {
             launch {
-                global_semaphore_grouppeerlist_ui.acquire()
+                global_semaphore_grouppeerlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var found = false
                 state.grouppeers.forEach {
                     if (item.pubkey == it.pubkey)
@@ -67,7 +67,7 @@ fun CoroutineScope.createGroupPeerStore(): GroupPeerStore
         override fun remove(item: GroupPeerItem)
         {
             launch {
-                global_semaphore_grouppeerlist_ui.acquire()
+                global_semaphore_grouppeerlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var sel_pubkey = state.selectedGrouppeerPubkey
                 var sel_item = state.selectedGrouppeer
                 var new_peers: ArrayList<GroupPeerItem> = ArrayList()
@@ -105,7 +105,7 @@ fun CoroutineScope.createGroupPeerStore(): GroupPeerStore
         override fun select(pubkey: String?)
         {
             launch {
-                global_semaphore_grouppeerlist_ui.acquire()
+                global_semaphore_grouppeerlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var wanted_contact_item: GroupPeerItem? = null
                 state.grouppeers.forEach {
                     if (pubkey == it.pubkey)
@@ -127,7 +127,7 @@ fun CoroutineScope.createGroupPeerStore(): GroupPeerStore
         override fun update(item: GroupPeerItem)
         {
             launch {
-                global_semaphore_grouppeerlist_ui.acquire()
+                global_semaphore_grouppeerlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var update_item: GroupPeerItem? = null
                 state.grouppeers.forEach {
                     if (item.pubkey == it.pubkey)
@@ -170,7 +170,7 @@ fun CoroutineScope.createGroupPeerStore(): GroupPeerStore
         override fun clear()
         {
             launch {
-                global_semaphore_grouppeerlist_ui.acquire()
+                global_semaphore_grouppeerlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 mutableStateFlow.value = state.copy(grouppeers = emptyList(),
                     selectedGrouppeerPubkey = null, selectedGrouppeer = null)
                 global_semaphore_grouppeerlist_ui.release()

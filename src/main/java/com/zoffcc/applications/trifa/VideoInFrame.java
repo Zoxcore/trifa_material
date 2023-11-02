@@ -13,7 +13,7 @@ public class VideoInFrame {
     public static int height = 480;
     static byte[] imageInByte = null;
     static BufferedImage imageIn = null;
-    final static Semaphore semaphore_video_in_convert = new Semaphore(1);
+    final static Semaphore semaphore_video_in_convert = new CustomSemaphore(1);
     static int semaphore_video_in_convert_active_threads = 0;
     static int semaphore_video_in_convert_max_active_threads = 1;
 

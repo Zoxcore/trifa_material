@@ -135,7 +135,7 @@ class MainActivity
         // !!!!!! DEBUG !!!!!! change to real password later !!!!!!
         // !!!!!! DEBUG !!!!!! change to real password later !!!!!!
         //
-        var semaphore_tox_savedata: Semaphore? = Semaphore(1)
+        var semaphore_tox_savedata: CustomSemaphore? = CustomSemaphore(1)
         fun main_init()
         {
             println("Version:" + Version)
@@ -1058,7 +1058,7 @@ class MainActivity
 
                 try
                 {
-                    semaphore_audio_out_convert.acquire()
+                    semaphore_audio_out_convert.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                     if (semaphore_audio_out_convert_active_threads >= semaphore_audio_out_convert_max_active_threads)
                     {
                         Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:too many threads running")
@@ -1074,7 +1074,7 @@ class MainActivity
                 val t_audio_pcm_play = Thread{
                     try
                     {
-                        semaphore_audio_out_convert.acquire()
+                        semaphore_audio_out_convert.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                         semaphore_audio_out_convert_active_threads++
                         semaphore_audio_out_convert.release()
                     } catch (e: java.lang.Exception)
@@ -1092,7 +1092,7 @@ class MainActivity
                     }
                     try
                     {
-                        semaphore_audio_out_convert.acquire()
+                        semaphore_audio_out_convert.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                         semaphore_audio_out_convert_active_threads--
                         semaphore_audio_out_convert.release()
                     } catch (e: java.lang.Exception)

@@ -1,6 +1,5 @@
 package com.zoffcc.applications.trifa
 
-import com.zoffcc.applications.sorm.ConferenceMessage
 import global_semaphore_contactlist_ui
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,7 +33,7 @@ fun CoroutineScope.createContactStore(): ContactStore
 
         init
         {
-            //launch {
+            // launch {
             //    channel.consumeAsFlow().collect { item ->
             //        mutableStateFlow.value = state.copy(contacts = (state.contacts + item))
             //    }
@@ -44,7 +43,7 @@ fun CoroutineScope.createContactStore(): ContactStore
         override fun add(item: ContactItem)
         {
             launch {
-                global_semaphore_contactlist_ui.acquire()
+                global_semaphore_contactlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var found = false
                 state.contacts.forEach {
                     if (item.pubkey == it.pubkey)
@@ -73,7 +72,7 @@ fun CoroutineScope.createContactStore(): ContactStore
         override fun remove(item: ContactItem)
         {
             launch {
-                global_semaphore_contactlist_ui.acquire()
+                global_semaphore_contactlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var sel_pubkey = state.selectedContactPubkey
                 var sel_item = state.selectedContact
                 var new_contacts: ArrayList<ContactItem> = ArrayList()
@@ -109,7 +108,7 @@ fun CoroutineScope.createContactStore(): ContactStore
         override fun select(pubkey: String?)
         {
             launch {
-                global_semaphore_contactlist_ui.acquire()
+                global_semaphore_contactlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var wanted_contact_item: ContactItem? = null
                 state.contacts.forEach {
                     if (pubkey == it.pubkey)
@@ -130,7 +129,7 @@ fun CoroutineScope.createContactStore(): ContactStore
         override fun update(item: ContactItem)
         {
             launch {
-                global_semaphore_contactlist_ui.acquire()
+                global_semaphore_contactlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var update_item: ContactItem? = null
                 state.contacts.forEach {
                     if (item.pubkey == it.pubkey)
@@ -167,7 +166,7 @@ fun CoroutineScope.createContactStore(): ContactStore
         override fun clear()
         {
             launch {
-                global_semaphore_contactlist_ui.acquire()
+                global_semaphore_contactlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 mutableStateFlow.value = state.copy(contacts = emptyList(), selectedContactPubkey = null, selectedContact = null)
                 global_semaphore_contactlist_ui.release()
             }
