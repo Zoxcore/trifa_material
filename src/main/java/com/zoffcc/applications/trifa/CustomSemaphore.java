@@ -51,7 +51,7 @@ public class CustomSemaphore extends Semaphore {
                     Thread.sleep(BLOCKING_THRESHOLD_MS);
                     if (!acquired)
                     {
-                        Log.i(TAG,""+SEM_ID + " " + "************* SEM:BLOCKING *************" + callerMethodName_final + " prev: " + prev_acquired_sourcefile_line);
+                        // Log.i(TAG,""+SEM_ID + " " + "************* SEM:BLOCKING *************" + callerMethodName_final + " prev: " + prev_acquired_sourcefile_line);
                         /*
                         while (acquired) {
                             Thread.sleep(WAIT_FOR_UNBLOCKING_MS);
