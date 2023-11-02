@@ -449,7 +449,6 @@ fun App()
                                 }
                             }
 
-
                             Text("video in: " + avstatestore.state.video_in_device_get() + " " + avstatestore.state.video_in_source_get()
                                 , fontSize = 13.sp, modifier = Modifier.fillMaxWidth(),
                                 maxLines = 1)
