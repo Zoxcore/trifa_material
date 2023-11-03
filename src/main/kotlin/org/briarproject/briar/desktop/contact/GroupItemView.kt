@@ -68,7 +68,7 @@ fun GroupItemView(
     )
     PeerCountCircle(
         modifier = Modifier.padding(end = 1.dp).requiredSize(28.dp),
-        peerCount = (tox_group_peer_count(HelperGroup.tox_group_by_groupid__wrapper(groupItem.groupId)))
+        peerCount = groupItem.numPeers.toLong()
     )
 }
 

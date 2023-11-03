@@ -59,7 +59,7 @@ fun GroupList(
                     ContextMenuArea(items = {
                         listOf(
                             ContextMenuItem("delete") {
-                                groupstore.remove(item = GroupItem(privacyState = 0, name = "", isConnected = 0, groupId = item.groupId))
+                                groupstore.remove(item = GroupItem(privacyState = 0, name = "", isConnected = 0, groupId = item.groupId, numPeers = 0))
                                 GlobalScope.launch(Dispatchers.IO) {
                                     HelperGeneric.delete_group_wrapper(item.groupId)
                                 }

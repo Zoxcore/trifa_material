@@ -18,11 +18,10 @@
 
 package org.briarproject.briar.desktop.contact
 
-import com.zoffcc.applications.trifa.ToxVars.TOX_GROUP_PRIVACY_STATE
-
 data class GroupItem(
     val name: String,
     val isConnected: Int,
+    val numPeers: Int,
     val groupId: String,
     val privacyState: Int
 ) {
@@ -31,6 +30,9 @@ data class GroupItem(
 
     fun updateGroupId(groupId: String) =
         copy(groupId = groupId)
+
+    fun updateNumPeers(numPeers: Int) =
+        copy(numPeers = numPeers)
 
     fun updateIsConnected(isConnected: Int) =
         copy(isConnected = isConnected)
