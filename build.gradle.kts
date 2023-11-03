@@ -1,4 +1,3 @@
-import org.gradle.internal.impldep.org.codehaus.plexus.util.Os
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.de.undercouch.gradle.tasks.download.Download
 
