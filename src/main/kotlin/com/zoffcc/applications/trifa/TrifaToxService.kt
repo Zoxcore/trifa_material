@@ -352,8 +352,9 @@ class TrifaToxService
                 val groupid_buffer = ByteArray(GROUP_ID_LENGTH)
                 groupid_buf3.get(groupid_buffer, 0, GROUP_ID_LENGTH)
                 val group_identifier: String = HelperGeneric.bytesToHex(groupid_buffer, 0, GROUP_ID_LENGTH).lowercase()
-                val is_connected: Int = tox_group_is_connected(conf_.toLong())
+                val is_connected: Int = tox_group_is_connected(group_numbers!![conf_])
                 var group_name: String? = tox_group_get_name(group_numbers!![conf_])
+                val group_num_peers = tox_group_peer_count(group_numbers!![conf_])
                 if (group_name == null)
                 {
                     group_name = ""
@@ -361,7 +362,7 @@ class TrifaToxService
                 val new_privacy_state: Int = tox_group_get_privacy_state(group_numbers!![conf_])
                 try
                 {
-                    groupstore.add(item = GroupItem(name = group_name, isConnected = is_connected, groupId = group_identifier, privacyState = new_privacy_state))
+                    groupstore.add(item = GroupItem(numPeers = group_num_peers.toInt(), name = group_name, isConnected = is_connected, groupId = group_identifier, privacyState = new_privacy_state))
                 } catch (_: Exception)
                 {
                 }

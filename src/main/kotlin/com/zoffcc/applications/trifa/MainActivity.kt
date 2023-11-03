@@ -1782,7 +1782,8 @@ class MainActivity
                 val group_id = tox_group_by_groupnum__wrapper(group_number)
                 val group_name = tox_group_get_name(group_number)
                 val group_connection_status = tox_group_is_connected(group_number)
-                groupstore.update(item = GroupItem(name = group_name!!, isConnected = group_connection_status, groupId = group_id, privacyState = new_privacy_state))
+                val group_num_peers = tox_group_peer_count(group_number)
+                groupstore.update(item = GroupItem(numPeers = group_num_peers.toInt(), name = group_name!!, isConnected = group_connection_status, groupId = group_id, privacyState = new_privacy_state))
             } catch (_: Exception)
             {
             }
@@ -1804,7 +1805,8 @@ class MainActivity
                 {
                     val group_identifier: String = bytesToHex(Arrays.copyOfRange(invite_data, 0, GROUP_ID_LENGTH), 0, GROUP_ID_LENGTH).lowercase()
                     val new_privacy_state = tox_group_get_privacy_state(new_group_num)
-                    groupstore.add(item = GroupItem(name = group_name!!, isConnected = 0, groupId = group_identifier, privacyState = new_privacy_state))
+                    val group_num_peers = tox_group_peer_count(new_group_num)
+                    groupstore.add(item = GroupItem(numPeers = group_num_peers.toInt(), name = group_name!!, isConnected = 0, groupId = group_identifier, privacyState = new_privacy_state))
                 } catch (_: Exception)
                 {
                 }
@@ -1839,7 +1841,8 @@ class MainActivity
                 val group_id = tox_group_by_groupnum__wrapper(group_number)
                 val group_name = tox_group_get_name(group_number)
                 val group_connection_status = tox_group_is_connected(group_number)
-                groupstore.update(item = GroupItem(name = group_name!!, isConnected = group_connection_status, groupId = group_id, privacyState = new_privacy_state))
+                val group_num_peers = tox_group_peer_count(group_number)
+                groupstore.update(item = GroupItem(numPeers = group_num_peers.toInt(), name = group_name!!, isConnected = group_connection_status, groupId = group_id, privacyState = new_privacy_state))
             } catch (_: Exception)
             {
             }
@@ -1860,6 +1863,18 @@ class MainActivity
                         connectionStatus = 0, pubkey = peer_pubkey!!,
                         peerRole = 2))
                 }
+            } catch (_: Exception)
+            {
+            }
+
+            try
+            {
+                val new_privacy_state = tox_group_get_privacy_state(group_number)
+                val group_id = tox_group_by_groupnum__wrapper(group_number)
+                val group_name = tox_group_get_name(group_number)
+                val group_connection_status = tox_group_is_connected(group_number)
+                val group_num_peers = tox_group_peer_count(group_number)
+                groupstore.update(item = GroupItem(numPeers = group_num_peers.toInt(), name = group_name!!, isConnected = group_connection_status, groupId = group_id, privacyState = new_privacy_state))
             } catch (_: Exception)
             {
             }
@@ -1899,7 +1914,8 @@ class MainActivity
                 val group_id = tox_group_by_groupnum__wrapper(group_number)
                 val group_name = tox_group_get_name(group_number)
                 val group_connection_status = tox_group_is_connected(group_number)
-                groupstore.update(item = GroupItem(name = group_name!!, isConnected = group_connection_status, groupId = group_id, privacyState = new_privacy_state))
+                val group_num_peers = tox_group_peer_count(group_number)
+                groupstore.update(item = GroupItem(numPeers = group_num_peers.toInt(), name = group_name!!, isConnected = group_connection_status, groupId = group_id, privacyState = new_privacy_state))
             } catch (_: Exception)
             {
             }
@@ -1915,7 +1931,8 @@ class MainActivity
                 val group_id = tox_group_by_groupnum__wrapper(group_number)
                 val group_name = tox_group_get_name(group_number)
                 val group_connection_status = tox_group_is_connected(group_number)
-                groupstore.update(item = GroupItem(name = group_name!!, isConnected = group_connection_status, groupId = group_id, privacyState = new_privacy_state))
+                val group_num_peers = tox_group_peer_count(group_number)
+                groupstore.update(item = GroupItem(numPeers = group_num_peers.toInt(), name = group_name!!, isConnected = group_connection_status, groupId = group_id, privacyState = new_privacy_state))
             } catch (_: Exception)
             {
             }
@@ -1936,7 +1953,8 @@ class MainActivity
                 val new_privacy_state = tox_group_get_privacy_state(group_number)
                 val group_id = tox_group_by_groupnum__wrapper(group_number)
                 val group_name = tox_group_get_name(group_number)
-                groupstore.update(item = GroupItem(name = group_name!!, isConnected = a_TOX_GROUP_CONNECTION_STATUS, groupId = group_id, privacyState = new_privacy_state))
+                val group_num_peers = tox_group_peer_count(group_number)
+                groupstore.update(item = GroupItem(numPeers = group_num_peers.toInt(), name = group_name!!, isConnected = a_TOX_GROUP_CONNECTION_STATUS, groupId = group_id, privacyState = new_privacy_state))
             } catch (_: Exception)
             {
             }
