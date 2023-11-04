@@ -101,19 +101,20 @@ import org.briarproject.briar.desktop.contact.GroupList
 import org.briarproject.briar.desktop.contact.GroupPeerList
 import org.briarproject.briar.desktop.navigation.BriarSidebar
 import org.briarproject.briar.desktop.ui.AboutScreen
+import org.briarproject.briar.desktop.ui.AddFriend
+import org.briarproject.briar.desktop.ui.AddGroup
 import org.briarproject.briar.desktop.ui.ExplainerChat
 import org.briarproject.briar.desktop.ui.ExplainerGroup
+import org.briarproject.briar.desktop.ui.ExplainerToxNotRunning
 import org.briarproject.briar.desktop.ui.HorizontalDivider
 import org.briarproject.briar.desktop.ui.UiMode
 import org.briarproject.briar.desktop.ui.UiPlaceholder
 import org.briarproject.briar.desktop.ui.VerticalDivider
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import java.awt.Component
-import java.awt.LayoutManager
 import java.awt.Toolkit
 import java.util.*
 import java.util.concurrent.Executors
-import java.util.concurrent.Semaphore
 import java.util.prefs.Preferences
 import javax.swing.JButton
 import javax.swing.JPanel
@@ -662,8 +663,13 @@ fun App()
                                 }
                             }
                         }
-                        UiMode.ABOUT -> AboutScreen()
+                        UiMode.ADDFRIEND -> {
+                            if (tox_running_state == "running") AddFriend()
+                            else ExplainerToxNotRunning()
+                        }
+                        UiMode.ADDGROUP -> AddGroup()
                         UiMode.SETTINGS -> SettingDetails()
+                        UiMode.ABOUT -> AboutScreen()
                         else -> UiPlaceholder()
                     }
                 }
