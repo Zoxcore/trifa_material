@@ -75,6 +75,8 @@ fun BriarSidebar(
         BriarSidebarButton(UiMode.CONTACTS)
         BriarSidebarButton(UiMode.GROUPS)
         BriarSidebarButton(UiMode.SETTINGS)
+        BriarSidebarButton(UiMode.ADDFRIEND)
+        BriarSidebarButton(UiMode.ADDGROUP)
         BriarSidebarButton(UiMode.ABOUT)
     }
 }

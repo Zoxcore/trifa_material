@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.briarproject.briar.desktop.utils.InternationalizationUtils
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 
 @Composable
@@ -19,6 +20,12 @@ fun ExplainerChat() {
 }
 
 val PARAGRAPH_WIDTH = 540.dp
+
+@Composable
+fun ExplainerToxNotRunning() =
+Explainer(headline = InternationalizationUtils.i18n("Tox is not running"), text = InternationalizationUtils.i18n("press the <start> button"))
+{}
+
 
 @Composable
 fun Explainer(headline: String, text: String, content: @Composable () -> Unit = {}) =

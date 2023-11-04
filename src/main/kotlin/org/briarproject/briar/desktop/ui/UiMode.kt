@@ -21,11 +21,18 @@ package org.briarproject.briar.desktop.ui
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 
 enum class UiMode(val icon: ImageVector, val contentDescriptionKey: String)
 {
-    CONTACTS(Icons.Filled.Contacts, "access.mode.contacts"), GROUPS(Icons.Filled.Group, "access.mode.groups"), SETTINGS(Icons.Filled.Settings, "access.mode.settings"), ABOUT(Icons.Filled.Info, "access.mode.about"),
+    CONTACTS(Icons.Filled.Contacts, "access.mode.contacts"),
+    GROUPS(Icons.Filled.Group, "access.mode.groups"),
+    SETTINGS(Icons.Filled.Settings, "access.mode.settings"),
+    ADDFRIEND(Icons.Filled.PersonAdd, "access.mode.addfriend"),
+    ADDGROUP(Icons.Filled.GroupAdd, "access.mode.addgroup"),
+    ABOUT(Icons.Filled.Info, "access.mode.about"),
 }
