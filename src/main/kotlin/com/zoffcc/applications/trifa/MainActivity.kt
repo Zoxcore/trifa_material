@@ -100,6 +100,7 @@ class MainActivity
         var tox_service_fg: TrifaToxService? = null
         var tox_savefile_directory = "."
         var PREF__udp_enabled = 1
+        var PREF__audio_play_volume_percent = 65
         var PREF__orbot_enabled_to_int = 0
         var PREF__local_discovery_enabled = 1
         var PREF__ipv6_enabled = 1
