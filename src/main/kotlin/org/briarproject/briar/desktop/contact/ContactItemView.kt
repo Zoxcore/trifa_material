@@ -50,7 +50,7 @@ fun ContactItemView(
         modifier = Modifier.weight(1f, fill = true),
     ) {
         Box(Modifier.align(Top).padding(vertical = 8.dp)) {
-            ProfileCircle(36.dp, contactItem)
+            ProfileCircle(35.dp, contactItem)
             //NumberBadge(
             //    num = contactItem.unread,
             //    modifier = Modifier.align(TopEnd).offset(6.dp, (-6).dp)
