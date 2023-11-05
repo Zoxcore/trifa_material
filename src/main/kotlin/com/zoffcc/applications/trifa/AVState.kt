@@ -6,6 +6,8 @@ import CAPTURE_VIDEO_WIDTH
 import avstatestorecallstate
 import com.zoffcc.applications.ffmpegav.AVActivity
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_init
+import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__audio_play_volume_percent
+import com.zoffcc.applications.trifa.MainActivity.Companion.set_audio_play_volume_percent
 import global_prefs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -332,6 +334,7 @@ data class AVState(val a: Int)
         }
 
         MainActivity.set_av_call_status(1)
+        set_audio_play_volume_percent(PREF__audio_play_volume_percent)
 
         println("___________start_outgoing_video_____________")
         ffmpeg_init_do()
