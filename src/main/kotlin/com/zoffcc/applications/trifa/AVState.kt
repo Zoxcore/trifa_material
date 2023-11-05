@@ -5,7 +5,9 @@ import CAPTURE_VIDEO_HEIGHT
 import CAPTURE_VIDEO_WIDTH
 import avstatestorecallstate
 import com.zoffcc.applications.ffmpegav.AVActivity
+import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_apply_audio_filter
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_init
+import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__audio_input_filter
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__audio_play_volume_percent
 import com.zoffcc.applications.trifa.MainActivity.Companion.set_audio_play_volume_percent
 import global_prefs
@@ -334,6 +336,7 @@ data class AVState(val a: Int)
         }
 
         MainActivity.set_av_call_status(1)
+        ffmpegav_apply_audio_filter(PREF__audio_input_filter)
         set_audio_play_volume_percent(PREF__audio_play_volume_percent)
 
         println("___________start_outgoing_video_____________")

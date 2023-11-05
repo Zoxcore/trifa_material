@@ -32,6 +32,8 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Audiotrack
+import androidx.compose.material.icons.filled.Filter
 import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.Refresh
@@ -76,6 +78,7 @@ import com.zoffcc.applications.trifa.HelperGeneric.PubkeyShort
 import com.zoffcc.applications.trifa.JPictureBox
 import com.zoffcc.applications.trifa.JPictureBoxOut
 import com.zoffcc.applications.trifa.Log
+import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__audio_input_filter
 import com.zoffcc.applications.trifa.MainActivity.Companion.main_init
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_name
@@ -300,6 +303,19 @@ fun App()
                                 }
                             }
                         )
+                        var audio_filter_current_value by remember { mutableStateOf(PREF__audio_input_filter)}
+                        Icon(modifier = Modifier.padding(5.dp).combinedClickable(
+                            onClick = {
+                                if (PREF__audio_input_filter == 0){
+                                    PREF__audio_input_filter = 1
+                                } else {
+                                    PREF__audio_input_filter = 0
+                                }
+                                audio_filter_current_value = PREF__audio_input_filter
+                                AVActivity.ffmpegav_apply_audio_filter(PREF__audio_input_filter)
+                            }),
+                            imageVector =  Icons.Default.Audiotrack, contentDescription =  "",
+                            tint = if (audio_filter_current_value == 1) Color.Red else Color.DarkGray)
                         Icon(modifier = Modifier.padding(5.dp)
                             .combinedClickable(onClick = {
                             if (video_in_box_small)

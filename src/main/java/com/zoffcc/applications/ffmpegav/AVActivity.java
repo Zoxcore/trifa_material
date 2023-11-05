@@ -5,11 +5,12 @@ import java.nio.ByteBuffer;
 public class AVActivity {
 
     private static final String TAG = "ffmpegav.AVActivity";
-    static final String Version = "0.99.0";
+    static final String Version = "0.99.3";
 
     public static native String ffmpegav_version();
     public static native String ffmpegav_libavutil_version();
     public static native int ffmpegav_init();
+    public static native void ffmpegav_apply_audio_filter(int apply_filter);
     public static native String[] ffmpegav_get_video_in_devices();
     public static native String[] ffmpegav_get_audio_in_devices();
     public static native String[] ffmpegav_get_in_sources(String devicename, int is_video);
@@ -323,6 +324,7 @@ public class AVActivity {
         });
 
         ffmpegav_start_video_in_capture();
+        ffmpegav_apply_audio_filter(1);
         ffmpegav_start_audio_in_capture();
         try
         {
