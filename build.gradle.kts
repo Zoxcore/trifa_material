@@ -37,6 +37,7 @@ dependencies {
     //
     //
     implementation("org.xerial:sqlite-jdbc:3.43.2.1")
+    implementation("ca.gosyer:kotlin-multiplatform-appdirs:1.1.1")
 }
 
 compose.desktop {
