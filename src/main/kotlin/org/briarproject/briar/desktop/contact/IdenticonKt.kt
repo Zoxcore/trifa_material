@@ -118,7 +118,7 @@ internal class IdenticonKt(private val input: String, width: Float, height: Floa
                 val x = cellWidth * c
                 val y = cellHeight * r
 
-                Log.i(TAG, "x="+x+" y="+y+ " w="+cellWidth+ " h="+cellHeight)
+                // Log.i(TAG, "x="+x+" y="+y+ " w="+cellWidth+ " h="+cellHeight)
                 g.drawRect(
                     color = colors[r][c],
                     topLeft = Offset(x, y),
