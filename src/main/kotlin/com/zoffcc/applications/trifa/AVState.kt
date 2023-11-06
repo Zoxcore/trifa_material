@@ -1,8 +1,6 @@
 package com.zoffcc.applications.trifa
 
 import CAPTURE_VIDEO_FPS
-import CAPTURE_VIDEO_HEIGHT
-import CAPTURE_VIDEO_WIDTH
 import RESOURCESDIR
 import avstatestorecallstate
 import com.zoffcc.applications.ffmpegav.AVActivity
@@ -53,6 +51,8 @@ data class AVState(val a: Int)
     private var audio_in_source = ""
     private var video_in_device = ""
     private var video_in_source = ""
+    private var video_in_resolution_width = 640
+    private var video_in_resolution_height = 480
     var calling_state = CALL_STATUS.CALL_STATUS_NONE
     private var devices_state = CALL_DEVICES_STATE.CALL_DEVICES_STATE_CLOSED
     private var call_with_friend_pubkey: String? = null
@@ -79,7 +79,7 @@ data class AVState(val a: Int)
                 {
                     println("ffmpeg video in device: " + video_in_device + " " + video_in_source)
                     val res_vd = AVActivity.ffmpegav_open_video_in_device(video_in_device, video_in_source,
-                        CAPTURE_VIDEO_WIDTH, CAPTURE_VIDEO_HEIGHT, CAPTURE_VIDEO_FPS)
+                        video_in_resolution_width, video_in_resolution_height, CAPTURE_VIDEO_FPS)
                     println("ffmpeg open video capture device: $res_vd")
                 }
             }
@@ -138,6 +138,24 @@ data class AVState(val a: Int)
                 println("==================ffmpeg init:2: $res")
             }
             ffmpeg_init_done_set(true)
+        }
+    }
+
+    fun video_in_resolution_get(): String
+    {
+        return (video_in_resolution_width.toString() + "x" + video_in_resolution_height.toString())
+    }
+
+    fun video_in_resolution_set(value: String?)
+    {
+        if ((value != null) && (value.length > 2))
+        {
+            try
+            {
+                video_in_resolution_width = value.split("x", limit = 2)[0].toInt()
+                video_in_resolution_height = value.split("x", limit = 2)[1].toInt()
+            } catch (_: Exception) {
+            }
         }
     }
 
@@ -363,23 +381,26 @@ data class AVState(val a: Int)
             val video_in_source = video_in_source_get()
             var video_buffer_2: ByteBuffer? = null
 
+            val video_in_resolution_width_pin = video_in_resolution_width
+            val video_in_resolution_height_pin = video_in_resolution_height
+
             if ((video_in_device != null) && (video_in_device != ""))
             {
                 if ((video_in_source != null) && (video_in_source != ""))
                 {
                     println("ffmpeg video in device: " + video_in_device + " " + video_in_source)
                     val res_vd = AVActivity.ffmpegav_open_video_in_device(video_in_device, video_in_source,
-                        CAPTURE_VIDEO_WIDTH, CAPTURE_VIDEO_HEIGHT, CAPTURE_VIDEO_FPS)
+                        video_in_resolution_width_pin, video_in_resolution_height_pin, CAPTURE_VIDEO_FPS)
                     println("ffmpeg open video capture device: $res_vd")
                 }
             }
-            val frame_width_px1 = CAPTURE_VIDEO_WIDTH
-            val frame_height_px1 = CAPTURE_VIDEO_HEIGHT
+            val frame_width_px1 = video_in_resolution_width_pin
+            val frame_height_px1 = video_in_resolution_height_pin
             val buffer_size_in_bytes1 = (frame_width_px1 * frame_height_px1 * 3) / 2
             val video_buffer_1 = ByteBuffer.allocateDirect(buffer_size_in_bytes1)
             AVActivity.ffmpegav_set_JNI_video_buffer(video_buffer_1, frame_width_px1, frame_height_px1)
-            val frame_width_px2 = CAPTURE_VIDEO_WIDTH
-            val frame_height_px2 = CAPTURE_VIDEO_HEIGHT
+            val frame_width_px2 = video_in_resolution_width_pin
+            val frame_height_px2 = video_in_resolution_height_pin
             val y_size = frame_width_px2 * frame_height_px2
             val u_size = (frame_width_px2 * frame_height_px2 / 4)
             val v_size = (frame_width_px2 * frame_height_px2 / 4)
@@ -472,7 +493,8 @@ data class AVState(val a: Int)
             AVActivity.ffmpegav_set_video_capture_callback(object : AVActivity.video_capture_callback
             {
                 override fun onSuccess(width: Long, height: Long, pts: Long)
-                { // Log.i(TAG, "ffmpeg open video capture onSuccess: $width $height $pts")
+                {
+                    // Log.i(TAG, "ffmpeg open video capture onSuccess: $width $height $pts")
                     val frame_width_px: Int = width.toInt()
                     val frame_height_px: Int = height.toInt()
                     val buffer_size_in_bytes3 = (frame_width_px * frame_height_px * 1.5f).toInt()
@@ -488,7 +510,8 @@ data class AVState(val a: Int)
                     video_buffer_2_v.rewind()
                     video_buffer_2!!.put(video_buffer_2_y)
                     video_buffer_2!!.put(video_buffer_2_u)
-                    video_buffer_2!!.put(video_buffer_2_v) // can we cache that? what if a friend gets deleted while in a call? and the friend number changes?
+                    video_buffer_2!!.put(video_buffer_2_v)
+                    // can we cache that? what if a friend gets deleted while in a call? and the friend number changes?
                     val friendnum = MainActivity.tox_friend_by_public_key(friendpubkey)
                     MainActivity.toxav_video_send_frame_age(friendnum = friendnum, frame_width_px = width.toInt(), frame_height_px = height.toInt(), age_ms = 0)
 

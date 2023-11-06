@@ -145,8 +145,6 @@ val AVATAR_SIZE = 40f
 val MAX_AVATAR_SIZE = 70f
 val SPACE_AFTER_LAST_MESSAGE = 2.dp
 val SPACE_BEFORE_FIRST_MESSAGE = 10.dp
-val CAPTURE_VIDEO_WIDTH = 640 // 1280
-val CAPTURE_VIDEO_HEIGHT = 480 // 720
 val CAPTURE_VIDEO_FPS = 20
 val VIDEO_IN_BOX_WIDTH_SMALL = 80.dp
 val VIDEO_IN_BOX_HEIGHT_SMALL = 80.dp
@@ -597,6 +595,30 @@ fun App()
                                         })
                                     {
                                         Text("-none-")
+                                    }
+                                }
+                            }
+
+                            var resolution_expanded by remember { mutableStateOf(false) }
+                            Text("video resolution: " + avstatestore.state.video_in_resolution_get()
+                                , fontSize = 13.sp, modifier = Modifier.fillMaxWidth(),
+                                maxLines = 1)
+                            IconButton(onClick = {
+                                resolution_expanded = true
+                            },
+                                modifier = Modifier.size(16.dp)) {
+                                Icon(Icons.Filled.Refresh, null)
+                            }
+                            val items = listOf("640x480", "480x640", "1280x720", "720x1280")
+                            DropdownMenu(expanded = resolution_expanded,
+                                onDismissRequest = { resolution_expanded = false },
+                                ){
+                                items.forEachIndexed { index, s ->
+                                    DropdownMenuItem(onClick = {
+                                        avstatestore.state.video_in_resolution_set(s)
+                                        resolution_expanded = false
+                                    }) {
+                                        Text(text = s)
                                     }
                                 }
                             }
