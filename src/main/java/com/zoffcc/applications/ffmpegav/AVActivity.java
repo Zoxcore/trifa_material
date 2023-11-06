@@ -5,11 +5,11 @@ import java.nio.ByteBuffer;
 public class AVActivity {
 
     private static final String TAG = "ffmpegav.AVActivity";
-    static final String Version = "0.99.3";
+    static final String Version = "0.99.4";
 
     public static native String ffmpegav_version();
     public static native String ffmpegav_libavutil_version();
-    public static native int ffmpegav_init();
+    public static native int ffmpegav_init(String resources_dir);
     public static native void ffmpegav_apply_audio_filter(int apply_filter);
     public static native String[] ffmpegav_get_video_in_devices();
     public static native String[] ffmpegav_get_audio_in_devices();
@@ -195,7 +195,8 @@ public class AVActivity {
         }
         Log.i(TAG, "libavutil version: " + ffmpegav_libavutil_version());
         Log.i(TAG, "ffmpegav version: " + ffmpegav_version());
-        final int res = ffmpegav_init();
+        // final int res = ffmpegav_init("./"); // exmaple with path must include the seperator at the end!
+        final int res = ffmpegav_init(null); // exmaple with "null" -> filter data will be loaded from current directory
         Log.i(TAG, "ffmpeg init: " + res);
 
         final String[] video_in_devices = ffmpegav_get_video_in_devices();

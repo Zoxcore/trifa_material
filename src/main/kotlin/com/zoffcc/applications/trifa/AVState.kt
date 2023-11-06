@@ -3,6 +3,7 @@ package com.zoffcc.applications.trifa
 import CAPTURE_VIDEO_FPS
 import CAPTURE_VIDEO_HEIGHT
 import CAPTURE_VIDEO_WIDTH
+import RESOURCESDIR
 import avstatestorecallstate
 import com.zoffcc.applications.ffmpegav.AVActivity
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_apply_audio_filter
@@ -15,6 +16,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.io.File
 import java.nio.ByteBuffer
 import java.util.concurrent.Semaphore
 
@@ -124,8 +126,17 @@ data class AVState(val a: Int)
     {
         if (!ffmpeg_init_done_get())
         {
-            val res = ffmpegav_init()
-            println("==================ffmpeg init: $res")
+            try
+            {
+                val res = ffmpegav_init(RESOURCESDIR.canonicalPath + File.separator)
+                println("==================ffmpeg init:1: $res")
+            }
+            catch(e: Exception)
+            {
+                Log.i(TAG, "ERROR: something happend while trying to get RESOURCESDIR.canonicalPath")
+                val res = ffmpegav_init(null)
+                println("==================ffmpeg init:2: $res")
+            }
             ffmpeg_init_done_set(true)
         }
     }

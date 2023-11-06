@@ -33,7 +33,6 @@ import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Audiotrack
-import androidx.compose.material.icons.filled.Filter
 import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.Refresh
@@ -69,6 +68,7 @@ import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import ca.gosyer.appdirs.AppDirs
 import com.zoffcc.applications.ffmpegav.AVActivity
 import com.zoffcc.applications.trifa.AudioBar
 import com.zoffcc.applications.trifa.AudioBar.audio_in_bar
@@ -116,12 +116,12 @@ import org.briarproject.briar.desktop.ui.VerticalDivider
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import java.awt.Component
 import java.awt.Toolkit
+import java.io.File
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.prefs.Preferences
 import javax.swing.JButton
 import javax.swing.JPanel
-import kotlin.collections.ArrayList
 
 private const val TAG = "trifa.Main.kt"
 var tox_running_state_wrapper = "start"
@@ -168,6 +168,8 @@ var global_semaphore_grouppeerlist_ui = CustomSemaphore(1)
 var global_semaphore_grouplist_ui = CustomSemaphore(1)
 var global_semaphore_messagelist_ui = CustomSemaphore(1)
 var global_semaphore_groupmessagelist_ui = CustomSemaphore(1)
+val APPDIRS = AppDirs("trifa_material", "zoxcore")
+val RESOURCESDIR = File(System.getProperty("compose.application.resources.dir"))
 
 @OptIn(DelicateCoroutinesApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -177,6 +179,21 @@ fun App()
     var start_button_text by remember { mutableStateOf("start") }
     var tox_running_state: String by remember { mutableStateOf("stopped") }
     var ui_scale by remember { mutableStateOf(1.0f) }
+
+    println("User data dir: " + APPDIRS.getUserDataDir())
+    println("User data dir (roaming): " + APPDIRS.getUserDataDir(roaming = true))
+    println("User config dir: " + APPDIRS.getUserConfigDir())
+    println("User config dir (roaming): " + APPDIRS.getUserConfigDir(roaming = true))
+    println("User cache dir: " + APPDIRS.getUserCacheDir())
+    println("User log dir: " + APPDIRS.getUserLogDir())
+    println("Site data dir: " + APPDIRS.getSiteDataDir())
+    println("Site data dir (multi path): " + APPDIRS.getSiteDataDir(multiPath = true))
+    println("Site config dir: " + APPDIRS.getSiteConfigDir())
+    println("Site config dir (multi path): " + APPDIRS.getSiteConfigDir(multiPath = true))
+    println("Shared dir: " + APPDIRS.getSharedDir())
+
+    Log.i(TAG, "resources dir: " + RESOURCESDIR)
+    Log.i(TAG, "resources dir canonical: " + RESOURCESDIR.canonicalPath + File.separator)
 
     Log.i(TAG, "CCCC:" + PrefsSettings::class.java)
     ui_scale = 1.0f
@@ -303,38 +320,41 @@ fun App()
                                 }
                             }
                         )
-                        var audio_filter_current_value by remember { mutableStateOf(PREF__audio_input_filter)}
-                        Icon(modifier = Modifier.padding(5.dp).combinedClickable(
-                            onClick = {
-                                if (PREF__audio_input_filter == 0){
-                                    PREF__audio_input_filter = 1
-                                } else {
-                                    PREF__audio_input_filter = 0
-                                }
-                                audio_filter_current_value = PREF__audio_input_filter
-                                AVActivity.ffmpegav_apply_audio_filter(PREF__audio_input_filter)
-                            }),
-                            imageVector =  Icons.Default.Audiotrack, contentDescription =  "",
-                            tint = if (audio_filter_current_value == 1) Color.Red else Color.DarkGray)
-                        Icon(modifier = Modifier.padding(5.dp)
-                            .combinedClickable(onClick = {
-                            if (video_in_box_small)
-                            {
-                                video_in_box_width = VIDEO_IN_BOX_WIDTH_BIG
-                                video_in_box_height = VIDEO_IN_BOX_HEIGHT_BIG
-                                main_top_tab_height = VIDEO_IN_BOX_HEIGHT_BIG
-                                video_in_box_width_fraction = VIDEO_IN_BOX_WIDTH_FRACTION_BIG
-                            }
-                            else
-                            {
-                                video_in_box_width = VIDEO_IN_BOX_WIDTH_SMALL
-                                video_in_box_height = VIDEO_IN_BOX_HEIGHT_SMALL
-                                main_top_tab_height = MAIN_TOP_TAB_HEIGHT
-                                video_in_box_width_fraction = VIDEO_IN_BOX_WIDTH_FRACTION_SMALL
-                            }
-                            video_in_box_small = video_in_box_small.not()
-                            Log.i(TAG, "update3: " + video_in_box_small)
-                        }), imageVector =  Icons.Default.Fullscreen, contentDescription =  "")
+                        Column {
+                            Icon(modifier = Modifier.padding(5.dp)
+                                .combinedClickable(onClick = {
+                                    if (video_in_box_small)
+                                    {
+                                        video_in_box_width = VIDEO_IN_BOX_WIDTH_BIG
+                                        video_in_box_height = VIDEO_IN_BOX_HEIGHT_BIG
+                                        main_top_tab_height = VIDEO_IN_BOX_HEIGHT_BIG
+                                        video_in_box_width_fraction = VIDEO_IN_BOX_WIDTH_FRACTION_BIG
+                                    } else
+                                    {
+                                        video_in_box_width = VIDEO_IN_BOX_WIDTH_SMALL
+                                        video_in_box_height = VIDEO_IN_BOX_HEIGHT_SMALL
+                                        main_top_tab_height = MAIN_TOP_TAB_HEIGHT
+                                        video_in_box_width_fraction = VIDEO_IN_BOX_WIDTH_FRACTION_SMALL
+                                    }
+                                    video_in_box_small = video_in_box_small.not()
+                                    Log.i(TAG, "update3: " + video_in_box_small)
+                                }), imageVector = Icons.Default.Fullscreen, contentDescription = "")
+                            var audio_filter_current_value by remember { mutableStateOf(PREF__audio_input_filter) }
+                            Icon(modifier = Modifier.padding(5.dp).combinedClickable(
+                                onClick = {
+                                    if (PREF__audio_input_filter == 0)
+                                    {
+                                        PREF__audio_input_filter = 1
+                                    } else
+                                    {
+                                        PREF__audio_input_filter = 0
+                                    }
+                                    audio_filter_current_value = PREF__audio_input_filter
+                                    AVActivity.ffmpegav_apply_audio_filter(PREF__audio_input_filter)
+                                }),
+                                imageVector = Icons.Default.Audiotrack, contentDescription = "",
+                                tint = if (audio_filter_current_value == 1) Color.Red else Color.DarkGray)
+                        }
                         var video_out_box_width by remember { mutableStateOf(VIDEO_OUT_BOX_WIDTH_SMALL) }
                         var video_out_box_height by remember { mutableStateOf(VIDEO_OUT_BOX_HEIGHT_SMALL) }
                         var video_out_box_small by remember { mutableStateOf(true)}
@@ -638,7 +658,7 @@ fun App()
                                 } else
                                 {
                                     messagestore.send(MessageAction.Clear(0))
-                                    //GlobalScope.launch {
+                                    // GlobalScope.launch {
                                         load_messages_for_friend(contacts.selectedContactPubkey)
                                     //}
                                     ChatAppWithScaffold(focusRequester = focusRequester, contactList = contacts, ui_scale = ui_scale)
@@ -669,7 +689,7 @@ fun App()
                                 } else
                                 {
                                     groupmessagestore.send(GroupMessageAction.ClearGroup(0))
-                                    //GlobalScope.launch {
+                                    // GlobalScope.launch {
                                         load_groupmessages_for_friend(groups.selectedGroupId)
                                     //}
                                     GroupAppWithScaffold(focusRequester = groupfocusRequester, groupList = groups, ui_scale = ui_scale)
