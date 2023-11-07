@@ -19,8 +19,8 @@ import java.io.File
 import java.nio.ByteBuffer
 
 data class AVStateCallState(val call_state: AVState.CALL_STATUS = AVState.CALL_STATUS.CALL_STATUS_NONE)
-data class AVStateVideoCaptureFpsState(val videocapfps_state: Int = 0)
-data class AVStateVideoPlayFpsState(val videoplayfps_state: Int = 0)
+data class AVStateVideoCaptureFpsState(val videocapfps_state: Int = 0, val sourceResolution: String = "")
+data class AVStateVideoPlayFpsState(val videoplayfps_state: Int = 0, val incomingResolution: String = "")
 
 data class AVState(val a: Int)
 {
@@ -55,6 +55,8 @@ data class AVState(val a: Int)
     private var video_in_source = ""
     private var video_in_resolution_width = 640
     private var video_in_resolution_height = 480
+    private var video_in_source_resolution_width = 0
+    private var video_in_source_resolution_height = 0
     private var current_video_in_fps = 0
     var calling_state = CALL_STATUS.CALL_STATUS_NONE
     private var devices_state = CALL_DEVICES_STATE.CALL_DEVICES_STATE_CLOSED
@@ -157,6 +159,24 @@ data class AVState(val a: Int)
             {
                 video_in_resolution_width = value.split("x", limit = 2)[0].toInt()
                 video_in_resolution_height = value.split("x", limit = 2)[1].toInt()
+            } catch (_: Exception) {
+            }
+        }
+    }
+
+    fun video_in_source_resolution_get(): String
+    {
+        return (video_in_source_resolution_width.toString() + "x" + video_in_source_resolution_height.toString())
+    }
+
+    fun video_in_source_resolution_set(value: String?)
+    {
+        if ((value != null) && (value.length > 2))
+        {
+            try
+            {
+                video_in_source_resolution_width = value.split("x", limit = 2)[0].toInt()
+                video_in_source_resolution_height = value.split("x", limit = 2)[1].toInt()
             } catch (_: Exception) {
             }
         }
@@ -505,13 +525,19 @@ data class AVState(val a: Int)
 
             AVActivity.ffmpegav_set_video_capture_callback(object : AVActivity.video_capture_callback
             {
-                override fun onSuccess(width: Long, height: Long, pts: Long, fps: Int)
+                override fun onSuccess(width: Long, height: Long, source_width: Long, source_height: Long, pts: Long, fps: Int)
                 {
                     // Log.i(TAG, "ffmpeg open video capture onSuccess: $width $height $pts FPS: $fps")
                     if (current_video_in_fps_get() != fps) {
                         current_video_in_fps_set(fps)
                         avstatestorevcapfpsstate.update(fps)
                     }
+                    if (!("" + source_width + "x" + source_height).equals(avstatestorevcapfpsstate.state.sourceResolution))
+                    {
+                        video_in_source_resolution_set("" + source_width + "x" + source_height)
+                        avstatestorevcapfpsstate.updateSourceResolution("" + source_width + "x" + source_height)
+                    }
+
                     val frame_width_px: Int = width.toInt()
                     val frame_height_px: Int = height.toInt()
                     val buffer_size_in_bytes3 = (frame_width_px * frame_height_px * 1.5f).toInt()
@@ -571,6 +597,7 @@ interface AVStateStoreVideoCaptureFpsState
     val stateFlow: StateFlow<AVStateVideoCaptureFpsState>
     val state get() = stateFlow.value
     fun update(fps: Int)
+    fun updateSourceResolution(sourceResolution: String)
 }
 
 fun CoroutineScope.createAVStateStoreVideoCaptureFpsState(): AVStateStoreVideoCaptureFpsState
@@ -586,6 +613,12 @@ fun CoroutineScope.createAVStateStoreVideoCaptureFpsState(): AVStateStoreVideoCa
                 mutableStateFlow.value = state.copy(videocapfps_state = fps)
             }
         }
+        override fun updateSourceResolution(sourceResolution: String)
+        {
+            launch {
+                mutableStateFlow.value = state.copy(sourceResolution = sourceResolution)
+            }
+        }
     }
 }
 
@@ -594,6 +627,7 @@ interface AVStateStoreVideoPlayFpsState
     val stateFlow: StateFlow<AVStateVideoPlayFpsState>
     val state get() = stateFlow.value
     fun update(fps: Int)
+    fun updateIncomingResolution(incomingResolution: String)
 }
 
 fun CoroutineScope.createAVStateStoreVideoPlayFpsState(): AVStateStoreVideoPlayFpsState
@@ -607,6 +641,12 @@ fun CoroutineScope.createAVStateStoreVideoPlayFpsState(): AVStateStoreVideoPlayF
         {
             launch {
                 mutableStateFlow.value = state.copy(videoplayfps_state = fps)
+            }
+        }
+        override fun updateIncomingResolution(incomingResolution: String)
+        {
+            launch {
+                mutableStateFlow.value = state.copy(incomingResolution = incomingResolution)
             }
         }
     }

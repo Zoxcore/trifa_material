@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 public class AVActivity {
 
     private static final String TAG = "ffmpegav.AVActivity";
-    static final String Version = "0.99.5";
+    static final String Version = "0.99.6";
 
     public static native String ffmpegav_version();
     public static native String ffmpegav_libavutil_version();
@@ -27,7 +27,7 @@ public class AVActivity {
     final static java.nio.ByteBuffer audio_buffer_2 = java.nio.ByteBuffer.allocateDirect(audio_buffer_size_in_bytes2);
 
     public static interface video_capture_callback {
-        void onSuccess(long width, long height, long pts, int fps);
+        void onSuccess(long width, long height, long source_width, long source_height, long pts, int fps);
         void onError();
     }
     static video_capture_callback video_capture_callback_function = null;
@@ -52,11 +52,11 @@ public class AVActivity {
         video_capture_callback_function = callback;
     }
 
-    public static void ffmpegav_callback_video_capture_frame_pts_cb_method(long width, long height, long pts, int fps)
+    public static void ffmpegav_callback_video_capture_frame_pts_cb_method(long width, long height, long source_width, long source_height, long pts, int fps)
     {
         // Log.i(TAG, "capture video frame w: " + width + " h: " + height + " pts: " + pts);
         if (video_capture_callback_function != null) {
-            video_capture_callback_function.onSuccess(width, height, pts, fps);
+            video_capture_callback_function.onSuccess(width, height, source_width, source_height, pts, fps);
         }
     }
 
@@ -296,8 +296,8 @@ public class AVActivity {
 
         ffmpegav_set_video_capture_callback(new video_capture_callback() {
             @Override
-            public void onSuccess(long width, long height, long pts, int fps) {
-                Log.i(TAG, "ffmpeg open video capture onSuccess:" + width + " " + height + " " + pts + " fps:" + fps);
+            public void onSuccess(long width, long height, long source_width, long source_height, long pts, int fps) {
+                Log.i(TAG, "ffmpeg open video capture onSuccess:" + width + " " + height + " " + source_width + " " + source_height + " " + pts + " fps:" + fps);
             }
             @Override
             public void onError() {
