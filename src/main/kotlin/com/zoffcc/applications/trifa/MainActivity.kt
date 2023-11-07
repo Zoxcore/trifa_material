@@ -7,6 +7,7 @@ import UIGroupMessage
 import UIMessage
 import User
 import avstatestore
+import avstatestorevplayfpsstate
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_loadjni
 import com.zoffcc.applications.sorm.FileDB
 import com.zoffcc.applications.sorm.Filetransfer
@@ -107,6 +108,10 @@ class MainActivity
         var PREF__ipv6_enabled = 1
         var PREF__force_udp_only = 0
         var incoming_messages_queue: BlockingQueue<String> = LinkedBlockingQueue()
+        @JvmStatic var video_play_count_frames: Long = 0
+        @JvmStatic var video_play_last_timestamp: Long = 0
+        var video_play_fps_value: Int = 0
+        @JvmStatic val video_play_measure_after_frame = 5;
 
         //
         var PREF__ngc_video_bitrate: Int = LOWER_NGC_VIDEO_BITRATE // ~600 kbits/s -> ~60 kbytes/s
@@ -2221,6 +2226,12 @@ class MainActivity
         {
             Log.i(TAG, "modify_message:filename_fullpath=" + message.filename_fullpath)
             messagestore.send(MessageAction.UpdateMessage(message, Filetransfer().filesize(file_size)))
+        }
+
+        @JvmStatic fun setVideo_play_fps(fps: Int)
+        {
+            video_play_fps_value = fps
+            avstatestorevplayfpsstate.update(fps)
         }
     }
 }

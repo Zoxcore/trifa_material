@@ -148,12 +148,12 @@ val SPACE_BEFORE_FIRST_MESSAGE = 10.dp
 val CAPTURE_VIDEO_FPS = 20
 val VIDEO_IN_BOX_WIDTH_SMALL = 80.dp
 val VIDEO_IN_BOX_HEIGHT_SMALL = 80.dp
-val VIDEO_IN_BOX_WIDTH_FRACTION_SMALL = 0.5f
+val VIDEO_IN_BOX_WIDTH_FRACTION_SMALL = 0.3f
 val VIDEO_IN_BOX_WIDTH_FRACTION_BIG = 0.9f
 val VIDEO_IN_BOX_WIDTH_BIG = 800.dp
 val VIDEO_IN_BOX_HEIGHT_BIG = 800.dp
-val VIDEO_OUT_BOX_WIDTH_SMALL = 50.dp
-val VIDEO_OUT_BOX_HEIGHT_SMALL = 50.dp
+val VIDEO_OUT_BOX_WIDTH_SMALL = 130.dp
+val VIDEO_OUT_BOX_HEIGHT_SMALL = 100.dp
 val VIDEO_OUT_BOX_WIDTH_BIG = 500.dp
 val VIDEO_OUT_BOX_HEIGHT_BIG = 500.dp
 val SAVEDATA_PATH_WIDTH = 200.dp
@@ -265,7 +265,7 @@ fun App()
                                 }
                                 var online_button_text by remember { mutableStateOf("offline") }
                                 Button( // self connection state button
-                                    onClick = {}, colors = ButtonDefaults.buttonColors(), enabled = false) {
+                                    modifier = Modifier.width(120.dp), onClick = {}, colors = ButtonDefaults.buttonColors(), enabled = false) {
                                     Box(modifier = Modifier.size(16.dp).border(1.dp, Color.Black, CircleShape).background(Color(online_button_color_wrapper), CircleShape))
                                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                                     Text(getOnlineButtonText(online_button_text))
@@ -294,30 +294,37 @@ fun App()
                         var video_in_box_height by remember { mutableStateOf(VIDEO_IN_BOX_HEIGHT_SMALL) }
                         var video_in_box_small by remember { mutableStateOf(true)}
                         var video_in_box_width_fraction by remember { mutableStateOf(VIDEO_IN_BOX_WIDTH_FRACTION_SMALL)}
-                        SwingPanel(
-                            background = Color.Green,
-                            modifier = Modifier.fillMaxWidth(video_in_box_width_fraction)
-                                .padding(5.dp)
-                                .fillMaxHeight(1.0f)
-                                .combinedClickable(onClick = {
-                                    if (video_in_box_small)
-                                    {
-                                        video_in_box_width = VIDEO_IN_BOX_WIDTH_BIG
-                                        video_in_box_height = VIDEO_IN_BOX_HEIGHT_BIG
+                        Column(modifier = Modifier.fillMaxHeight(1.0f)) {
+                            SwingPanel(
+                                background = Color.Green,
+                                modifier = Modifier.fillMaxWidth(video_in_box_width_fraction)
+                                    .padding(5.dp)
+                                    .weight(80.0f)
+                                    .combinedClickable(onClick = {
+                                        if (video_in_box_small)
+                                        {
+                                            video_in_box_width = VIDEO_IN_BOX_WIDTH_BIG
+                                            video_in_box_height = VIDEO_IN_BOX_HEIGHT_BIG
+                                        }
+                                        else
+                                        {
+                                            video_in_box_width = VIDEO_IN_BOX_WIDTH_SMALL
+                                            video_in_box_height = VIDEO_IN_BOX_HEIGHT_SMALL
+                                        }
+                                        video_in_box_small != video_in_box_small
+                                    }),
+                                factory = {
+                                    JPanel(SingleComponentAspectRatioKeeperLayout(),true).apply {
+                                        add(JPictureBox.videoinbox)
                                     }
-                                    else
-                                    {
-                                        video_in_box_width = VIDEO_IN_BOX_WIDTH_SMALL
-                                        video_in_box_height = VIDEO_IN_BOX_HEIGHT_SMALL
-                                    }
-                                    video_in_box_small != video_in_box_small
-                                }),
-                            factory = {
-                                JPanel(SingleComponentAspectRatioKeeperLayout(),true).apply {
-                                    add(JPictureBox.videoinbox)
                                 }
-                            }
-                        )
+                            )
+                            val current_vplayfps_state by avstatestorevplayfpsstate.stateFlow.collectAsState()
+                            Text(" fps: " + current_vplayfps_state.videoplayfps_state,
+                                fontSize = 13.sp,
+                                modifier = Modifier.height(20.dp),
+                                maxLines = 1)
+                        }
                         Column {
                             Icon(modifier = Modifier.padding(5.dp)
                                 .combinedClickable(onClick = {
@@ -353,33 +360,42 @@ fun App()
                                 imageVector = Icons.Default.Audiotrack, contentDescription = "",
                                 tint = if (audio_filter_current_value == 1) Color.Red else Color.DarkGray)
                         }
-                        var video_out_box_width by remember { mutableStateOf(VIDEO_OUT_BOX_WIDTH_SMALL) }
-                        var video_out_box_height by remember { mutableStateOf(VIDEO_OUT_BOX_HEIGHT_SMALL) }
-                        var video_out_box_small by remember { mutableStateOf(true)}
-                        SwingPanel(
-                            background = Color.Green,
-                            modifier = Modifier.size(video_out_box_width, video_out_box_height)
-                                .combinedClickable(onClick = {
-                                    if (video_out_box_small)
-                                    {
-                                        video_out_box_width = VIDEO_OUT_BOX_WIDTH_BIG
-                                        video_out_box_height = VIDEO_OUT_BOX_HEIGHT_BIG
+
+                        Column {
+                            Spacer(modifier = Modifier.height(5.dp))
+                            var video_out_box_width by remember { mutableStateOf(VIDEO_OUT_BOX_WIDTH_SMALL) }
+                            var video_out_box_height by remember { mutableStateOf(VIDEO_OUT_BOX_HEIGHT_SMALL) }
+                            var video_out_box_small by remember { mutableStateOf(true)}
+                            SwingPanel(
+                                background = Color.Green,
+                                modifier = Modifier.size(video_out_box_width, video_out_box_height)
+                                    .combinedClickable(onClick = {
+                                        if (video_out_box_small)
+                                        {
+                                            video_out_box_width = VIDEO_OUT_BOX_WIDTH_BIG
+                                            video_out_box_height = VIDEO_OUT_BOX_HEIGHT_BIG
+                                        }
+                                        else
+                                        {
+                                            video_out_box_width = VIDEO_OUT_BOX_WIDTH_SMALL
+                                            video_out_box_height = VIDEO_OUT_BOX_HEIGHT_SMALL
+                                        }
+                                        video_out_box_small = !video_out_box_small
+                                        Log.i(TAG, "update1: " + video_out_box_small)
+                                    }),
+                                factory = {
+                                    JPanel(SingleComponentAspectRatioKeeperLayout(),true).apply {
+                                        add(JPictureBoxOut.videooutbox)
                                     }
-                                    else
-                                    {
-                                        video_out_box_width = VIDEO_OUT_BOX_WIDTH_SMALL
-                                        video_out_box_height = VIDEO_OUT_BOX_HEIGHT_SMALL
-                                    }
-                                    video_out_box_small = !video_out_box_small
-                                    Log.i(TAG, "update1: " + video_out_box_small)
-                                }),
-                            factory = {
-                                JPanel(SingleComponentAspectRatioKeeperLayout(),true).apply {
-                                    add(JPictureBoxOut.videooutbox)
-                                }
-                            },
-                            update = {Log.i(TAG, "update2: " + video_out_box_small) }
-                        )
+                                },
+                                update = {Log.i(TAG, "update2: " + video_out_box_small) }
+                            )
+                            val current_vicfps_state by avstatestorevcapfpsstate.stateFlow.collectAsState()
+                            Text("fps: " + current_vicfps_state.videocapfps_state,
+                                fontSize = 13.sp,
+                                maxLines = 1)
+                        }
+
                         var expanded_a by remember { mutableStateOf(false) }
                         var expanded_v by remember { mutableStateOf(false) }
                         var expanded_as by remember { mutableStateOf(false) }
