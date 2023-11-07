@@ -7,6 +7,7 @@ import UIGroupMessage
 import UIMessage
 import User
 import avstatestore
+import avstatestorevcapfpsstate
 import avstatestorevplayfpsstate
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_loadjni
 import com.zoffcc.applications.sorm.FileDB
@@ -948,6 +949,15 @@ class MainActivity
                 }
             }
             new_video_in_frame(video_buffer_1, frame_width_px1, frame_height_px1)
+            try
+            {
+                if (!("" + frame_width_px + "x" + frame_height_px).equals(avstatestorevplayfpsstate.state.incomingResolution)) {
+                    avstatestorevplayfpsstate.updateIncomingResolution("" + frame_width_px + "x" + frame_height_px)
+                }
+            }
+            catch(e: Exception)
+            {
+            }
         }
 
         @OptIn(DelicateCoroutinesApi::class)
@@ -1004,6 +1014,11 @@ class MainActivity
             VideoInFrame.clear_video_in_frame()
             AudioBar.set_cur_value(0, audio_in_bar)
             AudioBar.set_cur_value(0, audio_out_bar)
+            avstatestorevplayfpsstate.updateIncomingResolution("")
+            avstatestorevplayfpsstate.update(0)
+            avstatestorevcapfpsstate.updateSourceResolution("")
+            avstatestorevcapfpsstate.update(0)
+
         }
 
         @JvmStatic

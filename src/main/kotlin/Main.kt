@@ -320,9 +320,12 @@ fun App()
                                 }
                             )
                             val current_vplayfps_state by avstatestorevplayfpsstate.stateFlow.collectAsState()
-                            Text(" fps: " + current_vplayfps_state.videoplayfps_state,
+                            Text(if (current_vplayfps_state.videoplayfps_state == 0) "" else (" fps: " + current_vplayfps_state.videoplayfps_state),
                                 fontSize = 13.sp,
                                 modifier = Modifier.height(20.dp),
+                                maxLines = 1)
+                            Text(" " + current_vplayfps_state.incomingResolution,
+                                fontSize = 13.sp,
                                 maxLines = 1)
                         }
                         Column {
@@ -391,7 +394,10 @@ fun App()
                                 update = {Log.i(TAG, "update2: " + video_out_box_small) }
                             )
                             val current_vicfps_state by avstatestorevcapfpsstate.stateFlow.collectAsState()
-                            Text("fps: " + current_vicfps_state.videocapfps_state,
+                            Text(if (current_vicfps_state.videocapfps_state == 0) "" else ("fps: " + current_vicfps_state.videocapfps_state),
+                                fontSize = 13.sp,
+                                maxLines = 1)
+                            Text("" + current_vicfps_state.sourceResolution,
                                 fontSize = 13.sp,
                                 maxLines = 1)
                         }
@@ -405,8 +411,8 @@ fun App()
                         var video_in_devices by remember { mutableStateOf(ArrayList<String>()) }
                         val video_in_sources by remember { mutableStateOf(ArrayList<String>()) }
                         Column(modifier = Modifier.padding(5.dp)) {
-                            Text(text = "audio in: " + avstatestore.state.audio_in_device_get() + " " + avstatestore.state.audio_in_source_get()
-                                , fontSize = 13.sp, modifier = Modifier.fillMaxWidth(),
+                            Text(text = "audio capture: " + avstatestore.state.audio_in_device_get() + " " + avstatestore.state.audio_in_source_get()
+                                , fontSize = 12.sp, modifier = Modifier.fillMaxWidth(),
                                 maxLines = 1)
                             Box {
                                 IconButton(onClick = {
@@ -500,8 +506,8 @@ fun App()
                                 }
                             }
 
-                            Text("video in: " + avstatestore.state.video_in_device_get() + " " + avstatestore.state.video_in_source_get()
-                                , fontSize = 13.sp, modifier = Modifier.fillMaxWidth(),
+                            Text("video capture: " + avstatestore.state.video_in_device_get() + " " + avstatestore.state.video_in_source_get()
+                                , fontSize = 12.sp, modifier = Modifier.fillMaxWidth(),
                                 maxLines = 1)
                             Box {
                                 IconButton(onClick = {
@@ -625,7 +631,7 @@ fun App()
                                 modifier = Modifier.size(16.dp)) {
                                 Icon(Icons.Filled.Refresh, null)
                             }
-                            val items = listOf("640x480", "480x640", "1280x720", "720x1280")
+                            val items = listOf("480x270", "640x480", "480x640", "960x540", "1280x720", "720x1280", "1920x1080", "1080x1920")
                             DropdownMenu(expanded = resolution_expanded,
                                 onDismissRequest = { resolution_expanded = false },
                                 ){
