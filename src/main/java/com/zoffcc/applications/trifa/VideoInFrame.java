@@ -6,6 +6,9 @@ import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Semaphore;
 
+import static com.zoffcc.applications.trifa.MainActivity.*;
+import static com.zoffcc.applications.trifa.MainActivity.setVideo_play_count_frames;
+
 public class VideoInFrame {
     private static final String TAG = "trifa.VideoInFrame";
 
@@ -216,7 +219,26 @@ public class VideoInFrame {
                         {
                             if (i != null)
                             {
-                                final long tt3 = System.currentTimeMillis();
+                                setVideo_play_count_frames(getVideo_play_count_frames() + 1);
+                                final int play_measure_after_frame = getVideo_play_measure_after_frame();
+                                if (getVideo_play_count_frames() >= play_measure_after_frame) {
+                                    setVideo_play_count_frames(0);
+                                    int fps = (int)((System.currentTimeMillis() - getVideo_play_last_timestamp()) / (float)play_measure_after_frame);
+                                    if (fps > 0) {
+                                        fps = 1000 / fps;
+                                    } else {
+                                        fps = 0;
+                                    }
+                                    if ((fps < 1) || (fps > 120))
+                                    {
+                                        setVideo_play_fps(0);
+                                    }
+                                    else
+                                    {
+                                        setVideo_play_fps(fps);
+                                    }
+                                    MainActivity.setVideo_play_last_timestamp(System.currentTimeMillis());
+                                }
                                 JPictureBox.videoinbox.setIcon(i);
                                 //Log.i(TAG, "new_video_in_frame:008:" + (System.currentTimeMillis() - tt3) + " ms");
                                 EventQueue.invokeLater(() -> {

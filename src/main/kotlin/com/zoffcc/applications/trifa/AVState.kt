@@ -3,6 +3,7 @@ package com.zoffcc.applications.trifa
 import CAPTURE_VIDEO_FPS
 import RESOURCESDIR
 import avstatestorecallstate
+import avstatestorevcapfpsstate
 import com.zoffcc.applications.ffmpegav.AVActivity
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_apply_audio_filter
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_init
@@ -16,9 +17,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.io.File
 import java.nio.ByteBuffer
-import java.util.concurrent.Semaphore
 
 data class AVStateCallState(val call_state: AVState.CALL_STATUS = AVState.CALL_STATUS.CALL_STATUS_NONE)
+data class AVStateVideoCaptureFpsState(val videocapfps_state: Int = 0)
+data class AVStateVideoPlayFpsState(val videoplayfps_state: Int = 0)
 
 data class AVState(val a: Int)
 {
@@ -53,6 +55,7 @@ data class AVState(val a: Int)
     private var video_in_source = ""
     private var video_in_resolution_width = 640
     private var video_in_resolution_height = 480
+    private var current_video_in_fps = 0
     var calling_state = CALL_STATUS.CALL_STATUS_NONE
     private var devices_state = CALL_DEVICES_STATE.CALL_DEVICES_STATE_CLOSED
     private var call_with_friend_pubkey: String? = null
@@ -157,6 +160,16 @@ data class AVState(val a: Int)
             } catch (_: Exception) {
             }
         }
+    }
+
+    fun current_video_in_fps_get(): Int
+    {
+        return current_video_in_fps
+    }
+
+    fun current_video_in_fps_set(value: Int)
+    {
+        current_video_in_fps = value
     }
 
     fun call_with_friend_pubkey_get(): String?
@@ -492,9 +505,13 @@ data class AVState(val a: Int)
 
             AVActivity.ffmpegav_set_video_capture_callback(object : AVActivity.video_capture_callback
             {
-                override fun onSuccess(width: Long, height: Long, pts: Long)
+                override fun onSuccess(width: Long, height: Long, pts: Long, fps: Int)
                 {
-                    // Log.i(TAG, "ffmpeg open video capture onSuccess: $width $height $pts")
+                    // Log.i(TAG, "ffmpeg open video capture onSuccess: $width $height $pts FPS: $fps")
+                    if (current_video_in_fps_get() != fps) {
+                        current_video_in_fps_set(fps)
+                        avstatestorevcapfpsstate.update(fps)
+                    }
                     val frame_width_px: Int = width.toInt()
                     val frame_height_px: Int = height.toInt()
                     val buffer_size_in_bytes3 = (frame_width_px * frame_height_px * 1.5f).toInt()
@@ -546,6 +563,52 @@ fun CoroutineScope.createAVStateStore(): AVStateStore
     return object : AVStateStore
     {
         override val stateFlow: StateFlow<AVState> = mutableStateFlow
+    }
+}
+
+interface AVStateStoreVideoCaptureFpsState
+{
+    val stateFlow: StateFlow<AVStateVideoCaptureFpsState>
+    val state get() = stateFlow.value
+    fun update(fps: Int)
+}
+
+fun CoroutineScope.createAVStateStoreVideoCaptureFpsState(): AVStateStoreVideoCaptureFpsState
+{
+    val mutableStateFlow = MutableStateFlow(AVStateVideoCaptureFpsState())
+
+    return object : AVStateStoreVideoCaptureFpsState
+    {
+        override val stateFlow: StateFlow<AVStateVideoCaptureFpsState> = mutableStateFlow
+        override fun update(fps: Int)
+        {
+            launch {
+                mutableStateFlow.value = state.copy(videocapfps_state = fps)
+            }
+        }
+    }
+}
+
+interface AVStateStoreVideoPlayFpsState
+{
+    val stateFlow: StateFlow<AVStateVideoPlayFpsState>
+    val state get() = stateFlow.value
+    fun update(fps: Int)
+}
+
+fun CoroutineScope.createAVStateStoreVideoPlayFpsState(): AVStateStoreVideoPlayFpsState
+{
+    val mutableStateFlow = MutableStateFlow(AVStateVideoPlayFpsState())
+
+    return object : AVStateStoreVideoPlayFpsState
+    {
+        override val stateFlow: StateFlow<AVStateVideoPlayFpsState> = mutableStateFlow
+        override fun update(fps: Int)
+        {
+            launch {
+                mutableStateFlow.value = state.copy(videoplayfps_state = fps)
+            }
+        }
     }
 }
 
