@@ -19,7 +19,7 @@ import java.io.File
 import java.nio.ByteBuffer
 
 data class AVStateCallState(val call_state: AVState.CALL_STATUS = AVState.CALL_STATUS.CALL_STATUS_NONE)
-data class AVStateVideoCaptureFpsState(val videocapfps_state: Int = 0, val sourceResolution: String = "")
+data class AVStateVideoCaptureFpsState(val videocapfps_state: Int = 0, val sourceResolution: String = "", val sourceFormat: String = "")
 data class AVStateVideoPlayFpsState(val videoplayfps_state: Int = 0, val incomingResolution: String = "")
 
 data class AVState(val a: Int)
@@ -525,9 +525,10 @@ data class AVState(val a: Int)
 
             AVActivity.ffmpegav_set_video_capture_callback(object : AVActivity.video_capture_callback
             {
-                override fun onSuccess(width: Long, height: Long, source_width: Long, source_height: Long, pts: Long, fps: Int)
+                override fun onSuccess(width: Long, height: Long, source_width: Long, source_height: Long, pts: Long, fps: Int, source_format: Int)
                 {
-                    // Log.i(TAG, "ffmpeg open video capture onSuccess: $width $height $pts FPS: $fps")
+                    Log.i(TAG, "ffmpeg open video capture onSuccess: $width $height $pts FPS: $fps Source Format: "
+                            + AVActivity.ffmpegav_video_source_format_name.value_str(source_format))
                     if (current_video_in_fps_get() != fps) {
                         current_video_in_fps_set(fps)
                         avstatestorevcapfpsstate.update(fps)
@@ -536,6 +537,11 @@ data class AVState(val a: Int)
                     {
                         video_in_source_resolution_set("" + source_width + "x" + source_height)
                         avstatestorevcapfpsstate.updateSourceResolution("" + source_width + "x" + source_height)
+                    }
+
+                    if (!AVActivity.ffmpegav_video_source_format_name.value_str(source_format).equals(avstatestorevcapfpsstate.state.sourceFormat))
+                    {
+                        avstatestorevcapfpsstate.updateSourceFormat(AVActivity.ffmpegav_video_source_format_name.value_str(source_format))
                     }
 
                     val frame_width_px: Int = width.toInt()
@@ -598,6 +604,7 @@ interface AVStateStoreVideoCaptureFpsState
     val state get() = stateFlow.value
     fun update(fps: Int)
     fun updateSourceResolution(sourceResolution: String)
+    fun updateSourceFormat(sourceFormat: String)
 }
 
 fun CoroutineScope.createAVStateStoreVideoCaptureFpsState(): AVStateStoreVideoCaptureFpsState
@@ -617,6 +624,12 @@ fun CoroutineScope.createAVStateStoreVideoCaptureFpsState(): AVStateStoreVideoCa
         {
             launch {
                 mutableStateFlow.value = state.copy(sourceResolution = sourceResolution)
+            }
+        }
+        override fun updateSourceFormat(sourceFormat: String)
+        {
+            launch {
+                mutableStateFlow.value = state.copy(sourceFormat = sourceFormat)
             }
         }
     }

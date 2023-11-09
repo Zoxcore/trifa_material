@@ -400,6 +400,9 @@ fun App()
                             Text("" + current_vicfps_state.sourceResolution,
                                 fontSize = 13.sp,
                                 maxLines = 1)
+                            Text("" + current_vicfps_state.sourceFormat,
+                                fontSize = 13.sp,
+                                maxLines = 1)
                         }
 
                         var expanded_a by remember { mutableStateOf(false) }

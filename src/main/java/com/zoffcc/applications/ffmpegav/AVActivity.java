@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 public class AVActivity {
 
     private static final String TAG = "ffmpegav.AVActivity";
-    static final String Version = "0.99.6";
+    static final String Version = "0.99.7";
 
     public static native String ffmpegav_version();
     public static native String ffmpegav_libavutil_version();
@@ -23,11 +23,54 @@ public class AVActivity {
     public static native int ffmpegav_close_audio_in_device();
     public static native int ffmpegav_close_video_in_device();
 
+    public static enum ffmpegav_video_source_format_name
+    {
+        // HINT: for more values see "codec_id.h" of ffmpeg source code
+        AV_CODEC_ID_NONE(0),
+        AV_CODEC_ID_MPEG1VIDEO(1),
+        AV_CODEC_ID_MPEG2VIDEO(2),
+        AV_CODEC_ID_H261(3),
+        AV_CODEC_ID_H263(4),
+        AV_CODEC_ID_RV10(5),
+        AV_CODEC_ID_RV20(6),
+        AV_CODEC_ID_MJPEG(7),
+        AV_CODEC_ID_RAWVIDEO(13),
+        AV_CODEC_ID_H264(27);
+
+        public int value;
+
+        private ffmpegav_video_source_format_name(int value)
+        {
+            this.value = value;
+        }
+
+        public static String value_str(int value)
+        {
+            if (value == AV_CODEC_ID_NONE.value)
+            {
+                return "CODEC: NONE";
+            }
+            else if (value == AV_CODEC_ID_MJPEG.value)
+            {
+                return "MJPEG";
+            }
+            else if (value == AV_CODEC_ID_RAWVIDEO.value)
+            {
+                return "RAWVIDEO";
+            }
+            else if (value == AV_CODEC_ID_H264.value)
+            {
+                return "H264";
+            }
+            return "UNKNOWN";
+        }
+    }
+
     final static int audio_buffer_size_in_bytes2 = 20000;
     final static java.nio.ByteBuffer audio_buffer_2 = java.nio.ByteBuffer.allocateDirect(audio_buffer_size_in_bytes2);
 
     public static interface video_capture_callback {
-        void onSuccess(long width, long height, long source_width, long source_height, long pts, int fps);
+        void onSuccess(long width, long height, long source_width, long source_height, long pts, int fps, int source_format);
         void onError();
     }
     static video_capture_callback video_capture_callback_function = null;
@@ -52,11 +95,11 @@ public class AVActivity {
         video_capture_callback_function = callback;
     }
 
-    public static void ffmpegav_callback_video_capture_frame_pts_cb_method(long width, long height, long source_width, long source_height, long pts, int fps)
+    public static void ffmpegav_callback_video_capture_frame_pts_cb_method(long width, long height, long source_width, long source_height, long pts, int fps, int source_format)
     {
         // Log.i(TAG, "capture video frame w: " + width + " h: " + height + " pts: " + pts);
         if (video_capture_callback_function != null) {
-            video_capture_callback_function.onSuccess(width, height, source_width, source_height, pts, fps);
+            video_capture_callback_function.onSuccess(width, height, source_width, source_height, pts, fps, source_format);
         }
     }
 
@@ -296,8 +339,10 @@ public class AVActivity {
 
         ffmpegav_set_video_capture_callback(new video_capture_callback() {
             @Override
-            public void onSuccess(long width, long height, long source_width, long source_height, long pts, int fps) {
-                Log.i(TAG, "ffmpeg open video capture onSuccess:" + width + " " + height + " " + source_width + " " + source_height + " " + pts + " fps:" + fps);
+            public void onSuccess(long width, long height, long source_width, long source_height, long pts, int fps, int source_format) {
+                Log.i(TAG, "ffmpeg open video capture onSuccess:" + width + " " + height + " " +
+                        source_width + " " + source_height + " " + pts + " fps: " + fps +
+                        " source_format: " + ffmpegav_video_source_format_name.value_str(source_format));
             }
             @Override
             public void onError() {
