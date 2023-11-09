@@ -631,7 +631,7 @@ fun App()
                                 modifier = Modifier.size(16.dp)) {
                                 Icon(Icons.Filled.Refresh, null)
                             }
-                            val items = listOf("480x270", "640x480", "480x640", "960x540", "1280x720", "720x1280", "1920x1080", "1080x1920")
+                            val items = listOf("480x270", "640x360", "640x480", "480x640", "960x540", "1280x720", "720x1280", "1920x1080", "1080x1920")
                             DropdownMenu(expanded = resolution_expanded,
                                 onDismissRequest = { resolution_expanded = false },
                                 ){
