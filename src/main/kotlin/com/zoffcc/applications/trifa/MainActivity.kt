@@ -1017,6 +1017,7 @@ class MainActivity
             avstatestorevplayfpsstate.updateIncomingResolution("")
             avstatestorevplayfpsstate.update(0)
             avstatestorevcapfpsstate.updateSourceResolution("")
+            avstatestorevcapfpsstate.updateSourceFormat("")
             avstatestorevcapfpsstate.update(0)
 
         }
