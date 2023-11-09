@@ -98,6 +98,11 @@ jobs:
           name: trifa-material_nightly.rpm
           path: trifa-material_nightly.rpm
 
+      - name: Rename artifact for release upload
+        if: contains(github.ref, 'refs/tags/v')
+        run: |
+          cp -v ./build/compose/binaries/main/deb/trifa-material_*_amd64.deb trifa-material.deb
+          cp -v ./build/compose/binaries/main/rpm/trifa_material-*.x86_64.rpm trifa-material.rpm
       - name: Upload to versioned release
         if: contains(github.ref, 'refs/tags/v')
         uses: ncipollo/release-action@v1
@@ -105,7 +110,7 @@ jobs:
           allowUpdates: true
           draft: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "trifa-material_nightly.deb,trifa-material_nightly.rpm"
+          artifacts: "trifa-material.deb,trifa-material.rpm"
 
       - name: Upload to nightly release
         uses: ncipollo/release-action@v1
@@ -169,6 +174,10 @@ jobs:
           name: trifa-material_nightly.dmg
           path: trifa-material_nightly.dmg
 
+      - name: Rename artifact for release upload
+        if: contains(github.ref, 'refs/tags/v')
+        run: |
+          cp -v /Users/runner/work/trifa_material/trifa_material/build/compose/binaries/main/dmg/trifa_material-*.dmg trifa-material.dmg
       - name: Upload to versioned release
         if: contains(github.ref, 'refs/tags/v')
         uses: ncipollo/release-action@v1
@@ -176,7 +185,7 @@ jobs:
           allowUpdates: true
           draft: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "trifa-material_nightly.dmg"
+          artifacts: "trifa-material.dmg"
 
       - name: Upload to nightly release
         uses: ncipollo/release-action@v1
@@ -239,6 +248,11 @@ jobs:
           name: trifa-material_nightly.exe
           path: trifa-material_nightly.exe
 
+      - name: Rename artifact for release upload
+        if: contains(github.ref, 'refs/tags/v')
+        run: |
+          cp -v ./build/compose/binaries/main/msi/trifa*material*.msi trifa-material.msi
+          cp -v ./build/compose/binaries/main/exe/trifa_material-*.exe trifa-material.exe
       - name: Upload to versioned release
         if: contains(github.ref, 'refs/tags/v')
         uses: ncipollo/release-action@v1
@@ -246,7 +260,7 @@ jobs:
           allowUpdates: true
           draft: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "trifa-material_nightly.msi,trifa-material_nightly.exe"
+          artifacts: "trifa-material.msi,trifa-material.exe"
 
       - name: Upload to nightly release
         uses: ncipollo/release-action@v1
