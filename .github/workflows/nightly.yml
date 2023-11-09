@@ -97,6 +97,16 @@ jobs:
         with:
           name: trifa-material_nightly.rpm
           path: trifa-material_nightly.rpm
+
+      - name: Upload to versioned release
+        if: contains(github.ref, 'refs/tags/v')
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          draft: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "trifa-material_nightly.deb,trifa-material_nightly.rpm"
+
       - name: Upload to nightly release
         uses: ncipollo/release-action@v1
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
@@ -158,6 +168,16 @@ jobs:
         with:
           name: trifa-material_nightly.dmg
           path: trifa-material_nightly.dmg
+
+      - name: Upload to versioned release
+        if: contains(github.ref, 'refs/tags/v')
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          draft: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "trifa-material_nightly.dmg"
+
       - name: Upload to nightly release
         uses: ncipollo/release-action@v1
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
@@ -218,6 +238,16 @@ jobs:
         with:
           name: trifa-material_nightly.exe
           path: trifa-material_nightly.exe
+
+      - name: Upload to versioned release
+        if: contains(github.ref, 'refs/tags/v')
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          draft: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "trifa-material_nightly.msi,trifa-material_nightly.exe"
+
       - name: Upload to nightly release
         uses: ncipollo/release-action@v1
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
