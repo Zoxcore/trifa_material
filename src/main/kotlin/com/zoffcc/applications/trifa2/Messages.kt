@@ -8,6 +8,11 @@ import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterEnd
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,24 +26,9 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-internal fun Messages(messages: List<UIMessage>, ui_scale: Float) {
+internal fun Messages(ui_scale: Float, selectedContactPubkey: String?) {
     val listState = rememberLazyListState()
-    if (messages.isNotEmpty()) {
-        LaunchedEffect(messages.last().msgDatabaseId) {
-            try
-            {
-                //Log.i(com.zoffcc.applications.trifa.TAG, "listState.canScrollForward=" + listState.canScrollForward
-                //+ " messages.lastIndex=" + messages.lastIndex + " messages.size=" + messages.size)
-                //if (listState.canScrollForward)
-                //{ // listState.animateScrollToItem(messages.lastIndex, scrollOffset = 0)
-                    listState.scrollToItem(messages.lastIndex, 20000)
-                //}
-            }
-            catch (e : Exception)
-            {
-            }
-        }
-    }
+    val msgs by messagestore.stateFlow.collectAsState()
     Box(Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(start = 4.dp, end = 10.dp),
@@ -46,8 +36,9 @@ internal fun Messages(messages: List<UIMessage>, ui_scale: Float) {
             state = listState,
         ) {
             item { Spacer(Modifier.size(SPACE_BEFORE_FIRST_MESSAGE)) }
-            // Log.i(com.zoffcc.applications.trifa.TAG, "LazyColumn --> draw")
-            items(messages, key = { it.id }) {
+            Log.i(com.zoffcc.applications.trifa.TAG, "LazyColumn --> draw")
+            items(msgs.messages, key = { it.msgDatabaseId }) {
+                Log.i(com.zoffcc.applications.trifa.TAG, "LazyColumn -> it.msgDatabaseId = " + it.msgDatabaseId)
                 ChatMessage(isMyMessage = (it.user == myUser), it, ui_scale)
             }
             item {
@@ -58,6 +49,32 @@ internal fun Messages(messages: List<UIMessage>, ui_scale: Float) {
             adapter = rememberScrollbarAdapter(listState),
             modifier = Modifier.fillMaxHeight().align(CenterEnd).width(10.dp) // .background(Color.Red)
         )
+        // This probably shouldn't cause a recomposition
+        var prevLastSerial by remember { mutableStateOf(-1L) }
+        var lastSerial = msgs.messages.lastOrNull()?.msgDatabaseId
+        var prevselectedContactPubkey by remember { mutableStateOf(selectedContactPubkey) }
+        if (prevselectedContactPubkey != selectedContactPubkey)
+        {
+            lastSerial = -1
+        }
+        Log.i(com.zoffcc.applications.trifa.TAG, "messages -> LaunchedEffect lastSerial1=" + lastSerial + " i=" + listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index)
+        LaunchedEffect(lastSerial, selectedContactPubkey) {
+            Log.i(com.zoffcc.applications.trifa.TAG, "messages -> LaunchedEffect lastSerial2=" + lastSerial + " i=" + listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index)
+            if (lastSerial != null) {
+                // If we're at the spot we last scrolled to
+                val lastVisibleSerial = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+                    ?.let { msgs.messages.getOrNull(it)?.msgDatabaseId }
+                    ?: -1L
+                Log.i(com.zoffcc.applications.trifa.TAG, "messages -> LaunchedEffect lastVisibleSerial=" + lastVisibleSerial)
+                if ((lastVisibleSerial >= prevLastSerial || lastVisibleSerial == -1L) && msgs.messages.lastIndex > 0) {
+                    // scroll to the end if we were at the end
+                    listState.scrollToItem(msgs.messages.lastIndex)
+                    Log.i(com.zoffcc.applications.trifa.TAG, "messages -> scroll to the end")
+                }
+                // remember the last serial
+                prevLastSerial = lastSerial
+            }
+        }
     }
 }
 
