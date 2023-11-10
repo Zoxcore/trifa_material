@@ -695,8 +695,8 @@ fun App()
                         UiMode.CONTACTS ->
                         {
                             val focusRequester = remember { FocusRequester() }
-                            val contacts by contactstore.stateFlow.collectAsState()
                             Row(modifier = Modifier.fillMaxWidth()) {
+                                val contacts by contactstore.stateFlow.collectAsState()
                                 ContactList(contactList = contacts)
                                 VerticalDivider()
                                 if (contacts.selectedContactPubkey == null)
@@ -704,10 +704,7 @@ fun App()
                                     ExplainerChat()
                                 } else
                                 {
-                                    messagestore.send(MessageAction.Clear(0))
-                                    // GlobalScope.launch {
-                                        load_messages_for_friend(contacts.selectedContactPubkey)
-                                    //}
+                                    load_messages_for_friend(contacts.selectedContactPubkey)
                                     ChatAppWithScaffold(focusRequester = focusRequester, contactList = contacts, ui_scale = ui_scale)
                                     LaunchedEffect(contacts.selectedContactPubkey) {
                                         focusRequester.requestFocus()
@@ -735,10 +732,8 @@ fun App()
                                     ExplainerGroup()
                                 } else
                                 {
-                                    groupmessagestore.send(GroupMessageAction.ClearGroup(0))
-                                    // GlobalScope.launch {
-                                        load_groupmessages_for_friend(groups.selectedGroupId)
-                                    //}
+                                    // groupmessagestore.send(GroupMessageAction.ClearGroup(0))
+                                    load_groupmessages_for_friend(groups.selectedGroupId)
                                     GroupAppWithScaffold(focusRequester = groupfocusRequester, groupList = groups, ui_scale = ui_scale)
                                     LaunchedEffect(groups.selectedGroupId) {
                                         groupfocusRequester.requestFocus()
@@ -791,7 +786,7 @@ fun load_messages_for_friend(selectedContactPubkey: String?)
                 }
             }
             // Thread.sleep(4000)
-            // Log.i(TAG, "LLLLLLLLLLLLLL")
+            Log.i(TAG, "LLLLLLLLLLLLLL uimessages:" + uimessages.size)
             messagestore.send(MessageAction.ReceiveMessagesBulkWithClear(uimessages, toxk))
         } catch (e: Exception)
         {

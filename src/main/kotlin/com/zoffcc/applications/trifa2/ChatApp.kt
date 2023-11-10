@@ -159,14 +159,13 @@ fun GroupAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boole
 @Composable
 fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, selectedContactPubkey: String?, ui_scale: Float)
 {
-    val state by messagestore.stateFlow.collectAsState()
     Theme {
         Surface {
             Box(modifier = Modifier.fillMaxSize()) {
                 Image(painterResource("background.jpg"), modifier = Modifier.fillMaxSize(), contentDescription = null, contentScale = ContentScale.Crop)
                 Column(modifier = Modifier.fillMaxSize()) {
                     Box(Modifier.weight(1f)) {
-                        Messages(state.messages, ui_scale)
+                        Messages(ui_scale, selectedContactPubkey)
                     }
                     Row(modifier = Modifier.fillMaxWidth().height(MESAGE_INPUT_LINE_HEIGHT)) {
                         if (displayTextField)
