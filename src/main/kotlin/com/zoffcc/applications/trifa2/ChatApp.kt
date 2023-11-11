@@ -166,7 +166,13 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                 Image(painterResource("background.jpg"), modifier = Modifier.fillMaxSize(), contentDescription = null, contentScale = ContentScale.Crop)
                 Column(modifier = Modifier.fillMaxSize()) {
                     Box(Modifier.weight(1f)) {
-                        Messages(ui_scale, selectedContactPubkey)
+                        val isActiveTarget = false
+                        Box(modifier = Modifier
+                            .fillMaxSize()
+                            .background(if (isActiveTarget) Color.Green else Color.Transparent))
+                            {
+                                Messages(ui_scale, selectedContactPubkey)
+                            }
                     }
                     Row(modifier = Modifier.fillMaxWidth().height(MESAGE_INPUT_LINE_HEIGHT)) {
                         if (displayTextField)
