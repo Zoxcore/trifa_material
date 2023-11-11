@@ -216,7 +216,7 @@ fun App()
                 VerticalDivider()
                 Column(Modifier.fillMaxSize()) {
                     Row(modifier = Modifier.fillMaxWidth().height(main_top_tab_height)) {
-                        Column() {
+                        Column{
                             Row(Modifier.wrapContentHeight(), Arrangement.spacedBy(5.dp)) {
                                 Button(modifier = Modifier.width(140.dp), onClick = { // start/stop tox button
                                     if (tox_running_state == "running")
@@ -320,10 +320,12 @@ fun App()
                                 }
                             )
                             val current_vplayfps_state by avstatestorevplayfpsstate.stateFlow.collectAsState()
+                            /*
                             Text(if (current_vplayfps_state.videoplayfps_state == 0) "" else (" fps: " + current_vplayfps_state.videoplayfps_state),
                                 fontSize = 13.sp,
                                 modifier = Modifier.height(20.dp),
                                 maxLines = 1)
+                             */
                             Text(" " + current_vplayfps_state.incomingResolution,
                                 fontSize = 13.sp,
                                 maxLines = 1)
@@ -394,9 +396,11 @@ fun App()
                                 update = {Log.i(TAG, "update2: " + video_out_box_small) }
                             )
                             val current_vicfps_state by avstatestorevcapfpsstate.stateFlow.collectAsState()
+                            /*
                             Text(if (current_vicfps_state.videocapfps_state == 0) "" else ("fps: " + current_vicfps_state.videocapfps_state),
                                 fontSize = 13.sp,
                                 maxLines = 1)
+                             */
                             Text("" + current_vicfps_state.sourceResolution,
                                 fontSize = 13.sp,
                                 maxLines = 1)
@@ -704,6 +708,7 @@ fun App()
                                     ExplainerChat()
                                 } else
                                 {
+                                    Log.i(TAG, "CONTACTS -> draw")
                                     load_messages_for_friend(contacts.selectedContactPubkey)
                                     ChatAppWithScaffold(focusRequester = focusRequester, contactList = contacts, ui_scale = ui_scale)
                                     LaunchedEffect(contacts.selectedContactPubkey) {
@@ -732,7 +737,6 @@ fun App()
                                     ExplainerGroup()
                                 } else
                                 {
-                                    // groupmessagestore.send(GroupMessageAction.ClearGroup(0))
                                     load_groupmessages_for_friend(groups.selectedGroupId)
                                     GroupAppWithScaffold(focusRequester = groupfocusRequester, groupList = groups, ui_scale = ui_scale)
                                     LaunchedEffect(groups.selectedGroupId) {
@@ -759,13 +763,14 @@ fun App()
 
 fun load_messages_for_friend(selectedContactPubkey: String?)
 {
+    Log.i(TAG, "ReceiveMessagesBulkWithClear")
     if (selectedContactPubkey != null)
     {
         try
         {
-            val toxk = selectedContactPubkey.uppercase()
+            val toxpk = selectedContactPubkey.uppercase()
             val uimessages = ArrayList<UIMessage>()
-            val messages = orma!!.selectFromMessage().tox_friendpubkeyEq(toxk).orderBySent_timestampAsc().toList()
+            val messages = orma!!.selectFromMessage().tox_friendpubkeyEq(toxpk).orderBySent_timestampAsc().toList()
             messages.forEach() { // 0 -> msg received, 1 -> msg sent
                 when (it.direction)
                 {
@@ -786,8 +791,7 @@ fun load_messages_for_friend(selectedContactPubkey: String?)
                 }
             }
             // Thread.sleep(4000)
-            Log.i(TAG, "LLLLLLLLLLLLLL uimessages:" + uimessages.size)
-            messagestore.send(MessageAction.ReceiveMessagesBulkWithClear(uimessages, toxk))
+            messagestore.send(MessageAction.ReceiveMessagesBulkWithClear(uimessages, toxpk))
         } catch (e: Exception)
         {
             e.printStackTrace()
@@ -801,6 +805,8 @@ fun load_groupmessages_for_friend(selectedGroupId: String?)
     {
         try
         {
+            val groupid = selectedGroupId.lowercase()
+            val uigroupmessages = ArrayList<UIGroupMessage>()
             val messages = orma!!.selectFromGroupMessage().group_identifierEq(selectedGroupId).orderBySent_timestampAsc().toList()
             messages.forEach() { // 0 -> msg received, 1 -> msg sent
                 when (it.direction)
@@ -810,19 +816,24 @@ fun load_groupmessages_for_friend(selectedGroupId: String?)
                         val friend_user = User(it.tox_group_peername + " / " + PubkeyShort(it.tox_group_peer_pubkey), picture = "friend_avatar.png", toxpk = it.tox_group_peer_pubkey.uppercase(), color = ColorProvider.getColor(true, it.tox_group_peer_pubkey.uppercase()))
                         when (it.TRIFA_MESSAGE_TYPE)
                         {
-                            TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value -> groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(groupmessage = UIGroupMessage(user = friend_user, timeMs = it.rcvd_timestamp, text = it.text, toxpk = it.tox_group_peer_pubkey.uppercase(), groupId = it.group_identifier.lowercase(), trifaMsgType = it.TRIFA_MESSAGE_TYPE, filename_fullpath = it.filename_fullpath)))
-                            TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value -> groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(groupmessage = UIGroupMessage(user = friend_user, timeMs = it.rcvd_timestamp, text = it.text, toxpk = it.tox_group_peer_pubkey.uppercase(), groupId = it.group_identifier.lowercase(), trifaMsgType = it.TRIFA_MESSAGE_TYPE, filename_fullpath = it.filename_fullpath)))
+                            TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value ->
+                                uigroupmessages.add(UIGroupMessage(message_id_tox = it.message_id_tox, msgDatabaseId = it.id, user = friend_user, timeMs = it.rcvd_timestamp, text = it.text, toxpk = it.tox_group_peer_pubkey.uppercase(), groupId = it.group_identifier.lowercase(), trifaMsgType = it.TRIFA_MESSAGE_TYPE, filename_fullpath = it.filename_fullpath))
+                            TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value ->
+                                uigroupmessages.add(UIGroupMessage(message_id_tox = it.message_id_tox, msgDatabaseId = it.id, user = friend_user, timeMs = it.rcvd_timestamp, text = it.text, toxpk = it.tox_group_peer_pubkey.uppercase(), groupId = it.group_identifier.lowercase(), trifaMsgType = it.TRIFA_MESSAGE_TYPE, filename_fullpath = it.filename_fullpath))
+
                         }
                     }
                     1 ->
                     {
-                        groupmessagestore.send(GroupMessageAction.SendGroupMessage(UIGroupMessage(myUser, timeMs = it.sent_timestamp, text = it.text, toxpk = myUser.toxpk, groupId = it.group_identifier.lowercase(), trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
+                        uigroupmessages.add(UIGroupMessage(message_id_tox = it.message_id_tox, msgDatabaseId = it.id, user = myUser, timeMs = it.sent_timestamp, text = it.text, toxpk = myUser.toxpk, groupId = it.group_identifier.lowercase(), trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null))
                     }
                     else ->
                     {
                     }
                 }
             }
+            // Thread.sleep(4000)
+            groupmessagestore.send(GroupMessageAction.ReceiveMessagesBulkWithClear(uigroupmessages, groupid))
         } catch (e: Exception)
         {
         }

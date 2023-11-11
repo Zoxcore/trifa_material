@@ -1783,12 +1783,18 @@ class MainActivity
 
             val group_id = tox_group_by_groupnum__wrapper(group_number).lowercase()
             val tox_peerpk = tox_group_peer_get_public_key(group_number, peer_id)!!.uppercase()
+            val message_id_hex = fourbytes_of_long_to_hex(message_id)
             val message_timestamp = System.currentTimeMillis()
-            received_groupmessage_to_db(tox_peerpk = tox_peerpk!!, groupid = group_id, message_timestamp = message_timestamp, group_message = message_orig, message_id = message_id)
+            val msg_dbid = received_groupmessage_to_db(tox_peerpk = tox_peerpk!!, groupid = group_id, message_timestamp = message_timestamp, group_message = message_orig, message_id = message_id)
             val peernum = tox_group_peer_by_public_key(group_number, tox_peerpk)
             val fname = tox_group_peer_get_name(group_number, peernum)
             val peer_user = User(fname + " / " + PubkeyShort(tox_peerpk), picture = "friend_avatar.png", toxpk = tox_peerpk.uppercase(), color = ColorProvider.getColor(true, tox_peerpk.uppercase()))
-            groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(UIGroupMessage(peer_user, timeMs = message_timestamp, message_orig!!, toxpk = tox_peerpk, groupId = group_id!!.lowercase(), trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
+            groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(
+                UIGroupMessage(
+                    message_id_tox = message_id_hex, msgDatabaseId = msg_dbid,
+                    user = peer_user, timeMs = message_timestamp, text = message_orig!!,
+                    toxpk = tox_peerpk, groupId = group_id!!.lowercase(),
+                    trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
         }
 
         @JvmStatic
@@ -2022,7 +2028,15 @@ class MainActivity
                         if (incoming_group_file_meta_data != null)
                         {
                             val peer_user = User(fname + " / " + PubkeyShort(tox_peerpk), picture = "friend_avatar.png", toxpk = tox_peerpk.uppercase(), color = ColorProvider.getColor(true, tox_peerpk.uppercase()))
-                            groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(UIGroupMessage(peer_user, timeMs = msg_timestamp, incoming_group_file_meta_data.message_text, toxpk = tox_peerpk, groupId = group_id!!.lowercase(), trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value, filename_fullpath = incoming_group_file_meta_data.path_name + incoming_group_file_meta_data.file_name)))
+                            groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(
+                                UIGroupMessage(
+                                    message_id_tox = "", msgDatabaseId = incoming_group_file_meta_data.rowid,
+                                    user = peer_user, timeMs = msg_timestamp,
+                                    text = incoming_group_file_meta_data.message_text,
+                                    toxpk = tox_peerpk, groupId = group_id!!.lowercase(),
+                                    trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value,
+                                    filename_fullpath = incoming_group_file_meta_data.path_name +
+                                            incoming_group_file_meta_data.file_name)))
                         }
                     } else
                     { // Log.i(TAG, "group_custom_packet_cb:wrong signature 2");

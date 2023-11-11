@@ -36,9 +36,9 @@ internal fun Messages(ui_scale: Float, selectedContactPubkey: String?) {
             state = listState,
         ) {
             item { Spacer(Modifier.size(SPACE_BEFORE_FIRST_MESSAGE)) }
-            Log.i(com.zoffcc.applications.trifa.TAG, "LazyColumn --> draw")
+            // Log.i(com.zoffcc.applications.trifa.TAG, "LazyColumn --> draw")
             items(msgs.messages, key = { it.msgDatabaseId }) {
-                Log.i(com.zoffcc.applications.trifa.TAG, "LazyColumn -> it.msgDatabaseId = " + it.msgDatabaseId)
+                // Log.i(com.zoffcc.applications.trifa.TAG, "LazyColumn -> it.msgDatabaseId = " + it.msgDatabaseId)
                 ChatMessage(isMyMessage = (it.user == myUser), it, ui_scale)
             }
             item {
@@ -56,16 +56,15 @@ internal fun Messages(ui_scale: Float, selectedContactPubkey: String?) {
         if (prevselectedContactPubkey != selectedContactPubkey)
         {
             lastSerial = -1
+            prevselectedContactPubkey = selectedContactPubkey
+            prevLastSerial = -1L
         }
-        Log.i(com.zoffcc.applications.trifa.TAG, "messages -> LaunchedEffect lastSerial1=" + lastSerial + " i=" + listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index)
         LaunchedEffect(lastSerial, selectedContactPubkey) {
-            Log.i(com.zoffcc.applications.trifa.TAG, "messages -> LaunchedEffect lastSerial2=" + lastSerial + " i=" + listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index)
             if (lastSerial != null) {
                 // If we're at the spot we last scrolled to
                 val lastVisibleSerial = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
                     ?.let { msgs.messages.getOrNull(it)?.msgDatabaseId }
                     ?: -1L
-                Log.i(com.zoffcc.applications.trifa.TAG, "messages -> LaunchedEffect lastVisibleSerial=" + lastVisibleSerial)
                 if ((lastVisibleSerial >= prevLastSerial || lastVisibleSerial == -1L) && msgs.messages.lastIndex > 0) {
                     // scroll to the end if we were at the end
                     listState.scrollToItem(msgs.messages.lastIndex)

@@ -1,29 +1,44 @@
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.toMutableStateList
+
 sealed interface GroupMessageAction
 {
+    data class SendMessagesBulk(val messages: List<UIGroupMessage>, val groupid: String) : GroupMessageAction
     data class SendGroupMessage(val groupmessage: UIGroupMessage) : GroupMessageAction
+    data class ReceiveMessagesBulkWithClear(val messages: List<UIGroupMessage>, val groupid: String) : GroupMessageAction
     data class ReceiveGroupMessage(val groupmessage: UIGroupMessage) : GroupMessageAction
     data class ClearGroup(val groupmessage: Int) : GroupMessageAction
 }
 
-data class GroupMessageState(val groupmessages: List<UIGroupMessage> = emptyList())
+data class GroupMessageState(val groupmessages: SnapshotStateList<UIGroupMessage> = mutableStateListOf())
 
 const val maxGroupMessages = 5000
 fun groupchatReducer(state: GroupMessageState, action: GroupMessageAction): GroupMessageState = when (action)
 {
+    is GroupMessageAction.ReceiveMessagesBulkWithClear ->
+    {
+        state.copy(groupmessages = (action.messages).toMutableStateList())
+    }
+    is GroupMessageAction.SendMessagesBulk ->
+    {
+        val m = state.groupmessages.toList()
+        state.copy(groupmessages = (m + action.messages).toMutableStateList())
+    }
     is GroupMessageAction.SendGroupMessage ->
     {
-        state.copy(groupmessages = (state.groupmessages + action.groupmessage).takeLast(maxGroupMessages))
+        state.copy(groupmessages = (state.groupmessages + action.groupmessage).takeLast(maxGroupMessages).toMutableStateList())
     }
     is GroupMessageAction.ReceiveGroupMessage ->
     {
-        state.copy(groupmessages = (state.groupmessages + action.groupmessage).takeLast(maxGroupMessages))
+        state.copy(groupmessages = (state.groupmessages + action.groupmessage).takeLast(maxGroupMessages).toMutableStateList())
     }
     is GroupMessageAction.ClearGroup ->
     {
-        state.copy(groupmessages = emptyList())
+        state.copy(mutableStateListOf())
     }
     else ->
     {
-        state.copy(groupmessages = emptyList())
+        state.copy(mutableStateListOf())
     }
 }

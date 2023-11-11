@@ -131,6 +131,7 @@ public class HelperGroup {
 
     public static class incoming_group_file_meta_data
     {
+        long rowid;
         String message_text;
         String path_name;
         String file_name;
@@ -274,6 +275,7 @@ public class HelperGroup {
             ret.message_text =  m.text;
             ret.path_name = m.path_name;
             ret.file_name = m.file_name;
+            ret.rowid = row_id;
 
             return ret; // return metadata
         }

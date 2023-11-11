@@ -32,6 +32,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.trifa.AVState
+import com.zoffcc.applications.trifa.HelperGroup
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity
@@ -212,14 +213,13 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
 @Composable
 fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, selectedGroupId: String?, ui_scale: Float)
 {
-    val state by groupmessagestore.stateFlow.collectAsState()
     Theme {
         Surface {
             Box(modifier = Modifier.fillMaxSize()) {
                 Image(painterResource("background.jpg"), modifier = Modifier.fillMaxSize(), contentDescription = null, contentScale = ContentScale.Crop)
                 Column(modifier = Modifier.fillMaxSize()) {
                     Box(Modifier.weight(1f)) {
-                        GroupMessages(state.groupmessages, ui_scale = ui_scale)
+                        GroupMessages(ui_scale = ui_scale, selectedGroupId)
                     }
                     if (displayTextField)
                     {
@@ -229,9 +229,16 @@ fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, s
                             val message_id: Long = tox_group_send_message(groupnum, ToxVars.TOX_MESSAGE_TYPE.TOX_MESSAGE_TYPE_NORMAL.value, text)
                             if (message_id >= 0)
                             {
-                                MainActivity.sent_groupmessage_to_db(groupid = selectedGroupId, message_timestamp =  timestamp, group_message = text, message_id = message_id )
-                                groupmessagestore.send(GroupMessageAction.SendGroupMessage(UIGroupMessage(myUser, timeMs = timestamp, text, toxpk = myUser.toxpk, groupId = selectedGroupId!!.lowercase(),
-                                    trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
+                                val message_id_hex = HelperGroup.fourbytes_of_long_to_hex(message_id)
+                                val db_msgid = MainActivity.sent_groupmessage_to_db(groupid = selectedGroupId, message_timestamp =  timestamp, group_message = text, message_id = message_id )
+                                groupmessagestore.send(GroupMessageAction.SendGroupMessage(
+                                    UIGroupMessage(
+                                        message_id_tox = message_id_hex, msgDatabaseId = db_msgid,
+                                        user = myUser, timeMs = timestamp, text = text,
+                                        toxpk = myUser.toxpk,
+                                        groupId = selectedGroupId!!.lowercase(),
+                                        trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value,
+                                        filename_fullpath = null)))
                             }
                         }
                     }

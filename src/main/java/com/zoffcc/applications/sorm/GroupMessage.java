@@ -35,7 +35,7 @@ public class GroupMessage
     private static final String TAG = "DB.GroupMessage";
 
     @PrimaryKey(autoincrement = true, auto = true)
-    long id; // uniqe message id!!
+    public long id; // uniqe message id!!
 
     @Column(indexed = true, helpers = Column.Helpers.ALL, defaultExpr = "")
     @Nullable
