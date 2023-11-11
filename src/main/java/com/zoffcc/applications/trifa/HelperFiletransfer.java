@@ -6,6 +6,7 @@ import com.zoffcc.applications.sorm.Message;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.net.URLConnection;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -15,12 +16,16 @@ import java.util.Base64;
 import java.util.Random;
 
 import static com.zoffcc.applications.sorm.OrmaDatabase.sqldb;
-import static com.zoffcc.applications.trifa.HelperMessage.set_message_state_from_id;
+import static com.zoffcc.applications.trifa.HelperGroup.bytebuffer_to_hexstring;
+import static com.zoffcc.applications.trifa.HelperMessage.*;
+import static com.zoffcc.applications.trifa.HelperMessage.update_single_message_from_messge_id;
 import static com.zoffcc.applications.trifa.MainActivity.*;
 import static com.zoffcc.applications.trifa.TRIFAGlobals.*;
 import static com.zoffcc.applications.trifa.TRIFAGlobals.TRIFA_FT_DIRECTION.TRIFA_FT_DIRECTION_INCOMING;
+import static com.zoffcc.applications.trifa.ToxVars.TOX_CAPABILITY_DECODE;
 import static com.zoffcc.applications.trifa.ToxVars.TOX_FILE_CONTROL.*;
 import static com.zoffcc.applications.trifa.ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_CANCEL;
+import static com.zoffcc.applications.trifa.ToxVars.TOX_FILE_ID_LENGTH;
 import static com.zoffcc.applications.trifa.ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_DATA;
 import static com.zoffcc.applications.trifa.ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_FTV2;
 
@@ -582,18 +587,13 @@ public class HelperFiletransfer {
                     // delete FT in DB
                     // Log.i(TAG, "FTFTFT:002");
                     delete_filetransfers_from_friendnum_and_filenum(friend_number, file_number);
-
                     // update UI
-                    // TODO: updates all messages, this is bad
-                    // update_all_messages_global(false);
                     try
                     {
-                        if (f.id != -1)
-                        {
-                            //**//HelperMessage.update_single_message_from_messge_id(msg_id, true);
-                        }
+                        final Message m = TrifaToxService.Companion.getOrma().selectFromMessage().idEq(msg_id).tox_friendpubkeyEq(tox_friend_get_public_key(friend_number)).toList().get(0);
+                        modify_message_with_ft(m, null);
                     }
-                    catch (Exception e)
+                    catch(Exception e)
                     {
                     }
                 }
@@ -623,16 +623,13 @@ public class HelperFiletransfer {
                     // delete FT in DB
                     // Log.i(TAG, "FTFTFT:OGFT:002");
                     delete_filetransfers_from_friendnum_and_filenum(friend_number, file_number);
-
                     // update UI
                     try
                     {
-                        if (f.id != -1)
-                        {
-                            //**//HelperMessage.update_single_message_from_messge_id(msg_id, true);
-                        }
+                        final Message m = TrifaToxService.Companion.getOrma().selectFromMessage().idEq(msg_id).tox_friendpubkeyEq(tox_friend_get_public_key(friend_number)).toList().get(0);
+                        modify_message_with_ft(m, null);
                     }
-                    catch (Exception e)
+                    catch(Exception e)
                     {
                     }
                 }
@@ -660,7 +657,6 @@ public class HelperFiletransfer {
             e.printStackTrace();
         }
     }
-
 
     public static long get_filetransfer_id_from_friendnum_and_filenum(long friend_number, long file_number)
     {
@@ -709,6 +705,114 @@ public class HelperFiletransfer {
         catch (Exception e)
         {
             e.printStackTrace();
+        }
+    }
+
+    public static void set_filetransfer_start_sending_from_id(long filetransfer_id)
+    {
+        try
+        {
+            TrifaToxService.Companion.getOrma().updateFiletransfer().idEq(filetransfer_id).
+                    ft_outgoing_started(true).execute();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    static void start_outgoing_ft(Message element)
+    {
+        try
+        {
+            set_message_queueing_from_id(element.id, false);
+            // accept FT
+            set_message_start_sending_from_id(element.id);
+            set_filetransfer_start_sending_from_id(element.filetransfer_id);
+
+            Filetransfer ft = TrifaToxService.Companion.getOrma().selectFromFiletransfer().
+                    idEq(element.filetransfer_id).
+                    orderByIdDesc().toList().get(0);
+
+            // update message view
+            update_single_message_from_messge_id(element.id, ft.filesize ,true);
+
+            Log.i(TAG, "MM2MM:8:ft.filesize=" + ft.filesize + " ftid=" + ft.id + " ft.mid=" + ft.message_id + " mid=" +
+                    element.id);
+
+            // ------ DEBUG ------
+            Log.i(TAG, "MM2MM:8a:ft full=" + ft);
+            // ------ DEBUG ------
+
+            ByteBuffer file_id_buffer = ByteBuffer.allocateDirect(TOX_FILE_ID_LENGTH);
+            MainActivity.tox_messagev3_get_new_message_id(file_id_buffer);
+
+            final String file_id_buffer_hex = bytebuffer_to_hexstring(file_id_buffer, true);
+            Log.i(TAG, "TOX_FILE_ID_LENGTH=" + TOX_FILE_ID_LENGTH + " file_id_buffer_hex=" + file_id_buffer_hex);
+            ft.tox_file_id_hex = file_id_buffer_hex;
+
+            // actually start sending the file to friend
+            long file_number = -1;
+            if (TOX_CAPABILITY_DECODE(
+                    tox_friend_get_capabilities(
+                            tox_friend_by_public_key(element.tox_friendpubkey))).ftv2)
+            {
+                Log.i(TAG, "TOX_FILE_KIND_FTV2");
+                file_number = tox_file_send(tox_friend_by_public_key(element.tox_friendpubkey),
+                        TOX_FILE_KIND_FTV2.value, ft.filesize, file_id_buffer, ft.file_name,
+                        ft.file_name.length());
+                ft.kind = TOX_FILE_KIND_FTV2.value;
+                element.filetransfer_kind = TOX_FILE_KIND_FTV2.value;
+            }
+            else
+            {
+                Log.i(TAG, "TOX_FILE_KIND_DATA");
+                file_number = tox_file_send(tox_friend_by_public_key(element.tox_friendpubkey),
+                        ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_DATA.value, ft.filesize, file_id_buffer,
+                        ft.file_name, ft.file_name.length());
+                ft.kind = ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_DATA.value;
+                element.filetransfer_kind = TOX_FILE_KIND_DATA.value;
+            }
+            // TODO: handle errors from tox_file_send() here -------
+
+            update_message_in_db_filetransfer_kind(element);
+
+            // @formatter:off
+            Log.i(TAG,
+                    "DEBUG_FT:OUT:file_chunk_request:file_number=" +
+                            file_number +
+                            " fn=" + tox_friend_by_public_key(element.tox_friendpubkey) +
+                            " filetransfer_id=" + element.filetransfer_id+
+                            " pk="+element.tox_friendpubkey+
+                            " path_name="+ft.path_name+
+                            " file_name=" + ft.file_name
+            );
+            // @formatter:on
+
+            if (file_number < 0)
+            {
+                Log.i(TAG, "tox_file_send:EE:" + file_number);
+
+                // cancel FT
+                set_filetransfer_state_from_id(element.filetransfer_id, TOX_FILE_CONTROL_CANCEL.value);
+                set_message_state_from_id(element.id, TOX_FILE_CONTROL_CANCEL.value);
+                // update message view
+                update_single_message_from_messge_id(element.id, ft.filesize,true);
+            }
+            else
+            {
+                Log.i(TAG, "MM2MM:9:new filenum=" + file_number);
+                // update the tox file number in DB -----------
+                ft.file_number = file_number;
+                update_filetransfer_db_full(ft);
+                // update the tox file number in DB -----------
+            }
+            Log.i(TAG, "button_ok:OnTouch:009:f_num=" + file_number);
+        }
+        catch (Exception e2)
+        {
+            e2.printStackTrace();
+            Log.i(TAG, "MM2MM:EE1:" + e2.getMessage());
         }
     }
 }

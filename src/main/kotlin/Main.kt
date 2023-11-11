@@ -770,20 +770,29 @@ fun load_messages_for_friend(selectedContactPubkey: String?)
         {
             val toxpk = selectedContactPubkey.uppercase()
             val uimessages = ArrayList<UIMessage>()
-            val messages = orma!!.selectFromMessage().tox_friendpubkeyEq(toxpk).orderBySent_timestampAsc().toList()
-            messages.forEach() { // 0 -> msg received, 1 -> msg sent
+            val messages = orma!!.selectFromMessage().
+                tox_friendpubkeyEq(toxpk).orderBySent_timestampAsc().toList()
+            messages.forEach() {
                 when (it.direction)
                 {
-                    0 ->
+                    TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value ->
                     {
                         val friendnum = tox_friend_by_public_key(it.tox_friendpubkey.uppercase())
                         val fname = tox_friend_get_name(friendnum)
                         val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = selectedContactPubkey, color = ColorProvider.getColor(false))
-                        uimessages.add(UIMessage(msgDatabaseId = it.id, user = friend_user, timeMs = it.rcvd_timestamp, text = it.text, toxpk = it.tox_friendpubkey.uppercase(), trifaMsgType = it.TRIFA_MESSAGE_TYPE, filename_fullpath = it.filename_fullpath))
+                        uimessages.add(UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value,
+                            user = friend_user, timeMs = it.rcvd_timestamp,
+                            text = it.text, toxpk = it.tox_friendpubkey.uppercase(),
+                            trifaMsgType = it.TRIFA_MESSAGE_TYPE, msgDatabaseId = it.id,
+                            filename_fullpath = it.filename_fullpath, file_state = it.state))
                     }
-                    1 ->
+                    TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value ->
                     {
-                        uimessages.add(UIMessage(msgDatabaseId = it.id, user = myUser, timeMs = it.sent_timestamp, text = it.text, toxpk = myUser.toxpk, trifaMsgType = it.TRIFA_MESSAGE_TYPE, filename_fullpath = it.filename_fullpath))
+                        uimessages.add(UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value,
+                            user = myUser, timeMs = it.sent_timestamp,
+                            text = it.text, toxpk = it.tox_friendpubkey.uppercase(),
+                            trifaMsgType = it.TRIFA_MESSAGE_TYPE, msgDatabaseId = it.id,
+                            filename_fullpath = it.filename_fullpath, file_state = it.state))
                     }
                     else ->
                     {
@@ -811,7 +820,7 @@ fun load_groupmessages_for_friend(selectedGroupId: String?)
             messages.forEach() { // 0 -> msg received, 1 -> msg sent
                 when (it.direction)
                 {
-                    0 ->
+                    TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value ->
                     {
                         val friend_user = User(it.tox_group_peername + " / " + PubkeyShort(it.tox_group_peer_pubkey), picture = "friend_avatar.png", toxpk = it.tox_group_peer_pubkey.uppercase(), color = ColorProvider.getColor(true, it.tox_group_peer_pubkey.uppercase()))
                         when (it.TRIFA_MESSAGE_TYPE)
@@ -823,7 +832,7 @@ fun load_groupmessages_for_friend(selectedGroupId: String?)
 
                         }
                     }
-                    1 ->
+                    TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value ->
                     {
                         uigroupmessages.add(UIGroupMessage(message_id_tox = it.message_id_tox, msgDatabaseId = it.id, user = myUser, timeMs = it.sent_timestamp, text = it.text, toxpk = myUser.toxpk, groupId = it.group_identifier.lowercase(), trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null))
                     }

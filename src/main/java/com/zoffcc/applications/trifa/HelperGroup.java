@@ -241,7 +241,7 @@ public class HelperGroup {
             GroupMessage m = new GroupMessage();
             m.is_new = false;
             m.tox_group_peer_pubkey = tox_peerpk;
-            m.direction = 0; // msg received
+            m.direction = TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value;
             m.TOX_MESSAGE_TYPE = 0;
             m.read = false;
             m.tox_group_peername = peername;

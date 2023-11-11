@@ -21,12 +21,15 @@ import com.zoffcc.applications.trifa.AudioSelectOutBox.semaphore_audio_out_conve
 import com.zoffcc.applications.trifa.AudioSelectOutBox.semaphore_audio_out_convert_max_active_threads
 import com.zoffcc.applications.trifa.HelperFiletransfer.check_auto_accept_incoming_filetransfer
 import com.zoffcc.applications.trifa.HelperFiletransfer.get_incoming_filetransfer_local_filename
+import com.zoffcc.applications.trifa.HelperFiletransfer.insert_into_filetransfer_db
 import com.zoffcc.applications.trifa.HelperFiletransfer.move_tmp_file_to_real_file
 import com.zoffcc.applications.trifa.HelperFiletransfer.set_message_accepted_from_id
 import com.zoffcc.applications.trifa.HelperFiletransfer.update_filetransfer_db_full
 import com.zoffcc.applications.trifa.HelperFriend.send_friend_msg_receipt_v2_wrapper
 import com.zoffcc.applications.trifa.HelperGeneric.PubkeyShort
 import com.zoffcc.applications.trifa.HelperGeneric.bytesToHex
+import com.zoffcc.applications.trifa.HelperGeneric.hexstring_to_bytebuffer
+import com.zoffcc.applications.trifa.HelperGeneric.read_chunk_from_SD_file
 import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
 import com.zoffcc.applications.trifa.HelperGroup.fourbytes_of_long_to_hex
 import com.zoffcc.applications.trifa.HelperGroup.handle_incoming_group_file
@@ -66,6 +69,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import lock_data_dir_input
 import messagestore
+import myUser
 import org.briarproject.briar.desktop.contact.ContactItem
 import org.briarproject.briar.desktop.contact.GroupItem
 import org.briarproject.briar.desktop.contact.GroupPeerItem
@@ -79,7 +83,6 @@ import java.nio.ByteBuffer
 import java.util.*
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.Semaphore
 
 @Suppress("UNUSED_PARAMETER")
 class MainActivity
@@ -230,10 +233,16 @@ class MainActivity
                 tox_savefile_directory = PREF__tox_savefile_dir + File.separator
                 Log.i(TAG, "init:PREF__udp_enabled=$PREF__udp_enabled")
                 init(tox_savefile_directory, PREF__udp_enabled, PREF__local_discovery_enabled, PREF__orbot_enabled_to_int, ORBOT_PROXY_HOST, ORBOT_PROXY_PORT, password_hash, PREF__ipv6_enabled, PREF__force_udp_only, PREF__ngc_video_bitrate, PREF__ngc_video_max_quantizer, PREF__ngc_audio_bitrate, PREF__ngc_audio_samplerate, PREF__ngc_audio_channels)
-                tox_service_fg!!.tox_thread_start_fg()
             }
             val my_tox_id_temp = get_my_toxid()
             Log.i(TAG, "MyToxID:$my_tox_id_temp")
+            myUser.toxpk = my_tox_id_temp
+
+            if (!TrifaToxService.TOX_SERVICE_STARTED)
+            {
+                tox_service_fg!!.tox_thread_start_fg()
+            }
+
             try
             {
                 Thread.currentThread().name = "t_main"
@@ -1305,7 +1314,7 @@ class MainActivity
                         val friendnum = tox_friend_by_public_key(toxpk)
                         val fname = tox_friend_get_name(friendnum)
                         val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk)
-                        messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(msgDatabaseId = msg_id_db, user = friend_user, timeMs = timestamp_wrap, text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
+                        messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value, user = friend_user, timeMs = timestamp_wrap, text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, msgDatabaseId = msg_id_db, filename_fullpath = null)))
                     } catch (_: Exception)
                     {
                     }
@@ -1322,8 +1331,8 @@ class MainActivity
                         val msg_id_db = received_message_to_db(toxpk, timestamp_wrap, friend_message)
                         val friendnum = tox_friend_by_public_key(toxpk)
                         val fname = tox_friend_get_name(friendnum)
-                        val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk)
-                        messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(msgDatabaseId = msg_id_db, user = friend_user, timeMs = timestamp_wrap, text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
+                        val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk!!)
+                        messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value, user = friend_user, timeMs = timestamp_wrap, text = friend_message!!, toxpk = toxpk!!, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, msgDatabaseId = msg_id_db, filename_fullpath = null)))
                     } catch (_: Exception)
                     {
                     }
@@ -1334,7 +1343,6 @@ class MainActivity
         @JvmStatic
         fun android_tox_callback_friend_message_v2_cb_method(friend_number: Long, friend_message: String?, length: Long, ts_sec: Long, ts_ms: Long, raw_message: ByteArray?, raw_message_length: Long)
         {
-            Log.i(TAG, "android_tox_callback_friend_message_v2_cb_method: fn=" + friend_number + " friend_message=" + friend_message)
             val msg_type = 1
             val raw_message_buf = ByteBuffer.allocateDirect(raw_message_length.toInt())
             raw_message_buf.put(raw_message, 0, raw_message_length.toInt())
@@ -1354,8 +1362,8 @@ class MainActivity
                 val msg_id_db = received_message_to_db(toxpk, message_timestamp, friend_message)
                 val friendnum = tox_friend_by_public_key(toxpk)
                 val fname = tox_friend_get_name(friendnum)
-                val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk)
-                messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(msgDatabaseId = msg_id_db, user = friend_user, timeMs = message_timestamp, text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
+                val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk!!)
+                messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value, user = friend_user, timeMs = message_timestamp, text = friend_message!!, toxpk = toxpk!!, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, msgDatabaseId = msg_id_db, filename_fullpath = null)))
             } catch (_: Exception)
             {
             }
@@ -1408,15 +1416,6 @@ class MainActivity
                         HelperMessage.set_message_state_from_id(msg_id, ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_RESUME.value)
                         HelperFiletransfer.set_filetransfer_accepted_from_id(ft_id)
                         set_message_accepted_from_id(msg_id)
-                        try
-                        {
-                            if (ft_id != -1L)
-                            {
-                                //**// HelperMessage.update_single_message_from_messge_id(msg_id, true)
-                            }
-                        } catch (e: java.lang.Exception)
-                        {
-                        }
                     }
                 } catch (e: java.lang.Exception)
                 {
@@ -1451,7 +1450,253 @@ class MainActivity
         @JvmStatic
         fun android_tox_callback_file_chunk_request_cb_method(friend_number: Long, file_number: Long, position: Long, length: Long)
         {
-            global_last_activity_outgoung_ft_ts = System.currentTimeMillis();
+            global_last_activity_outgoung_ft_ts = System.currentTimeMillis()
+
+            // try
+            // {
+                val ft = orma!!.selectFromFiletransfer().
+                directionEq(TRIFAGlobals.TRIFA_FT_DIRECTION.TRIFA_FT_DIRECTION_OUTGOING.value).
+                stateNotEq(ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_CANCEL.value).
+                tox_public_key_stringEq(tox_friend_get_public_key(friend_number)).
+                file_numberEq(file_number).orderByIdDesc().toList()[0]
+                if (ft == null)
+                {
+                    Log.i(TAG, "file_chunk_request:ft=NULL")
+                    return
+                }
+                // Log.i(TAG, "file_chunk_request:ft=" + ft.kind + ":" + ft);
+                if (ft.kind == ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_AVATAR.value)
+                {
+                    // TODO: write me!!
+                } else if (ft.kind == ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_FTV2.value)
+                {
+                    if (length == 0L)
+                    {
+                        Log.i(TAG, "file_chunk_request:file fully sent")
+                        // transfer finished -----------
+                        var filedb_id: Long = -1
+                        // put into "FileDB" table
+                        val file_ = FileDB()
+                        file_.kind = ft.kind
+                        file_.direction = ft.direction
+                        file_.tox_public_key_string = ft.tox_public_key_string
+                        file_.path_name = ft.path_name
+                        file_.file_name = ft.file_name
+                        file_.is_in_VFS = false
+                        file_.filesize = ft.filesize
+                        val row_id = orma!!.insertIntoFileDB(file_)
+                        // Log.i(TAG, "file_chunk_request:FileDB:row_id=" + row_id);
+                        filedb_id = orma!!.selectFromFileDB().tox_public_key_stringEq(ft.tox_public_key_string).file_nameEq(ft.file_name).path_nameEq(ft.path_name).directionEq(ft.direction).filesizeEq(ft.filesize).orderByIdDesc()[0].id
+                        val msg_id = HelperMessage.get_message_id_from_filetransfer_id_and_friendnum(ft.id, friend_number)
+                        val full_path_builder = ft.path_name + "/" + ft.file_name
+                        HelperMessage.update_message_in_db_filename_fullpath_friendnum_and_filenum(friend_number,
+                            file_number,
+                            full_path_builder)
+                        HelperMessage.set_message_state_from_friendnum_and_filenum(friend_number, file_number,
+                            ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_CANCEL.value)
+                        HelperMessage.set_message_filedb_from_friendnum_and_filenum(friend_number, file_number, filedb_id)
+                        HelperFiletransfer.set_filetransfer_for_message_from_friendnum_and_filenum(friend_number,
+                            file_number, -1)
+                        try
+                        {
+                            // Log.i(TAG, "file_chunk_request:file_READY:002");
+                            if (ft.id != -1L)
+                            {
+                                // Log.i(TAG, "file_chunk_request:file_READY:003:f.id=" + ft.id + " msg_id=" + msg_id);
+                                update_single_message_from_messge_id(msg_id, file_.filesize, true)
+                            }
+                        } catch (e: java.lang.Exception)
+                        {
+                            Log.i(TAG, "file_chunk_request:file_READY:EE:" + e.message)
+                        }
+                        // transfer finished -----------
+                        HelperFiletransfer.delete_filetransfers_from_friendnum_and_filenum(friend_number, file_number)
+                    } else
+                    {
+                        val fname = File(ft.path_name + "/" + ft.file_name).absolutePath
+                        // Log.i(TAG, "file_chunk_request:fname=" + fname);
+                        val file_chunk_length = length
+                        var bytes_chunk: ByteArray? = read_chunk_from_SD_file(fname, position, file_chunk_length)
+                        if (bytes_chunk == null)
+                        {
+                            return
+                        }
+                        var file_chunk = ByteBuffer.allocateDirect((file_chunk_length + TOX_FILE_ID_LENGTH).toInt())
+                        var file_id_hash_bytes: ByteBuffer? = hexstring_to_bytebuffer(ft.tox_file_id_hex)
+                        // Log.i(TAG, "file_id_hash_bytes="+file_id_hash_bytes)
+                        // Log.i(TAG, "ft.tox_file_id_hex="+ft.tox_file_id_hex)
+                        file_chunk!!.put(file_id_hash_bytes)
+                        file_chunk!!.put(bytes_chunk)
+                        bytes_chunk = null
+                        val res = tox_file_send_chunk(friend_number, file_number, position, file_chunk,
+                            file_chunk_length + TOX_FILE_ID_LENGTH)
+                        file_chunk = null
+                        file_id_hash_bytes = null
+                        if (ft.filesize < UPDATE_MESSAGE_PROGRESS_SMALL_FILE_IS_LESS_THAN_BYTES)
+                        {
+                            if (ft.current_position + UPDATE_MESSAGE_PROGRESS_AFTER_BYTES_SMALL_FILES < position)
+                            {
+                                ft.current_position = position
+                                HelperFiletransfer.update_filetransfer_db_current_position(ft)
+                                if (ft.kind != ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_AVATAR.value)
+                                {
+                                    // update_all_messages_global(false);
+                                    try
+                                    {
+                                        if (ft.id != -1L)
+                                        {
+                                            update_single_message_from_ftid(ft, true)
+                                        }
+                                    } catch (e: java.lang.Exception)
+                                    {
+                                    }
+                                }
+                            }
+                        } else
+                        {
+                            if (ft.current_position + UPDATE_MESSAGE_PROGRESS_AFTER_BYTES < position)
+                            {
+                                ft.current_position = position
+                                HelperFiletransfer.update_filetransfer_db_current_position(ft)
+                                if (ft.kind != ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_AVATAR.value)
+                                {
+                                    // update_all_messages_global(false);
+                                    try
+                                    {
+                                        if (ft.id != -1L)
+                                        {
+                                            update_single_message_from_ftid(ft, true)
+                                        }
+                                    } catch (_: java.lang.Exception)
+                                    {
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else  // TOX_FILE_KIND_DATA.value
+                {
+                    if (length == 0L)
+                    {
+                        Log.i(TAG, "file_chunk_request:file fully sent")
+                        // transfer finished -----------
+                        var filedb_id: Long = -1
+                        if (ft.kind != ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_AVATAR.value)
+                        {
+                            // put into "FileDB" table
+                            val file_ = FileDB()
+                            file_.kind = ft.kind
+                            file_.direction = ft.direction
+                            file_.tox_public_key_string = ft.tox_public_key_string
+                            file_.path_name = ft.path_name
+                            file_.file_name = ft.file_name
+                            file_.is_in_VFS = false
+                            file_.filesize = ft.filesize
+                            val row_id = orma!!.insertIntoFileDB(file_)
+                            // Log.i(TAG, "file_chunk_request:FileDB:row_id=" + row_id);
+                            filedb_id = orma!!.selectFromFileDB().tox_public_key_stringEq(ft.tox_public_key_string).
+                            file_nameEq(ft.file_name).path_nameEq(ft.path_name).
+                            directionEq(ft.direction).filesizeEq(ft.filesize).orderByIdDesc().toList()[0].id
+                            // Log.i(TAG, "file_chunk_request:FileDB:filedb_id=" + filedb_id);
+                        }
+                        // Log.i(TAG, "file_chunk_request:file_READY:001:f.id=" + ft.id);
+                        val msg_id = HelperMessage.get_message_id_from_filetransfer_id_and_friendnum(
+                            ft.id, friend_number)
+                        // Log.i(TAG, "file_chunk_request:file_READY:001a:msg_id=" + msg_id);
+                        HelperMessage.update_message_in_db_filename_fullpath_friendnum_and_filenum(friend_number,
+                            file_number,
+                            ft.path_name + "/" +
+                                    ft.file_name)
+                        HelperMessage.set_message_state_from_friendnum_and_filenum(friend_number, file_number,
+                            ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_CANCEL.value)
+                        HelperMessage.set_message_filedb_from_friendnum_and_filenum(
+                            friend_number, file_number, filedb_id)
+                        HelperFiletransfer.set_filetransfer_for_message_from_friendnum_and_filenum(friend_number,
+                            file_number, -1)
+                        try
+                        {
+                            // Log.i(TAG, "file_chunk_request:file_READY:002");
+                            if (ft.id != -1L)
+                            {
+                                // Log.i(TAG, "file_chunk_request:file_READY:003:f.id=" + ft.id + " msg_id=" + msg_id);
+                                update_single_message_from_messge_id(msg_id, ft.filesize, true)
+                            }
+                        } catch (e: java.lang.Exception)
+                        {
+                            Log.i(TAG, "file_chunk_request:file_READY:EE:" + e.message)
+                        }
+                        // transfer finished -----------
+                        val avatar_chunk = ByteBuffer.allocateDirect(1)
+                        val res = tox_file_send_chunk(friend_number, file_number, position, avatar_chunk, 0)
+                        // Log.i(TAG, "file_chunk_request:res(2)=" + res);
+                        // remove FT from DB
+                        HelperFiletransfer.delete_filetransfers_from_friendnum_and_filenum(friend_number, file_number)
+                    } else
+                    {
+                        val fname = File(ft.path_name + "/" + ft.file_name).absolutePath
+                        val file_chunk_length = length
+                        val bytes_chunk: ByteArray? = read_chunk_from_SD_file(fname, position, file_chunk_length)
+                        if (bytes_chunk == null)
+                        {
+                            return
+                        }
+                        // byte[] bytes_chunck = new byte[(int) file_chunk_length];
+                        // avatar_bytes.position((int) position);
+                        // avatar_bytes.get(bytes_chunck, 0, (int) file_chunk_length);
+                        val file_chunk = ByteBuffer.allocateDirect(file_chunk_length.toInt())
+                        file_chunk.put(bytes_chunk)
+                        val res = tox_file_send_chunk(friend_number, file_number, position, file_chunk, file_chunk_length)
+                        // Log.i(TAG, "file_chunk_request:res(1)=" + res);
+                        // TODO: handle error codes from tox_file_send_chunk() here ----
+                        if (ft.filesize < UPDATE_MESSAGE_PROGRESS_SMALL_FILE_IS_LESS_THAN_BYTES)
+                        {
+                            if ((ft.current_position + UPDATE_MESSAGE_PROGRESS_AFTER_BYTES_SMALL_FILES) < position)
+                            {
+                                ft.current_position = position
+                                HelperFiletransfer.update_filetransfer_db_current_position(ft)
+                                if (ft.kind != ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_AVATAR.value)
+                                {
+                                    // update_all_messages_global(false);
+                                    try
+                                    {
+                                        if (ft.id != -1L)
+                                        {
+                                            update_single_message_from_ftid(ft, true)
+                                        }
+                                    } catch (_: java.lang.Exception)
+                                    {
+                                    }
+                                }
+                            }
+                        } else
+                        {
+                            if ((ft.current_position + UPDATE_MESSAGE_PROGRESS_AFTER_BYTES) < position)
+                            {
+                                ft.current_position = position
+                                HelperFiletransfer.update_filetransfer_db_current_position(ft)
+                                if (ft.kind != ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_AVATAR.value)
+                                {
+                                    // update_all_messages_global(false);
+                                    try
+                                    {
+                                        if (ft.id != -1L)
+                                        {
+                                            update_single_message_from_ftid(ft, true)
+                                        }
+                                    } catch (_: java.lang.Exception)
+                                    {
+                                    }
+                                }
+                            }
+                        }
+                        // Log.i(TAG, "file_chunk_request:ft:099:" + (System.currentTimeMillis() - ts01));
+                    }
+                }
+            //} catch (e: java.lang.Exception)
+            //{
+            //    e.printStackTrace()
+            //    Log.i(TAG, "file_chunk_request:EE1:" + e.message)
+            //}
         }
 
         @JvmStatic
@@ -1508,7 +1753,7 @@ class MainActivity
                 f.id = ft_id // add FT message to UI
                 val m = Message()
                 m.tox_friendpubkey = friend_pk
-                m.direction = 0 // msg received
+                m.direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value // msg received
                 m.TOX_MESSAGE_TYPE = 0
                 m.TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value
                 m.filetransfer_id = ft_id
@@ -1565,8 +1810,8 @@ class MainActivity
                 }
                 val friendnum = tox_friend_by_public_key(friend_pk)
                 val fname = tox_friend_get_name(friendnum)
-                val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = friend_pk)
-                messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(msgDatabaseId = new_msg_id, user = friend_user, timeMs = timestampMs(), text = m.text, toxpk = friend_pk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value, filename_fullpath = null)))
+                val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = friend_pk!!)
+                messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value, user = friend_user, timeMs = timestampMs(), text = m.text, toxpk = friend_pk!!, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value, msgDatabaseId = new_msg_id, filename_fullpath = null, file_state = m.state)))
             }
             Log.i(TAG, "file_recv:incoming regular file:999")
         }
@@ -2120,7 +2365,7 @@ class MainActivity
             val m = com.zoffcc.applications.sorm.Message()
             m.is_new = false
             m.tox_friendpubkey = toxpk
-            m.direction = 0 // msg received
+            m.direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value // msg received
             m.TOX_MESSAGE_TYPE = 0
             m.read = true
             m.TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value
@@ -2154,7 +2399,7 @@ class MainActivity
             val m = com.zoffcc.applications.sorm.Message()
             m.is_new = false
             m.tox_friendpubkey = toxpk
-            m.direction = 1 // msg sent
+            m.direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value // msg sent
             m.TOX_MESSAGE_TYPE = 0
             m.read = false
             m.TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value
@@ -2192,7 +2437,7 @@ class MainActivity
             val m = GroupMessage()
             m.is_new = false
             m.tox_group_peer_pubkey = tox_peerpk
-            m.direction = 0 // msg received
+            m.direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value // msg received
             m.TOX_MESSAGE_TYPE = 0
             m.read = false
             m.tox_group_peername = peername
@@ -2215,6 +2460,98 @@ class MainActivity
             return row_id
         }
 
+        fun add_outgoing_file(filepath: String?, filename: String?, friend_pubkey: String?)
+        {
+            Log.i(TAG, "add_outgoing_file:regular file")
+            if ((filepath == null) || (filename == null) || (friend_pubkey == null))
+            {
+                Log.i(TAG, "add_outgoing_file:filepath or filename or friend_pubkey is null")
+                return
+            }
+
+            var file_size: Long = -1
+            file_size = try {
+                File(filepath + File.separator + filename).length()
+            } catch (e: java.lang.Exception) {
+                e.printStackTrace()
+                // file length unknown?
+                return
+            }
+            if (file_size < 1) {
+                // file length "zero"?
+                return
+            }
+            val friendnum = tox_friend_by_public_key(friend_pubkey)
+            Log.i(TAG, "add_outgoing_file:friendnum(2)=$friendnum")
+            val f = Filetransfer()
+            f.tox_public_key_string = friend_pubkey
+            f.direction = TRIFAGlobals.TRIFA_FT_DIRECTION.TRIFA_FT_DIRECTION_OUTGOING.value
+            f.file_number = -1 // add later when we actually have the number
+            f.kind = ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_DATA.value
+            f.state = ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_PAUSE.value
+            f.path_name = filepath
+            f.file_name = filename
+            f.filesize = file_size
+            f.ft_accepted = false
+            f.ft_outgoing_started = false
+            f.current_position = 0
+            Log.i(TAG, "add_outgoing_file:tox_public_key_string=" + f.tox_public_key_string)
+            val ft_id = insert_into_filetransfer_db(f)
+            f.id = ft_id
+            // Message m_tmp = orma.selectFromMessage().tox_friendpubkeyEq(tox_friend_get_public_key__wrapper(3)).orderByMessage_idDesc().get(0);
+            Log.i(TAG, "add_outgoing_file:MM2MM:2:$ft_id")
+            // ---------- DEBUG ----------
+            val ft_tmp = orma!!.selectFromFiletransfer().idEq(ft_id).toList()[0]
+            Log.i(TAG, "add_outgoing_file:MM2MM:4a:" + "fid=" + ft_tmp.id + " mid=" + ft_tmp.message_id)
+            // ---------- DEBUG ----------
+            // add FT message to UI
+            val m = Message()
+            m.tox_friendpubkey = friend_pubkey
+            m.direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value // msg outgoing
+            m.TOX_MESSAGE_TYPE = 0
+            m.TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value
+            m.filetransfer_id = ft_id
+            m.filedb_id = -1
+            m.state = ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_PAUSE.value
+            m.ft_accepted = false
+            m.ft_outgoing_started = false
+            m.ft_outgoing_queued = false
+            m.filename_fullpath = File(filepath + File.separator + filename).absolutePath
+            m.sent_timestamp = System.currentTimeMillis()
+            m.text = filename + "\n" + file_size + " bytes"
+            m.is_new = false // no notification for outgoing filetransfers
+            m.filetransfer_kind = ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_DATA.value
+            var new_msg_id: Long = -1
+            try
+            {
+                new_msg_id = orma!!.insertIntoMessage(m)
+            } catch (e: Exception)
+            {
+            }
+            m.id = new_msg_id
+            // ---------- DEBUG ----------
+            Log.i(TAG, "add_outgoing_file:MM2MM:3:$new_msg_id")
+            var m_tmp = orma!!.selectFromMessage().idEq(new_msg_id).toList()[0]
+            Log.i(TAG, "add_outgoing_file:MM2MM:4:" + m.filetransfer_id + "::" + m_tmp)
+            // ---------- DEBUG ----------
+            f.message_id = new_msg_id
+            update_filetransfer_db_full(f)
+            // ---------- DEBUG ----------
+            val ft_tmp2 = orma!!.selectFromFiletransfer().idEq(ft_id).toList()[0]
+            Log.i(TAG, "add_outgoing_file:MM2MM:4b:" + "fid=" + ft_tmp2.id + " mid=" + ft_tmp2.message_id)
+            // ---------- DEBUG ----------
+            // ---------- DEBUG ----------
+            m_tmp = orma!!.selectFromMessage().idEq(new_msg_id).toList()[0]
+            Log.i(TAG, "add_outgoing_file:MM2MM:5:" + m.filetransfer_id + "::" + m_tmp)
+            messagestore.send(MessageAction.SendMessage(UIMessage(
+                direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value,
+                msgDatabaseId = new_msg_id, user = myUser,
+                timeMs = m.sent_timestamp, text = m.text,
+                toxpk = friend_pubkey.uppercase(), trifaMsgType = m.TRIFA_MESSAGE_TYPE,
+                file_state = m.state,
+                filename_fullpath = m.filename_fullpath)))
+        }
+
         fun sent_groupmessage_to_db(groupid: String, message_timestamp: Long, group_message: String?, message_id: Long): Long
         {
             val message_id_hex = fourbytes_of_long_to_hex(message_id)
@@ -2224,7 +2561,7 @@ class MainActivity
             val m = com.zoffcc.applications.sorm.GroupMessage()
             m.is_new = false
             m.tox_group_peer_pubkey = tox_group_self_get_public_key(tox_group_by_groupid__wrapper(groupid))!!.uppercase()
-            m.direction = 1 // msg sent
+            m.direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value // msg sent
             m.TOX_MESSAGE_TYPE = 0
             m.read = true
             m.tox_group_peername = peername
@@ -2254,7 +2591,6 @@ class MainActivity
 
         @JvmStatic fun modify_message_with_finished_ft(message: Message, file_size: Long)
         {
-            Log.i(TAG, "modify_message:filename_fullpath=" + message.filename_fullpath)
             messagestore.send(MessageAction.UpdateMessage(message, Filetransfer().filesize(file_size)))
         }
 

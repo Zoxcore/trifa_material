@@ -178,6 +178,19 @@ public class TRIFAGlobals
 
     }
 
+    public static enum TRIFA_MSG_DIRECTION
+    {
+        TRIFA_MSG_DIRECTION_RECVD(0), TRIFA_MSG_DIRECTION_SENT(1) ;
+
+        public int value;
+
+        private TRIFA_MSG_DIRECTION(int value)
+        {
+            this.value = value;
+        }
+
+    }
+
     public static enum TRIFA_MSG_TYPE
     {
         TRIFA_MSG_TYPE_TEXT(0), TRIFA_MSG_FILE(1);

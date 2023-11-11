@@ -731,6 +731,7 @@ public class Message
 
     public Message state(int state)
     {
+        Log.i(TAG, "DB:state="+state);
         if (this.sql_set.equals(""))
         {
             this.sql_set = " set ";

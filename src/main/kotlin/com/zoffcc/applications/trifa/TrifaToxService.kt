@@ -1,11 +1,15 @@
 package com.zoffcc.applications.trifa
 
+import com.zoffcc.applications.sorm.Message
 import com.zoffcc.applications.sorm.OrmaDatabase
+import com.zoffcc.applications.trifa.HelperFiletransfer.start_outgoing_ft
 import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__udp_enabled
 import com.zoffcc.applications.trifa.MainActivity.Companion.add_tcp_relay_single_wrapper
 import com.zoffcc.applications.trifa.MainActivity.Companion.bootstrap_single_wrapper
 import com.zoffcc.applications.trifa.MainActivity.Companion.init_tox_callbacks
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_connection_status
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_name
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_chat_id
@@ -26,9 +30,11 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_kill
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_friend_list
 import com.zoffcc.applications.trifa.TRIFAGlobals.GROUP_ID_LENGTH
 import com.zoffcc.applications.trifa.TRIFAGlobals.global_last_activity_outgoung_ft_ts
+import com.zoffcc.applications.trifa.TRIFAGlobals.global_self_connection_status
 import contactstore
 import grouppeerstore
 import groupstore
+import online_button_text_wrapper
 import org.briarproject.briar.desktop.contact.ContactItem
 import org.briarproject.briar.desktop.contact.GroupItem
 import org.briarproject.briar.desktop.contact.GroupPeerItem
@@ -46,7 +52,8 @@ class TrifaToxService
         {
             override fun run()
             {
-                com.zoffcc.applications.sorm.OrmaDatabase.init() // ------ correct startup order ------
+                com.zoffcc.applications.sorm.OrmaDatabase.init()
+                // ------ correct startup order ------
                 orma = com.zoffcc.applications.sorm.OrmaDatabase()
                 val old_is_tox_started = is_tox_started
                 Log.i(TAG, "is_tox_started:==============================")
@@ -61,7 +68,8 @@ class TrifaToxService
                 clear_friends()
                 load_friends()
                 clear_groups()
-                load_groups() // --------------- bootstrap ---------------
+                load_groups()
+                // --------------- bootstrap ---------------
                 // --------------- bootstrap ---------------
                 // --------------- bootstrap ---------------
                 if (!old_is_tox_started)
@@ -84,14 +92,10 @@ class TrifaToxService
                 {
                     try
                     {
-
-                        if ((global_last_activity_outgoung_ft_ts > -1) && ((global_last_activity_outgoung_ft_ts + 200) > System.currentTimeMillis()))
-                        {
+                        if ((global_last_activity_outgoung_ft_ts > -1) && ((global_last_activity_outgoung_ft_ts + 200) > System.currentTimeMillis())) {
                             // HINT: iterate much faster if there are active filetransfers
                             sleep(0, 250)
-                        }
-                        else
-                        {
+                        } else {
                             sleep(tox_iteration_interval_ms)
                         }
                     } catch (e: InterruptedException)
@@ -103,7 +107,41 @@ class TrifaToxService
                     }
                     tox_iterate() // Log.i(TAG, "=====>>>>> tox_iterate()");
                     tox_iteration_interval_ms = tox_iteration_interval()
-                } // ------- MAIN TOX LOOP ---------------------------------------------------------------
+                    // --- start queued outgoing FTs here --------------
+                    // --- start queued outgoing FTs here --------------
+                    if (online_button_text_wrapper != "offline")
+                    {
+                        if (last_start_queued_fts_ms + 4 * 1000 < System.currentTimeMillis())
+                        {
+                            // Log.i(TAG, "start_queued_outgoing_FTs ============================================");
+                            last_start_queued_fts_ms = System.currentTimeMillis()
+                            try
+                            {
+                                val m_v1 = orma!!.selectFromMessage().directionEq(TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value).
+                                TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value).ft_outgoing_queuedEq(true).
+                                stateNotEq(ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_CANCEL.value).orderBySent_timestampAsc().toList()
+                                if (m_v1 != null && m_v1.size > 0)
+                                {
+                                    val ii: Iterator<Message> = m_v1.iterator()
+                                    while (ii.hasNext())
+                                    {
+                                        val m_resend_ft = ii.next()
+                                        if (tox_friend_get_connection_status(
+                                                tox_friend_by_public_key(m_resend_ft.tox_friendpubkey))
+                                            != ToxVars.TOX_CONNECTION.TOX_CONNECTION_NONE.value)
+                                        {
+                                            start_outgoing_ft(m_resend_ft)
+                                        }
+                                    }
+                                }
+                            } catch (e: java.lang.Exception)
+                            {
+                            }
+                        }
+                    }
+                    // --- start queued outgoing FTs here --------------
+                }
+                // ------- MAIN TOX LOOP ---------------------------------------------------------------
                 // ------- MAIN TOX LOOP ---------------------------------------------------------------
                 // ------- MAIN TOX LOOP ---------------------------------------------------------------
                 // ------- MAIN TOX LOOP ---------------------------------------------------------------

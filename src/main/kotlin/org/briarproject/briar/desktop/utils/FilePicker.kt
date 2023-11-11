@@ -22,15 +22,16 @@ import com.zoffcc.applications.trifa.Log
 import java.awt.FileDialog
 import java.awt.Frame
 
-object ImagePicker {
+object FilePicker {
 
     val TAG = "trifa.ImagePicker"
 
     private val SUPPORTED_EXTENSIONS_IMAGE = setOf("png", "jpg", "jpeg", "gif", "webp")
 
-    fun pickImageUsingDialog(parent: Frame? = null, onCloseRequest: (result: String?) -> Unit) {
+    fun pickFileUsingDialog(parent: Frame? = null, onCloseRequest: (directory: String?, filename: String?) -> Unit) {
         val dialog = java.awt.FileDialog(parent)
         dialog.isMultipleMode = false
+        /*
         dialog.setFilenameFilter { dir, name ->
             val parts = name.split(".")
             if (parts.size < 2) {
@@ -40,13 +41,20 @@ object ImagePicker {
                 SUPPORTED_EXTENSIONS_IMAGE.contains(extension.lowercase())
             }
         }
+        */
         dialog.mode = FileDialog.LOAD
         dialog.isVisible = true
         val files = dialog.files
         val file = if (files == null || files.isEmpty()) null else files[0]
-        Log.i (TAG, "Loading image from file '$file'")
+        Log.i (TAG, "Loading from file '$file'")
         if (file != null) {
-            onCloseRequest(file.canonicalPath)
+            try
+            {
+                onCloseRequest(file.absoluteFile.parent, file.absoluteFile.name)
+            }
+            catch (e: Exception)
+            {
+            }
         }
     }
 }
