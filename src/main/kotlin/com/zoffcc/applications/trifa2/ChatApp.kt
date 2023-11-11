@@ -36,6 +36,7 @@ import com.zoffcc.applications.trifa.HelperGroup
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity
+import com.zoffcc.applications.trifa.MainActivity.Companion.add_outgoing_file
 import com.zoffcc.applications.trifa.MainActivity.Companion.on_call_ended_actions
 import com.zoffcc.applications.trifa.MainActivity.Companion.sent_message_to_db
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
@@ -59,12 +60,13 @@ import com.zoffcc.applications.trifa.createSavepathStore
 import com.zoffcc.applications.trifa.createToxDataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
-import org.briarproject.briar.desktop.utils.ImagePicker.pickImageUsingDialog
+import org.briarproject.briar.desktop.utils.FilePicker.pickFileUsingDialog
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
+import java.io.File
 
 private const val TAG = "trifa.Chatapp"
-val myUser = User("Me", picture = null, toxpk = null)
+val myUser = User("Me", picture = null, toxpk = "AAA")
 val messagestore = CoroutineScope(SupervisorJob()).createMessageStore()
 val groupmessagestore = CoroutineScope(SupervisorJob()).createGroupMessageStore()
 val contactstore = CoroutineScope(SupervisorJob()).createContactStore()
@@ -186,7 +188,7 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                                     if (res >= 0)
                                     {
                                         val msg_id_db = sent_message_to_db(selectedContactPubkey, timestamp, text)
-                                        messagestore.send(MessageAction.SendMessage(UIMessage(msgDatabaseId = msg_id_db, user = myUser, timeMs = timestamp, text = text, toxpk = myUser.toxpk, trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
+                                        messagestore.send(MessageAction.SendMessage(UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value, user = myUser, timeMs = timestamp, text = text, toxpk = selectedContactPubkey!!, trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, msgDatabaseId = msg_id_db, filename_fullpath = null)))
                                     }
                                 }
                             }
@@ -202,8 +204,9 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                                 modifier = Modifier.width(40.dp).align(Alignment.Center),
                                 contentDescription = "send File",
                                 onClick = {
-                                    pickImageUsingDialog(onCloseRequest = {
-                                        Log.i(TAG, "pickImageUsingDialog:result=$it")
+                                    pickFileUsingDialog(onCloseRequest = { dir, file ->
+                                        Log.i(TAG, "pickFileUsingDialog:result=" + dir + "::" + File.separator + "::" + file )
+                                        add_outgoing_file(dir, file, selectedContactPubkey)
                                     })
                                 }
                             )

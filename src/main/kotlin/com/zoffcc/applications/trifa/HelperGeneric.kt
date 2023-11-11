@@ -19,6 +19,7 @@ import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.loadSvgPainter
 import androidx.compose.ui.res.loadXmlImageVector
 import androidx.compose.ui.unit.Density
+import com.zoffcc.applications.sorm.Filetransfer
 import com.zoffcc.applications.sorm.Message
 import com.zoffcc.applications.trifa.HelperFiletransfer.get_filetransfer_filenum_from_id
 import com.zoffcc.applications.trifa.HelperFiletransfer.set_filetransfer_state_from_id
@@ -34,13 +35,13 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.modify_message_with_
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_file_control
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_delete
-import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_by_chat_id
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_leave
 import com.zoffcc.applications.trifa.MainActivity.Companion.update_savedata_file
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import kotlinx.coroutines.withContext
 import org.xml.sax.InputSource
 import java.io.File
+import java.io.FileInputStream
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 
@@ -52,10 +53,32 @@ object HelperGeneric {
     fun PubkeyShort(pubkey: String) : String {
         return pubkey.take(PUBKEY_SHORT_LEN)
     }
+    fun bytebuffer_to_hexstring(`in`: ByteBuffer, upper_case: Boolean): String?
+    {
+        return try
+        {
+            `in`.rewind()
+            val sb = StringBuilder("")
+            while (`in`.hasRemaining())
+            {
+                if (upper_case)
+                {
+                    sb.append(String.format("%02X", `in`.get()))
+                } else
+                {
+                    sb.append(String.format("%02x", `in`.get()))
+                }
+            }
+            `in`.rewind()
+            sb.toString()
+        } catch (e: java.lang.Exception)
+        {
+            null
+        }
+    }
 
     fun cancel_ft_from_ui(uimessage: UIMessage)
     {
-        Log.i(TAG, "cancel_ft_from_ui:001")
         try
         {
             val msg: Message? = orma!!.selectFromMessage().idEq(uimessage.msgDatabaseId)
@@ -69,7 +92,8 @@ object HelperGeneric {
                 set_filetransfer_state_from_id(msg.filetransfer_id, ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_CANCEL.value)
                 set_message_state_from_id(msg.id, ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_CANCEL.value) // update message view
                 // update message view
-                modify_message_with_ft(msg, null)
+                msg.state = ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_CANCEL.value
+                modify_message_with_ft(msg, Filetransfer())
             }
         }
         catch(e: Exception)
@@ -143,20 +167,44 @@ object HelperGeneric {
             val ret: ByteBuffer = ByteBuffer.allocateDirect(in_bytes.size / 2)
             var i = 0
             while (i < in_bytes.size) {
-
                 // Log.i(TAG, "hexstring_to_bytebuffer:i=" + i + " byte=" + in_bytes[i] + " byte2=" + in_bytes[i + 1]);
                 val b1 = in_bytes[i + 1]
                 val b2 = in_bytes[i]
                 // Log.i(TAG, "hexstring_to_bytebuffer:res=" + two_hex_bytes_to_dec_int(b1, b2));
-                ret.put(two_hex_bytes_to_dec_int(b1, b2) as Byte)
+                ret.put(two_hex_bytes_to_dec_int(b1, b2).toByte())
                 i = i + 2
             }
             ret.rewind()
             return ret
         } catch (e: Exception) {
-            // e.printStackTrace()
+            e.printStackTrace()
         }
         return null
+    }
+    fun read_chunk_from_SD_file(file_name_with_path: String?, position: Long, file_chunk_length: Long): ByteArray?
+    {
+        if (file_name_with_path == null)
+        {
+            return null
+        }
+
+        val out = ByteArray(file_chunk_length.toInt())
+        try
+        {
+            val fis = FileInputStream(File(file_name_with_path))
+            fis.channel.position(position)
+            val actually_read = fis.read(out, 0, file_chunk_length.toInt())
+            try
+            {
+                fis.close()
+            } catch (_: java.lang.Exception)
+            {
+            }
+        } catch (e: java.lang.Exception)
+        {
+            e.printStackTrace()
+        }
+        return out
     }
 
     fun update_savedata_file_wrapper() {
@@ -176,7 +224,7 @@ object HelperGeneric {
             update_savedata_file(password_hash_2)
             val end_timestamp = System.currentTimeMillis()
             MainActivity.semaphore_tox_savedata!!.release()
-            //DEBUG// Log.i(TAG, "update_savedata_file()" + callerMethodName + " took:" + (end_timestamp - start_timestamp).toFloat() / 1000f + "s")
+            // DEBUG// Log.i(TAG, "update_savedata_file()" + callerMethodName + " took:" + (end_timestamp - start_timestamp).toFloat() / 1000f + "s")
         } catch (e: InterruptedException) {
             MainActivity.semaphore_tox_savedata!!.release()
             e.printStackTrace()

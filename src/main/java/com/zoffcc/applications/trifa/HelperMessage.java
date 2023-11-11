@@ -22,7 +22,6 @@ public class HelperMessage {
         }
         ByteBuffer hash_bytes = HelperGeneric.hexstring_to_bytebuffer(msgV3hash_hex_string);
 
-
         if (hash_bytes == null) {
             return;
         } else {
@@ -93,7 +92,7 @@ public class HelperMessage {
         try
         {
             TrifaToxService.Companion.getOrma().updateMessage().idEq(mid).state(state).execute();
-            // Log.i(TAG, "set_message_state_from_id:message_id=" + message_id + " state=" + state);
+            Log.i(TAG, "set_message_state_from_id:message_id=" + mid + " state=" + state);
         }
         catch (Exception e)
         {
@@ -218,6 +217,54 @@ public class HelperMessage {
         {
             e.printStackTrace();
             Log.i(TAG, "set_message_start_queueing_from_id:EE:" + e.getMessage());
+        }
+        try
+        {
+            Message msg = TrifaToxService.Companion.getOrma().selectFromMessage().idEq(mid).toList().get(0);
+            if (msg != null)
+            {
+                final Filetransfer ft = new Filetransfer();
+                ft.filesize(0);
+                if (ft_outgoing_queued == true) {
+                    msg.state = ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_RESUME.value;
+                }
+                Log.i(TAG, "modify_message_with_ft: state="+msg.state);
+                set_message_state_from_id(msg.id, msg.state);
+                modify_message_with_ft(msg, ft);
+            }
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    static void update_message_in_db_filetransfer_kind(final Message m)
+    {
+        try
+        {
+            TrifaToxService.Companion.getOrma().updateMessage().
+                    idEq(m.id).
+                    filetransfer_kind(m.filetransfer_kind).
+                    execute();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public static void set_message_start_sending_from_id(long message_id)
+    {
+        try
+        {
+            TrifaToxService.Companion.getOrma().updateMessage().
+                    idEq(message_id).ft_outgoing_started(true).execute();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            Log.i(TAG, "set_message_start_sending_from_id:EE:" + e.getMessage());
         }
     }
 }
