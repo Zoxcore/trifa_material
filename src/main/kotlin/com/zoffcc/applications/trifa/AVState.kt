@@ -527,8 +527,8 @@ data class AVState(val a: Int)
             {
                 override fun onSuccess(width: Long, height: Long, source_width: Long, source_height: Long, pts: Long, fps: Int, source_format: Int)
                 {
-                    Log.i(TAG, "ffmpeg open video capture onSuccess: $width $height $pts FPS: $fps Source Format: "
-                            + AVActivity.ffmpegav_video_source_format_name.value_str(source_format))
+                    // Log.i(TAG, "ffmpeg open video capture onSuccess: $width $height $pts FPS: $fps Source Format: "
+                    //         + AVActivity.ffmpegav_video_source_format_name.value_str(source_format))
                     if (current_video_in_fps_get() != fps) {
                         current_video_in_fps_set(fps)
                         avstatestorevcapfpsstate.update(fps)
@@ -617,7 +617,7 @@ fun CoroutineScope.createAVStateStoreVideoCaptureFpsState(): AVStateStoreVideoCa
         override fun update(fps: Int)
         {
             launch {
-                mutableStateFlow.value = state.copy(videocapfps_state = fps)
+                // mutableStateFlow.value = state.copy(videocapfps_state = fps)
             }
         }
         override fun updateSourceResolution(sourceResolution: String)
@@ -653,7 +653,7 @@ fun CoroutineScope.createAVStateStoreVideoPlayFpsState(): AVStateStoreVideoPlayF
         override fun update(fps: Int)
         {
             launch {
-                mutableStateFlow.value = state.copy(videoplayfps_state = fps)
+                //mutableStateFlow.value = state.copy(videoplayfps_state = fps)
             }
         }
         override fun updateIncomingResolution(incomingResolution: String)

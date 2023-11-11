@@ -8,39 +8,29 @@ import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterEnd
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.zoffcc.applications.trifa.Log
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
-import java.io.File
 
 @Composable
-internal fun GroupMessages(groupmessages: List<UIGroupMessage>, ui_scale: Float) {
+internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
     val listState = rememberLazyListState()
-    if (groupmessages.isNotEmpty()) {
-        LaunchedEffect(groupmessages.last().id, groupmessages.last().toxpk) {
-            try
-            {
-                // listState.animateScrollToItem(groupmessages.lastIndex, scrollOffset = 0)
-                listState.scrollToItem(groupmessages.lastIndex, 2000)
-            }
-            catch (e : Exception)
-            {
-            }
-        }
-    }
+    val grpmsgs by groupmessagestore.stateFlow.collectAsState()
     Box(Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(start = 4.dp, end = 10.dp),
@@ -48,7 +38,7 @@ internal fun GroupMessages(groupmessages: List<UIGroupMessage>, ui_scale: Float)
             state = listState
         ) {
             item { Spacer(Modifier.size(SPACE_BEFORE_FIRST_MESSAGE)) }
-            items(groupmessages, key = { it.id }) {
+            items(grpmsgs.groupmessages, key = { it.msgDatabaseId }) {
                 GroupChatMessage(isMyMessage = it.user == myUser, it, ui_scale)
             }
             item {
@@ -59,6 +49,31 @@ internal fun GroupMessages(groupmessages: List<UIGroupMessage>, ui_scale: Float)
             adapter = rememberScrollbarAdapter(listState),
             modifier = Modifier.fillMaxHeight().align(CenterEnd).width(10.dp) // .background(Color.Red)
         )
+        // This probably shouldn't cause a recomposition
+        var prevLastSerial by remember { mutableStateOf(-1L) }
+        var lastSerial = grpmsgs.groupmessages.lastOrNull()?.msgDatabaseId
+        var prevselectedGroupId by remember { mutableStateOf(selectedGroupId) }
+        if (prevselectedGroupId != selectedGroupId)
+        {
+            lastSerial = -1
+            prevselectedGroupId = selectedGroupId
+            prevLastSerial = -1L
+        }
+        LaunchedEffect(lastSerial, selectedGroupId) {
+            if (lastSerial != null) {
+                // If we're at the spot we last scrolled to
+                val lastVisibleSerial = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+                    ?.let { grpmsgs.groupmessages.getOrNull(it)?.msgDatabaseId }
+                    ?: -1L
+                if ((lastVisibleSerial >= prevLastSerial || lastVisibleSerial == -1L) && grpmsgs.groupmessages.lastIndex > 0) {
+                    // scroll to the end if we were at the end
+                    listState.scrollToItem(grpmsgs.groupmessages.lastIndex)
+                    Log.i(com.zoffcc.applications.trifa.TAG, "messages -> scroll to the end")
+                }
+                // remember the last serial
+                prevLastSerial = lastSerial
+            }
+        }
     }
 }
 
