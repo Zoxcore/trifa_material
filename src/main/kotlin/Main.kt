@@ -138,7 +138,7 @@ val SETTINGS_HEADER_SIZE = 56.dp
 val CONTACT_COLUMN_WIDTH = 230.dp
 val GROUPS_COLUMN_WIDTH = 200.dp
 val GROUP_PEER_COLUMN_WIDTH = 180.dp
-val MESAGE_INPUT_LINE_HEIGHT = 55.dp
+val MESAGE_INPUT_LINE_HEIGHT = 58.dp
 val MAIN_TOP_TAB_HEIGHT = 160.dp
 val IMAGE_PREVIEW_SIZE = 70f
 val AVATAR_SIZE = 40f
@@ -834,7 +834,13 @@ fun load_groupmessages_for_friend(selectedGroupId: String?)
                     }
                     TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value ->
                     {
-                        uigroupmessages.add(UIGroupMessage(message_id_tox = it.message_id_tox, msgDatabaseId = it.id, user = myUser, timeMs = it.sent_timestamp, text = it.text, toxpk = myUser.toxpk, groupId = it.group_identifier.lowercase(), trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null))
+                        when (it.TRIFA_MESSAGE_TYPE)
+                        {
+                            TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value ->
+                                uigroupmessages.add(UIGroupMessage(message_id_tox = it.message_id_tox, msgDatabaseId = it.id, user = myUser, timeMs = it.sent_timestamp, text = it.text, toxpk = it.tox_group_peer_pubkey.uppercase(), groupId = it.group_identifier.lowercase(), trifaMsgType = it.TRIFA_MESSAGE_TYPE, filename_fullpath = it.filename_fullpath))
+                            TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value ->
+                                uigroupmessages.add(UIGroupMessage(message_id_tox = it.message_id_tox, msgDatabaseId = it.id, user = myUser, timeMs = it.sent_timestamp, text = it.text, toxpk = it.tox_group_peer_pubkey.uppercase(), groupId = it.group_identifier.lowercase(), trifaMsgType = it.TRIFA_MESSAGE_TYPE, filename_fullpath = it.filename_fullpath))
+                        }
                     }
                     else ->
                     {

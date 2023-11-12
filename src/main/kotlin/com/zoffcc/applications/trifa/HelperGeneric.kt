@@ -19,6 +19,8 @@ import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.loadSvgPainter
 import androidx.compose.ui.res.loadXmlImageVector
 import androidx.compose.ui.unit.Density
+import com.sksamuel.scrimage.ImmutableImage
+import com.sksamuel.scrimage.webp.WebpWriter
 import com.zoffcc.applications.sorm.Filetransfer
 import com.zoffcc.applications.sorm.Message
 import com.zoffcc.applications.trifa.HelperFiletransfer.get_filetransfer_filenum_from_id
@@ -37,13 +39,21 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_delete
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_leave
 import com.zoffcc.applications.trifa.MainActivity.Companion.update_savedata_file
+import com.zoffcc.applications.trifa.TRIFAGlobals.VFS_FILE_DIR
+import com.zoffcc.applications.trifa.ToxVars.TOX_MAX_NGC_FILESIZE
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import kotlinx.coroutines.withContext
+import org.imgscalr.Scalr
 import org.xml.sax.InputSource
+import java.awt.Dimension
 import java.io.File
 import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
+import java.util.*
+import javax.imageio.ImageIO
 
 object HelperGeneric {
     private const val TAG = "trifa.Hlp.Generic"
@@ -280,6 +290,113 @@ object HelperGeneric {
 
     fun loadXmlImageVector(file: File, density: Density): ImageVector =
         file.inputStream().buffered().use { loadXmlImageVector(InputSource(it), density) }
+
+    fun shrink_image_file(ofw: MainActivity.Companion.outgoing_file_wrapped, groupid: String?): MainActivity.Companion.outgoing_file_wrapped
+    {
+        if (groupid == null)
+        {
+            return ofw
+        }
+
+        val ret = MainActivity.Companion.outgoing_file_wrapped()
+        ret.filename_wrapped = ofw.filename_wrapped
+        ret.filepath_wrapped = ofw.filepath_wrapped
+        ret.file_size_wrapped = ofw.file_size_wrapped
+
+        try
+        {
+            val ff1 = File(ofw.filepath_wrapped + File.separator + ofw.filename_wrapped)
+            Log.i(TAG, "shrink_image_file:file_before=" + ff1.canonicalPath)
+            Log.i(TAG, "shrink_image_file:fsize_before=" + ff1.length())
+            var new_len = ff1.length()
+            var max_width = 800
+            val filename_out = HelperFiletransfer.
+                get_incoming_filetransfer_local_filename(
+                    ofw.filename_wrapped, groupid.lowercase()
+                )
+            val ff2 = File(VFS_FILE_DIR + File.separator + groupid.lowercase(), filename_out)
+            File(VFS_FILE_DIR + File.separator + groupid.lowercase()).mkdirs()
+            val qualityies = intArrayOf(70, 50, 30, 10, 4, 2, 1, 0)
+            var count = 0
+            var quality = qualityies[count]
+            while (new_len > TOX_MAX_NGC_FILESIZE)
+            {
+                ImmutableImage.loader().fromFile(ff1).scaleToWidth(max_width).
+                    output(WebpWriter().withQ(quality),ff2.canonicalPath);
+                new_len = ff2.length()
+                Log.i(TAG, "shrink_image_file:fsize_after=" +
+                        new_len + " " + quality + " " + max_width + " " + ff2.absolutePath)
+                count++
+                if (count < qualityies.size)
+                {
+                    quality = qualityies[count]
+                    Log.i(TAG, "shrink_image_file:A:count=" + count + " qualityies.length=" + qualityies.size + " quality=" + quality)
+                } else
+                {
+                    Log.i(TAG, "shrink_image_file:B:count=" + count + " qualityies.length=" + qualityies.size + " quality=" + quality)
+                }
+                if (quality > 0)
+                {
+                    max_width = max_width - 20
+                } else
+                {
+                    max_width = max_width / 2
+                    if (max_width < 30)
+                    {
+                        max_width = 30
+                    }
+                }
+                if (max_width <= 30)
+                {
+                    ret.filename_wrapped = ff2.name
+                    ret.filepath_wrapped = ff2.parent
+                    ret.file_size_wrapped = new_len
+                    Log.i(TAG, "shrink_image_file:done:1:" +
+                            ret.filename_wrapped + " " + ret.filepath_wrapped + " " + ret.file_size_wrapped)
+                    return(ret)
+                }
+                if (new_len <= TOX_MAX_NGC_FILESIZE)
+                {
+                    ret.filename_wrapped = ff2.name
+                    ret.filepath_wrapped = ff2.parent
+                    ret.file_size_wrapped = new_len
+                    Log.i(TAG, "shrink_image_file:done:1:" +
+                            ret.filename_wrapped + " " + ret.filepath_wrapped + " " + ret.file_size_wrapped)
+                    return(ret)
+                } else
+                {
+                    try
+                    {
+                        ff2.delete()
+                        Log.i(TAG, "shrink_image_file:temp file deleted:002")
+                    } catch (ignored: java.lang.Exception)
+                    {
+                    }
+                }
+            }
+            Log.i(TAG, "shrink_image_file:fsize_after:END=" + ff1.length() + " " + ff1.absolutePath)
+        } catch (e: java.lang.Exception)
+        {
+            Log.i(TAG, "shrink_image_file:compressToFile:EE003:" + e.message)
+            e.printStackTrace()
+        }
+        return(ret)
+    }
+    @Throws(IOException::class)
+    fun io_file_copy(src: File?, dst: File?)
+    {
+        FileInputStream(src).use { `in` ->
+            FileOutputStream(dst).use { out ->
+                // Transfer bytes from in to out
+                val buf = ByteArray(1024)
+                var len: Int
+                while (`in`.read(buf).also { len = it } > 0)
+                {
+                    out.write(buf, 0, len)
+                }
+            }
+        }
+    }
 }
 
 /*

@@ -55,7 +55,7 @@ fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?, 
         inputText = ""
     }
     TextField(
-        modifier = Modifier.fillMaxWidth().fillMaxHeight()
+        modifier = Modifier.fillMaxWidth()
             .background(MaterialTheme.colors.background)
             .padding(1.dp)
             .focusRequester(focusRequester)

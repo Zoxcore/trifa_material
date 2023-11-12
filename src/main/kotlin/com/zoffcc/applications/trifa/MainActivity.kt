@@ -29,10 +29,14 @@ import com.zoffcc.applications.trifa.HelperFriend.send_friend_msg_receipt_v2_wra
 import com.zoffcc.applications.trifa.HelperGeneric.PubkeyShort
 import com.zoffcc.applications.trifa.HelperGeneric.bytesToHex
 import com.zoffcc.applications.trifa.HelperGeneric.hexstring_to_bytebuffer
+import com.zoffcc.applications.trifa.HelperGeneric.io_file_copy
 import com.zoffcc.applications.trifa.HelperGeneric.read_chunk_from_SD_file
+import com.zoffcc.applications.trifa.HelperGeneric.shrink_image_file
 import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
+import com.zoffcc.applications.trifa.HelperGroup.bytebuffer_to_hexstring
 import com.zoffcc.applications.trifa.HelperGroup.fourbytes_of_long_to_hex
 import com.zoffcc.applications.trifa.HelperGroup.handle_incoming_group_file
+import com.zoffcc.applications.trifa.HelperGroup.send_group_image
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupnum__wrapper
 import com.zoffcc.applications.trifa.HelperMessage.update_single_message_from_ftid
@@ -54,6 +58,7 @@ import com.zoffcc.applications.trifa.TRIFAGlobals.VFS_TMP_FILE_DIR
 import com.zoffcc.applications.trifa.TRIFAGlobals.global_last_activity_outgoung_ft_ts
 import com.zoffcc.applications.trifa.ToxVars.TOX_FILE_ID_LENGTH
 import com.zoffcc.applications.trifa.ToxVars.TOX_HASH_LENGTH
+import com.zoffcc.applications.trifa.ToxVars.TOX_MAX_NGC_FILESIZE
 import com.zoffcc.applications.trifa.ToxVars.TOX_MAX_NGC_FILE_AND_HEADER_SIZE
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import com.zoffcc.applications.trifa.VideoInFrame.new_video_in_frame
@@ -2458,6 +2463,113 @@ class MainActivity
             }
 
             return row_id
+        }
+        class outgoing_file_wrapped
+        {
+            var filepath_wrapped: String? = null
+            var filename_wrapped: String? = null
+            var file_size_wrapped: Long = -1
+        }
+
+        fun add_ngc_outgoing_file(filepath: String?, filename: String?, groupid: String?)
+        {
+            if ((filepath == null) || (filename == null) || (groupid == null))
+            {
+                Log.i(TAG, "add_outgoing_file:filepath or filename or friend_pubkey is null")
+                return
+            }
+
+            var file_size: Long = -1
+            file_size = try {
+                File(filepath + File.separator + filename).length()
+            } catch (e: java.lang.Exception) {
+                e.printStackTrace()
+                // file length unknown?
+                return
+            }
+            if (file_size < 1) {
+                // file length "zero"?
+                return
+            }
+
+            var ofw = outgoing_file_wrapped()
+            ofw.file_size_wrapped = file_size
+            ofw.filepath_wrapped = filepath
+            ofw.filename_wrapped = filename
+
+            if (file_size > TOX_MAX_NGC_FILESIZE)
+            {
+                // reducing the file size down to hopefully 37kbytes -------------------
+                Log.i(TAG, "add_outgoing_file:shrink:start")
+                ofw = shrink_image_file(ofw, groupid)
+                Log.i(TAG, "add_outgoing_file:shrink:done:" + ofw)
+                // reducing the file size down to hopefully 37kbytes -------------------
+            }
+            else
+            {
+                Log.i(TAG, "add_outgoing_file:no_need_to_shrink_file")
+                val filename_out = get_incoming_filetransfer_local_filename(
+                    ofw.filename_wrapped, groupid.lowercase())
+                val filename_out_with_path = VFS_FILE_DIR + File.separator + groupid.lowercase() +
+                        File.separator + filename_out
+                ofw.filepath_wrapped = File(filename_out_with_path).parent
+                ofw.filename_wrapped = File(filename_out_with_path).name
+                io_file_copy(File(filepath + File.separator + filename), File(filename_out_with_path))
+            }
+            Log.i(TAG, "add_outgoing_file:001")
+            // add FT message to UI
+            val m = GroupMessage()
+            m.is_new = false // own messages are always "not new"
+            m.tox_group_peer_pubkey = tox_group_self_get_public_key(
+                tox_group_by_groupid__wrapper(groupid))!!.uppercase(Locale.getDefault())
+            m.direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value
+            m.TOX_MESSAGE_TYPE = 0
+            m.read = true // !!!! there is no "read status" with conferences in Tox !!!!
+            m.tox_group_peername = null
+            m.private_message = 0
+            m.group_identifier = groupid.lowercase()
+            m.TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value
+            m.sent_timestamp = System.currentTimeMillis()
+            m.rcvd_timestamp = System.currentTimeMillis() // since we do not have anything better assume "now"
+            m.text = (ofw.filename_wrapped + "\n" + ofw.file_size_wrapped).toString() + " bytes"
+            m.was_synced = false
+            m.path_name = ofw.filepath_wrapped
+            m.file_name = ofw.filename_wrapped
+            m.filename_fullpath = File(ofw.filepath_wrapped + "/" + ofw.filename_wrapped).getAbsolutePath()
+            try
+            {
+                m.filesize = File(ofw.filepath_wrapped + "/" + ofw.filename_wrapped).length()
+            } catch (ee: java.lang.Exception)
+            {
+                m.filesize = 0
+            }
+            val hash_bytes = ByteBuffer.allocateDirect(TOX_HASH_LENGTH)
+            tox_messagev3_get_new_message_id(hash_bytes)
+            m.msg_id_hash = bytebuffer_to_hexstring(hash_bytes, true)
+            m.message_id_tox = ""
+            var row_id: Long = -1
+            try
+            {
+                row_id = orma!!.insertIntoGroupMessage(m)
+            } catch (e: Exception)
+            {
+            }
+            Log.i(TAG, "add_outgoing_file:090")
+            // now send the file to the group as custom package ----------
+            Log.i(TAG, "add_outgoing_file:091:send_group_image:start")
+            val res = send_group_image(m)
+            Log.i(TAG, "add_outgoing_file:092:send_group_image:done")
+            // now send the file to the group as custom package ----------
+
+            // update UI
+            groupmessagestore.send(
+                GroupMessageAction.SendGroupMessage(
+                UIGroupMessage(
+                    message_id_tox = m.message_id_tox, msgDatabaseId = row_id,
+                    user = myUser, timeMs = m.sent_timestamp, text = m.text,
+                    toxpk = m.tox_group_peer_pubkey, groupId = m.group_identifier,
+                    trifaMsgType = m.TRIFA_MESSAGE_TYPE,
+                    filename_fullpath = m.filename_fullpath)))
         }
 
         fun add_outgoing_file(filepath: String?, filename: String?, friend_pubkey: String?)
