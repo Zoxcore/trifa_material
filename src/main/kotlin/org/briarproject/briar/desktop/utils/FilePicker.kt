@@ -24,7 +24,7 @@ import java.awt.Frame
 
 object FilePicker {
 
-    val TAG = "trifa.ImagePicker"
+    val TAG = "trifa.FilePicker"
 
     private val SUPPORTED_EXTENSIONS_IMAGE = setOf("png", "jpg", "jpeg", "gif", "webp")
 
