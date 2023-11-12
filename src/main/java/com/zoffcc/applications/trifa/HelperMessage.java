@@ -3,6 +3,11 @@ package com.zoffcc.applications.trifa;
 import com.zoffcc.applications.sorm.Filetransfer;
 import com.zoffcc.applications.sorm.Message;
 
+import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 
@@ -266,5 +271,39 @@ public class HelperMessage {
             e.printStackTrace();
             Log.i(TAG, "set_message_start_sending_from_id:EE:" + e.getMessage());
         }
+    }
+
+    /**
+     * Get an image off the system clipboard.
+     *
+     * @return Returns an Image if successful; otherwise returns null.
+     */
+    public static Image getImageFromClipboard()
+    {
+        Transferable transferable = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
+        if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.imageFlavor))
+        {
+            try
+            {
+                // Log.i(TAG, "getImageFromClipboard:"+transferable.getTransferDataFlavors());
+                // Log.i(TAG, "getImageFromClipboard:I="+(Image) transferable.getTransferData(DataFlavor.imageFlavor));
+                return (Image) transferable.getTransferData(DataFlavor.imageFlavor);
+            }
+            catch (UnsupportedFlavorException e)
+            {
+                // handle this as desired
+                e.printStackTrace();
+            }
+            catch (IOException e)
+            {
+                // handle this as desired
+                e.printStackTrace();
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 }
