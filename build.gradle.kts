@@ -38,6 +38,8 @@ dependencies {
     //
     implementation("org.xerial:sqlite-jdbc:3.43.2.1")
     implementation("ca.gosyer:kotlin-multiplatform-appdirs:1.1.1")
+    implementation("com.sksamuel.scrimage:scrimage-core:4.1.1")
+    implementation("com.sksamuel.scrimage:scrimage-webp:4.1.1")
 }
 
 compose.desktop {

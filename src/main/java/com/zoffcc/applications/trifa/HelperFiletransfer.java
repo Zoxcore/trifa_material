@@ -5,6 +5,7 @@ import com.zoffcc.applications.sorm.Message;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URLConnection;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -120,11 +121,14 @@ public class HelperFiletransfer {
     {
         String result = filter_out_specials_from_filepath(incoming_filename);
         String wanted_full_filename_path = VFS_FILE_DIR + "/" + friend_pubkey_str;
-
-        // Log.i(TAG, "check_auto_accept_incoming_filetransfer:start=" + incoming_filename + " " + result + " " +
-        //           wanted_full_filename_path);
-
+        Log.i(TAG, "get_incoming_filetransfer_local_filename:start=" + incoming_filename + " " + result + " " +
+                   wanted_full_filename_path);
         File f1 = new File(wanted_full_filename_path + "/" + result);
+        try {
+            Log.i(TAG, "get_incoming_filetransfer_local_filename:file=" + f1.getCanonicalPath());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         if (f1.exists())
         {

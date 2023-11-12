@@ -1,5 +1,6 @@
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,7 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Screenshot
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
@@ -34,13 +36,16 @@ import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.trifa.AVState
 import com.zoffcc.applications.trifa.HelperGroup
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
+import com.zoffcc.applications.trifa.HelperMessage.take_screen_shot_with_selection
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity
+import com.zoffcc.applications.trifa.MainActivity.Companion.add_ngc_outgoing_file
 import com.zoffcc.applications.trifa.MainActivity.Companion.add_outgoing_file
 import com.zoffcc.applications.trifa.MainActivity.Companion.on_call_ended_actions
 import com.zoffcc.applications.trifa.MainActivity.Companion.sent_message_to_db
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_send_message
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_self_get_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_send_message
 import com.zoffcc.applications.trifa.MainActivity.Companion.toxav_call
 import com.zoffcc.applications.trifa.MainActivity.Companion.toxav_call_control
@@ -168,15 +173,9 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                 Image(painterResource("background.jpg"), modifier = Modifier.fillMaxSize(), contentDescription = null, contentScale = ContentScale.Crop)
                 Column(modifier = Modifier.fillMaxSize()) {
                     Box(Modifier.weight(1f)) {
-                        val isActiveTarget = false
-                        Box(modifier = Modifier
-                            .fillMaxSize()
-                            .background(if (isActiveTarget) Color.Green else Color.Transparent))
-                            {
-                                Messages(ui_scale, selectedContactPubkey)
-                            }
+                        Messages(ui_scale, selectedContactPubkey)
                     }
-                    Row(modifier = Modifier.fillMaxWidth().height(MESAGE_INPUT_LINE_HEIGHT)) {
+                    Row(modifier = Modifier.fillMaxWidth()) {
                         if (displayTextField)
                         {
                             Box(Modifier.weight(1f)) {
@@ -193,23 +192,33 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                                 }
                             }
                         }
-                        Box(Modifier.width(40.dp).height(MESAGE_INPUT_LINE_HEIGHT).
+                        Box(Modifier.width(80.dp).height(MESAGE_INPUT_LINE_HEIGHT).
                         background(MaterialTheme.colors.background)) {
-                            // val LocalWindowScope = staticCompositionLocalOf<FrameWindowScope?> { null }
-                            // val windowScope = LocalWindowScope.current!!
-                            IconButton(
-                                icon = Icons.Filled.AttachFile,
-                                iconTint = Color.DarkGray,
-                                iconSize = 25.dp,
-                                modifier = Modifier.width(40.dp).align(Alignment.Center),
-                                contentDescription = "send File",
-                                onClick = {
-                                    pickFileUsingDialog(onCloseRequest = { dir, file ->
-                                        Log.i(TAG, "pickFileUsingDialog:result=" + dir + "::" + File.separator + "::" + file )
-                                        add_outgoing_file(dir, file, selectedContactPubkey)
-                                    })
-                                }
-                            )
+                            Row(modifier = Modifier.width(80.dp)){
+                                IconButton(
+                                    icon = Icons.Filled.AttachFile,
+                                    iconTint = Color.DarkGray,
+                                    iconSize = 25.dp,
+                                    modifier = Modifier.width(40.dp),
+                                    contentDescription = "send File",
+                                    onClick = {
+                                        pickFileUsingDialog(onCloseRequest = { dir, file ->
+                                            Log.i(TAG, "pickFileUsingDialog:result=" + dir + "::" + File.separator + "::" + file )
+                                            add_outgoing_file(dir, file, selectedContactPubkey)
+                                        })
+                                    }
+                                )
+                                IconButton(
+                                    icon = Icons.Filled.Screenshot,
+                                    iconTint = Color.DarkGray,
+                                    iconSize = 25.dp,
+                                    modifier = Modifier.width(40.dp),
+                                    contentDescription = "take Screenshot",
+                                    onClick = {
+                                        take_screen_shot_with_selection(selectedContactPubkey)
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -225,29 +234,53 @@ fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, s
     Theme {
         Surface {
             Box(modifier = Modifier.fillMaxSize()) {
-                Image(painterResource("background.jpg"), modifier = Modifier.fillMaxSize(), contentDescription = null, contentScale = ContentScale.Crop)
+                Image(painterResource("background.jpg"), modifier = Modifier.fillMaxSize(),
+                    contentDescription = null, contentScale = ContentScale.Crop)
                 Column(modifier = Modifier.fillMaxSize()) {
                     Box(Modifier.weight(1f)) {
                         GroupMessages(ui_scale = ui_scale, selectedGroupId)
                     }
-                    if (displayTextField)
-                    {
-                        GroupSendMessage (focusRequester, selectedGroupId) { text ->
-                            val timestamp = System.currentTimeMillis()
-                            val groupnum: Long = tox_group_by_groupid__wrapper(selectedGroupId!!)
-                            val message_id: Long = tox_group_send_message(groupnum, ToxVars.TOX_MESSAGE_TYPE.TOX_MESSAGE_TYPE_NORMAL.value, text)
-                            if (message_id >= 0)
-                            {
-                                val message_id_hex = HelperGroup.fourbytes_of_long_to_hex(message_id)
-                                val db_msgid = MainActivity.sent_groupmessage_to_db(groupid = selectedGroupId, message_timestamp =  timestamp, group_message = text, message_id = message_id )
-                                groupmessagestore.send(GroupMessageAction.SendGroupMessage(
-                                    UIGroupMessage(
-                                        message_id_tox = message_id_hex, msgDatabaseId = db_msgid,
-                                        user = myUser, timeMs = timestamp, text = text,
-                                        toxpk = myUser.toxpk,
-                                        groupId = selectedGroupId!!.lowercase(),
-                                        trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value,
-                                        filename_fullpath = null)))
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        if (displayTextField)
+                        {
+                            Box(Modifier.weight(1f)) {
+                                GroupSendMessage (focusRequester, selectedGroupId) { text ->
+                                    val timestamp = System.currentTimeMillis()
+                                    val groupnum: Long = tox_group_by_groupid__wrapper(selectedGroupId!!)
+                                    val my_group_peerpk = tox_group_self_get_public_key(groupnum)
+                                    val message_id: Long = tox_group_send_message(groupnum, ToxVars.TOX_MESSAGE_TYPE.TOX_MESSAGE_TYPE_NORMAL.value, text)
+                                    if (message_id >= 0)
+                                    {
+                                        val message_id_hex = HelperGroup.fourbytes_of_long_to_hex(message_id)
+                                        val db_msgid = MainActivity.sent_groupmessage_to_db(groupid = selectedGroupId, message_timestamp =  timestamp, group_message = text, message_id = message_id )
+                                        groupmessagestore.send(GroupMessageAction.SendGroupMessage(
+                                            UIGroupMessage(
+                                                message_id_tox = message_id_hex, msgDatabaseId = db_msgid,
+                                                user = myUser, timeMs = timestamp, text = text,
+                                                toxpk = my_group_peerpk,
+                                                groupId = selectedGroupId!!.lowercase(),
+                                                trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value,
+                                                filename_fullpath = null)))
+                                    }
+                                }
+                            }
+                        }
+                        Box(Modifier.width(40.dp).height(MESAGE_INPUT_LINE_HEIGHT).
+                        background(MaterialTheme.colors.background)) {
+                            Row(modifier = Modifier.width(40.dp)){
+                                IconButton(
+                                    icon = Icons.Filled.AttachFile,
+                                    iconTint = Color.DarkGray,
+                                    iconSize = 25.dp,
+                                    modifier = Modifier.width(40.dp),
+                                    contentDescription = "send File",
+                                    onClick = {
+                                        pickFileUsingDialog(onCloseRequest = { dir, file ->
+                                            Log.i(TAG, "pickFileUsingDialog:result=" + dir + "::" + File.separator + "::" + file )
+                                            add_ngc_outgoing_file(dir, file, selectedGroupId)
+                                        })
+                                    }
+                                )
                             }
                         }
                     }

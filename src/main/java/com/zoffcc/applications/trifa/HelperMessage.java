@@ -3,14 +3,18 @@ package com.zoffcc.applications.trifa;
 import com.zoffcc.applications.sorm.Filetransfer;
 import com.zoffcc.applications.sorm.Message;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 
+import static com.zoffcc.applications.trifa.HelperFiletransfer.get_incoming_filetransfer_local_filename;
 import static com.zoffcc.applications.trifa.MainActivity.*;
 import static com.zoffcc.applications.trifa.ToxVars.TOX_HASH_LENGTH;
 import static com.zoffcc.applications.trifa.ToxVars.TOX_MESSAGE_TYPE.TOX_MESSAGE_TYPE_HIGH_LEVEL_ACK;
@@ -305,5 +309,93 @@ public class HelperMessage {
             }
         }
         return null;
+    }
+
+    public static void take_screen_shot_with_selection(final String selected_friend_pubkey)
+    {
+        try
+        {
+            Log.i(TAG, "CaptureOccured...SelectionRectangle start");
+            new SelectionRectangle();
+            final Thread t = new Thread(() -> {
+                try
+                {
+                    while (SelectionRectangle.showing)
+                    {
+                        Thread.sleep(20);
+                    }
+
+                    Thread.sleep(200);
+                    Log.i(TAG, "CaptureOccured...SelectionRectangle done");
+
+                    try
+                    {
+                        if (!SelectionRectangle.cancel)
+                        {
+                            Log.i(TAG, "CaptureOccured...Screenshot capture");
+                            BufferedImage img = (BufferedImage) Screenshot.capture(SelectionRectangle.capture_x,
+                                    SelectionRectangle.capture_y,
+                                    SelectionRectangle.capture_width,
+                                    SelectionRectangle.capture_height).getImage();
+
+                            Log.i(TAG, "CaptureOccured...Screenshot capture DONE");
+
+                            if (img != null)
+                            {
+                                Log.i(TAG, "CaptureOccured...Image");
+                                try
+                                {
+                                    Log.i(TAG, "CaptureOccured...Image:003:" + selected_friend_pubkey);
+
+                                    final String friend_pubkey_str = selected_friend_pubkey;
+
+                                    String wanted_full_filename_path =
+                                            TRIFAGlobals.VFS_FILE_DIR + "/" + friend_pubkey_str;
+                                    new File(wanted_full_filename_path).mkdirs();
+
+                                    String filename_local_corrected = get_incoming_filetransfer_local_filename(
+                                            "clip.png", friend_pubkey_str);
+
+                                    filename_local_corrected =
+                                            wanted_full_filename_path + "/" + filename_local_corrected;
+
+                                    Log.i(TAG, "CaptureOccured...Image:004:" + filename_local_corrected);
+                                    final File f_send = new File(filename_local_corrected);
+                                    boolean res = ImageIO.write(img, "png", f_send);
+                                    Log.i(TAG,
+                                            "CaptureOccured...Image:004:" + filename_local_corrected + " res=" +
+                                                    res);
+
+                                    // send file
+                                    MainActivity.Companion.add_outgoing_file(f_send.getAbsoluteFile().getParent(),
+                                            f_send.getAbsoluteFile().getName(), friend_pubkey_str);
+                                }
+                                catch (Exception e2)
+                                {
+                                    e2.printStackTrace();
+                                    Log.i(TAG, "CaptureOccured...EE2:" + e2.getMessage());
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Log.i(TAG, "CaptureOccured...SelectionRectangle CANCEL");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                    }
+                }
+                catch (Exception e2)
+                {
+                }
+            });
+            t.start();
+        }
+        catch (Throwable e)
+        {
+            e.printStackTrace();
+            Log.i(TAG, "CaptureOccured...EE1:" + e.getMessage());
+        }
     }
 }
