@@ -34,12 +34,18 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoffcc.applications.trifa.Log
 
 private const val TAG = "trifa.SendGroupMessage"
 
 @Composable
-fun GroupSendMessage(focusRequester: FocusRequester, sendGroupMessage: (String) -> Unit) {
+fun GroupSendMessage(focusRequester: FocusRequester, selectedGroupId: String?, sendGroupMessage: (String) -> Unit) {
     var inputText by remember { mutableStateOf("") }
+    LaunchedEffect(selectedGroupId)
+    {
+        Log.i(TAG, "selected group changed, reset input text")
+        inputText = ""
+    }
     TextField(
         modifier = Modifier.fillMaxWidth()
             .background(MaterialTheme.colors.background)

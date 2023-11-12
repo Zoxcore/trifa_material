@@ -180,7 +180,7 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                         if (displayTextField)
                         {
                             Box(Modifier.weight(1f)) {
-                                SendMessage(focusRequester) { text -> //
+                                SendMessage(focusRequester, selectedContactPubkey) { text -> //
                                     // Log.i(TAG, "selectedContactPubkey=" + selectedContactPubkey)
                                     val friend_num = tox_friend_by_public_key(selectedContactPubkey)
                                     val timestamp = System.currentTimeMillis()
@@ -232,7 +232,7 @@ fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, s
                     }
                     if (displayTextField)
                     {
-                        GroupSendMessage (focusRequester) { text ->
+                        GroupSendMessage (focusRequester, selectedGroupId) { text ->
                             val timestamp = System.currentTimeMillis()
                             val groupnum: Long = tox_group_by_groupid__wrapper(selectedGroupId!!)
                             val message_id: Long = tox_group_send_message(groupnum, ToxVars.TOX_MESSAGE_TYPE.TOX_MESSAGE_TYPE_NORMAL.value, text)

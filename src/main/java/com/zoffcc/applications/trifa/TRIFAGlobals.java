@@ -132,7 +132,7 @@ public class TRIFAGlobals
 
     final static String VFS_TMP_FILE_DIR = "./tempdir/files/";
     // final static String VFS_TMP_AVATAR_DIR = "/avatar_tempdir/files/"; // TODO: avatar should get their own directory!
-    final static String VFS_FILE_DIR = "./datadir/files/";
+    public final static String VFS_FILE_DIR = "./datadir/files/";
     final static String VFS_OWN_AVATAR_DIR = "./datadir/myavatar/";
     static String VFS_PREFIX = ""; // only set for normal (unencrypted) storage
 
