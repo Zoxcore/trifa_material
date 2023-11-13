@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 public class AVActivity {
 
     private static final String TAG = "ffmpegav.AVActivity";
-    static final String Version = "0.99.7";
+    static final String Version = "0.99.8";
 
     public static native String ffmpegav_version();
     public static native String ffmpegav_libavutil_version();
@@ -71,12 +71,14 @@ public class AVActivity {
 
     public static interface video_capture_callback {
         void onSuccess(long width, long height, long source_width, long source_height, long pts, int fps, int source_format);
+        void onBufferTooSmall(int y_buffer_size, int u_buffer_size, int v_buffer_size);
         void onError();
     }
     static video_capture_callback video_capture_callback_function = null;
 
     public static interface audio_capture_callback {
         void onSuccess(long read_bytes, int out_samples, int out_channels, int out_sample_rate, long pts);
+        void onBufferTooSmall(int audio_buffer_size);
         void onError();
     }
     static audio_capture_callback audio_capture_callback_function = null;
@@ -103,16 +105,30 @@ public class AVActivity {
         }
     }
 
-    public static void ffmpegav_set_audio_capture_callback(audio_capture_callback callback)
-    {
-        audio_capture_callback_function = callback;
-    }
-
     public static void ffmpegav_callback_audio_capture_frame_pts_cb_method(long read_bytes, int out_samples, int out_channels, int out_sample_rate, long pts)
     {
         // Log.i(TAG, "capture audio frame bytes: " + read_bytes + " samples: " + out_samples + " channels: " + out_channels + " sample_rate: " + out_sample_rate);
         if (audio_capture_callback_function != null) {
             audio_capture_callback_function.onSuccess(read_bytes, out_samples, out_channels, out_sample_rate, pts);
+        }
+    }
+
+    public static void ffmpegav_set_audio_capture_callback(audio_capture_callback callback)
+    {
+        audio_capture_callback_function = callback;
+    }
+
+    public static void ffmpegav_callback_video_capture_frame_too_small_cb_method(int y_buffer_size, int u_buffer_size, int v_buffer_size)
+    {
+        if (video_capture_callback_function != null) {
+            video_capture_callback_function.onBufferTooSmall(y_buffer_size, u_buffer_size, v_buffer_size);
+        }
+    }
+
+    public static void ffmpegav_callback_audio_capture_frame_too_small_cb_method(int audio_buffer_size)
+    {
+        if (audio_capture_callback_function != null) {
+            audio_capture_callback_function.onBufferTooSmall(audio_buffer_size);
         }
     }
 
@@ -328,7 +344,7 @@ public class AVActivity {
 
         final int frame_width_px2 = 640;
         final int frame_height_px2 = 480;
-        final int buffer_size_in_bytes2 = ((frame_width_px2 * frame_height_px2) * 3) / 2;
+        final int buffer_size_in_bytes2 = 10; // ((frame_width_px2 * frame_height_px2) * 3) / 2;
         final java.nio.ByteBuffer video_buffer_2_y = java.nio.ByteBuffer.allocateDirect(buffer_size_in_bytes2);
         final java.nio.ByteBuffer video_buffer_2_u = java.nio.ByteBuffer.allocateDirect(buffer_size_in_bytes2);
         final java.nio.ByteBuffer video_buffer_2_v = java.nio.ByteBuffer.allocateDirect(buffer_size_in_bytes2);
@@ -346,6 +362,15 @@ public class AVActivity {
             }
             @Override
             public void onError() {
+            }
+            @Override
+            public void onBufferTooSmall(int y_buffer_size, int u_buffer_size, int v_buffer_size) {
+                Log.i(TAG, "Video buffer too small, needed sizes: " + y_buffer_size
+                        + " " + u_buffer_size + " "+ v_buffer_size);
+                final java.nio.ByteBuffer video_buffer_2_y = java.nio.ByteBuffer.allocateDirect(y_buffer_size);
+                final java.nio.ByteBuffer video_buffer_2_u = java.nio.ByteBuffer.allocateDirect(u_buffer_size);
+                final java.nio.ByteBuffer video_buffer_2_v = java.nio.ByteBuffer.allocateDirect(v_buffer_size);
+                ffmpegav_set_JNI_video_buffer2(video_buffer_2_y, video_buffer_2_u, video_buffer_2_v, frame_width_px2, frame_height_px2);
             }
         });
 
@@ -367,6 +392,10 @@ public class AVActivity {
             @Override
             public void onError() {
             }
+            @Override
+            public void onBufferTooSmall(int audio_buffer_size) {
+                Log.i(TAG, "Audio buffer too small, needed size=" + audio_buffer_size);
+            }
         });
 
         ffmpegav_start_video_in_capture();
@@ -374,7 +403,7 @@ public class AVActivity {
         ffmpegav_start_audio_in_capture();
         try
         {
-            Thread.sleep(10000);
+            Thread.sleep(1000);
         }
         catch(Exception e)
         {
