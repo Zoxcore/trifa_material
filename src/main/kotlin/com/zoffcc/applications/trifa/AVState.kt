@@ -437,9 +437,9 @@ data class AVState(val a: Int)
             val y_size = frame_width_px2 * frame_height_px2
             val u_size = (frame_width_px2 * frame_height_px2 / 4)
             val v_size = (frame_width_px2 * frame_height_px2 / 4)
-            val video_buffer_2_y = ByteBuffer.allocateDirect(y_size)
-            val video_buffer_2_u = ByteBuffer.allocateDirect(u_size)
-            val video_buffer_2_v = ByteBuffer.allocateDirect(v_size)
+            var video_buffer_2_y = ByteBuffer.allocateDirect(y_size)
+            var video_buffer_2_u = ByteBuffer.allocateDirect(u_size)
+            var video_buffer_2_v = ByteBuffer.allocateDirect(v_size)
             AVActivity.ffmpegav_set_JNI_video_buffer2(video_buffer_2_y, video_buffer_2_u, video_buffer_2_v, frame_width_px2, frame_height_px2)
             val audio_in_device = audio_in_device_get()
             val audio_in_source = audio_in_source_get()
@@ -455,7 +455,7 @@ data class AVState(val a: Int)
                 }
             }
             val buffer_size_in_bytes2 = 50000 // TODO: don't hardcode this
-            val audio_buffer_1 = ByteBuffer.allocateDirect(buffer_size_in_bytes2)
+            var audio_buffer_1 = ByteBuffer.allocateDirect(buffer_size_in_bytes2)
             AVActivity.ffmpegav_set_JNI_audio_buffer2(audio_buffer_1)
 
             AVActivity.ffmpegav_set_audio_capture_callback(object : AVActivity.audio_capture_callback
@@ -518,6 +518,12 @@ data class AVState(val a: Int)
                     DEBUG ONLY ---------------------------- */
                 }
 
+                override fun onBufferTooSmall(audio_buffer_size: Int)
+                {
+                    audio_buffer_1 = ByteBuffer.allocateDirect(audio_buffer_size)
+                    AVActivity.ffmpegav_set_JNI_audio_buffer2(audio_buffer_1)
+                }
+
                 override fun onError()
                 {
                 }
@@ -566,6 +572,15 @@ data class AVState(val a: Int)
 
                     video_buffer_2!!.rewind()
                     VideoOutFrame.new_video_out_frame(video_buffer_2, frame_width_px, frame_height_px)
+                }
+
+                override fun onBufferTooSmall(y_buffer_size: Int, u_buffer_size: Int, v_buffer_size: Int)
+                {
+                    Log.i(TAG, "ffmpeg open video capture onBufferTooSmall: sizes needed: " + y_buffer_size + " " + u_buffer_size + " " + v_buffer_size)
+                    video_buffer_2_y = ByteBuffer.allocateDirect(y_buffer_size)
+                    video_buffer_2_u = ByteBuffer.allocateDirect(u_buffer_size)
+                    video_buffer_2_v = ByteBuffer.allocateDirect(v_buffer_size)
+                    AVActivity.ffmpegav_set_JNI_video_buffer2(video_buffer_2_y, video_buffer_2_u, video_buffer_2_v, frame_width_px2, frame_height_px2)
                 }
 
                 override fun onError()
