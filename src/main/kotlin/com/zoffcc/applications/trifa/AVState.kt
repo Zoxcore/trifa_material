@@ -9,6 +9,7 @@ import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_apply_audio_filter
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_init
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__audio_input_filter
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__audio_play_volume_percent
+import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__v4l2_capture_force_mjpeg
 import com.zoffcc.applications.trifa.MainActivity.Companion.set_audio_play_volume_percent
 import global_prefs
 import kotlinx.coroutines.CoroutineScope
@@ -84,7 +85,8 @@ data class AVState(val a: Int)
                 {
                     println("ffmpeg video in device: " + video_in_device + " " + video_in_source)
                     val res_vd = AVActivity.ffmpegav_open_video_in_device(video_in_device, video_in_source,
-                        video_in_resolution_width, video_in_resolution_height, CAPTURE_VIDEO_FPS)
+                        video_in_resolution_width, video_in_resolution_height, CAPTURE_VIDEO_FPS,
+                        PREF__v4l2_capture_force_mjpeg)
                     println("ffmpeg open video capture device: $res_vd")
                 }
             }
@@ -423,7 +425,8 @@ data class AVState(val a: Int)
                 {
                     println("ffmpeg video in device: " + video_in_device + " " + video_in_source)
                     val res_vd = AVActivity.ffmpegav_open_video_in_device(video_in_device, video_in_source,
-                        video_in_resolution_width_pin, video_in_resolution_height_pin, CAPTURE_VIDEO_FPS)
+                        video_in_resolution_width_pin, video_in_resolution_height_pin, CAPTURE_VIDEO_FPS,
+                        PREF__v4l2_capture_force_mjpeg)
                     println("ffmpeg open video capture device: $res_vd")
                 }
             }
