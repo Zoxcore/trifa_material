@@ -1,12 +1,18 @@
+@file:OptIn(ExperimentalComposeUiApi::class)
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -26,11 +32,17 @@ import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.DragData
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.onExternalDrag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.trifa.AVState
@@ -69,6 +81,11 @@ import org.briarproject.briar.desktop.utils.FilePicker.pickFileUsingDialog
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 import java.io.File
+import java.net.URI
+import java.nio.file.LinkOption
+import java.nio.file.Path
+import kotlin.io.path.exists
+import kotlin.io.path.toPath
 
 private const val TAG = "trifa.Chatapp"
 val myUser = User("Me", picture = null, toxpk = "AAA")
@@ -163,7 +180,7 @@ fun GroupAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boole
     }
 }
 
-@OptIn(ExperimentalResourceApi::class)
+@OptIn(ExperimentalResourceApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, selectedContactPubkey: String?, ui_scale: Float)
 {
@@ -172,8 +189,43 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
             Box(modifier = Modifier.fillMaxSize()) {
                 Image(painterResource("background.jpg"), modifier = Modifier.fillMaxSize(), contentDescription = null, contentScale = ContentScale.Crop)
                 Column(modifier = Modifier.fillMaxSize()) {
-                    Box(Modifier.weight(1f)) {
-                        Messages(ui_scale, selectedContactPubkey)
+                    var isDragging by remember { mutableStateOf(false) }
+                    Box(Modifier.weight(1f)
+                        .background(color = if (isDragging) Color.LightGray else Color.Transparent)
+                        .dashedBorder(color = if (isDragging) DragAndDropColors.active else Color.Transparent,
+                            strokeWidth = if (isDragging) 8.dp else 0.dp,
+                            cornerRadiusDp = if (isDragging) 15.dp else 0.dp)
+                        .onExternalDrag(
+                            onDragStart = { isDragging = true  },
+                            onDragExit = { isDragging = false },
+                            onDrop = { value ->
+                                isDragging = false
+                                Log.i(TAG, "dropping file here")
+                                if (value.dragData is DragData.FilesList) {
+                                    val newFiles = (value.dragData as DragData.FilesList).readFiles().mapNotNull {
+                                        URI(it).toPath().takeIf { it.exists(LinkOption.NOFOLLOW_LINKS) }
+                                    }
+                                    newFiles.forEach{
+                                        Log.i(TAG, "dropped file: " + it)
+                                    }
+                                }
+
+                            })) {
+                        if (isDragging)
+                        {
+                            Column(modifier = Modifier.fillMaxSize()) {
+                                Spacer(modifier = Modifier.weight(0.6f))
+                                DragAndDropDescription(
+                                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                                    color = DragAndDropColors.active
+                                )
+                                Spacer(modifier = Modifier.weight(0.6f))
+                            }
+                        }
+                        else
+                        {
+                            Messages(ui_scale, selectedContactPubkey)
+                        }
                     }
                     Row(modifier = Modifier.fillMaxWidth()) {
                         if (displayTextField)
