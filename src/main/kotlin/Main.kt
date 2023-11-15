@@ -33,9 +33,19 @@ import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Audiotrack
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.CameraEnhance
+import androidx.compose.material.icons.filled.ControlCamera
 import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.HistoryToggleOff
+import androidx.compose.material.icons.filled.LegendToggle
+import androidx.compose.material.icons.filled.NoiseAware
+import androidx.compose.material.icons.filled.NoiseControlOff
+import androidx.compose.material.icons.filled.RawOff
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.SettingsInputSvideo
+import androidx.compose.material.icons.filled.SlowMotionVideo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -86,6 +96,7 @@ import com.zoffcc.applications.trifa.JPictureBox
 import com.zoffcc.applications.trifa.JPictureBoxOut
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__audio_input_filter
+import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__v4l2_capture_force_mjpeg
 import com.zoffcc.applications.trifa.MainActivity.Companion.main_init
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_name
@@ -364,7 +375,9 @@ fun App()
                                     }
                                     video_in_box_small = video_in_box_small.not()
                                     Log.i(TAG, "update3: " + video_in_box_small)
-                                }), imageVector = Icons.Default.Fullscreen, contentDescription = "")
+                                }), imageVector = Icons.Default.Fullscreen,
+                                contentDescription = "toggle large incoming video size"
+                            )
                             var audio_filter_current_value by remember { mutableStateOf(PREF__audio_input_filter) }
                             Icon(modifier = Modifier.padding(5.dp).combinedClickable(
                                 onClick = {
@@ -378,8 +391,25 @@ fun App()
                                     audio_filter_current_value = PREF__audio_input_filter
                                     AVActivity.ffmpegav_apply_audio_filter(PREF__audio_input_filter)
                                 }),
-                                imageVector = Icons.Default.Audiotrack, contentDescription = "",
+                                imageVector = Icons.Default.NoiseAware,
+                                contentDescription = "enable Noise Suppresion on audio capture",
                                 tint = if (audio_filter_current_value == 1) Color.Red else Color.DarkGray)
+
+                            var video_force_mjpeg_value by remember { mutableStateOf(PREF__v4l2_capture_force_mjpeg) }
+                            Icon(modifier = Modifier.padding(5.dp).combinedClickable(
+                                onClick = {
+                                    if (PREF__v4l2_capture_force_mjpeg == 0)
+                                    {
+                                        PREF__v4l2_capture_force_mjpeg = 1
+                                    } else
+                                    {
+                                        PREF__v4l2_capture_force_mjpeg = 0
+                                    }
+                                    video_force_mjpeg_value = PREF__v4l2_capture_force_mjpeg
+                                }),
+                                imageVector = Icons.Default.RawOff,
+                                contentDescription = "force MJPEG on video capture",
+                                tint = if (video_force_mjpeg_value == 1) Color.Red else Color.DarkGray)
                         }
 
                         Column {
