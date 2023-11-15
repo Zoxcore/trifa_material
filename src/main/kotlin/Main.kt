@@ -17,10 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -49,7 +46,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.DragData
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
@@ -67,7 +63,6 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
-import androidx.compose.ui.onExternalDrag
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
@@ -144,15 +139,11 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
-import java.nio.file.LinkOption
-import java.nio.file.Path
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.prefs.Preferences
 import javax.swing.JPanel
 import javax.swing.UIManager
-import kotlin.io.path.exists
-import kotlin.io.path.toPath
 
 private const val TAG = "trifa.Main.kt"
 var tox_running_state_wrapper = "start"
@@ -1029,147 +1020,145 @@ fun main() = application(exitProcessOnExit = true) {
 
 fun update_bootstrap_nodes_from_internet()
 {
-    GlobalScope.launch {
-        val NODES_URL = "https://nodes.tox.chat/json"
-        val client = HttpClient.newHttpClient()
-        val request = HttpRequest.newBuilder()
-            .uri(URI(NODES_URL))
-            .GET()
-            .header("User-Agent", GENERIC_TOR_USERAGENT)
-            .build()
-        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
-        val fromJson: NodeListJS = Gson().fromJson(response.body(), NodeListJS::class.java)
-        Log.i(TAG, "getLastRefresh=" + fromJson.lastRefresh)
-        Log.i(TAG, "getLastScan=" + fromJson.lastScan)
-        Log.i(TAG, "getNodes=" + fromJson.nodes.size)
-        val bootstrap_nodes_list_from_internet = fromJson.nodes
-        var BootstrapNodeEntryDB_ids_full: List<BootstrapNodeEntryDB?>? = orma?.selectFromBootstrapNodeEntryDB()?.orderByIdAsc()?.toList()
-        val BootstrapNodeEntryDB_ids: MutableList<Long> = ArrayList()
-        if (BootstrapNodeEntryDB_ids_full != null)
+    val NODES_URL = "https://nodes.tox.chat/json"
+    val client = HttpClient.newHttpClient()
+    val request = HttpRequest.newBuilder()
+        .uri(URI(NODES_URL))
+        .GET()
+        .header("User-Agent", GENERIC_TOR_USERAGENT)
+        .build()
+    val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+    val fromJson: NodeListJS = Gson().fromJson(response.body(), NodeListJS::class.java)
+    Log.i(TAG, "getLastRefresh=" + fromJson.lastRefresh)
+    Log.i(TAG, "getLastScan=" + fromJson.lastScan)
+    Log.i(TAG, "getNodes=" + fromJson.nodes.size)
+    val bootstrap_nodes_list_from_internet = fromJson.nodes
+    var BootstrapNodeEntryDB_ids_full: List<BootstrapNodeEntryDB?>? = orma?.selectFromBootstrapNodeEntryDB()?.orderByIdAsc()?.toList()
+    val BootstrapNodeEntryDB_ids: MutableList<Long> = ArrayList()
+    if (BootstrapNodeEntryDB_ids_full != null)
+    {
+        for (bn1 in BootstrapNodeEntryDB_ids_full)
         {
-            for (bn1 in BootstrapNodeEntryDB_ids_full)
+            if (bn1 != null)
             {
-                if (bn1 != null)
-                {
-                    BootstrapNodeEntryDB_ids.add(bn1.id)
-                }
+                BootstrapNodeEntryDB_ids.add(bn1.id)
             }
         }
-        // HINT: set null to GC it soon
-        // HINT: set null to GC it soon
-        BootstrapNodeEntryDB_ids_full = null
-        var num_udp = 0
-        var num_tcp = 0
-        for (nl_entry in bootstrap_nodes_list_from_internet)
-        {
-            try
-            {
-                if (nl_entry.statusUdp)
-                {
-                    try
-                    {
-                        val bn2 = BootstrapNodeEntryDB()
-                        bn2.ip = nl_entry.ipv4
-                        bn2.port = nl_entry.port?.toLong()!!
-                        bn2.key_hex = nl_entry.publicKey.uppercase(Locale.getDefault())
-                        bn2.udp_node = true
-                        bn2.num = num_udp.toLong()
-                        if (bn2.ip != null && !bn2.ip.equals("none", ignoreCase = true) && bn2.port > 0 && bn2.key_hex != null)
-                        {
-                            orma?.insertIntoBootstrapNodeEntryDB(bn2)
-                            Log.i(TAG, "add UDP node:$bn2")
-                            num_udp++
-                        }
-                        val bn2_ip6 = BootstrapNodeEntryDB()
-                        bn2_ip6.ip = nl_entry.ipv6
-                        bn2_ip6.port = nl_entry.port?.toLong()!!
-                        bn2_ip6.key_hex = nl_entry.publicKey.uppercase(Locale.getDefault())
-                        bn2_ip6.udp_node = true
-                        bn2_ip6.num = num_udp.toLong()
-                        if (!bn2_ip6.ip.equals("-", ignoreCase = true) && bn2_ip6.port > 0 && bn2_ip6.key_hex != null)
-                        {
-                            orma?.insertIntoBootstrapNodeEntryDB(bn2_ip6)
-                            Log.i(TAG, "add UDP ipv6 node:$bn2_ip6")
-                            num_udp++
-                        }
-                    } catch (e: java.lang.Exception)
-                    {
-                        Log.i(TAG, "add UDP node:EE4:" + e.message)
-                        e.printStackTrace()
-                    }
-                }
-                if (nl_entry.statusTcp)
-                {
-                    val k = 0
-                    try
-                    {
-                        val bn2 = BootstrapNodeEntryDB()
-                        bn2.ip = nl_entry.ipv4
-                        val tcp_ports_count = nl_entry.tcpPorts.size
-                        bn2.port = nl_entry.tcpPorts[k]?.toLong()!!
-                        bn2.key_hex = nl_entry.publicKey.uppercase(Locale.getDefault())
-                        bn2.udp_node = false
-                        if (bn2.ip != null && !bn2.ip.equals("none", ignoreCase = true) && bn2.port > 0 && bn2.key_hex != null)
-                        {
-                            for (p in 0 until tcp_ports_count)
-                            {
-                                bn2.num = num_tcp.toLong()
-                                bn2.port = nl_entry.tcpPorts[p]?.toLong()!!
-                                orma?.insertIntoBootstrapNodeEntryDB(bn2)
-                                Log.i(TAG, "add tcp node:$bn2")
-                                num_tcp++
-                            }
-                        }
-                        val bn2_ip6 = BootstrapNodeEntryDB()
-                        bn2_ip6.ip = nl_entry.ipv6
-                        val tcp_ports_count_ip6 = nl_entry.tcpPorts.size
-                        bn2_ip6.key_hex = nl_entry.publicKey.uppercase(Locale.getDefault())
-                        bn2_ip6.udp_node = false
-                        bn2_ip6.num = num_tcp.toLong()
-                        if (!bn2_ip6.ip.equals("-", ignoreCase = true) && tcp_ports_count_ip6 > 0 && bn2_ip6.key_hex != null)
-                        {
-                            for (p in 0 until tcp_ports_count_ip6)
-                            {
-                                val bn2_ip6_ = BootstrapNodeEntryDB()
-                                bn2_ip6_.ip = nl_entry.ipv6
-                                bn2_ip6_.port = nl_entry.tcpPorts[p]?.toLong()!!
-                                bn2_ip6_.key_hex = nl_entry.publicKey.uppercase(Locale.getDefault())
-                                bn2_ip6_.udp_node = false
-                                bn2_ip6_.num = num_tcp.toLong()
-                                orma?.insertIntoBootstrapNodeEntryDB(bn2_ip6_)
-                                Log.i(TAG, "add tcp ipv6 node:$bn2_ip6_")
-                                num_tcp++
-                            }
-                        }
-                    } catch (e: java.lang.Exception)
-                    {
-                        Log.i(TAG, "add tcp node:EE5:" + e.message)
-                        e.printStackTrace()
-                    }
-                }
-            } catch (e: java.lang.Exception)
-            {
-                Log.i(TAG, "onConnected:EE3:" + e.message)
-                e.printStackTrace()
-            }
-        }
-
+    }
+    // HINT: set null to GC it soon
+    // HINT: set null to GC it soon
+    BootstrapNodeEntryDB_ids_full = null
+    var num_udp = 0
+    var num_tcp = 0
+    for (nl_entry in bootstrap_nodes_list_from_internet)
+    {
         try
         {
-            if (num_tcp > 1 && num_udp > 1)
+            if (nl_entry.statusUdp)
             {
-                // HINT: we added at least 2 UDP and 2 TCP nodes
-                // delete previous nodes from DB
-                for (bn_old__id in BootstrapNodeEntryDB_ids)
+                try
                 {
-                    orma?.deleteFromBootstrapNodeEntryDB()?.idEq(bn_old__id)?.execute()
+                    val bn2 = BootstrapNodeEntryDB()
+                    bn2.ip = nl_entry.ipv4
+                    bn2.port = nl_entry.port?.toLong()!!
+                    bn2.key_hex = nl_entry.publicKey.uppercase(Locale.getDefault())
+                    bn2.udp_node = true
+                    bn2.num = num_udp.toLong()
+                    if (bn2.ip != null && !bn2.ip.equals("none", ignoreCase = true) && bn2.port > 0 && bn2.key_hex != null)
+                    {
+                        orma?.insertIntoBootstrapNodeEntryDB(bn2)
+                        Log.i(TAG, "add UDP node:$bn2")
+                        num_udp++
+                    }
+                    val bn2_ip6 = BootstrapNodeEntryDB()
+                    bn2_ip6.ip = nl_entry.ipv6
+                    bn2_ip6.port = nl_entry.port?.toLong()!!
+                    bn2_ip6.key_hex = nl_entry.publicKey.uppercase(Locale.getDefault())
+                    bn2_ip6.udp_node = true
+                    bn2_ip6.num = num_udp.toLong()
+                    if (!bn2_ip6.ip.equals("-", ignoreCase = true) && bn2_ip6.port > 0 && bn2_ip6.key_hex != null)
+                    {
+                        orma?.insertIntoBootstrapNodeEntryDB(bn2_ip6)
+                        Log.i(TAG, "add UDP ipv6 node:$bn2_ip6")
+                        num_udp++
+                    }
+                } catch (e: java.lang.Exception)
+                {
+                    Log.i(TAG, "add UDP node:EE4:" + e.message)
+                    e.printStackTrace()
+                }
+            }
+            if (nl_entry.statusTcp)
+            {
+                val k = 0
+                try
+                {
+                    val bn2 = BootstrapNodeEntryDB()
+                    bn2.ip = nl_entry.ipv4
+                    val tcp_ports_count = nl_entry.tcpPorts.size
+                    bn2.port = nl_entry.tcpPorts[k]?.toLong()!!
+                    bn2.key_hex = nl_entry.publicKey.uppercase(Locale.getDefault())
+                    bn2.udp_node = false
+                    if (bn2.ip != null && !bn2.ip.equals("none", ignoreCase = true) && bn2.port > 0 && bn2.key_hex != null)
+                    {
+                        for (p in 0 until tcp_ports_count)
+                        {
+                            bn2.num = num_tcp.toLong()
+                            bn2.port = nl_entry.tcpPorts[p]?.toLong()!!
+                            orma?.insertIntoBootstrapNodeEntryDB(bn2)
+                            Log.i(TAG, "add tcp node:$bn2")
+                            num_tcp++
+                        }
+                    }
+                    val bn2_ip6 = BootstrapNodeEntryDB()
+                    bn2_ip6.ip = nl_entry.ipv6
+                    val tcp_ports_count_ip6 = nl_entry.tcpPorts.size
+                    bn2_ip6.key_hex = nl_entry.publicKey.uppercase(Locale.getDefault())
+                    bn2_ip6.udp_node = false
+                    bn2_ip6.num = num_tcp.toLong()
+                    if (!bn2_ip6.ip.equals("-", ignoreCase = true) && tcp_ports_count_ip6 > 0 && bn2_ip6.key_hex != null)
+                    {
+                        for (p in 0 until tcp_ports_count_ip6)
+                        {
+                            val bn2_ip6_ = BootstrapNodeEntryDB()
+                            bn2_ip6_.ip = nl_entry.ipv6
+                            bn2_ip6_.port = nl_entry.tcpPorts[p]?.toLong()!!
+                            bn2_ip6_.key_hex = nl_entry.publicKey.uppercase(Locale.getDefault())
+                            bn2_ip6_.udp_node = false
+                            bn2_ip6_.num = num_tcp.toLong()
+                            orma?.insertIntoBootstrapNodeEntryDB(bn2_ip6_)
+                            Log.i(TAG, "add tcp ipv6 node:$bn2_ip6_")
+                            num_tcp++
+                        }
+                    }
+                } catch (e: java.lang.Exception)
+                {
+                    Log.i(TAG, "add tcp node:EE5:" + e.message)
+                    e.printStackTrace()
                 }
             }
         } catch (e: java.lang.Exception)
         {
-            Log.i(TAG, "onConnected:EE6:" + e.message)
+            Log.i(TAG, "onConnected:EE3:" + e.message)
             e.printStackTrace()
         }
+    }
+
+    try
+    {
+        if (num_tcp > 1 && num_udp > 1)
+        {
+            // HINT: we added at least 2 UDP and 2 TCP nodes
+            // delete previous nodes from DB
+            for (bn_old__id in BootstrapNodeEntryDB_ids)
+            {
+                orma?.deleteFromBootstrapNodeEntryDB()?.idEq(bn_old__id)?.execute()
+            }
+        }
+    } catch (e: java.lang.Exception)
+    {
+        Log.i(TAG, "onConnected:EE6:" + e.message)
+        e.printStackTrace()
     }
 }
 

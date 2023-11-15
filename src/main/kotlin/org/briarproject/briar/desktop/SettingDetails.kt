@@ -45,6 +45,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import global_prefs
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import update_bootstrap_nodes_from_internet
 
@@ -159,9 +161,15 @@ fun SettingDetails()
         // ---- IPv6 ----
 
         Row(Modifier.wrapContentHeight().fillMaxWidth().padding(start = 15.dp)) {
+            var loading_nodes by remember { mutableStateOf(false) }
             Button(modifier = Modifier.width(400.dp),
+                enabled = if (loading_nodes) false else true,
                 onClick = {
-                update_bootstrap_nodes_from_internet()
+                    GlobalScope.launch {
+                        loading_nodes = true
+                        update_bootstrap_nodes_from_internet()
+                        loading_nodes = false
+                    }
             })
             {
                 Text("update bootstrap nodes from internet")
