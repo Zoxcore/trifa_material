@@ -85,6 +85,7 @@ import java.net.URI
 import java.nio.file.LinkOption
 import java.nio.file.Path
 import kotlin.io.path.exists
+import kotlin.io.path.name
 import kotlin.io.path.toPath
 
 private const val TAG = "trifa.Chatapp"
@@ -192,28 +193,37 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                     var isDragging by remember { mutableStateOf(false) }
                     Box(Modifier.weight(1f)
                         .background(color = if (isDragging) Color.LightGray else Color.Transparent)
-                        .dashedBorder(color = if (isDragging) DragAndDropColors.active else Color.Transparent,
-                            strokeWidth = if (isDragging) 8.dp else 0.dp,
-                            cornerRadiusDp = if (isDragging) 15.dp else 0.dp)
                         .onExternalDrag(
                             onDragStart = { isDragging = true  },
                             onDragExit = { isDragging = false },
                             onDrop = { value ->
                                 isDragging = false
-                                Log.i(TAG, "dropping file here")
+                                // Log.i(TAG, "dropping file here")
                                 if (value.dragData is DragData.FilesList) {
                                     val newFiles = (value.dragData as DragData.FilesList).readFiles().mapNotNull {
                                         URI(it).toPath().takeIf { it.exists(LinkOption.NOFOLLOW_LINKS) }
                                     }
                                     newFiles.forEach{
-                                        Log.i(TAG, "dropped file: " + it)
+                                        // Log.i(TAG, "dropped file: " + it.toAbsolutePath() + " " + it.parent.normalize().name + " " + it.fileName.name)
+                                        if (it.toAbsolutePath().toString().isNotEmpty())
+                                        {
+                                            // Log.i(TAG," " + it.toAbsolutePath().parent.toString() + " "
+                                            //        + it.toAbsolutePath().fileName.toString() + " " + selectedContactPubkey)
+                                            add_outgoing_file(it.toAbsolutePath().parent.toString(),
+                                                it.toAbsolutePath().fileName.toString(),
+                                                selectedContactPubkey)
+                                        }
                                     }
                                 }
 
                             })) {
                         if (isDragging)
                         {
-                            Column(modifier = Modifier.fillMaxSize()) {
+                            Column(modifier = Modifier.fillMaxSize()
+                                .padding(all = 10.dp)
+                                .dashedBorder(color = if (isDragging) DragAndDropColors.active else Color.Transparent,
+                                    strokeWidth = if (isDragging) 5.dp else 0.dp,
+                                    cornerRadiusDp = if (isDragging) 25.dp else 0.dp)) {
                                 Spacer(modifier = Modifier.weight(0.6f))
                                 DragAndDropDescription(
                                     modifier = Modifier.align(Alignment.CenterHorizontally),
