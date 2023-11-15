@@ -17,7 +17,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -32,20 +35,11 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Audiotrack
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.CameraEnhance
-import androidx.compose.material.icons.filled.ControlCamera
 import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material.icons.filled.Fullscreen
-import androidx.compose.material.icons.filled.HistoryToggleOff
-import androidx.compose.material.icons.filled.LegendToggle
 import androidx.compose.material.icons.filled.NoiseAware
-import androidx.compose.material.icons.filled.NoiseControlOff
 import androidx.compose.material.icons.filled.RawOff
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.SettingsInputSvideo
-import androidx.compose.material.icons.filled.SlowMotionVideo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -55,17 +49,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.DragData
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
+import androidx.compose.ui.composed
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
+import androidx.compose.ui.onExternalDrag
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -135,19 +138,21 @@ import org.briarproject.briar.desktop.ui.UiMode
 import org.briarproject.briar.desktop.ui.UiPlaceholder
 import org.briarproject.briar.desktop.ui.VerticalDivider
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
-import java.awt.Component
 import java.awt.Toolkit
 import java.io.File
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.nio.file.LinkOption
+import java.nio.file.Path
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.prefs.Preferences
-import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.UIManager
+import kotlin.io.path.exists
+import kotlin.io.path.toPath
 
 private const val TAG = "trifa.Main.kt"
 var tox_running_state_wrapper = "start"
@@ -1176,6 +1181,7 @@ object AboutIcon : Painter() {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun MainAppStart()
 {
@@ -1332,6 +1338,24 @@ private fun MainAppStart()
                     snapshotFlow { state.position }.filter { it.isSpecified }.onEach(::onWindowRelocate).launchIn(this)
                 }
                 App()
+/*
+                Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
+                    Column {
+                        val dragAndDropModifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
+                        var droppedFiles by remember { mutableStateOf<List<Path>>(emptyList()) }
+
+                        DragAndDropFileBox(dragAndDropModifier.size(height = 200.dp, width = 400.dp)) { dragData ->
+                            if (dragData is DragData.FilesList) {
+                                val newFiles = dragData.readFiles().mapNotNull {
+                                    URI(it).toPath().takeIf { it.exists(LinkOption.NOFOLLOW_LINKS) }
+                                }
+                                droppedFiles = (droppedFiles + newFiles).distinct()
+                            }
+                        }
+                        // FileListView(modifier = dragAndDropModifier, files = droppedFiles)
+                    }
+                }
+*/
             }
         } // ----------- main app screen -----------
         // ----------- main app screen -----------
@@ -1379,14 +1403,45 @@ fun lock_data_dir_input()
     savepathstore.updateEnabled(false)
 }
 
-fun actionButton(
-    text: String,
-    action: () -> Unit
-): JButton
-{
-    val button = JButton(text)
-    button.alignmentX = Component.CENTER_ALIGNMENT
-    button.addActionListener { action() }
-
-    return button
+object DragAndDropColors {
+    val default = Color.Gray
+    val active = Color(29, 117, 223, 255)
+    val fileItemBg = Color(233, 30, 99, 255)
+    val fileItemFg = Color.White
 }
+
+@Composable
+fun DragAndDropDescription(modifier: Modifier, color: Color) {
+    val modifier2 = modifier.padding(vertical = 2.dp)
+    Text(
+        "Drag & drop files here",
+        fontSize = 20.sp,
+        modifier = modifier2,
+        color = color
+    )
+}
+
+fun Modifier.dashedBorder(strokeWidth: Dp, color: Color, cornerRadiusDp: Dp) = composed(
+    factory = {
+        val density = LocalDensity.current
+        val strokeWidthPx = density.run { strokeWidth.toPx() }
+        val cornerRadiusPx = density.run { cornerRadiusDp.toPx() }
+
+        then(
+            Modifier.drawWithCache {
+                onDrawBehind {
+                    val stroke = Stroke(
+                        width = strokeWidthPx,
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+                    )
+                    drawRoundRect(
+                        color = color,
+                        style = stroke,
+                        cornerRadius = CornerRadius(cornerRadiusPx)
+                    )
+                }
+            }
+        )
+    }
+)
+
