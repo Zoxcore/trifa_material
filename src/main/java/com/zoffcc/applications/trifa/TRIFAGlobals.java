@@ -52,6 +52,9 @@ public class TRIFAGlobals
 
     final static boolean ADD_BOTS_ON_STARTUP = true;
 
+    final static int USE_MAX_NUMBER_OF_BOOTSTRAP_NODES = 40;
+    final static int USE_MAX_NUMBER_OF_BOOTSTRAP_TCP_RELAYS = 40;
+
     final static int HIGHER_GLOBAL_VIDEO_BITRATE = 3500;
     final static int NORMAL_GLOBAL_VIDEO_BITRATE = 2100;
     final static int LOWER_GLOBAL_VIDEO_BITRATE = 250;

@@ -2,6 +2,7 @@ package com.zoffcc.applications.sorm;
 
 import com.zoffcc.applications.trifa.Log;
 import com.zoffcc.applications.trifa.OperatingSystem;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -978,6 +979,21 @@ public class OrmaDatabase
     {
         GroupMessage ret = new GroupMessage();
         ret.sql_start = "DELETE FROM GroupMessage";
+        return ret;
+    }
+
+    public long insertIntoBootstrapNodeEntryDB(BootstrapNodeEntryDB b) { return b.insert(); }
+
+    public BootstrapNodeEntryDB selectFromBootstrapNodeEntryDB() {
+        BootstrapNodeEntryDB ret = new BootstrapNodeEntryDB();
+        ret.sql_start = "SELECT * FROM BootstrapNodeEntryDB";
+        return ret;
+    }
+
+    @NotNull
+    public BootstrapNodeEntryDB deleteFromBootstrapNodeEntryDB() {
+        BootstrapNodeEntryDB ret = new BootstrapNodeEntryDB();
+        ret.sql_start = "DELETE FROM BootstrapNodeEntryDB";
         return ret;
     }
 }

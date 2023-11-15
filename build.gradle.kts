@@ -36,10 +36,11 @@ dependencies {
     implementation(compose.materialIconsExtended)
     //
     //
-    implementation("org.xerial:sqlite-jdbc:3.43.2.1")
+    implementation("org.xerial:sqlite-jdbc:3.44.0.0")
     implementation("ca.gosyer:kotlin-multiplatform-appdirs:1.1.1")
     implementation("com.sksamuel.scrimage:scrimage-core:4.1.1")
     implementation("com.sksamuel.scrimage:scrimage-webp:4.1.1")
+    implementation("com.google.code.gson:gson:2.10.1")
 }
 
 compose.desktop {

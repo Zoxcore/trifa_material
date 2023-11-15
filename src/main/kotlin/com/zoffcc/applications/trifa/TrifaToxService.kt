@@ -1,5 +1,10 @@
 package com.zoffcc.applications.trifa
 
+import com.zoffcc.applications.sorm.BootstrapNodeEntryDB
+import com.zoffcc.applications.sorm.BootstrapNodeEntryDB.bootstrap_node_list
+import com.zoffcc.applications.sorm.BootstrapNodeEntryDB.get_tcprelay_nodelist_from_db
+import com.zoffcc.applications.sorm.BootstrapNodeEntryDB.get_udp_nodelist_from_db
+import com.zoffcc.applications.sorm.BootstrapNodeEntryDB.tcprelay_node_list
 import com.zoffcc.applications.sorm.Message
 import com.zoffcc.applications.sorm.OrmaDatabase
 import com.zoffcc.applications.trifa.HelperFiletransfer.start_outgoing_ft
@@ -29,8 +34,9 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_iteration_interv
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_kill
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_friend_list
 import com.zoffcc.applications.trifa.TRIFAGlobals.GROUP_ID_LENGTH
+import com.zoffcc.applications.trifa.TRIFAGlobals.USE_MAX_NUMBER_OF_BOOTSTRAP_NODES
+import com.zoffcc.applications.trifa.TRIFAGlobals.USE_MAX_NUMBER_OF_BOOTSTRAP_TCP_RELAYS
 import com.zoffcc.applications.trifa.TRIFAGlobals.global_last_activity_outgoung_ft_ts
-import com.zoffcc.applications.trifa.TRIFAGlobals.global_self_connection_status
 import contactstore
 import grouppeerstore
 import groupstore
@@ -42,6 +48,7 @@ import set_tox_running_state
 import toxdatastore
 import unlock_data_dir_input
 import java.nio.ByteBuffer
+import java.util.*
 
 class TrifaToxService
 {
@@ -72,6 +79,7 @@ class TrifaToxService
                 // --------------- bootstrap ---------------
                 // --------------- bootstrap ---------------
                 // --------------- bootstrap ---------------
+
                 if (!old_is_tox_started)
                 {
                     TRIFAGlobals.bootstrapping = true
@@ -202,6 +210,103 @@ class TrifaToxService
 
         // ------------------------------
         fun bootstrap_me()
+        {
+            Log.i(TAG, "bootstrap_me")
+            // TODO: bootstap_from_custom_nodes()
+            // ----- UDP ------
+            get_udp_nodelist_from_db(orma)
+            Log.i(TAG, "bootstrap_node_list[sort]=" + bootstrap_node_list.toString())
+
+            if (PREF__udp_enabled == 1)
+            {
+                try
+                {
+                    Collections.shuffle(bootstrap_node_list)
+                    Collections.shuffle(bootstrap_node_list)
+                } catch (e: java.lang.Exception)
+                {
+                    e.printStackTrace()
+                }
+                Log.i(TAG, "bootstrap_node_list[rand]=" + bootstrap_node_list.toString())
+                try
+                {
+                    val i2: Iterator<*> = bootstrap_node_list.iterator()
+                    var ee: BootstrapNodeEntryDB
+                    var used = 0
+                    while (i2.hasNext())
+                    {
+                        ee = i2.next() as BootstrapNodeEntryDB
+                        val bootstrap_result = bootstrap_single_wrapper(ee.ip, ee.port.toInt(), ee.key_hex)
+                        Log.i(TAG, "bootstrap_single:res=$bootstrap_result")
+                        if (bootstrap_result == 0)
+                        {
+                            used++
+                            // Log.Log.i(TAG, "bootstrap_single:++:used=" + used);
+                        }
+                        if (used >= USE_MAX_NUMBER_OF_BOOTSTRAP_NODES)
+                        {
+                            Log.i(TAG, "bootstrap_single:break:used=$used")
+                            break
+                        }
+                    }
+                } catch (e: java.lang.Exception)
+                {
+                    e.printStackTrace()
+                }
+            }
+            else
+            {
+                bootstrap_single_wrapper("127.0.0.1", 7766, "2AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1")
+            }
+            // ----- UDP ------
+            //
+            // ----- TCP ------
+            get_tcprelay_nodelist_from_db(orma)
+            Log.i(TAG, "tcprelay_node_list[sort]=" + tcprelay_node_list.toString())
+            try
+            {
+                Collections.shuffle(tcprelay_node_list)
+                Collections.shuffle(tcprelay_node_list)
+            } catch (e: java.lang.Exception)
+            {
+                e.printStackTrace()
+            }
+            Log.i(TAG, "tcprelay_node_list[rand]=" + tcprelay_node_list.toString())
+            try
+            {
+                if (USE_MAX_NUMBER_OF_BOOTSTRAP_TCP_RELAYS > 0)
+                {
+                    val i2: Iterator<*> = tcprelay_node_list.iterator()
+                    var ee: BootstrapNodeEntryDB
+                    var used = 0
+                    while (i2.hasNext())
+                    {
+                        ee = i2.next() as BootstrapNodeEntryDB
+                        val bootstrap_result: Int = add_tcp_relay_single_wrapper(ee.ip, ee.port.toInt(), ee.key_hex)
+                        Log.i(TAG, "add_tcp_relay_single:res=$bootstrap_result")
+                        if (bootstrap_result == 0)
+                        {
+                            used++
+                            // Log.Log.i(TAG, "add_tcp_relay_single:++:used=" + used);
+                        }
+                        if (used >= USE_MAX_NUMBER_OF_BOOTSTRAP_TCP_RELAYS)
+                        {
+                            Log.i(TAG, "add_tcp_relay_single:break:used=$used")
+                            break
+                        }
+                    }
+                }
+            } catch (e: java.lang.Exception)
+            {
+                e.printStackTrace()
+            }
+            // ----- TCP ------
+            // ----- TCP mobile ------
+            // Log.i(TAG, "add_tcp_relay_single:res=" + MainActivity.add_tcp_relay_single_wrapper("127.0.0.1", 33447, "252E6D7F8168682363BC473C3951357FB2E28BC9A7B7E1F4CB3B302DC331BDAA".substring(0, (TOX_PUBLIC_KEY_SIZE * 2) - 0)));
+            // ----- TCP mobile ------
+        }
+
+        fun bootstrap_me__obsolete()
         {
             Log.i(TAG, "bootstrap_me") // ----- UDP ------
             if (PREF__udp_enabled == 1)
