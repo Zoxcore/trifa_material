@@ -28,6 +28,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
@@ -43,6 +46,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import global_prefs
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
+import update_bootstrap_nodes_from_internet
 
 @Composable
 fun SettingDetails()
@@ -154,6 +158,15 @@ fun SettingDetails()
         }
         // ---- IPv6 ----
 
+        Row(Modifier.wrapContentHeight().fillMaxWidth().padding(start = 15.dp)) {
+            Button(modifier = Modifier.width(400.dp),
+                onClick = {
+                update_bootstrap_nodes_from_internet()
+            })
+            {
+                Text("update bootstrap nodes from internet")
+            }
+        }
     }
 }
 

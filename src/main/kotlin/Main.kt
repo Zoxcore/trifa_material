@@ -49,7 +49,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
@@ -67,9 +70,13 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberNotification
+import androidx.compose.ui.window.rememberTrayState
 import androidx.compose.ui.window.rememberWindowState
 import ca.gosyer.appdirs.AppDirs
+import com.google.gson.Gson
 import com.zoffcc.applications.ffmpegav.AVActivity
+import com.zoffcc.applications.sorm.BootstrapNodeEntryDB
 import com.zoffcc.applications.trifa.AudioBar
 import com.zoffcc.applications.trifa.AudioBar.audio_in_bar
 import com.zoffcc.applications.trifa.AudioBar.audio_out_bar
@@ -82,6 +89,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__audio_input_fi
 import com.zoffcc.applications.trifa.MainActivity.Companion.main_init
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_name
+import com.zoffcc.applications.trifa.NodeListJS
 import com.zoffcc.applications.trifa.PrefsSettings
 import com.zoffcc.applications.trifa.RandomNameGenerator
 import com.zoffcc.applications.trifa.SingleComponentAspectRatioKeeperLayout
@@ -92,11 +100,13 @@ import com.zoffcc.applications.trifa.TrifaToxService.Companion.load_grouppeers
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.briarproject.briar.desktop.SettingDetails
 import org.briarproject.briar.desktop.contact.ContactList
@@ -117,11 +127,16 @@ import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import java.awt.Component
 import java.awt.Toolkit
 import java.io.File
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.prefs.Preferences
 import javax.swing.JButton
 import javax.swing.JPanel
+import javax.swing.UIManager
 
 private const val TAG = "trifa.Main.kt"
 var tox_running_state_wrapper = "start"
@@ -168,6 +183,7 @@ var global_semaphore_messagelist_ui = CustomSemaphore(1)
 var global_semaphore_groupmessagelist_ui = CustomSemaphore(1)
 val APPDIRS = AppDirs("trifa_material", "zoxcore")
 val RESOURCESDIR = File(System.getProperty("compose.application.resources.dir"))
+const val GENERIC_TOR_USERAGENT = "Mozilla/5.0 (Windows NT 6.1; rv:60.0) Gecko/20100101 Firefox/60.0"
 
 @OptIn(DelicateCoroutinesApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -639,9 +655,10 @@ fun App()
                                 Icon(Icons.Filled.Refresh, null)
                             }
                             val items = listOf("480x270", "640x360", "640x480", "480x640", "960x540", "1280x720", "720x1280", "1920x1080", "1080x1920")
-                            DropdownMenu(expanded = resolution_expanded,
+                            DropdownMenu(
+                                expanded = resolution_expanded,
                                 onDismissRequest = { resolution_expanded = false },
-                                ){
+                            ){
                                 items.forEachIndexed { index, s ->
                                     DropdownMenuItem(onClick = {
                                         avstatestore.state.video_in_resolution_set(s)
@@ -953,7 +970,180 @@ fun main() = application(exitProcessOnExit = true) {
     { // e.printStackTrace()
     }
 
+    /*
+    Tray(
+        state = trayState,
+        icon = painterResource("icon-linux.png"),
+        menu = {}
+    )
+    */
+    // --------- test --------
+    // --------- test --------
+    val trayState = rememberTrayState()
+    val notification = rememberNotification("Notification", "Message from MyApp")
+    trayState.sendNotification(notification)
+    // --------- test --------
+    // --------- test --------
+
+    // ------- set UI look and feel to "system" for java AWT ----------
+    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
+    // ------- set UI look and feel to "system" for java AWT ----------
+
     MainAppStart()
+}
+
+fun update_bootstrap_nodes_from_internet()
+{
+    GlobalScope.launch {
+        val NODES_URL = "https://nodes.tox.chat/json"
+        val client = HttpClient.newHttpClient()
+        val request = HttpRequest.newBuilder()
+            .uri(URI(NODES_URL))
+            .GET()
+            .header("User-Agent", GENERIC_TOR_USERAGENT)
+            .build()
+        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+        val fromJson: NodeListJS = Gson().fromJson(response.body(), NodeListJS::class.java)
+        Log.i(TAG, "getLastRefresh=" + fromJson.lastRefresh)
+        Log.i(TAG, "getLastScan=" + fromJson.lastScan)
+        Log.i(TAG, "getNodes=" + fromJson.nodes.size)
+        val bootstrap_nodes_list_from_internet = fromJson.nodes
+        var BootstrapNodeEntryDB_ids_full: List<BootstrapNodeEntryDB?>? = orma?.selectFromBootstrapNodeEntryDB()?.orderByIdAsc()?.toList()
+        val BootstrapNodeEntryDB_ids: MutableList<Long> = ArrayList()
+        if (BootstrapNodeEntryDB_ids_full != null)
+        {
+            for (bn1 in BootstrapNodeEntryDB_ids_full)
+            {
+                if (bn1 != null)
+                {
+                    BootstrapNodeEntryDB_ids.add(bn1.id)
+                }
+            }
+        }
+        // HINT: set null to GC it soon
+        // HINT: set null to GC it soon
+        BootstrapNodeEntryDB_ids_full = null
+        var num_udp = 0
+        var num_tcp = 0
+        for (nl_entry in bootstrap_nodes_list_from_internet)
+        {
+            try
+            {
+                if (nl_entry.statusUdp)
+                {
+                    try
+                    {
+                        val bn2 = BootstrapNodeEntryDB()
+                        bn2.ip = nl_entry.ipv4
+                        bn2.port = nl_entry.port?.toLong()!!
+                        bn2.key_hex = nl_entry.publicKey.uppercase(Locale.getDefault())
+                        bn2.udp_node = true
+                        bn2.num = num_udp.toLong()
+                        if (bn2.ip != null && !bn2.ip.equals("none", ignoreCase = true) && bn2.port > 0 && bn2.key_hex != null)
+                        {
+                            orma?.insertIntoBootstrapNodeEntryDB(bn2)
+                            Log.i(TAG, "add UDP node:$bn2")
+                            num_udp++
+                        }
+                        val bn2_ip6 = BootstrapNodeEntryDB()
+                        bn2_ip6.ip = nl_entry.ipv6
+                        bn2_ip6.port = nl_entry.port?.toLong()!!
+                        bn2_ip6.key_hex = nl_entry.publicKey.uppercase(Locale.getDefault())
+                        bn2_ip6.udp_node = true
+                        bn2_ip6.num = num_udp.toLong()
+                        if (!bn2_ip6.ip.equals("-", ignoreCase = true) && bn2_ip6.port > 0 && bn2_ip6.key_hex != null)
+                        {
+                            orma?.insertIntoBootstrapNodeEntryDB(bn2_ip6)
+                            Log.i(TAG, "add UDP ipv6 node:$bn2_ip6")
+                            num_udp++
+                        }
+                    } catch (e: java.lang.Exception)
+                    {
+                        Log.i(TAG, "add UDP node:EE4:" + e.message)
+                        e.printStackTrace()
+                    }
+                }
+                if (nl_entry.statusTcp)
+                {
+                    val k = 0
+                    try
+                    {
+                        val bn2 = BootstrapNodeEntryDB()
+                        bn2.ip = nl_entry.ipv4
+                        val tcp_ports_count = nl_entry.tcpPorts.size
+                        bn2.port = nl_entry.tcpPorts[k]?.toLong()!!
+                        bn2.key_hex = nl_entry.publicKey.uppercase(Locale.getDefault())
+                        bn2.udp_node = false
+                        if (bn2.ip != null && !bn2.ip.equals("none", ignoreCase = true) && bn2.port > 0 && bn2.key_hex != null)
+                        {
+                            for (p in 0 until tcp_ports_count)
+                            {
+                                bn2.num = num_tcp.toLong()
+                                bn2.port = nl_entry.tcpPorts[p]?.toLong()!!
+                                orma?.insertIntoBootstrapNodeEntryDB(bn2)
+                                Log.i(TAG, "add tcp node:$bn2")
+                                num_tcp++
+                            }
+                        }
+                        val bn2_ip6 = BootstrapNodeEntryDB()
+                        bn2_ip6.ip = nl_entry.ipv6
+                        val tcp_ports_count_ip6 = nl_entry.tcpPorts.size
+                        bn2_ip6.key_hex = nl_entry.publicKey.uppercase(Locale.getDefault())
+                        bn2_ip6.udp_node = false
+                        bn2_ip6.num = num_tcp.toLong()
+                        if (!bn2_ip6.ip.equals("-", ignoreCase = true) && tcp_ports_count_ip6 > 0 && bn2_ip6.key_hex != null)
+                        {
+                            for (p in 0 until tcp_ports_count_ip6)
+                            {
+                                val bn2_ip6_ = BootstrapNodeEntryDB()
+                                bn2_ip6_.ip = nl_entry.ipv6
+                                bn2_ip6_.port = nl_entry.tcpPorts[p]?.toLong()!!
+                                bn2_ip6_.key_hex = nl_entry.publicKey.uppercase(Locale.getDefault())
+                                bn2_ip6_.udp_node = false
+                                bn2_ip6_.num = num_tcp.toLong()
+                                orma?.insertIntoBootstrapNodeEntryDB(bn2_ip6_)
+                                Log.i(TAG, "add tcp ipv6 node:$bn2_ip6_")
+                                num_tcp++
+                            }
+                        }
+                    } catch (e: java.lang.Exception)
+                    {
+                        Log.i(TAG, "add tcp node:EE5:" + e.message)
+                        e.printStackTrace()
+                    }
+                }
+            } catch (e: java.lang.Exception)
+            {
+                Log.i(TAG, "onConnected:EE3:" + e.message)
+                e.printStackTrace()
+            }
+        }
+
+        try
+        {
+            if (num_tcp > 1 && num_udp > 1)
+            {
+                // HINT: we added at least 2 UDP and 2 TCP nodes
+                // delete previous nodes from DB
+                for (bn_old__id in BootstrapNodeEntryDB_ids)
+                {
+                    orma?.deleteFromBootstrapNodeEntryDB()?.idEq(bn_old__id)?.execute()
+                }
+            }
+        } catch (e: java.lang.Exception)
+        {
+            Log.i(TAG, "onConnected:EE6:" + e.message)
+            e.printStackTrace()
+        }
+    }
+}
+
+object AboutIcon : Painter() {
+    override val intrinsicSize = Size(256f, 256f)
+
+    override fun DrawScope.onDraw() {
+        drawOval(Color(0xFFFFA500))
+    }
 }
 
 @Composable
