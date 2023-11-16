@@ -251,6 +251,10 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                                         val msg_id_db = sent_message_to_db(selectedContactPubkey, timestamp, text)
                                         messagestore.send(MessageAction.SendMessage(UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value, user = myUser, timeMs = timestamp, text = text, toxpk = selectedContactPubkey!!, trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, msgDatabaseId = msg_id_db, filename_fullpath = null)))
                                     }
+                                    else
+                                    {
+                                        SnackBarToast("Sending Message failed")
+                                    }
                                 }
                             }
                         }
@@ -323,6 +327,10 @@ fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, s
                                                 groupId = selectedGroupId!!.lowercase(),
                                                 trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value,
                                                 filename_fullpath = null)))
+                                    }
+                                    else
+                                    {
+                                        SnackBarToast("Sending Group Message failed")
                                     }
                                 }
                             }

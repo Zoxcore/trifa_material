@@ -3,6 +3,7 @@ package com.zoffcc.applications.trifa
 import ColorProvider
 import GroupMessageAction
 import MessageAction
+import SnackBarToast
 import UIGroupMessage
 import UIMessage
 import User
@@ -1287,6 +1288,7 @@ class MainActivity
             {
             }
             update_savedata_file_wrapper()
+            SnackBarToast("added new Friend")
         }
 
         @JvmStatic
@@ -2091,6 +2093,7 @@ class MainActivity
                 {
                 }
             }
+            SnackBarToast("added new Group")
         }
 
         @JvmStatic
@@ -2218,6 +2221,7 @@ class MainActivity
             {
             }
             update_savedata_file_wrapper()
+            SnackBarToast("You joined a Group")
         }
 
         @JvmStatic

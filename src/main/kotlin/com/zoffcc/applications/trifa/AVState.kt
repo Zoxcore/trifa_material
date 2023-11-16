@@ -597,6 +597,8 @@ data class AVState(val a: Int)
         semaphore_avstate.acquire()
         devices_state = CALL_DEVICES_STATE.CALL_DEVICES_STATE_ACTIVE
         semaphore_avstate.release()
+        //
+        HelperNotification.displayNotification("Incoming call ...")
     }
 }
 
