@@ -1,6 +1,7 @@
 package com.zoffcc.applications.trifa
 
 import ImageloaderDispatcher
+import SnackBarToast
 import UIMessage
 import androidx.compose.foundation.Image
 import androidx.compose.material.Icon
@@ -122,6 +123,7 @@ object HelperGeneric {
             tox_group_leave(group_num_temp, "quit")
             update_savedata_file_wrapper()
         }
+        SnackBarToast("Group removed")
     }
 
     fun delete_friend_wrapper(friend_pubkey: String)
@@ -135,6 +137,7 @@ object HelperGeneric {
             tox_friend_delete(friend_num_temp)
             update_savedata_file_wrapper()
         }
+        SnackBarToast("Friend removed")
     }
 
     fun bytesToHex(bytes: ByteArray, start: Int, len: Int): String {

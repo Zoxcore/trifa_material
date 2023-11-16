@@ -19,6 +19,7 @@
 package org.briarproject.briar.desktop
 
 import SETTINGS_HEADER_SIZE
+import SnackBarToast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -169,6 +170,7 @@ fun SettingDetails()
                         loading_nodes = true
                         update_bootstrap_nodes_from_internet()
                         loading_nodes = false
+                        SnackBarToast("Bootstrap nodes updated from internet")
                     }
             })
             {

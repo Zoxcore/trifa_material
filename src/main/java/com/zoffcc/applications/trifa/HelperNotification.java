@@ -34,7 +34,7 @@ public class HelperNotification
     static final String notify_send_full_path = "/usr/bin/notify-send";
     static final String notify_send_full_path_aternative = "/bin/notify-send";
 
-    public static void displayMessage(String message)
+    public static void displayNotification(String message)
     {
         try
         {
@@ -131,7 +131,7 @@ public class HelperNotification
             if (SystemTray.isSupported())
             {
                 Log.i(TAG, "SystemTray supported on this platform");
-                if (OperatingSystem.getCurrent() != OperatingSystem.WINDOWS)
+                if (OperatingSystem.getCurrent() == OperatingSystem.WINDOWS)
                 {
                     SystemTray tray = SystemTray.getSystemTray();
                     Image image = Toolkit.getDefaultToolkit().getImage(icon_file_full_path);
@@ -139,6 +139,10 @@ public class HelperNotification
                     trayIcon.setImageAutoSize(true);
                     tray.add(trayIcon);
                     Log.i(TAG, "SystemTray added");
+                }
+                else
+                {
+                    Log.i(TAG, "SystemTray will not be used on this platform");
                 }
             }
             else
