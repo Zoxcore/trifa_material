@@ -74,6 +74,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.Tray
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
@@ -83,6 +84,10 @@ import androidx.compose.ui.window.rememberTrayState
 import androidx.compose.ui.window.rememberWindowState
 import ca.gosyer.appdirs.AppDirs
 import com.google.gson.Gson
+import com.notification.NotificationFactory
+import com.notification.manager.SimpleManager
+import com.theme.ThemePackagePresets
+import com.utils.Time
 import com.zoffcc.applications.ffmpegav.AVActivity
 import com.zoffcc.applications.sorm.BootstrapNodeEntryDB
 import com.zoffcc.applications.trifa.AudioBar
@@ -90,6 +95,8 @@ import com.zoffcc.applications.trifa.AudioBar.audio_in_bar
 import com.zoffcc.applications.trifa.AudioBar.audio_out_bar
 import com.zoffcc.applications.trifa.CustomSemaphore
 import com.zoffcc.applications.trifa.HelperGeneric.PubkeyShort
+import com.zoffcc.applications.trifa.HelperNotification.displayMessage
+import com.zoffcc.applications.trifa.HelperNotification.init_system_tray
 import com.zoffcc.applications.trifa.JPictureBox
 import com.zoffcc.applications.trifa.JPictureBoxOut
 import com.zoffcc.applications.trifa.Log
@@ -109,13 +116,11 @@ import com.zoffcc.applications.trifa.TrifaToxService.Companion.load_grouppeers
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.briarproject.briar.desktop.SettingDetails
 import org.briarproject.briar.desktop.contact.ContactList
@@ -996,24 +1001,12 @@ fun main() = application(exitProcessOnExit = true) {
     { // e.printStackTrace()
     }
 
-    /*
-    Tray(
-        state = trayState,
-        icon = painterResource("icon-linux.png"),
-        menu = {}
-    )
-    */
-    // --------- test --------
-    // --------- test --------
-    val trayState = rememberTrayState()
-    val notification = rememberNotification("Notification", "Message from MyApp")
-    trayState.sendNotification(notification)
-    // --------- test --------
-    // --------- test --------
-
     // ------- set UI look and feel to "system" for java AWT ----------
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
     // ------- set UI look and feel to "system" for java AWT ----------
+
+    init_system_tray(RESOURCESDIR.canonicalPath + File.separator + "icon-linux.png")
+    displayMessage("w3ö.<4ß< +q2 ß#4op 4oq3#4o# 4oü23o4 ,23\n\n okrgpo \n 4potkp34 \n\neer")
 
     MainAppStart()
 }
