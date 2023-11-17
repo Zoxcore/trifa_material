@@ -84,6 +84,11 @@ compose.desktop {
                 TargetFormat.Deb, TargetFormat.Rpm
             ) // , TargetFormat.AppImage)
 
+            nativeDistributions {
+                // modules("java.instrument", "java.net.http", "java.prefs", "java.sql", "jdk.unsupported")
+                includeAllModules = true
+            }
+
             val iconsRoot = project.file("resources")
             println("iconsRoot=$iconsRoot")
             macOS {
