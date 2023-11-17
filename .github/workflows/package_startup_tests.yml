@@ -63,9 +63,8 @@ jobs:
            screencapture -T 60 -x -t png /Users/runner/screen07.png &
            screencapture -T 90 -x -t png /Users/runner/screen09.png &
            screencapture -T 110 -x -t png /Users/runner/screen10.png &
-           screencapture -T 200 -x -t png /Users/runner/screenshot-macos.png &
            screencapture -T 230 -x -t png /Users/runner/screen12.png &
-           screencapture -T 300 -x -t png /Users/runner/screen13.png &
+           screencapture -T 300 -x -t png /Users/runner/screenshot-macos.png &
            export _HOME_
            cd "$_HOME_"
            cd "$_SRC_"
