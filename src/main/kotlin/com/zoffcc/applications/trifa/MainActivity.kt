@@ -11,6 +11,8 @@ import avstatestore
 import avstatestorevcapfpsstate
 import avstatestorevplayfpsstate
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_loadjni
+import com.zoffcc.applications.jninotifications.NTFYActivity
+import com.zoffcc.applications.jninotifications.NTFYActivity.jninotifications_loadjni
 import com.zoffcc.applications.sorm.FileDB
 import com.zoffcc.applications.sorm.Filetransfer
 import com.zoffcc.applications.sorm.GroupMessage
@@ -108,6 +110,7 @@ class MainActivity
         // --------- global config ---------
         // --------- global config ---------
         var native_lib_loaded = false
+        @JvmStatic var native_notification_lib_loaded_error = -1
         var tox_service_fg: TrifaToxService? = null
         var tox_savefile_directory = "."
         var PREF__udp_enabled = 1
@@ -315,6 +318,11 @@ class MainActivity
                 val libdir2: String = resourcesDir.path
                 System.out.println("XXXXX7:" + libdir2)
                 ffmpegav_loadjni(libdir2)
+                if (OperatingSystem.getCurrent() == OperatingSystem.LINUX)
+                {
+                    native_notification_lib_loaded_error = jninotifications_loadjni(libdir2)
+                    Log.i(TAG, "jninotifications version: " + NTFYActivity.jninotifications_version())
+                }
             }
         }
 

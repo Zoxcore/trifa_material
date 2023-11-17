@@ -101,6 +101,7 @@ import com.zoffcc.applications.trifa.CustomSemaphore
 import com.zoffcc.applications.trifa.HelperGeneric.PubkeyShort
 import com.zoffcc.applications.trifa.HelperNotification.displayNotification
 import com.zoffcc.applications.trifa.HelperNotification.init_system_tray
+import com.zoffcc.applications.trifa.HelperNotification.set_resouces_dir
 import com.zoffcc.applications.trifa.JPictureBox
 import com.zoffcc.applications.trifa.JPictureBoxOut
 import com.zoffcc.applications.trifa.Log
@@ -1029,6 +1030,10 @@ fun main() = application(exitProcessOnExit = true) {
     } catch (e: Exception)
     { // e.printStackTrace()
     }
+
+    try {
+        set_resouces_dir(RESOURCESDIR.canonicalPath)
+    } catch(e: Exception) {}
 
     // ------- set UI look and feel to "system" for java AWT ----------
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
