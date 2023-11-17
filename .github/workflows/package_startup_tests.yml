@@ -82,11 +82,11 @@ jobs:
            echo "--------4--------"
            cd /Users/runner/work/
            echo "--------5--------"
-           ls -al /Volumes/
+           ls -al /Volumes/ || echo "x"
            echo "--------6--------"
-           ls -al /Volumes/trifa_material/
+           ls -al /Volumes/trifa_material/ || echo "x"
            echo "--------7--------"
-           ls -al /Volumes/trifa_material/trifa_material.app/
+           ls -al /Volumes/trifa_material/trifa_material.app/ || echo "x"
            echo "--------8--------"
            /Volumes/trifa_material/trifa_material.app/Contents/MacOS/trifa_material &
            pwd
