@@ -92,8 +92,8 @@ jobs:
            pwd
            sleep 60
            cliclick -m verbose m:12,34
-           sleep 10
-           cliclick -m verbose c:77,124
+           sleep 240
+           cliclick -m verbose c:106,128
            sleep 10
            cliclick -m verbose c:139,124
            sleep 60
