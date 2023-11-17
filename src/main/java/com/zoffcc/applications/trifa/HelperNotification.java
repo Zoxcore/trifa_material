@@ -25,6 +25,9 @@ import java.awt.Toolkit;
 import java.awt.TrayIcon;
 import java.io.File;
 
+import static com.zoffcc.applications.jninotifications.NTFYActivity.jninotifications_notify;
+import static com.zoffcc.applications.jninotifications.NTFYActivity.jninotifications_version;
+
 public class HelperNotification
 {
     private static final String TAG = "trifa.HelperNotification";
@@ -33,6 +36,12 @@ public class HelperNotification
     static long last_message_timestamp = -1L;
     static final String notify_send_full_path = "/usr/bin/notify-send";
     static final String notify_send_full_path_aternative = "/bin/notify-send";
+    static String resources_dir = null;
+
+    public static void set_resouces_dir(String dir)
+    {
+        resources_dir = dir;
+    }
 
     public static void displayNotification(String message)
     {
@@ -48,35 +57,39 @@ public class HelperNotification
             last_message_timestamp = System.currentTimeMillis();
 
             String title = "TRIfA";
-
             String os = System.getProperty("os.name");
             if (os.contains("Linux"))
             {
-                final File f1 = new File(notify_send_full_path);
-                final File f2 = new File(notify_send_full_path_aternative);
-                if (f1.exists() && f1.isFile())
+                int res_jni_notify = -1;
+                if (MainActivity.getNative_notification_lib_loaded_error() == 0)
                 {
-                    Log.i(TAG, "using notify-send for Notification");
-                    ProcessBuilder builder = new ProcessBuilder(notify_send_full_path, "-a", "TRIfA",
-                            "" + filter_out_specials_2(title),
-                            "" + filter_out_specials_2(message));
-                    builder.inheritIO().start();
+                    String icon_path = null;
+                    if (resources_dir != null)
+                    {
+                        icon_path = resources_dir + File.separator + "icon-linux.png";
+                    }
+                    res_jni_notify = jninotifications_notify(title,
+                            title, message,
+                            icon_path);
+                    Log.i(TAG, "using native JNI for Notification");
                 }
-                else if (f2.exists() && f2.isFile())
-                {
-                    Log.i(TAG, "using notify-send alternative path for Notification");
-                    ProcessBuilder builder = new ProcessBuilder(notify_send_full_path, "-a", "TRIfA",
-                            "" + filter_out_specials_2(title),
-                            "" + filter_out_specials_2(message));
-                    builder.inheritIO().start();
-                }
-                else
-                {
-                    Log.i(TAG, "using zenity for Notification");
-                    ProcessBuilder builder = new ProcessBuilder("zenity", "--notification",
-                            "--title=" + filter_out_specials_2(title),
-                            "--text=" + filter_out_specials_2(message));
-                    builder.inheritIO().start();
+
+                if (res_jni_notify != 0) {
+                    final File f1 = new File(notify_send_full_path);
+                    final File f2 = new File(notify_send_full_path_aternative);
+                    if (f1.exists() && f1.isFile()) {
+                        Log.i(TAG, "using notify-send for Notification");
+                        ProcessBuilder builder = new ProcessBuilder(notify_send_full_path, "-a", "TRIfA", "" + filter_out_specials_2(title), "" + filter_out_specials_2(message));
+                        builder.inheritIO().start();
+                    } else if (f2.exists() && f2.isFile()) {
+                        Log.i(TAG, "using notify-send alternative path for Notification");
+                        ProcessBuilder builder = new ProcessBuilder(notify_send_full_path, "-a", "TRIfA", "" + filter_out_specials_2(title), "" + filter_out_specials_2(message));
+                        builder.inheritIO().start();
+                    } else {
+                        Log.i(TAG, "using zenity for Notification");
+                        ProcessBuilder builder = new ProcessBuilder("zenity", "--notification", "--title=" + filter_out_specials_2(title), "--text=" + filter_out_specials_2(message));
+                        builder.inheritIO().start();
+                    }
                 }
             }
             else if (os.contains("Mac"))
