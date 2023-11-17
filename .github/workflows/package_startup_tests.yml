@@ -18,7 +18,7 @@ defaults:
 
 jobs:
   macos:
-    runs-on: macos-latest
+    runs-on: macos-11
     if: ${{ true }}
     permissions:
       contents: write
@@ -72,9 +72,13 @@ jobs:
            mkdir -p /Users/runner/work/
            cd /Users/runner/work/
            wget "https://github.com/Zoxcore/trifa_material/releases/download/nightly/trifa-material_nightly.dmg" -O app.dmg
+           echo "--------1--------"
            hdiutil info
+           echo "--------2--------"
            hdiutil attach /Users/runner/work/app.dmg
+           echo "--------3--------"
            hdiutil info
+           echo "--------4--------"
            cd /Users/runner/work/
            ls -al /Volumes/
            /Volumes/trifa_material/trifa_material.app/Contents/MacOS/trifa_material &
