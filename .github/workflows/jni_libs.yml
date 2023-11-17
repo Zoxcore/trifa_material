@@ -1,10 +1,10 @@
 name: JNI Libs
 
 on:
-  push:
-    paths-ignore:
-     - 'README.md'
-     - 'CHANGELOG.md'
+#  push:
+#    paths-ignore:
+#     - 'README.md'
+#     - 'CHANGELOG.md'
   pull_request:
     paths-ignore:
      - 'README.md'
