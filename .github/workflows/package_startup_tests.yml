@@ -75,7 +75,8 @@ jobs:
            echo "--------1--------"
            hdiutil info
            echo "--------2--------"
-           hdiutil attach /Users/runner/work/app.dmg
+           hdiutil convert /Users/runner/work/app.dmg -format UDTO -o /Users/runner/work/app2.dmg
+           hdiutil attach /Users/runner/work/app2.dmg.cdr
            echo "--------3--------"
            hdiutil info
            echo "--------4--------"
