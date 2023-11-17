@@ -81,7 +81,13 @@ jobs:
            hdiutil info
            echo "--------4--------"
            cd /Users/runner/work/
+           echo "--------5--------"
            ls -al /Volumes/
+           echo "--------6--------"
+           ls -al /Volumes/trifa_material/
+           echo "--------7--------"
+           ls -al /Volumes/trifa_material/trifa_material.app/
+           echo "--------8--------"
            /Volumes/trifa_material/trifa_material.app/Contents/MacOS/trifa_material &
            pwd
            sleep 20
