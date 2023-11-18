@@ -81,8 +81,9 @@ compose.desktop {
             targetFormats(
                 TargetFormat.Msi, TargetFormat.Exe,
                 TargetFormat.Dmg,
+                TargetFormat.AppImage,
                 TargetFormat.Deb, TargetFormat.Rpm
-            ) // , TargetFormat.AppImage)
+            )
 
             nativeDistributions {
                 // modules("java.instrument", "java.net.http", "java.prefs", "java.sql", "jdk.unsupported")
@@ -140,15 +141,22 @@ tasks {
 
     val copyAppimageIconfile by registering(Exec::class) {
         environment("ARCH", "x86_64")
-        commandLine("cp", "-v", linuxIconFile, "${linuxAppDir}/${appName}")
+        println("iconFile_src=" + linuxIconFile)
+        println("iconFile_dst=" + "${linuxAppDir}/trifa_material.png")
+        println("appName=" + "${appName}")
+        commandLine("cp", "-v", linuxIconFile, "${linuxAppDir}/trifa_material.png")
     }
 
     val executeAppImageBuilder by registering(Exec::class) {
         dependsOn(downloadAppImageBuilder)
-        // dependsOn(copyBuildToPackaging)
         dependsOn(copyAppimageDesktopfile)
         dependsOn(copyAppimageIconfile)
         environment("ARCH", "x86_64")
+        println("cmd: " + "${appImageTool} ${linuxAppDir} $appName-${project.version}.AppImage")
         commandLine(appImageTool, linuxAppDir, "$appName-${project.version}.AppImage")
+        println("src=" + "trifa_material-*.AppImage")
+        println("dst=" + "${linuxAppDir}/")
+        println("version=" + "${version}")
+        commandLine("cp", "-v", "trifa_material-${version}.AppImage", "${linuxAppDir}/")
     }
 }
