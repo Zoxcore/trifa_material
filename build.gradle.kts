@@ -81,9 +81,9 @@ compose.desktop {
             targetFormats(
                 TargetFormat.Msi, TargetFormat.Exe,
                 TargetFormat.Dmg,
-                TargetFormat.AppImage,
                 TargetFormat.Deb, TargetFormat.Rpm
             )
+            // TargetFormat.AppImage
 
             nativeDistributions {
                 // modules("java.instrument", "java.net.http", "java.prefs", "java.sql", "jdk.unsupported")
