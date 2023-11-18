@@ -147,16 +147,18 @@ tasks {
         commandLine("cp", "-v", linuxIconFile, "${linuxAppDir}/trifa_material.png")
     }
 
+    val setAppimageRunfile by registering(Exec::class) {
+        workingDir = linuxAppDir
+        commandLine("ln", "-sf", "trifa_material/bin/trifa_material", "AppRun")
+    }
+
     val executeAppImageBuilder by registering(Exec::class) {
         dependsOn(downloadAppImageBuilder)
         dependsOn(copyAppimageDesktopfile)
         dependsOn(copyAppimageIconfile)
+        dependsOn(setAppimageRunfile)
         environment("ARCH", "x86_64")
-        println("cmd: " + "${appImageTool} ${linuxAppDir} $appName-${project.version}.AppImage")
-        commandLine(appImageTool, linuxAppDir, "$appName-${project.version}.AppImage")
-        println("src=" + "trifa_material-*.AppImage")
-        println("dst=" + "${linuxAppDir}/")
-        println("version=" + "${version}")
-        commandLine("cp", "-v", "trifa_material-${version}.AppImage", "${linuxAppDir}/")
+        println("cmd: " + "${appImageTool} ${linuxAppDir} $appName-${project.version}-x86_64.AppImage")
+        commandLine(appImageTool, linuxAppDir, "$appName-${project.version}-x86_64.AppImage")
     }
 }
