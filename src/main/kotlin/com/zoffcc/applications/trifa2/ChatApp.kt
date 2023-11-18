@@ -144,6 +144,9 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
                         avstatestore.state.calling_state_set(AVState.CALL_STATUS.CALL_STATUS_CALLING)
                         avstatestore.state.call_with_friend_pubkey_set(friendpubkey)
                         avstatestore.state.start_av_call()
+                        MainActivity.toxav_option_set(friendnum,
+                            ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MAX_BITRATE.value.toLong(),
+                            TRIFAGlobals.GLOBAL_VIDEO_BITRATE.toLong())
                         println("toxav: set 003")
                     }) {
                         if (current_callstate.call_state == AVState.CALL_STATUS.CALL_STATUS_CALLING)
