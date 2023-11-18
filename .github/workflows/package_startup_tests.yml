@@ -122,3 +122,131 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         artifacts: "package-screenshot-macos.png"
 
+  windows-test:
+    runs-on: windows-latest
+    if: ${{ true }}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Display the path
+        run: echo %PATH%
+        shell: cmd
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin' # See 'Supported distributions' for available options
+          java-version: '17'
+
+      - name: java-version
+        run: java -version
+        shell: bash
+
+      - name: download package
+        shell: bash
+        run: |
+             curl -L "https://github.com/Zoxcore/trifa_material/releases/download/nightly/trifa-material_nightly.msi" -o app.msi
+             pwd
+             ls -al
+
+      - name: list and install downloaded package
+        shell: pwsh
+        run: |
+             $file = "D:\a\trifa_material\trifa_material\app.msi" 
+             $log = "install.log" 
+             $procMain = Start-Process "msiexec" "/i `"$file`" /qn /l*! `"$log`"" -NoNewWindow -PassThru
+             $procLog = Start-Process "powershell" "Get-Content -Path `"$log`" -Wait" -NoNewWindow -PassThru 
+             $procMain.WaitForExit() 
+             $procLog.Kill()
+             dir "C:\Program Files\trifa_material\"
+
+      - name: list installed software
+        shell: pwsh
+        run: |
+          get-wmiobject Win32_Product | Format-Table IdentifyingNumber, Name
+
+#        C9814BA7-5321-378E-A20F-D3B0A2B2DED5
+
+      - name: startup-app
+        shell: pwsh
+        run: |
+          [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
+          [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
+          Start-Sleep -Seconds 30
+          Start-Process -FilePath 'C:\Program Files\trifa_material\trifa_material.exe' -WorkingDirectory "D:\a\trifa_material\trifa_material"
+          Start-Sleep -Seconds 20
+          Start-Sleep -Seconds 8
+          $signature=@'
+          [DllImport("user32.dll",CharSet=CharSet.Auto,CallingConvention=CallingConvention.StdCall)]
+          public static extern void mouse_event(long dwFlags, long dx, long dy, long cButtons, long dwExtraInfo);
+          '@
+          $SendMouseClick = Add-Type -memberDefinition $signature -name "Win32MouseEventNew" -namespace Win32Functions -passThru
+          $x = 84
+          $y = 104
+          [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point($x, $y)
+          sleep -Seconds 02
+          $SendMouseClick::mouse_event(0x00000002, 0, 0, 0, 0);
+          $SendMouseClick::mouse_event(0x00000004, 0, 0, 0, 0);
+          sleep -Seconds 02
+          $x = 146
+          $y = 104
+          [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point($x, $y)
+          $SendMouseClick::mouse_event(0x00000002, 0, 0, 0, 0);
+          $SendMouseClick::mouse_event(0x00000004, 0, 0, 0, 0);
+          Start-Sleep -Seconds 2
+
+      - name: startup-app
+        shell: pwsh
+        run: |
+          [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
+          [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
+          $signature=@'
+          [DllImport("user32.dll",CharSet=CharSet.Auto,CallingConvention=CallingConvention.StdCall)]
+          public static extern void mouse_event(long dwFlags, long dx, long dy, long cButtons, long dwExtraInfo);
+          '@
+          $SendMouseClick = Add-Type -memberDefinition $signature -name "Win32MouseEventNew" -namespace Win32Functions -passThru
+          $x = 215
+          $y = 325
+          [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point($x, $y)
+          sleep -Seconds 02
+          $SendMouseClick::mouse_event(0x00000002, 0, 0, 0, 0);
+          $SendMouseClick::mouse_event(0x00000004, 0, 0, 0, 0);
+          sleep -Seconds 02
+
+      - name: capture-screen
+        shell: pwsh
+        run: |
+          Add-Type -AssemblyName System.Windows.Forms
+          Add-Type -AssemblyName System.Drawing
+          $Screen = [System.Windows.Forms.SystemInformation]::VirtualScreen
+          $Width  = $Screen.Width
+          $Height = $Screen.Height
+          $Left   = $Screen.Left
+          $Top    = $Screen.Top
+          $bitmap  = New-Object System.Drawing.Bitmap $Width, $Height
+          $graphic = [System.Drawing.Graphics]::FromImage($bitmap)
+          $graphic.CopyFromScreen($Left, $Top, 0, 0, $bitmap.Size)
+          $bitmap.Save("D:\a\trifa_material\trifa_material\package-screenshot-windows.png")
+          Write-Output "Screenshot saved to:"
+          Write-Output D:\a\trifa_material\trifa_material\package-screenshot-windows.png
+
+      - name: upload-screenshots
+        uses: actions/upload-artifact@v3
+        with:
+          name: screenshot-windows
+          path: |
+            D:\a\trifa_material\trifa_material\package-screenshot-windows.png
+
+      - name: Upload to nightly release
+        uses: ncipollo/release-action@v1
+        if: github.ref == 'refs/heads/master'
+        with:
+          allowUpdates: true
+          tag: nightly
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          prerelease: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "package-screenshot-windows.png"
+
