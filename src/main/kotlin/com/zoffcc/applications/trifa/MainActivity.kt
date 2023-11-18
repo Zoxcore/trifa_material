@@ -926,12 +926,17 @@ class MainActivity
                 // we have some call with a friend already
                 return
             }
+
+            // TODO: do not auto-answer calls
             val call_answer = toxav_answer(friend_number, GLOBAL_AUDIO_BITRATE.toLong(), GLOBAL_VIDEO_BITRATE.toLong())
             if (call_answer == 1)
             {
                 avstatestore.state.calling_state_set(AVState.CALL_STATUS.CALL_STATUS_CALLING)
                 avstatestore.state.call_with_friend_pubkey_set(tox_friend_get_public_key(friend_number))
                 avstatestore.state.start_av_call()
+                toxav_option_set(friend_number,
+                    ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MAX_BITRATE.value.toLong(),
+                    GLOBAL_VIDEO_BITRATE.toLong())
             }
         }
 
@@ -1194,6 +1199,32 @@ class MainActivity
         @JvmStatic
         fun android_toxav_callback_call_comm_cb_method(friend_number: Long, a_TOXAV_CALL_COMM_INFO: Long, comm_number: Long)
         {
+            if (a_TOXAV_CALL_COMM_INFO == ToxVars.TOXAV_CALL_COMM_INFO.TOXAV_CALL_COMM_DECODER_CURRENT_BITRATE.value.toLong())
+            {
+                Log.i(TAG, "call_comm_cb: fnum: " + friend_number
+                        + " DECODER_CURRENT_BITRATE = " + comm_number)
+            }
+            else if (a_TOXAV_CALL_COMM_INFO == ToxVars.TOXAV_CALL_COMM_INFO.TOXAV_CALL_COMM_ENCODER_CURRENT_BITRATE.value.toLong())
+            {
+                Log.i(TAG, "call_comm_cb: fnum: " + friend_number
+                        + " ENCODER_CURRENT_BITRATE = " + comm_number)
+            }
+            else if (a_TOXAV_CALL_COMM_INFO == ToxVars.TOXAV_CALL_COMM_INFO.TOXAV_CALL_COMM_NETWORK_ROUND_TRIP_MS.value.toLong())
+            {
+                Log.i(TAG, "call_comm_cb: fnum: " + friend_number
+                        + " NETWORK_ROUND_TRIP_MS = " + comm_number)
+            }
+            else if (a_TOXAV_CALL_COMM_INFO == ToxVars.TOXAV_CALL_COMM_INFO.TOXAV_CALL_COMM_PLAY_DELAY.value.toLong())
+            {
+                Log.i(TAG, "call_comm_cb: fnum: " + friend_number
+                        + " PLAY_DELAY = " + comm_number)
+            }
+            else
+            {
+                // Log.i(TAG, "call_comm_cb: fnum: " + friend_number
+                //        + " TOXAV_CALL_COMM_INFO: " + a_TOXAV_CALL_COMM_INFO
+                //        + " value: " + comm_number)
+            }
         }
 
         // -------- called by AV native methods --------
