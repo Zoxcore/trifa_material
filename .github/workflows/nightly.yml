@@ -126,6 +126,91 @@ jobs:
           artifacts: "trifa-material_nightly.deb,trifa-material_nightly.rpm"
 
 
+
+
+  build-appimage-nightly-artifact:
+    name: Nightly Artifact AppImage Build
+    runs-on: ubuntu-20.04
+    needs: [update-nightly-tag]
+    if: |
+      always() &&
+      (needs.update-nightly-tag.result == 'success' ||
+        needs.update-nightly-tag.result == 'skipped')
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: install dependencies
+        run: |
+          sudo apt-get update && \
+          sudo DEBIAN_FRONTEND=noninteractive \
+          apt-get install -y --no-install-recommends \
+          ca-certificates \
+          wget \
+          rpm \
+          sed \
+          openjdk-17-jdk \
+          openjdk-17-jdk-headless
+
+      - name: show java version
+        run:  type -a java;java -version
+
+      - name: set java version
+        run:  sudo update-java-alternatives -s java-1.17.0-openjdk-amd64
+
+      - name: show java version
+        run:  type -a java;java -version
+
+      - name: activate appimage package creation
+        run: |
+          sed -i -e 's#TargetFormat.Dmg#TargetFormat.AppImage#' build.gradle.kts
+
+      - name: build package
+        run:  id;pwd;ls -al;./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64 packageAppImage
+
+      - name: make appimage
+        run:  id;pwd;ls -al;./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64 executeAppImageBuilder
+
+      - name: check appimage
+        run:  id;pwd;ls -hal ./trifa-material*AppImage
+
+      - name: Rename artifact for nightly upload
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: |
+          cp -v ./trifa-material*AppImage trifa-material_nightly-x86_64.appimage
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: trifa-material_nightly-x86_64.appimage
+          path: trifa-material_nightly-x86_64.appimage
+
+      - name: Rename artifact for release upload
+        if: contains(github.ref, 'refs/tags/v')
+        run: |
+          cp -v ./trifa-material*AppImage trifa-material-x86_64.appimage
+      - name: Upload to versioned release
+        if: contains(github.ref, 'refs/tags/v')
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          draft: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "trifa-material-x86_64.appimage"
+
+      - name: Upload to nightly release
+        uses: ncipollo/release-action@v1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        with:
+          allowUpdates: true
+          tag: nightly
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          prerelease: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "trifa-material_nightly.appimage"
+
   build-macos-nightly-artifact:
     name: Nightly Artifact macOS Build
     runs-on: macos-latest
