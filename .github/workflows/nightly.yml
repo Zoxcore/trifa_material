@@ -173,12 +173,12 @@ jobs:
         run:  id;pwd;ls -al;./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64 executeAppImageBuilder
 
       - name: check appimage
-        run:  id;pwd;ls -hal ./trifa-material*AppImage
+        run:  id;pwd;ls -hal ./trifa*material*AppImage
 
       - name: Rename artifact for nightly upload
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
-          cp -v ./trifa-material*AppImage trifa-material_nightly-x86_64.appimage
+          cp -v ./trifa*material*AppImage trifa-material_nightly-x86_64.appimage
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
@@ -188,7 +188,7 @@ jobs:
       - name: Rename artifact for release upload
         if: contains(github.ref, 'refs/tags/v')
         run: |
-          cp -v ./trifa-material*AppImage trifa-material-x86_64.appimage
+          cp -v ./trifa*material*AppImage trifa-material-x86_64.appimage
       - name: Upload to versioned release
         if: contains(github.ref, 'refs/tags/v')
         uses: ncipollo/release-action@v1
@@ -209,7 +209,7 @@ jobs:
           prerelease: true
           replacesArtifacts: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "trifa-material_nightly.appimage"
+          artifacts: "trifa-material_nightly-x86_64.appimage"
 
   build-macos-nightly-artifact:
     name: Nightly Artifact macOS Build
