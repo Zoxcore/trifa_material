@@ -68,7 +68,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
                 if ((lastVisibleSerial >= prevLastSerial || lastVisibleSerial == -1L) && grpmsgs.groupmessages.lastIndex > 0) {
                     // scroll to the end if we were at the end
                     listState.scrollToItem(grpmsgs.groupmessages.lastIndex)
-                    Log.i(com.zoffcc.applications.trifa.TAG, "messages -> scroll to the end")
+                    // Log.i(com.zoffcc.applications.trifa.TAG, "messages -> scroll to the end")
                 }
                 // remember the last serial
                 prevLastSerial = lastSerial

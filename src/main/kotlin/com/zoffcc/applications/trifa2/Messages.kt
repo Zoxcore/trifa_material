@@ -68,7 +68,7 @@ internal fun Messages(ui_scale: Float, selectedContactPubkey: String?) {
                 if ((lastVisibleSerial >= prevLastSerial || lastVisibleSerial == -1L) && msgs.messages.lastIndex > 0) {
                     // scroll to the end if we were at the end
                     listState.scrollToItem(msgs.messages.lastIndex)
-                    Log.i(com.zoffcc.applications.trifa.TAG, "messages -> scroll to the end")
+                    // Log.i(com.zoffcc.applications.trifa.TAG, "messages -> scroll to the end")
                 }
                 // remember the last serial
                 prevLastSerial = lastSerial
