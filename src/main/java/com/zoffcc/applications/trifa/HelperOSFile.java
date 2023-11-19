@@ -29,4 +29,45 @@ public class HelperOSFile {
             e2.printStackTrace();
         }
     }
+
+    public static void show_file_in_explorer(String filename_with_path)
+    {
+        if (OperatingSystem.getCurrent() == OperatingSystem.WINDOWS)
+        {
+            final String filename_for_windows = filename_with_path.replace("/", "\\");
+            try
+            {
+                Desktop.getDesktop().browseFileDirectory(new File(filename_for_windows));
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                show_containing_dir_in_explorer(filename_for_windows);
+            }
+        }
+        else if (OperatingSystem.getCurrent() == OperatingSystem.LINUX)
+        {
+            try
+            {
+                Desktop.getDesktop().browseFileDirectory(new File(filename_with_path));
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                show_containing_dir_in_explorer(filename_with_path);
+            }
+        }
+        else if (OperatingSystem.getCurrent() == OperatingSystem.MACOS)
+        {
+            try
+            {
+                Desktop.getDesktop().browseFileDirectory(new File(filename_with_path));
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                show_containing_dir_in_explorer(filename_with_path);
+            }
+        }
+    }
 }

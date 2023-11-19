@@ -115,7 +115,7 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
                 backgroundColor = MaterialTheme.colors.background,
                 modifier = Modifier.height(40.dp),
                 actions = {
-                    IconButton(onClick = {/* Do Something*/ }) {
+                    IconButton(onClick = {/* TODO: */ }) {
                         Icon(Icons.Filled.Call, null)
                     }
                     val current_callstate by avstatestorecallstate.stateFlow.collectAsState()

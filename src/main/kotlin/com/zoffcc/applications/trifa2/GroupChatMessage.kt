@@ -43,6 +43,7 @@ import com.zoffcc.applications.trifa.HelperGeneric.AsyncImage
 import com.zoffcc.applications.trifa.HelperGeneric.loadImageBitmap
 import com.zoffcc.applications.trifa.HelperOSFile
 import com.zoffcc.applications.trifa.HelperOSFile.show_containing_dir_in_explorer
+import com.zoffcc.applications.trifa.HelperOSFile.show_file_in_explorer
 import com.zoffcc.applications.trifa.TRIFAGlobals
 import java.io.File
 
@@ -126,16 +127,16 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                                         contentDescription = "Image",
                                         modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp).
                                         combinedClickable(
-                                            onClick = { HelperOSFile.show_containing_dir_in_explorer(groupmessage.filename_fullpath) },
-                                            onLongClick = {}))
+                                            onClick = { show_file_in_explorer(groupmessage.filename_fullpath) },
+                                            onLongClick = { show_containing_dir_in_explorer(groupmessage.filename_fullpath) }))
                                 }
                                 else
                                 {
                                     Icon(
                                         modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp).
                                         combinedClickable(
-                                            onClick = { show_containing_dir_in_explorer(groupmessage.filename_fullpath) },
-                                            onLongClick = {}),
+                                            onClick = { show_file_in_explorer(groupmessage.filename_fullpath) },
+                                            onLongClick = { show_containing_dir_in_explorer(groupmessage.filename_fullpath) }),
                                         imageVector = Icons.Default.Attachment,
                                         contentDescription = "File",
                                         tint = MaterialTheme.colors.primary

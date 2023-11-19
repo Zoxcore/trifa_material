@@ -37,19 +37,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.trifa.HelperFiletransfer.check_filename_is_image
 import com.zoffcc.applications.trifa.HelperGeneric
 import com.zoffcc.applications.trifa.HelperGeneric.cancel_ft_from_ui
 import com.zoffcc.applications.trifa.HelperMessage.set_message_queueing_from_id
-import com.zoffcc.applications.trifa.HelperOSFile
-import com.zoffcc.applications.trifa.Log
+import com.zoffcc.applications.trifa.HelperOSFile.show_containing_dir_in_explorer
+import com.zoffcc.applications.trifa.HelperOSFile.show_file_in_explorer
 import com.zoffcc.applications.trifa.TRIFAGlobals
 import com.zoffcc.applications.trifa.TRIFAGlobals.TRIFA_MSG_TYPE
 import com.zoffcc.applications.trifa.ToxVars
-import org.briarproject.briar.desktop.utils.InternationalizationUtils
 import java.io.File
 import kotlin.random.Random
 
@@ -166,16 +164,16 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                                 contentDescription = "Image",
                                                 modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp).
                                                 combinedClickable(
-                                                    onClick = { HelperOSFile.show_containing_dir_in_explorer(message.filename_fullpath) },
-                                                    onLongClick = {}))
+                                                    onClick = { show_file_in_explorer(message.filename_fullpath) },
+                                                    onLongClick = { show_containing_dir_in_explorer(message.filename_fullpath) }))
                                         }
                                         else
                                         {
                                             Icon(
                                                 modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp).
                                                 combinedClickable(
-                                                    onClick = { HelperOSFile.show_containing_dir_in_explorer(message.filename_fullpath) },
-                                                    onLongClick = {}),
+                                                    onClick = { show_file_in_explorer(message.filename_fullpath) },
+                                                    onLongClick = { show_containing_dir_in_explorer(message.filename_fullpath) }),
                                                 imageVector = Icons.Default.Attachment,
                                                 contentDescription = "File",
                                                 tint = MaterialTheme.colors.primary
@@ -234,16 +232,16 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                                 contentDescription = "Image",
                                                 modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp).
                                                 combinedClickable(
-                                                    onClick = { HelperOSFile.show_containing_dir_in_explorer(message.filename_fullpath) },
-                                                    onLongClick = {}))
+                                                    onClick = { show_file_in_explorer(message.filename_fullpath) },
+                                                    onLongClick = { show_containing_dir_in_explorer(message.filename_fullpath) }))
                                         }
                                         else
                                         {
                                             Icon(
                                                 modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp).
                                                 combinedClickable(
-                                                    onClick = { HelperOSFile.show_containing_dir_in_explorer(message.filename_fullpath) },
-                                                    onLongClick = {}),
+                                                    onClick = { show_file_in_explorer(message.filename_fullpath) },
+                                                    onLongClick = { show_containing_dir_in_explorer(message.filename_fullpath) }),
                                                 imageVector = Icons.Default.Attachment,
                                                 contentDescription = "File",
                                                 tint = MaterialTheme.colors.primary
