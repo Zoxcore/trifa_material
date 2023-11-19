@@ -812,7 +812,10 @@ fun App()
                             if (tox_running_state == "running") AddFriend()
                             else ExplainerToxNotRunning()
                         }
-                        UiMode.ADDGROUP -> AddGroup()
+                        UiMode.ADDGROUP -> {
+                            if (tox_running_state == "running") AddGroup()
+                            else ExplainerToxNotRunning()
+                        }
                         UiMode.SETTINGS -> SettingDetails()
                         UiMode.ABOUT -> AboutScreen()
                         else -> UiPlaceholder()
@@ -1087,7 +1090,7 @@ fun update_bootstrap_nodes_from_internet()
                     val bn2 = BootstrapNodeEntryDB()
                     bn2.ip = nl_entry.ipv4
                     bn2.port = nl_entry.port?.toLong()!!
-                    bn2.key_hex = nl_entry.publicKey.uppercase(Locale.getDefault())
+                    bn2.key_hex = nl_entry.publicKey.uppercase()
                     bn2.udp_node = true
                     bn2.num = num_udp.toLong()
                     if (bn2.ip != null && !bn2.ip.equals("none", ignoreCase = true) && bn2.port > 0 && bn2.key_hex != null)
@@ -1099,7 +1102,7 @@ fun update_bootstrap_nodes_from_internet()
                     val bn2_ip6 = BootstrapNodeEntryDB()
                     bn2_ip6.ip = nl_entry.ipv6
                     bn2_ip6.port = nl_entry.port?.toLong()!!
-                    bn2_ip6.key_hex = nl_entry.publicKey.uppercase(Locale.getDefault())
+                    bn2_ip6.key_hex = nl_entry.publicKey.uppercase()
                     bn2_ip6.udp_node = true
                     bn2_ip6.num = num_udp.toLong()
                     if (!bn2_ip6.ip.equals("-", ignoreCase = true) && bn2_ip6.port > 0 && bn2_ip6.key_hex != null)
@@ -1123,7 +1126,7 @@ fun update_bootstrap_nodes_from_internet()
                     bn2.ip = nl_entry.ipv4
                     val tcp_ports_count = nl_entry.tcpPorts.size
                     bn2.port = nl_entry.tcpPorts[k]?.toLong()!!
-                    bn2.key_hex = nl_entry.publicKey.uppercase(Locale.getDefault())
+                    bn2.key_hex = nl_entry.publicKey.uppercase()
                     bn2.udp_node = false
                     if (bn2.ip != null && !bn2.ip.equals("none", ignoreCase = true) && bn2.port > 0 && bn2.key_hex != null)
                     {
@@ -1139,7 +1142,7 @@ fun update_bootstrap_nodes_from_internet()
                     val bn2_ip6 = BootstrapNodeEntryDB()
                     bn2_ip6.ip = nl_entry.ipv6
                     val tcp_ports_count_ip6 = nl_entry.tcpPorts.size
-                    bn2_ip6.key_hex = nl_entry.publicKey.uppercase(Locale.getDefault())
+                    bn2_ip6.key_hex = nl_entry.publicKey.uppercase()
                     bn2_ip6.udp_node = false
                     bn2_ip6.num = num_tcp.toLong()
                     if (!bn2_ip6.ip.equals("-", ignoreCase = true) && tcp_ports_count_ip6 > 0 && bn2_ip6.key_hex != null)
@@ -1149,7 +1152,7 @@ fun update_bootstrap_nodes_from_internet()
                             val bn2_ip6_ = BootstrapNodeEntryDB()
                             bn2_ip6_.ip = nl_entry.ipv6
                             bn2_ip6_.port = nl_entry.tcpPorts[p]?.toLong()!!
-                            bn2_ip6_.key_hex = nl_entry.publicKey.uppercase(Locale.getDefault())
+                            bn2_ip6_.key_hex = nl_entry.publicKey.uppercase()
                             bn2_ip6_.udp_node = false
                             bn2_ip6_.num = num_tcp.toLong()
                             orma?.insertIntoBootstrapNodeEntryDB(bn2_ip6_)
