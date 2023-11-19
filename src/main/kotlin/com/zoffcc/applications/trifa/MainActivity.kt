@@ -1327,7 +1327,7 @@ class MainActivity
             {
             }
             update_savedata_file_wrapper()
-            SnackBarToast("added new Friend")
+            SnackBarToast("Invited by a new Friend")
         }
 
         @JvmStatic
@@ -2132,7 +2132,7 @@ class MainActivity
                 {
                 }
             }
-            SnackBarToast("added new Group")
+            SnackBarToast("Invited to a new Group")
         }
 
         @JvmStatic
@@ -2313,7 +2313,7 @@ class MainActivity
                     if (data[6] == 0x1.toByte() && data[7] == 0x11.toByte())
                     {
                         val group_id = tox_group_by_groupnum__wrapper(group_number)
-                        val tox_peerpk = tox_group_peer_get_public_key(group_number, peer_id)!!.uppercase(Locale.getDefault());
+                        val tox_peerpk = tox_group_peer_get_public_key(group_number, peer_id)!!.uppercase()
                         val peernum = tox_group_peer_by_public_key(group_number, tox_peerpk)
                         val fname = tox_group_peer_get_name(group_number, peernum)
                         val msg_timestamp = System.currentTimeMillis()
@@ -2565,7 +2565,7 @@ class MainActivity
             val m = GroupMessage()
             m.is_new = false // own messages are always "not new"
             m.tox_group_peer_pubkey = tox_group_self_get_public_key(
-                tox_group_by_groupid__wrapper(groupid))!!.uppercase(Locale.getDefault())
+                tox_group_by_groupid__wrapper(groupid))!!.uppercase()
             m.direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value
             m.TOX_MESSAGE_TYPE = 0
             m.read = true // !!!! there is no "read status" with conferences in Tox !!!!
