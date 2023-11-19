@@ -58,7 +58,7 @@ import javax.imageio.ImageIO
 
 object HelperGeneric {
     private const val TAG = "trifa.Hlp.Generic"
-    val hexArray = "0123456789ABCDEF".toCharArray()
+    @JvmStatic val hexArray = "0123456789ABCDEF".toCharArray()
     const val PUBKEY_SHORT_LEN = 6
 
     fun PubkeyShort(pubkey: String) : String {

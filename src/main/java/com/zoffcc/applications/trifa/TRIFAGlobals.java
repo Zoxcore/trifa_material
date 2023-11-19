@@ -118,6 +118,11 @@ public class TRIFAGlobals
     static long LAST_ONLINE_TIMSTAMP_ONLINE_NOW = Long.MAX_VALUE - 1;
     static long LAST_ONLINE_TIMSTAMP_ONLINE_OFFLINE = -1;
 
+    public static final int TOX_NGC_HISTORY_SYNC_MAX_PEERNAME_BYTES = 25;
+    public static final int TOX_NGC_HISTORY_SYNC_MAX_SECONDS_BACK = 130 * 60; // 130 minutes
+
+    static int MESSAGE_GROUP_HISTORY_SYNC_DOUBLE_INTERVAL_SECS = 60 * 24 * 1; // 1 day
+
     static long global_last_activity_outgoung_ft_ts = -1;
 
     final static String NOTIFICATION_FCM_PUSH_URL_PREFIX = "https://tox.zoff.xyz/toxfcm/fcm.php?id=";
@@ -207,6 +212,17 @@ public class TRIFAGlobals
 
     }
 
+    public static enum TRIFA_SYNC_TYPE
+    {
+        TRIFA_SYNC_TYPE_NONE(0), TRIFA_SYNC_TYPE_TOXPROXY(1), TRIFA_SYNC_TYPE_NGC_PEERS(2);
+
+        public int value;
+
+        private TRIFA_SYNC_TYPE(int value)
+        {
+            this.value = value;
+        }
+    }
 
     public static enum CONTROL_PROXY_MESSAGE_TYPE
     {

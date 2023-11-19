@@ -39,7 +39,9 @@ import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
 import com.zoffcc.applications.trifa.HelperGroup.bytebuffer_to_hexstring
 import com.zoffcc.applications.trifa.HelperGroup.fourbytes_of_long_to_hex
 import com.zoffcc.applications.trifa.HelperGroup.handle_incoming_group_file
+import com.zoffcc.applications.trifa.HelperGroup.handle_incoming_sync_group_message
 import com.zoffcc.applications.trifa.HelperGroup.send_group_image
+import com.zoffcc.applications.trifa.HelperGroup.send_ngch_request
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupnum__wrapper
 import com.zoffcc.applications.trifa.HelperMessage.update_single_message_from_ftid
@@ -2077,7 +2079,9 @@ class MainActivity
             val tox_peerpk = tox_group_peer_get_public_key(group_number, peer_id)!!.uppercase()
             val message_id_hex = fourbytes_of_long_to_hex(message_id)
             val message_timestamp = System.currentTimeMillis()
-            val msg_dbid = received_groupmessage_to_db(tox_peerpk = tox_peerpk!!, groupid = group_id, message_timestamp = message_timestamp, group_message = message_orig, message_id = message_id)
+            val msg_dbid = received_groupmessage_to_db(tox_peerpk = tox_peerpk!!,
+                groupid = group_id, message_timestamp = message_timestamp,
+                group_message = message_orig, message_id_hex = message_id_hex)
             val peernum = tox_group_peer_by_public_key(group_number, tox_peerpk)
             val fname = tox_group_peer_get_name(group_number, peernum)
             val peer_user = User(fname + " / " + PubkeyShort(tox_peerpk), picture = "friend_avatar.png", toxpk = tox_peerpk.uppercase(), color = ColorProvider.getColor(true, tox_peerpk.uppercase()))
@@ -2138,10 +2142,10 @@ class MainActivity
         @JvmStatic
         fun android_tox_callback_group_peer_join_cb_method(group_number: Long, peer_id: Long)
         {
+            val group_id = tox_group_by_groupnum__wrapper(group_number)
             try
             {
                 val new_privacy_state = tox_group_get_privacy_state(group_number)
-                val group_id = tox_group_by_groupnum__wrapper(group_number)
                 val group_name = tox_group_get_name(group_number)
                 val group_connection_status = tox_group_is_connected(group_number)
                 val group_num_peers = tox_group_peer_count(group_number)
@@ -2152,7 +2156,6 @@ class MainActivity
 
             try
             {
-                val group_id = tox_group_by_groupnum__wrapper(group_number)
                 if (groupstore.stateFlow.value.selectedGroupId == group_id)
                 {
                     val peer_pubkey = tox_group_peer_get_public_key(group_number, peer_id)
@@ -2167,6 +2170,12 @@ class MainActivity
                 }
             } catch (_: Exception)
             {
+            }
+            val privacy_state = tox_group_get_privacy_state(group_number)
+            if (privacy_state == ToxVars.TOX_GROUP_PRIVACY_STATE.TOX_GROUP_PRIVACY_STATE_PUBLIC.value)
+            {
+                val peer_pubkey = tox_group_peer_get_public_key(group_number, peer_id)
+                send_ngch_request(group_id, peer_pubkey)
             }
 
             update_savedata_file_wrapper()
@@ -2293,7 +2302,21 @@ class MainActivity
 
         @JvmStatic
         fun android_tox_callback_group_custom_packet_cb_method(group_number: Long, peer_id: Long, data: ByteArray?, length: Long)
-        { // check for correct signature of packets
+        {
+            try
+            {
+                val res = tox_group_self_get_peer_id(group_number)
+                if (res == peer_id)
+                {
+                    // HINT: ignore own packets
+                    Log.i(TAG, "group_custom_packet_cb:gn=$group_number peerid=$peer_id ignoring own packet")
+                    return
+                }
+            } catch (e: java.lang.Exception)
+            {
+            }
+
+            // check for correct signature of packets
             val header_ngc_audio_v1 = (6 + 1 + 1 + 1 + 1).toLong()
             val header_ngc_video_v1 = (6 + 1 + 1 + 1 + 1 + 1).toLong()
             val header_ngc_video_v2 = (6 + 1 + 1 + 1 + 1 + 1 + 2 + 1).toLong()
@@ -2395,6 +2418,72 @@ class MainActivity
         @JvmStatic
         fun android_tox_callback_group_custom_private_packet_cb_method(group_number: Long, peer_id: Long, data: ByteArray?, length: Long)
         {
+            try
+            {
+                val res = tox_group_self_get_peer_id(group_number)
+                if (res == peer_id)
+                {
+                    // HINT: ignore own packets
+                    Log.i(TAG, "group_custom_private_packet_cb:gn=$group_number peerid=$peer_id ignoring own packet")
+                    return
+                }
+            } catch (e: java.lang.Exception)
+            {
+            }
+            // check for correct signature of packets
+            val header = (6 + 1 + 1).toLong()
+            if (length > TOX_MAX_NGC_FILE_AND_HEADER_SIZE || length < header)
+            {
+                Log.i(TAG, "group_custom_private_packet_cb: data length has wrong size: $length")
+                return
+            }
+            // @formatter:off
+            /*
+            | what      | Length in bytes| Contents                                           |
+            |------     |--------        |------------------                                  |
+            | magic     |       6        |  0x667788113435                                    |
+            | version   |       1        |  0x01                                              |
+             */
+            // @formatter:on
+            // @formatter:off
+            /*
+            | what      | Length in bytes| Contents                                           |
+            |------     |--------        |------------------                                  |
+            | magic     |       6        |  0x667788113435                                    |
+            | version   |       1        |  0x01                                              |
+             */
+            // @formatter:on
+            if (data!![0] == 0x66.toByte() && data[1] == 0x77.toByte() && data[2] == 0x88.toByte() && data[3] == 0x11.toByte() && data[4] == 0x34.toByte() && data[5] == 0x35.toByte())
+            {
+                if (data[6] == 0x1.toByte() && data[7] == 0x1.toByte())
+                {
+                    Log.i(TAG, "group_custom_private_packet_cb: got ngch_request");
+                    val privacy_state = tox_group_get_privacy_state(group_number)
+                    if (privacy_state == ToxVars.TOX_GROUP_PRIVACY_STATE.TOX_GROUP_PRIVACY_STATE_PUBLIC.value)
+                    {
+                        // sync_group_message_history(group_number, peer_id);
+                    } else
+                    {
+                        Log.i(TAG, "group_custom_private_packet_cb: only sync history for public groups!")
+                    }
+                } else if (data[6] == 0x1.toByte() && data[7] == 0x2.toByte())
+                {
+                    val header_syncmsg = 6 + 1 + 1 + 4 + 32 + 4 + 25
+                    if (length >= header_syncmsg + 1)
+                    {
+                        Log.i(TAG, "group_custom_private_packet_cb: got ngch_syncmsg");
+                        handle_incoming_sync_group_message(group_number, peer_id, data, length);
+                    }
+                } else if (data[6] == 0x1.toByte() && data[7] == 0x3.toByte())
+                {
+                    val header_syncfile = 6 + 1 + 1 + 32 + 32 + 4 + 25 + 255
+                    if (length >= header_syncfile + 1)
+                    {
+                        Log.i(TAG, "group_custom_private_packet_cb: got ngch_syncfile");
+                        // handle_incoming_sync_group_file(group_number, peer_id, data, length);
+                    }
+                }
+            }
         }
 
         @JvmStatic
@@ -2477,9 +2566,8 @@ class MainActivity
             return row_id
         }
 
-        fun received_groupmessage_to_db(tox_peerpk: String, groupid: String, message_timestamp: Long, group_message: String?, message_id: Long): Long
+        fun received_groupmessage_to_db(tox_peerpk: String, groupid: String, message_timestamp: Long, group_message: String?, message_id_hex: String): Long
         {
-            val message_id_hex = fourbytes_of_long_to_hex(message_id)
             val groupnum = tox_group_by_groupid__wrapper(groupid)
             val peernum = tox_group_peer_by_public_key(groupnum, tox_peerpk)
             val peername = tox_group_peer_get_name(groupnum, peernum)
@@ -2508,6 +2596,22 @@ class MainActivity
 
             return row_id
         }
+
+        fun incoming_synced_group_text_msg(m: GroupMessage)
+        {
+            val message_timestamp = m.sent_timestamp
+
+            val msg_dbid = received_groupmessage_to_db(tox_peerpk = m.tox_group_peer_pubkey!!, groupid = m.group_identifier, message_timestamp = message_timestamp, group_message = m.text, message_id_hex = m.message_id_tox)
+            val peer_user = User(m.tox_group_peername + " / " + PubkeyShort(m.tox_group_peer_pubkey), picture = "friend_avatar.png", toxpk = m.tox_group_peer_pubkey.uppercase(), color = ColorProvider.getColor(true, m.tox_group_peer_pubkey.uppercase()))
+
+            groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(
+                UIGroupMessage(
+                    message_id_tox = m.message_id_tox, msgDatabaseId = msg_dbid,
+                    user = peer_user, timeMs = message_timestamp, text = m.text,
+                    toxpk = m.tox_group_peer_pubkey, groupId = m.group_identifier,
+                    trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
+        }
+
         class outgoing_file_wrapped
         {
             var filepath_wrapped: String? = null
@@ -2724,10 +2828,10 @@ class MainActivity
             m.private_message = 0;
             m.group_identifier = groupid;
             m.TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value
-            m.sent_timestamp = System.currentTimeMillis();
-            m.rcvd_timestamp = System.currentTimeMillis(); // since we do not have anything better assume "now"
-            m.text = group_message;
-            m.was_synced = false;
+            m.sent_timestamp = System.currentTimeMillis()
+            m.rcvd_timestamp = System.currentTimeMillis() // since we do not have anything better assume "now"
+            m.text = group_message
+            m.was_synced = false
             m.message_id_tox = message_id_hex
             var row_id: Long = -1
             try
