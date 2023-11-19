@@ -51,7 +51,7 @@ fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?, 
     var inputText by remember { mutableStateOf("") }
     LaunchedEffect(selectedContactPubkey)
     {
-        Log.i(TAG, "selected friend changed, reset input text")
+        // Log.i(TAG, "selected friend changed, reset input text")
         inputText = ""
     }
     TextField(

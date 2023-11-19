@@ -43,7 +43,7 @@ fun GroupSendMessage(focusRequester: FocusRequester, selectedGroupId: String?, s
     var inputText by remember { mutableStateOf("") }
     LaunchedEffect(selectedGroupId)
     {
-        Log.i(TAG, "selected group changed, reset input text")
+        // Log.i(TAG, "selected group changed, reset input text")
         inputText = ""
     }
     TextField(
