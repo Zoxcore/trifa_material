@@ -1,5 +1,8 @@
+@file:OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
+
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
@@ -17,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -43,8 +47,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.NoiseAware
+import androidx.compose.material.icons.filled.QrCode
+import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.RawOff
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -64,15 +71,20 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.vector.VectorPainter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
@@ -119,6 +131,15 @@ import com.zoffcc.applications.trifa.TrifaToxService
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.clear_grouppeers
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.load_grouppeers
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
+import io.github.alexzhirkevich.qrose.options.QrBallShape
+import io.github.alexzhirkevich.qrose.options.QrBrush
+import io.github.alexzhirkevich.qrose.options.QrFrameShape
+import io.github.alexzhirkevich.qrose.options.QrPixelShape
+import io.github.alexzhirkevich.qrose.options.brush
+import io.github.alexzhirkevich.qrose.options.circle
+import io.github.alexzhirkevich.qrose.options.roundCorners
+import io.github.alexzhirkevich.qrose.options.solid
+import io.github.alexzhirkevich.qrose.rememberQrCodePainter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -146,6 +167,7 @@ import org.briarproject.briar.desktop.ui.UiMode
 import org.briarproject.briar.desktop.ui.UiPlaceholder
 import org.briarproject.briar.desktop.ui.VerticalDivider
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
+import org.jetbrains.compose.resources.ExperimentalResourceApi
 import java.awt.Toolkit
 import java.io.File
 import java.net.URI
@@ -329,8 +351,13 @@ fun App()
                                     }.start()
                                 }
                             }
-                            SaveDataPath()
-                            ToxIDTextField()
+                            Row(verticalAlignment = Alignment.Bottom) {
+                                Column {
+                                    SaveDataPath()
+                                    ToxIDTextField()
+                                }
+                                ToxIDQRCode()
+                            }
                         }
                         Spacer(modifier = Modifier.width(5.dp))
                         var video_in_box_width by remember { mutableStateOf(VIDEO_IN_BOX_WIDTH_SMALL) }
@@ -934,6 +961,49 @@ fun load_groupmessages_for_friend(selectedGroupId: String?)
         {
         }
     }
+}
+
+@Composable
+private fun ToxIDQRCode()
+{
+    val toxdata by toxdatastore.stateFlow.collectAsState()
+    val qrcodePainter = rememberQrCodePainter(toxdata.mytoxid, toxdata.mytoxid) {
+        colors {
+            dark = QrBrush.solid(Color.Black)
+            light = QrBrush.solid(Color.White)
+            frame = QrBrush.solid(Color.Blue)
+        }
+    }
+
+    val QRCODE_BOX_WIDTH_SMALL = MYTOXID_HEIGHT
+    val QRCODE_BOX_HEIGHT_SMALL = MYTOXID_HEIGHT
+    val QRCODE_BOX_WIDTH_LARGE = 150.dp
+    val QRCODE_BOX_HEIGHT_LARGE = 150.dp
+    var qrcode_box_width by remember { mutableStateOf(QRCODE_BOX_WIDTH_SMALL) }
+    var qrcode_box_height by remember { mutableStateOf(QRCODE_BOX_HEIGHT_SMALL) }
+    var qrcode_box_small by remember { mutableStateOf(true)}
+    val image_qrcode_icon = rememberVectorPainter(Icons.Filled.QrCode2)
+    Image(if (qrcode_box_small) image_qrcode_icon else qrcodePainter,
+        modifier = Modifier.width(qrcode_box_width).
+        height(qrcode_box_height).
+        padding(start = 5.dp).
+        combinedClickable(onClick = {
+                if (qrcode_box_small)
+                {
+                    qrcode_box_width = QRCODE_BOX_WIDTH_LARGE
+                    qrcode_box_height = QRCODE_BOX_HEIGHT_LARGE
+                    qrcode_box_small = false
+                }
+                else
+                {
+                    qrcode_box_width = QRCODE_BOX_WIDTH_SMALL
+                    qrcode_box_height = QRCODE_BOX_HEIGHT_SMALL
+                    qrcode_box_small = true
+                }
+            })
+        ,
+        contentDescription = "my ToxID QR-Code",
+        contentScale = ContentScale.Fit)
 }
 
 @Composable
