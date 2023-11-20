@@ -1,10 +1,14 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.de.undercouch.gradle.tasks.download.Download
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 plugins {
     kotlin("jvm")
     // kotlin("multiplatform")
     id("org.jetbrains.compose")
+    id("com.github.gmazzo.buildconfig") version "4.2.0"
+    id("org.ajoberstar.grgit") version "4.1.0"
 }
 
 group = "com.zoffcc.applications.trifa_material"
@@ -15,6 +19,24 @@ repositories {
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     google()
+}
+
+buildConfig {
+    buildConfigField("String", "APP_NAME", "\"${project.name}\"")
+    buildConfigField("String", "APP_VERSION", provider { "\"${project.version}\"" })
+    try
+    {
+        buildConfigField("String", "GIT_COMMIT_HASH", "\"" + grgit.head().abbreviatedId + "\"")
+        buildConfigField("String", "GIT_COMMIT_DATE", "\"" + grgit.head().dateTime.
+        format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + "\"")
+        buildConfigField("String", "GIT_COMMIT_MSG", "\"" + grgit.head().shortMessage.replace("\"", "_") + "\"")
+    }
+    catch (e: Exception)
+    {
+        buildConfigField("String", "GIT_COMMIT_HASH", "\"" + "????" + "\"")
+        buildConfigField("String", "GIT_COMMIT_DATE", "\"" + "????" + "\"")
+        buildConfigField("String", "GIT_COMMIT_MSG", "\"" + "????" + "\"")
+    }
 }
 
 dependencies {
