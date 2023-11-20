@@ -38,6 +38,7 @@ import androidx.compose.ui.semantics.text
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
+import com.zoffcc.applications.trifa_material.trifa_material.BuildConfig
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import java.time.Instant
 import java.time.ZoneId
@@ -110,7 +111,12 @@ private fun GeneralInfo() {
         //   add(Entry("Git branch/tag", "None detected")) // NON-NLS
         // add(Entry("Git hash", BuildData.GIT_HASH)) // NON-NLS
         // add(Entry("Commit time", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(commitTime))) // NON-NLS
+        add(Entry(i18n("about.version"), BuildConfig.APP_VERSION))
+        add(Entry(i18n("about.git_commit_hash"), BuildConfig.GIT_COMMIT_HASH))
+        add(Entry(i18n("about.git_commit_date"), BuildConfig.GIT_COMMIT_DATE))
+        add(Entry(i18n("about.git_commit_msg"), BuildConfig.GIT_COMMIT_MSG))
         add(Entry(i18n("about.website"), "https://github.com/Zoxcore/trifa_material", true))
+
         // add(Entry(i18n("about.contact"), Strings.EMAIL, true))
     }
 
