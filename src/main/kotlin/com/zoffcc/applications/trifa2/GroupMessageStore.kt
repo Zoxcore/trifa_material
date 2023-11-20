@@ -31,6 +31,7 @@ fun CoroutineScope.createGroupMessageStore(): GroupMessageStore
         override fun send(action: GroupMessageAction)
         {
             launch {
+                global_semaphore_groupmessagelist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 if (action is GroupMessageAction.ReceiveGroupMessage)
                 {
                     if (groupstore.state.selectedGroupId == action.groupmessage.groupId)
@@ -41,6 +42,7 @@ fun CoroutineScope.createGroupMessageStore(): GroupMessageStore
                 {
                     groupmessagechannel.send(action)
                 }
+                global_semaphore_groupmessagelist_ui.release()
             }
         }
 
