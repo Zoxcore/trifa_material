@@ -44,7 +44,9 @@ fun GroupPeerList(
                 contentType = { item -> item::class }
             ) { item ->
                 ListItemView(
-                    onSelect = { grouppeerstore.select(item.pubkey) },
+                    onSelect = {
+                               //grouppeerstore.select(item.pubkey)
+                        },
                     selected = (grouppeerList.selectedGrouppeerPubkey == item.pubkey)
                 ) {
                     val modifier = Modifier
