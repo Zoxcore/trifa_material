@@ -323,7 +323,16 @@ class MainActivity
                 if (OperatingSystem.getCurrent() == OperatingSystem.LINUX)
                 {
                     native_notification_lib_loaded_error = jninotifications_loadjni(libdir2)
-                    Log.i(TAG, "jninotifications version: " + NTFYActivity.jninotifications_version())
+                    if (native_notification_lib_loaded_error == 0)
+                    {
+                        try
+                        {
+                            Log.i(TAG, "jninotifications version: " + NTFYActivity.jninotifications_version())
+                        }
+                        catch(e: Exception)
+                        {
+                        }
+                    }
                 }
             }
         }
