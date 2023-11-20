@@ -28,8 +28,10 @@ buildConfig {
     {
         buildConfigField("String", "GIT_COMMIT_HASH", "\"" + grgit.head().abbreviatedId + "\"")
         buildConfigField("String", "GIT_COMMIT_DATE", "\"" + grgit.head().dateTime.
-        format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + "\"")
-        buildConfigField("String", "GIT_COMMIT_MSG", "\"" + grgit.head().shortMessage.replace("\"", "_") + "\"")
+          format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + "\"")
+        buildConfigField("String", "GIT_COMMIT_MSG", "\"" + grgit.head().shortMessage.
+          replace("\"", "_").replace("\n", "_").
+          replace("\r", "_").take(40) + "\"")
     }
     catch (e: Exception)
     {
