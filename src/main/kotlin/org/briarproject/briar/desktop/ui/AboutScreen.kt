@@ -112,6 +112,8 @@ private fun GeneralInfo() {
         // add(Entry("Git hash", BuildData.GIT_HASH)) // NON-NLS
         // add(Entry("Commit time", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(commitTime))) // NON-NLS
         add(Entry(i18n("about.version"), BuildConfig.APP_VERSION))
+        add(Entry(i18n("about.git_kotlin_version"), BuildConfig.KOTLIN_VERSION))
+        add(Entry(i18n("about.git_commit_branch"), BuildConfig.GIT_BRANCH))
         add(Entry(i18n("about.git_commit_hash"), BuildConfig.GIT_COMMIT_HASH))
         add(Entry(i18n("about.git_commit_date"), BuildConfig.GIT_COMMIT_DATE))
         add(Entry(i18n("about.git_commit_msg"), BuildConfig.GIT_COMMIT_MSG))
