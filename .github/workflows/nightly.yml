@@ -494,7 +494,6 @@ jobs:
         - name: create runscript
           run: |
                printf '#!/bin/bash\n' > /tmp/a.sh
-               printf 'fvwm2 &' >> /tmp/a.sh
                printf 'xclock -digital -geometry 300x45+100+688 &\n' >> /tmp/a.sh
                printf '/home/runner/work/trifa_material/trifa_material/gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64/ run &\n' >> /tmp/a.sh
                printf 'sleep 20\n' >> /tmp/a.sh
@@ -511,6 +510,8 @@ jobs:
                printf 'sleep 220\n' >> /tmp/a.sh
                printf 'xdotool mousemove --sync 214 295 click 1\n' >> /tmp/a.sh
                printf 'sleep 40\n' >> /tmp/a.sh
+               printf 'fvwm2 &' >> /tmp/a.sh
+               printf 'sleep 20\n' >> /tmp/a.sh
                printf 'import -window root /tmp/screenshot-linux.png\n' >> /tmp/a.sh
                cat /tmp/a.sh
                chmod a+rx /tmp/a.sh
