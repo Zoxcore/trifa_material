@@ -481,6 +481,7 @@ jobs:
                sudo apt-get install imagemagick
                sudo apt-get install xdotool xclip
                sudo apt-get install x11-apps x11-utils
+               sudo apt-get install lwm fvwm
                sudo apt-get install xvfb
 
         - name: download tester
@@ -495,6 +496,7 @@ jobs:
         - name: create runscript
           run: |
                printf '#!/bin/bash\n' > /tmp/a.sh
+               printf 'fvwm2 &' >> /tmp/a.sh
                printf 'xclock -digital -geometry 300x45+100+688 &\n' >> /tmp/a.sh
                printf '/home/runner/work/trifa_material/trifa_material/gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64/ run &\n' >> /tmp/a.sh
                printf 'sleep 20\n' >> /tmp/a.sh
