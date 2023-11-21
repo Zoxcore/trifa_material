@@ -1,7 +1,6 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.de.undercouch.gradle.tasks.download.Download
 import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 
 plugins {
     kotlin("jvm")
@@ -24,8 +23,18 @@ repositories {
 buildConfig {
     buildConfigField("String", "APP_NAME", "\"${project.name}\"")
     buildConfigField("String", "APP_VERSION", provider { "\"${project.version}\"" })
+    buildConfigField("String", "KOTLIN_VERSION", "\"" + embeddedKotlinVersion + "\"")
+    buildConfigField("String", "PROJECT_VERSION", "\"${project.version}\"")
     try
     {
+        try
+        {
+            buildConfigField("String", "GIT_BRANCH", "\"" + grgit.branch.current().fullName + "\"")
+        }
+        catch (e: Exception)
+        {
+            buildConfigField("String", "GIT_BRANCH", "\"" + "????" + "\"")
+        }
         buildConfigField("String", "GIT_COMMIT_HASH", "\"" + grgit.head().abbreviatedId + "\"")
         buildConfigField("String", "GIT_COMMIT_DATE", "\"" + grgit.head().dateTime.
           format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + "\"")
@@ -35,6 +44,7 @@ buildConfig {
     }
     catch (e: Exception)
     {
+        buildConfigField("String", "GIT_BRANCH", "\"" + "????" + "\"")
         buildConfigField("String", "GIT_COMMIT_HASH", "\"" + "????" + "\"")
         buildConfigField("String", "GIT_COMMIT_DATE", "\"" + "????" + "\"")
         buildConfigField("String", "GIT_COMMIT_MSG", "\"" + "????" + "\"")
