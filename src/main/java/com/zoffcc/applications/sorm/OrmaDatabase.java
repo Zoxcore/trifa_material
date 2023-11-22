@@ -20,6 +20,7 @@ public class OrmaDatabase
     final static boolean ORMA_TRACE = false; // set "false" for release builds
 
     private static final String CREATE_DB_FILE_SHA256SUM = "LvrHIP4y43BVnVTsd6Y1kAZXqaqKQPnRk3+0HKFP0xA=";
+    private static final String CREATE_DB_FILE_ON_WINDOWS_SHA256SUM = "5QKQ8Ga1SXdvsiEbf6Ps99KdIJVTNldtI42C3UMI9DM=";
     public static Connection sqldb = null;
     static int current_db_version = 0;
     static Semaphore orma_semaphore_lastrowid_on_insert = new Semaphore(1);
@@ -605,9 +606,10 @@ public class OrmaDatabase
             Log.i(TAG, "loading asset file: " + asset_filename);
             String sha256sum_of_create_db_file = sha256sum_of_file(asset_filename);
             Log.i(TAG, "create_db:sha256sum_of_create_db_file=" + sha256sum_of_create_db_file);
-            // TODO: on some windows systems the checksum does not seem to match?
-            // maybe "\r\n" or the file is not read as UTF-8 ?
-            if (sha256sum_of_create_db_file.equals(CREATE_DB_FILE_SHA256SUM))
+            // TODO: on windows systems the checksum does not seem to match?
+            // it must be "\r\n" in the sql textfile the file has more bytes also?
+            if ((sha256sum_of_create_db_file.equals(CREATE_DB_FILE_SHA256SUM))
+                || (sha256sum_of_create_db_file.equals(CREATE_DB_FILE_ON_WINDOWS_SHA256SUM)))
             {
                 String create_db_sqls = readSQLFileAsString(asset_filename);
                 if (current_db_version == 0)
