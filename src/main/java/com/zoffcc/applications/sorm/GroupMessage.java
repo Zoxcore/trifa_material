@@ -21,6 +21,7 @@ package com.zoffcc.applications.sorm;
 
 import com.zoffcc.applications.trifa.Log;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -208,9 +209,11 @@ public class GroupMessage
 
         try
         {
+            String insert_pstmt_sql = null;
+            PreparedStatement insert_pstmt = null;
+
             // @formatter:off
-            Statement statement = sqldb.createStatement();
-            final String sql_str="insert into " + this.getClass().getSimpleName() +
+            insert_pstmt_sql="insert into " + this.getClass().getSimpleName() +
                     "(" +
                     "message_id_tox,"+
                     "group_identifier,"+
@@ -234,45 +237,62 @@ public class GroupMessage
                     ")" +
                     "values" +
                     "(" +
-                    "'"+s(this.message_id_tox)+"'," +
-                    "'"+s(this.group_identifier)+"'," +
-                    "'"+s(this.tox_group_peer_pubkey)+"'," +
-                    "'"+s(this.private_message)+"'," +
-                    "'"+s(this.tox_group_peername)+"'," +
-                    "'"+s(this.direction)+"'," +
-                    "'"+s(this.TOX_MESSAGE_TYPE)+"'," +
-                    "'"+s(this.TRIFA_MESSAGE_TYPE)+"'," +
-                    "'"+s(this.sent_timestamp)+"'," +
-                    "'"+s(this.rcvd_timestamp)+"'," +
-                    "'"+b(this.read)+"'," +
-                    "'"+b(this.is_new)+"'," +
-                    "'"+s(this.text)+"'," +
-                    "'"+b(this.was_synced)+"'," +
-                    "'"+s(this.msg_id_hash)+"'," +
-                    "'"+s(this.path_name)+"'," +
-                    "'"+s(this.file_name)+"'," +
-                    "'"+s(this.filename_fullpath)+"'," +
-                    "'"+s(this.filesize)+"'" +
+                    "?1," +
+                    "?2," +
+                    "?3," +
+                    "?4," +
+                    "?5," +
+                    "?6," +
+                    "?7," +
+                    "?8," +
+                    "?9," +
+                    "?10," +
+                    "?11," +
+                    "?12," +
+                    "?13," +
+                    "?14," +
+                    "?15," +
+                    "?16," +
+                    "?17," +
+                    "?18," +
+                    "?19" +
                     ")";
+
+            insert_pstmt = sqldb.prepareStatement(insert_pstmt_sql);
+
+            insert_pstmt.clearParameters();
+
+            insert_pstmt.setString(1, this.message_id_tox);
+            insert_pstmt.setString(2, this.group_identifier);
+            insert_pstmt.setString(3, this.tox_group_peer_pubkey);
+            insert_pstmt.setInt(4, this.private_message);
+            insert_pstmt.setString(5, this.tox_group_peername);
+            insert_pstmt.setInt(6, this.direction);
+            insert_pstmt.setInt(7, this.TOX_MESSAGE_TYPE);
+            insert_pstmt.setInt(8, this.TRIFA_MESSAGE_TYPE);
+            insert_pstmt.setLong(9, this.sent_timestamp);
+            insert_pstmt.setLong(10, this.rcvd_timestamp);
+            insert_pstmt.setBoolean(11, this.read);
+            insert_pstmt.setBoolean(12, this.is_new);
+            insert_pstmt.setString(13, this.text);
+            insert_pstmt.setBoolean(14, this.was_synced);
+            insert_pstmt.setString(15, this.msg_id_hash);
+            insert_pstmt.setString(16, this.path_name);
+            insert_pstmt.setString(17, this.file_name);
+            insert_pstmt.setString(18, this.filename_fullpath);
+            insert_pstmt.setLong(19, this.filesize);
 
             if (ORMA_TRACE)
             {
-                Log.i(TAG, "sql=" + sql_str);
+                Log.i(TAG, "sql=" + insert_pstmt);
             }
 
             orma_semaphore_lastrowid_on_insert.acquire();
-            statement.execute(sql_str);
-            ret = get_last_rowid(statement);
+            insert_pstmt.executeUpdate();
+            insert_pstmt.close();
+            ret = get_last_rowid_pstmt();
             orma_semaphore_lastrowid_on_insert.release();
             // @formatter:on
-
-            try
-            {
-                statement.close();
-            }
-            catch (Exception ignored)
-            {
-            }
         }
         catch (Exception e)
         {
