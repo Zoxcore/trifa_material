@@ -39,14 +39,16 @@ public class OrmaDatabase
         {
             byte[] buffer = new byte[8192];
             int count;
+            long bytes_read_total = 0;
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             BufferedInputStream bis = new BufferedInputStream(new FileInputStream(filename_with_path));
             while ((count = bis.read(buffer)) > 0)
             {
                 digest.update(buffer, 0, count);
+                bytes_read_total = bytes_read_total + count;
             }
             bis.close();
-
+            Log.i(TAG, "sha256sum_of_file:bytes_read_total=" + bytes_read_total);
             byte[] hash = digest.digest();
             return (bytesToString(hash));
         }
@@ -613,8 +615,7 @@ public class OrmaDatabase
             Log.i(TAG, "create_db:sha256sum_of_create_db_file=" + sha256sum_of_create_db_file);
             // TODO: on some windows systems the checksum does not seem to match?
             // maybe "\r\n" or the file is not read as UTF-8 ?
-            if ((sha256sum_of_create_db_file.equals(CREATE_DB_FILE_SHA256SUM)) ||
-                    (OperatingSystem.getCurrent() == OperatingSystem.WINDOWS))
+            if (sha256sum_of_create_db_file.equals(CREATE_DB_FILE_SHA256SUM))
             {
                 String create_db_sqls = readSQLFileAsString(asset_filename);
                 if (current_db_version == 0)
@@ -624,6 +625,8 @@ public class OrmaDatabase
             }
             else
             {
+                Log.i(TAG, "expected:"+ CREATE_DB_FILE_SHA256SUM);
+                Log.i(TAG, "     git:" + sha256sum_of_create_db_file);
                 Log.i(TAG, "create_db:input file sha256 hash does not match!");
                 System.exit(5);
             }
