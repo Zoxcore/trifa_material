@@ -19,7 +19,7 @@ public class OrmaDatabase
     private static final String TAG = "trifa.OrmaDatabase";
     final static boolean ORMA_TRACE = false; // set "false" for release builds
 
-    private static final String CREATE_DB_FILE_SHA256SUM = "HJC9IOw3S0l53MKJOLXV1iUCWaglwXLyW9gncs52wds=";
+    private static final String CREATE_DB_FILE_SHA256SUM = "LvrHIP4y43BVnVTsd6Y1kAZXqaqKQPnRk3+0HKFP0xA=";
     public static Connection sqldb = null;
     static int current_db_version = 0;
     static Semaphore orma_semaphore_lastrowid_on_insert = new Semaphore(1);
@@ -292,19 +292,11 @@ public class OrmaDatabase
         }
     }
 
-    public static int update_db(int current_db_version)
+    public static int update_db(final int current_db_version)
     {
         if (current_db_version < 1)
         {
-            try
-            {
-                final String update_001 = "CREATE UNIQUE INDEX ux_tox_public_key_string_of_owner ON RelayListDB(tox_public_key_string_of_owner);";
-                run_multi_sql(update_001);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
+            // dummy. sadly now it has to stay.
         }
 
         if (current_db_version < 2)

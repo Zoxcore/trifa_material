@@ -387,15 +387,3 @@ CREATE INDEX IF NOT EXISTS "index_added_timestamp_on_FriendList" ON "FriendList"
 CREATE INDEX IF NOT EXISTS "index_is_relay_on_FriendList" ON "FriendList" (
 	"is_relay"
 );
-
-ALTER TABLE GroupMessage add path_name TEXT DEFAULT NULL;
-CREATE INDEX IF NOT EXISTS "index_path_name_on_GroupMessage" ON "GroupMessage" ("path_name");
-
-ALTER TABLE GroupMessage add file_name TEXT DEFAULT NULL;
-CREATE INDEX IF NOT EXISTS  "index_file_name_on_GroupMessage" ON "GroupMessage" ("file_name");
-
-ALTER TABLE GroupMessage add filename_fullpath TEXT DEFAULT NULL;
-CREATE INDEX IF NOT EXISTS  "index_filename_fullpath_on_GroupMessage" ON "GroupMessage" ("filename_fullpath");
-
-ALTER TABLE GroupMessage add filesize INTEGER NOT NULL DEFAULT 0;
-CREATE INDEX IF NOT EXISTS  "index_filesize_on_GroupMessage" ON "GroupMessage" ("filesize");
