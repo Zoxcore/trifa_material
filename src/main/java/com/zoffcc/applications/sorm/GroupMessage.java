@@ -485,4 +485,22 @@ public class GroupMessage
         this.sql_orderby = this.sql_orderby + " sent_timestamp ASC ";
         return this;
     }
+
+    public GroupMessage private_messageEq(int private_message) {
+        this.sql_where = this.sql_where + " and private_message='" + s(private_message) + "' ";
+        return this;
+    }
+
+    public GroupMessage orderByRcvd_timestampAsc() {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " rcvd_timestamp ASC ";
+        return this;
+    }
 }

@@ -43,6 +43,7 @@ import com.zoffcc.applications.trifa.HelperGroup.handle_incoming_group_file
 import com.zoffcc.applications.trifa.HelperGroup.handle_incoming_sync_group_message
 import com.zoffcc.applications.trifa.HelperGroup.send_group_image
 import com.zoffcc.applications.trifa.HelperGroup.send_ngch_request
+import com.zoffcc.applications.trifa.HelperGroup.sync_group_message_history
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupnum__wrapper
 import com.zoffcc.applications.trifa.HelperMessage.update_single_message_from_ftid
@@ -2491,7 +2492,7 @@ class MainActivity
                     val privacy_state = tox_group_get_privacy_state(group_number)
                     if (privacy_state == ToxVars.TOX_GROUP_PRIVACY_STATE.TOX_GROUP_PRIVACY_STATE_PUBLIC.value)
                     {
-                        // sync_group_message_history(group_number, peer_id);
+                        sync_group_message_history(group_number, peer_id);
                     } else
                     {
                         Log.i(TAG, "group_custom_private_packet_cb: only sync history for public groups!")
