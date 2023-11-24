@@ -122,8 +122,13 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
                     IconButton(onClick = {
                         // video call button pressed
                         val friendpubkey = contactList.selectedContactPubkey
-                        val friendnum = tox_friend_by_public_key(friendpubkey)
+                        if (avstatestore.state.calling_state_get() == AVState.CALL_STATUS.CALL_STATUS_INCOMING)
+                        {
+                            println("toxav: we have an unanswered incoming call. ret 007")
+                            return@IconButton
+                        }
 
+                        val friendnum = tox_friend_by_public_key(friendpubkey)
                         if (avstatestore.state.calling_state_get() == AVState.CALL_STATUS.CALL_STATUS_CALLING)
                         {
                             avstatestore.state.ffmpeg_devices_stop()
