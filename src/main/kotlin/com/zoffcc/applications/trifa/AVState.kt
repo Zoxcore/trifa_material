@@ -32,7 +32,6 @@ data class AVState(val a: Int)
 
     enum class CALL_STATUS {
         CALL_STATUS_NONE,
-        CALL_STATUS_OUTGOING,
         CALL_STATUS_INCOMING,
         CALL_STATUS_CALLING,
         CALL_STATUS_ENDING
@@ -213,6 +212,7 @@ data class AVState(val a: Int)
     {
         calling_state = value
         avstatestorecallstate.update(status = value)
+        Log.i(TAG, "calling_state_set:" + value)
     }
 
     fun ffmpeg_init_done_get(): Boolean
@@ -597,8 +597,6 @@ data class AVState(val a: Int)
         semaphore_avstate.acquire()
         devices_state = CALL_DEVICES_STATE.CALL_DEVICES_STATE_ACTIVE
         semaphore_avstate.release()
-        //
-        HelperNotification.displayNotification("Incoming call ...")
     }
 }
 

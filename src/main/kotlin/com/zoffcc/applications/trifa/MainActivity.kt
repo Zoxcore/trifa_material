@@ -8,6 +8,7 @@ import UIGroupMessage
 import UIMessage
 import User
 import avstatestore
+import avstatestorecallstate
 import avstatestorevcapfpsstate
 import avstatestorevplayfpsstate
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_loadjni
@@ -61,6 +62,7 @@ import com.zoffcc.applications.trifa.TRIFAGlobals.UPDATE_MESSAGE_PROGRESS_SMALL_
 import com.zoffcc.applications.trifa.TRIFAGlobals.VFS_FILE_DIR
 import com.zoffcc.applications.trifa.TRIFAGlobals.VFS_TMP_FILE_DIR
 import com.zoffcc.applications.trifa.TRIFAGlobals.global_last_activity_outgoung_ft_ts
+import com.zoffcc.applications.trifa.ToxVars.TOX_CONNECTION
 import com.zoffcc.applications.trifa.ToxVars.TOX_FILE_ID_LENGTH
 import com.zoffcc.applications.trifa.ToxVars.TOX_HASH_LENGTH
 import com.zoffcc.applications.trifa.ToxVars.TOX_MAX_NGC_FILESIZE
@@ -938,17 +940,9 @@ class MainActivity
                 return
             }
 
-            // TODO: do not auto-answer calls
-            val call_answer = toxav_answer(friend_number, GLOBAL_AUDIO_BITRATE.toLong(), GLOBAL_VIDEO_BITRATE.toLong())
-            if (call_answer == 1)
-            {
-                avstatestore.state.calling_state_set(AVState.CALL_STATUS.CALL_STATUS_CALLING)
-                avstatestore.state.call_with_friend_pubkey_set(tox_friend_get_public_key(friend_number))
-                avstatestore.state.start_av_call()
-                toxav_option_set(friend_number,
-                    ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MAX_BITRATE.value.toLong(),
-                    GLOBAL_VIDEO_BITRATE.toLong())
-            }
+            avstatestore.state.calling_state_set(AVState.CALL_STATUS.CALL_STATUS_INCOMING)
+            avstatestore.state.call_with_friend_pubkey_set(tox_friend_get_public_key(friend_number))
+            HelperNotification.displayNotification("Incoming call ...")
         }
 
         @JvmStatic
@@ -1007,6 +1001,20 @@ class MainActivity
             GlobalScope.launch {
                 try
                 {
+                    if (avstatestorecallstate.state.call_state == AVState.CALL_STATUS.CALL_STATUS_INCOMING)
+                    {
+                        if (avstatestore.state.call_with_friend_pubkey_get() != tox_friend_get_public_key(friend_number))
+                        {
+                            if (a_TOXAV_FRIEND_CALL_STATE and ToxVars.TOXAV_FRIEND_CALL_STATE.TOXAV_FRIEND_CALL_STATE_FINISHED.value > 0)
+                            {
+                                decline_incoming_av_call()
+                            } else if (a_TOXAV_FRIEND_CALL_STATE and ToxVars.TOXAV_FRIEND_CALL_STATE.TOXAV_FRIEND_CALL_STATE_ERROR.value > 0)
+                            {
+                                decline_incoming_av_call()
+                            }
+                        }
+                    }
+
                     if ((avstatestore.state.call_with_friend_pubkey_get() == null) ||
                         (avstatestore.state.call_with_friend_pubkey_get() != tox_friend_get_public_key(friend_number)))
                     {
@@ -1258,6 +1266,14 @@ class MainActivity
             } else
             {
                 set_tox_online_state("offline")
+                if (avstatestore.state.call_with_friend_pubkey_get() != null)
+                {
+                    val fnum = tox_friend_by_public_key(avstatestore.state.call_with_friend_pubkey_get())
+                    if (fnum != -1L)
+                    {
+                        shutdown_av_call(fnum)
+                    }
+                }
             }
         }
 
@@ -1313,6 +1329,11 @@ class MainActivity
                 contactstore.update(item = ContactItem(name = fname, isConnected = tox_friend_get_connection_status(friend_number), pubkey = tox_friend_get_public_key(friend_number)!!))
             } catch (_: Exception)
             {
+            }
+
+            if (a_TOX_CONNECTION == TOX_CONNECTION.TOX_CONNECTION_NONE.value)
+            {
+                shutdown_av_call(friend_number)
             }
         }
 
@@ -2867,6 +2888,61 @@ class MainActivity
         {
             video_play_fps_value = fps
             avstatestorevplayfpsstate.update(fps)
+        }
+
+        fun decline_incoming_av_call()
+        {
+            val calling_friend_pk = avstatestore.state.call_with_friend_pubkey_get()
+            if (calling_friend_pk != null)
+            {
+                val fnum = tox_friend_by_public_key(calling_friend_pk)
+                if (fnum != -1L)
+                {
+                    toxav_call_control(fnum, ToxVars.TOXAV_CALL_CONTROL.TOXAV_CALL_CONTROL_CANCEL.value)
+                }
+            }
+            avstatestore.state.calling_state_set(AVState.CALL_STATUS.CALL_STATUS_NONE)
+            avstatestore.state.call_with_friend_pubkey_set(null)
+        }
+
+        fun accept_incoming_av_call(friendpubkey: String)
+        {
+            val friend_number = tox_friend_by_public_key(friendpubkey)
+            if (friend_number == -1L)
+            {
+                // friend with this pubkey not found
+                return
+            }
+            val call_answer = toxav_answer(friend_number, GLOBAL_AUDIO_BITRATE.toLong(), GLOBAL_VIDEO_BITRATE.toLong())
+            if (call_answer == 1)
+            {
+                avstatestore.state.calling_state_set(AVState.CALL_STATUS.CALL_STATUS_CALLING)
+                avstatestore.state.call_with_friend_pubkey_set(tox_friend_get_public_key(friend_number))
+                avstatestore.state.start_av_call()
+                toxav_option_set(friend_number,
+                    ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MAX_BITRATE.value.toLong(),
+                    GLOBAL_VIDEO_BITRATE.toLong())
+            }
+        }
+
+        fun shutdown_av_call(friend_number: Long)
+        {
+            if (avstatestorecallstate.state.call_state == AVState.CALL_STATUS.CALL_STATUS_INCOMING)
+            {
+                if (avstatestore.state.call_with_friend_pubkey_get() == tox_friend_get_public_key(friend_number))
+                {
+                    decline_incoming_av_call()
+                }
+            }
+            else if (avstatestorecallstate.state.call_state == AVState.CALL_STATUS.CALL_STATUS_CALLING)
+            {
+                if (avstatestore.state.call_with_friend_pubkey_get() == tox_friend_get_public_key(friend_number))
+                {
+                    avstatestore.state.ffmpeg_devices_stop()
+                    toxav_call_control(friend_number, ToxVars.TOXAV_CALL_CONTROL.TOXAV_CALL_CONTROL_CANCEL.value)
+                    on_call_ended_actions()
+                }
+            }
         }
     }
 }
