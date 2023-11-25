@@ -302,7 +302,7 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
     }
 }
 
-@OptIn(ExperimentalResourceApi::class)
+@OptIn(ExperimentalResourceApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, selectedGroupId: String?, ui_scale: Float)
 {
@@ -312,8 +312,51 @@ fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, s
                 Image(painterResource("background.jpg"), modifier = Modifier.fillMaxSize(),
                     contentDescription = null, contentScale = ContentScale.Crop)
                 Column(modifier = Modifier.fillMaxSize()) {
-                    Box(Modifier.weight(1f)) {
-                        GroupMessages(ui_scale = ui_scale, selectedGroupId)
+                    var isDragging by remember { mutableStateOf(false) }
+                    Box(Modifier.weight(1f)
+                        .background(color = if (isDragging) Color.LightGray else Color.Transparent)
+                        .onExternalDrag(
+                            onDragStart = { isDragging = true  },
+                            onDragExit = { isDragging = false },
+                            onDrop = { value ->
+                                isDragging = false
+                                // Log.i(TAG, "dropping file here")
+                                if (value.dragData is DragData.FilesList) {
+                                    val newFiles = (value.dragData as DragData.FilesList).readFiles().mapNotNull {
+                                        URI(it).toPath().takeIf { it.exists(LinkOption.NOFOLLOW_LINKS) }
+                                    }
+                                    newFiles.forEach{
+                                        // Log.i(TAG, "dropped file: " + it.toAbsolutePath() + " " + it.parent.normalize().name + " " + it.fileName.name)
+                                        if (it.toAbsolutePath().toString().isNotEmpty())
+                                        {
+                                            // Log.i(TAG," " + it.toAbsolutePath().parent.toString() + " "
+                                            //        + it.toAbsolutePath().fileName.toString() + " " + selectedContactPubkey)
+                                            add_ngc_outgoing_file(it.toAbsolutePath().parent.toString(),
+                                                it.toAbsolutePath().fileName.toString(), selectedGroupId)
+                                        }
+                                    }
+                                }
+
+                            })) {
+                        if (isDragging)
+                        {
+                            Column(modifier = Modifier.fillMaxSize()
+                                .padding(all = 10.dp)
+                                .dashedBorder(color = if (isDragging) DragAndDropColors.active else Color.Transparent,
+                                    strokeWidth = if (isDragging) 5.dp else 0.dp,
+                                    cornerRadiusDp = if (isDragging) 25.dp else 0.dp)) {
+                                Spacer(modifier = Modifier.weight(0.6f))
+                                DragAndDropDescription(
+                                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                                    color = DragAndDropColors.active
+                                )
+                                Spacer(modifier = Modifier.weight(0.6f))
+                            }
+                        }
+                        else
+                        {
+                            GroupMessages(ui_scale = ui_scale, selectedGroupId)
+                        }
                     }
                     Row(modifier = Modifier.fillMaxWidth()) {
                         if (displayTextField)
