@@ -2728,7 +2728,7 @@ class MainActivity
                 // reducing the file size down to hopefully 37kbytes -------------------
                 Log.i(TAG, "add_outgoing_file:shrink:start")
                 ofw = shrink_image_file(ofw, groupid)
-                Log.i(TAG, "add_outgoing_file:shrink:done:" + ofw)
+                Log.i(TAG, "add_outgoing_file:shrink:done:")
                 // reducing the file size down to hopefully 37kbytes -------------------
             }
             else
