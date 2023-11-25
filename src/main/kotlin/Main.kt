@@ -138,6 +138,7 @@ import com.zoffcc.applications.trifa.PrefsSettings
 import com.zoffcc.applications.trifa.RandomNameGenerator
 import com.zoffcc.applications.trifa.SingleComponentAspectRatioKeeperLayout
 import com.zoffcc.applications.trifa.TRIFAGlobals
+import com.zoffcc.applications.trifa.ToxVars
 import com.zoffcc.applications.trifa.TrifaToxService
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.clear_grouppeers
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.load_grouppeers
@@ -544,8 +545,24 @@ fun App()
                                             imageVector = Icons.Default.RawOff,
                                             contentDescription = "force MJPEG on video capture",
                                             tint = if (video_force_mjpeg_value == 1) Color.Red else Color.DarkGray)
-                                    }
 
+                                        val current_callstate3 by avstatestorecallstate.stateFlow.collectAsState()
+                                        if (current_callstate3.call_state == AVState.CALL_STATUS.CALL_STATUS_CALLING)
+                                        {
+                                            Icon(modifier = Modifier.size(36.dp)
+                                                .align(Alignment.CenterHorizontally)
+                                                .combinedClickable(
+                                                onClick = {
+                                                    val friendnum = tox_friend_by_public_key(avstatestore.state.call_with_friend_pubkey_get())
+                                                    avstatestore.state.ffmpeg_devices_stop()
+                                                    MainActivity.toxav_call_control(friendnum, ToxVars.TOXAV_CALL_CONTROL.TOXAV_CALL_CONTROL_CANCEL.value)
+                                                    MainActivity.on_call_ended_actions()
+                                                }),
+                                                imageVector = Icons.Filled.Cancel,
+                                                tint = Color.Red,
+                                                contentDescription = "stop Call")
+                                        }
+                                    }
                                     Column {
                                         Spacer(modifier = Modifier.height(5.dp))
                                         var video_out_box_width by remember { mutableStateOf(VIDEO_OUT_BOX_WIDTH_SMALL) }
