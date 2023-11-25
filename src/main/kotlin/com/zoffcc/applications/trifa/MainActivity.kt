@@ -40,6 +40,7 @@ import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
 import com.zoffcc.applications.trifa.HelperGroup.bytebuffer_to_hexstring
 import com.zoffcc.applications.trifa.HelperGroup.fourbytes_of_long_to_hex
 import com.zoffcc.applications.trifa.HelperGroup.handle_incoming_group_file
+import com.zoffcc.applications.trifa.HelperGroup.handle_incoming_sync_group_file
 import com.zoffcc.applications.trifa.HelperGroup.handle_incoming_sync_group_message
 import com.zoffcc.applications.trifa.HelperGroup.send_group_image
 import com.zoffcc.applications.trifa.HelperGroup.send_ngch_request
@@ -2112,12 +2113,15 @@ class MainActivity
             val message_timestamp = System.currentTimeMillis()
             val msg_dbid = received_groupmessage_to_db(tox_peerpk = tox_peerpk!!,
                 groupid = group_id, message_timestamp = message_timestamp,
-                group_message = message_orig, message_id_hex = message_id_hex)
+                group_message = message_orig, message_id_hex = message_id_hex,
+                was_synced = false)
             val peernum = tox_group_peer_by_public_key(group_number, tox_peerpk)
             val fname = tox_group_peer_get_name(group_number, peernum)
             val peer_user = User(fname + " / " + PubkeyShort(tox_peerpk), picture = "friend_avatar.png", toxpk = tox_peerpk.uppercase(), color = ColorProvider.getColor(true, tox_peerpk.uppercase()))
             groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(
                 UIGroupMessage(
+                    was_synced = false,
+                    msg_id_hash = "",
                     message_id_tox = message_id_hex, msgDatabaseId = msg_dbid,
                     user = peer_user, timeMs = message_timestamp, text = message_orig!!,
                     toxpk = tox_peerpk, groupId = group_id!!.lowercase(),
@@ -2351,7 +2355,7 @@ class MainActivity
             val header_ngc_audio_v1 = (6 + 1 + 1 + 1 + 1).toLong()
             val header_ngc_video_v1 = (6 + 1 + 1 + 1 + 1 + 1).toLong()
             val header_ngc_video_v2 = (6 + 1 + 1 + 1 + 1 + 1 + 2 + 1).toLong()
-            val header_ngc_histsync_and_files = (6 + 1 + 1 + 32 + 4 + 255).toLong()
+            val header_ngc_histsync_and_files = (6 + 1 + 1 + 32 + 32 + 4 + 25 + 255).toLong()
             if (length <= TOX_MAX_NGC_FILE_AND_HEADER_SIZE && length >= header_ngc_histsync_and_files + 1)
             { // @formatter:off
                 /*
@@ -2369,22 +2373,30 @@ class MainActivity
                         val group_id = tox_group_by_groupnum__wrapper(group_number)
                         val tox_peerpk = tox_group_peer_get_public_key(group_number, peer_id)!!.uppercase()
                         val peernum = tox_group_peer_by_public_key(group_number, tox_peerpk)
-                        val fname = tox_group_peer_get_name(group_number, peernum)
+                        var tox_peer_name = tox_group_peer_get_name(group_number, peernum)
+                        if (tox_peer_name == null)
+                        {
+                            tox_peer_name = "peer " + peernum
+                        }
+                        val hash_bytes = ByteBuffer.allocateDirect(TOX_HASH_LENGTH)
+                        hash_bytes.put(data, 8, 32)
+                        val message_id_hash = bytebuffer_to_hexstring(hash_bytes, true)
+
                         val msg_timestamp = System.currentTimeMillis()
-                        val incoming_group_file_meta_data = handle_incoming_group_file(group_number, peer_id, data, length, header_ngc_histsync_and_files)
+                        val incoming_group_file_meta_data =
+                            handle_incoming_group_file(
+                                message_id_hash,
+                                tox_peer_name,
+                                tox_peerpk,
+                                false, msg_timestamp, group_number, peer_id, data,
+                                length, header_ngc_histsync_and_files)
 
                         if (incoming_group_file_meta_data != null)
                         {
-                            val peer_user = User(fname + " / " + PubkeyShort(tox_peerpk), picture = "friend_avatar.png", toxpk = tox_peerpk.uppercase(), color = ColorProvider.getColor(true, tox_peerpk.uppercase()))
-                            groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(
-                                UIGroupMessage(
-                                    message_id_tox = "", msgDatabaseId = incoming_group_file_meta_data.rowid,
-                                    user = peer_user, timeMs = msg_timestamp,
-                                    text = incoming_group_file_meta_data.message_text,
-                                    toxpk = tox_peerpk, groupId = group_id!!.lowercase(),
-                                    trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value,
-                                    filename_fullpath = incoming_group_file_meta_data.path_name +
-                                            incoming_group_file_meta_data.file_name)))
+                            add_ngc_incoming_file_to_ui(incoming_group_file_meta_data,
+                                msg_timestamp, tox_peer_name, tox_peerpk,
+                                incoming_group_file_meta_data.msg_id_hash,
+                                group_id, false)
                         }
                     } else
                     { // Log.i(TAG, "group_custom_packet_cb:wrong signature 2");
@@ -2488,7 +2500,7 @@ class MainActivity
             {
                 if (data[6] == 0x1.toByte() && data[7] == 0x1.toByte())
                 {
-                    Log.i(TAG, "group_custom_private_packet_cb: got ngch_request");
+                    // Log.i(TAG, "group_custom_private_packet_cb: got ngch_request");
                     val privacy_state = tox_group_get_privacy_state(group_number)
                     if (privacy_state == ToxVars.TOX_GROUP_PRIVACY_STATE.TOX_GROUP_PRIVACY_STATE_PUBLIC.value)
                     {
@@ -2502,7 +2514,7 @@ class MainActivity
                     val header_syncmsg = 6 + 1 + 1 + 4 + 32 + 4 + 25
                     if (length >= header_syncmsg + 1)
                     {
-                        Log.i(TAG, "group_custom_private_packet_cb: got ngch_syncmsg");
+                        // Log.i(TAG, "group_custom_private_packet_cb: got ngch_syncmsg");
                         handle_incoming_sync_group_message(group_number, peer_id, data, length);
                     }
                 } else if (data[6] == 0x1.toByte() && data[7] == 0x3.toByte())
@@ -2511,7 +2523,7 @@ class MainActivity
                     if (length >= header_syncfile + 1)
                     {
                         Log.i(TAG, "group_custom_private_packet_cb: got ngch_syncfile");
-                        // handle_incoming_sync_group_file(group_number, peer_id, data, length);
+                        handle_incoming_sync_group_file(group_number, peer_id, data, length);
                     }
                 }
             }
@@ -2597,7 +2609,7 @@ class MainActivity
             return row_id
         }
 
-        fun received_groupmessage_to_db(tox_peerpk: String, groupid: String, message_timestamp: Long, group_message: String?, message_id_hex: String): Long
+        fun received_groupmessage_to_db(tox_peerpk: String, groupid: String, message_timestamp: Long, group_message: String?, message_id_hex: String, was_synced: Boolean): Long
         {
             val groupnum = tox_group_by_groupid__wrapper(groupid)
             val peernum = tox_group_peer_by_public_key(groupnum, tox_peerpk)
@@ -2616,7 +2628,7 @@ class MainActivity
             m.sent_timestamp = System.currentTimeMillis()
             m.text = group_message
             m.message_id_tox = message_id_hex
-            m.was_synced = false
+            m.was_synced = was_synced
             var row_id: Long = -1
             try
             {
@@ -2632,11 +2644,13 @@ class MainActivity
         {
             val message_timestamp = m.sent_timestamp
 
-            val msg_dbid = received_groupmessage_to_db(tox_peerpk = m.tox_group_peer_pubkey!!, groupid = m.group_identifier, message_timestamp = message_timestamp, group_message = m.text, message_id_hex = m.message_id_tox)
+            val msg_dbid = received_groupmessage_to_db(tox_peerpk = m.tox_group_peer_pubkey!!, groupid = m.group_identifier, message_timestamp = message_timestamp, group_message = m.text, message_id_hex = m.message_id_tox, was_synced = m.was_synced)
             val peer_user = User(m.tox_group_peername + " / " + PubkeyShort(m.tox_group_peer_pubkey), picture = "friend_avatar.png", toxpk = m.tox_group_peer_pubkey.uppercase(), color = ColorProvider.getColor(true, m.tox_group_peer_pubkey.uppercase()))
 
             groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(
                 UIGroupMessage(
+                    was_synced = true,
+                    msg_id_hash = m.msg_id_hash,
                     message_id_tox = m.message_id_tox, msgDatabaseId = msg_dbid,
                     user = peer_user, timeMs = message_timestamp, text = m.text,
                     toxpk = m.tox_group_peer_pubkey, groupId = m.group_identifier,
@@ -2648,6 +2662,32 @@ class MainActivity
             var filepath_wrapped: String? = null
             var filename_wrapped: String? = null
             var file_size_wrapped: Long = -1
+        }
+
+        fun add_ngc_incoming_file_to_ui(file_meta_data: HelperGroup.incoming_group_file_meta_data,
+                               msg_timestamp: Long,
+                               peer_name: String,
+                               tox_peerpk: String,
+                               msg_id_hash: String,
+                               group_id: String,
+                               was_synced: Boolean)
+        {
+            val peer_user = User(peer_name + " / " +
+                    PubkeyShort(tox_peerpk), picture = "friend_avatar.png",
+                toxpk = tox_peerpk.uppercase(),
+                color = ColorProvider.getColor(true, tox_peerpk.uppercase()))
+
+            groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(
+                UIGroupMessage(
+                    was_synced = was_synced,
+                    msg_id_hash = msg_id_hash,
+                    message_id_tox = "", msgDatabaseId = file_meta_data.rowid,
+                    user = peer_user, timeMs = msg_timestamp,
+                    text = file_meta_data.message_text,
+                    toxpk = tox_peerpk, groupId = group_id.lowercase(),
+                    trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value,
+                    filename_fullpath = file_meta_data.path_name +
+                            file_meta_data.file_name)))
         }
 
         fun add_ngc_outgoing_file(filepath: String?, filename: String?, groupid: String?)
@@ -2744,6 +2784,8 @@ class MainActivity
             groupmessagestore.send(
                 GroupMessageAction.SendGroupMessage(
                 UIGroupMessage(
+                    was_synced = m.was_synced,
+                    msg_id_hash = m.msg_id_hash,
                     message_id_tox = m.message_id_tox, msgDatabaseId = row_id,
                     user = myUser, timeMs = m.sent_timestamp, text = m.text,
                     toxpk = m.tox_group_peer_pubkey, groupId = m.group_identifier,
@@ -2843,7 +2885,7 @@ class MainActivity
                 filename_fullpath = m.filename_fullpath)))
         }
 
-        fun sent_groupmessage_to_db(groupid: String, message_timestamp: Long, group_message: String?, message_id: Long): Long
+        fun sent_groupmessage_to_db(groupid: String, message_timestamp: Long, group_message: String?, message_id: Long, was_synced: Boolean): Long
         {
             val message_id_hex = fourbytes_of_long_to_hex(message_id)
             val groupnum = tox_group_by_groupid__wrapper(groupid)
@@ -2862,7 +2904,7 @@ class MainActivity
             m.sent_timestamp = System.currentTimeMillis()
             m.rcvd_timestamp = System.currentTimeMillis() // since we do not have anything better assume "now"
             m.text = group_message
-            m.was_synced = false
+            m.was_synced = was_synced
             m.message_id_tox = message_id_hex
             var row_id: Long = -1
             try

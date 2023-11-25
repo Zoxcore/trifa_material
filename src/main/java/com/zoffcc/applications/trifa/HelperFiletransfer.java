@@ -119,6 +119,7 @@ public class HelperFiletransfer {
 
     public static String get_incoming_filetransfer_local_filename(String incoming_filename, String friend_pubkey_str)
     {
+        Log.i(TAG, "get_incoming_filetransfer_local_filename:000:" + incoming_filename);
         String result = filter_out_specials_from_filepath(incoming_filename);
         String wanted_full_filename_path = VFS_FILE_DIR + "/" + friend_pubkey_str;
         Log.i(TAG, "get_incoming_filetransfer_local_filename:start=" + incoming_filename + " " + result + " " +

@@ -46,7 +46,7 @@ public class GroupMessage
     public String group_identifier = "-1"; // f_key -> GroupDB.group_identifier
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    public String tox_group_peer_pubkey;
+    public String tox_group_peer_pubkey; // uppercase
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     @Nullable
@@ -89,7 +89,7 @@ public class GroupMessage
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     @Nullable
-    public String msg_id_hash = null; // 32byte hash
+    public String msg_id_hash = null; // 32byte hash (as hex string uppercase)
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     @Nullable
@@ -158,8 +158,12 @@ public class GroupMessage
         try
         {
             Statement statement = sqldb.createStatement();
-            ResultSet rs = statement.executeQuery(
-                    this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit);
+            final String sql = this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit;
+            if (ORMA_TRACE)
+            {
+                Log.i(TAG, "sql=" + sql);
+            }
+            ResultSet rs = statement.executeQuery(sql);
             while (rs.next())
             {
                 GroupMessage out = new GroupMessage();
@@ -501,6 +505,11 @@ public class GroupMessage
             this.sql_orderby = this.sql_orderby + " , ";
         }
         this.sql_orderby = this.sql_orderby + " rcvd_timestamp ASC ";
+        return this;
+    }
+
+    public GroupMessage msg_id_hashEq(String msg_id_hash) {
+        this.sql_where = this.sql_where + " and msg_id_hash='" + s(msg_id_hash) + "' ";
         return this;
     }
 }
