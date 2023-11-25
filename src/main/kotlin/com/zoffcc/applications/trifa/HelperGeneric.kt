@@ -140,7 +140,7 @@ object HelperGeneric {
         SnackBarToast("Friend removed")
     }
 
-    fun bytesToHex(bytes: ByteArray, start: Int, len: Int): String {
+    @JvmStatic fun bytesToHex(bytes: ByteArray, start: Int, len: Int): String {
         val hexChars = CharArray(len * 2)
         // System.out.println("blen=" + (len));
         for (j in start until start + len) {
