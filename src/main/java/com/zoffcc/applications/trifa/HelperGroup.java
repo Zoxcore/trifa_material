@@ -412,7 +412,7 @@ public class HelperGroup {
             {
                 data_buf.put(buffer, 0, length);
                 length_sum = length_sum + length;
-                Log.i(TAG,"put " + length + " bytes into buffer");
+                // Log.i(TAG,"put " + length + " bytes into buffer");
             }
         }
         catch(Exception e)
