@@ -2620,7 +2620,14 @@ class MainActivity
             m.direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value // msg received
             m.TOX_MESSAGE_TYPE = 0
             m.read = false
-            m.tox_group_peername = peername
+            if (peername == null)
+            {
+                m.tox_group_peername = ""
+            }
+            else
+            {
+                m.tox_group_peername = peername
+            }
             m.private_message = 0
             m.group_identifier = groupid.lowercase()
             m.TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value
@@ -2736,15 +2743,24 @@ class MainActivity
                 io_file_copy(File(filepath + File.separator + filename), File(filename_out_with_path))
             }
             Log.i(TAG, "add_outgoing_file:001")
+            val group_num = tox_group_by_groupid__wrapper(groupid)
+            val self_peernum = tox_group_self_get_peer_id(group_num)
+            val self_name_in_group = tox_group_peer_get_name(group_num , self_peernum)
             // add FT message to UI
             val m = GroupMessage()
             m.is_new = false // own messages are always "not new"
-            m.tox_group_peer_pubkey = tox_group_self_get_public_key(
-                tox_group_by_groupid__wrapper(groupid))!!.uppercase()
+            m.tox_group_peer_pubkey = tox_group_self_get_public_key(group_num)!!.uppercase()
             m.direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value
             m.TOX_MESSAGE_TYPE = 0
             m.read = true // !!!! there is no "read status" with conferences in Tox !!!!
-            m.tox_group_peername = null
+            if (self_name_in_group == null)
+            {
+                m.tox_group_peername = ""
+            }
+            else
+            {
+                m.tox_group_peername = self_name_in_group
+            }
             m.private_message = 0
             m.group_identifier = groupid.lowercase()
             m.TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value
@@ -2897,7 +2913,14 @@ class MainActivity
             m.direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value // msg sent
             m.TOX_MESSAGE_TYPE = 0
             m.read = true
-            m.tox_group_peername = peername
+            if (peername == null)
+            {
+                m.tox_group_peername = ""
+            }
+            else
+            {
+                m.tox_group_peername = peername
+            }
             m.private_message = 0;
             m.group_identifier = groupid;
             m.TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value
