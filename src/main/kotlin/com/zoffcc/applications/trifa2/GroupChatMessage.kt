@@ -171,7 +171,7 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                                     icon = Icons.Filled.Check,
                                     iconTint = Color.Magenta,
                                     enabled = false,
-                                    iconSize = 20.dp,
+                                    iconSize = 13.dp,
                                     contentDescription = "synced",
                                     onClick = {}
                                 )
