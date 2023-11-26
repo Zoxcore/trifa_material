@@ -34,10 +34,10 @@ public class TRIFADatabaseGlobalsNew
     private static final String TAG = "DB.TRIFADatabaseGlobalsNew";
 
     @PrimaryKey
-    String key;
+    public String key;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    String value;
+    public String value;
 
     static TRIFADatabaseGlobalsNew deep_copy(TRIFADatabaseGlobalsNew in)
     {

@@ -62,6 +62,7 @@ class TrifaToxService
                 com.zoffcc.applications.sorm.OrmaDatabase.init()
                 // ------ correct startup order ------
                 orma = com.zoffcc.applications.sorm.OrmaDatabase()
+                load_db_prefs()
                 val old_is_tox_started = is_tox_started
                 Log.i(TAG, "is_tox_started:==============================")
                 Log.i(TAG, "is_tox_started=" + is_tox_started)
@@ -180,6 +181,7 @@ class TrifaToxService
                 set_tox_running_state("stopped")
                 clear_friends()
                 clear_groups()
+                orma = null
                 com.zoffcc.applications.sorm.OrmaDatabase.shutdown()
                 unlock_data_dir_input()
                 try
@@ -191,6 +193,24 @@ class TrifaToxService
             }
         }
         (ToxServiceThread as Thread).start()
+    }
+
+    private fun load_db_prefs()
+    {
+        MainActivity.DB_PREF__open_files_directly = false
+        try
+        {
+            if (HelperFriend.get_g_opts("DB_PREF__open_files_directly") != null)
+            {
+                if (HelperFriend.get_g_opts("DB_PREF__open_files_directly").equals("true"))
+                {
+                    MainActivity.DB_PREF__open_files_directly = true
+                }
+            }
+        } catch (e: java.lang.Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     companion object

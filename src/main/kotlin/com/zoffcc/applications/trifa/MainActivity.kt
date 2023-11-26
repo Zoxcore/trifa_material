@@ -127,6 +127,7 @@ class MainActivity
         var PREF__local_discovery_enabled = 1
         var PREF__ipv6_enabled = 1
         var PREF__force_udp_only = 0
+        @JvmStatic var DB_PREF__open_files_directly = false
         var incoming_messages_queue: BlockingQueue<String> = LinkedBlockingQueue()
         @JvmStatic var video_play_count_frames: Long = 0
         @JvmStatic var video_play_last_timestamp: Long = 0

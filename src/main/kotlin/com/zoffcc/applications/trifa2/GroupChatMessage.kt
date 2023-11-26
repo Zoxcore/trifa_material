@@ -1,8 +1,5 @@
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Icon
@@ -33,7 +29,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.text.font.FontWeight
@@ -43,13 +38,10 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.trifa.HelperFiletransfer
-import com.zoffcc.applications.trifa.HelperGeneric
 import com.zoffcc.applications.trifa.HelperGeneric.AsyncImage
 import com.zoffcc.applications.trifa.HelperGeneric.loadImageBitmap
-import com.zoffcc.applications.trifa.HelperMessage
-import com.zoffcc.applications.trifa.HelperOSFile
 import com.zoffcc.applications.trifa.HelperOSFile.show_containing_dir_in_explorer
-import com.zoffcc.applications.trifa.HelperOSFile.show_file_in_explorer
+import com.zoffcc.applications.trifa.HelperOSFile.show_file_in_explorer_or_open
 import com.zoffcc.applications.trifa.TRIFAGlobals
 import java.io.File
 
@@ -133,7 +125,7 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                                         contentDescription = "Image",
                                         modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp).
                                         combinedClickable(
-                                            onClick = { show_file_in_explorer(groupmessage.filename_fullpath) },
+                                            onClick = { show_file_in_explorer_or_open(groupmessage.filename_fullpath) },
                                             onLongClick = { show_containing_dir_in_explorer(groupmessage.filename_fullpath) }))
                                 }
                                 else
@@ -141,7 +133,7 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                                     Icon(
                                         modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp).
                                         combinedClickable(
-                                            onClick = { show_file_in_explorer(groupmessage.filename_fullpath) },
+                                            onClick = { show_file_in_explorer_or_open(groupmessage.filename_fullpath) },
                                             onLongClick = { show_containing_dir_in_explorer(groupmessage.filename_fullpath) }),
                                         imageVector = Icons.Default.Attachment,
                                         contentDescription = "File",

@@ -30,7 +30,7 @@ public class HelperOSFile {
         }
     }
 
-    public static void show_file_in_explorer(String filename_with_path)
+    public static void show_file_in_explorer_or_open(String filename_with_path)
     {
         if (OperatingSystem.getCurrent() == OperatingSystem.WINDOWS)
         {
@@ -47,14 +47,26 @@ public class HelperOSFile {
         }
         else if (OperatingSystem.getCurrent() == OperatingSystem.LINUX)
         {
-            try
+            if (MainActivity.getDB_PREF__open_files_directly())
             {
-                Desktop.getDesktop().browseFileDirectory(new File(filename_with_path));
+                try {
+                    Desktop.getDesktop().open(new File(filename_with_path));
+                } catch (Exception e2) {
+                    e2.printStackTrace();
+                    show_containing_dir_in_explorer(filename_with_path);
+                }
             }
-            catch (Exception e)
+            else
             {
-                e.printStackTrace();
-                show_containing_dir_in_explorer(filename_with_path);
+                try
+                {
+                    Desktop.getDesktop().browseFileDirectory(new File(filename_with_path));
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                    show_containing_dir_in_explorer(filename_with_path);
+                }
             }
         }
         else if (OperatingSystem.getCurrent() == OperatingSystem.MACOS)
