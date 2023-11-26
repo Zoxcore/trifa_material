@@ -23,7 +23,6 @@ repositories {
 buildConfig {
     buildConfigField("String", "APP_NAME", "\"${project.name}\"")
     buildConfigField("String", "APP_VERSION", provider { "\"${project.version}\"" })
-    buildConfigField("String", "KOTLIN_VERSION", "\"" + embeddedKotlinVersion + "\"")
     buildConfigField("String", "PROJECT_VERSION", "\"${project.version}\"")
     try
     {

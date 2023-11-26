@@ -117,6 +117,7 @@ class MainActivity
         // --------- global config ---------
         var native_lib_loaded = false
         @JvmStatic var native_notification_lib_loaded_error = -1
+        @JvmStatic var native_ffmpegav_lib_loaded_error = -1
         var tox_service_fg: TrifaToxService? = null
         var tox_savefile_directory = "."
         var PREF__udp_enabled = 1
@@ -324,7 +325,16 @@ class MainActivity
 
                 val libdir2: String = resourcesDir.path
                 System.out.println("XXXXX7:" + libdir2)
-                ffmpegav_loadjni(libdir2)
+
+                native_ffmpegav_lib_loaded_error = -1
+                try
+                {
+                    native_ffmpegav_lib_loaded_error = ffmpegav_loadjni(libdir2)
+                }
+                catch(_: Exception)
+                {
+                }
+
                 if (OperatingSystem.getCurrent() == OperatingSystem.LINUX)
                 {
                     native_notification_lib_loaded_error = jninotifications_loadjni(libdir2)
