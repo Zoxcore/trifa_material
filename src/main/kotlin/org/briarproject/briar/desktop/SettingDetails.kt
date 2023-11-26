@@ -166,6 +166,29 @@ fun SettingDetails()
         }
         // ---- IPv6 ----
 
+        // ---- tor proxy ----
+        var tox_tor_proxy by remember { mutableStateOf(false) }
+        try
+        {
+            if (global_prefs.getBoolean("tox.settings.tor_proxy", false))
+            {
+                tox_tor_proxy = true
+            }
+        } catch (_: Exception)
+        {
+        }
+        DetailItem(label = i18n("use Tor proxy [on localhost port: 9050]"),
+            description = (if (tox_tor_proxy) i18n("enabled") else i18n("disabled"))) {
+            Switch(
+                checked = tox_tor_proxy,
+                onCheckedChange = {
+                    global_prefs.putBoolean("tox.settings.tor_proxy", it)
+                    tox_tor_proxy = it
+                },
+            )
+        }
+        // ---- tor proxy ----
+
         // database prefs ===================
         if (orma != null)
         {
