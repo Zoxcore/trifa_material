@@ -38,6 +38,16 @@ import androidx.compose.ui.semantics.text
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
+import com.zoffcc.applications.ffmpegav.AVActivity
+import com.zoffcc.applications.jninotifications.NTFYActivity
+import com.zoffcc.applications.trifa.MainActivity
+import com.zoffcc.applications.trifa.MainActivity.Companion.jnictoxcore_version
+import com.zoffcc.applications.trifa.MainActivity.Companion.libavutil_version
+import com.zoffcc.applications.trifa.MainActivity.Companion.libopus_version
+import com.zoffcc.applications.trifa.MainActivity.Companion.libsodium_version
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_version_major
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_version_minor
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_version_patch
 import com.zoffcc.applications.trifa_material.trifa_material.BuildConfig
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import java.time.Instant
@@ -111,13 +121,65 @@ private fun GeneralInfo() {
         //   add(Entry("Git branch/tag", "None detected")) // NON-NLS
         // add(Entry("Git hash", BuildData.GIT_HASH)) // NON-NLS
         // add(Entry("Commit time", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(commitTime))) // NON-NLS
-        add(Entry(i18n("about.version"), BuildConfig.APP_VERSION))
-        add(Entry(i18n("about.git_kotlin_version"), BuildConfig.KOTLIN_VERSION))
+        add(Entry(i18n("about.trifa_material_version"), BuildConfig.APP_VERSION))
         add(Entry(i18n("about.git_commit_branch"), BuildConfig.GIT_BRANCH))
         add(Entry(i18n("about.git_commit_hash"), BuildConfig.GIT_COMMIT_HASH))
         add(Entry(i18n("about.git_commit_date"), BuildConfig.GIT_COMMIT_DATE))
         add(Entry(i18n("about.git_commit_msg"), BuildConfig.GIT_COMMIT_MSG))
         add(Entry(i18n("about.website"), "https://github.com/Zoxcore/trifa_material", true))
+
+        add(Entry(i18n("about.toxcore_version"), ""+tox_version_major() +"."+ tox_version_minor()+"."+ tox_version_patch()))
+        add(Entry(i18n("about.jnictoxcore_version"), jnictoxcore_version()))
+        var libavutil_version = "???"
+        var libopus_version = "???"
+        var libsodium_version = "???"
+        try
+        {
+            libavutil_version = libavutil_version()!!
+            libopus_version = libopus_version()!!
+            libsodium_version = libsodium_version()!!
+        }
+        catch (_: Exception)
+        {
+        }
+        add(Entry(i18n("about.libavutil_version"), libavutil_version))
+        add(Entry(i18n("about.libopus_version"), libopus_version))
+        add(Entry(i18n("about.libsodium_version"), libsodium_version))
+        var ffmpegav_libavutil_version = "???"
+        var ffmpegav_version = "???"
+        if (MainActivity.native_ffmpegav_lib_loaded_error == 0)
+        {
+            try
+            {
+                ffmpegav_libavutil_version = AVActivity.ffmpegav_libavutil_version()
+                ffmpegav_version = AVActivity.ffmpegav_version()
+            } catch (_: Exception)
+            {
+            }
+        }
+        else
+        {
+            ffmpegav_libavutil_version = "JNI lib not loaded"
+            ffmpegav_version = "JNI lib not loaded"
+        }
+        add(Entry(i18n("about.ffmpegav_libavutil_version"), ffmpegav_libavutil_version))
+        add(Entry(i18n("about.ffmpegav_version"), ffmpegav_version))
+        var jninotifications_version = "???"
+
+        if (MainActivity.native_notification_lib_loaded_error == 0)
+        {
+            try
+            {
+                jninotifications_version = NTFYActivity.jninotifications_version()
+            } catch (_: Exception)
+            {
+            }
+        }
+        else
+        {
+            jninotifications_version = "JNI lib not loaded"
+        }
+        add(Entry(i18n("about.jninotifications_version"), jninotifications_version))
 
         // add(Entry(i18n("about.contact"), Strings.EMAIL, true))
     }
