@@ -130,6 +130,8 @@ compose.desktop {
             macOS {
                 println("iconFile=" + iconsRoot.resolve("icon-mac.icns"))
                 iconFile.set(iconsRoot.resolve("icon-mac.icns"))
+                bundleID = "com.zoffcc.applications.trifa_material"
+                // dockName = ""
             }
             windows {
                 iconFile.set(iconsRoot.resolve("icon-windows.ico"))
@@ -143,6 +145,7 @@ compose.desktop {
                 iconFile.set(iconsRoot.resolve("icon-linux.png"))
                 println("iconFile=" + iconsRoot.resolve("icon-linux.png"))
             }
+            println("targetFormats=" + targetFormats)
         }
     }
 }
