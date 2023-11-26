@@ -127,6 +127,7 @@ class MainActivity
         var PREF__audio_input_filter = 0
         var PREF__v4l2_capture_force_mjpeg: Int = 0 // 0 -> auto, 1 -> force MJPEG video capture with v4l2 devices
         var PREF__orbot_enabled_to_int = 0
+        var PREF__orbot_enabled_to_int_used_for_init = -1
         var PREF__local_discovery_enabled = 1
         var PREF__ipv6_enabled = 1
         var PREF__force_udp_only = 0
@@ -272,7 +273,8 @@ class MainActivity
                 Log.i(TAG, "init:PREF__force_udp_only=$PREF__force_udp_only")
                 Log.i(TAG, "init:PREF__local_discovery_enabled=$PREF__local_discovery_enabled")
                 Log.i(TAG, "init:PREF__orbot_enabled_to_int=$PREF__orbot_enabled_to_int")
-                init(tox_savefile_directory, PREF__udp_enabled, PREF__local_discovery_enabled, PREF__orbot_enabled_to_int, ORBOT_PROXY_HOST, ORBOT_PROXY_PORT, password_hash, PREF__ipv6_enabled, PREF__force_udp_only, PREF__ngc_video_bitrate, PREF__ngc_video_max_quantizer, PREF__ngc_audio_bitrate, PREF__ngc_audio_samplerate, PREF__ngc_audio_channels)
+                PREF__orbot_enabled_to_int_used_for_init = PREF__orbot_enabled_to_int
+                init(tox_savefile_directory, PREF__udp_enabled, PREF__local_discovery_enabled, PREF__orbot_enabled_to_int_used_for_init, ORBOT_PROXY_HOST, ORBOT_PROXY_PORT, password_hash, PREF__ipv6_enabled, PREF__force_udp_only, PREF__ngc_video_bitrate, PREF__ngc_video_max_quantizer, PREF__ngc_audio_bitrate, PREF__ngc_audio_samplerate, PREF__ngc_audio_channels)
             }
             val my_tox_id_temp = get_my_toxid()
             Log.i(TAG, "MyToxID:$my_tox_id_temp")
