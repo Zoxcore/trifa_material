@@ -120,6 +120,8 @@ class MainActivity
         @JvmStatic var native_ffmpegav_lib_loaded_error = -1
         var tox_service_fg: TrifaToxService? = null
         var tox_savefile_directory = "."
+        var ORBOT_PROXY_HOST = "127.0.0.1"
+        var ORBOT_PROXY_PORT: Long = 9050
         var PREF__udp_enabled = 1
         var PREF__audio_play_volume_percent = 100
         var PREF__audio_input_filter = 0
@@ -242,14 +244,34 @@ class MainActivity
             PREF__ipv6_enabled = ipv6_mode_int
             Log.i(TAG, "PREF__ipv6_enabled:" + PREF__ipv6_enabled)
 
+            var tox_tor_proxy_int = 0
+            try
+            {
+                if (global_prefs.getBoolean("tox.settings.tor_proxy", false))
+                {
+                    tox_tor_proxy_int = 1
+                }
+            } catch (_: Exception)
+            {
+            }
+            PREF__orbot_enabled_to_int = tox_tor_proxy_int
+            Log.i(TAG, "PREF__orbot_enabled_to_int:" + PREF__orbot_enabled_to_int)
+
             lock_data_dir_input()
 
             if (!TrifaToxService.TOX_SERVICE_STARTED)
             {
-                var ORBOT_PROXY_HOST = ""
-                var ORBOT_PROXY_PORT: Long = 0
                 tox_savefile_directory = PREF__tox_savefile_dir + File.separator
+                if (PREF__orbot_enabled_to_int == 1)
+                {
+                    PREF__udp_enabled = 0
+                    PREF__force_udp_only = 0
+                    PREF__local_discovery_enabled = 0
+                }
                 Log.i(TAG, "init:PREF__udp_enabled=$PREF__udp_enabled")
+                Log.i(TAG, "init:PREF__force_udp_only=$PREF__force_udp_only")
+                Log.i(TAG, "init:PREF__local_discovery_enabled=$PREF__local_discovery_enabled")
+                Log.i(TAG, "init:PREF__orbot_enabled_to_int=$PREF__orbot_enabled_to_int")
                 init(tox_savefile_directory, PREF__udp_enabled, PREF__local_discovery_enabled, PREF__orbot_enabled_to_int, ORBOT_PROXY_HOST, ORBOT_PROXY_PORT, password_hash, PREF__ipv6_enabled, PREF__force_udp_only, PREF__ngc_video_bitrate, PREF__ngc_video_max_quantizer, PREF__ngc_audio_bitrate, PREF__ngc_audio_samplerate, PREF__ngc_audio_channels)
             }
             val my_tox_id_temp = get_my_toxid()
