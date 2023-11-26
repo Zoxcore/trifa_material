@@ -1073,6 +1073,7 @@ fun load_groupmessages_for_friend(selectedGroupId: String?)
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ToxIDQRCode()
 {
@@ -1180,7 +1181,14 @@ fun set_tox_online_state(new_state: String)
         online_button_color_wrapper = Color.Green.toArgb()
     } else if (online_button_text_wrapper == "tcp")
     {
-        online_button_color_wrapper = Color.Yellow.toArgb()
+        if (MainActivity.PREF__orbot_enabled_to_int_used_for_init == 1)
+        {
+            online_button_color_wrapper = Color.Magenta.toArgb()
+        }
+        else
+        {
+            online_button_color_wrapper = Color.Yellow.toArgb()
+        }
     } else
     {
         online_button_color_wrapper = Color.Red.toArgb()
