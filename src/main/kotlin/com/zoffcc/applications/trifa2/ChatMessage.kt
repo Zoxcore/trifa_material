@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Start
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -44,7 +43,7 @@ import com.zoffcc.applications.trifa.HelperGeneric
 import com.zoffcc.applications.trifa.HelperGeneric.cancel_ft_from_ui
 import com.zoffcc.applications.trifa.HelperMessage.set_message_queueing_from_id
 import com.zoffcc.applications.trifa.HelperOSFile.show_containing_dir_in_explorer
-import com.zoffcc.applications.trifa.HelperOSFile.show_file_in_explorer
+import com.zoffcc.applications.trifa.HelperOSFile.show_file_in_explorer_or_open
 import com.zoffcc.applications.trifa.TRIFAGlobals
 import com.zoffcc.applications.trifa.TRIFAGlobals.TRIFA_MSG_TYPE
 import com.zoffcc.applications.trifa.ToxVars
@@ -164,7 +163,7 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                                 contentDescription = "Image",
                                                 modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp).
                                                 combinedClickable(
-                                                    onClick = { show_file_in_explorer(message.filename_fullpath) },
+                                                    onClick = { show_file_in_explorer_or_open(message.filename_fullpath) },
                                                     onLongClick = { show_containing_dir_in_explorer(message.filename_fullpath) }))
                                         }
                                         else
@@ -172,7 +171,7 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                             Icon(
                                                 modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp).
                                                 combinedClickable(
-                                                    onClick = { show_file_in_explorer(message.filename_fullpath) },
+                                                    onClick = { show_file_in_explorer_or_open(message.filename_fullpath) },
                                                     onLongClick = { show_containing_dir_in_explorer(message.filename_fullpath) }),
                                                 imageVector = Icons.Default.Attachment,
                                                 contentDescription = "File",
@@ -232,7 +231,7 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                                 contentDescription = "Image",
                                                 modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp).
                                                 combinedClickable(
-                                                    onClick = { show_file_in_explorer(message.filename_fullpath) },
+                                                    onClick = { show_file_in_explorer_or_open(message.filename_fullpath) },
                                                     onLongClick = { show_containing_dir_in_explorer(message.filename_fullpath) }))
                                         }
                                         else
@@ -240,7 +239,7 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                             Icon(
                                                 modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp).
                                                 combinedClickable(
-                                                    onClick = { show_file_in_explorer(message.filename_fullpath) },
+                                                    onClick = { show_file_in_explorer_or_open(message.filename_fullpath) },
                                                     onLongClick = { show_containing_dir_in_explorer(message.filename_fullpath) }),
                                                 imageVector = Icons.Default.Attachment,
                                                 contentDescription = "File",

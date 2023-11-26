@@ -45,6 +45,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.zoffcc.applications.trifa.HelperFriend
+import com.zoffcc.applications.trifa.HelperFriend.get_g_opts
+import com.zoffcc.applications.trifa.HelperFriend.set_g_opts
+import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__open_files_directly
+import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import global_prefs
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -160,6 +165,40 @@ fun SettingDetails()
             )
         }
         // ---- IPv6 ----
+
+        // database prefs ===================
+        if (orma != null)
+        {
+            // ---- open files directly ----
+            var open_files_directly by remember { mutableStateOf(false) }
+            try
+            {
+                if (get_g_opts("DB_PREF__open_files_directly") != null)
+                {
+                    if (get_g_opts("DB_PREF__open_files_directly").equals("true"))
+                    {
+                        open_files_directly = true
+                    }
+                }
+            } catch (e: java.lang.Exception)
+            {
+                e.printStackTrace()
+            }
+            DetailItem(label = i18n("Open files directly instead of showing the containing directory.\nthis can be potentially dangerous!"),
+                description = (if (open_files_directly) i18n("enabled") else i18n("disabled"))) {
+                Switch(
+                    checked = open_files_directly,
+                    onCheckedChange = {
+                        set_g_opts("DB_PREF__open_files_directly", it.toString().lowercase())
+                        println("DB_PREF__open_files_directly="+it.toString().lowercase())
+                        DB_PREF__open_files_directly = it
+                        open_files_directly = it
+                    },
+                )
+            }
+            // ---- open files directly ----
+        }
+        // database prefs ===================
 
         Row(Modifier.wrapContentHeight().fillMaxWidth().padding(start = 15.dp)) {
             var loading_nodes by remember { mutableStateOf(false) }
