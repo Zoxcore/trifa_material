@@ -358,6 +358,77 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "trifa-material_nightly.msi,trifa-material_nightly.exe"
 
+  build-windows-nightly-zip-artifact:
+    runs-on: ubuntu-20.04
+    needs: [build-windows-nightly-artifact]
+    if: |
+      always() &&
+      (needs.build-windows-nightly-artifact.result == 'success')
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: trifa-material_nightly.msi
+
+      - name: show artifact
+        run:  ls -al
+
+      - name: install dependencies
+        run: |
+          sudo apt-get update && \
+          sudo DEBIAN_FRONTEND=noninteractive \
+          apt-get install -y --no-install-recommends \
+          ca-certificates \
+          wget \
+          zip \
+          msitools
+
+      - name: show msitools version
+        run:  msiextract --version
+
+      - name: show zip version
+        run:  zip --version
+
+      - name: extract msi2zip
+        run: |
+          id;pwd;ls -al
+          msiextract trifa-material_nightly.msi
+
+      - name: create zip
+        run: |
+          id;pwd;ls -al
+          zip -r trifa-material-windows_nightly.zip trifa_material
+          id;pwd;ls -al
+
+      - name: Rename artifact for release upload
+        if: contains(github.ref, 'refs/tags/v')
+        run: |
+          cp -v trifa-material-windows_nightly.zip trifa-material-windows.zip
+      - name: Upload to versioned release
+        if: contains(github.ref, 'refs/tags/v')
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          draft: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "trifa-material-windows.zip"
+
+      - name: Upload to nightly release
+        uses: ncipollo/release-action@v1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        with:
+          allowUpdates: true
+          tag: nightly
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          prerelease: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "trifa-material-windows_nightly.zip"
+
 
 
   macos-test:
