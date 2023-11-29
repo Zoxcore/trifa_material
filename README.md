@@ -16,7 +16,7 @@ Automated screenshots:<br>
 <img src="https://img.shields.io/badge/license-GPLv3%2B-blue.svg" alt="GPLv3+" />
 </a>
 
-## Development Snapshot Version (Android)
+## Development Snapshot Version
 the latest Development Snapshot can be downloaded from [here](https://github.com/Zoxcore/trifa_material/releases/tag/nightly)
 
 <a href="https://github.com/Zoxcore/trifa_material/releases/download/nightly/trifa-material_nightly.deb
