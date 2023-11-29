@@ -19,7 +19,7 @@ Automated screenshots:<br>
 ## Development Snapshot Version
 the latest Development Snapshot can be downloaded from [here](https://github.com/Zoxcore/trifa_material/releases/tag/nightly)
 
-<a href="https://github.com/Zoxcore/trifa_material/releases/download/nightly/trifa-material_nightly.deb
+<a href="https://github.com/Zoxcore/trifa_material/releases/download/nightly/trifa-material_nightly-x86_64.appimage
 "><img src="https://raw.githubusercontent.com/Zoxcore/trifa_material/master/images/on_github_nightly.png" width="200"></a>
 
 ## Installation & starting the App [Linux, Windows and MacOS]
