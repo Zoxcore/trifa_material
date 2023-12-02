@@ -276,7 +276,6 @@ class MainActivity
                 Log.i(TAG, "init:PREF__orbot_enabled_to_int=$PREF__orbot_enabled_to_int")
                 PREF__orbot_enabled_to_int_used_for_init = PREF__orbot_enabled_to_int
                 init(tox_savefile_directory, PREF__udp_enabled, PREF__local_discovery_enabled, PREF__orbot_enabled_to_int_used_for_init, ORBOT_PROXY_HOST, ORBOT_PROXY_PORT, password_hash, PREF__ipv6_enabled, PREF__force_udp_only, PREF__ngc_video_bitrate, PREF__ngc_video_max_quantizer, PREF__ngc_audio_bitrate, PREF__ngc_audio_samplerate, PREF__ngc_audio_channels)
-                HelperNotification.displayNotification("starting tox ...")
             }
             val my_tox_id_temp = get_my_toxid()
             Log.i(TAG, "MyToxID:$my_tox_id_temp")
