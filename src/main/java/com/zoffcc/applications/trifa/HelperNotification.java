@@ -94,12 +94,25 @@ public class HelperNotification
             }
             else if (os.contains("Mac"))
             {
-                Log.i(TAG, "using osascript for Notification");
-                ProcessBuilder builder = new ProcessBuilder("osascript", "-e",
-                        "display notification \"" + filter_out_specials_2(message) +
-                                "\"" + " with title \"" + filter_out_specials_2(title) +
-                                "\"");
-                builder.inheritIO().start();
+                int res_jni_notify = -1;
+                if (MainActivity.getNative_notification_lib_loaded_error() == 0)
+                {
+                    String icon_path = null;
+                    if (resources_dir != null)
+                    {
+                        icon_path = resources_dir + File.separator + "icon-linux.png";
+                    }
+                    res_jni_notify = jninotifications_notify(title,
+                            title, message,
+                            icon_path);
+                    Log.i(TAG, "using macOS objC native JNI for Notification");
+                }
+
+                if (res_jni_notify != 0) {
+                    Log.i(TAG, "using osascript for Notification");
+                    ProcessBuilder builder = new ProcessBuilder("osascript", "-e", "display notification \"" + filter_out_specials_2(message) + "\"" + " with title \"" + filter_out_specials_2(title) + "\"");
+                    builder.inheritIO().start();
+                }
             }
             else if (SystemTray.isSupported())
             {
