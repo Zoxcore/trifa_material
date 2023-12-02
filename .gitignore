@@ -13,3 +13,4 @@ tempdir/
 main.db-journal
 savedata.tox__backup
 trifa_material-*.AppImage
+main.db__backup
