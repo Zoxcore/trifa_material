@@ -189,6 +189,29 @@ fun SettingDetails()
         }
         // ---- tor proxy ----
 
+        // ---- enable noise ----
+        var tox_noise by remember { mutableStateOf(false) }
+        try
+        {
+            if (global_prefs.getBoolean("tox.settings.tox_noise", false))
+            {
+                tox_noise = true
+            }
+        } catch (_: Exception)
+        {
+        }
+        DetailItem(label = i18n("enable the experimental toxcore with NOISE handshake.\n!! this is experimental and also needs an app restart !!"),
+            description = (if (tox_noise) i18n("enabled") else i18n("disabled"))) {
+            Switch(
+                checked = tox_noise,
+                onCheckedChange = {
+                    global_prefs.putBoolean("tox.settings.tox_noise", it)
+                    tox_noise = it
+                },
+            )
+        }
+        // ---- enable noise ----
+
         // database prefs ===================
         if (orma != null)
         {

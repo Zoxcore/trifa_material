@@ -1,6 +1,7 @@
 @file:OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -80,6 +81,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.painter.Painter
@@ -192,6 +194,7 @@ import java.util.prefs.Preferences
 import javax.swing.JFrame
 import javax.swing.JPanel
 import javax.swing.UIManager
+import javax.swing.border.Border
 
 private const val TAG = "trifa.Main.kt"
 var tox_running_state_wrapper = "start"
@@ -350,8 +353,23 @@ fun App()
                                 }
                                 var online_button_text by remember { mutableStateOf("offline") }
                                 Button( // self connection state button
-                                    modifier = Modifier.width(120.dp), onClick = {}, colors = ButtonDefaults.buttonColors(), enabled = false) {
-                                    Box(modifier = Modifier.size(16.dp).border(1.dp, Color.Black, CircleShape).background(Color(online_button_color_wrapper), CircleShape))
+                                    modifier = Modifier.width(120.dp),
+                                    onClick = {},
+                                    border = BorderStroke(
+                                        if (MainActivity.PREF__toxnoise_enabled_to_int_used_for_init == 1)
+                                            3.dp
+                                        else
+                                            0.dp,
+                                        if (MainActivity.PREF__toxnoise_enabled_to_int_used_for_init == 1)
+                                            Color.Red
+                                        else
+                                            Color.Transparent
+                                        ),
+                                    colors = ButtonDefaults.buttonColors(),
+                                    enabled = false) {
+                                    Box(modifier = Modifier.size(16.dp).border(1.dp,
+                                        Color.Black,
+                                        CircleShape).background(Color(online_button_color_wrapper), CircleShape))
                                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                                     Text(getOnlineButtonText(online_button_text))
                                     Thread {

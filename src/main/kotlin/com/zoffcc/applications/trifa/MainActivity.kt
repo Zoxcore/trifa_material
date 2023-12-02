@@ -128,6 +128,7 @@ class MainActivity
         var PREF__v4l2_capture_force_mjpeg: Int = 0 // 0 -> auto, 1 -> force MJPEG video capture with v4l2 devices
         var PREF__orbot_enabled_to_int = 0
         var PREF__orbot_enabled_to_int_used_for_init = -1
+        @JvmStatic var PREF__toxnoise_enabled_to_int_used_for_init = -1
         var PREF__local_discovery_enabled = 1
         var PREF__ipv6_enabled = 1
         var PREF__force_udp_only = 0
@@ -317,16 +318,35 @@ class MainActivity
                 System.out.println("XXXXX1.1:OS:" + OperatingSystem.getCurrent())
                 System.out.println("XXXXX1.2:OS:" + OperatingSystem.getName())
                 System.out.println("XXXXX1.3:OS:" + OperatingSystem.getArchitecture())
-                var libFile = File(resourcesDir, "libjni-c-toxcore.so")
+
+                var use_tox_noise = 0
+                try
+                {
+                    if (global_prefs.getBoolean("tox.settings.tox_noise", false))
+                    {
+                        use_tox_noise = 1
+                    }
+                } catch (_: Exception)
+                {
+                }
+                PREF__toxnoise_enabled_to_int_used_for_init = use_tox_noise
+
+                var noise_jni_name_addon = ""
+                if (use_tox_noise == 1)
+                {
+                    noise_jni_name_addon = "_noise"
+                }
+
+                var libFile = File(resourcesDir, "libjni-c-toxcore${noise_jni_name_addon}.so")
                 if (OperatingSystem.getCurrent() == OperatingSystem.LINUX)
                 {
-                    libFile = File(resourcesDir, "libjni-c-toxcore.so")
+                    libFile = File(resourcesDir, "libjni-c-toxcore${noise_jni_name_addon}.so")
                 } else if (OperatingSystem.getCurrent() == OperatingSystem.WINDOWS)
                 {
-                    libFile = File(resourcesDir, "jni-c-toxcore.dll")
+                    libFile = File(resourcesDir, "jni-c-toxcore${noise_jni_name_addon}.dll")
                 } else if (OperatingSystem.getCurrent() == OperatingSystem.MACOS)
                 {
-                    libFile = File(resourcesDir, "libjni-c-toxcore.jnilib")
+                    libFile = File(resourcesDir, "libjni-c-toxcore${noise_jni_name_addon}.jnilib")
                 } else
                 {
                     System.out.println("XXXXX1.1:OS:Unknown operating system:EXIT")
