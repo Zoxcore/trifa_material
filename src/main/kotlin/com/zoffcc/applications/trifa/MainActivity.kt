@@ -479,6 +479,9 @@ class MainActivity
         external fun libopus_version(): String?
 
         @JvmStatic
+        external fun libvpx_version(): String?
+
+        @JvmStatic
         external fun libsodium_version(): String?
 
         @JvmStatic
