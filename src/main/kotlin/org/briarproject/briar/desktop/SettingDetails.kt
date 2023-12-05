@@ -42,6 +42,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,6 +56,8 @@ import com.zoffcc.applications.trifa.HelperFriend
 import com.zoffcc.applications.trifa.HelperFriend.get_g_opts
 import com.zoffcc.applications.trifa.HelperFriend.set_g_opts
 import com.zoffcc.applications.trifa.HelperNotification
+import com.zoffcc.applications.trifa.HelperOSFile.show_containing_dir_in_explorer
+import com.zoffcc.applications.trifa.MainActivity
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__open_files_directly
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import global_prefs
@@ -62,7 +65,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.briarproject.briar.desktop.ui.VerticallyScrollableArea
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
+import savepathstore
 import update_bootstrap_nodes_from_internet
+import java.io.File
 
 @Composable
 fun SettingDetails()
@@ -253,6 +258,21 @@ fun SettingDetails()
             // ---- open files directly ----
         }
         // database prefs ===================
+
+        val savepathdata by savepathstore.stateFlow.collectAsState()
+        if (!savepathdata.savePathEnabled)
+        {
+            Row(Modifier.wrapContentHeight().fillMaxWidth().padding(start = 15.dp)) {
+                Button(modifier = Modifier.width(400.dp),
+                    enabled = true,
+                    onClick = {
+                        show_containing_dir_in_explorer(MainActivity.PREF__tox_savefile_dir + File.separator + ".")
+                    })
+                {
+                    Text("Open data directory")
+                }
+            }
+        }
 
         Row(Modifier.wrapContentHeight().fillMaxWidth().padding(start = 15.dp)) {
             Button(modifier = Modifier.width(400.dp),
