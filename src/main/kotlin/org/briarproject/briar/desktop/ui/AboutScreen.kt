@@ -46,6 +46,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.getNativeLibTOXGITHA
 import com.zoffcc.applications.trifa.MainActivity.Companion.jnictoxcore_version
 import com.zoffcc.applications.trifa.MainActivity.Companion.libavutil_version
 import com.zoffcc.applications.trifa.MainActivity.Companion.libopus_version
+import com.zoffcc.applications.trifa.MainActivity.Companion.libvpx_version
 import com.zoffcc.applications.trifa.MainActivity.Companion.libsodium_version
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_version_major
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_version_minor
@@ -130,14 +131,16 @@ private fun GeneralInfo() {
         add(Entry(i18n("about.toxcore_commit_hash"), "" + getNativeLibTOXGITHASH()))
 
         add(Entry(i18n("about.jnictoxcore_version"), "" + jnictoxcore_version()))
-        add(Entry(i18n("about.jnictoxcore_commit_hash"), "" + getNativeLibGITHASH()))
+        // add(Entry(i18n("about.jnictoxcore_commit_hash"), "" + getNativeLibGITHASH()))
         var libavutil_version = "???"
         var libopus_version = "???"
+        var libvpx_version = "???"
         var libsodium_version = "???"
         try
         {
             libavutil_version = libavutil_version()!!
             libopus_version = libopus_version()!!
+            libvpx_version = libvpx_version()!!
             libsodium_version = libsodium_version()!!
         }
         catch (_: Exception)
@@ -145,6 +148,7 @@ private fun GeneralInfo() {
         }
         add(Entry(i18n("about.libavutil_version"), libavutil_version))
         add(Entry(i18n("about.libopus_version"), libopus_version))
+        add(Entry(i18n("about.libvpx_version"), libvpx_version))
         add(Entry(i18n("about.libsodium_version"), libsodium_version))
         var ffmpegav_libavutil_version = "???"
         var ffmpegav_version = "???"
