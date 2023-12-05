@@ -41,6 +41,8 @@ import androidx.compose.ui.unit.dp
 import com.zoffcc.applications.ffmpegav.AVActivity
 import com.zoffcc.applications.jninotifications.NTFYActivity
 import com.zoffcc.applications.trifa.MainActivity
+import com.zoffcc.applications.trifa.MainActivity.Companion.getNativeLibGITHASH
+import com.zoffcc.applications.trifa.MainActivity.Companion.getNativeLibTOXGITHASH
 import com.zoffcc.applications.trifa.MainActivity.Companion.jnictoxcore_version
 import com.zoffcc.applications.trifa.MainActivity.Companion.libavutil_version
 import com.zoffcc.applications.trifa.MainActivity.Companion.libopus_version
@@ -50,10 +52,6 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_version_minor
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_version_patch
 import com.zoffcc.applications.trifa_material.trifa_material.BuildConfig
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import kotlin.Float.Companion.MIN_VALUE
 
 @Composable
 fun AboutScreen(
@@ -128,8 +126,11 @@ private fun GeneralInfo() {
         add(Entry(i18n("about.git_commit_msg"), BuildConfig.GIT_COMMIT_MSG))
         add(Entry(i18n("about.website"), "https://github.com/Zoxcore/trifa_material", true))
 
-        add(Entry(i18n("about.toxcore_version"), ""+tox_version_major() +"."+ tox_version_minor()+"."+ tox_version_patch()))
-        add(Entry(i18n("about.jnictoxcore_version"), jnictoxcore_version()))
+        add(Entry(i18n("about.toxcore_version"), "" + tox_version_major() +"."+ tox_version_minor()+"."+ tox_version_patch()))
+        add(Entry(i18n("about.toxcore_commit_hash"), "" + getNativeLibTOXGITHASH()))
+
+        add(Entry(i18n("about.jnictoxcore_version"), "" + jnictoxcore_version()))
+        add(Entry(i18n("about.jnictoxcore_commit_hash"), "" + getNativeLibGITHASH()))
         var libavutil_version = "???"
         var libopus_version = "???"
         var libsodium_version = "???"
