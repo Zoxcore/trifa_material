@@ -21,6 +21,7 @@ interface SavepathStore {
     fun updatePath(p: String)
     fun createPathDirectories()
     fun updateEnabled(e: Boolean)
+    fun isEnabled(): Boolean
     val stateFlow: StateFlow<savepathenabled_state>
     val state get() = stateFlow.value
 }
@@ -55,6 +56,10 @@ fun CoroutineScope.createSavepathStore(): SavepathStore {
             launch {
                 channelEnabled.send(e)
             }
+        }
+        override fun isEnabled(): Boolean
+        {
+            return state.savePathEnabled
         }
 
         init {
