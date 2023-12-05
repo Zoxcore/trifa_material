@@ -402,10 +402,6 @@ class MainActivity
         // -------- native methods --------
         @JvmStatic
         external fun init(data_dir: String?, udp_enabled: Int, local_discovery_enabled: Int, orbot_enabled: Int, orbot_host: String?, orbot_port: Long, tox_encrypt_passphrase_hash: String?, enable_ipv6: Int, force_udp_only_mode: Int, ngc_video_bitrate: Int, max_quantizer: Int, ngc_audio_bitrate: Int, ngc_audio_sampling_rate: Int, ngc_audio_channel_count: Int)
-        val nativeLibGITHASH: String?
-            external get
-        val nativeLibTOXGITHASH: String?
-            external get
 
         @JvmStatic
         external fun update_savedata_file(tox_encrypt_passphrase_hash: String?)
@@ -472,6 +468,12 @@ class MainActivity
 
         @JvmStatic
         external fun libavutil_version(): String?
+
+        @JvmStatic
+        external fun getNativeLibTOXGITHASH(): String?
+
+        @JvmStatic
+        external fun getNativeLibGITHASH(): String?
 
         @JvmStatic
         external fun libopus_version(): String?
