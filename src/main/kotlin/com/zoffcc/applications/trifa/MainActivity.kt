@@ -101,9 +101,6 @@ import java.util.concurrent.LinkedBlockingQueue
 @Suppress("UNUSED_PARAMETER")
 class MainActivity
 {
-    val nativeLibAPI: String?
-        external get
-
     companion object
     {
         private const val TAG = "trifa.MainActivity"
