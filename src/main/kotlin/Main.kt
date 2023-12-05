@@ -347,6 +347,7 @@ fun App()
                                             start_button_text = "stop"
                                         }.start()
                                         TrifaToxService.stop_me = false
+                                        savepathstore.createPathDirectories()
                                         main_init()
                                     }
                                 }) {

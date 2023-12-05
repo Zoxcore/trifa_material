@@ -19,6 +19,7 @@ data class savepathenabled_state(
 
 interface SavepathStore {
     fun updatePath(p: String)
+    fun createPathDirectories()
     fun updateEnabled(e: Boolean)
     val stateFlow: StateFlow<savepathenabled_state>
     val state get() = stateFlow.value
@@ -35,6 +36,18 @@ fun CoroutineScope.createSavepathStore(): SavepathStore {
         override fun updatePath(p: String) {
             launch {
                 channelPath.send(p)
+            }
+        }
+        override fun createPathDirectories()
+        {
+            try
+            {
+                val dir_file = File(PREF__tox_savefile_dir)
+                dir_file.mkdirs()
+            }
+            catch(e: Exception)
+            {
+                Log.i(TAG, "error creating savefile directory and parents: " + PREF__tox_savefile_dir)
             }
         }
 
@@ -59,7 +72,6 @@ fun CoroutineScope.createSavepathStore(): SavepathStore {
                     try
                     {
                         val dir_file = File(item)
-                        dir_file.mkdirs()
                         PREF__tox_savefile_dir = item
                         PREF__database_files_dir = item
                         VFS_TMP_FILE_DIR = PREF__tox_savefile_dir + File.separator + "/tempdir/files/"
@@ -72,7 +84,7 @@ fun CoroutineScope.createSavepathStore(): SavepathStore {
                     }
                     catch(e: Exception)
                     {
-                        Log.i(TAG, "error creating savefile dir: " + item)
+                        Log.i(TAG, "error setting savefile dir: " + item)
                     }
                 }
             }
