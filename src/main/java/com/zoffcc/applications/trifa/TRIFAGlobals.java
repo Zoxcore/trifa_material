@@ -138,9 +138,9 @@ public class TRIFAGlobals
     static long MESSAGE_V2_MSG_SENT_OK = (Long.MAX_VALUE - 1);
     static int global_self_connection_status = ToxVars.TOX_CONNECTION.TOX_CONNECTION_NONE.value;
 
-    final static String VFS_TMP_FILE_DIR = "./tempdir/files/";
+    static String VFS_TMP_FILE_DIR = "./tempdir/files/";
     // final static String VFS_TMP_AVATAR_DIR = "/avatar_tempdir/files/"; // TODO: avatar should get their own directory!
-    public final static String VFS_FILE_DIR = "./datadir/files/";
+    public static String VFS_FILE_DIR = "./datadir/files/";
     final static String VFS_OWN_AVATAR_DIR = "./datadir/myavatar/";
     static String VFS_PREFIX = ""; // only set for normal (unencrypted) storage
 

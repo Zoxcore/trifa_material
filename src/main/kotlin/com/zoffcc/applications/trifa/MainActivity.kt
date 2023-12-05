@@ -304,6 +304,14 @@ class MainActivity
             } catch (_: Exception)
             {
             }
+
+            try
+            {
+                PrintWriter("toxid.txt", "UTF-8").use { out -> out.write(my_tox_id_temp) }
+                Log.i(TAG, "also writing toxid to current directory: " + "toxid.txt")
+            } catch (_: Exception)
+            {
+            }
         }
 
         init

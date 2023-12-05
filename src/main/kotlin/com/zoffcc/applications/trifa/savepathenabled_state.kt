@@ -1,5 +1,9 @@
 package com.zoffcc.applications.trifa
 
+import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__database_files_dir
+import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__tox_savefile_dir
+import com.zoffcc.applications.trifa.TRIFAGlobals.VFS_FILE_DIR
+import com.zoffcc.applications.trifa.TRIFAGlobals.VFS_TMP_FILE_DIR
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,11 +56,24 @@ fun CoroutineScope.createSavepathStore(): SavepathStore {
             }
             launch {
                 channelPath.consumeAsFlow().collect { item ->
-                    mutableStateFlow.value =
-                        state.copy(
-                            savePathEnabled = state.savePathEnabled,
-                            savePath = item
-                        )
+                    try
+                    {
+                        val dir_file = File(item)
+                        dir_file.mkdirs()
+                        PREF__tox_savefile_dir = item
+                        PREF__database_files_dir = item
+                        VFS_TMP_FILE_DIR = PREF__tox_savefile_dir + File.separator + "/tempdir/files/"
+                        VFS_FILE_DIR = PREF__tox_savefile_dir + File.separator + "/datadir/files/"
+                        mutableStateFlow.value =
+                            state.copy(
+                                savePathEnabled = state.savePathEnabled,
+                                savePath = item
+                            )
+                    }
+                    catch(e: Exception)
+                    {
+                        Log.i(TAG, "error creating savefile dir: " + item)
+                    }
                 }
             }
 

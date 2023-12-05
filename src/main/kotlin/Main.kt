@@ -258,6 +258,7 @@ fun App()
 
     println("User data dir: " + APPDIRS.getUserDataDir())
     println("User data dir (roaming): " + APPDIRS.getUserDataDir(roaming = true))
+    savepathstore.updatePath(APPDIRS.getUserDataDir(roaming = true))
     println("User config dir: " + APPDIRS.getUserConfigDir())
     println("User config dir (roaming): " + APPDIRS.getUserConfigDir(roaming = true))
     println("User cache dir: " + APPDIRS.getUserCacheDir())
