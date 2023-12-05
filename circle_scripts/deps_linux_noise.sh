@@ -137,6 +137,10 @@ tar -xf "opus_""$OPUS_FILENAME"
 rm -f "opus"*.tar.gz
 cd opus*/
 
+echo '#!/bin/bash
+export PACKAGE_VERSION="'"$OPUS_VERSION"'"' > package_version
+chmod a+rx package_version
+
   ./autogen.sh
   export CXXFLAGS=${CXXFLAGS_ADDON}
   export CFLAGS=${CFLAGS_ADDON}

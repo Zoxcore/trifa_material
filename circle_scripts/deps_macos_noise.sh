@@ -137,6 +137,10 @@ tar -xf "opus_""$OPUS_FILENAME"
 rm -f "opus"*.tar.gz
 cd opus*/
 
+echo '#!/bin/bash
+export PACKAGE_VERSION="'"$OPUS_VERSION"'"' > package_version
+chmod a+rx package_version
+
   ./autogen.sh
   CFLAGS="-O2 -g -fPIC" ./configure \
                                --prefix="$_INST_" \
