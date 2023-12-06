@@ -331,6 +331,16 @@ jobs:
           name: trifa-material_nightly.exe
           path: trifa-material_nightly.exe
 
+      - name: Rename artifact for nightly upload for tags
+        if: contains(github.ref, 'refs/tags/v')
+        run: |
+          cp -v ./build/compose/binaries/main/msi/trifa*material*.msi trifa-material_nightly.msi
+      - name: Upload artifact for tags
+        uses: actions/upload-artifact@v3
+        with:
+          name: trifa-material_nightly.msi
+          path: trifa-material_nightly.msi
+
       - name: Rename artifact for release upload
         if: contains(github.ref, 'refs/tags/v')
         run: |
