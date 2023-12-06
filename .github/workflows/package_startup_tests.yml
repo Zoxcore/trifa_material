@@ -17,7 +17,7 @@ defaults:
     shell: bash
 
 jobs:
-  macos:
+  macos-test-dmg:
     runs-on: macos-11
     if: ${{ true }}
     permissions:
@@ -64,7 +64,7 @@ jobs:
            screencapture -T 90 -x -t png /Users/runner/screen09.png &
            screencapture -T 110 -x -t png /Users/runner/screen10.png &
            screencapture -T 230 -x -t png /Users/runner/screen12.png &
-           screencapture -T 300 -x -t png /Users/runner/screenshot-macos.png &
+           screencapture -T 300 -x -t png /Users/runner/screenshot-macos-dmg.png &
            export _HOME_
            cd "$_HOME_"
            cd "$_SRC_"
@@ -100,7 +100,7 @@ jobs:
            sleep 120
            pwd
            ls -al /Users/runner/
-           cp -v /Users/runner/screenshot-macos.png /Users/runner/work/trifa_material/trifa_material/package-screenshot-macos.png
+           cp -v /Users/runner/screenshot-macos-dmg.png /Users/runner/work/trifa_material/trifa_material/package-screenshot-macos-dmg.png
 
     - name: upload-screenshots
       uses: actions/upload-artifact@v3
@@ -120,9 +120,93 @@ jobs:
         prerelease: true
         replacesArtifacts: true
         token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: "package-screenshot-macos.png"
+        artifacts: "package-screenshot-macos-dmg.png"
 
-  windows-test:
+  linux-test-deb:
+    runs-on: ubuntu-20.04
+    if: ${{ true }}
+    permissions:
+      contents: write
+    steps:
+        - uses: actions/checkout@v3
+        - name: install deps
+          run: |
+               sudo apt-get update
+               sudo apt-get install curl wget ca-certificates openjdk-17-jdk-headless openjdk-17-jdk
+               sudo apt-get install imagemagick
+               sudo apt-get install xdotool xclip
+               sudo apt-get install x11-apps x11-utils
+               sudo apt-get install lwm fvwm
+               sudo apt-get install xvfb
+
+        - name: download package
+          shell: bash
+          run: |
+               curl -L "https://github.com/Zoxcore/trifa_material/releases/download/nightly/trifa-material_nightly.deb" -o app.deb
+               pwd
+               ls -al
+
+        - name: install package
+          shell: bash
+          run: |
+               sudo dpkg -i ./app.deb
+               dpkg -L trifa-material
+               ls -al /opt/trifa-material/bin/trifa_material
+               file /opt/trifa-material/bin/trifa_material
+
+        - name: create runscript
+          run: |
+               printf '#!/bin/bash\n' > /tmp/a.sh
+               printf 'xclock -digital -geometry 300x45+100+688 &\n' >> /tmp/a.sh
+               printf '/opt/trifa-material/bin/trifa_material &\n' >> /tmp/a.sh
+               printf 'sleep 20\n' >> /tmp/a.sh
+               printf 'xwininfo -id $(xdotool getactivewindow)\n' >> /tmp/a.sh
+               printf 'xdotool mousemove --sync 80 74 click 1\n' >> /tmp/a.sh
+               printf 'sleep 2\n' >> /tmp/a.sh
+               printf 'xdotool mousemove --sync 140 74 click 1\n' >> /tmp/a.sh
+               printf 'pwd\n' >> /tmp/a.sh
+               printf 'sleep 5\n' >> /tmp/a.sh
+               printf 'ls -ratl\n' >> /tmp/a.sh
+               printf 'cat /home/runner/work/trifa_material/trifa_material/toxid.txt;echo\n' >> /tmp/a.sh
+               printf 'cd /home/runner/work/trifa_material/trifa_material/java_tox_tester-master/\n' >> /tmp/a.sh
+               printf './do_run.sh $(cat /home/runner/work/trifa_material/trifa_material/toxid.txt) >/dev/null 2>/dev/null &\n' >> /tmp/a.sh
+               printf 'sleep 220\n' >> /tmp/a.sh
+               printf 'xdotool mousemove --sync 214 295 click 1\n' >> /tmp/a.sh
+               printf 'sleep 40\n' >> /tmp/a.sh
+               printf 'fvwm2 &' >> /tmp/a.sh
+               printf 'sleep 20\n' >> /tmp/a.sh
+               printf 'import -window root /tmp/package-screenshot-linux-deb.png\n' >> /tmp/a.sh
+               cat /tmp/a.sh
+               chmod a+rx /tmp/a.sh
+
+        - name: startup-app
+          run: |
+               pwd
+               ls -al
+               xvfb-run --server-args="-screen 0 1024x768x24" --auto-servernum /tmp/a.sh
+               cp -av /tmp/package-screenshot-linux-deb.png package-screenshot-linux-deb.png
+
+        - name: upload-screenshots
+          uses: actions/upload-artifact@v3
+          with:
+            name: screenshot-linux
+            path: /tmp/package-screenshot-linux-deb.png
+
+        - name: Upload to nightly release
+          uses: ncipollo/release-action@v1
+          if: github.ref == 'refs/heads/master'
+          with:
+            allowUpdates: true
+            tag: nightly
+            omitBodyDuringUpdate: true
+            omitNameDuringUpdate: true
+            prerelease: true
+            replacesArtifacts: true
+            token: ${{ secrets.GITHUB_TOKEN }}
+            artifacts: "package-screenshot-linux-deb.png"
+
+
+  windows-test-msi:
     runs-on: windows-latest
     if: ${{ true }}
     permissions:
@@ -226,16 +310,16 @@ jobs:
           $bitmap  = New-Object System.Drawing.Bitmap $Width, $Height
           $graphic = [System.Drawing.Graphics]::FromImage($bitmap)
           $graphic.CopyFromScreen($Left, $Top, 0, 0, $bitmap.Size)
-          $bitmap.Save("D:\a\trifa_material\trifa_material\package-screenshot-windows.png")
+          $bitmap.Save("D:\a\trifa_material\trifa_material\package-screenshot-windows-msi.png")
           Write-Output "Screenshot saved to:"
-          Write-Output D:\a\trifa_material\trifa_material\package-screenshot-windows.png
+          Write-Output D:\a\trifa_material\trifa_material\package-screenshot-windows-msi.png
 
       - name: upload-screenshots
         uses: actions/upload-artifact@v3
         with:
           name: screenshot-windows
           path: |
-            D:\a\trifa_material\trifa_material\package-screenshot-windows.png
+            D:\a\trifa_material\trifa_material\package-screenshot-windows-msi.png
 
       - name: Upload to nightly release
         uses: ncipollo/release-action@v1
@@ -248,5 +332,5 @@ jobs:
           prerelease: true
           replacesArtifacts: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "package-screenshot-windows.png"
+          artifacts: "package-screenshot-windows-msi.png"
 
