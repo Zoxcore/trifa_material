@@ -73,6 +73,60 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "libjni-c-toxcore.jnilib"
 
+
+  build-raspi-jni-artifact:
+    name: JNI Artifact Raspi Build
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: install deps
+        run: |
+          sudo apt-get update && \
+          sudo DEBIAN_FRONTEND=noninteractive \
+          apt-get install -y --no-install-recommends \
+          ca-certificates
+
+      - name: make script dockcross-linux-armv7
+        run: docker run --rm dockcross/linux-armv7 > ./dockcross-linux-armv7; chmod +x ./dockcross-linux-armv7
+
+      - name: test
+        run: ./dockcross-linux-armv7 bash -c 'ls -al;id;pwd;hostname;uname -a'
+
+      - name: build deps
+        run:  |
+          ./dockcross-linux-armv7 bash -c './circle_scripts/deps_linux.sh raspi'
+
+      - name: build jni lib
+        run:  |
+          ./dockcross-linux-armv7 bash -c './circle_scripts/java_jni_lib_linux.sh raspi'
+
+      - name: sha hash of jni lib
+        run:  |
+          mv -v /home/runner/work/trifa_material/trifa_material/libjni-c-toxcore.so /home/runner/work/trifa_material/trifa_material/libjni-c-toxcore_raspi.so
+          sha256sum /home/runner/work/trifa_material/trifa_material/libjni-c-toxcore_raspi.so || echo "ignore"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: libjni-c-toxcore_raspi.so
+          path: libjni-c-toxcore_raspi.so
+      - name: Upload to nightly release
+        uses: ncipollo/release-action@v1
+        if: github.ref == 'refs/heads/master'
+        with:
+          allowUpdates: true
+          tag: nightly
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          prerelease: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "libjni-c-toxcore_raspi.so"
+
+
   build-linux-jni-artifact:
     name: JNI Artifact Linux Build
     runs-on: ubuntu-20.04

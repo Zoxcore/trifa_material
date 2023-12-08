@@ -67,6 +67,54 @@ export LDFLAGS=" "
 
   export CXXFLAGS=${CXXFLAGS_ADDON}
   export CFLAGS=${CFLAGS_ADDON}
+
+  if [ "$1""x" == "raspix" ]; then
+    echo "*** RASPI ***"
+  ./configure --arch="arm" \
+              --enable-gpl \
+              --prefix="$_INST_" \
+              --target-os="linux" \
+              --cross-prefix="armv7-unknown-linux-gnueabi-" \
+              --disable-asm \
+              --enable-pic \
+              --disable-swscale \
+              --disable-network \
+              --disable-everything \
+              --disable-debug \
+              --disable-shared \
+              --disable-programs \
+              --disable-protocols \
+              --disable-doc \
+              --disable-sdl2 \
+              --disable-avfilter \
+              --disable-filters \
+              --disable-iconv \
+              --disable-network \
+              --disable-muxers \
+              --disable-postproc \
+              --disable-swresample \
+              --disable-swscale-alpha \
+              --disable-dwt \
+              --disable-lsp \
+              --disable-faan \
+              --disable-vaapi \
+              --disable-vdpau \
+              --disable-zlib \
+              --disable-xlib \
+              --disable-bzlib \
+              --disable-lzma \
+              --disable-encoders \
+              --disable-decoders \
+              --disable-demuxers \
+              --disable-parsers \
+              --disable-bsfs \
+              --disable-libxcb \
+              --disable-libxcb-shm \
+              --enable-parser=h264 \
+              --enable-decoder=h264 || exit 1
+
+  else
+
   ./configure \
               --enable-gpl \
               --prefix="$_INST_" \
@@ -111,6 +159,7 @@ export LDFLAGS=" "
 #              --disable-lzo \
 #              --disable-avresample \
 
+  fi
 
   make -j || exit 1
   make install
@@ -144,13 +193,25 @@ chmod a+rx package_version
   ./autogen.sh
   export CXXFLAGS=${CXXFLAGS_ADDON}
   export CFLAGS=${CFLAGS_ADDON}
-  ./configure \
+
+  if [ "$1""x" == "raspix" ]; then
+    echo "*** RASPI ***"
+    ./configure --host="$CROSS_TRIPLE" \
                                --prefix="$_INST_" \
                                --disable-shared \
                                --enable-static \
                                --disable-soname-versions \
                                --disable-extra-programs \
                                --disable-doc || exit 1
+  else
+    ./configure \
+                               --prefix="$_INST_" \
+                               --disable-shared \
+                               --enable-static \
+                               --disable-soname-versions \
+                               --disable-extra-programs \
+                               --disable-doc || exit 1
+  fi
   make || exit 1
   make install
   unset CXXFLAGS
@@ -176,11 +237,20 @@ cd libsodium*/
 
   export CXXFLAGS=${CXXFLAGS_ADDON}
   export CFLAGS=${CFLAGS_ADDON}
-  ./configure \
+  if [ "$1""x" == "raspix" ]; then
+    echo "*** RASPI ***"
+    ./configure --host="$CROSS_TRIPLE" \
               --prefix="$_INST_" \
               --disable-shared \
               --enable-static \
               --with-pic || exit 1
+  else
+    ./configure \
+              --prefix="$_INST_" \
+              --disable-shared \
+              --enable-static \
+              --with-pic || exit 1
+  fi
 
   make || exit 1
   make install
@@ -208,7 +278,11 @@ cd libvpx*/
 
   export CXXFLAGS=${CXXFLAGS_ADDON}
   export CFLAGS=${CFLAGS_ADDON}
-  ./configure \
+
+  if [ "$1""x" == "raspix" ]; then
+    echo "*** RASPI ***"
+
+    ./configure --target=armv7-linux-gcc \
                                          --prefix="$_INST_" \
                                          --disable-shared \
                                          --size-limit=16384x16384 \
@@ -222,7 +296,22 @@ cd libvpx*/
                                          --disable-tools \
                                          --disable-docs \
                                          --disable-unit-tests || exit 1
-
+  else
+    ./configure \
+                                         --prefix="$_INST_" \
+                                         --disable-shared \
+                                         --size-limit=16384x16384 \
+                                         --enable-onthefly-bitpacking \
+                                         --enable-runtime-cpu-detect \
+                                         --enable-realtime-only \
+                                         --enable-multi-res-encoding \
+                                         --enable-temporal-denoising \
+                                         --enable-static \
+                                         --disable-examples \
+                                         --disable-tools \
+                                         --disable-docs \
+                                         --disable-unit-tests || exit 1
+  fi
   make || exit 1
   make install
   unset CXXFLAGS
@@ -235,10 +324,11 @@ fi
 
 
 # --- NASM ---
-if [ 1 == 1 ]; then
 
-cd "$_SRC_"
-
+if [ "$1""x" == "raspix" ]; then
+    echo "*** RASPI ***"
+else
+    cd "$_SRC_"
     export PATH=$ORIGPATH
 
     rm -Rf nasm
@@ -261,8 +351,7 @@ cd "$_SRC_"
     nasm --version || exit 1
     
     export PATH=$NEWPATH
-cd "$_HOME_"
-
+    cd "$_HOME_"
 fi
 # --- NASM ---
 
@@ -279,14 +368,26 @@ cd x264/
 
   export CXXFLAGS=${CXXFLAGS_ADDON}
   export CFLAGS=${CFLAGS_ADDON}
-  ./configure \
+
+  if [ "$1""x" == "raspix" ]; then
+    echo "*** RASPI ***"
+    ./configure --host="$CROSS_TRIPLE" \
+                                         --disable-asm \
                                          --prefix="$_INST_" \
                                          --disable-opencl \
                                          --enable-static \
                                          --disable-avs \
                                          --disable-cli \
                                          --enable-pic || exit 
-
+  else
+    ./configure \
+                                         --prefix="$_INST_" \
+                                         --disable-opencl \
+                                         --enable-static \
+                                         --disable-avs \
+                                         --disable-cli \
+                                         --enable-pic || exit 
+  fi
   make || exit 1
   make install
   unset CXXFLAGS
@@ -323,7 +424,9 @@ cat toxcore/tox.h | grep 'TOX_GIT_COMMIT_HASH'
 
 autoreconf -fi
 
-./configure \
+if [ "$1""x" == "raspix" ]; then
+  echo "*** RASPI ***"
+  ./configure --host="$CROSS_TRIPLE" \
      CXXFLAGS="$CXXFLAGS_ADDON" \
      CFLAGS="-fPIC $CFLAGS_ADDON $CFLAGS_MORE -DTOX_CAPABILITIES_ACTIVE $LOGG" \
     --prefix="$_INST_" \
@@ -331,6 +434,16 @@ autoreconf -fi
     --disable-shared \
     --disable-testing \
     --disable-rt || exit 1
+else
+  ./configure \
+     CXXFLAGS="$CXXFLAGS_ADDON" \
+     CFLAGS="-fPIC $CFLAGS_ADDON $CFLAGS_MORE -DTOX_CAPABILITIES_ACTIVE $LOGG" \
+    --prefix="$_INST_" \
+    --disable-soname-versions \
+    --disable-shared \
+    --disable-testing \
+    --disable-rt || exit 1
+fi
 
     make || exit 1
     make install
