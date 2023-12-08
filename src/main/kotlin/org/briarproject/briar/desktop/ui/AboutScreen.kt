@@ -53,6 +53,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_version_minor
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_version_patch
 import com.zoffcc.applications.trifa_material.trifa_material.BuildConfig
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
+import org.sqlite.SQLiteJDBCLoader
 
 @Composable
 fun AboutScreen(
@@ -185,7 +186,7 @@ private fun GeneralInfo() {
             jninotifications_version = "JNI lib not loaded"
         }
         add(Entry(i18n("about.jninotifications_version"), jninotifications_version))
-
+        add(Entry(i18n("about.sqlitejdbc"), SQLiteJDBCLoader.getVersion()))
         // add(Entry(i18n("about.contact"), Strings.EMAIL, true))
     }
 
