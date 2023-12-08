@@ -7,6 +7,16 @@ id -a
 pwd
 ls -al
 
+if [ "$1""x" == "raspix" ]; then
+  echo "*** RASPI ***"
+  sudo apt-get update && \
+          sudo apt-get install -y --no-install-recommends \
+          ca-certificates \
+          openjdk-17-jdk \
+          openjdk-17-jdk-headless \
+          coreutils autoconf libtool pkg-config
+fi
+
 export _SRC_=$_HOME_/src/
 export _INST_=$_HOME_/inst/
 
@@ -69,7 +79,14 @@ CFLAGS_MORE="--param=ssp-buffer-size=1 -fstack-protector-all -std=gnu99 -I$_INST
 #     export CFLAGS=" $CFLAGS -pg "
 # fi
 
-gcc $CFLAGS \
+GCC_=gcc
+
+if [ "$1""x" == "raspix" ]; then
+  echo "*** RASPI ***"
+  GCC_="$CC"
+fi
+
+$GCC_ $CFLAGS \
 -Wall \
 -DJAVA_LINUX \
 -DNOGLOBALVARS \
