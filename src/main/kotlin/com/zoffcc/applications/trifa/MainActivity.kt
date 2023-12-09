@@ -487,6 +487,9 @@ class MainActivity
         external fun libvpx_version(): String?
 
         @JvmStatic
+        external fun x264_version(): String?
+
+        @JvmStatic
         external fun libsodium_version(): String?
 
         @JvmStatic
