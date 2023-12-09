@@ -51,6 +51,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.libsodium_version
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_version_major
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_version_minor
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_version_patch
+import com.zoffcc.applications.trifa.MainActivity.Companion.x264_version
 import com.zoffcc.applications.trifa_material.trifa_material.BuildConfig
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import org.sqlite.SQLiteJDBCLoader
@@ -136,12 +137,14 @@ private fun GeneralInfo() {
         var libavutil_version = "???"
         var libopus_version = "???"
         var libvpx_version = "???"
+        var x264_version = "???"
         var libsodium_version = "???"
         try
         {
             libavutil_version = libavutil_version()!!
             libopus_version = libopus_version()!!
             libvpx_version = libvpx_version()!!
+            x264_version = x264_version()!!
             libsodium_version = libsodium_version()!!
         }
         catch (_: Exception)
@@ -150,6 +153,7 @@ private fun GeneralInfo() {
         add(Entry(i18n("about.libavutil_version"), libavutil_version))
         add(Entry(i18n("about.libopus_version"), libopus_version))
         add(Entry(i18n("about.libvpx_version"), libvpx_version))
+        add(Entry(i18n("about.x264_version"), x264_version))
         add(Entry(i18n("about.libsodium_version"), libsodium_version))
         var ffmpegav_libavutil_version = "???"
         var ffmpegav_version = "???"
