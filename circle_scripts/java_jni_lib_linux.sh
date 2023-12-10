@@ -86,8 +86,12 @@ if [ "$1""x" == "raspix" ]; then
   GCC_="$CC"
 fi
 
+git_hash_for_jni=$(git rev-parse --verify --short=8 HEAD 2>/dev/null|tr -dc '[A-Fa-f0-9]' 2>/dev/null)
+echo "XX:""$git_hash_for_jni"":YY"
+
 $GCC_ $CFLAGS \
 -Wall \
+-DGIT_HASH=\"$git_hash_for_jni\" \
 -DJAVA_LINUX \
 -DNOGLOBALVARS \
 $CFLAGS_ADDON $CFLAGS_MORE \

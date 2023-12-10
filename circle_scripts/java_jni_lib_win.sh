@@ -65,8 +65,12 @@ echo "JAVADIR2:""$JAVADIR2"
 
 export CFLAGS=" -fPIC -D_FORTIFY_SOURCE=2 -std=gnu99 -I$_INST_/include/ -L$_INST_/lib -fstack-protector-all "
 
+git_hash_for_jni=$(git rev-parse --verify --short=8 HEAD 2>/dev/null|tr -dc '[A-Fa-f0-9]' 2>/dev/null)
+echo "XX:""$git_hash_for_jni"":YY"
+
 x86_64-w64-mingw32-gcc-win32 $CFLAGS \
 -Wall -D_JNI_IMPLEMENTATION_ -Wl,-kill-at \
+-DGIT_HASH=\"$git_hash_for_jni\" \
 -DJAVA_LINUX \
 -DNOGLOBALVARS \
 $C_FLAGS $CXX_FLAGS $LD_FLAGS \
