@@ -49,6 +49,7 @@ import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.HighQuality
 import androidx.compose.material.icons.filled.NoiseAware
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.QrCode2
@@ -130,6 +131,7 @@ import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__audio_input_filter
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__v4l2_capture_force_mjpeg
+import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__video_super_hq
 import com.zoffcc.applications.trifa.MainActivity.Companion.accept_incoming_av_call
 import com.zoffcc.applications.trifa.MainActivity.Companion.decline_incoming_av_call
 import com.zoffcc.applications.trifa.MainActivity.Companion.main_init
@@ -566,6 +568,51 @@ fun App()
                                             imageVector = Icons.Default.RawOff,
                                             contentDescription = "force MJPEG on video capture",
                                             tint = if (video_force_mjpeg_value == 1) Color.Red else Color.DarkGray)
+
+                                        var video_super_hq_value by remember { mutableStateOf(PREF__video_super_hq) }
+                                        Icon(modifier = Modifier.padding(5.dp).combinedClickable(
+                                            onClick = {
+                                                if (PREF__video_super_hq == 0)
+                                                {
+                                                    PREF__video_super_hq = 1
+                                                } else
+                                                {
+                                                    PREF__video_super_hq = 0
+                                                }
+                                                video_super_hq_value = PREF__video_super_hq
+
+                                                try
+                                                {
+                                                    if (!savepathstore.isEnabled())
+                                                    {
+                                                        val friendnum = tox_friend_by_public_key(avstatestore.state.call_with_friend_pubkey_get())
+                                                        if (PREF__video_super_hq == 1)
+                                                        {
+                                                            MainActivity.toxav_option_set(friendnum,
+                                                                ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MIN_BITRATE.value.toLong(),
+                                                                TRIFAGlobals.SUPERHIGH_GLOBAL_VIDEO_BITRATE.toLong())
+                                                            MainActivity.toxav_option_set(friendnum,
+                                                                ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MAX_BITRATE.value.toLong(),
+                                                                TRIFAGlobals.SUPERHIGH_GLOBAL_VIDEO_BITRATE.toLong())
+                                                        } else
+                                                        {
+                                                            MainActivity.toxav_option_set(friendnum,
+                                                                ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MIN_BITRATE.value.toLong(),
+                                                                90)
+                                                            MainActivity.toxav_option_set(friendnum,
+                                                                ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MAX_BITRATE.value.toLong(),
+                                                                TRIFAGlobals.GLOBAL_VIDEO_BITRATE.toLong())
+                                                        }
+                                                    }
+                                                }
+                                                catch (_: java.lang.Exception)
+                                                {
+                                                }
+                                            }),
+                                            imageVector = Icons.Default.HighQuality,
+                                            contentDescription = "force super HQ on video capture",
+                                            tint = if (video_super_hq_value == 1) Color.Red else Color.DarkGray)
+
 
                                         val current_callstate3 by avstatestorecallstate.stateFlow.collectAsState()
                                         if (current_callstate3.call_state == AVState.CALL_STATUS.CALL_STATUS_CALLING)

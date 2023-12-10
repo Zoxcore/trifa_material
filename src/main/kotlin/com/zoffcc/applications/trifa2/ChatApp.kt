@@ -155,15 +155,24 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
                         avstatestore.state.start_av_call()
                         GlobalScope.launch {
                             delay(1000)
-                            //MainActivity.toxav_option_set(friendnum,
-                            //    ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_BITRATE_AUTOSET.value.toLong(),
-                            //    0)
-                            MainActivity.toxav_option_set(friendnum,
-                                ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MIN_BITRATE.value.toLong(),
-                                TRIFAGlobals.GLOBAL_VIDEO_BITRATE.toLong())
-                            MainActivity.toxav_option_set(friendnum,
-                                ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MAX_BITRATE.value.toLong(),
-                                TRIFAGlobals.GLOBAL_VIDEO_BITRATE.toLong())
+                            if (MainActivity.PREF__video_super_hq == 1)
+                            {
+                                MainActivity.toxav_option_set(friendnum,
+                                    ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MIN_BITRATE.value.toLong(),
+                                    TRIFAGlobals.SUPERHIGH_GLOBAL_VIDEO_BITRATE.toLong())
+                                MainActivity.toxav_option_set(friendnum,
+                                    ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MAX_BITRATE.value.toLong(),
+                                    TRIFAGlobals.SUPERHIGH_GLOBAL_VIDEO_BITRATE.toLong())
+                            }
+                            else
+                            {
+                                MainActivity.toxav_option_set(friendnum,
+                                    ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MIN_BITRATE.value.toLong(),
+                                    90)
+                                MainActivity.toxav_option_set(friendnum,
+                                    ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MAX_BITRATE.value.toLong(),
+                                    TRIFAGlobals.GLOBAL_VIDEO_BITRATE.toLong())
+                            }
                             println("toxav: set 003")
                         }
                     }) {
