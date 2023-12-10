@@ -13,6 +13,9 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__v4l2_capture_f
 import com.zoffcc.applications.trifa.MainActivity.Companion.set_audio_play_volume_percent
 import global_prefs
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -114,14 +117,27 @@ data class AVState(val a: Int)
         semaphore_avstate.release()
         if (devices_state_copy == CALL_DEVICES_STATE.CALL_DEVICES_STATE_ACTIVE)
         {
+            Log.i(TAG, "ffmpeg_devices_stop:ffmpegav_stop_audio_in_capture")
             AVActivity.ffmpegav_stop_audio_in_capture()
+            //Thread.sleep(20)
+            Log.i(TAG, "ffmpeg_devices_stop:ffmpegav_close_audio_in_device")
             AVActivity.ffmpegav_close_audio_in_device()
+            //Thread.sleep(20)
+            Log.i(TAG, "ffmpeg_devices_stop:ffmpegav_stop_video_in_capture")
             AVActivity.ffmpegav_stop_video_in_capture()
+            //Thread.sleep(20)
+            Log.i(TAG, "ffmpeg_devices_stop:ffmpegav_close_video_in_device")
             AVActivity.ffmpegav_close_video_in_device()
+            //Thread.sleep(20)
+            Log.i(TAG, "ffmpeg_devices_stop:set_cur_value1")
             AudioBar.set_cur_value(0, AudioBar.audio_in_bar)
+            Log.i(TAG, "ffmpeg_devices_stop:set_cur_value2")
             AudioBar.set_cur_value(0, AudioBar.audio_out_bar)
+            Log.i(TAG, "ffmpeg_devices_stop:clear_video_out_frame")
             VideoOutFrame.clear_video_out_frame()
+            Log.i(TAG, "ffmpeg_devices_stop:clear_video_in_frame")
             VideoInFrame.clear_video_in_frame()
+            Log.i(TAG, "ffmpeg_devices_stop:DONE")
         }
         semaphore_avstate.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
         devices_state = CALL_DEVICES_STATE.CALL_DEVICES_STATE_CLOSED
@@ -389,6 +405,7 @@ data class AVState(val a: Int)
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     fun start_av_call()
     {
         val friendpubkey = call_with_friend_pubkey
@@ -464,7 +481,9 @@ data class AVState(val a: Int)
             AVActivity.ffmpegav_set_audio_capture_callback(object : AVActivity.audio_capture_callback
             {
                 override fun onSuccess(read_bytes: Long, out_samples: Int, out_channels: Int, out_sample_rate: Int, pts: Long)
-                { // Log.i(TAG, "ffmpeg open audio capture onSuccess: $read_bytes $out_samples $out_channels $out_sample_rate $pts")
+                {
+                    // Log.i(TAG, "ffmpeg open audio capture onSuccess: $read_bytes $out_samples $out_channels $out_sample_rate $pts")
+                    // val t1 = System.currentTimeMillis()
                     if ((audio_buffer_2 == null))
                     {
                         audio_buffer_2 = ByteBuffer.allocateDirect(buffer_size_in_bytes2)
@@ -483,9 +502,18 @@ data class AVState(val a: Int)
 
                     audio_buffer_2!!.rewind()
                     audio_buffer_1!!.rewind()
-                    audio_buffer_2!!.put(audio_buffer_1) // can we cache that? what if a friend gets deleted while in a call? and the friend number changes?
+                    audio_buffer_2!!.put(audio_buffer_1)
+                    // can we cache that? what if a friend gets deleted while in a call? and the friend number changes?
                     val friendnum = MainActivity.tox_friend_by_public_key(friendpubkey)
-                    val tox_audio_res = MainActivity.toxav_audio_send_frame(friend_number = friendnum, sample_count = out_samples.toLong(), channels = out_channels, sampling_rate = out_sample_rate.toLong()) // Log.i(TAG, "tox_audio_res=" + tox_audio_res)
+                    // HINT: fix me --------
+                    GlobalScope.launch {
+                        val toxav_audio_send_frame_res = MainActivity.toxav_audio_send_frame(friend_number = friendnum, sample_count = out_samples.toLong(), channels = out_channels, sampling_rate = out_sample_rate.toLong())
+                        if (toxav_audio_send_frame_res != 0)
+                        {
+                            Log.i(TAG, "toxav_audio_send_frame:result=" + toxav_audio_send_frame_res)
+                        }
+                    }
+                    // HINT: fix me --------
                     val sample_count_: Int = out_samples
                     val t_audio_bar_set: Thread = object : Thread()
                     {
@@ -519,6 +547,8 @@ data class AVState(val a: Int)
                         e.printStackTrace()
                     }
                     DEBUG ONLY ---------------------------- */
+                    // val t2 = System.currentTimeMillis()
+                    // Log.i(TAG, "AAAAAAAAAA:" + (t2 - t1))
                 }
 
                 override fun onBufferTooSmall(audio_buffer_size: Int)
