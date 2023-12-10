@@ -15,7 +15,7 @@ import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 @Composable
 fun ExplainerChat() {
     Theme {
-        Explainer(headline = i18n("No Contacts selected"), text = i18n("Select a Contact to start chatting"))
+        Explainer(headline = i18n("ui.no_contacts_selected"), text = i18n("ui.select_contact_to_start_chatting"))
     }
 }
 
@@ -23,7 +23,7 @@ val PARAGRAPH_WIDTH = 540.dp
 
 @Composable
 fun ExplainerToxNotRunning() =
-Explainer(headline = InternationalizationUtils.i18n("Tox is not running"), text = InternationalizationUtils.i18n("press the <start> button"))
+Explainer(headline = i18n("ui.tox_is_not_running"), text = i18n("ui.press_the_start_button"))
 {}
 
 

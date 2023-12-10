@@ -8,6 +8,6 @@ import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 fun ExplainerGroup()
 {
     Theme {
-        Explainer(headline = i18n("No Groups selected"), text = i18n("Select a Group to start chatting"))
+        Explainer(headline = i18n("ui.no_groups_selected"), text = i18n("ui.select_group_to_start_chatting"))
     }
 }

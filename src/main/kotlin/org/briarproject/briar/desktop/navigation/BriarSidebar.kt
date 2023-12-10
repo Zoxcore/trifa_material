@@ -105,7 +105,7 @@ fun BriarSidebarButton(
             )
         } else if (sideBarButtonState is Warning)
         {
-            Icon(Icons.Default.Error, i18n("mailbox.status.problem"), modifier = Modifier.offset((-12).dp, 12.dp).size(16.dp), tint = MaterialTheme.colors.error)
+            Icon(Icons.Default.Error, i18n("ui.generic_error"), modifier = Modifier.offset((-12).dp, 12.dp).size(16.dp), tint = MaterialTheme.colors.error)
         }
     },
 ) {

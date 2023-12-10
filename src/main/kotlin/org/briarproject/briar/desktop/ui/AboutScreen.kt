@@ -64,7 +64,7 @@ fun AboutScreen(
 
     IconButton(
         icon = Icons.Filled.ArrowBack,
-        contentDescription = i18n("access.return_to_previous_screen"),
+        contentDescription = i18n("ui.return_to_previous_screen"),
         onClick = onBackButton,
         modifier = Modifier.align(TopStart)
     )
@@ -88,7 +88,7 @@ fun AboutScreen(modifier: Modifier = Modifier.padding(16.dp)) {
             )
         }
         var state by remember { mutableStateOf(0) }
-        val titles = listOf(i18n("about.category.general"), i18n("about.category.dependencies"))
+        val titles = listOf(i18n("ui.about.category_general"), i18n("ui.about.category_dependencies"))
         TabRow(selectedTabIndex = state, backgroundColor = MaterialTheme.colors.background) {
             titles.forEachIndexed { index, title ->
                 Tab(
@@ -197,7 +197,7 @@ private fun GeneralInfo() {
     VerticallyScrollableArea { scrollState ->
         LazyColumn(
             modifier = Modifier.semantics {
-                contentDescription = i18n("access.about.list.general")
+                contentDescription = i18n("ui.about.list_general")
             },
             state = scrollState
         ) {
@@ -252,7 +252,7 @@ private fun AboutEntry(entry: Entry) =
                     val clipboardManager = LocalClipboardManager.current
                     IconButton(
                         icon = Icons.Filled.ContentCopy,
-                        contentDescription = i18n("copy"),
+                        contentDescription = i18n("ui.copy"),
                         onClick = {
                             clipboardManager.setText(AnnotatedString(entry.value))
                         }
@@ -267,7 +267,7 @@ private fun Libraries() {
     VerticallyScrollableArea { scrollState ->
         LazyColumn(
             modifier = Modifier.semantics {
-                contentDescription = i18n("access.about.list.dependencies")
+                contentDescription = i18n("ui.about.list_dependencies")
             },
             state = scrollState
         ) {

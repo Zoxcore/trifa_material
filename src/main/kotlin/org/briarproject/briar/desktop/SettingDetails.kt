@@ -72,7 +72,7 @@ import java.io.File
 @Composable
 fun SettingDetails()
 {
-    SettingDetail(i18n("Settings")) {/*
+    SettingDetail(i18n("ui.settings_headline")) {/*
         //    val dummylist = listOf("Sue Helen", "JR", "Pamela")
         DetailItem(label = i18n("settings.display.theme.title"), description = "${i18n("access.settings.current_value")}: " + i18n("settings.display.theme") + // NON-NLS
                 ", " + i18n("access.settings.click_to_change_value")) {
