@@ -69,8 +69,12 @@ CFLAGS_MORE="--param=ssp-buffer-size=1 -fstack-protector-all -std=gnu99 -I$_INST
 #     export CFLAGS=" $CFLAGS -pg "
 # fi
 
+git_hash_for_jni=$(git rev-parse --verify --short=8 HEAD 2>/dev/null|tr -dc '[A-Fa-f0-9]' 2>/dev/null)
+echo "XX:""$git_hash_for_jni"":YY"
+
 gcc $CFLAGS \
 -Wall \
+-DGIT_HASH=\"$git_hash_for_jni\" \
 -DJAVA_LINUX \
 -DNOGLOBALVARS \
 $CFLAGS_ADDON $CFLAGS_MORE \
