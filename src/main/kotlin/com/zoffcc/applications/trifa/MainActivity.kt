@@ -80,6 +80,7 @@ import groupstore
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import lock_data_dir_input
 import messagestore
@@ -3044,6 +3045,7 @@ class MainActivity
             avstatestore.state.call_with_friend_pubkey_set(null)
         }
 
+        @OptIn(DelicateCoroutinesApi::class)
         fun accept_incoming_av_call(friendpubkey: String)
         {
             val friend_number = tox_friend_by_public_key(friendpubkey)
@@ -3058,9 +3060,15 @@ class MainActivity
                 avstatestore.state.calling_state_set(AVState.CALL_STATUS.CALL_STATUS_CALLING)
                 avstatestore.state.call_with_friend_pubkey_set(tox_friend_get_public_key(friend_number))
                 avstatestore.state.start_av_call()
-                toxav_option_set(friend_number,
-                    ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MAX_BITRATE.value.toLong(),
-                    GLOBAL_VIDEO_BITRATE.toLong())
+                GlobalScope.launch {
+                    delay(1000)
+                    toxav_option_set(friend_number,
+                        ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MIN_BITRATE.value.toLong(),
+                        GLOBAL_VIDEO_BITRATE.toLong())
+                    toxav_option_set(friend_number,
+                        ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MAX_BITRATE.value.toLong(),
+                        GLOBAL_VIDEO_BITRATE.toLong())
+                }
             }
         }
 

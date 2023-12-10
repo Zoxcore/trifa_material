@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 public class AVActivity {
 
     private static final String TAG = "ffmpegav.AVActivity";
-    static final String Version = "0.99.9";
+    static final String Version = "0.99.10";
 
     public static native String ffmpegav_version();
     public static native String ffmpegav_libavutil_version();
@@ -22,6 +22,10 @@ public class AVActivity {
     public static native int ffmpegav_stop_audio_in_capture();
     public static native int ffmpegav_close_audio_in_device();
     public static native int ffmpegav_close_video_in_device();
+
+    public static java.nio.ByteBuffer ffmpegav_video_buffer_2_y = null;
+    public static java.nio.ByteBuffer ffmpegav_video_buffer_2_u = null;
+    public static java.nio.ByteBuffer ffmpegav_video_buffer_2_v = null;
 
     public static enum ffmpegav_video_source_format_name
     {
@@ -358,10 +362,10 @@ public class AVActivity {
         final int frame_width_px2 = 640;
         final int frame_height_px2 = 480;
         final int buffer_size_in_bytes2 = 10; // ((frame_width_px2 * frame_height_px2) * 3) / 2;
-        final java.nio.ByteBuffer video_buffer_2_y = java.nio.ByteBuffer.allocateDirect(buffer_size_in_bytes2);
-        final java.nio.ByteBuffer video_buffer_2_u = java.nio.ByteBuffer.allocateDirect(buffer_size_in_bytes2);
-        final java.nio.ByteBuffer video_buffer_2_v = java.nio.ByteBuffer.allocateDirect(buffer_size_in_bytes2);
-        ffmpegav_set_JNI_video_buffer2(video_buffer_2_y, video_buffer_2_u, video_buffer_2_v, frame_width_px2, frame_height_px2);
+        ffmpegav_video_buffer_2_y = java.nio.ByteBuffer.allocateDirect(buffer_size_in_bytes2);
+        ffmpegav_video_buffer_2_u = java.nio.ByteBuffer.allocateDirect(buffer_size_in_bytes2);
+        ffmpegav_video_buffer_2_v = java.nio.ByteBuffer.allocateDirect(buffer_size_in_bytes2);
+        ffmpegav_set_JNI_video_buffer2(ffmpegav_video_buffer_2_y, ffmpegav_video_buffer_2_u, ffmpegav_video_buffer_2_v, frame_width_px2, frame_height_px2);
 
 
         ffmpegav_set_JNI_audio_buffer2(audio_buffer_2);
@@ -370,8 +374,8 @@ public class AVActivity {
             @Override
             public void onSuccess(long width, long height, long source_width, long source_height, long pts, int fps, int source_format) {
                 Log.i(TAG, "ffmpeg open video capture onSuccess:" + width + " " + height + " " +
-                source_width + " " + source_height + " " + pts + " fps: " + fps +
-                " source_format: " + ffmpegav_video_source_format_name.value_str(source_format));
+                        source_width + " " + source_height + " " + pts + " fps: " + fps +
+                        " source_format: " + ffmpegav_video_source_format_name.value_str(source_format));
             }
             @Override
             public void onError() {
@@ -379,11 +383,11 @@ public class AVActivity {
             @Override
             public void onBufferTooSmall(int y_buffer_size, int u_buffer_size, int v_buffer_size) {
                 Log.i(TAG, "Video buffer too small, needed sizes: " + y_buffer_size
-                    + " " + u_buffer_size + " "+ v_buffer_size);
-                final java.nio.ByteBuffer video_buffer_2_y = java.nio.ByteBuffer.allocateDirect(y_buffer_size);
-                final java.nio.ByteBuffer video_buffer_2_u = java.nio.ByteBuffer.allocateDirect(u_buffer_size);
-                final java.nio.ByteBuffer video_buffer_2_v = java.nio.ByteBuffer.allocateDirect(v_buffer_size);
-                ffmpegav_set_JNI_video_buffer2(video_buffer_2_y, video_buffer_2_u, video_buffer_2_v, frame_width_px2, frame_height_px2);
+                        + " " + u_buffer_size + " "+ v_buffer_size);
+                ffmpegav_video_buffer_2_y = java.nio.ByteBuffer.allocateDirect(y_buffer_size);
+                ffmpegav_video_buffer_2_u = java.nio.ByteBuffer.allocateDirect(u_buffer_size);
+                ffmpegav_video_buffer_2_v = java.nio.ByteBuffer.allocateDirect(v_buffer_size);
+                ffmpegav_set_JNI_video_buffer2(ffmpegav_video_buffer_2_y, ffmpegav_video_buffer_2_u, ffmpegav_video_buffer_2_v, frame_width_px2, frame_height_px2);
             }
         });
 
