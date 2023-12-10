@@ -304,6 +304,13 @@ fun SettingDetails()
                 Text("update bootstrap nodes from internet")
             }
         }
+        //
+        // --------------------------------------
+        // HINT: change locale at runtime:
+        //
+        // Locale.setDefault(Locale.GERMAN)
+        // ResourceBundle.clearCache()
+        // --------------------------------------
     }
 }
 
