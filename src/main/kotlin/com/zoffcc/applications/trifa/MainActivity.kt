@@ -56,6 +56,7 @@ import com.zoffcc.applications.trifa.TRIFAGlobals.GROUP_ID_LENGTH
 import com.zoffcc.applications.trifa.TRIFAGlobals.LOWER_NGC_VIDEO_BITRATE
 import com.zoffcc.applications.trifa.TRIFAGlobals.LOWER_NGC_VIDEO_QUANTIZER
 import com.zoffcc.applications.trifa.TRIFAGlobals.NGC_AUDIO_BITRATE
+import com.zoffcc.applications.trifa.TRIFAGlobals.SUPERHIGH_GLOBAL_VIDEO_BITRATE
 import com.zoffcc.applications.trifa.TRIFAGlobals.TRIFA_MSG_TYPE
 import com.zoffcc.applications.trifa.TRIFAGlobals.UINT32_MAX_JAVA
 import com.zoffcc.applications.trifa.TRIFAGlobals.UPDATE_MESSAGE_PROGRESS_AFTER_BYTES
@@ -124,6 +125,7 @@ class MainActivity
         var PREF__audio_play_volume_percent = 100
         var PREF__audio_input_filter = 0
         var PREF__v4l2_capture_force_mjpeg: Int = 0 // 0 -> auto, 1 -> force MJPEG video capture with v4l2 devices
+        var PREF__video_super_hq: Int = 0 // 0 -> normal, 1 -> super high quality video capture
         var PREF__orbot_enabled_to_int = 0
         var PREF__orbot_enabled_to_int_used_for_init = -1
         @JvmStatic var PREF__toxnoise_enabled_to_int_used_for_init = -1
@@ -3062,12 +3064,24 @@ class MainActivity
                 avstatestore.state.start_av_call()
                 GlobalScope.launch {
                     delay(1000)
-                    toxav_option_set(friend_number,
-                        ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MIN_BITRATE.value.toLong(),
-                        GLOBAL_VIDEO_BITRATE.toLong())
-                    toxav_option_set(friend_number,
-                        ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MAX_BITRATE.value.toLong(),
-                        GLOBAL_VIDEO_BITRATE.toLong())
+                    if (PREF__video_super_hq == 1)
+                    {
+                        toxav_option_set(friend_number,
+                            ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MIN_BITRATE.value.toLong(),
+                            SUPERHIGH_GLOBAL_VIDEO_BITRATE.toLong())
+                        toxav_option_set(friend_number,
+                            ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MAX_BITRATE.value.toLong(),
+                            SUPERHIGH_GLOBAL_VIDEO_BITRATE.toLong())
+                    }
+                    else
+                    {
+                        toxav_option_set(friend_number,
+                            ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MIN_BITRATE.value.toLong(),
+                            90)
+                        toxav_option_set(friend_number,
+                            ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MAX_BITRATE.value.toLong(),
+                            GLOBAL_VIDEO_BITRATE.toLong())
+                    }
                 }
             }
         }
