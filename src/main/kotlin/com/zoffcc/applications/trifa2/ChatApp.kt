@@ -78,7 +78,10 @@ import com.zoffcc.applications.trifa.createGroupStore
 import com.zoffcc.applications.trifa.createSavepathStore
 import com.zoffcc.applications.trifa.createToxDataStore
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.briarproject.briar.desktop.utils.FilePicker.pickFileUsingDialog
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
@@ -150,10 +153,19 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
                         avstatestore.state.calling_state_set(AVState.CALL_STATUS.CALL_STATUS_CALLING)
                         avstatestore.state.call_with_friend_pubkey_set(friendpubkey)
                         avstatestore.state.start_av_call()
-                        MainActivity.toxav_option_set(friendnum,
-                            ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MAX_BITRATE.value.toLong(),
-                            TRIFAGlobals.GLOBAL_VIDEO_BITRATE.toLong())
-                        println("toxav: set 003")
+                        GlobalScope.launch {
+                            delay(1000)
+                            //MainActivity.toxav_option_set(friendnum,
+                            //    ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_BITRATE_AUTOSET.value.toLong(),
+                            //    0)
+                            MainActivity.toxav_option_set(friendnum,
+                                ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MIN_BITRATE.value.toLong(),
+                                TRIFAGlobals.GLOBAL_VIDEO_BITRATE.toLong())
+                            MainActivity.toxav_option_set(friendnum,
+                                ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MAX_BITRATE.value.toLong(),
+                                TRIFAGlobals.GLOBAL_VIDEO_BITRATE.toLong())
+                            println("toxav: set 003")
+                        }
                     }) {
                         if (current_callstate.call_state == AVState.CALL_STATUS.CALL_STATUS_CALLING)
                         {

@@ -1,6 +1,7 @@
 package com.zoffcc.applications.trifa
 
 import CAPTURE_VIDEO_FPS
+import CAPTURE_VIDEO_HIGH_FPS
 import RESOURCESDIR
 import avstatestorecallstate
 import avstatestorevcapfpsstate
@@ -85,9 +86,16 @@ data class AVState(val a: Int)
             {
                 if ((video_in_source != null) && (video_in_source != ""))
                 {
+                    var capture_fps_used = CAPTURE_VIDEO_FPS
+                    if ((video_in_resolution_width == 1920) && (video_in_resolution_height == 1080))
+                    {
+                        capture_fps_used = CAPTURE_VIDEO_HIGH_FPS
+                    }
+                    println("ffmpeg video in device:2: " + video_in_resolution_width + " x " + video_in_resolution_height)
+                    println("capture_fps_used:2: " + capture_fps_used)
                     println("ffmpeg video in device: " + video_in_device + " " + video_in_source)
                     val res_vd = AVActivity.ffmpegav_open_video_in_device(video_in_device, video_in_source,
-                        video_in_resolution_width, video_in_resolution_height, CAPTURE_VIDEO_FPS,
+                        video_in_resolution_width, video_in_resolution_height, capture_fps_used,
                         PREF__v4l2_capture_force_mjpeg)
                     println("ffmpeg open video capture device: $res_vd")
                 }
@@ -440,9 +448,16 @@ data class AVState(val a: Int)
             {
                 if ((video_in_source != null) && (video_in_source != ""))
                 {
+                    var capture_fps_used = CAPTURE_VIDEO_FPS
+                    if ((video_in_resolution_width == 1920) && (video_in_resolution_height == 1080))
+                    {
+                        capture_fps_used = CAPTURE_VIDEO_HIGH_FPS
+                    }
+                    println("ffmpeg video in device:1: " + video_in_resolution_width + " x " + video_in_resolution_height)
+                    println("capture_fps_used:1: " + capture_fps_used)
                     println("ffmpeg video in device: " + video_in_device + " " + video_in_source)
                     val res_vd = AVActivity.ffmpegav_open_video_in_device(video_in_device, video_in_source,
-                        video_in_resolution_width_pin, video_in_resolution_height_pin, CAPTURE_VIDEO_FPS,
+                        video_in_resolution_width_pin, video_in_resolution_height_pin, capture_fps_used,
                         PREF__v4l2_capture_force_mjpeg)
                     println("ffmpeg open video capture device: $res_vd")
                 }
@@ -457,10 +472,10 @@ data class AVState(val a: Int)
             val y_size = frame_width_px2 * frame_height_px2
             val u_size = (frame_width_px2 * frame_height_px2 / 4)
             val v_size = (frame_width_px2 * frame_height_px2 / 4)
-            var video_buffer_2_y = ByteBuffer.allocateDirect(y_size)
-            var video_buffer_2_u = ByteBuffer.allocateDirect(u_size)
-            var video_buffer_2_v = ByteBuffer.allocateDirect(v_size)
-            AVActivity.ffmpegav_set_JNI_video_buffer2(video_buffer_2_y, video_buffer_2_u, video_buffer_2_v, frame_width_px2, frame_height_px2)
+            AVActivity.ffmpegav_video_buffer_2_y = ByteBuffer.allocateDirect(y_size)
+            AVActivity.ffmpegav_video_buffer_2_u = ByteBuffer.allocateDirect(u_size)
+            AVActivity.ffmpegav_video_buffer_2_v = ByteBuffer.allocateDirect(v_size)
+            AVActivity.ffmpegav_set_JNI_video_buffer2(AVActivity.ffmpegav_video_buffer_2_y, AVActivity.ffmpegav_video_buffer_2_u, AVActivity.ffmpegav_video_buffer_2_v, frame_width_px2, frame_height_px2)
             val audio_in_device = audio_in_device_get()
             val audio_in_source = audio_in_source_get()
             var audio_buffer_2: ByteBuffer? = null
@@ -593,15 +608,15 @@ data class AVState(val a: Int)
                         VideoOutFrame.setup_video_out_resolution(frame_width_px, frame_height_px, buffer_size_in_bytes3)
                     }
                     video_buffer_2!!.rewind()
-                    video_buffer_2_y.rewind()
-                    video_buffer_2_u.rewind()
-                    video_buffer_2_v.rewind()
-                    video_buffer_2!!.put(video_buffer_2_y)
-                    video_buffer_2!!.put(video_buffer_2_u)
-                    video_buffer_2!!.put(video_buffer_2_v)
+                    AVActivity.ffmpegav_video_buffer_2_y.rewind()
+                    AVActivity.ffmpegav_video_buffer_2_u.rewind()
+                    AVActivity.ffmpegav_video_buffer_2_v.rewind()
+                    video_buffer_2!!.put(AVActivity.ffmpegav_video_buffer_2_y)
+                    video_buffer_2!!.put(AVActivity.ffmpegav_video_buffer_2_u)
+                    video_buffer_2!!.put(AVActivity.ffmpegav_video_buffer_2_v)
                     // can we cache that? what if a friend gets deleted while in a call? and the friend number changes?
                     val friendnum = MainActivity.tox_friend_by_public_key(friendpubkey)
-                    MainActivity.toxav_video_send_frame_age(friendnum = friendnum, frame_width_px = width.toInt(), frame_height_px = height.toInt(), age_ms = 0)
+                    MainActivity.toxav_video_send_frame_age(friendnum = friendnum, frame_width_px = width.toInt(), frame_height_px = height.toInt(), age_ms = pts.toInt())
 
                     video_buffer_2!!.rewind()
                     VideoOutFrame.new_video_out_frame(video_buffer_2, frame_width_px, frame_height_px)
@@ -610,10 +625,10 @@ data class AVState(val a: Int)
                 override fun onBufferTooSmall(y_buffer_size: Int, u_buffer_size: Int, v_buffer_size: Int)
                 {
                     Log.i(TAG, "ffmpeg open video capture onBufferTooSmall: sizes needed: " + y_buffer_size + " " + u_buffer_size + " " + v_buffer_size)
-                    video_buffer_2_y = ByteBuffer.allocateDirect(y_buffer_size)
-                    video_buffer_2_u = ByteBuffer.allocateDirect(u_buffer_size)
-                    video_buffer_2_v = ByteBuffer.allocateDirect(v_buffer_size)
-                    AVActivity.ffmpegav_set_JNI_video_buffer2(video_buffer_2_y, video_buffer_2_u, video_buffer_2_v, frame_width_px2, frame_height_px2)
+                    AVActivity.ffmpegav_video_buffer_2_y = ByteBuffer.allocateDirect(y_buffer_size)
+                    AVActivity.ffmpegav_video_buffer_2_u = ByteBuffer.allocateDirect(u_buffer_size)
+                    AVActivity.ffmpegav_video_buffer_2_v = ByteBuffer.allocateDirect(v_buffer_size)
+                    AVActivity.ffmpegav_set_JNI_video_buffer2(AVActivity.ffmpegav_video_buffer_2_y, AVActivity.ffmpegav_video_buffer_2_u, AVActivity.ffmpegav_video_buffer_2_v, frame_width_px2, frame_height_px2)
                 }
 
                 override fun onError()
