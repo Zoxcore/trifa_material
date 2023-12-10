@@ -1203,7 +1203,7 @@ class MainActivity
                     semaphore_audio_out_convert.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                     if (semaphore_audio_out_convert_active_threads >= semaphore_audio_out_convert_max_active_threads)
                     {
-                        // Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:too many threads running")
+                        Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:too many threads running")
                         semaphore_audio_out_convert.release()
                         return
                     }
@@ -1227,7 +1227,11 @@ class MainActivity
                     // HINT: this may block!!
                     try
                     {
-                        AudioSelectOutBox.sourceDataLine.write(audio_out_byte_buffer, 0, want_bytes)
+                        val bytes_actually_written = AudioSelectOutBox.sourceDataLine.write(audio_out_byte_buffer, 0, want_bytes)
+                        if (bytes_actually_written != want_bytes)
+                        {
+                            Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:bytes_actually_written=" + bytes_actually_written + " want_bytes=" + want_bytes)
+                        }
                     } catch (e: java.lang.Exception)
                     {
                         Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:sourceDataLine.write:EE:" + e.message) // e.printStackTrace();
