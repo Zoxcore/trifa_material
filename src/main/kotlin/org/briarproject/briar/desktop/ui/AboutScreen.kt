@@ -133,7 +133,7 @@ private fun GeneralInfo() {
         add(Entry(i18n("about.toxcore_commit_hash"), "" + getNativeLibTOXGITHASH()))
 
         add(Entry(i18n("about.jnictoxcore_version"), "" + jnictoxcore_version()))
-        // add(Entry(i18n("about.jnictoxcore_commit_hash"), "" + getNativeLibGITHASH()))
+        add(Entry(i18n("about.jnictoxcore_commit_hash"), "" + getNativeLibGITHASH()))
         var libavutil_version = "???"
         var libopus_version = "???"
         var libvpx_version = "???"
