@@ -36,7 +36,7 @@ fun ContactList(
             state = scrollState,
             modifier = Modifier
                 .semantics {
-                    contentDescription = i18n("access.contact.list")
+                    contentDescription = i18n("ui.access_contact_list")
                 }
                 .selectableGroup()
         ) {

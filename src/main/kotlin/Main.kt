@@ -896,9 +896,9 @@ fun App()
                         update = { }
                     )
                     UIScaleItem(
-                        label = i18n("UI Scale"),
-                        description = "${i18n("current_value:")}: "
-                                + " " + ui_scale + ", " + i18n("drag Slider to change")) {
+                        label = i18n("ui.ui_scale"),
+                        description = "${i18n("ui.current_value")}: "
+                                + " " + ui_scale + ", " + i18n("ui.drag_slider_to_change")) {
                         Row(horizontalArrangement = Arrangement.spacedBy(2.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.width(200.dp)) {
@@ -1529,7 +1529,7 @@ private fun MainAppStart()
                 {
                     Dialog(
                         onCloseRequest = { isAskingToClose = false },
-                        title = i18n("Close TRIfA ?"),
+                        title = i18n("ui.close_trifa"),
                     ) {
                         Button(onClick = {
                             if (tox_running_state_wrapper == "running")
@@ -1554,7 +1554,7 @@ private fun MainAppStart()
                                 closing_application = true
                             }
                         }) {
-                            Text(i18n("Yes"))
+                            Text(i18n("ui.yes"))
                         }
                     }
                 }

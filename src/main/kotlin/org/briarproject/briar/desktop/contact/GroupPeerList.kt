@@ -34,7 +34,7 @@ fun GroupPeerList(
             state = scrollState,
             modifier = Modifier
                 .semantics {
-                    contentDescription = i18n("access.grouppeer.list")
+                    contentDescription = i18n("ui.access_group_peerlist")
                 }
                 .selectableGroup()
         ) {
