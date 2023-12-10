@@ -242,7 +242,7 @@ cd "$_SRC_"
     export PATH=$ORIGPATH
 
     rm -Rf nasm
-    git clone http://repo.or.cz/nasm.git
+    git clone https://github.com/netwide-assembler/nasm
     cd nasm/
     git checkout "$NASM_VERSION"
 
