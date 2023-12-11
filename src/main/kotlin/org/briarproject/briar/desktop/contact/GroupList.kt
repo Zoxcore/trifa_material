@@ -19,7 +19,9 @@ import com.zoffcc.applications.trifa.HelperGeneric
 import com.zoffcc.applications.trifa.StateContacts
 import com.zoffcc.applications.trifa.StateGroups
 import contactstore
+import globalstore
 import groupstore
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -27,6 +29,7 @@ import org.briarproject.briar.desktop.ui.ListItemView
 import org.briarproject.briar.desktop.ui.VerticallyScrollableArea
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 
+@OptIn(DelicateCoroutinesApi::class)
 @Composable
 fun GroupList(
     groupList: StateGroups,
@@ -48,7 +51,10 @@ fun GroupList(
                 contentType = { item -> item::class }
             ) { item ->
                 ListItemView(
-                    onSelect = { groupstore.select(item.groupId) },
+                    onSelect = {
+                        GlobalScope.launch { globalstore.try_clear_unread_group_message_count() }
+                        groupstore.select(item.groupId)
+                               },
                     selected = (groupList.selectedGroupId == item.groupId)
                 ) {
                     val modifier = Modifier

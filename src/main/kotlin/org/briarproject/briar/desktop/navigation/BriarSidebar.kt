@@ -33,13 +33,21 @@ import androidx.compose.material.BadgedBox
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import globalstore
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.briarproject.briar.desktop.navigation.SidebarButtonState.None
 import org.briarproject.briar.desktop.navigation.SidebarButtonState.UnreadMessages
 import org.briarproject.briar.desktop.navigation.SidebarButtonState.Warning
@@ -48,6 +56,7 @@ import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 
 val SIDEBAR_WIDTH = 56.dp
 
+@OptIn(DelicateCoroutinesApi::class)
 @Composable
 fun BriarSidebar(
     uiMode: UiMode,
@@ -60,7 +69,17 @@ fun BriarSidebar(
         messageCount: Int = 0,
     ) = BriarSidebarButton(
         selected = uiMode == mode,
-        onClick = { setUiMode(mode) },
+        onClick = {
+                    setUiMode(mode)
+            if (mode == UiMode.CONTACTS)
+            {
+                GlobalScope.launch { globalstore.try_clear_unread_message_count() }
+            }
+            else if (mode == UiMode.GROUPS)
+            {
+                GlobalScope.launch { globalstore.try_clear_unread_group_message_count() }
+            }
+                  },
         icon = mode.icon,
         contentDescription = "",
         sideBarButtonState = if (messageCount == 0) None else UnreadMessages(messageCount),
@@ -72,8 +91,9 @@ fun BriarSidebar(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) { // profile button
         Spacer(Modifier.height(4.dp))
-        BriarSidebarButton(UiMode.CONTACTS)
-        BriarSidebarButton(UiMode.GROUPS)
+        val current_globalstate by globalstore.stateFlow.collectAsState()
+        BriarSidebarButton(UiMode.CONTACTS, messageCount = current_globalstate.contacts_unread_message_count)
+        BriarSidebarButton(UiMode.GROUPS, messageCount = current_globalstate.contacts_unread_group_message_count)
         BriarSidebarButton(UiMode.SETTINGS)
         BriarSidebarButton(UiMode.ADDFRIEND)
         BriarSidebarButton(UiMode.ADDGROUP)
@@ -101,8 +121,18 @@ fun BriarSidebarButton(
         {
             Badge(
                 modifier = Modifier.offset((-12).dp, 12.dp),
-                backgroundColor = MaterialTheme.colors.secondary,
+                backgroundColor = Color.Green,
             )
+            {
+                if (sideBarButtonState.messageCount < 90)
+                {
+                    Text("" + sideBarButtonState.messageCount)
+                }
+                else
+                {
+                    Text("+")
+                }
+            }
         } else if (sideBarButtonState is Warning)
         {
             Icon(Icons.Default.Error, i18n("ui.generic_error"), modifier = Modifier.offset((-12).dp, 12.dp).size(16.dp), tint = MaterialTheme.colors.error)

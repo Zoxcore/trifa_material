@@ -126,6 +126,7 @@ fun CoroutineScope.createContactStore(): ContactStore
                 global_semaphore_contactlist_ui.release()
             }
         }
+
         override fun visible(value: Boolean)
         {
             global_semaphore_contactlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))

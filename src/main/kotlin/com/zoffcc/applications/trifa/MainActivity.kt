@@ -7,12 +7,10 @@ import SnackBarToast
 import UIGroupMessage
 import UIMessage
 import User
-import androidx.compose.ui.platform.LocalWindowInfo
 import avstatestore
 import avstatestorecallstate
 import avstatestorevcapfpsstate
 import avstatestorevplayfpsstate
-import com.notification.Notification
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_loadjni
 import com.zoffcc.applications.jninotifications.NTFYActivity
 import com.zoffcc.applications.jninotifications.NTFYActivity.jninotifications_loadjni
@@ -2630,7 +2628,11 @@ class MainActivity
             m.tox_friendpubkey = toxpk
             m.direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value // msg received
             m.TOX_MESSAGE_TYPE = 0
-            m.read = true
+            m.read = false
+            if ((contactstore.state.visible) && (contactstore.state.selectedContactPubkey == toxpk))
+            {
+                m.read = true
+            }
             m.TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value
             if (message_timestamp > 0)
             {
@@ -2662,6 +2664,7 @@ class MainActivity
                         e2.printStackTrace()
                     }
                     HelperNotification.displayNotification("new Message" + fname)
+                    globalstore.increase_unread_message_count()
                 }
             } catch (e: Exception)
             {
@@ -2677,7 +2680,7 @@ class MainActivity
             m.tox_friendpubkey = toxpk
             m.direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value // msg sent
             m.TOX_MESSAGE_TYPE = 0
-            m.read = false
+            m.read = true
             m.TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value
             if (message_timestamp > 0)
             {
@@ -2715,6 +2718,10 @@ class MainActivity
             m.direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value // msg received
             m.TOX_MESSAGE_TYPE = 0
             m.read = false
+            if ((groupstore.state.visible) && (groupstore.state.selectedGroupId == groupid))
+            {
+                m.read = true
+            }
             if (peername == null)
             {
                 m.tox_group_peername = ""
@@ -2735,6 +2742,23 @@ class MainActivity
             try
             {
                 row_id = orma!!.insertIntoGroupMessage(m)
+                if ((!globalstore.isFocused()) || (globalstore.isMinimized()) || (!groupstore.state.visible) || (groupstore.state.selectedGroupId != groupid))
+                {
+                    var grptitle: String? = ""
+                    try
+                    {
+                        val group_title = tox_group_get_name(groupnum)
+                        if ((group_title != null) && (group_title.length > 0))
+                        {
+                            grptitle = " in " + group_title
+                        }
+                    }
+                    catch(_: Exception)
+                    {
+                    }
+                    HelperNotification.displayNotification("new Group Message" + grptitle)
+                    globalstore.increase_unread_group_message_count()
+                }
             } catch (e: Exception)
             {
             }
