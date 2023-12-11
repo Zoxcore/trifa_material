@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.briarproject.briar.desktop.contact.ContactItem
 
-data class StateContacts(val contacts: List<ContactItem> = emptyList(), val selectedContactPubkey: String? = null, val selectedContact: ContactItem? = null)
+data class StateContacts(val contacts: List<ContactItem> = emptyList(), val visible: Boolean = false, val selectedContactPubkey: String? = null, val selectedContact: ContactItem? = null)
 
 const val TAG = "trifa.ContactsStore"
 
@@ -16,6 +16,7 @@ interface ContactStore
     fun add(item: ContactItem)
     fun remove(item: ContactItem)
     fun select(pubkey: String?)
+    fun visible(value: Boolean)
     fun clear()
     fun update(item: ContactItem)
     val stateFlow: StateFlow<StateContacts>
@@ -124,6 +125,12 @@ fun CoroutineScope.createContactStore(): ContactStore
                 mutableStateFlow.value = state.copy(contacts = state.contacts, selectedContactPubkey = used_pubkey, selectedContact = wanted_contact_item)
                 global_semaphore_contactlist_ui.release()
             }
+        }
+        override fun visible(value: Boolean)
+        {
+            global_semaphore_contactlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
+            mutableStateFlow.value = state.copy(visible = value)
+            global_semaphore_contactlist_ui.release()
         }
 
         override fun update(item: ContactItem)

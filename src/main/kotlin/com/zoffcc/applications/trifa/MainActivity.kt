@@ -7,10 +7,12 @@ import SnackBarToast
 import UIGroupMessage
 import UIMessage
 import User
+import androidx.compose.ui.platform.LocalWindowInfo
 import avstatestore
 import avstatestorecallstate
 import avstatestorevcapfpsstate
 import avstatestorevplayfpsstate
+import com.notification.Notification
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_loadjni
 import com.zoffcc.applications.jninotifications.NTFYActivity
 import com.zoffcc.applications.jninotifications.NTFYActivity.jninotifications_loadjni
@@ -75,6 +77,7 @@ import com.zoffcc.applications.trifa.VideoInFrame.new_video_in_frame
 import com.zoffcc.applications.trifa.VideoInFrame.setup_video_in_resolution
 import contactstore
 import global_prefs
+import globalstore
 import groupmessagestore
 import grouppeerstore
 import groupstore
@@ -1510,7 +1513,7 @@ class MainActivity
             val msg_id_as_hex_string: String? = msg_id_buffer_compat.array()?.let {
                 bytesToHex(it, msg_id_buffer_compat.arrayOffset(), msg_id_buffer_compat.limit())
             }
-            Log.i(TAG, "TOX_FILE_KIND_MESSAGEV2_SEND:MSGv2HASH:2=" + msg_id_as_hex_string);
+            // Log.i(TAG, "TOX_FILE_KIND_MESSAGEV2_SEND:MSGv2HASH:2=" + msg_id_as_hex_string);
 
             try
             {
@@ -2617,6 +2620,9 @@ class MainActivity
             return add_tcp_relay_single(ip, key_hex, port.toLong())
         }
 
+        /*
+         * put an incoming 1-on-1 text message into the database
+         */
         fun received_message_to_db(toxpk: String?, message_timestamp: Long, friend_message: String?): Long
         {
             val m = com.zoffcc.applications.sorm.Message()
@@ -2644,6 +2650,19 @@ class MainActivity
             try
             {
                 row_id = orma!!.insertIntoMessage(m)
+                if ((!globalstore.isFocused()) || (globalstore.isMinimized()) || (!contactstore.state.visible) || (contactstore.state.selectedContactPubkey != toxpk))
+                {
+                    var fname: String? = ""
+                    try
+                    {
+                        fname = " from " + tox_friend_get_name(tox_friend_by_public_key(toxpk))
+                    }
+                    catch (e2: Exception)
+                    {
+                        e2.printStackTrace()
+                    }
+                    HelperNotification.displayNotification("new Message" + fname)
+                }
             } catch (e: Exception)
             {
             }

@@ -66,6 +66,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -76,6 +77,8 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.FocusState
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -93,6 +96,7 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -966,6 +970,7 @@ fun App()
                     {
                         UiMode.CONTACTS ->
                         {
+                            contactstore.visible(true)
                             val focusRequester = remember { FocusRequester() }
                             Row(modifier = Modifier.fillMaxWidth()) {
                                 val contacts by contactstore.stateFlow.collectAsState()
@@ -987,6 +992,7 @@ fun App()
                         }
                         UiMode.GROUPS ->
                         {
+                            contactstore.visible(false)
                             val groupfocusRequester = remember { FocusRequester() }
                             val groups by groupstore.stateFlow.collectAsState()
                             val grouppeers by grouppeerstore.stateFlow.collectAsState()
@@ -1014,16 +1020,27 @@ fun App()
                             }
                         }
                         UiMode.ADDFRIEND -> {
+                            contactstore.visible(false)
                             if (tox_running_state == "running") AddFriend()
                             else ExplainerToxNotRunning()
                         }
                         UiMode.ADDGROUP -> {
+                            contactstore.visible(false)
                             if (tox_running_state == "running") AddGroup()
                             else ExplainerToxNotRunning()
                         }
-                        UiMode.SETTINGS -> SettingDetails()
-                        UiMode.ABOUT -> AboutScreen()
-                        else -> UiPlaceholder()
+                        UiMode.SETTINGS -> {
+                            contactstore.visible(false)
+                            SettingDetails()
+                        }
+                        UiMode.ABOUT -> {
+                            contactstore.visible(false)
+                            AboutScreen()
+                        }
+                        else -> {
+                            contactstore.visible(false)
+                            UiPlaceholder()
+                        }
                     }
                 }
             }
@@ -1558,6 +1575,7 @@ private fun MainAppStart()
         {
             Window(onCloseRequest = { isAskingToClose = true }, title = "TRIfA",
                 icon = appIcon, state = state,
+                focusable = true,
                 onKeyEvent = {
                     when (it.key) {
                         Key.F11 -> {
@@ -1572,7 +1590,6 @@ private fun MainAppStart()
                     }
                 }
             ) {
-
                 if (isAskingToClose)
                 {
                     Dialog(
@@ -1606,36 +1623,37 @@ private fun MainAppStart()
                         }
                     }
                 }
-
+                val windowInfo = LocalWindowInfo.current
+                LaunchedEffect(windowInfo) {
+                    snapshotFlow { windowInfo.isWindowFocused }.collect { onWindowFocused ->
+                        onWindowFocused(onWindowFocused)
+                    }
+                }
                 LaunchedEffect(state) {
+                    snapshotFlow { state.isMinimized }.onEach(::onWindowMinimised).launchIn(this)
                     snapshotFlow { state.size }.onEach(::onWindowResize).launchIn(this)
-
                     snapshotFlow { state.position }.filter { it.isSpecified }.onEach(::onWindowRelocate).launchIn(this)
                 }
                 App()
-/*
-                Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
-                    Column {
-                        val dragAndDropModifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
-                        var droppedFiles by remember { mutableStateOf<List<Path>>(emptyList()) }
-
-                        DragAndDropFileBox(dragAndDropModifier.size(height = 200.dp, width = 400.dp)) { dragData ->
-                            if (dragData is DragData.FilesList) {
-                                val newFiles = dragData.readFiles().mapNotNull {
-                                    URI(it).toPath().takeIf { it.exists(LinkOption.NOFOLLOW_LINKS) }
-                                }
-                                droppedFiles = (droppedFiles + newFiles).distinct()
-                            }
-                        }
-                        // FileListView(modifier = dragAndDropModifier, files = droppedFiles)
-                    }
-                }
-*/
             }
         } // ----------- main app screen -----------
         // ----------- main app screen -----------
         // ----------- main app screen -----------
     }
+}
+
+@Suppress("UNUSED_PARAMETER")
+private fun onWindowFocused(focused: Boolean)
+{
+    println("onWindowFocused $focused")
+    globalstore.updateFocused(focused)
+}
+
+@Suppress("UNUSED_PARAMETER")
+private fun onWindowMinimised(minimised: Boolean)
+{
+    println("onWindowMinimised $minimised")
+    globalstore.updateMinimized(minimised)
 }
 
 @Suppress("UNUSED_PARAMETER")
