@@ -38,6 +38,7 @@ import com.zoffcc.applications.trifa.TRIFAGlobals.USE_MAX_NUMBER_OF_BOOTSTRAP_NO
 import com.zoffcc.applications.trifa.TRIFAGlobals.USE_MAX_NUMBER_OF_BOOTSTRAP_TCP_RELAYS
 import com.zoffcc.applications.trifa.TRIFAGlobals.global_last_activity_outgoung_ft_ts
 import contactstore
+import globalstore
 import grouppeerstore
 import groupstore
 import online_button_text_wrapper
@@ -63,6 +64,15 @@ class TrifaToxService
                 // ------ correct startup order ------
                 orma = com.zoffcc.applications.sorm.OrmaDatabase()
                 load_db_prefs()
+                try {
+                    globalstore.try_clear_unread_message_count()
+                } catch(_: Exception) {
+                }
+
+                try {
+                    globalstore.try_clear_unread_group_message_count()
+                } catch(_: Exception) {
+                }
                 val old_is_tox_started = is_tox_started
                 Log.i(TAG, "is_tox_started:==============================")
                 Log.i(TAG, "is_tox_started=" + is_tox_started)
@@ -181,6 +191,14 @@ class TrifaToxService
                 set_tox_running_state("stopped")
                 clear_friends()
                 clear_groups()
+                try {
+                    globalstore.hard_clear_unread_message_count()
+                } catch(_: Exception) {
+                }
+                try {
+                    globalstore.hard_clear_unread_group_message_count()
+                } catch(_: Exception) {
+                }
                 orma = null
                 com.zoffcc.applications.sorm.OrmaDatabase.shutdown()
                 unlock_data_dir_input()

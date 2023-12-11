@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.zoffcc.applications.trifa.HelperGeneric.delete_friend_wrapper
 import com.zoffcc.applications.trifa.StateContacts
 import contactstore
+import globalstore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -46,7 +47,10 @@ fun ContactList(
                 contentType = { item -> item::class }
             ) { item ->
                 ListItemView(
-                    onSelect = { contactstore.select(item.pubkey) },
+                    onSelect = {
+                                GlobalScope.launch { globalstore.try_clear_unread_message_count() }
+                                contactstore.select(item.pubkey)
+                               },
                     selected = (contactList.selectedContactPubkey == item.pubkey)
                 ) {
                     val modifier = Modifier

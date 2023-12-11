@@ -14,7 +14,9 @@ import java.io.File
 
 data class globalstore_state(
     val mainwindow_minimized: Boolean = false,
-    val mainwindow_focused: Boolean = true
+    val mainwindow_focused: Boolean = true,
+    val contacts_unread_message_count: Int = 0,
+    val contacts_unread_group_message_count: Int = 0
 )
 
 interface GlobalStore {
@@ -22,6 +24,14 @@ interface GlobalStore {
     fun updateFocused(value: Boolean)
     fun isMinimized(): Boolean
     fun isFocused(): Boolean
+    fun increase_unread_message_count()
+    fun get_unread_message_count(): Int
+    fun try_clear_unread_message_count()
+    fun hard_clear_unread_message_count()
+    fun increase_unread_group_message_count()
+    fun get_unread_group_message_count(): Int
+    fun try_clear_unread_group_message_count()
+    fun hard_clear_unread_group_message_count()
     val stateFlow: StateFlow<globalstore_state>
     val state get() = stateFlow.value
 }
@@ -50,6 +60,67 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
         override fun isFocused(): Boolean
         {
             return state.mainwindow_focused
+        }
+        override fun increase_unread_message_count()
+        {
+            mutableStateFlow.value = state.copy(contacts_unread_message_count = (state.contacts_unread_message_count + 1))
+        }
+        override fun get_unread_message_count(): Int
+        {
+            return state.contacts_unread_message_count
+        }
+
+        override fun try_clear_unread_message_count()
+        {
+            var unread_count = 0
+            try
+            {
+                unread_count = TrifaToxService.orma!!.selectFromMessage()
+                    .directionEq(TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value)
+                    .readEq(false).count()
+                Log.i(TAG, "try_clear_unread_message_count:unread_count=" +  unread_count)
+            }
+            catch (e: Exception)
+            {
+                e.printStackTrace()
+            }
+            mutableStateFlow.value = state.copy(contacts_unread_message_count = unread_count)
+        }
+
+        override fun hard_clear_unread_message_count()
+        {
+            mutableStateFlow.value = state.copy(contacts_unread_message_count = 0)
+        }
+
+        override fun increase_unread_group_message_count()
+        {
+            mutableStateFlow.value = state.copy(contacts_unread_group_message_count = (state.contacts_unread_group_message_count + 1))
+        }
+        override fun get_unread_group_message_count(): Int
+        {
+            return state.contacts_unread_group_message_count
+        }
+
+        override fun try_clear_unread_group_message_count()
+        {
+            var unread_count = 0
+            try
+            {
+                unread_count = TrifaToxService.orma!!.selectFromGroupMessage()
+                    .directionEq(TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value)
+                    .readEq(false).count()
+                Log.i(TAG, "try_clear_unread_group_message_count:unread_count=" +  unread_count)
+            }
+            catch (e: Exception)
+            {
+                e.printStackTrace()
+            }
+            mutableStateFlow.value = state.copy(contacts_unread_group_message_count = unread_count)
+        }
+
+        override fun hard_clear_unread_group_message_count()
+        {
+            mutableStateFlow.value = state.copy(contacts_unread_group_message_count = 0)
         }
     }
 }

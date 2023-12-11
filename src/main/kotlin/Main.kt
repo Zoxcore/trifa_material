@@ -971,6 +971,7 @@ fun App()
                         UiMode.CONTACTS ->
                         {
                             contactstore.visible(true)
+                            groupstore.visible(false)
                             val focusRequester = remember { FocusRequester() }
                             Row(modifier = Modifier.fillMaxWidth()) {
                                 val contacts by contactstore.stateFlow.collectAsState()
@@ -983,6 +984,7 @@ fun App()
                                 {
                                     Log.i(TAG, "CONTACTS -> draw")
                                     load_messages_for_friend(contacts.selectedContactPubkey)
+                                    GlobalScope.launch { globalstore.try_clear_unread_message_count() }
                                     ChatAppWithScaffold(focusRequester = focusRequester, contactList = contacts, ui_scale = ui_scale)
                                     LaunchedEffect(contacts.selectedContactPubkey) {
                                         focusRequester.requestFocus()
@@ -993,6 +995,7 @@ fun App()
                         UiMode.GROUPS ->
                         {
                             contactstore.visible(false)
+                            groupstore.visible(true)
                             val groupfocusRequester = remember { FocusRequester() }
                             val groups by groupstore.stateFlow.collectAsState()
                             val grouppeers by grouppeerstore.stateFlow.collectAsState()
@@ -1012,6 +1015,7 @@ fun App()
                                 } else
                                 {
                                     load_groupmessages_for_friend(groups.selectedGroupId)
+                                    GlobalScope.launch { globalstore.try_clear_unread_group_message_count() }
                                     GroupAppWithScaffold(focusRequester = groupfocusRequester, groupList = groups, ui_scale = ui_scale)
                                     LaunchedEffect(groups.selectedGroupId) {
                                         groupfocusRequester.requestFocus()
@@ -1021,24 +1025,29 @@ fun App()
                         }
                         UiMode.ADDFRIEND -> {
                             contactstore.visible(false)
+                            groupstore.visible(false)
                             if (tox_running_state == "running") AddFriend()
                             else ExplainerToxNotRunning()
                         }
                         UiMode.ADDGROUP -> {
                             contactstore.visible(false)
+                            groupstore.visible(false)
                             if (tox_running_state == "running") AddGroup()
                             else ExplainerToxNotRunning()
                         }
                         UiMode.SETTINGS -> {
                             contactstore.visible(false)
+                            groupstore.visible(false)
                             SettingDetails()
                         }
                         UiMode.ABOUT -> {
                             contactstore.visible(false)
+                            groupstore.visible(false)
                             AboutScreen()
                         }
                         else -> {
                             contactstore.visible(false)
+                            groupstore.visible(false)
                             UiPlaceholder()
                         }
                     }
@@ -1072,6 +1081,10 @@ fun load_messages_for_friend(selectedContactPubkey: String?)
         try
         {
             val toxpk = selectedContactPubkey.uppercase()
+            try {
+                orma!!.updateMessage().tox_friendpubkeyEq(toxpk).read(true).execute()
+            } catch(_: Exception) {
+            }
             val uimessages = ArrayList<UIMessage>()
             val messages = orma!!.selectFromMessage().
                 tox_friendpubkeyEq(toxpk).orderBySent_timestampAsc().toList()
@@ -1118,6 +1131,11 @@ fun load_groupmessages_for_friend(selectedGroupId: String?)
         try
         {
             val groupid = selectedGroupId.lowercase()
+            try {
+                orma!!.updateGroupMessage().group_identifierEq(selectedGroupId)
+                    .read(true).execute()
+            } catch(_: Exception) {
+            }
             val uigroupmessages = ArrayList<UIGroupMessage>()
             val messages = orma!!.selectFromGroupMessage().group_identifierEq(selectedGroupId).orderBySent_timestampAsc().toList()
             messages.forEach() { // 0 -> msg received, 1 -> msg sent

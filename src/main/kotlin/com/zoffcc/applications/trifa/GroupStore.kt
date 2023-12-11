@@ -8,13 +8,14 @@ import kotlinx.coroutines.launch
 import org.briarproject.briar.desktop.contact.ContactItem
 import org.briarproject.briar.desktop.contact.GroupItem
 
-data class StateGroups(val groups: List<GroupItem> = emptyList(), val selectedGroupId: String? = null, val selectedGroup: GroupItem? = null)
+data class StateGroups(val groups: List<GroupItem> = emptyList(), val visible: Boolean = false, val selectedGroupId: String? = null, val selectedGroup: GroupItem? = null)
 
 interface GroupStore
 {
     fun add(item: GroupItem)
     fun remove(item: GroupItem)
     fun select(pubkey: String?)
+    fun visible(value: Boolean)
     fun clear()
     fun update(item: GroupItem)
     val stateFlow: StateFlow<StateGroups>
@@ -125,6 +126,13 @@ fun CoroutineScope.createGroupStore(): GroupStore
                 mutableStateFlow.value = state.copy(groups = state.groups, selectedGroupId = used_groupid, selectedGroup = wanted_group_item)
                 global_semaphore_grouplist_ui.release()
             }
+        }
+
+        override fun visible(value: Boolean)
+        {
+            global_semaphore_grouplist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
+            mutableStateFlow.value = state.copy(visible = value)
+            global_semaphore_grouplist_ui.release()
         }
 
         override fun update(item: GroupItem)
