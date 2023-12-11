@@ -73,6 +73,7 @@ import com.zoffcc.applications.trifa.createAVStateStoreCallState
 import com.zoffcc.applications.trifa.createAVStateStoreVideoCaptureFpsState
 import com.zoffcc.applications.trifa.createAVStateStoreVideoPlayFpsState
 import com.zoffcc.applications.trifa.createContactStore
+import com.zoffcc.applications.trifa.createGlobalStore
 import com.zoffcc.applications.trifa.createGroupPeerStore
 import com.zoffcc.applications.trifa.createGroupStore
 import com.zoffcc.applications.trifa.createSavepathStore
@@ -96,6 +97,7 @@ import kotlin.io.path.toPath
 private const val TAG = "trifa.Chatapp"
 val myUser = User("Me", picture = null, toxpk = "AAA")
 val messagestore = CoroutineScope(SupervisorJob()).createMessageStore()
+val globalstore = CoroutineScope(SupervisorJob()).createGlobalStore()
 val groupmessagestore = CoroutineScope(SupervisorJob()).createGroupMessageStore()
 val contactstore = CoroutineScope(SupervisorJob()).createContactStore()
 val grouppeerstore = CoroutineScope(SupervisorJob()).createGroupPeerStore()

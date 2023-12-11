@@ -12,6 +12,48 @@ import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 import java.io.File
 
+data class globalstore_state(
+    val mainwindow_minimized: Boolean = false,
+    val mainwindow_focused: Boolean = true
+)
+
+interface GlobalStore {
+    fun updateMinimized(value: Boolean)
+    fun updateFocused(value: Boolean)
+    fun isMinimized(): Boolean
+    fun isFocused(): Boolean
+    val stateFlow: StateFlow<globalstore_state>
+    val state get() = stateFlow.value
+}
+
+fun CoroutineScope.createGlobalStore(): GlobalStore {
+    val mutableStateFlow = MutableStateFlow(globalstore_state())
+    return object : GlobalStore
+    {
+        override val stateFlow: StateFlow<globalstore_state> = mutableStateFlow
+
+        override fun updateMinimized(value: Boolean)
+        {
+            mutableStateFlow.value = state.copy(mainwindow_minimized = value)
+        }
+
+        override fun updateFocused(value: Boolean)
+        {
+            mutableStateFlow.value = state.copy(mainwindow_focused = value)
+        }
+
+        override fun isMinimized(): Boolean
+        {
+            return state.mainwindow_minimized
+        }
+
+        override fun isFocused(): Boolean
+        {
+            return state.mainwindow_focused
+        }
+    }
+}
+
 data class savepathenabled_state(
     val savePathEnabled: Boolean = true,
     val savePath: String = File(MainActivity.PREF__tox_savefile_dir).canonicalPath + File.separator
