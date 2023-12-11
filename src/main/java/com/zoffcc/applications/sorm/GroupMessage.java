@@ -512,4 +512,27 @@ public class GroupMessage
         this.sql_where = this.sql_where + " and msg_id_hash='" + s(msg_id_hash) + "' ";
         return this;
     }
+
+    public GroupMessage directionEq(int direction) {
+        this.sql_where = this.sql_where + " and direction='" + s(direction) + "' ";
+        return this;
+    }
+
+    public GroupMessage readEq(boolean read) {
+        this.sql_where = this.sql_where + " and read='" + b(read) + "' ";
+        return this;
+    }
+
+    public GroupMessage read(boolean read) {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " read='" + b(read) + "' ";
+        return this;
+    }
 }
