@@ -26,7 +26,6 @@ import java.awt.TrayIcon;
 import java.io.File;
 
 import static com.zoffcc.applications.jninotifications.NTFYActivity.jninotifications_notify;
-import static com.zoffcc.applications.jninotifications.NTFYActivity.jninotifications_version;
 
 public class HelperNotification
 {
@@ -56,8 +55,9 @@ public class HelperNotification
 
             last_message_timestamp = System.currentTimeMillis();
 
-            String title = "TRIfA";
-            String os = System.getProperty("os.name");
+            final String application = "TRIfA";
+            final String title = "TRIfA";
+            final String os = System.getProperty("os.name");
             if (os.contains("Linux"))
             {
                 int res_jni_notify = -1;
@@ -68,7 +68,7 @@ public class HelperNotification
                     {
                         icon_path = resources_dir + File.separator + "icon-linux.png";
                     }
-                    res_jni_notify = jninotifications_notify(title,
+                    res_jni_notify = jninotifications_notify(application,
                             title, message,
                             icon_path);
                     Log.i(TAG, "using native JNI for Notification");
@@ -102,7 +102,7 @@ public class HelperNotification
                     {
                         icon_path = resources_dir + File.separator + "icon-linux.png";
                     }
-                    res_jni_notify = jninotifications_notify(title,
+                    res_jni_notify = jninotifications_notify(application,
                             title, message,
                             icon_path);
                     Log.i(TAG, "using macOS objC native JNI for Notification");
