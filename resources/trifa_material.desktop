@@ -1,5 +1,6 @@
 [Desktop Entry]
-Name=trifa_material
+Name=TRIfA Material
+GenericName=Tox client
 StartupWMClass=normal_trifa_material
 Comment=TRIfA Material Tox Client
 Exec=trifa_material/bin/trifa_material
@@ -8,3 +9,4 @@ Terminal=false
 Type=Application
 Categories=InstantMessaging;Network;
 MimeType=x-scheme-handler/tox;
+X-GNOME-UsesNotifications=true
