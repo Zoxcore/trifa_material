@@ -109,7 +109,10 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
                 unread_count = TrifaToxService.orma!!.selectFromGroupMessage()
                     .directionEq(TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value)
                     .readEq(false).count()
-                Log.i(TAG, "try_clear_unread_group_message_count:unread_count=" +  unread_count)
+                if (unread_count != 0)
+                {
+                    Log.i(TAG, "try_clear_unread_group_message_count:unread_count=" +  unread_count)
+                }
             }
             catch (e: Exception)
             {
