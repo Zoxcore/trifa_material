@@ -57,6 +57,7 @@ public class AudioSelectOutBox
     public synchronized static void init()
     {
         if (init_ready == false) {
+            Log.i(TAG, "____________init");
             audioformat = new AudioFormat(SAMPLE_RATE, SAMPLE_SIZE_BIT, CHANNELS, true, false);
             reload_device_list();
             init_ready = true;
@@ -65,6 +66,7 @@ public class AudioSelectOutBox
 
     public static void reload_device_list()
     {
+        Log.i(TAG, "____________reload_device_list");
         Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();
         DataLine.Info sourceDLInfo = new DataLine.Info(SourceDataLine.class, audioformat);
         for (int cnt = 0; cnt < mixerInfo.length; cnt++)
@@ -103,6 +105,7 @@ public class AudioSelectOutBox
 
     public static void change_audio_format(int sample_rate, int channels)
     {
+        Log.i(TAG, "____________change_audio_format");
         try
         {
             Log.i(TAG, "AA::OUT::change_audio_format:001:" + sample_rate + " " + channels);
@@ -129,6 +132,7 @@ public class AudioSelectOutBox
 
     public synchronized static void change_device(Mixer.Info i)
     {
+        Log.i(TAG, "____________change_device");
         try
         {
             semaphore_audio_device_changes.acquire();
