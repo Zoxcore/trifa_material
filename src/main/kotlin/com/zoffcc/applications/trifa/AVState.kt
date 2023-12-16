@@ -680,7 +680,7 @@ fun CoroutineScope.createAVStateStoreVideoCaptureFpsState(): AVStateStoreVideoCa
         override fun update(fps: Int)
         {
             launch {
-                // mutableStateFlow.value = state.copy(videocapfps_state = fps)
+                mutableStateFlow.value = state.copy(videocapfps_state = fps)
             }
         }
         override fun updateSourceResolution(sourceResolution: String)
@@ -716,7 +716,7 @@ fun CoroutineScope.createAVStateStoreVideoPlayFpsState(): AVStateStoreVideoPlayF
         override fun update(fps: Int)
         {
             launch {
-                //mutableStateFlow.value = state.copy(videoplayfps_state = fps)
+                mutableStateFlow.value = state.copy(videoplayfps_state = fps)
             }
         }
         override fun updateIncomingResolution(incomingResolution: String)
