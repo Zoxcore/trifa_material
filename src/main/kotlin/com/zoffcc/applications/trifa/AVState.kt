@@ -24,8 +24,8 @@ import java.io.File
 import java.nio.ByteBuffer
 
 data class AVStateCallState(val call_state: AVState.CALL_STATUS = AVState.CALL_STATUS.CALL_STATUS_NONE)
-data class AVStateVideoCaptureFpsState(val videocapfps_state: Int = 0, val sourceResolution: String = "", val sourceFormat: String = "")
-data class AVStateVideoPlayFpsState(val videoplayfps_state: Int = 0, val incomingResolution: String = "")
+data class AVStateVideoCaptureFpsState(val videocapfps_state: Int = 0, val videocap_enc_bitrate: Int = 0, val sourceResolution: String = "", val sourceFormat: String = "")
+data class AVStateVideoPlayFpsState(val videoplayfps_state: Int = 0, val videocap_dec_bitrate: Int = 0, val incomingResolution: String = "")
 
 data class AVState(val a: Int)
 {
@@ -666,6 +666,7 @@ interface AVStateStoreVideoCaptureFpsState
     val stateFlow: StateFlow<AVStateVideoCaptureFpsState>
     val state get() = stateFlow.value
     fun update(fps: Int)
+    fun updateEncoderVBitrate(bitrate: Int)
     fun updateSourceResolution(sourceResolution: String)
     fun updateSourceFormat(sourceFormat: String)
 }
@@ -679,10 +680,17 @@ fun CoroutineScope.createAVStateStoreVideoCaptureFpsState(): AVStateStoreVideoCa
         override val stateFlow: StateFlow<AVStateVideoCaptureFpsState> = mutableStateFlow
         override fun update(fps: Int)
         {
-            launch {
-                mutableStateFlow.value = state.copy(videocapfps_state = fps)
-            }
+            //launch {
+            //    mutableStateFlow.value = state.copy(videocapfps_state = fps)
+            //}
         }
+        override fun updateEncoderVBitrate(bitrate: Int)
+        {
+            //launch {
+            //    mutableStateFlow.value = state.copy(videocap_enc_bitrate = bitrate)
+            //}
+        }
+
         override fun updateSourceResolution(sourceResolution: String)
         {
             launch {
@@ -703,6 +711,7 @@ interface AVStateStoreVideoPlayFpsState
     val stateFlow: StateFlow<AVStateVideoPlayFpsState>
     val state get() = stateFlow.value
     fun update(fps: Int)
+    fun updateDecoderVBitrate(bitrate: Int)
     fun updateIncomingResolution(incomingResolution: String)
 }
 
@@ -715,10 +724,17 @@ fun CoroutineScope.createAVStateStoreVideoPlayFpsState(): AVStateStoreVideoPlayF
         override val stateFlow: StateFlow<AVStateVideoPlayFpsState> = mutableStateFlow
         override fun update(fps: Int)
         {
-            launch {
-                mutableStateFlow.value = state.copy(videoplayfps_state = fps)
-            }
+            //launch {
+            //    mutableStateFlow.value = state.copy(videoplayfps_state = fps)
+            //}
         }
+        override fun updateDecoderVBitrate(bitrate: Int)
+        {
+            //launch {
+            //    mutableStateFlow.value = state.copy(videocap_dec_bitrate = bitrate)
+            //}
+        }
+
         override fun updateIncomingResolution(incomingResolution: String)
         {
             launch {

@@ -511,11 +511,16 @@ fun App()
                                         )
                                         val current_vplayfps_state by avstatestorevplayfpsstate.stateFlow.collectAsState()
 
-                            Text(if (current_vplayfps_state.videoplayfps_state == 0) "" else (" fps: " + current_vplayfps_state.videoplayfps_state),
-                                fontSize = 13.sp,
-                                modifier = Modifier.height(20.dp),
-                                maxLines = 1)
+                                        /*
+                                        Text(if (current_vplayfps_state.videoplayfps_state == 0) "" else (" fps: " + current_vplayfps_state.videoplayfps_state),
+                                            fontSize = 13.sp,
+                                            modifier = Modifier.height(20.dp),
+                                            maxLines = 1)
 
+                                        Text(if (current_vplayfps_state.videocap_dec_bitrate == 0) "" else (" BR: " + current_vplayfps_state.videocap_dec_bitrate),
+                                            fontSize = 13.sp,
+                                            maxLines = 1)
+                                        */
                                         Text(" " + current_vplayfps_state.incomingResolution,
                                             fontSize = 13.sp,
                                             maxLines = 1)
@@ -665,10 +670,14 @@ fun App()
                                         )
                                         val current_vicfps_state by avstatestorevcapfpsstate.stateFlow.collectAsState()
 
-                            Text(if (current_vicfps_state.videocapfps_state == 0) "" else ("fps: " + current_vicfps_state.videocapfps_state),
-                                fontSize = 13.sp,
-                                maxLines = 1)
-
+                                        /*
+                                        Text(if (current_vicfps_state.videocapfps_state == 0) "" else ("fps: " + current_vicfps_state.videocapfps_state),
+                                            fontSize = 13.sp,
+                                            maxLines = 1)
+                                        Text(if (current_vicfps_state.videocap_enc_bitrate == 0) "" else (" BR: " + current_vicfps_state.videocap_enc_bitrate),
+                                            fontSize = 13.sp,
+                                            maxLines = 1)
+                                        */
                                         Text("" + current_vicfps_state.sourceResolution,
                                             fontSize = 13.sp,
                                             maxLines = 1)

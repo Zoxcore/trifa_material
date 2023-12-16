@@ -1139,9 +1139,11 @@ class MainActivity
             AudioBar.set_cur_value(0, audio_out_bar)
             avstatestorevplayfpsstate.updateIncomingResolution("")
             avstatestorevplayfpsstate.update(0)
+            avstatestorevplayfpsstate.updateDecoderVBitrate(0)
             avstatestorevcapfpsstate.updateSourceResolution("")
             avstatestorevcapfpsstate.updateSourceFormat("")
             avstatestorevcapfpsstate.update(0)
+            avstatestorevcapfpsstate.updateEncoderVBitrate(0)
 
         }
 
@@ -1301,11 +1303,14 @@ class MainActivity
             {
                 Log.i(TAG, "call_comm_cb: fnum: " + friend_number
                         + " DECODER_CURRENT_BITRATE = " + comm_number)
+                avstatestorevplayfpsstate.updateDecoderVBitrate(comm_number.toInt())
             }
             else if (a_TOXAV_CALL_COMM_INFO == ToxVars.TOXAV_CALL_COMM_INFO.TOXAV_CALL_COMM_ENCODER_CURRENT_BITRATE.value.toLong())
             {
                 Log.i(TAG, "call_comm_cb: fnum: " + friend_number
                         + " ENCODER_CURRENT_BITRATE = " + comm_number)
+                avstatestorevcapfpsstate.updateEncoderVBitrate(comm_number.toInt())
+
             }
             else if (a_TOXAV_CALL_COMM_INFO == ToxVars.TOXAV_CALL_COMM_INFO.TOXAV_CALL_COMM_NETWORK_ROUND_TRIP_MS.value.toLong())
             {
