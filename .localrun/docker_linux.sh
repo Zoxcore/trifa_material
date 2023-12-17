@@ -55,6 +55,8 @@ pkgs_Ubuntu_16_04="
     gdb
     nano
     yasm
+    nasm
+    sudo
     openjdk-8-jdk-headless
 "
 
@@ -77,6 +79,8 @@ pkgs_Ubuntu_18_04="
     gdb
     nano
     yasm
+    nasm
+    sudo
     openjdk-17-jdk-headless
 "
 

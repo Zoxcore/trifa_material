@@ -24,3 +24,7 @@ RUN apt-get update && \
         yasm \
         openjdk-17-jdk-headless
 
+RUN apt-get update && \
+        apt-get -y --force-yes install \
+        nasm \
+        sudo

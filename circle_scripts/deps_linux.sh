@@ -44,7 +44,6 @@ _X264_VERSION_="baee400fa9ced6f5481a728138fed6e867b0ff7f"
 # ------- deps verisions ---------
 
 
-
 # ---------- ffmpeg ---------
 if [ 1 == 1 ]; then
 
@@ -349,7 +348,6 @@ else
     type -a nasm
 
     nasm --version || exit 1
-    
     export PATH=$NEWPATH
     cd "$_HOME_"
 fi
@@ -435,9 +433,17 @@ if [ "$1""x" == "raspix" ]; then
     --disable-testing \
     --disable-rt || exit 1
 else
+  if [ "$2""x" == "asanx" ]; then
+    echo "***** ASAN *****"
+    echo "***** ASAN *****"
+    echo "***** ASAN *****"
+    CFLAGS_ASAN="-fsanitize=address -fno-omit-frame-pointer -fsanitize-recover=address -static-libasan"
+  else
+    CFLAGS_ASAN=""
+  fi
   ./configure \
      CXXFLAGS="$CXXFLAGS_ADDON" \
-     CFLAGS="-fPIC $CFLAGS_ADDON $CFLAGS_MORE -DTOX_CAPABILITIES_ACTIVE $LOGG" \
+     CFLAGS="-fPIC $CFLAGS_ADDON $CFLAGS_MORE -DTOX_CAPABILITIES_ACTIVE $LOGG $CFLAGS_ASAN" \
     --prefix="$_INST_" \
     --disable-soname-versions \
     --disable-shared \
