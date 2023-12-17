@@ -3,6 +3,9 @@
 p=$(pwd)
 h=$(echo $HOME)
 
+if [ "$1""x" == "buildx" ]; then
+  ./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64/ packageDistributionForCurrentOS
+fi
 
 LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libasan.so.6.0.0 \
 /usr/lib/jvm/java-17-openjdk-amd64/bin/java -Dapple.awt.application.name=TRIfA \
