@@ -151,6 +151,7 @@ import com.zoffcc.applications.trifa.TrifaToxService
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.clear_grouppeers
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.load_grouppeers
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
+import com.zoffcc.applications.trifa_material.trifa_material.BuildConfig
 import io.github.alexzhirkevich.qrose.options.QrBallShape
 import io.github.alexzhirkevich.qrose.options.QrBrush
 import io.github.alexzhirkevich.qrose.options.QrFrameShape
@@ -1601,7 +1602,7 @@ private fun MainAppStart()
 
         if (isOpen)
         {
-            Window(onCloseRequest = { isAskingToClose = true }, title = "TRIfA",
+            Window(onCloseRequest = { isAskingToClose = true }, title = "TRIfA - " + BuildConfig.APP_VERSION,
                 icon = appIcon, state = state,
                 focusable = true,
                 onKeyEvent = {
