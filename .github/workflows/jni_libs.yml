@@ -77,6 +77,8 @@ jobs:
   build-raspi-jni-artifact:
     name: JNI Artifact Raspi Build
     runs-on: ubuntu-22.04
+    if: |
+      false
     permissions:
       contents: write
     steps:
