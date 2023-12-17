@@ -66,6 +66,7 @@ data class AVState(val a: Int)
     private var devices_state = CALL_DEVICES_STATE.CALL_DEVICES_STATE_CLOSED
     private var call_with_friend_pubkey: String? = null
     private var semaphore_avstate = CustomSemaphore(1)
+    private val ffmpeg_devices_lock = Any()
 
     init
     {
@@ -119,37 +120,43 @@ data class AVState(val a: Int)
 
     fun ffmpeg_devices_stop()
     {
-        val devices_state_copy: CALL_DEVICES_STATE
-        semaphore_avstate.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
-        devices_state_copy = devices_state
-        semaphore_avstate.release()
-        if (devices_state_copy == CALL_DEVICES_STATE.CALL_DEVICES_STATE_ACTIVE)
-        {
-            Log.i(TAG, "ffmpeg_devices_stop:ffmpegav_stop_audio_in_capture")
-            AVActivity.ffmpegav_stop_audio_in_capture()
-            //Thread.sleep(20)
-            Log.i(TAG, "ffmpeg_devices_stop:ffmpegav_close_audio_in_device")
-            AVActivity.ffmpegav_close_audio_in_device()
-            //Thread.sleep(20)
-            Log.i(TAG, "ffmpeg_devices_stop:ffmpegav_stop_video_in_capture")
-            AVActivity.ffmpegav_stop_video_in_capture()
-            //Thread.sleep(20)
-            Log.i(TAG, "ffmpeg_devices_stop:ffmpegav_close_video_in_device")
-            AVActivity.ffmpegav_close_video_in_device()
-            //Thread.sleep(20)
-            Log.i(TAG, "ffmpeg_devices_stop:set_cur_value1")
-            AudioBar.set_cur_value(0, AudioBar.audio_in_bar)
-            Log.i(TAG, "ffmpeg_devices_stop:set_cur_value2")
-            AudioBar.set_cur_value(0, AudioBar.audio_out_bar)
-            Log.i(TAG, "ffmpeg_devices_stop:clear_video_out_frame")
-            VideoOutFrame.clear_video_out_frame()
-            Log.i(TAG, "ffmpeg_devices_stop:clear_video_in_frame")
-            VideoInFrame.clear_video_in_frame()
-            Log.i(TAG, "ffmpeg_devices_stop:DONE")
+        synchronized(ffmpeg_devices_lock) {
+            val devices_state_copy: CALL_DEVICES_STATE
+            semaphore_avstate.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
+            devices_state_copy = devices_state
+            semaphore_avstate.release()
+            if (devices_state_copy == CALL_DEVICES_STATE.CALL_DEVICES_STATE_ACTIVE)
+            {
+                Log.i(TAG, "ffmpeg_devices_stop:ffmpegav_stop_audio_in_capture")
+                AVActivity.ffmpegav_stop_audio_in_capture()
+                //Thread.sleep(20)
+                Log.i(TAG, "ffmpeg_devices_stop:ffmpegav_close_audio_in_device")
+                AVActivity.ffmpegav_close_audio_in_device()
+                //Thread.sleep(20)
+                Log.i(TAG, "ffmpeg_devices_stop:ffmpegav_stop_video_in_capture")
+                AVActivity.ffmpegav_stop_video_in_capture()
+                //Thread.sleep(20)
+                Log.i(TAG, "ffmpeg_devices_stop:ffmpegav_close_video_in_device")
+                AVActivity.ffmpegav_close_video_in_device()
+                //Thread.sleep(20)
+                Log.i(TAG, "ffmpeg_devices_stop:set_cur_value1")
+                AudioBar.set_cur_value(0, AudioBar.audio_in_bar)
+                Log.i(TAG, "ffmpeg_devices_stop:set_cur_value2")
+                AudioBar.set_cur_value(0, AudioBar.audio_out_bar)
+                Log.i(TAG, "ffmpeg_devices_stop:clear_video_out_frame")
+                VideoOutFrame.clear_video_out_frame()
+                Log.i(TAG, "ffmpeg_devices_stop:clear_video_in_frame")
+                VideoInFrame.clear_video_in_frame()
+                Log.i(TAG, "ffmpeg_devices_stop:DONE")
+            }
+            else
+            {
+                Log.i(TAG, "ffmpeg_devices_stop:already stopped")
+            }
+            semaphore_avstate.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
+            devices_state = CALL_DEVICES_STATE.CALL_DEVICES_STATE_CLOSED
+            semaphore_avstate.release()
         }
-        semaphore_avstate.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
-        devices_state = CALL_DEVICES_STATE.CALL_DEVICES_STATE_CLOSED
-        semaphore_avstate.release()
     }
 
     fun ffmpeg_init_do()
@@ -277,7 +284,9 @@ data class AVState(val a: Int)
         semaphore_avstate.release()
         if (devices_state_copy == CALL_DEVICES_STATE.CALL_DEVICES_STATE_ACTIVE)
         {
+            Log.i(TAG, "ffmpeg_devices_stop:001")
             ffmpeg_devices_stop()
+            Log.i(TAG, "ffmpeg_devices_start:001:########################")
             ffmpeg_devices_start()
         }
     }
