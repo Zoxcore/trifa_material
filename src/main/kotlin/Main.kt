@@ -631,6 +631,7 @@ fun App()
                                                 .combinedClickable(
                                                 onClick = {
                                                     val friendnum = tox_friend_by_public_key(avstatestore.state.call_with_friend_pubkey_get())
+                                                    Log.i(com.zoffcc.applications.trifa.TAG, "ffmpeg_devices_stop:002")
                                                     avstatestore.state.ffmpeg_devices_stop()
                                                     MainActivity.toxav_call_control(friendnum, ToxVars.TOXAV_CALL_CONTROL.TOXAV_CALL_CONTROL_CANCEL.value)
                                                     MainActivity.on_call_ended_actions()

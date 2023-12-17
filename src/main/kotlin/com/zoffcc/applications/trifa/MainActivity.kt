@@ -1106,17 +1106,20 @@ class MainActivity
                     } else if (a_TOXAV_FRIEND_CALL_STATE and ToxVars.TOXAV_FRIEND_CALL_STATE.TOXAV_FRIEND_CALL_STATE_FINISHED.value > 0)
                     {
                         Log.i(TAG, "toxav_call_state:from=$friend_number call ending(1)")
+                        Log.i(com.zoffcc.applications.trifa.TAG, "ffmpeg_devices_stop:003")
                         avstatestore.state.ffmpeg_devices_stop()
                         on_call_ended_actions()
                     } else if (avstatestore.state.calling_state_get() != AVState.CALL_STATUS.CALL_STATUS_NONE &&
                         a_TOXAV_FRIEND_CALL_STATE == ToxVars.TOXAV_FRIEND_CALL_STATE.TOXAV_FRIEND_CALL_STATE_NONE.value)
                     {
                         Log.i(TAG, "toxav_call_state:from=$friend_number call ending(2)")
+                        Log.i(com.zoffcc.applications.trifa.TAG, "ffmpeg_devices_stop:004")
                         avstatestore.state.ffmpeg_devices_stop()
                         on_call_ended_actions()
                     } else if (a_TOXAV_FRIEND_CALL_STATE and ToxVars.TOXAV_FRIEND_CALL_STATE.TOXAV_FRIEND_CALL_STATE_ERROR.value > 0)
                     {
                         Log.i(TAG, "toxav_call_state:from=$friend_number call ERROR(3)")
+                        Log.i(com.zoffcc.applications.trifa.TAG, "ffmpeg_devices_stop:005")
                         avstatestore.state.ffmpeg_devices_stop()
                         on_call_ended_actions()
                     }
@@ -3147,6 +3150,7 @@ class MainActivity
             {
                 if (avstatestore.state.call_with_friend_pubkey_get() == tox_friend_get_public_key(friend_number))
                 {
+                    Log.i(com.zoffcc.applications.trifa.TAG, "ffmpeg_devices_stop:006")
                     avstatestore.state.ffmpeg_devices_stop()
                     toxav_call_control(friend_number, ToxVars.TOXAV_CALL_CONTROL.TOXAV_CALL_CONTROL_CANCEL.value)
                     on_call_ended_actions()

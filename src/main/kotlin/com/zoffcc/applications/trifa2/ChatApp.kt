@@ -137,6 +137,7 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
                         val friendnum = tox_friend_by_public_key(friendpubkey)
                         if (avstatestore.state.calling_state_get() == AVState.CALL_STATUS.CALL_STATUS_CALLING)
                         {
+                            Log.i(com.zoffcc.applications.trifa.TAG, "ffmpeg_devices_stop:007")
                             avstatestore.state.ffmpeg_devices_stop()
                             toxav_call_control(friendnum, ToxVars.TOXAV_CALL_CONTROL.TOXAV_CALL_CONTROL_CANCEL.value)
                             on_call_ended_actions()
