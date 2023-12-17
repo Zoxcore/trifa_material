@@ -89,8 +89,19 @@ fi
 git_hash_for_jni=$(git rev-parse --verify --short=8 HEAD 2>/dev/null|tr -dc '[A-Fa-f0-9]' 2>/dev/null)
 echo "XX:""$git_hash_for_jni"":YY"
 
+if [ "$2""x" == "asanx" ]; then
+  echo "***** ASAN *****"
+  echo "***** ASAN *****"
+  echo "***** ASAN *****"
+  CFLAGS_ASAN="-fsanitize=address -fno-omit-frame-pointer -fsanitize-recover=address -static-libasan"
+else
+  CFLAGS_ASAN=""
+fi
+
+
 $GCC_ $CFLAGS \
 -Wall \
+$CFLAGS_ASAN \
 -DGIT_HASH=\"$git_hash_for_jni\" \
 -DJAVA_LINUX \
 -DNOGLOBALVARS \
