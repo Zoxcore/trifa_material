@@ -1,7 +1,6 @@
 package com.zoffcc.applications.sorm;
 
 import com.zoffcc.applications.trifa.Log;
-import com.zoffcc.applications.trifa.OperatingSystem;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -27,6 +26,11 @@ public class OrmaDatabase
 
     public OrmaDatabase()
     {
+    }
+
+    public static Connection getSqldb()
+    {
+        return sqldb;
     }
 
     public static String bytesToString(byte[] bytes)
