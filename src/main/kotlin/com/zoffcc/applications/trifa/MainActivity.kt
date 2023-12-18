@@ -406,6 +406,22 @@ class MainActivity
             }
         }
 
+        class send_message_result
+        {
+            @kotlin.jvm.JvmField
+            var msg_num: Long = 0
+            @kotlin.jvm.JvmField
+            var msg_v2 = false
+            @kotlin.jvm.JvmField
+            var msg_hash_hex: String? = null
+            @kotlin.jvm.JvmField
+            var msg_hash_v3_hex: String? = null
+            @kotlin.jvm.JvmField
+            var raw_message_buf_hex: String? = null
+            @kotlin.jvm.JvmField
+            var error_num: Long = 0
+        }
+
         // -------- native methods --------
         // -------- native methods --------
         // -------- native methods --------
@@ -2675,40 +2691,6 @@ class MainActivity
                     HelperNotification.displayNotification("new Message" + fname)
                     globalstore.increase_unread_message_count()
                 }
-            } catch (e: Exception)
-            {
-            }
-
-            return row_id
-        }
-
-        fun sent_message_to_db(toxpk: String?, message_timestamp: Long, friend_message: String?): Long
-        {
-            val m = com.zoffcc.applications.sorm.Message()
-            m.tox_friendpubkey = toxpk
-            m.direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value // msg sent
-            m.TOX_MESSAGE_TYPE = 0
-            m.read = false
-            m.is_new = false
-            m.TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value
-            if (message_timestamp > 0)
-            {
-                m.sent_timestamp = message_timestamp
-            } else
-            {
-                m.sent_timestamp = System.currentTimeMillis()
-            }
-            m.sent_timestamp_ms = 0
-            m.rcvd_timestamp = 0
-            m.rcvd_timestamp_ms = 0
-            m.text = friend_message
-            m.msg_version = 0
-            m.msg_idv3_hash = ""
-            m.sent_push = 0
-            var row_id: Long = -1
-            try
-            {
-                row_id = orma!!.insertIntoMessage(m)
             } catch (e: Exception)
             {
             }
