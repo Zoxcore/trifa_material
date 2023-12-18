@@ -900,7 +900,7 @@ public class Message
 
     public Message resend_countLt(int resend_count)
     {
-        this.sql_where = this.sql_where + " and  resend_count<'" + s(filetransfer_id) + "' ";
+        this.sql_where = this.sql_where + " and  resend_count<'" + s(resend_count) + "' ";
         return this;
     }
 
