@@ -37,6 +37,10 @@ the latest Development Snapshot can be downloaded from [here](https://github.com
 Use Weblate:
 https://hosted.weblate.org/projects/trifa-a-tox-client-for-android/trifa-material/
 
+## Remove my Background from the Camera Video like Zoom or MS Teams does (Linux only!)
+check instructions on how to do it here:
+https://github.com/floe/backscrub
+
 <br>
 Any use of this project's code by GitHub Copilot, past or present, is done
 without our permission.  We do not consent to GitHub's use of this project's
