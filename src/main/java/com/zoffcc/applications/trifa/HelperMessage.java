@@ -592,4 +592,54 @@ public class HelperMessage {
             // e.printStackTrace();
         }
     }
+
+    static void update_message_in_db_resend_count(final Message m)
+    {
+        try
+        {
+            TrifaToxService.Companion.getOrma().updateMessage().
+                    idEq(m.id).
+                    resend_count(m.resend_count).
+                    execute();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    static void update_message_in_db_messageid(final Message m)
+    {
+        try
+        {
+            TrifaToxService.Companion.getOrma().updateMessage().
+                    idEq(m.id).
+                    message_id(m.message_id).
+                    execute();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    synchronized static void update_message_in_db_no_read_recvedts(final Message m)
+    {
+        try
+        {
+            TrifaToxService.Companion.getOrma().updateMessage().
+                    idEq(m.id).
+                    text(m.text).
+                    sent_timestamp(m.sent_timestamp).
+                    msg_version(m.msg_version).
+                    filename_fullpath(m.filename_fullpath).
+                    raw_msgv2_bytes(m.raw_msgv2_bytes).
+                    msg_id_hash(m.msg_id_hash).
+                    execute();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
 }

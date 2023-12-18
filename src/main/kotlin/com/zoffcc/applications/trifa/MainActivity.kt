@@ -32,6 +32,7 @@ import com.zoffcc.applications.trifa.HelperFiletransfer.update_filetransfer_db_f
 import com.zoffcc.applications.trifa.HelperFriend.send_friend_msg_receipt_v2_wrapper
 import com.zoffcc.applications.trifa.HelperGeneric.PubkeyShort
 import com.zoffcc.applications.trifa.HelperGeneric.bytesToHex
+import com.zoffcc.applications.trifa.HelperGeneric.get_friend_msgv3_capability
 import com.zoffcc.applications.trifa.HelperGeneric.hexstring_to_bytebuffer
 import com.zoffcc.applications.trifa.HelperGeneric.io_file_copy
 import com.zoffcc.applications.trifa.HelperGeneric.read_chunk_from_SD_file
@@ -71,6 +72,8 @@ import com.zoffcc.applications.trifa.ToxVars.TOX_HASH_LENGTH
 import com.zoffcc.applications.trifa.ToxVars.TOX_MAX_NGC_FILESIZE
 import com.zoffcc.applications.trifa.ToxVars.TOX_MAX_NGC_FILE_AND_HEADER_SIZE
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
+import com.zoffcc.applications.trifa.TrifaToxService.Companion.resend_old_messages
+import com.zoffcc.applications.trifa.TrifaToxService.Companion.resend_v3_messages
 import com.zoffcc.applications.trifa.VideoInFrame.new_video_in_frame
 import com.zoffcc.applications.trifa.VideoInFrame.setup_video_in_resolution
 import contactstore
@@ -1437,6 +1440,28 @@ class MainActivity
             if (a_TOX_CONNECTION == TOX_CONNECTION.TOX_CONNECTION_NONE.value)
             {
                 shutdown_av_call(friend_number)
+            }
+
+            if (a_TOX_CONNECTION != TOX_CONNECTION.TOX_CONNECTION_NONE.value)
+            {
+                // ******** friend just came online ********
+                Log.i(TAG, "friend_connection_status_cb:friend just came online")
+                // resend latest msgV3 message that was not "read"
+                try
+                {
+                    val fpubkey = tox_friend_get_public_key(friend_number)
+                    Log.i(TAG, "friend_connection_status_cb:friend just came online:" + fpubkey)
+                    if (get_friend_msgv3_capability(fpubkey) == 1L)
+                    {
+                        resend_v3_messages(fpubkey)
+                    }
+                    else
+                    {
+                        resend_old_messages(fpubkey)
+                    }
+                } catch (_: java.lang.Exception)
+                {
+                }
             }
         }
 
