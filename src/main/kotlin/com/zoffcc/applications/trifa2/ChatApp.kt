@@ -267,7 +267,7 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                         {
                             Box(Modifier.weight(1f)) {
                                 SendMessage(focusRequester, selectedContactPubkey) { text -> //
-                                    // Log.i(TAG, "selectedContactPubkey=" + selectedContactPubkey)
+                                    Log.i(TAG, "selectedContactPubkey=" + selectedContactPubkey)
                                     if (!send_message_onclick(text, selectedContactPubkey))
                                     {
                                         SnackBarToast("Sending Message failed")

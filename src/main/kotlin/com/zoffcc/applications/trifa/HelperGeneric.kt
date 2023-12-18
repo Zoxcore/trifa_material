@@ -19,6 +19,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.loadSvgPainter
 import androidx.compose.ui.res.loadXmlImageVector
+import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.Density
 import com.sksamuel.scrimage.ImmutableImage
 import com.sksamuel.scrimage.webp.WebpWriter
@@ -34,6 +35,7 @@ import com.zoffcc.applications.trifa.HelperGroup.delete_group_all_messages
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
 import com.zoffcc.applications.trifa.HelperMessage.set_message_queueing_from_id
 import com.zoffcc.applications.trifa.HelperMessage.set_message_state_from_id
+import com.zoffcc.applications.trifa.HelperMessage.tox_friend_send_message_wrapper
 import com.zoffcc.applications.trifa.MainActivity.Companion.modify_message_with_ft
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_file_control
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
@@ -42,11 +44,12 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_leave
 import com.zoffcc.applications.trifa.MainActivity.Companion.update_savedata_file
 import com.zoffcc.applications.trifa.TRIFAGlobals.VFS_FILE_DIR
 import com.zoffcc.applications.trifa.ToxVars.TOX_MAX_NGC_FILESIZE
+import com.zoffcc.applications.trifa.ToxVars.TOX_MSGV3_MAX_MESSAGE_LENGTH
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import kotlinx.coroutines.withContext
-import org.imgscalr.Scalr
+import messagestore
+import myUser
 import org.xml.sax.InputSource
-import java.awt.Dimension
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -54,7 +57,7 @@ import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import java.util.*
-import javax.imageio.ImageIO
+import javax.swing.SwingUtilities
 
 object HelperGeneric {
     private const val TAG = "trifa.Hlp.Generic"
@@ -399,6 +402,139 @@ object HelperGeneric {
                 }
             }
         }
+    }
+
+    fun trim_to_utf8_length_bytes(input_string_2: String, max_length_in_bytes: Int): String?
+    {
+        var input_string = input_string_2
+        try
+        {
+            do
+            {
+                var valueInBytes: ByteArray? = null
+                valueInBytes = input_string.toByteArray(StandardCharsets.UTF_8)
+                input_string = if (valueInBytes.size > max_length_in_bytes)
+                {
+                    input_string.substring(0, input_string.length - 1)
+                } else
+                {
+                    return input_string
+                }
+            } while (input_string.length > 0)
+        } catch (e: java.lang.Exception)
+        {
+        }
+        return null
+    }
+
+    /* HINT: send a message to a friend */
+    fun send_message_onclick(msg2: String?, friendPubkey: String?): Boolean
+    {
+        if ((friendPubkey == null) || (friendPubkey.isEmpty()))
+        {
+            Log.i(TAG, "send_message_onclick:ret:01")
+            return false
+        }
+
+        if ((msg2 == null) || (msg2.isEmpty()))
+        {
+            Log.i(TAG, "send_message_onclick:ret:02")
+            return false
+        }
+
+        val friendnum = tox_friend_by_public_key(friendPubkey)
+        val timestamp = System.currentTimeMillis()
+
+        if (friendnum == -1L)
+        {
+            Log.i(TAG, "send_message_onclick:ret:03")
+            return false
+        }
+        var msg: String? = ""
+        try
+        {
+            // send typed message to friend
+            msg = trim_to_utf8_length_bytes(msg2, TOX_MSGV3_MAX_MESSAGE_LENGTH)
+            val m = Message()
+            m.tox_friendpubkey = friendPubkey.toUpperCase()
+            m.direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value
+            m.TOX_MESSAGE_TYPE = 0
+            m.TRIFA_MESSAGE_TYPE = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value
+            m.rcvd_timestamp = 0L
+            m.sent_timestamp = timestamp
+            m.read = false
+            m.is_new = false // own messages are always "not new"
+            m.text = msg
+            m.msg_version = 0
+            m.resend_count = 0 // we have tried to resend this message "0" times
+            m.sent_push = 0
+            m.msg_idv3_hash = ""
+            m.msg_id_hash = ""
+            m.raw_msgv2_bytes = ""
+
+            val result: MainActivity.Companion.send_message_result =
+                tox_friend_send_message_wrapper(friendPubkey.toUpperCase(),
+                    0, msg,
+                    m.sent_timestamp / 1000)
+
+            val res: Long = result.msg_num
+            if (res > -1)
+            {
+                m.resend_count = 1 // we sent the message successfully
+                m.message_id = res
+            } else
+            {
+                m.resend_count = 0 // sending was NOT successfull
+                m.message_id = -1
+            }
+            if (result.msg_v2)
+            {
+                m.msg_version = 1
+            } else
+            {
+                m.msg_version = 0
+            }
+            if (result.msg_hash_hex != null && !result.msg_hash_hex.equals("", true))
+            {
+                // msgV2 message -----------
+                m.msg_id_hash = result.msg_hash_hex
+                // msgV2 message -----------
+            }
+            if (result.msg_hash_v3_hex != null && !result.msg_hash_v3_hex.equals("", true))
+            {
+                // msgV3 message -----------
+                m.msg_idv3_hash = result.msg_hash_v3_hex
+                // msgV3 message -----------
+            }
+            if (result.raw_message_buf_hex != null && !result.raw_message_buf_hex.equals("", true))
+            {
+                // save raw message bytes of this v2 msg into the database
+                // we need it if we want to resend it later
+                m.raw_msgv2_bytes = result.raw_message_buf_hex
+            }
+            // TODO: typing indicator **// stop_self_typing_indicator_s()
+            var row_id: Long = -1
+            try
+            {
+                row_id = orma!!.insertIntoMessage(m)
+            } catch (e: Exception)
+            {
+            }
+            m.id = row_id
+            messagestore.send(MessageAction.SendMessage(UIMessage(
+                direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value,
+                user = myUser,
+                timeMs = timestamp,
+                text = msg!!, toxpk = friendPubkey.toUpperCase(),
+                trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value,
+                msgDatabaseId = row_id,
+                filename_fullpath = null)))
+
+        } catch (e: java.lang.Exception)
+        {
+            e.printStackTrace()
+        }
+        return true
     }
 }
 
