@@ -2,8 +2,6 @@
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -47,18 +44,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.trifa.AVState
+import com.zoffcc.applications.trifa.HelperGeneric.send_message_onclick
 import com.zoffcc.applications.trifa.HelperGroup
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
 import com.zoffcc.applications.trifa.HelperMessage.take_screen_shot_with_selection
-import com.zoffcc.applications.trifa.HelperNotification.displayNotification
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity
 import com.zoffcc.applications.trifa.MainActivity.Companion.add_ngc_outgoing_file
 import com.zoffcc.applications.trifa.MainActivity.Companion.add_outgoing_file
 import com.zoffcc.applications.trifa.MainActivity.Companion.on_call_ended_actions
-import com.zoffcc.applications.trifa.MainActivity.Companion.sent_message_to_db
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
-import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_send_message
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_self_get_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_send_message
 import com.zoffcc.applications.trifa.MainActivity.Companion.toxav_call
@@ -67,7 +62,6 @@ import com.zoffcc.applications.trifa.StateContacts
 import com.zoffcc.applications.trifa.StateGroups
 import com.zoffcc.applications.trifa.TRIFAGlobals
 import com.zoffcc.applications.trifa.ToxVars
-import com.zoffcc.applications.trifa.ToxVars.TOX_MESSAGE_TYPE
 import com.zoffcc.applications.trifa.createAVStateStore
 import com.zoffcc.applications.trifa.createAVStateStoreCallState
 import com.zoffcc.applications.trifa.createAVStateStoreVideoCaptureFpsState
@@ -85,13 +79,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.briarproject.briar.desktop.utils.FilePicker.pickFileUsingDialog
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-import org.jetbrains.compose.resources.painterResource
 import java.io.File
 import java.net.URI
 import java.nio.file.LinkOption
-import java.nio.file.Path
 import kotlin.io.path.exists
-import kotlin.io.path.name
 import kotlin.io.path.toPath
 
 private const val TAG = "trifa.Chatapp"
@@ -277,8 +268,11 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                             Box(Modifier.weight(1f)) {
                                 SendMessage(focusRequester, selectedContactPubkey) { text -> //
                                     // Log.i(TAG, "selectedContactPubkey=" + selectedContactPubkey)
-                                    val friend_num = tox_friend_by_public_key(selectedContactPubkey)
-                                    val timestamp = System.currentTimeMillis()
+                                    if (!send_message_onclick(text, selectedContactPubkey))
+                                    {
+                                        SnackBarToast("Sending Message failed")
+                                    }
+                                    /*
                                     val res = tox_friend_send_message(friend_num, TOX_MESSAGE_TYPE.TOX_MESSAGE_TYPE_NORMAL.value, text)
                                     if (res >= 0)
                                     {
@@ -289,6 +283,7 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                                     {
                                         SnackBarToast("Sending Message failed")
                                     }
+                                    */
                                 }
                             }
                         }
