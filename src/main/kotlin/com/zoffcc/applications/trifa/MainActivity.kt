@@ -2632,14 +2632,15 @@ class MainActivity
         fun received_message_to_db(toxpk: String?, message_timestamp: Long, friend_message: String?): Long
         {
             val m = com.zoffcc.applications.sorm.Message()
-            m.is_new = false
             m.tox_friendpubkey = toxpk
             m.direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value // msg received
             m.TOX_MESSAGE_TYPE = 0
             m.read = false
+            m.is_new = true
             if ((contactstore.state.visible) && (contactstore.state.selectedContactPubkey == toxpk))
             {
                 m.read = true
+                m.is_new = false
             }
             m.TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value
             if (message_timestamp > 0)
@@ -2684,11 +2685,11 @@ class MainActivity
         fun sent_message_to_db(toxpk: String?, message_timestamp: Long, friend_message: String?): Long
         {
             val m = com.zoffcc.applications.sorm.Message()
-            m.is_new = false
             m.tox_friendpubkey = toxpk
             m.direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value // msg sent
             m.TOX_MESSAGE_TYPE = 0
-            m.read = true
+            m.read = false
+            m.is_new = false
             m.TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value
             if (message_timestamp > 0)
             {
@@ -2721,14 +2722,15 @@ class MainActivity
             val peernum = tox_group_peer_by_public_key(groupnum, tox_peerpk)
             val peername = tox_group_peer_get_name(groupnum, peernum)
             val m = GroupMessage()
-            m.is_new = false
             m.tox_group_peer_pubkey = tox_peerpk
             m.direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value // msg received
             m.TOX_MESSAGE_TYPE = 0
             m.read = false
+            m.is_new = true
             if ((groupstore.state.visible) && (groupstore.state.selectedGroupId == groupid))
             {
                 m.read = true
+                m.is_new = false
             }
             if (peername == null)
             {
@@ -2875,11 +2877,11 @@ class MainActivity
             val self_name_in_group = tox_group_peer_get_name(group_num , self_peernum)
             // add FT message to UI
             val m = GroupMessage()
-            m.is_new = false // own messages are always "not new"
             m.tox_group_peer_pubkey = tox_group_self_get_public_key(group_num)!!.uppercase()
             m.direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value
             m.TOX_MESSAGE_TYPE = 0
             m.read = true // !!!! there is no "read status" with conferences in Tox !!!!
+            m.is_new = false // own messages are always "not new"
             if (self_name_in_group == null)
             {
                 m.tox_group_peername = ""
@@ -3035,11 +3037,11 @@ class MainActivity
             val peernum = tox_group_self_get_peer_id(groupnum)
             val peername = tox_group_peer_get_name(groupnum, peernum)
             val m = com.zoffcc.applications.sorm.GroupMessage()
-            m.is_new = false
             m.tox_group_peer_pubkey = tox_group_self_get_public_key(tox_group_by_groupid__wrapper(groupid))!!.uppercase()
             m.direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value // msg sent
             m.TOX_MESSAGE_TYPE = 0
             m.read = true
+            m.is_new = false
             if (peername == null)
             {
                 m.tox_group_peername = ""
