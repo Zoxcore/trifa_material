@@ -8,7 +8,16 @@ import com.zoffcc.applications.sorm.BootstrapNodeEntryDB.tcprelay_node_list
 import com.zoffcc.applications.sorm.Message
 import com.zoffcc.applications.sorm.OrmaDatabase
 import com.zoffcc.applications.trifa.HelperFiletransfer.start_outgoing_ft
+import com.zoffcc.applications.trifa.HelperGeneric.get_friend_msgv3_capability
+import com.zoffcc.applications.trifa.HelperGeneric.is_friend_online_real
+import com.zoffcc.applications.trifa.HelperGeneric.tox_friend_resend_msgv3_wrapper
 import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
+import com.zoffcc.applications.trifa.HelperGroup.hex_to_bytes
+import com.zoffcc.applications.trifa.HelperMessage.tox_friend_send_message_wrapper
+import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_messageid
+import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_no_read_recvedts
+import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_resend_count
+import com.zoffcc.applications.trifa.HelperRelay.get_relay_for_friend
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__udp_enabled
 import com.zoffcc.applications.trifa.MainActivity.Companion.add_tcp_relay_single_wrapper
 import com.zoffcc.applications.trifa.MainActivity.Companion.bootstrap_single_wrapper
@@ -33,7 +42,9 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_iterate
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_iteration_interval
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_kill
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_friend_list
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_util_friend_resend_message_v2
 import com.zoffcc.applications.trifa.TRIFAGlobals.GROUP_ID_LENGTH
+import com.zoffcc.applications.trifa.TRIFAGlobals.MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION
 import com.zoffcc.applications.trifa.TRIFAGlobals.USE_MAX_NUMBER_OF_BOOTSTRAP_NODES
 import com.zoffcc.applications.trifa.TRIFAGlobals.USE_MAX_NUMBER_OF_BOOTSTRAP_TCP_RELAYS
 import com.zoffcc.applications.trifa.TRIFAGlobals.global_last_activity_outgoung_ft_ts
@@ -126,7 +137,42 @@ class TrifaToxService
                     }
                     tox_iterate() // Log.i(TAG, "=====>>>>> tox_iterate()");
                     tox_iteration_interval_ms = tox_iteration_interval()
-                    // --- start queued outgoing FTs here --------------
+
+                    // --- send pending 1-on-1 text messages here --------------
+                    if (online_button_text_wrapper != "offline")
+                    {
+                        if ((last_resend_pending_messages4_ms + (5 * 1000)) < System.currentTimeMillis())
+                        {
+                            last_resend_pending_messages4_ms = System.currentTimeMillis();
+                            // TODO // resend_push_for_v3_messages();
+                        }
+
+                        if ((last_resend_pending_messages0_ms + (30 * 1000)) < System.currentTimeMillis())
+                        {
+                            last_resend_pending_messages0_ms = System.currentTimeMillis();
+                            resend_old_messages(null);
+                        }
+
+                        if ((last_resend_pending_messages1_ms + (30 * 1000)) < System.currentTimeMillis())
+                        {
+                            last_resend_pending_messages1_ms = System.currentTimeMillis();
+                            resend_v3_messages(null);
+                        }
+
+                        if ((last_resend_pending_messages2_ms + (30 * 1000)) < System.currentTimeMillis())
+                        {
+                            last_resend_pending_messages2_ms = System.currentTimeMillis();
+                            resend_v2_messages(false);
+                        }
+
+                        if ((last_resend_pending_messages3_ms + (120 * 1000)) < System.currentTimeMillis())
+                        {
+                            last_resend_pending_messages3_ms = System.currentTimeMillis();
+                            resend_v2_messages(true);
+                        }
+                    }
+                    // --- send pending 1-on-1 text messages here --------------
+
                     // --- start queued outgoing FTs here --------------
                     if (online_button_text_wrapper != "offline")
                     {
@@ -482,6 +528,225 @@ class TrifaToxService
                 }
             }
         }
+
+        fun resend_v3_messages(friend_pubkey: String?)
+        {
+            Log.i(TAG, "resend_v3_messages")
+            // loop through "old msg version" msgV3 1-on-1 text messages that have "resend_count < MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION" --------------
+            try
+            {
+                var max_resend_count_per_iteration = 20
+                if (friend_pubkey != null)
+                {
+                    max_resend_count_per_iteration = 20
+                }
+                var cur_resend_count_per_iteration = 0
+                var m_v1: List<Message>? = null
+                m_v1 = if (friend_pubkey != null)
+                {
+                    orma!!.selectFromMessage().directionEq(1).msg_versionEq(0).tox_friendpubkeyEq(friend_pubkey).TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value).resend_countLt(MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION).readEq(false).orderBySent_timestampAsc().toList()
+                } else
+                {
+                    orma!!.selectFromMessage().directionEq(1).msg_versionEq(0).TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value).resend_countLt(MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION).readEq(false).orderBySent_timestampAsc().toList()
+                }
+                if (m_v1 != null && m_v1.size > 0)
+                {
+                    val ii = m_v1.iterator()
+                    while (ii.hasNext())
+                    {
+                        val m_resend_v1 = ii.next()
+                        if (friend_pubkey == null)
+                        {
+                            if (is_friend_online_real(tox_friend_by_public_key(m_resend_v1.tox_friendpubkey)) == 0)
+                            {
+                                continue
+                            }
+                        }
+                        if (get_friend_msgv3_capability(m_resend_v1.tox_friendpubkey) != 1L)
+                        {
+                            continue
+                        }
+                        tox_friend_resend_msgv3_wrapper(m_resend_v1)
+                        cur_resend_count_per_iteration++
+                        if (cur_resend_count_per_iteration >= max_resend_count_per_iteration)
+                        {
+                            break
+                        }
+                    }
+                }
+            } catch (e: java.lang.Exception)
+            {
+                e.printStackTrace()
+                Log.i(TAG, "resend_v3_messages:EE:" + e.message)
+            }
+            // loop through all pending outgoing 1-on-1 text messages --------------
+        }
+
+        fun resend_old_messages(friend_pubkey: String?)
+        {
+            Log.i(TAG, "resend_old_messages")
+            try
+            {
+                var max_resend_count_per_iteration = 10
+                if (friend_pubkey != null)
+                {
+                    max_resend_count_per_iteration = 20
+                }
+                var cur_resend_count_per_iteration = 0
+                // HINT: cutoff time "now" minus 25 seconds
+                val cutoff_sent_time = System.currentTimeMillis() - 25 * 1000
+                var m_v0: List<Message>? = null
+                m_v0 = if (friend_pubkey != null)
+                {
+                    // HINT: this is the generic resend for all friends, that happens in regular intervals
+                    //       only resend if the original sent timestamp is at least 25 seconds in the past
+                    //       to try to avoid resending when the read receipt is very late.
+                    orma!!.selectFromMessage().directionEq(1).TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value).msg_versionEq(0).tox_friendpubkeyEq(friend_pubkey).readEq(false).resend_countLt(2).orderBySent_timestampAsc().sent_timestampLt(cutoff_sent_time).toList()
+                } else
+                {
+                    // HINT: this is the specific resend for 1 friend only, when that friend comes online
+                    orma!!.selectFromMessage().directionEq(1).TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value).msg_versionEq(0).readEq(false).resend_countLt(2).orderBySent_timestampAsc().toList()
+                }
+                if (m_v0 != null && m_v0.size > 0)
+                {
+                    val ii = m_v0.iterator()
+                    while (ii.hasNext())
+                    {
+                        val m_resend_v0 = ii.next()
+                        if (friend_pubkey == null)
+                        {
+                            if (is_friend_online_real(tox_friend_by_public_key(m_resend_v0.tox_friendpubkey)) == 0)
+                            {
+                                // Log.i(TAG, "resend_old_messages:RET:01:" +
+                                //            get_friend_name_from_pubkey(m_resend_v0.tox_friendpubkey));
+                                continue
+                            }
+                        }
+                        if (get_friend_msgv3_capability(m_resend_v0.tox_friendpubkey) == 1L)
+                        {
+                            // Log.i(TAG, "resend_old_messages:RET:02:" +
+                            //            get_friend_name_from_pubkey(m_resend_v0.tox_friendpubkey));
+                            continue
+                        }
+                        // Log.i(TAG, "resend_old_messages:tox_friend_resend_msgv3_wrapper:" + m_resend_v0.text + " : m=" +
+                        //            m_resend_v0 + " : " + get_friend_name_from_pubkey(m_resend_v0.tox_friendpubkey));
+                        tox_friend_resend_msgv3_wrapper(m_resend_v0)
+                        cur_resend_count_per_iteration++
+                        if (cur_resend_count_per_iteration >= max_resend_count_per_iteration)
+                        {
+                            break
+                        }
+                    }
+                }
+            } catch (e: java.lang.Exception)
+            {
+                e.printStackTrace()
+            }
+        }
+
+        fun resend_v2_messages(at_relay: Boolean)
+        {
+            Log.i(TAG, "resend_v2_messages")
+            // loop through all pending outgoing 1-on-1 text messages V2 (resend) --------------
+            try
+            {
+                val max_resend_count_per_iteration = 10
+                var cur_resend_count_per_iteration = 0
+                val m_v1 = orma!!.selectFromMessage().
+                directionEq(1).TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value)
+                    .msg_versionEq(1).readEq(false).
+                    msg_at_relayEq(at_relay).orderBySent_timestampAsc().toList()
+                if (m_v1 != null && m_v1.size > 0)
+                {
+                    Log.i(TAG, "resend_v2_messages: we have " + m_v1.size + " messages to resend")
+                    val ii: Iterator<Message> = m_v1.iterator()
+                    while (ii.hasNext())
+                    {
+                        val m_resend_v2 = ii.next()
+                        if (is_friend_online_real(tox_friend_by_public_key(m_resend_v2.tox_friendpubkey)) == 0)
+                        {
+                            continue
+                        }
+                        if (m_resend_v2.msg_id_hash == null ||
+                            m_resend_v2.msg_id_hash.equals("", ignoreCase = true)) // resend msgV2 WITHOUT hash
+                        {
+                            Log.i(TAG, "resend_v2_messages:resend_msgV2_WITHOUT_hash:f=" +
+                                    m_resend_v2.tox_friendpubkey + " m=" + m_resend_v2)
+                            val result: MainActivity.Companion.send_message_result? = tox_friend_send_message_wrapper(
+                                m_resend_v2.tox_friendpubkey, 0, m_resend_v2.text, m_resend_v2.sent_timestamp / 1000)
+                            if (result != null)
+                            {
+                                Log.i(TAG, "resend_v2_messages: resend result=" + result.msg_num)
+                                val res: Long = result.msg_num
+                                if (res > -1)
+                                {
+                                    m_resend_v2.resend_count = 1 // we sent the message successfully
+                                    m_resend_v2.message_id = res
+                                } else
+                                {
+                                    m_resend_v2.resend_count = 0 // sending was NOT successfull
+                                    m_resend_v2.message_id = -1
+                                }
+                                if (result.msg_v2)
+                                {
+                                    m_resend_v2.msg_version = 1
+                                } else
+                                {
+                                    m_resend_v2.msg_version = 0
+                                }
+                                if (result.msg_hash_hex != null && !result.msg_hash_hex.equals("", true))
+                                {
+                                    // msgV2 message -----------
+                                    m_resend_v2.msg_id_hash = result.msg_hash_hex
+                                    // msgV2 message -----------
+                                }
+                                if (result.msg_hash_v3_hex != null && !result.msg_hash_v3_hex.equals("", true))
+                                {
+                                    // msgV3 message -----------
+                                    m_resend_v2.msg_idv3_hash = result.msg_hash_v3_hex
+                                    // msgV3 message -----------
+                                }
+                                if (result.raw_message_buf_hex != null &&
+                                    !result.raw_message_buf_hex.equals("", true))
+                                {
+                                    // save raw message bytes of this v2 msg into the database
+                                    // we need it if we want to resend it later
+                                    m_resend_v2.raw_msgv2_bytes = result.raw_message_buf_hex
+                                }
+                                update_message_in_db_messageid(m_resend_v2)
+                                update_message_in_db_resend_count(m_resend_v2)
+                                update_message_in_db_no_read_recvedts(m_resend_v2)
+                            }
+                        } else  // resend msgV2 with hash
+                        {
+                            val raw_data_length = m_resend_v2.raw_msgv2_bytes.length / 2
+                            val raw_msg_resend_data = hex_to_bytes(m_resend_v2.raw_msgv2_bytes)
+                            val msg_text_buffer_resend_v2 = ByteBuffer.allocateDirect(raw_data_length)
+                            msg_text_buffer_resend_v2.put(raw_msg_resend_data, 0, raw_data_length)
+                            val res: Int = tox_util_friend_resend_message_v2(
+                                tox_friend_by_public_key(m_resend_v2.tox_friendpubkey),
+                                msg_text_buffer_resend_v2, raw_data_length.toLong())
+                            val relay = get_relay_for_friend(m_resend_v2.tox_friendpubkey)
+                            if (relay != null)
+                            {
+                                val res_relay: Int = tox_util_friend_resend_message_v2(tox_friend_by_public_key(relay),
+                                    msg_text_buffer_resend_v2,
+                                    raw_data_length.toLong())
+                            }
+                        }
+                        cur_resend_count_per_iteration++
+                        if (cur_resend_count_per_iteration >= max_resend_count_per_iteration)
+                        {
+                            break
+                        }
+                    }
+                }
+            } catch (e: java.lang.Exception)
+            {
+                e.printStackTrace()
+            }
+            // loop through all pending outgoing 1-on-1 text messages V2 (resend the resend) --------------
+        }
     }
 
     fun clear_friends()
@@ -554,5 +819,4 @@ class TrifaToxService
             conf_++
         }
     }
-
 }

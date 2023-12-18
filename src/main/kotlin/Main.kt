@@ -1093,7 +1093,7 @@ fun load_messages_for_friend(selectedContactPubkey: String?)
         {
             val toxpk = selectedContactPubkey.uppercase()
             try {
-                orma!!.updateMessage().tox_friendpubkeyEq(toxpk).read(true).execute()
+                orma!!.updateMessage().tox_friendpubkeyEq(toxpk).is_new(false).execute()
             } catch(_: Exception) {
             }
             val uimessages = ArrayList<UIMessage>()
@@ -1144,7 +1144,7 @@ fun load_groupmessages_for_friend(selectedGroupId: String?)
             val groupid = selectedGroupId.lowercase()
             try {
                 orma!!.updateGroupMessage().group_identifierEq(selectedGroupId)
-                    .read(true).execute()
+                    .is_new(false).execute()
             } catch(_: Exception) {
             }
             val uigroupmessages = ArrayList<UIGroupMessage>()

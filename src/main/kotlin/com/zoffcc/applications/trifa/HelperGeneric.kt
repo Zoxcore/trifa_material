@@ -1,6 +1,7 @@
 package com.zoffcc.applications.trifa
 
 import ImageloaderDispatcher
+import MessageAction
 import SnackBarToast
 import UIMessage
 import androidx.compose.foundation.Image
@@ -19,7 +20,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.loadSvgPainter
 import androidx.compose.ui.res.loadXmlImageVector
-import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.Density
 import com.sksamuel.scrimage.ImmutableImage
 import com.sksamuel.scrimage.webp.WebpWriter
@@ -36,13 +36,19 @@ import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
 import com.zoffcc.applications.trifa.HelperMessage.set_message_queueing_from_id
 import com.zoffcc.applications.trifa.HelperMessage.set_message_state_from_id
 import com.zoffcc.applications.trifa.HelperMessage.tox_friend_send_message_wrapper
+import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_messageid
+import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_resend_count
 import com.zoffcc.applications.trifa.MainActivity.Companion.modify_message_with_ft
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_file_control
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_delete
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_capabilities
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_connection_status
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_leave
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_messagev3_friend_send_message
 import com.zoffcc.applications.trifa.MainActivity.Companion.update_savedata_file
 import com.zoffcc.applications.trifa.TRIFAGlobals.VFS_FILE_DIR
+import com.zoffcc.applications.trifa.ToxVars.TOX_HASH_LENGTH
 import com.zoffcc.applications.trifa.ToxVars.TOX_MAX_NGC_FILESIZE
 import com.zoffcc.applications.trifa.ToxVars.TOX_MSGV3_MAX_MESSAGE_LENGTH
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
@@ -57,7 +63,6 @@ import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import java.util.*
-import javax.swing.SwingUtilities
 
 object HelperGeneric {
     private const val TAG = "trifa.Hlp.Generic"
@@ -534,6 +539,59 @@ object HelperGeneric {
         {
             e.printStackTrace()
         }
+        return true
+    }
+
+    fun is_friend_online_real(friendnum: Long): Int
+    {
+        return try {
+            tox_friend_get_connection_status(friendnum)
+        } catch (e: java.lang.Exception) {
+            0
+        }
+    }
+
+    fun get_friend_msgv3_capability(friend_public_key_string: String?): Long
+    {
+        var ret: Long = 0
+        return try {
+            val fcap = tox_friend_get_capabilities(tox_friend_by_public_key(friend_public_key_string))
+            if ((fcap and ToxVars.TOX_CAPABILITY_MSGV2) != 0.toLong())
+            {
+                1
+            }
+            else
+            {
+                0
+            }
+        } catch (e: java.lang.Exception) {
+            0
+        }
+    }
+
+    fun tox_friend_resend_msgv3_wrapper(m: Message): Boolean
+    {
+        if (m.msg_idv3_hash == null)
+        {
+            m.resend_count++
+            update_message_in_db_resend_count(m)
+            return false
+        }
+        if (m.msg_idv3_hash.length < TOX_HASH_LENGTH)
+        {
+            m.resend_count++
+            update_message_in_db_resend_count(m)
+            return false
+        }
+        val hash_bytes = hexstring_to_bytebuffer(m.msg_idv3_hash)
+        val res = tox_messagev3_friend_send_message(tox_friend_by_public_key(m.tox_friendpubkey),
+            TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, m.text, hash_bytes,
+            m.sent_timestamp / 1000)
+        m.resend_count++
+        m.message_id = res
+        update_message_in_db_resend_count(m)
+        update_message_in_db_messageid(m)
+        // TODO: // update_single_message(m, true)
         return true
     }
 }
