@@ -531,7 +531,6 @@ class TrifaToxService
 
         fun resend_v3_messages(friend_pubkey: String?)
         {
-            Log.i(TAG, "resend_v3_messages")
             // loop through "old msg version" msgV3 1-on-1 text messages that have "resend_count < MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION" --------------
             try
             {
@@ -551,6 +550,7 @@ class TrifaToxService
                 }
                 if (m_v1 != null && m_v1.size > 0)
                 {
+                    Log.i(TAG, "resend_v3_messages: we have " + m_v1.size + " messages to resend")
                     val ii = m_v1.iterator()
                     while (ii.hasNext())
                     {
@@ -584,7 +584,6 @@ class TrifaToxService
 
         fun resend_old_messages(friend_pubkey: String?)
         {
-            Log.i(TAG, "resend_old_messages")
             try
             {
                 var max_resend_count_per_iteration = 10
@@ -609,6 +608,7 @@ class TrifaToxService
                 }
                 if (m_v0 != null && m_v0.size > 0)
                 {
+                    Log.i(TAG, "resend_old_messages: we have " + m_v0.size + " messages to resend")
                     val ii = m_v0.iterator()
                     while (ii.hasNext())
                     {
@@ -646,7 +646,6 @@ class TrifaToxService
 
         fun resend_v2_messages(at_relay: Boolean)
         {
-            Log.i(TAG, "resend_v2_messages")
             // loop through all pending outgoing 1-on-1 text messages V2 (resend) --------------
             try
             {
@@ -670,13 +669,10 @@ class TrifaToxService
                         if (m_resend_v2.msg_id_hash == null ||
                             m_resend_v2.msg_id_hash.equals("", ignoreCase = true)) // resend msgV2 WITHOUT hash
                         {
-                            Log.i(TAG, "resend_v2_messages:resend_msgV2_WITHOUT_hash:f=" +
-                                    m_resend_v2.tox_friendpubkey + " m=" + m_resend_v2)
                             val result: MainActivity.Companion.send_message_result? = tox_friend_send_message_wrapper(
                                 m_resend_v2.tox_friendpubkey, 0, m_resend_v2.text, m_resend_v2.sent_timestamp / 1000)
                             if (result != null)
                             {
-                                Log.i(TAG, "resend_v2_messages: resend result=" + result.msg_num)
                                 val res: Long = result.msg_num
                                 if (res > -1)
                                 {

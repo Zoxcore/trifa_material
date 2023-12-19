@@ -1423,7 +1423,7 @@ class MainActivity
         @JvmStatic
         fun android_tox_callback_friend_connection_status_cb_method(friend_number: Long, a_TOX_CONNECTION: Int)
         {
-            Log.i(TAG, "android_tox_callback_friend_connection_status_cb_method: fn=" + friend_number + " " + a_TOX_CONNECTION)
+            Log.i(TAG, "android_tox_callback_friend_connection_status_cb_method: friend number: " + friend_number + " " + a_TOX_CONNECTION)
             update_savedata_file_wrapper()
             try
             {
@@ -1445,12 +1445,12 @@ class MainActivity
             if (a_TOX_CONNECTION != TOX_CONNECTION.TOX_CONNECTION_NONE.value)
             {
                 // ******** friend just came online ********
-                Log.i(TAG, "friend_connection_status_cb:friend just came online")
+                Log.i(TAG, "android_tox_callback_friend_connection_status_cb_method:friend just came online: friend number: " + friend_number)
                 // resend latest msgV3 message that was not "read"
                 try
                 {
                     val fpubkey = tox_friend_get_public_key(friend_number)
-                    Log.i(TAG, "friend_connection_status_cb:friend just came online:" + fpubkey)
+                    // Log.i(TAG, "friend_connection_status_cb:friend just came online:" + fpubkey)
                     if (get_friend_msgv3_capability(fpubkey) == 1L)
                     {
                         resend_v3_messages(fpubkey)
