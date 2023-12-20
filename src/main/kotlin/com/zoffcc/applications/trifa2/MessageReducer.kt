@@ -17,7 +17,7 @@ sealed interface MessageAction
 
 data class MessageState(var messages: SnapshotStateList<UIMessage> = mutableStateListOf())
 
-const val maxMessages = 5000
+const val maxMessages = MAX_ONE_ON_ONE_MESSAGES_TO_SHOW
 fun chatReducer(state: MessageState, action: MessageAction): MessageState = when (action)
 {
     is MessageAction.SendMessagesBulk ->

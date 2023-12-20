@@ -241,6 +241,8 @@ val SAVEDATA_PATH_WIDTH = 200.dp
 val SAVEDATA_PATH_HEIGHT = 50.dp
 val MYTOXID_WIDTH = 200.dp
 val MYTOXID_HEIGHT = 50.dp
+const val MAX_ONE_ON_ONE_MESSAGES_TO_SHOW = 20000
+const val MAX_GROUP_MESSAGES_TO_SHOW = 20000
 const val SNACKBAR_TOAST_MS_DURATION: Long = 1000
 val ImageloaderDispatcher = Executors.newFixedThreadPool(5).asCoroutineDispatcher()
 var global_semaphore_contactlist_ui = CustomSemaphore(1)
@@ -1025,6 +1027,7 @@ fun App()
                                     ExplainerGroup()
                                 } else
                                 {
+                                    Log.i(TAG, "GROUPS -> draw")
                                     load_groupmessages_for_friend(groups.selectedGroupId)
                                     GlobalScope.launch { globalstore.try_clear_unread_group_message_count() }
                                     GroupAppWithScaffold(focusRequester = groupfocusRequester, groupList = groups, ui_scale = ui_scale)
@@ -1086,9 +1089,9 @@ fun SnackBarToast(message: String, duration_ms: Long = SNACKBAR_TOAST_MS_DURATIO
 
 fun load_messages_for_friend(selectedContactPubkey: String?)
 {
-    Log.i(TAG, "ReceiveMessagesBulkWithClear")
     if (selectedContactPubkey != null)
     {
+        Log.i(TAG, "load_messages_for_friend")
         try
         {
             val toxpk = selectedContactPubkey.uppercase()
@@ -1139,6 +1142,7 @@ fun load_groupmessages_for_friend(selectedGroupId: String?)
 {
     if (selectedGroupId != null)
     {
+        Log.i(TAG, "load_groupmessages_for_friend")
         try
         {
             val groupid = selectedGroupId.lowercase()
