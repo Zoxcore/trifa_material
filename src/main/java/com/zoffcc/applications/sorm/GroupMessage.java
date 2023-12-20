@@ -291,8 +291,26 @@ public class GroupMessage
                 Log.i(TAG, "sql=" + insert_pstmt);
             }
 
+            final long t1 = System.currentTimeMillis();
             orma_semaphore_lastrowid_on_insert.acquire();
+            final long t2 = System.currentTimeMillis();
+            if (ORMA_LONG_RUNNING_TRACE)
+            {
+                if ((t2 - t1) > ORMA_LONG_RUNNING_MS)
+                {
+                    Log.i(TAG, "insertIntoGroupMessage acquire running long (" + (t2 - t1)+ " ms)");
+                }
+            }
+            final long t3 = System.currentTimeMillis();
             insert_pstmt.executeUpdate();
+            final long t4 = System.currentTimeMillis();
+            if (ORMA_LONG_RUNNING_TRACE)
+            {
+                if ((t4 - t3) > ORMA_LONG_RUNNING_MS)
+                {
+                    Log.i(TAG, "insertIntoGroupMessage sql running long (" + (t4 - t3)+ " ms)");
+                }
+            }
             insert_pstmt.close();
             ret = get_last_rowid_pstmt();
             orma_semaphore_lastrowid_on_insert.release();

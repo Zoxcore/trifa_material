@@ -17,6 +17,8 @@ public class OrmaDatabase
 {
     private static final String TAG = "trifa.OrmaDatabase";
     final static boolean ORMA_TRACE = false; // set "false" for release builds
+    final static boolean ORMA_LONG_RUNNING_TRACE = true; // set "false" for release builds
+    final static long ORMA_LONG_RUNNING_MS = 100; // set "false" for release builds
 
     private static final String CREATE_DB_FILE_SHA256SUM = "LvrHIP4y43BVnVTsd6Y1kAZXqaqKQPnRk3+0HKFP0xA=";
     private static final String CREATE_DB_FILE_ON_WINDOWS_SHA256SUM = "5QKQ8Ga1SXdvsiEbf6Ps99KdIJVTNldtI42C3UMI9DM=";
