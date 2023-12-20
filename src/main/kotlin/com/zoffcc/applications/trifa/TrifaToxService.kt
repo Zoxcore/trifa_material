@@ -41,13 +41,18 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_peer_get_r
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_iterate
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_iteration_interval
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_kill
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_connection_status
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_friend_list
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_util_friend_resend_message_v2
 import com.zoffcc.applications.trifa.TRIFAGlobals.GROUP_ID_LENGTH
 import com.zoffcc.applications.trifa.TRIFAGlobals.MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION
+import com.zoffcc.applications.trifa.TRIFAGlobals.TOX_BOOTSTRAP_AGAIN_AFTER_OFFLINE_MILLIS
 import com.zoffcc.applications.trifa.TRIFAGlobals.USE_MAX_NUMBER_OF_BOOTSTRAP_NODES
 import com.zoffcc.applications.trifa.TRIFAGlobals.USE_MAX_NUMBER_OF_BOOTSTRAP_TCP_RELAYS
+import com.zoffcc.applications.trifa.TRIFAGlobals.bootstrapping
 import com.zoffcc.applications.trifa.TRIFAGlobals.global_last_activity_outgoung_ft_ts
+import com.zoffcc.applications.trifa.TRIFAGlobals.global_self_connection_status
+import com.zoffcc.applications.trifa.TRIFAGlobals.global_self_last_went_offline_timestamp
 import contactstore
 import globalstore
 import grouppeerstore
@@ -107,12 +112,15 @@ class TrifaToxService
                     TRIFAGlobals.bootstrapping = true
                     Log.i(TAG, "bootrapping:set to true")
                     bootstrap_me()
-                } // --------------- bootstrap ---------------
+                }
+                // --------------- bootstrap ---------------
                 // --------------- bootstrap ---------------
                 // --------------- bootstrap ---------------
                 var tox_iteration_interval_ms = tox_iteration_interval()
                 Log.i(TAG, "tox_iteration_interval_ms=$tox_iteration_interval_ms")
-                tox_iterate() // ------- MAIN TOX LOOP ---------------------------------------------------------------
+                tox_iterate()
+                global_self_connection_status == tox_self_get_connection_status()
+                // ------- MAIN TOX LOOP ---------------------------------------------------------------
                 // ------- MAIN TOX LOOP ---------------------------------------------------------------
                 // ------- MAIN TOX LOOP ---------------------------------------------------------------
                 // ------- MAIN TOX LOOP ---------------------------------------------------------------
@@ -135,7 +143,9 @@ class TrifaToxService
                     {
                         e.printStackTrace()
                     }
-                    tox_iterate() // Log.i(TAG, "=====>>>>> tox_iterate()");
+                    check_if_need_bootstrap_again()
+                    tox_iterate()
+                    // Log.i(TAG, "=====>>>>> tox_iterate()");
                     tox_iteration_interval_ms = tox_iteration_interval()
 
                     // --- send pending 1-on-1 text messages here --------------
@@ -277,6 +287,32 @@ class TrifaToxService
         }
     }
 
+    private fun check_if_need_bootstrap_again()
+    {
+        if (global_self_connection_status == ToxVars.TOX_CONNECTION.TOX_CONNECTION_NONE.value)
+        {
+            if (global_self_last_went_offline_timestamp != -1L)
+            {
+                if (global_self_last_went_offline_timestamp + TOX_BOOTSTRAP_AGAIN_AFTER_OFFLINE_MILLIS <
+                    System.currentTimeMillis())
+                {
+                    Log.i(TAG, "offline for too long --> bootstrap again ...")
+                    global_self_last_went_offline_timestamp = System.currentTimeMillis()
+                    bootstrapping = true
+                    Log.i(TAG, "bootrapping:set to true[2]")
+                    try
+                    {
+                        bootstrap_me()
+                    } catch (e: java.lang.Exception)
+                    {
+                        e.printStackTrace()
+                        Log.i(TAG, "bootstrap_me:001:EE:" + e.message)
+                    }
+                }
+            }
+        }
+    }
+
     companion object
     {
         const val TAG = "trifa.ToxService"
@@ -389,6 +425,7 @@ class TrifaToxService
             // ----- TCP mobile ------
             // Log.i(TAG, "add_tcp_relay_single:res=" + MainActivity.add_tcp_relay_single_wrapper("127.0.0.1", 33447, "252E6D7F8168682363BC473C3951357FB2E28BC9A7B7E1F4CB3B302DC331BDAA".substring(0, (TOX_PUBLIC_KEY_SIZE * 2) - 0)));
             // ----- TCP mobile ------
+            bootstrapping = false
         }
 
         fun bootstrap_me__obsolete()
