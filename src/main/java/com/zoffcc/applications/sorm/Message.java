@@ -212,7 +212,17 @@ public class Message
             {
                 Log.i(TAG, "sql=" + sql);
             }
+            final long t1 = System.currentTimeMillis();
             ResultSet rs = statement.executeQuery(sql);
+            final long t2 = System.currentTimeMillis();
+            if (ORMA_LONG_RUNNING_TRACE)
+            {
+                if ((t2 - t1) > ORMA_LONG_RUNNING_MS)
+                {
+                    Log.i(TAG, "long running (" + (t2 - t1)+ " ms) sql=" + sql);
+                }
+            }
+            final long t3 = System.currentTimeMillis();
             while (rs.next())
             {
                 Message out = new Message();
@@ -249,6 +259,15 @@ public class Message
 
                 list.add(out);
             }
+            final long t4 = System.currentTimeMillis();
+            if (ORMA_LONG_RUNNING_TRACE)
+            {
+                if ((t4 - t3) > ORMA_LONG_RUNNING_MS)
+                {
+                    Log.i(TAG, "long running (" + (t4 - t3)+ " ms) fetch=" + sql);
+                }
+            }
+
 
             try
             {
@@ -377,10 +396,50 @@ public class Message
                 Log.i(TAG, "sql=" + insert_pstmt);
             }
 
+            final long t1 = System.currentTimeMillis();
             orma_semaphore_lastrowid_on_insert.acquire();
+            final long t2 = System.currentTimeMillis();
+            if (ORMA_LONG_RUNNING_TRACE)
+            {
+                if ((t2 - t1) > ORMA_LONG_RUNNING_MS)
+                {
+                    Log.i(TAG, "insertIntoMessage acquire running long (" + (t2 - t1)+ " ms)");
+                }
+            }
+
+            final long t3 = System.currentTimeMillis();
             insert_pstmt.executeUpdate();
+            final long t4 = System.currentTimeMillis();
+            if (ORMA_LONG_RUNNING_TRACE)
+            {
+                if ((t4 - t3) > ORMA_LONG_RUNNING_MS)
+                {
+                    Log.i(TAG, "insertIntoMessage sql running long (" + (t4 - t3)+ " ms)");
+                }
+            }
+
+            final long t5 = System.currentTimeMillis();
             insert_pstmt.close();
+            final long t6 = System.currentTimeMillis();
+            if (ORMA_LONG_RUNNING_TRACE)
+            {
+                if ((t6 - t5) > ORMA_LONG_RUNNING_MS)
+                {
+                    Log.i(TAG, "insertIntoMessage statement close running long (" + (t6 - t5)+ " ms)");
+                }
+            }
+
+            final long t7 = System.currentTimeMillis();
             ret = get_last_rowid_pstmt();
+            final long t8 = System.currentTimeMillis();
+            if (ORMA_LONG_RUNNING_TRACE)
+            {
+                if ((t8 - t7) > ORMA_LONG_RUNNING_MS)
+                {
+                    Log.i(TAG, "insertIntoMessage getLastRowId running long (" + (t8 - t7)+ " ms)");
+                }
+            }
+
             orma_semaphore_lastrowid_on_insert.release();
         }
         catch (Exception e)
