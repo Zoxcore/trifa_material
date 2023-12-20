@@ -13,7 +13,7 @@ sealed interface GroupMessageAction
 
 data class GroupMessageState(val groupmessages: SnapshotStateList<UIGroupMessage> = mutableStateListOf())
 
-const val maxGroupMessages = 5000
+const val maxGroupMessages = MAX_GROUP_MESSAGES_TO_SHOW
 fun groupchatReducer(state: GroupMessageState, action: GroupMessageAction): GroupMessageState = when (action)
 {
     is GroupMessageAction.ReceiveMessagesBulkWithClear ->
