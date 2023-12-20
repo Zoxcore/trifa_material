@@ -1361,7 +1361,7 @@ class MainActivity
         @JvmStatic
         fun android_tox_callback_self_connection_status_cb_method(a_TOX_CONNECTION: Int)
         {
-            Log.i(TAG, "android_tox_callback_self_connection_status_cb_method: " + a_TOX_CONNECTION)
+            // Log.i(TAG, "android_tox_callback_self_connection_status_cb_method: " + a_TOX_CONNECTION)
             update_savedata_file_wrapper()
             if (a_TOX_CONNECTION == ToxVars.TOX_CONNECTION.TOX_CONNECTION_TCP.value)
             {
