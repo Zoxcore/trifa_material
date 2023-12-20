@@ -45,7 +45,7 @@ fun chatReducer(state: MessageState, action: MessageAction): MessageState = when
         // val m = state.messages
         // m.add(action.message)
         // m.takeLast(maxMessages)
-        Log.i(com.zoffcc.applications.trifa.TAG, "MessageAction.ReceiveMessage")
+        // Log.i(com.zoffcc.applications.trifa.TAG, "MessageAction.ReceiveMessage")
         state.copy(messages = (state.messages + action.message).takeLast(maxMessages).toMutableStateList())
     }
     is MessageAction.Clear ->
