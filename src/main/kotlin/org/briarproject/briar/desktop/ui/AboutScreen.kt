@@ -38,6 +38,7 @@ import androidx.compose.ui.semantics.text
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
+import com.google.gson.internal.JavaVersion
 import com.zoffcc.applications.ffmpegav.AVActivity
 import com.zoffcc.applications.jninotifications.NTFYActivity
 import com.zoffcc.applications.trifa.MainActivity
@@ -128,6 +129,19 @@ private fun GeneralInfo() {
         add(Entry(i18n("about.git_commit_date"), BuildConfig.GIT_COMMIT_DATE))
         add(Entry(i18n("about.git_commit_msg"), BuildConfig.GIT_COMMIT_MSG))
         add(Entry(i18n("about.website"), "https://github.com/Zoxcore/trifa_material", true))
+
+        try
+        {
+            add(Entry(i18n("about.kotlin_compiler_used_version"), BuildConfig.KOTLIN_VERSION))
+        } catch(_: Exception) {}
+        try
+        {
+            add(Entry(i18n("about.kotlin_runtime_version"), kotlin.KotlinVersion.CURRENT.toString()))
+        } catch(_: Exception) {}
+        try
+        {
+            add(Entry(i18n("about.java_runtime_version"), Runtime.version().toString()))
+        } catch(_: Exception) {}
 
         add(Entry(i18n("about.toxcore_version"), "" + tox_version_major() +"."+ tox_version_minor()+"."+ tox_version_patch()))
         add(Entry(i18n("about.toxcore_commit_hash"), "" + getNativeLibTOXGITHASH()))
