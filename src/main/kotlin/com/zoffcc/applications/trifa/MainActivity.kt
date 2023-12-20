@@ -66,6 +66,8 @@ import com.zoffcc.applications.trifa.TRIFAGlobals.UPDATE_MESSAGE_PROGRESS_SMALL_
 import com.zoffcc.applications.trifa.TRIFAGlobals.VFS_FILE_DIR
 import com.zoffcc.applications.trifa.TRIFAGlobals.VFS_TMP_FILE_DIR
 import com.zoffcc.applications.trifa.TRIFAGlobals.global_last_activity_outgoung_ft_ts
+import com.zoffcc.applications.trifa.TRIFAGlobals.global_self_connection_status
+import com.zoffcc.applications.trifa.TRIFAGlobals.global_self_last_went_offline_timestamp
 import com.zoffcc.applications.trifa.ToxVars.TOX_CONNECTION
 import com.zoffcc.applications.trifa.ToxVars.TOX_FILE_ID_LENGTH
 import com.zoffcc.applications.trifa.ToxVars.TOX_HASH_LENGTH
@@ -1361,16 +1363,20 @@ class MainActivity
         @JvmStatic
         fun android_tox_callback_self_connection_status_cb_method(a_TOX_CONNECTION: Int)
         {
+            global_self_connection_status = a_TOX_CONNECTION
             // Log.i(TAG, "android_tox_callback_self_connection_status_cb_method: " + a_TOX_CONNECTION)
             update_savedata_file_wrapper()
             if (a_TOX_CONNECTION == ToxVars.TOX_CONNECTION.TOX_CONNECTION_TCP.value)
             {
+                global_self_last_went_offline_timestamp = -1;
                 set_tox_online_state("tcp")
             } else if (a_TOX_CONNECTION == ToxVars.TOX_CONNECTION.TOX_CONNECTION_UDP.value)
             {
+                global_self_last_went_offline_timestamp = -1;
                 set_tox_online_state("udp")
             } else
             {
+                global_self_last_went_offline_timestamp = System.currentTimeMillis();
                 set_tox_online_state("offline")
                 if (avstatestore.state.call_with_friend_pubkey_get() != null)
                 {

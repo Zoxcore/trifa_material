@@ -32,8 +32,8 @@ public class TRIFAGlobals
     static boolean bootstrapping = false;
     static long global_self_last_went_online_timestamp = -1;
     static long global_self_last_went_offline_timestamp = -1;
-    final static int TOX_BOOTSTRAP_AGAIN_AFTER_OFFLINE_MILLIS =
-            1000 * 60 * 2; // bootstrap again after 2 minutes offline
+    // bootstrap again after 30 seconds offline
+    final static int TOX_BOOTSTRAP_AGAIN_AFTER_OFFLINE_MILLIS = 30 * 1000;
 
     public static final String MY_PACKAGE_NAME = "com.zoffcc.applications.trifa";
 
