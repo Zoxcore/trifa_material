@@ -26,6 +26,7 @@ import java.awt.TrayIcon;
 import java.io.File;
 
 import static com.zoffcc.applications.jninotifications.NTFYActivity.jninotifications_notify;
+import static com.zoffcc.applications.trifa.MainActivity.getDB_PREF__notifications_active;
 
 public class HelperNotification
 {
@@ -42,8 +43,18 @@ public class HelperNotification
         resources_dir = dir;
     }
 
-    public static void displayNotification(String message)
+    public static void displayNotification(final String message)
     {
+        displayNotification_with_force_option(message, false);
+    }
+
+    public static void displayNotification_with_force_option(final String message, final boolean force)
+    {
+        if ((!getDB_PREF__notifications_active()) && (!force))
+        {
+            return;
+        }
+
         try
         {
             if ((last_message_timestamp + (2 * 1000)) > System.currentTimeMillis())
