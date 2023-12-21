@@ -75,7 +75,7 @@ dependencies {
     implementation("com.sksamuel.scrimage:scrimage-core:4.1.1")
     implementation("com.sksamuel.scrimage:scrimage-webp:4.1.1")
     implementation("com.google.code.gson:gson:2.10.1")
-    implementation("io.github.alexzhirkevich:qrose:1.0.0-beta02")
+    implementation("io.github.alexzhirkevich:qrose:1.0.0-beta3")
 }
 
 compose.desktop {
