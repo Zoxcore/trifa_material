@@ -58,6 +58,7 @@ import com.zoffcc.applications.trifa.HelperFriend.set_g_opts
 import com.zoffcc.applications.trifa.HelperNotification
 import com.zoffcc.applications.trifa.HelperOSFile.show_containing_dir_in_explorer
 import com.zoffcc.applications.trifa.MainActivity
+import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__notifications_active
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__open_files_directly
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import global_prefs
@@ -256,6 +257,35 @@ fun SettingDetails()
                 )
             }
             // ---- open files directly ----
+            // ---- notifications active ----
+            var notifications_active by remember { mutableStateOf(true) }
+            try
+            {
+                if (get_g_opts("DB_PREF__notifications_active") != null)
+                {
+                    if (get_g_opts("DB_PREF__notifications_active").equals("false"))
+                    {
+                        notifications_active = false
+                    }
+                }
+            } catch (e: java.lang.Exception)
+            {
+                e.printStackTrace()
+            }
+
+            DetailItem(label = i18n("enable notifications"),
+                description = (if (notifications_active) i18n("enabled") else i18n("disabled"))) {
+                Switch(
+                    checked = notifications_active,
+                    onCheckedChange = {
+                        set_g_opts("DB_PREF__notifications_active", it.toString().lowercase())
+                        println("DB_PREF__notifications_active="+it.toString().lowercase())
+                        DB_PREF__notifications_active = it
+                        notifications_active = it
+                    },
+                )
+            }
+            // ---- notifications active ----
         }
         // database prefs ===================
 
@@ -279,7 +309,7 @@ fun SettingDetails()
                 enabled = true,
                 onClick = {
                     GlobalScope.launch {
-                        HelperNotification.displayNotification("test notification öäüß{}?°^!_;:,.-_|<>'1234567890")
+                        HelperNotification.displayNotification_with_force_option("test notification öäüß{}?°^!_;:,.-_|<>'1234567890", true)
                         SnackBarToast("Notification triggered")
                     }
                 })
