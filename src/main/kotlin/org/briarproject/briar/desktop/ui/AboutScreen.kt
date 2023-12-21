@@ -132,6 +132,10 @@ private fun GeneralInfo() {
 
         try
         {
+            add(Entry(i18n("about.compose_version"), BuildConfig.COMPOSE_VERSION))
+        } catch(_: Exception) {}
+        try
+        {
             add(Entry(i18n("about.kotlin_compiler_used_version"), BuildConfig.KOTLIN_VERSION))
         } catch(_: Exception) {}
         try

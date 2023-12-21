@@ -24,7 +24,8 @@ buildConfig {
     buildConfigField("String", "APP_NAME", "\"${project.name}\"")
     buildConfigField("String", "APP_VERSION", provider { "\"${project.version}\"" })
     buildConfigField("String", "PROJECT_VERSION", "\"${project.version}\"")
-    buildConfigField("String", "KOTLIN_VERSION", "\"" + kotlin.coreLibrariesVersion + "\"")
+    buildConfigField("String", "KOTLIN_VERSION", "\"${kotlin.coreLibrariesVersion}\"")
+    buildConfigField("String", "COMPOSE_VERSION", "\"${project.findProperty("compose.version")}\"")
     try
     {
         try
