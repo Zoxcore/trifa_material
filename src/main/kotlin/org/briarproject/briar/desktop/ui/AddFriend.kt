@@ -23,6 +23,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoffcc.applications.trifa.HelperFriend
 import com.zoffcc.applications.trifa.HelperGeneric
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_add
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_public_key
@@ -73,6 +74,13 @@ fun AddFriend() = Box {
                         try
                         {
                             val friend_pubkey = tox_friend_get_public_key(friendnum)
+                            try
+                            {
+                                HelperFriend.add_friend_real(friend_pubkey)
+                            }
+                            catch(_: java.lang.Exception)
+                            {
+                            }
                             contactstore.add(item = ContactItem(name = "new Friend #" + friendnum, isConnected = 0, pubkey = friend_pubkey!!))
                         } catch (_: Exception)
                         {
