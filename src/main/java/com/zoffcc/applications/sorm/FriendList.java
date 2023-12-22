@@ -40,65 +40,65 @@ public class FriendList
 
     @Column
     @Nullable
-    String name;
+    public String name;
 
     @Column(indexed = true, defaultExpr = "", helpers = Column.Helpers.ALL)
     @Nullable
-    String alias_name;
+    public String alias_name;
 
     @Column
     @Nullable
-    String status_message;
+    public String status_message;
 
     @Column(indexed = true, defaultExpr = "0", helpers = Column.Helpers.ALL)
-    int TOX_CONNECTION; // 0 --> NONE (offline), 1 --> TCP (online), 2 --> UDP (online)
+    public int TOX_CONNECTION; // 0 --> NONE (offline), 1 --> TCP (online), 2 --> UDP (online)
 
     @Column(indexed = true, defaultExpr = "0", helpers = Column.Helpers.ALL)
     public int TOX_CONNECTION_real; // 0 --> NONE (offline), 1 --> TCP (online), 2 --> UDP (online)
 
     @Column(indexed = true, defaultExpr = "0", helpers = Column.Helpers.ALL)
-    int TOX_CONNECTION_on_off; // 0 --> offline, 1 --> online
+    public int TOX_CONNECTION_on_off; // 0 --> offline, 1 --> online
 
     @Column(indexed = true, defaultExpr = "0", helpers = Column.Helpers.ALL)
-    int TOX_CONNECTION_on_off_real; // 0 --> offline, 1 --> online
+    public int TOX_CONNECTION_on_off_real; // 0 --> offline, 1 --> online
 
     @Column(indexed = true, defaultExpr = "0", helpers = Column.Helpers.ALL)
-    int TOX_USER_STATUS; // 0 --> NONE, 1 --> online AWAY, 2 --> online BUSY
+    public int TOX_USER_STATUS; // 0 --> NONE, 1 --> online AWAY, 2 --> online BUSY
 
     @Column
     @Nullable
-    String avatar_pathname = null;
+    public String avatar_pathname = null;
 
     @Column
     @Nullable
-    String avatar_filename = null;
+    public String avatar_filename = null;
 
     @Column(indexed = true, defaultExpr = "false", helpers = Column.Helpers.ALL)
     @Nullable
-    boolean avatar_update = false; // has avatar changed for this friend?
+    public boolean avatar_update = false; // has avatar changed for this friend?
 
     @Column(indexed = true, defaultExpr = "-1", helpers = Column.Helpers.ALL)
-    long avatar_update_timestamp = -1L;
+    public long avatar_update_timestamp = -1L;
 
     @Column(indexed = true, defaultExpr = "false", helpers = Column.Helpers.ALL)
     @Nullable
-    boolean notification_silent = false; // show notifications for this friend?
+    public boolean notification_silent = false; // show notifications for this friend?
 
     @Column(indexed = true, defaultExpr = "0", helpers = Column.Helpers.ALL)
-    int sort = 0;
+    public int sort = 0;
 
     @Column(indexed = true, defaultExpr = "-1", helpers = Column.Helpers.ALL)
-    long last_online_timestamp = -1L;
+    public long last_online_timestamp = -1L;
 
     @Column(indexed = true, defaultExpr = "-1", helpers = Column.Helpers.ALL)
-    long last_online_timestamp_real = -1L;
+    public long last_online_timestamp_real = -1L;
 
     @Column(indexed = true, defaultExpr = "-1", helpers = Column.Helpers.ALL)
-    long added_timestamp = -1L;
+    public long added_timestamp = -1L;
 
     @Column(indexed = true, defaultExpr = "false", helpers = Column.Helpers.ALL)
     @Nullable
-    boolean is_relay = false;
+    public boolean is_relay = false;
 
     @Column(indexed = true, defaultExpr = "", helpers = Column.Helpers.ALL)
     @Nullable
@@ -108,7 +108,7 @@ public class FriendList
     public long capabilities = 0;
 
     @Column(indexed = true, defaultExpr = "0", helpers = Column.Helpers.ALL)
-    long msgv3_capability = 0;
+    public long msgv3_capability = 0;
 
     static FriendList deep_copy(FriendList in)
     {

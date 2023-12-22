@@ -4,6 +4,7 @@ import com.zoffcc.applications.sorm.FriendList;
 import com.zoffcc.applications.sorm.TRIFADatabaseGlobalsNew;
 import org.sqlite.SQLiteException;
 
+import javax.swing.*;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -16,7 +17,7 @@ import static com.zoffcc.applications.trifa.HelperMessage.get_message_in_db_sent
 import static com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_sent_push_set;
 import static com.zoffcc.applications.trifa.HelperRelay.get_pushurl_for_friend;
 import static com.zoffcc.applications.trifa.HelperRelay.is_valid_pushurl_for_friend_with_whitelist;
-import static com.zoffcc.applications.trifa.MainActivity.tox_friend_get_public_key;
+import static com.zoffcc.applications.trifa.MainActivity.*;
 import static com.zoffcc.applications.trifa.TRIFAGlobals.*;
 import static java.time.temporal.ChronoUnit.SECONDS;
 
@@ -230,5 +231,127 @@ public class HelperFriend {
         }
 
         return false;
+    }
+
+    public static void add_friend_real(final String friend_tox_id)
+    {
+        // nospam=8 chars, checksum=4 chars
+        String friend_public_key = friend_tox_id.substring(0, friend_tox_id.length() - 12);
+        // Log.i(TAG, "add_friend_real:add friend PK:" + friend_public_key);
+        FriendList f = new FriendList();
+        f.tox_public_key_string = friend_public_key.toUpperCase();
+
+        try
+        {
+            // set name as the last 5 char of TOXID (until we get a name sent from friend)
+            f.name = friend_public_key.substring(friend_public_key.length() - 5,
+                    friend_public_key.length());
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            f.name = "Unknown";
+        }
+
+        f.TOX_USER_STATUS = 0;
+        f.TOX_CONNECTION = 0;
+        f.TOX_CONNECTION_on_off = 0;
+        f.avatar_filename = null;
+        f.avatar_pathname = null;
+
+        try
+        {
+            insert_into_friendlist_db(f);
+        }
+        catch (Exception e)
+        {
+            // e.printStackTrace();
+        }
+    }
+
+    static void add_friend_to_system(final String friend_public_key, final boolean as_friends_relay, final String owner_public_key)
+    {
+        final FriendList f = new FriendList();
+        f.tox_public_key_string = friend_public_key;
+        f.TOX_USER_STATUS = 0;
+        f.TOX_CONNECTION = 0;
+        f.TOX_CONNECTION_on_off = 0;
+        // set name as the last 5 char of the publickey (until we get a proper name)
+        f.name = friend_public_key.substring(friend_public_key.length() - 5, friend_public_key.length());
+        f.avatar_pathname = null;
+        f.avatar_filename = null;
+        f.capabilities = 0;
+
+        try
+        {
+            f.added_timestamp = System.currentTimeMillis();
+            insert_into_friendlist_db(f);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            Log.i(TAG, "friend_request:insert:EE2:" + e.getMessage());
+            return;
+        }
+
+        if (as_friends_relay)
+        {
+            // add relay for friend to DB
+            // TODO // HelperRelay.add_or_update_friend_relay(friend_public_key, owner_public_key);
+        }
+
+        if (MainActivity.getDB_PREF__U_keep_nospam() == false)
+        {
+            // ---- set new random nospam value after each added friend ----
+            // ---- set new random nospam value after each added friend ----
+            // ---- set new random nospam value after each added friend ----
+            HelperGeneric.set_new_random_nospam_value();
+            final String my_tox_id_local = get_my_toxid();
+            global_my_toxid = my_tox_id_local;
+        }
+    }
+
+    synchronized static void insert_into_friendlist_db(final FriendList f)
+    {
+        try
+        {
+            if (TrifaToxService.Companion.getOrma().selectFromFriendList().
+                    tox_public_key_stringEq(f.tox_public_key_string).count() == 0)
+            {
+                f.added_timestamp = System.currentTimeMillis();
+                TrifaToxService.Companion.getOrma().insertIntoFriendList(f);
+                Log.i(TAG, "friend added to DB: " + f.tox_public_key_string.substring(0, 5));
+            }
+            else
+            {
+                // friend already in DB
+                Log.i(TAG, "friend already in DB: " + f.tox_public_key_string.substring(0, 5));
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            Log.i(TAG, "friend add to DB:EE:" + e.getMessage());
+        }
+
+        //            }
+        //        };
+        //        t.start();
+    }
+
+    static void update_friend_in_db_capabilities(FriendList f)
+    {
+        TrifaToxService.Companion.getOrma().updateFriendList().
+                tox_public_key_stringEq(f.tox_public_key_string).
+                capabilities(f.capabilities).
+                execute();
+    }
+
+    static void update_friend_in_db_msgv3_capability(FriendList f)
+    {
+        TrifaToxService.Companion.getOrma().updateFriendList().
+                tox_public_key_stringEq(f.tox_public_key_string).
+                msgv3_capability(f.msgv3_capability).
+                execute();
     }
 }

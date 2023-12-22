@@ -46,6 +46,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_capab
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_connection_status
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_leave
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_messagev3_friend_send_message
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_set_nospam
 import com.zoffcc.applications.trifa.MainActivity.Companion.update_savedata_file
 import com.zoffcc.applications.trifa.TRIFAGlobals.VFS_FILE_DIR
 import com.zoffcc.applications.trifa.ToxVars.TOX_HASH_LENGTH
@@ -556,7 +557,7 @@ object HelperGeneric {
         var ret: Long = 0
         return try {
             val fcap = tox_friend_get_capabilities(tox_friend_by_public_key(friend_public_key_string))
-            if ((fcap and ToxVars.TOX_CAPABILITY_MSGV2) != 0.toLong())
+            if ((fcap and ToxVars.TOX_CAPABILITY_MSGV3) != 0.toLong())
             {
                 1
             }
@@ -593,6 +594,15 @@ object HelperGeneric {
         update_message_in_db_messageid(m)
         // TODO: // update_single_message(m, true)
         return true
+    }
+
+    @JvmStatic
+    fun set_new_random_nospam_value()
+    {
+        val random = Random()
+        val new_nospam = random.nextInt().toLong() + (1L shl 31)
+        tox_self_set_nospam(new_nospam)
+        update_savedata_file_wrapper()
     }
 }
 

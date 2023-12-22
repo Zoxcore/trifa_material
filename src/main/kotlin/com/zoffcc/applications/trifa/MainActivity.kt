@@ -7,6 +7,7 @@ import SnackBarToast
 import UIGroupMessage
 import UIMessage
 import User
+import androidx.compose.ui.text.toUpperCase
 import avstatestore
 import avstatestorecallstate
 import avstatestorevcapfpsstate
@@ -29,7 +30,10 @@ import com.zoffcc.applications.trifa.HelperFiletransfer.insert_into_filetransfer
 import com.zoffcc.applications.trifa.HelperFiletransfer.move_tmp_file_to_real_file
 import com.zoffcc.applications.trifa.HelperFiletransfer.set_message_accepted_from_id
 import com.zoffcc.applications.trifa.HelperFiletransfer.update_filetransfer_db_full
+import com.zoffcc.applications.trifa.HelperFriend.main_get_friend
 import com.zoffcc.applications.trifa.HelperFriend.send_friend_msg_receipt_v2_wrapper
+import com.zoffcc.applications.trifa.HelperFriend.update_friend_in_db_capabilities
+import com.zoffcc.applications.trifa.HelperFriend.update_friend_in_db_msgv3_capability
 import com.zoffcc.applications.trifa.HelperGeneric.PubkeyShort
 import com.zoffcc.applications.trifa.HelperGeneric.bytesToHex
 import com.zoffcc.applications.trifa.HelperGeneric.get_friend_msgv3_capability
@@ -68,6 +72,7 @@ import com.zoffcc.applications.trifa.TRIFAGlobals.VFS_TMP_FILE_DIR
 import com.zoffcc.applications.trifa.TRIFAGlobals.global_last_activity_outgoung_ft_ts
 import com.zoffcc.applications.trifa.TRIFAGlobals.global_self_connection_status
 import com.zoffcc.applications.trifa.TRIFAGlobals.global_self_last_went_offline_timestamp
+import com.zoffcc.applications.trifa.ToxVars.TOX_CAPABILITY_DECODE
 import com.zoffcc.applications.trifa.ToxVars.TOX_CONNECTION
 import com.zoffcc.applications.trifa.ToxVars.TOX_FILE_ID_LENGTH
 import com.zoffcc.applications.trifa.ToxVars.TOX_HASH_LENGTH
@@ -105,6 +110,7 @@ import java.nio.ByteBuffer
 import java.util.*
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
+import kotlin.concurrent.fixedRateTimer
 
 @Suppress("UNUSED_PARAMETER")
 class MainActivity
@@ -140,6 +146,7 @@ class MainActivity
         var PREF__force_udp_only = 0
         @JvmStatic var DB_PREF__open_files_directly = false
         @JvmStatic var DB_PREF__notifications_active = true
+        @JvmStatic var DB_PREF__U_keep_nospam = true;
         var incoming_messages_queue: BlockingQueue<String> = LinkedBlockingQueue()
         @JvmStatic var video_play_count_frames: Long = 0
         @JvmStatic var video_play_last_timestamp: Long = 0
@@ -1453,11 +1460,26 @@ class MainActivity
             {
                 // ******** friend just came online ********
                 Log.i(TAG, "android_tox_callback_friend_connection_status_cb_method:friend just came online: friend number: " + friend_number)
-                // resend latest msgV3 message that was not "read"
                 try
                 {
                     val fpubkey = tox_friend_get_public_key(friend_number)
-                    // Log.i(TAG, "friend_connection_status_cb:friend just came online:" + fpubkey)
+                    var f = main_get_friend(friend_number)
+                    if (f != null)
+                    {
+                        val friend_capabilities = tox_friend_get_capabilities(friend_number)
+                        f.capabilities = friend_capabilities
+                        update_friend_in_db_capabilities(f)
+                        if (TOX_CAPABILITY_DECODE(f.capabilities).msgv3)
+                        {
+                            f.msgv3_capability = 1
+                        }
+                        else
+                        {
+                            f.msgv3_capability = 0
+                        }
+                        update_friend_in_db_msgv3_capability(f)
+                    }
+
                     if (get_friend_msgv3_capability(fpubkey) == 1L)
                     {
                         resend_v3_messages(fpubkey)
@@ -1487,14 +1509,32 @@ class MainActivity
         {
             Log.i(TAG, "android_tox_callback_friend_request_cb_method: friend_public_key=" + friend_public_key)
             val new_friendnumber = tox_friend_add_norequest(friend_public_key)
-            try
+            if (new_friendnumber > -1)
             {
-                contactstore.add(item = ContactItem(name = "new Friend #" + new_friendnumber, isConnected = 0, pubkey = friend_public_key!!))
-            } catch (_: Exception)
-            {
+                if (new_friendnumber != UINT32_MAX_JAVA)
+                {
+                    update_savedata_file_wrapper()
+                    try
+                    {
+                        if (friend_public_key != null)
+                        {
+                            HelperFriend.add_friend_to_system(friend_public_key.toUpperCase(),
+                                false, null);
+                        }
+                    }
+                    catch(_: Exception)
+                    {
+                    }
+
+                    try
+                    {
+                        contactstore.add(item = ContactItem(name = "new Friend #" + new_friendnumber, isConnected = 0, pubkey = friend_public_key!!))
+                    } catch (_: Exception)
+                    {
+                    }
+                    SnackBarToast("Invited by a new Friend")
+                }
             }
-            update_savedata_file_wrapper()
-            SnackBarToast("Invited by a new Friend")
         }
 
         @JvmStatic

@@ -1,10 +1,12 @@
 package com.zoffcc.applications.trifa
 
+import avstatestore
 import com.zoffcc.applications.sorm.BootstrapNodeEntryDB
 import com.zoffcc.applications.sorm.BootstrapNodeEntryDB.bootstrap_node_list
 import com.zoffcc.applications.sorm.BootstrapNodeEntryDB.get_tcprelay_nodelist_from_db
 import com.zoffcc.applications.sorm.BootstrapNodeEntryDB.get_udp_nodelist_from_db
 import com.zoffcc.applications.sorm.BootstrapNodeEntryDB.tcprelay_node_list
+import com.zoffcc.applications.sorm.FriendList
 import com.zoffcc.applications.sorm.Message
 import com.zoffcc.applications.sorm.OrmaDatabase
 import com.zoffcc.applications.trifa.HelperFiletransfer.start_outgoing_ft
@@ -47,6 +49,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_util_friend_rese
 import com.zoffcc.applications.trifa.TRIFAGlobals.GROUP_ID_LENGTH
 import com.zoffcc.applications.trifa.TRIFAGlobals.MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION
 import com.zoffcc.applications.trifa.TRIFAGlobals.TOX_BOOTSTRAP_AGAIN_AFTER_OFFLINE_MILLIS
+import com.zoffcc.applications.trifa.TRIFAGlobals.TOX_ITERATE_MS_MIN_NORMAL
 import com.zoffcc.applications.trifa.TRIFAGlobals.USE_MAX_NUMBER_OF_BOOTSTRAP_NODES
 import com.zoffcc.applications.trifa.TRIFAGlobals.USE_MAX_NUMBER_OF_BOOTSTRAP_TCP_RELAYS
 import com.zoffcc.applications.trifa.TRIFAGlobals.bootstrapping
@@ -132,9 +135,32 @@ class TrifaToxService
                     {
                         if ((global_last_activity_outgoung_ft_ts > -1) && ((global_last_activity_outgoung_ft_ts + 200) > System.currentTimeMillis())) {
                             // HINT: iterate much faster if there are active filetransfers
-                            sleep(0, 250)
+                            sleep(0, 50)
+                            // Log.i(TAG, "=====>>>>> tox_iteration_interval: "+ "2")
                         } else {
-                            sleep(tox_iteration_interval_ms)
+                            if (avstatestore.state.calling_state_get() != AVState.CALL_STATUS.CALL_STATUS_NONE)
+                            {
+                                // HINT: iterate faster if there are active toxav calls
+                                sleep(4, 0)
+                                // Log.i(TAG, "=====>>>>> tox_iteration_interval: "+ "4")
+                            }
+                            else
+                            {
+                                if (tox_iteration_interval_ms < TOX_ITERATE_MS_MIN_NORMAL)
+                                {
+                                    // HINT: never iterate faster than TOX_ITERATE_MS_MIN_NORMAL
+                                    sleep(TOX_ITERATE_MS_MIN_NORMAL.toLong())
+                                    // Log.i(TAG, "=====>>>>> tox_iteration_interval: "+ TOX_ITERATE_MS_MIN_NORMAL)
+                                }
+                                else
+                                {
+                                    sleep(tox_iteration_interval_ms)
+                                    if (tox_iteration_interval_ms != 50L)
+                                    {
+                                        Log.i(TAG, "=====>>>>> tox_iteration_interval: " + tox_iteration_interval_ms)
+                                    }
+                                }
+                            }
                         }
                     } catch (e: InterruptedException)
                     {
@@ -145,8 +171,9 @@ class TrifaToxService
                     }
                     check_if_need_bootstrap_again()
                     tox_iterate()
-                    // Log.i(TAG, "=====>>>>> tox_iterate()");
+                    // Log.i(TAG, "=====>>>>> tox_iterate()")
                     tox_iteration_interval_ms = tox_iteration_interval()
+                    // Log.i(TAG, "=====>>>>> tox_iteration_interval: "+ tox_iteration_interval_ms)
 
                     // --- send pending 1-on-1 text messages here --------------
                     if (online_button_text_wrapper != "offline")
@@ -821,11 +848,82 @@ class TrifaToxService
     {
         tox_self_get_friend_list()?.forEach {
             Log.i(TAG, "friend:" + it)
+
+            var f: FriendList? = null
+            val f_pubkey = tox_friend_get_public_key(it)
+            var fl: MutableList<FriendList>? = null
+            if (f_pubkey != null)
+            {
+                fl = orma!!.selectFromFriendList().
+                    tox_public_key_stringEq(f_pubkey.toUpperCase()).toList()
+            }
+            if ((fl != null) && (fl.size > 0))
+            {
+                f = fl.get(0)
+            }
+            else
+            {
+                f = null;
+            }
+            var exists_in_db = false
+            if (f == null)
+            {
+                Log.i(TAG, "loading_friend:c is null")
+                f = FriendList()
+                f.tox_public_key_string = "" + (Math.random() * 10000000.0).toLong()
+                try
+                {
+                    f.tox_public_key_string = f_pubkey
+                } catch (e: java.lang.Exception)
+                {
+                    e.printStackTrace()
+                }
+                f.name = "Friend #" + it
+                exists_in_db = false
+            } else
+            {
+                exists_in_db = true
+            }
+
             var fname = tox_friend_get_name(it)
             if (fname == null)
             {
-                fname = "Friend"
+                fname = "Friend #" + it
             }
+            f.name = fname
+
+            try
+            {
+                // get the real "live" connection status of this friend
+                // the value in the database may be old (and wrong)
+                val status_new = tox_friend_get_connection_status(it)
+                val combined_connection_status_: Int = status_new
+                f.TOX_CONNECTION = combined_connection_status_
+                f.TOX_CONNECTION_on_off = 0
+                f.added_timestamp = System.currentTimeMillis()
+            } catch (e: java.lang.Exception)
+            {
+                e.printStackTrace()
+            }
+
+            if (exists_in_db == false)
+            {
+                // Log.i(TAG, "loading_friend:1:insertIntoFriendList:" + " f=" + f);
+                orma!!.insertIntoFriendList(f);
+                // Log.i(TAG, "loading_friend:2:insertIntoFriendList:" + " f=" + f);
+            }
+            else
+            {
+                // Log.i(TAG, "loading_friend:1:updateFriendList:" + " f=" + f);
+                orma!!.updateFriendList().tox_public_key_stringEq(f_pubkey)
+                    .name(f.name).
+                    status_message(f.status_message).
+                    TOX_CONNECTION(f.TOX_CONNECTION).
+                    TOX_CONNECTION_on_off(0).
+                    TOX_USER_STATUS(f.TOX_USER_STATUS).execute();
+                // Log.i(TAG, "loading_friend:1:updateFriendList:" + " f=" + f);
+            }
+
             try
             {
                 contactstore.add(item = ContactItem(name = fname, isConnected = 0, pubkey = tox_friend_get_public_key(it)!!))
