@@ -44,6 +44,78 @@ public class HelperFriend {
         }
     }
 
+    static void update_friend_msgv3_capability(long friend_number, int new_value)
+    {
+        try
+        {
+            if ((new_value == 0) || (new_value == 1))
+            {
+                FriendList f = TrifaToxService.Companion.getOrma().selectFromFriendList().
+                        tox_public_key_stringEq(tox_friend_get_public_key(friend_number)).
+                        get(0);
+                if (f != null)
+                {
+                    if (f.msgv3_capability != new_value)
+                    {
+                        Log.i(TAG,
+                                "update_friend_msgv3_capability f=" +
+                                        get_friend_name_from_num(friend_number) + " new=" +
+                                        new_value + " old=" + f.msgv3_capability);
+                        TrifaToxService.Companion.getOrma().updateFriendList().
+                                tox_public_key_stringEq(tox_friend_get_public_key(friend_number)).
+                                msgv3_capability(new_value).
+                                execute();
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+        }
+    }
+
+    static String get_friend_name_from_num(long friendnum)
+    {
+        String result = "Unknown";
+
+        try
+        {
+            if (TrifaToxService.Companion.getOrma() != null)
+            {
+                try
+                {
+                    String result_alias = TrifaToxService.Companion.getOrma().selectFromFriendList().
+                            tox_public_key_stringEq(tox_friend_get_public_key(friendnum)).
+                            toList().get(0).alias_name;
+
+                    if (result_alias != null)
+                    {
+                        if (result_alias.length() > 0)
+                        {
+                            result = result_alias;
+                            return result;
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+
+                result = TrifaToxService.Companion.getOrma().selectFromFriendList().
+                        tox_public_key_stringEq(tox_friend_get_public_key(friendnum)).
+                        toList().get(0).name;
+            }
+        }
+        catch (Exception e)
+        {
+            result = "Unknown";
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
     static FriendList main_get_friend(long friendnum) {
         FriendList f = null;
 

@@ -502,10 +502,12 @@ object HelperGeneric {
             {
                 m.resend_count = 1 // we sent the message successfully
                 m.message_id = res
+                Log.i(TAG, "send_message_onclick:1: message_id=" + res)
             } else
             {
                 m.resend_count = 0 // sending was NOT successfull
                 m.message_id = -1
+                Log.i(TAG, "send_message_onclick:2: message_id=" + "-1")
             }
             if (result.msg_v2)
             {
