@@ -8,6 +8,7 @@ import avstatestorevcapfpsstate
 import com.zoffcc.applications.ffmpegav.AVActivity
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_apply_audio_filter
 import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_init
+import com.zoffcc.applications.trifa.MainActivity.Companion.AUDIO_PCM_DEBUG_FILES
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__audio_input_filter
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__audio_play_volume_percent
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__v4l2_capture_force_mjpeg
@@ -512,7 +513,8 @@ data class AVState(val a: Int)
                     {
                         audio_buffer_2 = ByteBuffer.allocateDirect(buffer_size_in_bytes2)
                         MainActivity.set_JNI_audio_buffer(audio_buffer_2)
-                    }/* DEBUG ONLY ----------------------------
+                    }
+                    /* DEBUG ONLY ----------------------------
                     try
                     {
                         audio_buffer_1!!.rewind()
@@ -535,6 +537,21 @@ data class AVState(val a: Int)
                         if (toxav_audio_send_frame_res != 0)
                         {
                             Log.i(TAG, "toxav_audio_send_frame:result=" + toxav_audio_send_frame_res)
+                        }
+                        if (AUDIO_PCM_DEBUG_FILES)
+                        {
+                            val f = File("/tmp/toxaudio_send.txt")
+                            try
+                            {
+                                audio_buffer_2!!.rewind()
+                                val want_bytes = out_samples * 2
+                                val audio_in_byte_buffer = ByteArray(want_bytes)
+                                audio_buffer_2!![audio_in_byte_buffer, 0, want_bytes]
+                                f.appendBytes(audio_in_byte_buffer)
+                            } catch (e: Exception)
+                            {
+                                e.printStackTrace()
+                            }
                         }
                     }
                     // HINT: fix me --------
