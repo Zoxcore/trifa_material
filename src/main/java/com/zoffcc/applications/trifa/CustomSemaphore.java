@@ -24,6 +24,10 @@ public class CustomSemaphore extends Semaphore {
         acquire(null);
     }
 
+    public void acquire_passthru() throws InterruptedException {
+        super.acquire();
+    }
+
     public void acquire(String sourcefile_line_) throws InterruptedException {
 
         String callerMethodName = "";
@@ -72,6 +76,11 @@ public class CustomSemaphore extends Semaphore {
         prev_acquired_sourcefile_line = sourcefile_line_;
         acquired = true;
         if (LOGGING) Log.i(TAG, ""+SEM_ID + " " + "acquire:finish" + callerMethodName);
+    }
+
+    public void release_passthru()
+    {
+        super.release();
     }
 
     @Override
