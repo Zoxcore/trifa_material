@@ -37,10 +37,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -49,17 +52,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.trifa.HelperFriend
 import com.zoffcc.applications.trifa.HelperFriend.get_g_opts
 import com.zoffcc.applications.trifa.HelperFriend.set_g_opts
+import com.zoffcc.applications.trifa.HelperGeneric
 import com.zoffcc.applications.trifa.HelperNotification
 import com.zoffcc.applications.trifa.HelperOSFile.show_containing_dir_in_explorer
 import com.zoffcc.applications.trifa.MainActivity
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__notifications_active
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__open_files_directly
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_name
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_set_name
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import global_prefs
 import kotlinx.coroutines.GlobalScope
@@ -286,6 +296,54 @@ fun SettingDetails()
                 )
             }
             // ---- notifications active ----
+
+
+
+
+
+            // ---- change own name for one-on-one chats ----
+            var tox_self_name = ""
+            try
+            {
+                tox_self_name = tox_self_get_name()!!
+            } catch (e: java.lang.Exception)
+            {
+                e.printStackTrace()
+            }
+            var tox_own_name by remember { mutableStateOf(tox_self_name) }
+
+            Row(Modifier.wrapContentHeight().fillMaxWidth().padding(start = 15.dp)) {
+                TextField(enabled = true, singleLine = true,
+                    textStyle = TextStyle(fontSize = 16.sp),
+                    modifier = Modifier.padding(0.dp).weight(1.0f),
+                    colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White),
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.None,
+                        autoCorrect = false,
+                    ), value = tox_own_name,
+                    onValueChange = {
+                        tox_own_name = it
+                    })
+
+                Button(modifier = Modifier.width(300.dp).padding(start = 20.dp, end = 20.dp),
+                    enabled = true,
+                    onClick = {
+                        if (tox_self_set_name(tox_own_name) == 1)
+                        {
+                            HelperGeneric.update_savedata_file_wrapper()
+                            SnackBarToast("You have changed your own name")
+                        }
+                        else
+                        {
+                            SnackBarToast("Error while trying to set your own name")
+                        }
+                    })
+                {
+                    Text("Update your Name")
+                }
+            }
+            // ---- change own name for one-on-one chats ----
+
         }
         // database prefs ===================
 
