@@ -10,6 +10,7 @@ import com.zoffcc.applications.sorm.FriendList
 import com.zoffcc.applications.sorm.Message
 import com.zoffcc.applications.sorm.OrmaDatabase
 import com.zoffcc.applications.trifa.HelperFiletransfer.start_outgoing_ft
+import com.zoffcc.applications.trifa.HelperFriend.get_friend_name_from_pubkey
 import com.zoffcc.applications.trifa.HelperGeneric.get_friend_msgv3_capability
 import com.zoffcc.applications.trifa.HelperGeneric.is_friend_online_real
 import com.zoffcc.applications.trifa.HelperGeneric.tox_friend_resend_msgv3_wrapper
@@ -737,7 +738,17 @@ class TrifaToxService
                 if (m_v1 != null && m_v1.size > 0)
                 {
                     Log.i(TAG, "resend_v2_messages: we have " + m_v1.size + " messages to resend")
-                    val ii: Iterator<Message> = m_v1.iterator()
+                    var ii: Iterator<Message> = m_v1.iterator()
+                    var m_counter = 0
+                    while (ii.hasNext())
+                    {
+                        val m_resend_v2 = ii.next()
+                        m_counter++
+
+                        Log.i(TAG, "resend_v2_messages: " + m_counter + ": "
+                                + get_friend_name_from_pubkey(m_resend_v2.tox_friendpubkey) + " " + m_resend_v2.text)
+                    }
+                    ii = m_v1.iterator()
                     while (ii.hasNext())
                     {
                         val m_resend_v2 = ii.next()

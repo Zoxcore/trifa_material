@@ -1569,11 +1569,17 @@ class MainActivity
         fun android_tox_callback_friend_message_cb_method(friend_number: Long, message_type: Int, friend_message: String?, length: Long, msgV3hash_bin: ByteArray?, message_timestamp: Long)
         {
             // Log.i(TAG, "android_tox_callback_friend_message_cb_method: fn=" + friend_number + " friend_message=" + friend_message)
+            val toxpk = tox_friend_get_public_key(friend_number)!!.uppercase()
+            if ((toxpk == null) || (toxpk.equals("-1", true)))
+            {
+                Log.i(TAG, "android_tox_callback_friend_message_cb_method: tox pubkey error")
+                return
+            }
+
             var msgV3hash_hex_string: String? = null
             if (msgV3hash_bin != null)
             {
                 msgV3hash_hex_string = bytesToHex(msgV3hash_bin, 0, msgV3hash_bin.size)
-                val toxpk = tox_friend_get_public_key(friend_number)!!.uppercase()
                 val got_messages = orma!!.selectFromMessage().tox_friendpubkeyEq(toxpk).
                     directionEq(0).msg_idv3_hashEq(msgV3hash_hex_string).count()
                 // Log.i(TAG, "friend_message:friend:" + friend_number + " msgV3hash_hex_string:" + msgV3hash_hex_string +
@@ -1599,10 +1605,9 @@ class MainActivity
             GlobalScope.launch(Dispatchers.IO) {
                 if (msgV3hash_bin != null)
                 {
-                    val toxpk = tox_friend_get_public_key(friend_number)!!.uppercase()
                     val got_messages_mirrored = orma!!.selectFromMessage().
-                        tox_friendpubkeyEq(toxpk).directionEq(1).
-                        msg_idv3_hashEq(msgV3hash_hex_string).count()
+                            tox_friendpubkeyEq(toxpk).directionEq(1).
+                            msg_idv3_hashEq(msgV3hash_hex_string).count()
                     // Log.i(TAG, "update_friend_msgv3_capability:got_messages_mirrored=" + got_messages_mirrored + " hash1=" +
                     //           msgV3hash_bin + " " + msgV3hash_hex_string);
                     if (got_messages_mirrored > 0)
@@ -1612,7 +1617,8 @@ class MainActivity
                     {
                         update_friend_msgv3_capability(friend_number, 1)
                     }
-                } else
+                }
+                else
                 {
                     // Log.i(TAG, "update_friend_msgv3_capability:hash0=" + msgV3hash_bin + " " + msgV3hash_hex_string);
                     update_friend_msgv3_capability(friend_number, 0)
@@ -1624,7 +1630,6 @@ class MainActivity
                     try
                     {
                         // ("msgv3:"+friend_message)
-                        val toxpk = tox_friend_get_public_key(friend_number)!!.uppercase()
                         var timestamp_wrap: Long = message_timestamp * 1000
                         if (timestamp_wrap == 0L)
                         {
@@ -1642,7 +1647,6 @@ class MainActivity
                 {
                     try
                     { // ("msgv1:"+friend_message)
-                        val toxpk = tox_friend_get_public_key(friend_number)
                         var timestamp_wrap: Long = message_timestamp * 1000
                         if (timestamp_wrap == 0L)
                         {
@@ -1663,6 +1667,13 @@ class MainActivity
         @JvmStatic
         fun android_tox_callback_friend_message_v2_cb_method(friend_number: Long, friend_message: String?, length: Long, ts_sec: Long, ts_ms: Long, raw_message: ByteArray?, raw_message_length: Long)
         {
+            val toxpk = tox_friend_get_public_key(friend_number)!!.uppercase()
+            if ((toxpk == null) || (toxpk.equals("-1", true)))
+            {
+                Log.i(TAG, "android_tox_callback_friend_message_v2_cb_method: tox pubkey error")
+                return
+            }
+
             val msg_type = 1
             val raw_message_buf = ByteBuffer.allocateDirect(raw_message_length.toInt())
             raw_message_buf.put(raw_message, 0, raw_message_length.toInt())
@@ -1675,7 +1686,6 @@ class MainActivity
             }
             Log.i(TAG, "TOX_FILE_KIND_MESSAGEV2:MSGv2HASH:2=" + msg_id_as_hex_string)
 
-            val toxpk = tox_friend_get_public_key(friend_number)
             val already_have_message = orma!!.selectFromMessage().tox_friendpubkeyEq(toxpk).
                 msg_id_hashEq(msg_id_as_hex_string).count()
             val pin_timestamp = System.currentTimeMillis()
