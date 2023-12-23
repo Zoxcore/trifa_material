@@ -637,11 +637,19 @@ object HelperGeneric {
 
         ngc_video_packet_last_incoming_ts = System.currentTimeMillis()
         val ngc_incoming_video_from_peer: String = tox_group_peer_get_public_key(group_number, peer_id)!!
-            ngc_update_video_incoming_peer_list(ngc_incoming_video_from_peer)
-        if (ngc_video_showing_video_from_peer_pubkey.equals("-1")) {
+        // Log.i(TAG, "show_ngc_incoming_video_frame_v2: ngc_update_video_incoming_peer_list:" + ngc_incoming_video_from_peer)
+        ngc_update_video_incoming_peer_list(ngc_incoming_video_from_peer)
+
+        if (ngc_video_showing_video_from_peer_pubkey.equals("-1"))
+        {
+            Log.i(TAG, "show_ngc_incoming_video_frame_v2: ngc_video_showing_video_from_peer_pubkey:1a:" + ngc_video_showing_video_from_peer_pubkey)
             ngc_video_showing_video_from_peer_pubkey = ngc_incoming_video_from_peer
-        } else if (!ngc_video_showing_video_from_peer_pubkey.equals(ngc_incoming_video_from_peer, true)) {
+            Log.i(TAG, "show_ngc_incoming_video_frame_v2: ngc_video_showing_video_from_peer_pubkey:1b:" + ngc_video_showing_video_from_peer_pubkey)
+        }
+        else if (!ngc_video_showing_video_from_peer_pubkey.equals(ngc_incoming_video_from_peer, true))
+        {
             // we are already showing the video of a different peer in the group
+            // Log.i(TAG, "show_ngc_incoming_video_frame_v2: we are already showing the video of a different peer in the group")
             return
         }
 
@@ -668,16 +676,16 @@ object HelperGeneric {
                 System.arraycopy(encoded_video_and_header, 12, high_seqnum, 0, 1)
                 System.arraycopy(encoded_video_and_header, 13, chkskum, 0, 1)
                 val seqnum = java.lang.Byte.toUnsignedInt(low_seqnum[0]) + Integer.toUnsignedLong((high_seqnum[0].toInt() shl 8))
-                if (seqnum != (last_video_seq_num + 1)) {
-                    Log.i(TAG, "!!!!!!!seqnumber_missing!!!!! " + seqnum + " -> " + (last_video_seq_num + 1));
-                }
+                //if (seqnum != (last_video_seq_num + 1)) {
+                //    Log.i(TAG, "!!!!!!!seqnumber_missing!!!!! " + seqnum + " -> " + (last_video_seq_num + 1));
+                //}
                 last_video_seq_num = seqnum
-                val crc_8 = Integer.toUnsignedLong(calc_crc_8(yuv_frame_encoded_buf))
-                if (java.lang.Byte.toUnsignedInt(chkskum[0]).toLong() != crc_8) {
-                    Log.i(TAG, "checksum=" + java.lang.Byte.toUnsignedInt(chkskum[0]).toLong()
-                          + " crc8=" + crc_8 + " seqnum=" + seqnum
-                          + " yuv_frame_encoded_bytes=" + (yuv_frame_encoded_bytes + 14));
-                }
+                //val crc_8 = Integer.toUnsignedLong(calc_crc_8(yuv_frame_encoded_buf))
+                //if (java.lang.Byte.toUnsignedInt(chkskum[0]).toLong() != crc_8) {
+                //    Log.i(TAG, "checksum=" + java.lang.Byte.toUnsignedInt(chkskum[0]).toLong()
+                //          + " crc8=" + crc_8 + " seqnum=" + seqnum
+                //          + " yuv_frame_encoded_bytes=" + (yuv_frame_encoded_bytes + 14));
+                //}
                 //
                 ystride = toxav_ngc_video_decode(yuv_frame_encoded_buf, yuv_frame_encoded_bytes,
                     w2, h2, y_buf2, u_buf2, v_buf2, flush_decoder)
@@ -754,7 +762,7 @@ object HelperGeneric {
     {
         lookup_ngc_incoming_video_peer_list.put(peer_pubkey, System.currentTimeMillis())
         ngc_update_video_incoming_peer_list_ts()
-        // Log.i(TAG, "ngc_update_video_incoming_peer_list entries=" + lookup_ngc_incoming_video_peer_list.size());
+        // Log.i(TAG, "ngc_update_video_incoming_peer_list entries=" + lookup_ngc_incoming_video_peer_list.size)
     }
 
     fun ngc_update_video_incoming_peer_list_ts()
@@ -764,12 +772,24 @@ object HelperGeneric {
             return
         }
         // remove all peers that have not sent video in the last 5 seconds
-        val iterator: MutableIterator<Long> = lookup_ngc_incoming_video_peer_list.values.iterator() as MutableIterator<Long>
+        val iterator: MutableIterator<MutableMap.MutableEntry<String, Long>> = lookup_ngc_incoming_video_peer_list.iterator() as MutableIterator
         while (iterator.hasNext())
         {
-            if (iterator.next() < System.currentTimeMillis() - 5 * 1000)
+            val item = iterator.next()
+            if (item.value < System.currentTimeMillis() - (5 * 1000))
             {
+                // Log.i(TAG, "ngc_update_video_incoming_peer_list: iterator.remove: " + item.key)
+                if (item.key.equals(ngc_video_showing_video_from_peer_pubkey, true))
+                {
+                    // HINT: we are removing the peer from which we are showing the video currently
+                    // set pubkey to "-1". this will switch to the next peer sending video
+                    ngc_video_showing_video_from_peer_pubkey = "-1"
+                }
                 iterator.remove()
+            }
+            else
+            {
+                // Log.i(TAG, "ngc_update_video_incoming_peer_list: KEEP")
             }
         }
     }
