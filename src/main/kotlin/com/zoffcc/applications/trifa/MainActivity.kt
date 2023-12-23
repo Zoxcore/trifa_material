@@ -1733,7 +1733,55 @@ class MainActivity
             msg_id_buffer.put(msg_id, 0, TOX_HASH_LENGTH)
             val msg_id_buffer_compat = ByteBufferCompat(msg_id_buffer)
             val message_id_hash_as_hex_string = bytesToHex(msg_id_buffer_compat.array()!!, msg_id_buffer_compat.arrayOffset(), msg_id_buffer_compat.limit())
-            // Log.i(TAG, "receipt_message_v2_cb:MSGv2HASH:2=" + message_id_hash_as_hex_string);
+            Log.i(TAG, "receipt_message_v2_cb:MSGv2HASH:2=" + message_id_hash_as_hex_string)
+
+            try
+            {
+                val toxpk = tox_friend_get_public_key(friend_number)!!.uppercase()
+                if ((toxpk == null) || (toxpk.equals("-1", true)))
+                {
+                    Log.i(TAG, "receipt_message_v2_cb: tox pubkey error")
+                    return
+                }
+                val m_try = orma!!.selectFromMessage().
+                    msg_id_hashEq(message_id_hash_as_hex_string).
+                    tox_friendpubkeyEq(toxpk).directionEq(1).
+                    readEq(false).toList()
+                if ((m_try == null) || (m_try.size < 1))
+                {
+                    // HINT: it must a an ACK send from a friends toxproxy to singal the receipt of the message on behalf of the friend
+                    // TODO: write me
+                    return
+                }
+
+                val m = orma!!.selectFromMessage().
+                    msg_id_hashEq(message_id_hash_as_hex_string).
+                    tox_friendpubkeyEq(toxpk).
+                    directionEq(1).
+                    readEq(false).
+                    toList().get(0)
+
+                if (m != null)
+                {
+                    try
+                    {
+                        m.raw_msgv2_bytes = ""
+                        m.rcvd_timestamp = System.currentTimeMillis()
+                        m.read = true
+                        HelperMessage.update_message_in_db_read_rcvd_timestamp_rawmsgbytes(m)
+                        m.resend_count = 2
+                        HelperMessage.update_message_in_db_resend_count(m)
+                    }
+                    catch(_: Exception)
+                    {
+
+                    }
+                }
+            }
+            catch(e: Exception)
+            {
+                e.printStackTrace()
+            }
         }
 
         @JvmStatic
