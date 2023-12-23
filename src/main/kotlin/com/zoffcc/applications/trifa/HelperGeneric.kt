@@ -45,17 +45,21 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_delete
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_capabilities
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_connection_status
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_leave
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_peer_get_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_messagev3_friend_send_message
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_set_nospam
+import com.zoffcc.applications.trifa.MainActivity.Companion.toxav_ngc_video_decode
 import com.zoffcc.applications.trifa.MainActivity.Companion.update_savedata_file
 import com.zoffcc.applications.trifa.TRIFAGlobals.VFS_FILE_DIR
 import com.zoffcc.applications.trifa.ToxVars.TOX_HASH_LENGTH
 import com.zoffcc.applications.trifa.ToxVars.TOX_MAX_NGC_FILESIZE
 import com.zoffcc.applications.trifa.ToxVars.TOX_MSGV3_MAX_MESSAGE_LENGTH
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
+import groupstore
 import kotlinx.coroutines.withContext
 import messagestore
 import myUser
+import org.jetbrains.skia.Bitmap
 import org.xml.sax.InputSource
 import java.io.File
 import java.io.FileInputStream
@@ -69,6 +73,16 @@ object HelperGeneric {
     private const val TAG = "trifa.Hlp.Generic"
     @JvmStatic val hexArray = "0123456789ABCDEF".toCharArray()
     const val PUBKEY_SHORT_LEN = 6
+
+    var ngc_video_showing_video_from_peer_pubkey = "-1"
+    var ngc_video_frame_last_incoming_ts = -1L
+    var ngc_video_packet_last_incoming_ts = -1L
+    var ngc_audio_packet_last_incoming_ts = -1L
+    var ngc_video_frame_image: Bitmap? = null
+    var ngc_own_video_frame_image: Bitmap? = null
+    var lookup_ngc_incoming_video_peer_list: MutableMap<String, Long> = HashMap()
+    var flush_decoder = 0
+    var last_video_seq_num: Long = -1
 
     fun PubkeyShort(pubkey: String) : String {
         return pubkey.take(PUBKEY_SHORT_LEN)
@@ -603,6 +617,156 @@ object HelperGeneric {
         val new_nospam = random.nextInt().toLong() + (1L shl 31)
         tox_self_set_nospam(new_nospam)
         update_savedata_file_wrapper()
+    }
+
+    fun show_ngc_incoming_video_frame_v2(group_number: Long,
+                                         peer_id: Long,
+                                         encoded_video_and_header: ByteArray,
+                                         length: Long) {
+        val group_id = HelperGroup.tox_group_by_groupnum__wrapper(group_number).lowercase()
+        if (groupstore.stateFlow.value.selectedGroupId != group_id)
+        {
+            // Log.i(TAG, "show_ngc_incoming_video_frame_v2: video frame not from selected group chat")
+            return
+        }
+
+        ngc_video_packet_last_incoming_ts = System.currentTimeMillis()
+        val ngc_incoming_video_from_peer: String = tox_group_peer_get_public_key(group_number, peer_id)!!
+            ngc_update_video_incoming_peer_list(ngc_incoming_video_from_peer)
+        if (ngc_video_showing_video_from_peer_pubkey.equals("-1")) {
+            ngc_video_showing_video_from_peer_pubkey = ngc_incoming_video_from_peer
+        } else if (!ngc_video_showing_video_from_peer_pubkey.equals(ngc_incoming_video_from_peer, true)) {
+            // we are already showing the video of a different peer in the group
+            return
+        }
+
+        // remove header from data (14 bytes)
+        val yuv_frame_encoded_bytes = (length - 14).toInt()
+        if ((yuv_frame_encoded_bytes > 0) && (yuv_frame_encoded_bytes < 40000)) {
+            // TODO: make faster and better. this is not optimized.
+            val yuv_frame_encoded_buf = ByteArray(yuv_frame_encoded_bytes)
+            val w2 = 480 + 32 // 240 + 16; // encoder stride added
+            val h2 = 640 // 320;
+            val y_bytes2 = w2 * h2
+            val u_bytes2 = (w2 * h2) / 4
+            val v_bytes2 = (w2 * h2) / 4
+            val y_buf2 = ByteArray(y_bytes2)
+            val u_buf2 = ByteArray(u_bytes2)
+            val v_buf2 = ByteArray(v_bytes2)
+            var ystride = -1
+            val chkskum = ByteArray(1)
+            val low_seqnum = ByteArray(1)
+            val high_seqnum = ByteArray(1)
+            try {
+                System.arraycopy(encoded_video_and_header, 14, yuv_frame_encoded_buf, 0, yuv_frame_encoded_bytes)
+                System.arraycopy(encoded_video_and_header, 11, low_seqnum, 0, 1)
+                System.arraycopy(encoded_video_and_header, 12, high_seqnum, 0, 1)
+                System.arraycopy(encoded_video_and_header, 13, chkskum, 0, 1)
+                val seqnum = java.lang.Byte.toUnsignedInt(low_seqnum[0]) + Integer.toUnsignedLong((high_seqnum[0].toInt() shl 8))
+                if (seqnum != (last_video_seq_num + 1)) {
+                    Log.i(TAG, "!!!!!!!seqnumber_missing!!!!! " + seqnum + " -> " + (last_video_seq_num + 1));
+                }
+                last_video_seq_num = seqnum
+                val crc_8 = Integer.toUnsignedLong(calc_crc_8(yuv_frame_encoded_buf))
+                if (java.lang.Byte.toUnsignedInt(chkskum[0]).toLong() != crc_8) {
+                    Log.i(TAG, "checksum=" + java.lang.Byte.toUnsignedInt(chkskum[0]).toLong()
+                          + " crc8=" + crc_8 + " seqnum=" + seqnum
+                          + " yuv_frame_encoded_bytes=" + (yuv_frame_encoded_bytes + 14));
+                }
+                //
+                ystride = toxav_ngc_video_decode(yuv_frame_encoded_buf, yuv_frame_encoded_bytes,
+                    w2, h2, y_buf2, u_buf2, v_buf2, flush_decoder)
+                // if (ystride != -1)
+                //{
+                //    Log.i(TAG, "toxav_ngc_video_decode:ystride=" + ystride);
+                //}
+                flush_decoder = 0
+            } catch (e: java.lang.Exception) {
+                e.printStackTrace()
+                return
+            }
+            val ystride_ = ystride
+            //
+            try  {
+                if (ystride_ == -1)
+                {
+                    // TODO // ngc_video_view.setImageResource(R.drawable.round_loading_animation)
+                }
+                else
+                {
+                    val w2_decoder = ystride_ // encoder stride
+                    val w2_decoder_uv = ystride_ / 2 // encoder stride
+                    val h2_decoder = 640 // 320;
+                    val h2_decoder_uv = h2_decoder / 2
+                    val y_bytes2_decoder = h2_decoder * w2_decoder
+                    val u_bytes2_decoder = (h2_decoder_uv * w2_decoder_uv)
+                    val v_bytes2_decoder = (h2_decoder_uv * w2_decoder_uv)
+                    val yuv_frame_data_buf = ByteBuffer.allocateDirect(
+                        y_bytes2_decoder + u_bytes2_decoder + v_bytes2_decoder)
+                    yuv_frame_data_buf.rewind()
+                    //
+                    yuv_frame_data_buf.put(y_buf2, 0, y_bytes2_decoder)
+                    yuv_frame_data_buf.put(u_buf2, 0, u_bytes2_decoder)
+                    yuv_frame_data_buf.put(v_buf2, 0, v_bytes2_decoder)
+                    //
+                    yuv_frame_data_buf.rewind()
+                    if ((VideoInFrame.width != w2_decoder || VideoInFrame.height != h2_decoder) || (VideoInFrame.imageInByte == null))
+                    {
+                        VideoInFrame.setup_video_in_resolution(w2_decoder, h2_decoder, (y_bytes2_decoder + u_bytes2_decoder + v_bytes2_decoder))
+                    }
+                    VideoInFrame.new_video_in_frame(yuv_frame_data_buf, w2_decoder, h2_decoder)
+                }
+                ngc_video_frame_last_incoming_ts = System.currentTimeMillis()
+            } catch (e: java.lang.Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun calc_crc_8(yuv_frame_encoded_buf: ByteArray): Int
+    {
+        val CRC_POLYNOM = 0x9c
+        val CRC_PRESET = 0xFF
+        var crc_U = CRC_PRESET
+        for (i in yuv_frame_encoded_buf.indices)
+        {
+            crc_U = crc_U xor java.lang.Byte.toUnsignedInt(yuv_frame_encoded_buf[i])
+            for (j in 0..7)
+            {
+                crc_U = if (crc_U and 0x01 != 0)
+                {
+                    crc_U ushr 1 xor CRC_POLYNOM
+                } else
+                {
+                    crc_U ushr 1
+                }
+            }
+        }
+        return crc_U
+    }
+
+    fun ngc_update_video_incoming_peer_list(peer_pubkey: String)
+    {
+        lookup_ngc_incoming_video_peer_list.put(peer_pubkey, System.currentTimeMillis())
+        ngc_update_video_incoming_peer_list_ts()
+        // Log.i(TAG, "ngc_update_video_incoming_peer_list entries=" + lookup_ngc_incoming_video_peer_list.size());
+    }
+
+    fun ngc_update_video_incoming_peer_list_ts()
+    {
+        if (lookup_ngc_incoming_video_peer_list.isEmpty())
+        {
+            return
+        }
+        // remove all peers that have not sent video in the last 5 seconds
+        val iterator: MutableIterator<Long> = lookup_ngc_incoming_video_peer_list.values.iterator() as MutableIterator<Long>
+        while (iterator.hasNext())
+        {
+            if (iterator.next() < System.currentTimeMillis() - 5 * 1000)
+            {
+                iterator.remove()
+            }
+        }
     }
 }
 

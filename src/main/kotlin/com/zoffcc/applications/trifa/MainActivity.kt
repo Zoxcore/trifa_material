@@ -40,6 +40,7 @@ import com.zoffcc.applications.trifa.HelperGeneric.get_friend_msgv3_capability
 import com.zoffcc.applications.trifa.HelperGeneric.hexstring_to_bytebuffer
 import com.zoffcc.applications.trifa.HelperGeneric.io_file_copy
 import com.zoffcc.applications.trifa.HelperGeneric.read_chunk_from_SD_file
+import com.zoffcc.applications.trifa.HelperGeneric.show_ngc_incoming_video_frame_v2
 import com.zoffcc.applications.trifa.HelperGeneric.shrink_image_file
 import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
 import com.zoffcc.applications.trifa.HelperGroup.bytebuffer_to_hexstring
@@ -936,6 +937,19 @@ class MainActivity
          */
         @JvmStatic
         external fun tox_group_invite_accept(friend_number: Long, invite_data_buffer: ByteBuffer?, invite_data_length: Long, my_peer_name: String?, password: String?): Long
+
+        @JvmStatic
+        external fun toxav_ngc_video_encode(vbitrate: Int, max_quantizer: Int, width: Int, height: Int, y: ByteArray, y_bytes: Int, u: ByteArray, u_bytes: Int, v: ByteArray, v_bytes: Int, encoded_frame_bytes: ByteArray): Int
+
+        @JvmStatic
+        external fun toxav_ngc_video_decode(encoded_frame_bytes: ByteArray, encoded_frame_size_bytes: Int, width: Int, height: Int, y: ByteArray, u: ByteArray, v: ByteArray, flush_decoder: Int): Int
+
+        @JvmStatic
+        external fun toxav_ngc_audio_encode(pcm: ByteArray, sample_count_per_frame: Int, encoded_frame_bytes: ByteArray): Int
+
+        @JvmStatic
+        external fun toxav_ngc_audio_decode(encoded_frame_bytes: ByteArray, encoded_frame_size_bytes: Int, pcm_decoded: ByteArray): Int
+
 
         // --------------- new Groups -------------
         // --------------- new Groups -------------
@@ -2304,6 +2318,7 @@ class MainActivity
         @JvmStatic
         fun android_tox_callback_group_private_message_cb_method(group_number: Long, peer_id: Long, a_TOX_MESSAGE_TYPE: Int, message_orig: String?, length: Long)
         {
+            // TODO: write me!!
         }
 
         @JvmStatic
@@ -2511,6 +2526,11 @@ class MainActivity
         @JvmStatic
         fun android_tox_callback_group_custom_packet_cb_method(group_number: Long, peer_id: Long, data: ByteArray?, length: Long)
         {
+            if (data == null)
+            {
+                return;
+            }
+
             try
             {
                 val res = tox_group_self_get_peer_id(group_number)
@@ -2530,7 +2550,8 @@ class MainActivity
             val header_ngc_video_v2 = (6 + 1 + 1 + 1 + 1 + 1 + 2 + 1).toLong()
             val header_ngc_histsync_and_files = (6 + 1 + 1 + 32 + 32 + 4 + 25 + 255).toLong()
             if (length <= TOX_MAX_NGC_FILE_AND_HEADER_SIZE && length >= header_ngc_histsync_and_files + 1)
-            { // @formatter:off
+            {
+                // @formatter:off
                 /*
                 | what      | Length in bytes| Contents                                           |
                 |------     |--------        |------------------                                  |
@@ -2572,10 +2593,12 @@ class MainActivity
                                 group_id, false)
                         }
                     } else
-                    { // Log.i(TAG, "group_custom_packet_cb:wrong signature 2");
+                    {
+                        // Log.i(TAG, "group_custom_packet_cb:wrong signature 2");
                     }
                 } else
-                { // Log.i(TAG, "group_custom_packet_cb:wrong signature 1");
+                {
+                    // Log.i(TAG, "group_custom_packet_cb:wrong signature 1");
                 }
             }
 
@@ -2592,20 +2615,25 @@ class MainActivity
                 if (data!![0] == 0x66.toByte() && data[1] == 0x77.toByte() && data[2] == 0x88.toByte() && data[3] == 0x11.toByte() && data[4] == 0x34.toByte() && data[5] == 0x35.toByte())
                 { // byte 640 and 480. LOL
                     if (data[6] == 0x01.toByte() && data[7] == 0x21.toByte() && data[8] == 480.toByte() && data[9] == 640.toByte() && data[10] == 1.toByte())
-                    { // disable ngc video version 1 -----------
+                    {
+                        // disable ngc video version 1 -----------
                     } else if (data[6] == 0x02.toByte() && data[7] == 0x21.toByte() && data[8] == 480.toByte() && data[9] == 640.toByte() && data[10] == 1.toByte() && length >= header_ngc_video_v2 + 1)
-                    { // Log.i(TAG, "group_custom_packet_cb:video_v2");
-                        //*****//show_ngc_incoming_video_frame_v2(group_number, peer_id, data, length)
+                    {
+                        // Log.i(TAG, "group_custom_packet_cb:video_v2:length=" + length)
+                        show_ngc_incoming_video_frame_v2(group_number, peer_id, data, length)
                     } else
-                    { // Log.i(TAG, "group_custom_packet_cb:wrong signature 2");
+                    {
+                        // Log.i(TAG, "group_custom_packet_cb:wrong signature 2");
                     }
                 } else
-                { // Log.i(TAG, "group_custom_packet_cb:wrong signature 1");
+                {
+                    // Log.i(TAG, "group_custom_packet_cb:wrong signature 1");
                 }
             }
 
             if (length <= TOX_MAX_NGC_FILE_AND_HEADER_SIZE && length >= header_ngc_audio_v1 + 1)
-            { // @formatter:off
+            {
+                // @formatter:off
                 /*
                 | what          | Length in bytes| Contents                                           |
                 |------         |--------        |------------------                                  |
@@ -2620,7 +2648,8 @@ class MainActivity
                 if (data!![0] == 0x66.toByte() && data[1] == 0x77.toByte() && data[2] == 0x88.toByte() && data[3] == 0x11.toByte() && data[4] == 0x34.toByte() && data[5] == 0x35.toByte())
                 {
                     if (data[6] == 0x01.toByte() && data[7] == 0x31.toByte() && data[8] == 1.toByte() && data[9] == 48.toByte())
-                    { //*****//play_ngc_incoming_audio_frame(group_number, peer_id, data, length)
+                    {
+                        //*****//play_ngc_incoming_audio_frame(group_number, peer_id, data, length)
                     } else
                     {
                     }
@@ -2628,7 +2657,6 @@ class MainActivity
                 {
                 }
             }
-
         }
 
         @JvmStatic
