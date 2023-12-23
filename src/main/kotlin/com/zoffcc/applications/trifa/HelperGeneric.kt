@@ -21,6 +21,7 @@ import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.loadSvgPainter
 import androidx.compose.ui.res.loadXmlImageVector
 import androidx.compose.ui.unit.Density
+import avstatestore
 import com.sksamuel.scrimage.ImmutableImage
 import com.sksamuel.scrimage.webp.WebpWriter
 import com.zoffcc.applications.sorm.Filetransfer
@@ -55,6 +56,7 @@ import com.zoffcc.applications.trifa.ToxVars.TOX_HASH_LENGTH
 import com.zoffcc.applications.trifa.ToxVars.TOX_MAX_NGC_FILESIZE
 import com.zoffcc.applications.trifa.ToxVars.TOX_MSGV3_MAX_MESSAGE_LENGTH
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
+import globalstore
 import groupstore
 import kotlinx.coroutines.withContext
 import messagestore
@@ -626,7 +628,8 @@ object HelperGeneric {
                                          encoded_video_and_header: ByteArray,
                                          length: Long) {
         val group_id = HelperGroup.tox_group_by_groupnum__wrapper(group_number).lowercase()
-        if (groupstore.stateFlow.value.selectedGroupId != group_id)
+        if ((globalstore.isMinimized()) || (avstatestore.state.calling_state_get() == AVState.CALL_STATUS.CALL_STATUS_CALLING)
+            || (!groupstore.state.visible) || (groupstore.stateFlow.value.selectedGroupId != group_id))
         {
             // Log.i(TAG, "show_ngc_incoming_video_frame_v2: video frame not from selected group chat")
             return

@@ -116,6 +116,51 @@ public class HelperFriend {
         return result;
     }
 
+    static String get_friend_name_from_pubkey(String friend_pubkey)
+    {
+        String ret = "Unknown";
+        String friend_alias_name = "";
+        String friend_name = "";
+
+        try
+        {
+            friend_alias_name = TrifaToxService.Companion.getOrma().selectFromFriendList().
+                    tox_public_key_stringEq(friend_pubkey).
+                    toList().get(0).alias_name;
+        }
+        catch (Exception e)
+        {
+            friend_alias_name = "";
+            e.printStackTrace();
+        }
+
+        if ((friend_alias_name == null) || (friend_alias_name.equals("")))
+        {
+            try
+            {
+                friend_name = TrifaToxService.Companion.getOrma().selectFromFriendList().
+                        tox_public_key_stringEq(friend_pubkey).
+                        toList().get(0).name;
+            }
+            catch (Exception e)
+            {
+                friend_name = "";
+                e.printStackTrace();
+            }
+
+            if ((friend_name != null) && (!friend_name.equals("")))
+            {
+                ret = friend_name;
+            }
+        }
+        else
+        {
+            ret = friend_alias_name;
+        }
+
+        return ret;
+    }
+
     static FriendList main_get_friend(long friendnum) {
         FriendList f = null;
 
