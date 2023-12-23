@@ -48,6 +48,64 @@ public class HelperMessage {
         }
     }
 
+    static void process_msgv3_high_level_ack(final long friend_number, String msgV3hash_hex_string, long message_timestamp)
+    {
+        Message m = null;
+        try
+        {
+            m = TrifaToxService.Companion.getOrma().selectFromMessage().
+                    msg_idv3_hashEq(msgV3hash_hex_string).
+                    tox_friendpubkeyEq(tox_friend_get_public_key(friend_number)).
+                    directionEq(1).
+                    readEq(false).
+                    orderByIdDesc().
+                    toList().get(0);
+        }
+        catch (Exception e)
+        {
+            return;
+        }
+
+        if (m != null)
+        {
+            try
+            {
+                if (message_timestamp > 0)
+                {
+                    m.rcvd_timestamp = message_timestamp * 1000;
+                }
+                else
+                {
+                    m.rcvd_timestamp = System.currentTimeMillis();
+                }
+                m.read = true;
+                update_message_in_db_read_rcvd_timestamp_rawmsgbytes(m);
+                // TODO: update message in UI
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    static void update_message_in_db_read_rcvd_timestamp_rawmsgbytes(final Message m)
+    {
+        try
+        {
+            TrifaToxService.Companion.getOrma().updateMessage().
+                    idEq(m.id).
+                    read(m.read).
+                    raw_msgv2_bytes(m.raw_msgv2_bytes).
+                    rcvd_timestamp(m.rcvd_timestamp).
+                    execute();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     public static long get_message_id_from_filetransfer_id_and_friendnum(long filetransfer_id, long friend_number)
     {
         try

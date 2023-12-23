@@ -7,7 +7,6 @@ import SnackBarToast
 import UIGroupMessage
 import UIMessage
 import User
-import androidx.compose.ui.text.toUpperCase
 import avstatestore
 import avstatestorecallstate
 import avstatestorevcapfpsstate
@@ -34,6 +33,7 @@ import com.zoffcc.applications.trifa.HelperFriend.main_get_friend
 import com.zoffcc.applications.trifa.HelperFriend.send_friend_msg_receipt_v2_wrapper
 import com.zoffcc.applications.trifa.HelperFriend.update_friend_in_db_capabilities
 import com.zoffcc.applications.trifa.HelperFriend.update_friend_in_db_msgv3_capability
+import com.zoffcc.applications.trifa.HelperFriend.update_friend_msgv3_capability
 import com.zoffcc.applications.trifa.HelperGeneric.PubkeyShort
 import com.zoffcc.applications.trifa.HelperGeneric.bytesToHex
 import com.zoffcc.applications.trifa.HelperGeneric.get_friend_msgv3_capability
@@ -53,6 +53,7 @@ import com.zoffcc.applications.trifa.HelperGroup.send_ngch_request
 import com.zoffcc.applications.trifa.HelperGroup.sync_group_message_history
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupnum__wrapper
+import com.zoffcc.applications.trifa.HelperMessage.process_msgv3_high_level_ack
 import com.zoffcc.applications.trifa.HelperMessage.update_single_message_from_ftid
 import com.zoffcc.applications.trifa.HelperMessage.update_single_message_from_messge_id
 import com.zoffcc.applications.trifa.TRIFAGlobals.AVATAR_INCOMING_MAX_BYTE_SIZE
@@ -111,7 +112,6 @@ import java.nio.ByteBuffer
 import java.util.*
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
-import kotlin.concurrent.fixedRateTimer
 
 @Suppress("UNUSED_PARAMETER")
 class MainActivity
@@ -124,6 +124,7 @@ class MainActivity
         // --------- global config ---------
         // --------- global config ---------
         const val CTOXCORE_NATIVE_LOGGING = false // set "false" for release builds
+        const val AUDIO_PCM_DEBUG_FILES = false // set "false" for release builds
 
         // --------- global config ---------
         // --------- global config ---------
@@ -1252,33 +1253,46 @@ class MainActivity
 
                 try
                 {
-                    semaphore_audio_out_convert.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
+                    semaphore_audio_out_convert.acquire_passthru()
                     if (semaphore_audio_out_convert_active_threads >= semaphore_audio_out_convert_max_active_threads)
                     {
                         Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:too many threads running")
-                        semaphore_audio_out_convert.release()
+                        semaphore_audio_out_convert.release_passthru()
                         return
                     }
-                    semaphore_audio_out_convert.release()
+                    semaphore_audio_out_convert.release_passthru()
                 } catch (e: java.lang.Exception)
                 {
-                    semaphore_audio_out_convert.release()
+                    semaphore_audio_out_convert.release_passthru()
                 }
 
                 val t_audio_pcm_play = Thread{
                     try
                     {
-                        semaphore_audio_out_convert.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
+                        semaphore_audio_out_convert.acquire_passthru()
                         semaphore_audio_out_convert_active_threads++
-                        semaphore_audio_out_convert.release()
+                        semaphore_audio_out_convert.release_passthru()
                     } catch (e: java.lang.Exception)
                     {
-                        semaphore_audio_out_convert.release()
+                        semaphore_audio_out_convert.release_passthru()
                     }
                     // HINT: this acutally plays incoming Audio
                     // HINT: this may block!!
                     try
                     {
+                        GlobalScope.launch {
+                            if (AUDIO_PCM_DEBUG_FILES)
+                            {
+                                val f: File = File("/tmp/toxaudio_recv.txt")
+                                try
+                                {
+                                    f.appendBytes(audio_out_byte_buffer)
+                                } catch (e: Exception)
+                                {
+                                    e.printStackTrace()
+                                }
+                            }
+                        }
                         val bytes_actually_written = AudioSelectOutBox.sourceDataLine.write(audio_out_byte_buffer, 0, want_bytes)
                         if (bytes_actually_written != want_bytes)
                         {
@@ -1290,12 +1304,12 @@ class MainActivity
                     }
                     try
                     {
-                        semaphore_audio_out_convert.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
+                        semaphore_audio_out_convert.acquire_passthru()
                         semaphore_audio_out_convert_active_threads--
-                        semaphore_audio_out_convert.release()
+                        semaphore_audio_out_convert.release_passthru()
                     } catch (e: java.lang.Exception)
                     {
-                        semaphore_audio_out_convert.release()
+                        semaphore_audio_out_convert.release_passthru()
                     }
                     var global_audio_out_vu: Float = AUDIO_VU_MIN_VALUE
                     if (sample_count > 0)
@@ -1559,19 +1573,57 @@ class MainActivity
             if (msgV3hash_bin != null)
             {
                 msgV3hash_hex_string = bytesToHex(msgV3hash_bin, 0, msgV3hash_bin.size)
+                val toxpk = tox_friend_get_public_key(friend_number)!!.uppercase()
+                val got_messages = orma!!.selectFromMessage().tox_friendpubkeyEq(toxpk).
+                    directionEq(0).msg_idv3_hashEq(msgV3hash_hex_string).count()
+                // Log.i(TAG, "friend_message:friend:" + friend_number + " msgV3hash_hex_string:" + msgV3hash_hex_string +
+                //            " got_messages=" + got_messages);
+                // Log.i(TAG, "friend_message:friend:" + friend_number + " msgV3hash_hex_string:" + msgV3hash_hex_string +
+                //            " got_messages=" + got_messages);
+                if (got_messages > 0)
+                {
+                    // HINT: we already have received a message with this hash
+                    // still send the msgV3 high level ACK, and then ignore
+                    Log.i(TAG, "TOX_MESSAGEv3:ignore double message")
+                    HelperMessage.send_msgv3_high_level_ack(friend_number, msgV3hash_hex_string)
+                    return
+                }
             }
 
             if (message_type == ToxVars.TOX_MESSAGE_TYPE.TOX_MESSAGE_TYPE_HIGH_LEVEL_ACK.value)
             {
+                process_msgv3_high_level_ack(friend_number, msgV3hash_hex_string, message_timestamp);
                 return
             }
 
             GlobalScope.launch(Dispatchers.IO) {
+                if (msgV3hash_bin != null)
+                {
+                    val toxpk = tox_friend_get_public_key(friend_number)!!.uppercase()
+                    val got_messages_mirrored = orma!!.selectFromMessage().
+                        tox_friendpubkeyEq(toxpk).directionEq(1).
+                        msg_idv3_hashEq(msgV3hash_hex_string).count()
+                    // Log.i(TAG, "update_friend_msgv3_capability:got_messages_mirrored=" + got_messages_mirrored + " hash1=" +
+                    //           msgV3hash_bin + " " + msgV3hash_hex_string);
+                    if (got_messages_mirrored > 0)
+                    {
+                        update_friend_msgv3_capability(friend_number, 0)
+                    } else
+                    {
+                        update_friend_msgv3_capability(friend_number, 1)
+                    }
+                } else
+                {
+                    // Log.i(TAG, "update_friend_msgv3_capability:hash0=" + msgV3hash_bin + " " + msgV3hash_hex_string);
+                    update_friend_msgv3_capability(friend_number, 0)
+                }
+
                 if (msgV3hash_hex_string != null)
                 {
                     HelperMessage.send_msgv3_high_level_ack(friend_number, msgV3hash_hex_string);
                     try
-                    { // ("msgv3:"+friend_message)
+                    {
+                        // ("msgv3:"+friend_message)
                         val toxpk = tox_friend_get_public_key(friend_number)!!.uppercase()
                         var timestamp_wrap: Long = message_timestamp * 1000
                         if (timestamp_wrap == 0L)
@@ -1621,11 +1673,26 @@ class MainActivity
             val msg_id_as_hex_string: String? = msg_id_buffer_compat.array()?.let {
                 bytesToHex(it, msg_id_buffer_compat.arrayOffset(), msg_id_buffer_compat.limit())
             }
-            // Log.i(TAG, "TOX_FILE_KIND_MESSAGEV2_SEND:MSGv2HASH:2=" + msg_id_as_hex_string);
+            Log.i(TAG, "TOX_FILE_KIND_MESSAGEV2:MSGv2HASH:2=" + msg_id_as_hex_string)
+
+            val toxpk = tox_friend_get_public_key(friend_number)
+            val already_have_message = orma!!.selectFromMessage().tox_friendpubkeyEq(toxpk).
+                msg_id_hashEq(msg_id_as_hex_string).count()
+            val pin_timestamp = System.currentTimeMillis()
+
+            if (already_have_message > 0)
+            {
+                // it's a double send, ignore it
+                // send message receipt v2, most likely the other party did not get it yet
+                // TODO: use received timstamp, not "now" here!
+                Log.i(TAG, "TOX_FILE_KIND_MESSAGEV2:ignore double message")
+                send_friend_msg_receipt_v2_wrapper(friend_number, msg_type,
+                    msg_id_buffer,pin_timestamp / 1000)
+                return
+            }
 
             try
             {
-                val toxpk = tox_friend_get_public_key(friend_number)
                 val message_timestamp = ts_sec * 1000
                 val msg_id_db = received_message_to_db(toxpk, message_timestamp, friend_message)
                 val friendnum = tox_friend_by_public_key(toxpk)
@@ -1635,8 +1702,8 @@ class MainActivity
             } catch (_: Exception)
             {
             }
-            val pin_timestamp = System.currentTimeMillis()
-            send_friend_msg_receipt_v2_wrapper(friend_number, msg_type, msg_id_buffer, (pin_timestamp / 1000));
+            send_friend_msg_receipt_v2_wrapper(friend_number, msg_type,
+                msg_id_buffer, (pin_timestamp / 1000));
         }
 
         @JvmStatic

@@ -757,10 +757,12 @@ class TrifaToxService
                                 {
                                     m_resend_v2.resend_count = 1 // we sent the message successfully
                                     m_resend_v2.message_id = res
+                                    Log.i(TAG, "resend_v2_messages:1: message_id=" + res)
                                 } else
                                 {
                                     m_resend_v2.resend_count = 0 // sending was NOT successfull
                                     m_resend_v2.message_id = -1
+                                    Log.i(TAG, "resend_v2_messages:2: message_id=" + "-1")
                                 }
                                 if (result.msg_v2)
                                 {
@@ -801,6 +803,8 @@ class TrifaToxService
                             val res: Int = tox_util_friend_resend_message_v2(
                                 tox_friend_by_public_key(m_resend_v2.tox_friendpubkey),
                                 msg_text_buffer_resend_v2, raw_data_length.toLong())
+                            Log.i(TAG, "resend_v2_messages:7: tox_util_friend_resend_message_v2 res: " + res)
+                            /*
                             val relay = get_relay_for_friend(m_resend_v2.tox_friendpubkey)
                             if (relay != null)
                             {
@@ -808,6 +812,7 @@ class TrifaToxService
                                     msg_text_buffer_resend_v2,
                                     raw_data_length.toLong())
                             }
+                            */
                         }
                         cur_resend_count_per_iteration++
                         if (cur_resend_count_per_iteration >= max_resend_count_per_iteration)
