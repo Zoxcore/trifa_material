@@ -39,6 +39,7 @@ import com.zoffcc.applications.trifa.HelperGeneric.bytesToHex
 import com.zoffcc.applications.trifa.HelperGeneric.get_friend_msgv3_capability
 import com.zoffcc.applications.trifa.HelperGeneric.hexstring_to_bytebuffer
 import com.zoffcc.applications.trifa.HelperGeneric.io_file_copy
+import com.zoffcc.applications.trifa.HelperGeneric.play_ngc_incoming_audio_frame
 import com.zoffcc.applications.trifa.HelperGeneric.read_chunk_from_SD_file
 import com.zoffcc.applications.trifa.HelperGeneric.show_ngc_incoming_video_frame_v2
 import com.zoffcc.applications.trifa.HelperGeneric.shrink_image_file
@@ -154,6 +155,7 @@ class MainActivity
         @JvmStatic var video_play_last_timestamp: Long = 0
         var video_play_fps_value: Int = 0
         @JvmStatic val video_play_measure_after_frame = 5;
+        var ngc_audio_in_queue: BlockingQueue<ByteArray> = LinkedBlockingQueue(3 * 5)
 
         //
         var PREF__ngc_video_bitrate: Int = LOWER_NGC_VIDEO_BITRATE // ~600 kbits/s -> ~60 kbytes/s
@@ -2774,7 +2776,7 @@ class MainActivity
                 {
                     if (data[6] == 0x01.toByte() && data[7] == 0x31.toByte() && data[8] == 1.toByte() && data[9] == 48.toByte())
                     {
-                        //*****//play_ngc_incoming_audio_frame(group_number, peer_id, data, length)
+                        play_ngc_incoming_audio_frame(group_number, peer_id, data, length)
                     } else
                     {
                     }

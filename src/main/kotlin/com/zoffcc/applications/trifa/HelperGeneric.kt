@@ -40,6 +40,7 @@ import com.zoffcc.applications.trifa.HelperMessage.tox_friend_send_message_wrapp
 import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_messageid
 import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_resend_count
 import com.zoffcc.applications.trifa.MainActivity.Companion.modify_message_with_ft
+import com.zoffcc.applications.trifa.MainActivity.Companion.ngc_audio_in_queue
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_file_control
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_delete
@@ -49,6 +50,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_leave
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_peer_get_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_messagev3_friend_send_message
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_set_nospam
+import com.zoffcc.applications.trifa.MainActivity.Companion.toxav_ngc_audio_decode
 import com.zoffcc.applications.trifa.MainActivity.Companion.toxav_ngc_video_decode
 import com.zoffcc.applications.trifa.MainActivity.Companion.update_savedata_file
 import com.zoffcc.applications.trifa.TRIFAGlobals.VFS_FILE_DIR
@@ -623,6 +625,72 @@ object HelperGeneric {
         update_savedata_file_wrapper()
     }
 
+    fun play_ngc_incoming_audio_frame(group_number: Long,
+                                      peer_id: Long,
+                                      encoded_audio_and_header: ByteArray,
+                                      length: Long)
+    {
+        val group_id = HelperGroup.tox_group_by_groupnum__wrapper(group_number).lowercase()
+        if ((globalstore.isMinimized()) || (avstatestore.state.calling_state_get() == AVState.CALL_STATUS.CALL_STATUS_CALLING)
+            || (!groupstore.state.visible) || (groupstore.stateFlow.value.selectedGroupId != group_id))
+        {
+            // Log.i(TAG, "play_ngc_incoming_audio_frame: audio frame not from selected group chat")
+            return
+        }
+
+        ngc_video_packet_last_incoming_ts = System.currentTimeMillis()
+        val ngc_incoming_video_from_peer: String = tox_group_peer_get_public_key(group_number, peer_id)!!
+        ngc_update_video_incoming_peer_list(ngc_incoming_video_from_peer)
+
+        if (ngc_video_showing_video_from_peer_pubkey.equals("-1"))
+        {
+            Log.i(TAG, "play_ngc_incoming_audio_frame: ngc_video_showing_video_from_peer_pubkey:2a:" + ngc_video_showing_video_from_peer_pubkey)
+            ngc_video_showing_video_from_peer_pubkey = ngc_incoming_video_from_peer
+            Log.i(TAG, "play_ngc_incoming_audio_frame: ngc_video_showing_video_from_peer_pubkey:2b:" + ngc_video_showing_video_from_peer_pubkey)
+        }
+        else if (!ngc_video_showing_video_from_peer_pubkey.equals(ngc_incoming_video_from_peer, true))
+        {
+            // we are already showing the video of a different peer in the group
+            // Log.i(TAG, "play_ngc_incoming_audio_frame: we are already playing the audio of a different peer in the group")
+            return
+        }
+        // remove header from data (10 bytes)
+        // remove header from data (10 bytes)
+        val pcm_encoded_length = (length - 10).toInt()
+        val pcm_encoded_buf = ByteArray(pcm_encoded_length * 10)
+        val pcm_decoded_buf = ByteArray(20000)
+        val bytes_in_40ms = 1920
+        val pcm_decoded_buf_delta_1 = ByteArray(bytes_in_40ms * 2)
+        val pcm_decoded_buf_delta_2 = ByteArray(bytes_in_40ms * 2)
+        val pcm_decoded_buf_delta_3 = ByteArray(bytes_in_40ms * 2)
+        try
+        {
+            System.arraycopy(encoded_audio_and_header, 10, pcm_encoded_buf, 0, pcm_encoded_length)
+            //
+            //Log.i(TAG, "play_ngc_incoming_audio_frame:toxav_ngc_audio_decode:"
+            //        + pcm_encoded_buf
+            //        + " " + pcm_encoded_length
+            //        + " " + pcm_decoded_buf)
+            val decoded_samples: Int = toxav_ngc_audio_decode(
+                pcm_encoded_buf,
+                pcm_encoded_length,
+                pcm_decoded_buf)
+            //Log.i(TAG, "play_ngc_incoming_audio_frame:toxav_ngc_audio_decode:decoded_samples="
+            //        + decoded_samples)
+            // put pcm data into a FIFO
+            System.arraycopy(pcm_decoded_buf, 0, pcm_decoded_buf_delta_1, 0, bytes_in_40ms * 2)
+            ngc_audio_in_queue.offer(pcm_decoded_buf_delta_1)
+            System.arraycopy(pcm_decoded_buf, bytes_in_40ms * 2, pcm_decoded_buf_delta_2, 0, bytes_in_40ms * 2)
+            ngc_audio_in_queue.offer(pcm_decoded_buf_delta_2)
+            System.arraycopy(pcm_decoded_buf, bytes_in_40ms * 2 * 2, pcm_decoded_buf_delta_3, 0, bytes_in_40ms * 2)
+            ngc_audio_in_queue.offer(pcm_decoded_buf_delta_3)
+            ngc_video_frame_last_incoming_ts = System.currentTimeMillis()
+        } catch (e: java.lang.Exception)
+        {
+            e.printStackTrace()
+        }
+    }
+
     fun show_ngc_incoming_video_frame_v2(group_number: Long,
                                          peer_id: Long,
                                          encoded_video_and_header: ByteArray,
@@ -676,12 +744,12 @@ object HelperGeneric {
                 System.arraycopy(encoded_video_and_header, 12, high_seqnum, 0, 1)
                 System.arraycopy(encoded_video_and_header, 13, chkskum, 0, 1)
                 val seqnum = java.lang.Byte.toUnsignedInt(low_seqnum[0]) + Integer.toUnsignedLong((high_seqnum[0].toInt() shl 8))
-                //if (seqnum != (last_video_seq_num + 1)) {
+                // if (seqnum != (last_video_seq_num + 1)) {
                 //    Log.i(TAG, "!!!!!!!seqnumber_missing!!!!! " + seqnum + " -> " + (last_video_seq_num + 1));
                 //}
                 last_video_seq_num = seqnum
-                //val crc_8 = Integer.toUnsignedLong(calc_crc_8(yuv_frame_encoded_buf))
-                //if (java.lang.Byte.toUnsignedInt(chkskum[0]).toLong() != crc_8) {
+                // val crc_8 = Integer.toUnsignedLong(calc_crc_8(yuv_frame_encoded_buf))
+                // if (java.lang.Byte.toUnsignedInt(chkskum[0]).toLong() != crc_8) {
                 //    Log.i(TAG, "checksum=" + java.lang.Byte.toUnsignedInt(chkskum[0]).toLong()
                 //          + " crc8=" + crc_8 + " seqnum=" + seqnum
                 //          + " yuv_frame_encoded_bytes=" + (yuv_frame_encoded_bytes + 14));

@@ -20,11 +20,11 @@ import com.zoffcc.applications.trifa.HelperMessage.tox_friend_send_message_wrapp
 import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_messageid
 import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_no_read_recvedts
 import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_resend_count
-import com.zoffcc.applications.trifa.HelperRelay.get_relay_for_friend
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__udp_enabled
 import com.zoffcc.applications.trifa.MainActivity.Companion.add_tcp_relay_single_wrapper
 import com.zoffcc.applications.trifa.MainActivity.Companion.bootstrap_single_wrapper
 import com.zoffcc.applications.trifa.MainActivity.Companion.init_tox_callbacks
+import com.zoffcc.applications.trifa.MainActivity.Companion.ngc_audio_in_queue
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_connection_status
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_name
@@ -61,6 +61,8 @@ import contactstore
 import globalstore
 import grouppeerstore
 import groupstore
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import online_button_text_wrapper
 import org.briarproject.briar.desktop.contact.ContactItem
 import org.briarproject.briar.desktop.contact.GroupItem
@@ -68,6 +70,7 @@ import org.briarproject.briar.desktop.contact.GroupPeerItem
 import set_tox_running_state
 import toxdatastore
 import unlock_data_dir_input
+import java.io.File
 import java.nio.ByteBuffer
 import java.util.*
 
@@ -110,6 +113,9 @@ class TrifaToxService
                 // --------------- bootstrap ---------------
                 // --------------- bootstrap ---------------
                 // --------------- bootstrap ---------------
+
+                ngc_audio_play_thread_running = true
+                ngc_audio_play_thread_start()
 
                 if (!old_is_tox_started)
                 {
@@ -249,6 +255,16 @@ class TrifaToxService
                 // ------- MAIN TOX LOOP ---------------------------------------------------------------
                 // ------- MAIN TOX LOOP ---------------------------------------------------------------
                 // ------- MAIN TOX LOOP ---------------------------------------------------------------
+                ngc_audio_play_thread_running = false
+                try
+                {
+                    ngc_audio_play_thread!!.join(500)
+                }
+                catch(e: Exception)
+                {
+                    e.printStackTrace()
+                }
+
                 try
                 {
                     sleep(100) // wait a bit, for "something" to finish up in the native code
@@ -271,6 +287,7 @@ class TrifaToxService
                     e.printStackTrace()
                 }
                 update_savedata_file_wrapper()
+
                 is_tox_started = false
                 set_tox_running_state("stopped")
                 clear_friends()
@@ -295,6 +312,151 @@ class TrifaToxService
             }
         }
         (ToxServiceThread as Thread).start()
+    }
+
+    fun ngc_audio_play_thread_start()
+    {
+        Log.i(TAG, "ngc_audio_play_thread_start:starting Thread")
+        ngc_audio_play_thread = object : Thread()
+        {
+            override fun run()
+            {
+                try
+                {
+                    val sleep_millis: Long = 40
+                    var sleep_millis_current: Long = sleep_millis
+                    var d1: Long = 0
+                    val sampling_rate = 48000
+                    val channels = 1
+                    val bytes_in_40ms = 1920
+                    // val sample_count = bytes_in_40ms / 2
+                    while (ngc_audio_play_thread_running)
+                    {
+                        d1 = System.currentTimeMillis()
+                        // -- play incoming bytes --
+                        // -- play incoming bytes --
+                        try
+                        {
+                            val buf: ByteArray = ngc_audio_in_queue.poll()
+                            if (buf != null)
+                            {
+                                if ((sampling_rate != AudioSelectOutBox.SAMPLE_RATE) ||
+                                    (channels != AudioSelectOutBox.CHANNELS) ||
+                                    (AudioSelectOutBox.sourceDataLine == null))
+                                {
+                                    Log.i(TAG, "ngc_audio_play_thread_start:11:1");
+                                    AudioSelectOutBox.init()
+                                    AudioSelectOutBox.change_audio_format(sampling_rate, channels)
+                                    Log.i(TAG, "ngc_audio_play_thread_start:11:2");
+                                }
+                                if (sampling_rate != AudioSelectOutBox.SAMPLE_RATE ||
+                                    channels != AudioSelectOutBox.CHANNELS)
+                                {
+                                    Log.i(TAG, "ngc_audio_play_thread_start:22:1:$sampling_rate" + " "
+                                            + AudioSelectOutBox.SAMPLE_RATE)
+                                    AudioSelectOutBox.change_audio_format(sampling_rate, channels)
+                                    Log.i(TAG, "ngc_audio_play_thread_start:22:2")
+                                }
+
+                                try
+                                {
+                                    val want_bytes = buf.size
+                                    val sample_count = want_bytes / 2
+                                    try
+                                    {
+                                        AudioSelectOutBox.semaphore_audio_out_convert.acquire_passthru()
+                                        if (AudioSelectOutBox.semaphore_audio_out_convert_active_threads >= AudioSelectOutBox.semaphore_audio_out_convert_max_active_threads)
+                                        {
+                                            Log.i(TAG, "ngc_audio_play_thread_start:too many threads running")
+                                            AudioSelectOutBox.semaphore_audio_out_convert.release_passthru()
+                                            return
+                                        }
+                                        AudioSelectOutBox.semaphore_audio_out_convert.release_passthru()
+                                    } catch (e: java.lang.Exception)
+                                    {
+                                        AudioSelectOutBox.semaphore_audio_out_convert.release_passthru()
+                                    }
+
+                                    val t_audio_pcm_play = Thread{
+                                        try
+                                        {
+                                            AudioSelectOutBox.semaphore_audio_out_convert.acquire_passthru()
+                                            AudioSelectOutBox.semaphore_audio_out_convert_active_threads++
+                                            AudioSelectOutBox.semaphore_audio_out_convert.release_passthru()
+                                        } catch (e: java.lang.Exception)
+                                        {
+                                            AudioSelectOutBox.semaphore_audio_out_convert.release_passthru()
+                                        }
+                                        // HINT: this acutally plays incoming Audio
+                                        // HINT: this may block!!
+                                        try
+                                        {
+                                            val bytes_actually_written = AudioSelectOutBox.sourceDataLine.write(buf, 0, want_bytes)
+                                            if (bytes_actually_written != want_bytes)
+                                            {
+                                                Log.i(TAG, "ngc_audio_play_thread_start:bytes_actually_written=" + bytes_actually_written + " want_bytes=" + want_bytes)
+                                            }
+                                        } catch (e: java.lang.Exception)
+                                        {
+                                            Log.i(TAG, "ngc_audio_play_thread_start:sourceDataLine.write:EE:" + e.message) // e.printStackTrace();
+                                        }
+                                        try
+                                        {
+                                            AudioSelectOutBox.semaphore_audio_out_convert.acquire_passthru()
+                                            AudioSelectOutBox.semaphore_audio_out_convert_active_threads--
+                                            AudioSelectOutBox.semaphore_audio_out_convert.release_passthru()
+                                        } catch (e: java.lang.Exception)
+                                        {
+                                            AudioSelectOutBox.semaphore_audio_out_convert.release_passthru()
+                                        }
+                                        var global_audio_out_vu: Float = MainActivity.AUDIO_VU_MIN_VALUE
+                                        if (sample_count > 0)
+                                        {
+                                            val vu_value = AudioBar.audio_vu(buf, sample_count)
+                                            global_audio_out_vu = if (vu_value > MainActivity.AUDIO_VU_MIN_VALUE)
+                                            {
+                                                vu_value
+                                            } else
+                                            {
+                                                0f
+                                            }
+                                        }
+                                        val global_audio_out_vu_ = global_audio_out_vu
+                                        AudioBar.set_cur_value(global_audio_out_vu_.toInt(), AudioBar.audio_out_bar)
+                                    }
+                                    t_audio_pcm_play.start()
+                                }
+                                catch(_: Exception)
+                                {
+                                }
+
+                            }
+                        } catch (e: java.lang.Exception)
+                        {
+                        }
+                        // -- play incoming bytes --
+                        // -- play incoming bytes --
+                        val delta = (System.currentTimeMillis() - d1)
+
+                        sleep_millis_current = sleep_millis - delta
+                        if (sleep_millis_current < 1)
+                        {
+                            sleep_millis_current = 1
+                        } else if (sleep_millis_current > sleep_millis + 5)
+                        {
+                            sleep_millis_current = sleep_millis + 5
+                        }
+
+                        sleep(sleep_millis_current - 1L, 1000000 - 5000) // sleep
+                        // Log.i(TAG, "ngc_audio_play_thread_start: running ...")
+                    }
+                } catch (_: Exception)
+                {
+                }
+                Log.i(TAG, "ngc_audio_play_thread_start: Thread ending")
+            }
+        }
+        (ngc_audio_play_thread as Thread).start()
     }
 
     private fun load_db_prefs()
@@ -371,6 +533,8 @@ class TrifaToxService
         var last_resend_pending_messages3_ms: Long = -1
         var last_resend_pending_messages4_ms: Long = -1
         var last_start_queued_fts_ms: Long = -1
+        var ngc_audio_play_thread_running = false
+        var ngc_audio_play_thread: Thread? = null
 
         // ------------------------------
         fun bootstrap_me()
