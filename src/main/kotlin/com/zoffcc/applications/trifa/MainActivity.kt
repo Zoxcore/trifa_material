@@ -20,9 +20,6 @@ import com.zoffcc.applications.sorm.GroupMessage
 import com.zoffcc.applications.sorm.Message
 import com.zoffcc.applications.trifa.AudioBar.audio_in_bar
 import com.zoffcc.applications.trifa.AudioBar.audio_out_bar
-import com.zoffcc.applications.trifa.AudioSelectOutBox.semaphore_audio_out_convert
-import com.zoffcc.applications.trifa.AudioSelectOutBox.semaphore_audio_out_convert_active_threads
-import com.zoffcc.applications.trifa.AudioSelectOutBox.semaphore_audio_out_convert_max_active_threads
 import com.zoffcc.applications.trifa.HelperFiletransfer.check_auto_accept_incoming_filetransfer
 import com.zoffcc.applications.trifa.HelperFiletransfer.get_incoming_filetransfer_local_filename
 import com.zoffcc.applications.trifa.HelperFiletransfer.insert_into_filetransfer_db
@@ -164,6 +161,10 @@ class MainActivity
         var audio_queue_full_trigger = false
         var audio_queue_play_trigger = true
         var ngc_audio_in_queue: BlockingQueue<ByteArray> = LinkedBlockingQueue(ngc_audio_in_queue_max_capacity)
+        const val tox_audio_in_queue_max_capacity = 10
+        var tox_a_queue_full_trigger = false
+        var tox_a_queue_stop_trigger = true
+        var tox_audio_in_queue: BlockingQueue<ByteArray> = LinkedBlockingQueue(tox_audio_in_queue_max_capacity)
 
         //
         var PREF__ngc_video_bitrate: Int = LOWER_NGC_VIDEO_BITRATE // ~600 kbits/s -> ~60 kbytes/s
@@ -1191,6 +1192,15 @@ class MainActivity
             avstatestore.state.call_with_friend_pubkey_set(null)
             set_av_call_status(0)
             Thread.sleep(100)
+            try
+            {
+                val collection: ArrayList<ByteArray> = ArrayList<ByteArray>()
+                tox_audio_in_queue.drainTo(collection)
+                tox_audio_in_queue.drainTo(collection)
+                tox_audio_in_queue.drainTo(collection)
+            }
+            catch(_: Exception)
+            {}
             VideoOutFrame.clear_video_out_frame()
             VideoInFrame.clear_video_in_frame()
             AudioBar.set_cur_value(0, audio_in_bar)
@@ -1261,83 +1271,34 @@ class MainActivity
                 val want_bytes = (sample_count * 2 * channels).toInt()
                 val audio_out_byte_buffer = ByteArray(want_bytes)
                 _recBuffer!![audio_out_byte_buffer, 0, want_bytes]
-
-                try
+                //
+                if ((tox_audio_in_queue.remainingCapacity() < 1) && (!tox_a_queue_full_trigger))
                 {
-                    semaphore_audio_out_convert.acquire_passthru()
-                    if (semaphore_audio_out_convert_active_threads >= semaphore_audio_out_convert_max_active_threads)
-                    {
-                        Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:too many threads running")
-                        semaphore_audio_out_convert.release_passthru()
-                        return
-                    }
-                    semaphore_audio_out_convert.release_passthru()
-                } catch (e: java.lang.Exception)
+                    Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:trigger:" + tox_audio_in_queue.size)
+                    tox_a_queue_full_trigger = true
+                }
+                else
                 {
-                    semaphore_audio_out_convert.release_passthru()
+                    if (tox_a_queue_full_trigger)
+                    {
+                        if (tox_audio_in_queue.remainingCapacity() >= tox_audio_in_queue_max_capacity - 2)
+                        {
+                            tox_a_queue_full_trigger = false
+                            // Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:release:")
+                        }
+                        else
+                        {
+                            // Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:-----------:" +
+                            //        audio_queue_full_trigger)
+                        }
+                    }
+                    else
+                    {
+                        tox_audio_in_queue.offer(audio_out_byte_buffer)
+                        // Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:offer:" + tox_audio_in_queue.size)
+                    }
                 }
-
-                val t_audio_pcm_play = Thread{
-                    try
-                    {
-                        semaphore_audio_out_convert.acquire_passthru()
-                        semaphore_audio_out_convert_active_threads++
-                        semaphore_audio_out_convert.release_passthru()
-                    } catch (e: java.lang.Exception)
-                    {
-                        semaphore_audio_out_convert.release_passthru()
-                    }
-                    // HINT: this acutally plays incoming Audio
-                    // HINT: this may block!!
-                    try
-                    {
-                        GlobalScope.launch {
-                            if (AUDIO_PCM_DEBUG_FILES)
-                            {
-                                val f: File = File("/tmp/toxaudio_recv.txt")
-                                try
-                                {
-                                    f.appendBytes(audio_out_byte_buffer)
-                                } catch (e: Exception)
-                                {
-                                    e.printStackTrace()
-                                }
-                            }
-                        }
-                        val bytes_actually_written = AudioSelectOutBox.sourceDataLine.write(audio_out_byte_buffer, 0, want_bytes)
-                        if (bytes_actually_written != want_bytes)
-                        {
-                            Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:bytes_actually_written=" + bytes_actually_written + " want_bytes=" + want_bytes)
-                        }
-                    } catch (e: java.lang.Exception)
-                    {
-                        Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:sourceDataLine.write:EE:" + e.message) // e.printStackTrace();
-                    }
-                    try
-                    {
-                        semaphore_audio_out_convert.acquire_passthru()
-                        semaphore_audio_out_convert_active_threads--
-                        semaphore_audio_out_convert.release_passthru()
-                    } catch (e: java.lang.Exception)
-                    {
-                        semaphore_audio_out_convert.release_passthru()
-                    }
-                    var global_audio_out_vu: Float = AUDIO_VU_MIN_VALUE
-                    if (sample_count > 0)
-                    {
-                        val vu_value = AudioBar.audio_vu(audio_out_byte_buffer, sample_count.toInt())
-                        global_audio_out_vu = if (vu_value > AUDIO_VU_MIN_VALUE)
-                        {
-                            vu_value
-                        } else
-                        {
-                            0f
-                        }
-                    }
-                    val global_audio_out_vu_ = global_audio_out_vu
-                    AudioBar.set_cur_value(global_audio_out_vu_.toInt(), audio_out_bar)
-                }
-                t_audio_pcm_play.start()
+                //
             }
             catch(_: Exception)
             {
@@ -1372,26 +1333,26 @@ class MainActivity
         {
             if (a_TOXAV_CALL_COMM_INFO == ToxVars.TOXAV_CALL_COMM_INFO.TOXAV_CALL_COMM_DECODER_CURRENT_BITRATE.value.toLong())
             {
-                Log.i(TAG, "call_comm_cb: fnum: " + friend_number
-                        + " DECODER_CURRENT_BITRATE = " + comm_number)
+                //Log.i(TAG, "call_comm_cb: fnum: " + friend_number
+                //        + " DECODER_CURRENT_BITRATE = " + comm_number)
                 avstatestorevplayfpsstate.updateDecoderVBitrate(comm_number.toInt())
             }
             else if (a_TOXAV_CALL_COMM_INFO == ToxVars.TOXAV_CALL_COMM_INFO.TOXAV_CALL_COMM_ENCODER_CURRENT_BITRATE.value.toLong())
             {
-                Log.i(TAG, "call_comm_cb: fnum: " + friend_number
-                        + " ENCODER_CURRENT_BITRATE = " + comm_number)
+                //Log.i(TAG, "call_comm_cb: fnum: " + friend_number
+                //        + " ENCODER_CURRENT_BITRATE = " + comm_number)
                 avstatestorevcapfpsstate.updateEncoderVBitrate(comm_number.toInt())
 
             }
             else if (a_TOXAV_CALL_COMM_INFO == ToxVars.TOXAV_CALL_COMM_INFO.TOXAV_CALL_COMM_NETWORK_ROUND_TRIP_MS.value.toLong())
             {
-                Log.i(TAG, "call_comm_cb: fnum: " + friend_number
-                        + " NETWORK_ROUND_TRIP_MS = " + comm_number)
+                //Log.i(TAG, "call_comm_cb: fnum: " + friend_number
+                //        + " NETWORK_ROUND_TRIP_MS = " + comm_number)
             }
             else if (a_TOXAV_CALL_COMM_INFO == ToxVars.TOXAV_CALL_COMM_INFO.TOXAV_CALL_COMM_PLAY_DELAY.value.toLong())
             {
-                Log.i(TAG, "call_comm_cb: fnum: " + friend_number
-                        + " PLAY_DELAY = " + comm_number)
+                //Log.i(TAG, "call_comm_cb: fnum: " + friend_number
+                //        + " PLAY_DELAY = " + comm_number)
             }
             else
             {
