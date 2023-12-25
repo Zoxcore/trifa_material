@@ -43,7 +43,7 @@ public class AudioSelectOutBox
 
     final static CustomSemaphore semaphore_audio_out_convert = new CustomSemaphore(1);
     static int semaphore_audio_out_convert_active_threads = 0;
-    static int semaphore_audio_out_convert_max_active_threads = 1;
+    static int semaphore_audio_out_convert_max_active_threads = 2;
     final static CustomSemaphore semaphore_audio_device_changes = new CustomSemaphore(1);
 
     final static int SAMPLE_RATE_DEFAULT = 48000;
