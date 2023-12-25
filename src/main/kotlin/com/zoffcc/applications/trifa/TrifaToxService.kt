@@ -909,8 +909,8 @@ class TrifaToxService
                         val m_resend_v2 = ii.next()
                         m_counter++
 
-                        Log.i(TAG, "resend_v2_messages: " + m_counter + ": "
-                                + get_friend_name_from_pubkey(m_resend_v2.tox_friendpubkey) + " " + m_resend_v2.text)
+                        Log.i(TAG, "resend_v2_messages: " + m_counter + ": friend="
+                                + get_friend_name_from_pubkey(m_resend_v2.tox_friendpubkey) + " text=" + m_resend_v2.text)
                     }
                     ii = m_v1.iterator()
                     while (ii.hasNext())
