@@ -26,6 +26,8 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.audio_queue_play_tri
 import com.zoffcc.applications.trifa.MainActivity.Companion.bootstrap_single_wrapper
 import com.zoffcc.applications.trifa.MainActivity.Companion.init_tox_callbacks
 import com.zoffcc.applications.trifa.MainActivity.Companion.ngc_audio_in_queue
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_a_queue_stop_trigger
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_audio_in_queue
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_connection_status
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_name
@@ -62,8 +64,6 @@ import contactstore
 import globalstore
 import grouppeerstore
 import groupstore
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import online_button_text_wrapper
 import org.briarproject.briar.desktop.contact.ContactItem
 import org.briarproject.briar.desktop.contact.GroupItem
@@ -71,7 +71,6 @@ import org.briarproject.briar.desktop.contact.GroupPeerItem
 import set_tox_running_state
 import toxdatastore
 import unlock_data_dir_input
-import java.io.File
 import java.nio.ByteBuffer
 import java.util.*
 
@@ -117,6 +116,9 @@ class TrifaToxService
 
                 ngc_audio_play_thread_running = true
                 ngc_audio_play_thread_start()
+
+                tox_audio_play_thread_running = true
+                tox_audio_play_thread_start()
 
                 if (!old_is_tox_started)
                 {
@@ -266,6 +268,16 @@ class TrifaToxService
                     e.printStackTrace()
                 }
 
+                tox_audio_play_thread_running = false
+                try
+                {
+                    tox_audio_play_thread!!.join(500)
+                }
+                catch(e: Exception)
+                {
+                    e.printStackTrace()
+                }
+
                 try
                 {
                     sleep(100) // wait a bit, for "something" to finish up in the native code
@@ -313,6 +325,139 @@ class TrifaToxService
             }
         }
         (ToxServiceThread as Thread).start()
+    }
+
+    fun tox_audio_play_thread_start()
+    {
+        Log.i(TAG, "[]tox_audio_frame:starting Thread")
+        tox_audio_play_thread = object : Thread()
+        {
+            override fun run()
+            {
+                try
+                {
+                    tox_a_queue_stop_trigger = true
+                    while (tox_audio_play_thread_running)
+                    {
+                        // -- play incoming bytes --
+                        // -- play incoming bytes --
+                        try
+                        {
+                            if ((tox_audio_in_queue.size < 2) && (!tox_a_queue_stop_trigger))
+                            {
+                                tox_a_queue_stop_trigger = true
+                                // Log.i(TAG, "[]tox_audio_frame:trigger:" + tox_audio_in_queue.size)
+                            }
+                            else
+                            {
+                                if (tox_a_queue_stop_trigger)
+                                {
+                                    if (tox_audio_in_queue.size >= 6)
+                                    {
+                                        tox_a_queue_stop_trigger = false
+                                        // Log.i(TAG, "[]tox_audio_frame:release:" + tox_audio_in_queue.size)
+                                    }
+                                    else
+                                    {
+                                        //Log.i(TAG, "[]tox_audio_frame:+++++++++:" + tox_a_queue_play_trigger + " "
+                                        //+ tox_audio_in_queue.size + " " + tox_audio_in_queue.remainingCapacity())
+                                        sleep(20)
+                                    }
+                                } else
+                                {
+                                    val buf: ByteArray = tox_audio_in_queue.poll()
+                                    if (buf != null)
+                                    {
+                                        try
+                                        {
+                                            val want_bytes = buf.size
+                                            val sample_count = want_bytes / 2
+                                            try
+                                            {
+                                                AudioSelectOutBox.semaphore_audio_out_convert.acquire_passthru()
+                                                if (AudioSelectOutBox.semaphore_audio_out_convert_active_threads >= AudioSelectOutBox.semaphore_audio_out_convert_max_active_threads)
+                                                {
+                                                    Log.i(TAG, "[]tox_audio_frame:too many threads running: " + AudioSelectOutBox.semaphore_audio_out_convert_active_threads)
+                                                    AudioSelectOutBox.semaphore_audio_out_convert.release_passthru()
+                                                    continue
+                                                }
+                                                AudioSelectOutBox.semaphore_audio_out_convert.release_passthru()
+                                            } catch (e: java.lang.Exception)
+                                            {
+                                                AudioSelectOutBox.semaphore_audio_out_convert.release_passthru()
+                                            }
+
+                                            val t_tox_audio_pcm_play = Thread{
+                                                try
+                                                {
+                                                    AudioSelectOutBox.semaphore_audio_out_convert.acquire_passthru()
+                                                    AudioSelectOutBox.semaphore_audio_out_convert_active_threads++
+                                                    AudioSelectOutBox.semaphore_audio_out_convert.release_passthru()
+                                                } catch (e: java.lang.Exception)
+                                                {
+                                                    AudioSelectOutBox.semaphore_audio_out_convert.release_passthru()
+                                                }
+                                                // HINT: this acutally plays incoming Audio
+                                                // HINT: this may block!!
+                                                try
+                                                {
+                                                    val bytes_actually_written = AudioSelectOutBox.sourceDataLine.write(buf, 0, want_bytes)
+                                                    if (bytes_actually_written != want_bytes)
+                                                    {
+                                                        Log.i(TAG, "[]tox_audio_frame:bytes_actually_written=" + bytes_actually_written + " want_bytes=" + want_bytes)
+                                                    }
+                                                } catch (e: java.lang.Exception)
+                                                {
+                                                    Log.i(TAG, "[]tox_audio_frame:sourceDataLine.write:EE:" + e.message) // e.printStackTrace();
+                                                }
+                                                try
+                                                {
+                                                    AudioSelectOutBox.semaphore_audio_out_convert.acquire_passthru()
+                                                    AudioSelectOutBox.semaphore_audio_out_convert_active_threads--
+                                                    AudioSelectOutBox.semaphore_audio_out_convert.release_passthru()
+                                                } catch (e: java.lang.Exception)
+                                                {
+                                                    Log.i(TAG, "[]tox_audio_frame:--:EEEEEE")
+                                                    AudioSelectOutBox.semaphore_audio_out_convert.release_passthru()
+                                                }
+                                                var global_audio_out_vu: Float = MainActivity.AUDIO_VU_MIN_VALUE
+                                                if (sample_count > 0)
+                                                {
+                                                    val vu_value = AudioBar.audio_vu(buf, sample_count)
+                                                    global_audio_out_vu = if (vu_value > MainActivity.AUDIO_VU_MIN_VALUE)
+                                                    {
+                                                        vu_value
+                                                    } else
+                                                    {
+                                                        0f
+                                                    }
+                                                }
+                                                val global_audio_out_vu_ = global_audio_out_vu
+                                                AudioBar.set_cur_value(global_audio_out_vu_.toInt(), AudioBar.audio_out_bar)
+                                            }
+                                            t_tox_audio_pcm_play.start()
+                                        }
+                                        catch(e: Exception)
+                                        {
+                                            e.printStackTrace()
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (e: java.lang.Exception)
+                        {
+                        }
+                        // -- play incoming bytes --
+                        // -- play incoming bytes --
+                        sleep(20)
+                    }
+                } catch (_: Exception)
+                {
+                }
+                Log.i(TAG, "[]tox_audio_frame: Thread ending")
+            }
+        }
+        (tox_audio_play_thread as Thread).start()
     }
 
     fun ngc_audio_play_thread_start()
@@ -399,7 +544,7 @@ class TrifaToxService
                                                 AudioSelectOutBox.semaphore_audio_out_convert.release_passthru()
                                             }
 
-                                            val t_audio_pcm_play = Thread{
+                                            val t_ngc_audio_pcm_play = Thread{
                                                 try
                                                 {
                                                     AudioSelectOutBox.semaphore_audio_out_convert.acquire_passthru()
@@ -447,7 +592,7 @@ class TrifaToxService
                                                 val global_audio_out_vu_ = global_audio_out_vu
                                                 AudioBar.set_cur_value(global_audio_out_vu_.toInt(), AudioBar.audio_out_bar)
                                             }
-                                            t_audio_pcm_play.start()
+                                            t_ngc_audio_pcm_play.start()
                                         }
                                         catch(e: Exception)
                                         {
@@ -548,6 +693,8 @@ class TrifaToxService
         var last_start_queued_fts_ms: Long = -1
         var ngc_audio_play_thread_running = false
         var ngc_audio_play_thread: Thread? = null
+        var tox_audio_play_thread_running = false
+        var tox_audio_play_thread: Thread? = null
 
         // ------------------------------
         fun bootstrap_me()
