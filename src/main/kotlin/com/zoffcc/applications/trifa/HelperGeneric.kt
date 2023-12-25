@@ -40,8 +40,11 @@ import com.zoffcc.applications.trifa.HelperMessage.set_message_state_from_id
 import com.zoffcc.applications.trifa.HelperMessage.tox_friend_send_message_wrapper
 import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_messageid
 import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_resend_count
+import com.zoffcc.applications.trifa.MainActivity.Companion.ROTATE_INCOMING_NGC_VIDEO
+import com.zoffcc.applications.trifa.MainActivity.Companion.audio_queue_full_trigger
 import com.zoffcc.applications.trifa.MainActivity.Companion.modify_message_with_ft
 import com.zoffcc.applications.trifa.MainActivity.Companion.ngc_audio_in_queue
+import com.zoffcc.applications.trifa.MainActivity.Companion.ngc_audio_in_queue_max_capacity
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_file_control
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_delete
@@ -679,12 +682,37 @@ object HelperGeneric {
             //Log.i(TAG, "play_ngc_incoming_audio_frame:toxav_ngc_audio_decode:decoded_samples="
             //        + decoded_samples)
             // put pcm data into a FIFO
-            System.arraycopy(pcm_decoded_buf, 0, pcm_decoded_buf_delta_1, 0, bytes_in_40ms * 2)
-            ngc_audio_in_queue.offer(pcm_decoded_buf_delta_1)
-            System.arraycopy(pcm_decoded_buf, bytes_in_40ms * 2, pcm_decoded_buf_delta_2, 0, bytes_in_40ms * 2)
-            ngc_audio_in_queue.offer(pcm_decoded_buf_delta_2)
-            System.arraycopy(pcm_decoded_buf, bytes_in_40ms * 2 * 2, pcm_decoded_buf_delta_3, 0, bytes_in_40ms * 2)
-            ngc_audio_in_queue.offer(pcm_decoded_buf_delta_3)
+            if ((ngc_audio_in_queue.remainingCapacity() < 2) && (!audio_queue_full_trigger))
+            {
+                Log.i(TAG, "play_ngc_incoming_audio_frame:trigger:" + ngc_audio_in_queue.size)
+                audio_queue_full_trigger = true
+            }
+            else
+            {
+                if (audio_queue_full_trigger)
+                {
+                    if (ngc_audio_in_queue.remainingCapacity() >= ngc_audio_in_queue_max_capacity - 2)
+                    {
+                        audio_queue_full_trigger = false
+                        Log.i(TAG, "play_ngc_incoming_audio_frame:release:")
+                    }
+                    else
+                    {
+                        //Log.i(TAG, "play_ngc_incoming_audio_frame:-----------:" +
+                        //        audio_queue_full_trigger)
+                    }
+                }
+                else
+                {
+                    // Log.i(TAG, "play_ngc_incoming_audio_frame:push:" + ngc_audio_in_queue.size + " " + ngc_audio_in_queue.remainingCapacity())
+                    System.arraycopy(pcm_decoded_buf, 0, pcm_decoded_buf_delta_1, 0, bytes_in_40ms * 2)
+                    ngc_audio_in_queue.offer(pcm_decoded_buf_delta_1)
+                    System.arraycopy(pcm_decoded_buf, bytes_in_40ms * 2, pcm_decoded_buf_delta_2, 0, bytes_in_40ms * 2)
+                    ngc_audio_in_queue.offer(pcm_decoded_buf_delta_2)
+                    System.arraycopy(pcm_decoded_buf, bytes_in_40ms * 2 * 2, pcm_decoded_buf_delta_3, 0, bytes_in_40ms * 2)
+                    ngc_audio_in_queue.offer(pcm_decoded_buf_delta_3)
+                }
+            }
             ngc_video_frame_last_incoming_ts = System.currentTimeMillis()
         } catch (e: java.lang.Exception)
         {
@@ -783,10 +811,9 @@ object HelperGeneric {
                     val y_bytes2_decoder = h2_decoder * w2_decoder
                     val u_bytes2_decoder = (h2_decoder_uv * w2_decoder_uv)
                     val v_bytes2_decoder = (h2_decoder_uv * w2_decoder_uv)
-                    var yuv_frame_data_buf: ByteBuffer?
+                    val yuv_frame_data_buf: ByteBuffer?
 
-                    var ROTATE = true
-                    if (ROTATE)
+                    if (ROTATE_INCOMING_NGC_VIDEO)
                     {
                         // - rotate yuv (not optimized!!) -
                         // - rotate yuv (not optimized!!) -
