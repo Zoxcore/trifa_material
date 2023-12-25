@@ -29,7 +29,9 @@ import com.zoffcc.applications.trifa.HelperFiletransfer.insert_into_filetransfer
 import com.zoffcc.applications.trifa.HelperFiletransfer.move_tmp_file_to_real_file
 import com.zoffcc.applications.trifa.HelperFiletransfer.set_message_accepted_from_id
 import com.zoffcc.applications.trifa.HelperFiletransfer.update_filetransfer_db_full
+import com.zoffcc.applications.trifa.HelperFriend.add_pushurl_for_friend
 import com.zoffcc.applications.trifa.HelperFriend.main_get_friend
+import com.zoffcc.applications.trifa.HelperFriend.remove_pushurl_for_friend
 import com.zoffcc.applications.trifa.HelperFriend.send_friend_msg_receipt_v2_wrapper
 import com.zoffcc.applications.trifa.HelperFriend.update_friend_in_db_capabilities
 import com.zoffcc.applications.trifa.HelperFriend.update_friend_in_db_msgv3_capability
@@ -45,6 +47,7 @@ import com.zoffcc.applications.trifa.HelperGeneric.show_ngc_incoming_video_frame
 import com.zoffcc.applications.trifa.HelperGeneric.shrink_image_file
 import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
 import com.zoffcc.applications.trifa.HelperGroup.bytebuffer_to_hexstring
+import com.zoffcc.applications.trifa.HelperGroup.bytes_to_hex
 import com.zoffcc.applications.trifa.HelperGroup.fourbytes_of_long_to_hex
 import com.zoffcc.applications.trifa.HelperGroup.handle_incoming_group_file
 import com.zoffcc.applications.trifa.HelperGroup.handle_incoming_sync_group_file
@@ -81,6 +84,7 @@ import com.zoffcc.applications.trifa.ToxVars.TOX_FILE_ID_LENGTH
 import com.zoffcc.applications.trifa.ToxVars.TOX_HASH_LENGTH
 import com.zoffcc.applications.trifa.ToxVars.TOX_MAX_NGC_FILESIZE
 import com.zoffcc.applications.trifa.ToxVars.TOX_MAX_NGC_FILE_AND_HEADER_SIZE
+import com.zoffcc.applications.trifa.ToxVars.TOX_PUBLIC_KEY_SIZE
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.resend_old_messages
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.resend_v3_messages
@@ -110,6 +114,7 @@ import java.io.File
 import java.io.PrintWriter
 import java.io.RandomAccessFile
 import java.nio.ByteBuffer
+import java.nio.charset.StandardCharsets
 import java.util.*
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
@@ -1457,6 +1462,44 @@ class MainActivity
         @JvmStatic
         fun android_tox_callback_friend_lossless_packet_cb_method(friend_number: Long, data: ByteArray?, length: Long)
         {
+            if (length > 0)
+            {
+                val fpubkey = tox_friend_get_public_key(friend_number)
+                if (fpubkey == null)
+                {
+                    return
+                }
+
+                if (data!![0].toUByte().toInt() == TRIFAGlobals.CONTROL_PROXY_MESSAGE_TYPE.CONTROL_PROXY_MESSAGE_TYPE_PROXY_PUBKEY_FOR_FRIEND.value)
+                {
+                    if (length == (TOX_PUBLIC_KEY_SIZE + 1).toLong())
+                    {
+                        Log.i(TAG, "friend_lossless_packet_cb:recevied CONTROL_PROXY_MESSAGE_TYPE_PROXY_PUBKEY_FOR_FRIEND")
+                        val relay_pubkey: String = bytes_to_hex(data).substring(2)
+                        Log.i(TAG, "friend_lossless_packet_cb:recevied pubkey:" + relay_pubkey.uppercase())
+                        // TODO: add relays // HelperFriend.add_friend_to_system(relay_pubkey.uppercase(), true, fpubkey)
+                    }
+                } else if (data[0].toUByte().toInt() == TRIFAGlobals.CONTROL_PROXY_MESSAGE_TYPE.CONTROL_PROXY_MESSAGE_TYPE_PUSH_URL_FOR_FRIEND.value)
+                {
+                    Log.i(TAG,
+                          "android_tox_callback_friend_lossless_packet_cb_method:CONTROL_PROXY_MESSAGE_TYPE_PUSH_URL_FOR_FRIEND:len=" +
+                          length);
+                    if (length > "https://".length + 1)
+                    {
+                        val pushurl = String(Arrays.copyOfRange(data, 1, data.size), StandardCharsets.UTF_8)
+                        Log.i(TAG,
+                              "android_tox_callback_friend_lossless_packet_cb_method:CONTROL_PROXY_MESSAGE_TYPE_PUSH_URL_FOR_FRIEND:pushurl=" +
+                              pushurl)
+                        add_pushurl_for_friend(pushurl, fpubkey)
+                    } else
+                    {
+                        if (length == 0L)
+                        {
+                            remove_pushurl_for_friend(fpubkey)
+                        }
+                    }
+                }
+            }
         }
 
         @JvmStatic

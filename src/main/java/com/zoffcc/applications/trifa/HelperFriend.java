@@ -2,9 +2,7 @@ package com.zoffcc.applications.trifa;
 
 import com.zoffcc.applications.sorm.FriendList;
 import com.zoffcc.applications.sorm.TRIFADatabaseGlobalsNew;
-import org.sqlite.SQLiteException;
 
-import javax.swing.*;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -470,5 +468,29 @@ public class HelperFriend {
                 tox_public_key_stringEq(f.tox_public_key_string).
                 msgv3_capability(f.msgv3_capability).
                 execute();
+    }
+
+    static void add_pushurl_for_friend(final String friend_push_url, final String friend_pubkey)
+    {
+        try
+        {
+            TrifaToxService.Companion.getOrma().updateFriendList().tox_public_key_stringEq(friend_pubkey).push_url(friend_push_url).execute();
+        }
+        catch (Exception e)
+        {
+            Log.i(TAG, "add_pushurl_for_friend:EE:" + e.getMessage());
+        }
+    }
+
+    static void remove_pushurl_for_friend(final String friend_pubkey)
+    {
+        try
+        {
+            TrifaToxService.Companion.getOrma().updateFriendList().tox_public_key_stringEq(friend_pubkey).push_url(null).execute();
+        }
+        catch (Exception e)
+        {
+            Log.i(TAG, "remove_pushurl_for_friend:EE:" + e.getMessage());
+        }
     }
 }
