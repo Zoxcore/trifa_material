@@ -1,6 +1,7 @@
 package com.zoffcc.applications.trifa
 
 import avstatestore
+import avstatestorecallstate
 import com.zoffcc.applications.sorm.BootstrapNodeEntryDB
 import com.zoffcc.applications.sorm.BootstrapNodeEntryDB.bootstrap_node_list
 import com.zoffcc.applications.sorm.BootstrapNodeEntryDB.get_tcprelay_nodelist_from_db
@@ -450,6 +451,10 @@ class TrifaToxService
                         // -- play incoming bytes --
                         // -- play incoming bytes --
                         sleep(20)
+                        if (avstatestorecallstate.state.call_state != AVState.CALL_STATUS.CALL_STATUS_CALLING)
+                        {
+                            sleep(200)
+                        }
                     }
                 } catch (_: Exception)
                 {
@@ -607,6 +612,10 @@ class TrifaToxService
                         // -- play incoming bytes --
                         // -- play incoming bytes --
                         sleep(20)
+                        if ((HelperGeneric.ngc_video_packet_last_incoming_ts + 5000) < System.currentTimeMillis())
+                        {
+                            sleep(200)
+                        }
                     }
                 } catch (_: Exception)
                 {
