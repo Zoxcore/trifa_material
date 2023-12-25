@@ -1408,4 +1408,70 @@ public class HelperGroup {
 
         Companion.incoming_synced_group_text_msg(m);
     }
+
+    public static byte[] YUV420rotate90(byte[] data, byte[] output, int imageWidth, int imageHeight)
+    {
+        // Rotate the Y luma
+        int i = 0;
+        for (int x = 0; x < imageWidth; x++)
+        {
+            for (int y = imageHeight - 1; y >= 0; y--)
+            {
+                output[i++] = data[y * imageWidth + x];
+            }
+        }
+
+        // Rotate the U and V color components
+        int size = imageWidth * imageHeight;
+        i = size;
+        int j = size;
+        int uv = size / 4;
+        for (int x = 0; x < (imageWidth / 2); x++)
+        {
+            for (int y = (imageHeight / 2) - 1; y >= 0; y--)
+            {
+                try
+                {
+                    output[i] = data[j + (y * (imageWidth / 2) + x)];
+                    output[i + uv] = data[j + uv + (y * (imageWidth / 2) + x)];
+                }
+                catch (Exception e)
+                {
+                }
+                i++;
+            }
+        }
+        return output;
+    }
+
+    public static byte[] YUV420rotateMinus90(byte[] data, byte[] output, int imageWidth, int imageHeight)
+    {
+        return rotateYUV420Degree180(YUV420rotate90(data, output, imageWidth, imageHeight), imageWidth, imageHeight);
+    }
+
+    private static byte[] rotateYUV420Degree180(byte[] data, int imageWidth, int imageHeight)
+    {
+        byte[] yuv = new byte[imageWidth * imageHeight * 3 / 2];
+        int i = 0;
+        int count = 0;
+        // y
+        for (i = imageWidth * imageHeight - 1; i >= 0; i--) {
+            yuv[count] = data[i];
+            count++;
+        }
+        //
+        final int y_size = imageWidth * imageHeight;
+        final int u_size = (imageWidth * imageHeight) / 4;
+        // u
+        for (i = u_size - 1; i >= 0; i--) {
+            yuv[count] = data[y_size + i];
+            count++;
+        }
+        // v
+        for (i = u_size - 1; i >= 0; i--) {
+            yuv[count] = data[y_size + u_size + i];
+            count++;
+        }
+        return yuv;
+    }
 }

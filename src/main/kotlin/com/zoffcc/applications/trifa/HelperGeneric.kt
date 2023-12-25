@@ -31,6 +31,7 @@ import com.zoffcc.applications.trifa.HelperFiletransfer.set_filetransfer_state_f
 import com.zoffcc.applications.trifa.HelperFriend.delete_friend
 import com.zoffcc.applications.trifa.HelperFriend.delete_friend_all_filetransfers
 import com.zoffcc.applications.trifa.HelperFriend.delete_friend_all_messages
+import com.zoffcc.applications.trifa.HelperGroup.YUV420rotateMinus90
 import com.zoffcc.applications.trifa.HelperGroup.delete_group
 import com.zoffcc.applications.trifa.HelperGroup.delete_group_all_messages
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
@@ -775,21 +776,51 @@ object HelperGeneric {
                 }
                 else
                 {
-                    val w2_decoder = ystride_ // encoder stride
+                    var w2_decoder = ystride_ // encoder stride
                     val w2_decoder_uv = ystride_ / 2 // encoder stride
-                    val h2_decoder = 640 // 320;
+                    var h2_decoder = 640 // 320;
                     val h2_decoder_uv = h2_decoder / 2
                     val y_bytes2_decoder = h2_decoder * w2_decoder
                     val u_bytes2_decoder = (h2_decoder_uv * w2_decoder_uv)
                     val v_bytes2_decoder = (h2_decoder_uv * w2_decoder_uv)
-                    val yuv_frame_data_buf = ByteBuffer.allocateDirect(
-                        y_bytes2_decoder + u_bytes2_decoder + v_bytes2_decoder)
-                    yuv_frame_data_buf.rewind()
-                    //
-                    yuv_frame_data_buf.put(y_buf2, 0, y_bytes2_decoder)
-                    yuv_frame_data_buf.put(u_buf2, 0, u_bytes2_decoder)
-                    yuv_frame_data_buf.put(v_buf2, 0, v_bytes2_decoder)
-                    //
+                    var yuv_frame_data_buf: ByteBuffer?
+
+                    var ROTATE = true
+                    if (ROTATE)
+                    {
+                        // - rotate yuv (not optimized!!) -
+                        // - rotate yuv (not optimized!!) -
+                        val tmp_yuv = ByteArray(y_bytes2_decoder + u_bytes2_decoder + v_bytes2_decoder)
+                        var tmp_yuv_rotated = ByteArray(y_bytes2_decoder + u_bytes2_decoder + v_bytes2_decoder)
+                        System.arraycopy(y_buf2, 0, tmp_yuv, 0, y_bytes2_decoder)
+                        System.arraycopy(u_buf2, 0, tmp_yuv, y_bytes2_decoder, u_bytes2_decoder)
+                        System.arraycopy(v_buf2, 0, tmp_yuv, y_bytes2_decoder + u_bytes2_decoder, v_bytes2_decoder)
+                        tmp_yuv_rotated = YUV420rotateMinus90(tmp_yuv, tmp_yuv_rotated, w2_decoder, h2_decoder)
+                        val tmp = w2_decoder
+                        w2_decoder = h2_decoder
+                        h2_decoder = tmp
+                        //
+                        yuv_frame_data_buf = ByteBuffer.allocateDirect(
+                            y_bytes2_decoder + u_bytes2_decoder + v_bytes2_decoder)
+                        yuv_frame_data_buf.rewind()
+                        //
+                        yuv_frame_data_buf.put(tmp_yuv_rotated, 0, y_bytes2_decoder)
+                        yuv_frame_data_buf.put(tmp_yuv_rotated, y_bytes2_decoder, u_bytes2_decoder)
+                        yuv_frame_data_buf.put(tmp_yuv_rotated, y_bytes2_decoder + u_bytes2_decoder, v_bytes2_decoder)
+                        // - rotate yuv (not optimized!!) -
+                        // - rotate yuv (not optimized!!) -
+                    }
+                    else
+                    {
+                        yuv_frame_data_buf = ByteBuffer.allocateDirect(
+                            y_bytes2_decoder + u_bytes2_decoder + v_bytes2_decoder)
+                        yuv_frame_data_buf.rewind()
+                        //
+                        yuv_frame_data_buf.put(y_buf2, 0, y_bytes2_decoder)
+                        yuv_frame_data_buf.put(u_buf2, 0, u_bytes2_decoder)
+                        yuv_frame_data_buf.put(v_buf2, 0, v_bytes2_decoder)
+                        //
+                    }
                     yuv_frame_data_buf.rewind()
                     if ((VideoInFrame.width != w2_decoder || VideoInFrame.height != h2_decoder) || (VideoInFrame.imageInByte == null))
                     {
