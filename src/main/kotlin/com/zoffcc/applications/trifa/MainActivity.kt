@@ -160,7 +160,10 @@ class MainActivity
         @JvmStatic var video_play_last_timestamp: Long = 0
         var video_play_fps_value: Int = 0
         @JvmStatic val video_play_measure_after_frame = 5;
-        var ngc_audio_in_queue: BlockingQueue<ByteArray> = LinkedBlockingQueue(3 * 5)
+        const val ngc_audio_in_queue_max_capacity = 10
+        var audio_queue_full_trigger = false
+        var audio_queue_play_trigger = true
+        var ngc_audio_in_queue: BlockingQueue<ByteArray> = LinkedBlockingQueue(ngc_audio_in_queue_max_capacity)
 
         //
         var PREF__ngc_video_bitrate: Int = LOWER_NGC_VIDEO_BITRATE // ~600 kbits/s -> ~60 kbytes/s
@@ -173,6 +176,7 @@ class MainActivity
         @JvmField var PREF__auto_accept_video = true
         @JvmField var PREF__auto_accept_all_upto = true
         const val AUDIO_VU_MIN_VALUE = -20f
+        var ROTATE_INCOMING_NGC_VIDEO = true
         //
         var video_buffer_1: ByteBuffer? = null
         var buffer_size_in_bytes = 0
