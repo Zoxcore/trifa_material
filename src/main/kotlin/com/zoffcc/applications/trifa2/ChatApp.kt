@@ -272,18 +272,6 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                                     {
                                         SnackBarToast("Sending Message failed")
                                     }
-                                    /*
-                                    val res = tox_friend_send_message(friend_num, TOX_MESSAGE_TYPE.TOX_MESSAGE_TYPE_NORMAL.value, text)
-                                    if (res >= 0)
-                                    {
-                                        val msg_id_db = sent_message_to_db(selectedContactPubkey, timestamp, text)
-                                        messagestore.send(MessageAction.SendMessage(UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value, user = myUser, timeMs = timestamp, text = text, toxpk = selectedContactPubkey!!, trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, msgDatabaseId = msg_id_db, filename_fullpath = null)))
-                                    }
-                                    else
-                                    {
-                                        SnackBarToast("Sending Message failed")
-                                    }
-                                    */
                                 }
                             }
                         }
