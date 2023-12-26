@@ -316,13 +316,6 @@ class MainActivity
 
             try
             {
-                Thread.currentThread().name = "t_main"
-            } catch (_: Exception)
-            {
-            }
-
-            try
-            {
                 toxdatastore.updateToxID(my_tox_id_temp)
             } catch (_: Exception)
             {
