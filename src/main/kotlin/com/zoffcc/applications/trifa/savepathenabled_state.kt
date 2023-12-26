@@ -19,6 +19,8 @@ data class globalstore_state(
     val contacts_unread_group_message_count: Int = 0
 )
 
+private val globalstore_state_lock = Any()
+
 interface GlobalStore {
     fun updateMinimized(value: Boolean)
     fun updateFocused(value: Boolean)
@@ -72,19 +74,23 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
 
         override fun try_clear_unread_message_count()
         {
-            var unread_count = 0
-            try
-            {
-                unread_count = TrifaToxService.orma!!.selectFromMessage()
-                    .directionEq(TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value)
-                    .is_newEq(true).count()
-                Log.i(TAG, "try_clear_unread_message_count:unread_count=" +  unread_count)
+            synchronized(globalstore_state_lock) {
+                var unread_count = 0
+                try
+                {
+                    unread_count = TrifaToxService.orma!!.selectFromMessage()
+                        .directionEq(TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value)
+                        .is_newEq(true).count()
+                    if (unread_count > 0)
+                    {
+                        Log.i(TAG, "try_clear_unread_message_count:unread_count=" + unread_count)
+                    }
+                } catch (e: Exception)
+                {
+                    e.printStackTrace()
+                }
+                mutableStateFlow.value = state.copy(contacts_unread_message_count = unread_count)
             }
-            catch (e: Exception)
-            {
-                e.printStackTrace()
-            }
-            mutableStateFlow.value = state.copy(contacts_unread_message_count = unread_count)
         }
 
         override fun hard_clear_unread_message_count()
