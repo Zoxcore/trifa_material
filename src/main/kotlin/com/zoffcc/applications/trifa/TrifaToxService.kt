@@ -84,6 +84,13 @@ class TrifaToxService
         {
             override fun run()
             {
+                try
+                {
+                    Thread.currentThread().name = "t_tox_iter"
+                } catch (_: Exception)
+                {
+                }
+
                 com.zoffcc.applications.sorm.OrmaDatabase.init()
                 // ------ correct startup order ------
                 orma = com.zoffcc.applications.sorm.OrmaDatabase()
@@ -337,6 +344,13 @@ class TrifaToxService
             {
                 try
                 {
+                    Thread.currentThread().name = "t_a_play"
+                } catch (_: Exception)
+                {
+                }
+
+                try
+                {
                     tox_a_queue_stop_trigger = true
                     while (tox_audio_play_thread_running)
                     {
@@ -472,6 +486,13 @@ class TrifaToxService
         {
             override fun run()
             {
+                try
+                {
+                    Thread.currentThread().name = "t_ngc_a_play"
+                } catch (_: Exception)
+                {
+                }
+
                 try
                 {
                     val sleep_millis: Long = 40
