@@ -1,5 +1,6 @@
 package org.briarproject.briar.desktop.ui
 
+import SnackBarToast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -85,6 +86,7 @@ fun AddFriend() = Box {
                         } catch (_: Exception)
                         {
                         }
+                        SnackBarToast("You have invited a new Friend")
                     } else
                     {
                         // some error on adding friend
