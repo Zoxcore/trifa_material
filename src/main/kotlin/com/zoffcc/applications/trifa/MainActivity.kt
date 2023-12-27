@@ -125,7 +125,6 @@ class MainActivity
     companion object
     {
         private const val TAG = "trifa.MainActivity"
-        const val Version = "0.99.0"
 
         // --------- global config ---------
         // --------- global config ---------
@@ -202,7 +201,6 @@ class MainActivity
         var semaphore_tox_savedata: CustomSemaphore? = CustomSemaphore(1)
         fun main_init()
         {
-            println("Version:" + Version)
             try
             {
                 println("java.vm.name:" + System.getProperty("java.vm.name"))
