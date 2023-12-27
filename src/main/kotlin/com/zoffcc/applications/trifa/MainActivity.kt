@@ -90,6 +90,7 @@ import com.zoffcc.applications.trifa.TrifaToxService.Companion.resend_old_messag
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.resend_v3_messages
 import com.zoffcc.applications.trifa.VideoInFrame.new_video_in_frame
 import com.zoffcc.applications.trifa.VideoInFrame.setup_video_in_resolution
+import com.zoffcc.applications.trifa_material.trifa_material.BuildConfig
 import contactstore
 import global_prefs
 import globalstore
@@ -201,6 +202,13 @@ class MainActivity
         var semaphore_tox_savedata: CustomSemaphore? = CustomSemaphore(1)
         fun main_init()
         {
+            try
+            {
+                println("Version:" + BuildConfig.APP_VERSION)
+            }
+            catch (_: Exception)
+            {}
+
             try
             {
                 println("java.vm.name:" + System.getProperty("java.vm.name"))
