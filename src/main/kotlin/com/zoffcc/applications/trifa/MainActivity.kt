@@ -7,6 +7,7 @@ import SnackBarToast
 import UIGroupMessage
 import UIMessage
 import User
+import androidx.compose.ui.text.toUpperCase
 import avstatestore
 import avstatestorecallstate
 import avstatestorevcapfpsstate
@@ -26,7 +27,9 @@ import com.zoffcc.applications.trifa.HelperFiletransfer.insert_into_filetransfer
 import com.zoffcc.applications.trifa.HelperFiletransfer.move_tmp_file_to_real_file
 import com.zoffcc.applications.trifa.HelperFiletransfer.set_message_accepted_from_id
 import com.zoffcc.applications.trifa.HelperFiletransfer.update_filetransfer_db_full
+import com.zoffcc.applications.trifa.HelperFriend.add_friend_avatar_chunk
 import com.zoffcc.applications.trifa.HelperFriend.add_pushurl_for_friend
+import com.zoffcc.applications.trifa.HelperFriend.del_friend_avatar
 import com.zoffcc.applications.trifa.HelperFriend.main_get_friend
 import com.zoffcc.applications.trifa.HelperFriend.remove_pushurl_for_friend
 import com.zoffcc.applications.trifa.HelperFriend.send_friend_msg_receipt_v2_wrapper
@@ -2099,7 +2102,8 @@ class MainActivity
         fun android_tox_callback_file_recv_cb_method(friend_number: Long, file_number: Long, a_TOX_FILE_KIND: Int, file_size: Long, filename: String?, filename_length: Long)
         {
             if (a_TOX_FILE_KIND == ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_AVATAR.value)
-            { // Log.i(TAG, "file_recv:TOX_FILE_KIND_AVATAR");
+            {
+                // Log.i(TAG, "file_recv:TOX_FILE_KIND_AVATAR");
                 if (file_size > AVATAR_INCOMING_MAX_BYTE_SIZE)
                 {
                     Log.i(TAG, "file_recv:avatar_too_large")
@@ -2111,12 +2115,47 @@ class MainActivity
                         e.printStackTrace()
                     }
                     return
-                } else if (file_size == 0L)
+                }
+                else if (file_size == 0L)
                 {
-                    Log.i(TAG, "file_recv:avatar_size_zero") // friend wants to unset avatar
+                    Log.i(TAG, "file_recv:avatar_size_zero")
+                    // friend wants to unset avatar
+                    val friend_pk = tox_friend_get_public_key(friend_number)
+                    if (friend_pk != null)
+                    {
+                        del_friend_avatar(friend_pk)
+                    }
+                    try
+                    {
+                        tox_file_control(friend_number, file_number, ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_CANCEL.value)
+                    } catch (e: java.lang.Exception)
+                    {
+                        e.printStackTrace()
+                    }
                     return
                 }
-                tox_file_control(friend_number, file_number, ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_CANCEL.value)
+
+                val friend_pk = tox_friend_get_public_key(friend_number)
+                if (friend_pk != null)
+                {
+                    val f = Filetransfer()
+                    f.tox_public_key_string = friend_pk.toUpperCase()
+                    f.direction = TRIFAGlobals.TRIFA_FT_DIRECTION.TRIFA_FT_DIRECTION_INCOMING.value
+                    f.file_number = file_number
+                    f.kind = a_TOX_FILE_KIND
+                    f.state = ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_PAUSE.value
+                    f.path_name = ""
+                    f.file_name = ""
+                    f.filesize = file_size
+                    f.ft_accepted = true
+                    f.ft_outgoing_started = true // dummy for incoming FTs, but still set it here
+                    f.current_position = 0
+                    f.message_id = -1
+                    val ft_id: Long = insert_into_filetransfer_db(f)
+                    f.id = ft_id
+                    // TODO: we just accept incoming avatar, maybe make some checks first?
+                    tox_file_control(friend_number, file_number, ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_RESUME.value);
+                }
             } else  // DATA file ft
             {
                 val friend_pk = tox_friend_get_public_key(friend_number)
@@ -2230,9 +2269,12 @@ class MainActivity
                 }
                 if (position == 0L)
                 {
-                    val f1 = File(f.path_name + "/" + f.file_name)
-                    val f2 = File(f1.parent)
-                    f2.mkdirs()
+                    if (f.kind != ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_AVATAR.value)
+                    {
+                        val f1 = File(f.path_name + "/" + f.file_name)
+                        val f2 = File(f1.parent)
+                        f2.mkdirs()
+                    }
                 }
             } catch (e: java.lang.Exception)
             {
@@ -2243,10 +2285,10 @@ class MainActivity
             {
                 try
                 {
-                    move_tmp_file_to_real_file(f.path_name, f.file_name, VFS_FILE_DIR + "/" + f.tox_public_key_string + "/", f.file_name)
                     var filedb_id: Long = -1
                     if (f.kind != ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_AVATAR.value)
                     {
+                        move_tmp_file_to_real_file(f.path_name, f.file_name, VFS_FILE_DIR + "/" + f.tox_public_key_string + "/", f.file_name)
                         val file_ = FileDB()
                         file_.kind = f.kind
                         file_.direction = f.direction
@@ -2257,9 +2299,12 @@ class MainActivity
                         val row_id = orma!!.insertIntoFileDB(file_)
                         filedb_id = orma!!.selectFromFileDB().tox_public_key_stringEq(f.tox_public_key_string).file_nameEq(f.file_name).orderByIdDesc().toList()[0].id // Log.i(TAG, "file_recv_chunk:FileDB:filedb_id=" + filedb_id);
                     }
+
                     if (f.kind == ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_AVATAR.value)
                     {
-                    } else
+                        Log.i(TAG, "callback_file_recv_chunk_cb: incoming avatar finished: " + f.filesize)
+                    }
+                    else
                     {
                         val msg_id: Long = HelperMessage.get_message_id_from_filetransfer_id_and_friendnum(f.id, friend_number) // Log.i(TAG, "file_recv_chunk:file_READY:001a:msg_id=" + msg_id);
                         HelperMessage.update_message_in_db_filename_fullpath_friendnum_and_filenum(friend_number, file_number, (VFS_FILE_DIR + "/" + f.tox_public_key_string + "/" + f.file_name))
@@ -2285,67 +2330,76 @@ class MainActivity
             {
                 try
                 {
-                    GlobalScope.launch(Dispatchers.IO) {
-                        try
-                        {
-                            val fos = RandomAccessFile(f.path_name + "/" + f.file_name, "rw")
-                            if (f.kind == ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_FTV2.value)
-                            {
-                                fos.seek(position)
-                                fos.write(Arrays.copyOfRange(data, TOX_FILE_ID_LENGTH, data!!.size))
-                                fos.close()
-                            } else
-                            {
-                                fos.seek(position)
-                                fos.write(data)
-                                fos.close()
-                            }
-                        } catch (ex: java.lang.Exception)
-                        {
-                        }
-                    }
-                    if (f.filesize < UPDATE_MESSAGE_PROGRESS_SMALL_FILE_IS_LESS_THAN_BYTES)
+                    if (f.kind == ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_AVATAR.value)
                     {
-                        if ((f.current_position + UPDATE_MESSAGE_PROGRESS_AFTER_BYTES_SMALL_FILES) < position)
+                        val avatar_chunk_hex = bytesToHex(data!!, 0, length.toInt()).uppercase()
+                        Log.i(TAG, "callback_file_recv_chunk_cb:incoming avatar chunk: " + position + " " + length + " " + avatar_chunk_hex)
+                        add_friend_avatar_chunk(friend_pk, avatar_chunk_hex, (position == 0L))
+                    }
+                    else
+                    {
+                        GlobalScope.launch(Dispatchers.IO) {
+                            try
+                            {
+                                val fos = RandomAccessFile(f.path_name + "/" + f.file_name, "rw")
+                                if (f.kind == ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_FTV2.value)
+                                {
+                                    fos.seek(position)
+                                    fos.write(Arrays.copyOfRange(data, TOX_FILE_ID_LENGTH, data!!.size))
+                                    fos.close()
+                                } else
+                                {
+                                    fos.seek(position)
+                                    fos.write(data)
+                                    fos.close()
+                                }
+                            } catch (ex: java.lang.Exception)
+                            {
+                            }
+                        }
+                        if (f.filesize < UPDATE_MESSAGE_PROGRESS_SMALL_FILE_IS_LESS_THAN_BYTES)
                         {
-                            GlobalScope.launch(Dispatchers.IO) {
-                                try
-                                {
-                                    f.current_position = position
-                                    HelperFiletransfer.update_filetransfer_db_current_position(f)
-                                    if (f.kind != ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_AVATAR.value)
+                            if ((f.current_position + UPDATE_MESSAGE_PROGRESS_AFTER_BYTES_SMALL_FILES) < position)
+                            {
+                                GlobalScope.launch(Dispatchers.IO) {
+                                    try
                                     {
-                                        if (f.id != -1L)
+                                        f.current_position = position
+                                        HelperFiletransfer.update_filetransfer_db_current_position(f)
+                                        if (f.kind != ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_AVATAR.value)
                                         {
-                                            update_single_message_from_ftid(f, true)
-                                            // Log.i(TAG, "update FT ----==========>>> file pos=" + position + " " + VFS_FILE_DIR + "/" + f.tox_public_key_string + "/" + f.file_name)
+                                            if (f.id != -1L)
+                                            {
+                                                update_single_message_from_ftid(f, true)
+                                                // Log.i(TAG, "update FT ----==========>>> file pos=" + position + " " + VFS_FILE_DIR + "/" + f.tox_public_key_string + "/" + f.file_name)
+                                            }
                                         }
+                                    } catch (e: java.lang.Exception)
+                                    {
                                     }
-                                } catch (e: java.lang.Exception)
-                                {
                                 }
                             }
-                        }
-                    } else
-                    {
-                        if ((f.current_position + UPDATE_MESSAGE_PROGRESS_AFTER_BYTES) < position)
+                        } else
                         {
-                            GlobalScope.launch(Dispatchers.IO) {
-                                try
-                                {
-                                    f.current_position = position
-                                    HelperFiletransfer.update_filetransfer_db_current_position(f)
-                                    if (f.kind != ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_AVATAR.value)
+                            if ((f.current_position + UPDATE_MESSAGE_PROGRESS_AFTER_BYTES) < position)
+                            {
+                                GlobalScope.launch(Dispatchers.IO) {
+                                    try
                                     {
-                                        if (f.id != -1L)
-                                        { //**// HelperMessage.update_single_message_from_ftid(f.id, true)
-                                            // Log.i(TAG, "update FT ----==========>>> file pos=" + position + " " + VFS_FILE_DIR + "/" + f.tox_public_key_string + "/" + f.file_name)
-                                            update_single_message_from_ftid(f, true)
+                                        f.current_position = position
+                                        HelperFiletransfer.update_filetransfer_db_current_position(f)
+                                        if (f.kind != ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_AVATAR.value)
+                                        {
+                                            if (f.id != -1L)
+                                            { //**// HelperMessage.update_single_message_from_ftid(f.id, true)
+                                                // Log.i(TAG, "update FT ----==========>>> file pos=" + position + " " + VFS_FILE_DIR + "/" + f.tox_public_key_string + "/" + f.file_name)
+                                                update_single_message_from_ftid(f, true)
 
+                                            }
                                         }
+                                    } catch (e: java.lang.Exception)
+                                    {
                                     }
-                                } catch (e: java.lang.Exception)
-                                {
                                 }
                             }
                         }

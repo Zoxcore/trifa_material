@@ -24,14 +24,22 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.zoffcc.applications.trifa.HelperGeneric
+import com.zoffcc.applications.trifa.HelperGeneric.friend_get_avatar
+import com.zoffcc.applications.trifa.HelperGeneric.friend_has_avatar
+import com.zoffcc.applications.trifa.HelperOSFile
 import org.jetbrains.compose.resources.ExperimentalResourceApi
+import java.io.ByteArrayInputStream
 
 /**
  * Display the avatar for a [ContactItem]. If it has an avatar image, display that, otherwise
@@ -53,12 +61,28 @@ fun ProfileCircle(size: Dp, contactItem: ContactItem) {
  * @param size the size of the circle.
  */
 @Composable
-fun ProfileCircle(size: Dp, input: String) {
-    Canvas(
-        Modifier.size(size).clip(CircleShape)
-            .border(1.dp, Color.Black, CircleShape)
-    ) {
-        IdenticonKt(input, this.size.width, this.size.height).draw(this)
+fun ProfileCircle(size: Dp, pubkey: String) {
+    if (friend_has_avatar(pubkey))
+    {
+        val avatar_bytes = friend_get_avatar(pubkey)
+        if (avatar_bytes != null)
+        {
+            HelperGeneric.AsyncImage(load = {
+                loadImageBitmap(ByteArrayInputStream(avatar_bytes))
+            }, painterFor = { remember { BitmapPainter(it) } },
+                contentDescription = "Image",
+                modifier = Modifier.size(size).clip(CircleShape)
+                    .border(1.dp, Color.Black, CircleShape))
+        }
+    }
+    else
+    {
+        Canvas(
+            Modifier.size(size).clip(CircleShape)
+                .border(1.dp, Color.Black, CircleShape)
+        ) {
+            IdenticonKt(pubkey, this.size.width, this.size.height).draw(this)
+        }
     }
 }
 
