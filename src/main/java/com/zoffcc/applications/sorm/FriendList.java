@@ -73,6 +73,14 @@ public class FriendList
     @Nullable
     public String avatar_filename = null;
 
+    @Column
+    @Nullable
+    public String avatar_hex = null;
+
+    @Column
+    @Nullable
+    public String avatar_hash_hex = null;
+
     @Column(indexed = true, defaultExpr = "false", helpers = Column.Helpers.ALL)
     @Nullable
     public boolean avatar_update = false; // has avatar changed for this friend?
@@ -123,6 +131,8 @@ public class FriendList
         out.TOX_USER_STATUS = in.TOX_USER_STATUS;
         out.avatar_filename = in.avatar_filename;
         out.avatar_pathname = in.avatar_pathname;
+        out.avatar_hex = in.avatar_hex;
+        out.avatar_hash_hex = in.avatar_hash_hex;
         out.avatar_update = in.avatar_update;
         out.notification_silent = in.notification_silent;
         out.sort = in.sort;
@@ -205,6 +215,8 @@ public class FriendList
                 f.push_url = rs.getString("push_url");
                 f.capabilities = rs.getLong("capabilities");
                 f.msgv3_capability = rs.getLong("msgv3_capability");
+                f.avatar_hex = rs.getString("avatar_hex");
+                f.avatar_hash_hex = rs.getString("avatar_hash_hex");
 
                 fl.add(f);
             }
@@ -256,6 +268,8 @@ public class FriendList
                     "is_relay,"	+
                     "push_url,"	+
                     "capabilities,"	+
+                    "avatar_hex,"	+
+                    "avatar_hash_hex,"	+
                     "msgv3_capability"	+
                     ")" +
                     "values" +
@@ -281,6 +295,8 @@ public class FriendList
                     "'"+b(this.is_relay)+"'," +
                     "'"+s(this.push_url)+"'," +
                     "'"+s(this.capabilities)+"'," +
+                    "'"+s(this.avatar_hex)+"'," +
+                    "'"+s(this.avatar_hash_hex)+"'," +
                     "'"+s(this.msgv3_capability)+"'" +
                     ")";
 
@@ -720,6 +736,32 @@ public class FriendList
             this.sql_set = this.sql_set + " , ";
         }
         this.sql_set = this.sql_set + " capabilities='" + s(capabilities) + "' ";
+        return this;
+    }
+
+    public FriendList avatar_hex(String avatar_hex) {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " avatar_hex='" + s(avatar_hex) + "' ";
+        return this;
+    }
+
+    public FriendList avatar_hash_hex(String avatar_hash_hex) {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " avatar_hash_hex='" + s(avatar_hash_hex) + "' ";
         return this;
     }
 }

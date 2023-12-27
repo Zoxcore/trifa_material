@@ -29,8 +29,10 @@ import androidx.compose.ui.Alignment.Companion.Start
 import androidx.compose.ui.Alignment.Companion.Top
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 
 @Composable
@@ -49,8 +51,8 @@ fun ContactItemView(
         horizontalArrangement = spacedBy(0.dp),
         modifier = Modifier.weight(1f, fill = true),
     ) {
-        Box(Modifier.align(Top).padding(vertical = 8.dp)) {
-            ProfileCircle(35.dp, contactItem)
+        Box(Modifier.align(Top).padding(vertical = 0.dp)) {
+            ProfileCircle(45.dp, contactItem)
             //NumberBadge(
             //    num = contactItem.unread,
             //    modifier = Modifier.align(TopEnd).offset(6.dp, (-6).dp)

@@ -493,4 +493,36 @@ public class HelperFriend {
             Log.i(TAG, "remove_pushurl_for_friend:EE:" + e.getMessage());
         }
     }
+
+    static void add_friend_avatar_chunk(String friend_pubkey, String avatar_chunk_hex, boolean first)
+    {
+       FriendList f = TrifaToxService.Companion.getOrma().selectFromFriendList().tox_public_key_stringEq(friend_pubkey).toList().get(0);
+       if (first)
+       {
+           f.avatar_hex = avatar_chunk_hex;
+       }
+       else {
+           f.avatar_hex = f.avatar_hex + avatar_chunk_hex;
+       }
+        TrifaToxService.Companion.getOrma().updateFriendList().tox_public_key_stringEq(friend_pubkey)
+                .avatar_hex(f.avatar_hex).execute();
+    }
+
+    static void del_friend_avatar(String friend_pubkey)
+    {
+        try
+        {
+            TrifaToxService.Companion.getOrma().updateFriendList().tox_public_key_stringEq(friend_pubkey).
+                    avatar_pathname(null).
+                    avatar_filename(null).
+                    avatar_hex(null).
+                    avatar_hash_hex(null).
+                    execute();
+        }
+        catch (Exception e)
+        {
+            Log.i(TAG, "set_friend_avatar:EE:" + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 }

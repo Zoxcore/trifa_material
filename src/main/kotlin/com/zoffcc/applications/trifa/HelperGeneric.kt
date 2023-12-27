@@ -919,6 +919,41 @@ object HelperGeneric {
             }
         }
     }
+
+    @OptIn(ExperimentalStdlibApi::class)
+    fun friend_get_avatar(friend_pubkey: String): ByteArray?
+    {
+        try
+        {
+            val f = orma!!.selectFromFriendList().tox_public_key_stringEq(friend_pubkey).toList().get(0)
+            if ((f.avatar_hex == null) || (f.avatar_hex.length < 1))
+            {
+                return null
+            }
+            return f.avatar_hex.hexToByteArray()
+        }
+        catch(_: Exception)
+        {
+            return null
+        }
+    }
+
+    fun friend_has_avatar(friend_pubkey: String): Boolean
+    {
+        try
+        {
+            val f = orma!!.selectFromFriendList().tox_public_key_stringEq(friend_pubkey).toList().get(0)
+            if ((f.avatar_hex == null) || (f.avatar_hex.length < 1))
+            {
+                return false
+            }
+            return true
+        }
+        catch(_: Exception)
+        {
+            return false
+        }
+    }
 }
 
 /*
