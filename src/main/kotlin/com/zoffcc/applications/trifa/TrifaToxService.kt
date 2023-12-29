@@ -965,6 +965,8 @@ class TrifaToxService
 
         fun resend_v3_messages(friend_pubkey: String?)
         {
+            return
+
             // loop through "old msg version" msgV3 1-on-1 text messages that have "resend_count < MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION" --------------
             try
             {
@@ -985,7 +987,17 @@ class TrifaToxService
                 if (m_v1 != null && m_v1.size > 0)
                 {
                     Log.i(TAG, "resend_v3_messages: we have " + m_v1.size + " messages to resend")
-                    val ii = m_v1.iterator()
+                    var ii = m_v1.iterator()
+                    var m_counter = 0
+                    while (ii.hasNext())
+                    {
+                        val m_resend_v1 = ii.next()
+                        m_counter++
+
+                        Log.i(TAG, "resend_v3_messages: " + m_counter + ": friend="
+                                + get_friend_name_from_pubkey(m_resend_v1.tox_friendpubkey) + " text=" + m_resend_v1.text)
+                    }
+                    ii = m_v1.iterator()
                     while (ii.hasNext())
                     {
                         val m_resend_v1 = ii.next()
@@ -1018,6 +1030,8 @@ class TrifaToxService
 
         fun resend_old_messages(friend_pubkey: String?)
         {
+            return
+
             try
             {
                 var max_resend_count_per_iteration = 10
@@ -1043,7 +1057,17 @@ class TrifaToxService
                 if (m_v0 != null && m_v0.size > 0)
                 {
                     Log.i(TAG, "resend_old_messages: we have " + m_v0.size + " messages to resend")
-                    val ii = m_v0.iterator()
+                    var ii = m_v0.iterator()
+                    var m_counter = 0
+                    while (ii.hasNext())
+                    {
+                        val m_resend_v0 = ii.next()
+                        m_counter++
+
+                        Log.i(TAG, "resend_old_messages: " + m_counter + ": friend="
+                                + get_friend_name_from_pubkey(m_resend_v0.tox_friendpubkey) + " text=" + m_resend_v0.text)
+                    }
+                    ii = m_v0.iterator()
                     while (ii.hasNext())
                     {
                         val m_resend_v0 = ii.next()
