@@ -75,7 +75,7 @@ private fun ContactItemViewInfo(contactItem: ContactItem) = Column(
 ) {
     Text(
         text = contactItem.name,
-        style = MaterialTheme.typography.body1,
+        style = if (contactItem.name.length > 14) MaterialTheme.typography.body1.copy(fontSize = 13.sp) else MaterialTheme.typography.body1,
         maxLines = 1,
         overflow = Ellipsis,
     )
