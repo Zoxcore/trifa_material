@@ -1817,8 +1817,8 @@ class MainActivity
                         m.raw_msgv2_bytes = ""
                         m.rcvd_timestamp = System.currentTimeMillis()
                         m.read = true
-                        HelperMessage.update_message_in_db_read_rcvd_timestamp_rawmsgbytes(m)
-                        m.resend_count = 2
+                        update_message_in_db_read_rcvd_timestamp_rawmsgbytes(m)
+                        m.resend_count = TRIFAGlobals.MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION
                         HelperMessage.update_message_in_db_resend_count(m)
                     }
                     catch(_: Exception)
