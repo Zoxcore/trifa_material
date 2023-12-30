@@ -13,7 +13,7 @@ fi
 LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libasan.so.6.0.0 \
 /usr/lib/jvm/java-17-openjdk-amd64/bin/java -Dapple.awt.application.name=TRIfA \
 -Dcom.apple.mrj.application.apple.menu.about.name=TRIfA -Dcompose.application.configure.swing.globals=true -Dcompose.application.resources.dir="$p"/build/compose/tmp/prepareAppResources -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant \
--cp "$p"/build/compose/jars/trifa_material-linux-x64-1.0.10.jar \
+-cp "$p"/build/compose/jars/trifa_material-linux-x64-1.0.11.jar \
 MainKt
 
 # -cp "$p"/build/libs/trifa_material-1.0.8.jar:\
