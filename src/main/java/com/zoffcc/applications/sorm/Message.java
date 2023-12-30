@@ -117,7 +117,7 @@ public class Message
     public int msg_version; // 0 -> old Message, 1 -> for MessageV2 Message
 
     @Column(indexed = true, defaultExpr = "2")
-    public int resend_count; // 2 -> do not resend msg anymore, 0 or 1 -> resend count
+    public int resend_count; // for msgV2 "> 1" -> do not resend msg anymore, 0 or 1 -> resend count
 
     @Column(indexed = true, defaultExpr = "false", helpers = Column.Helpers.ALL)
     public boolean ft_outgoing_queued = false;
