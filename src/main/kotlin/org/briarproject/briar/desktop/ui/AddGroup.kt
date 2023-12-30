@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -150,6 +151,17 @@ fun AddGroup() = Box {
                 Text("join the Public Information Group")
             }
         }
+        Spacer(modifier = Modifier.height(30.dp))
+        Row {
+            Spacer(modifier = Modifier.width(35.dp))
+            Text(fontWeight = FontWeight.ExtraBold,
+                fontSize = 16.sp,
+                text ="Important Notice: ")
+            Text(fontWeight = FontWeight.Normal,
+                fontSize = 16.sp,
+                text ="Joining a Tox Public group for the first time can take a long time, even up to 30 minutes")
+        }
+        Spacer(modifier = Modifier.height(30.dp))
     }
 }
 
