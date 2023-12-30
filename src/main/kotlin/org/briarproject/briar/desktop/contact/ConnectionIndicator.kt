@@ -39,9 +39,13 @@ fun ConnectionIndicator(
     modifier: Modifier = Modifier.size(16.dp),
     isConnected: Int,
 ) = Box(
-    modifier = modifier
-        .border(1.dp, Color.Black, CircleShape)
-        .background(getConnectionColor(isConnected), CircleShape)
+    modifier = if (isConnected == 0)
+            modifier
+            .background(getConnectionColor(isConnected), CircleShape)
+         else
+             modifier
+            .border(1.dp, Color.Black, CircleShape)
+            .background(getConnectionColor(isConnected), CircleShape)
 )
 
 fun getConnectionColor(connection_status : Int): Color {
