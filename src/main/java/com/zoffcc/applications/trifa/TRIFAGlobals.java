@@ -50,6 +50,9 @@ public class TRIFAGlobals
     //  groupbot@toxme.io
     final static String GROUPBOT_TOXID = "56A1ADE4B65B86BCD51CC73E2CD4E542179F47959FE3E0E21B4B0ACDADE51855D34D34D37CB5";
 
+    // TRIfA public info group
+    final public static String TOX_TRIFA_PUBLIC_GROUPID = "154b3973bd0e66304fd6179a8a54759073649e09e6e368f0334fc6ed666ab762";
+
     final static boolean ADD_BOTS_ON_STARTUP = true;
 
     final static int USE_MAX_NUMBER_OF_BOOTSTRAP_NODES = 40;
