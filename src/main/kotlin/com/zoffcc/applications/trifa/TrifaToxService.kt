@@ -965,8 +965,6 @@ class TrifaToxService
 
         fun resend_v3_messages(friend_pubkey: String?)
         {
-            return
-
             // loop through "old msg version" msgV3 1-on-1 text messages that have "resend_count < MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION" --------------
             try
             {
@@ -1008,11 +1006,14 @@ class TrifaToxService
                                 continue
                             }
                         }
+                        Log.i(TAG, "resend_v3_messages:get_friend_msgv3_capability=" + get_friend_msgv3_capability(m_resend_v1.tox_friendpubkey))
                         if (get_friend_msgv3_capability(m_resend_v1.tox_friendpubkey) != 1L)
                         {
                             continue
                         }
-                        tox_friend_resend_msgv3_wrapper(m_resend_v1)
+                        Log.i(TAG, "resend_v3_messages:tox_friend_resend_msgv3_wrapper:" + m_resend_v1.text + " : m=" +
+                                m_resend_v1 + " : " + get_friend_name_from_pubkey(m_resend_v1.tox_friendpubkey));
+                        // ** // tox_friend_resend_msgv3_wrapper(m_resend_v1)
                         cur_resend_count_per_iteration++
                         if (cur_resend_count_per_iteration >= max_resend_count_per_iteration)
                         {
@@ -1030,8 +1031,6 @@ class TrifaToxService
 
         fun resend_old_messages(friend_pubkey: String?)
         {
-            return
-
             try
             {
                 var max_resend_count_per_iteration = 10
@@ -1048,11 +1047,11 @@ class TrifaToxService
                     // HINT: this is the generic resend for all friends, that happens in regular intervals
                     //       only resend if the original sent timestamp is at least 25 seconds in the past
                     //       to try to avoid resending when the read receipt is very late.
-                    orma!!.selectFromMessage().directionEq(1).TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value).msg_versionEq(0).tox_friendpubkeyEq(friend_pubkey).readEq(false).resend_countLt(2).orderBySent_timestampAsc().sent_timestampLt(cutoff_sent_time).toList()
+                    orma!!.selectFromMessage().directionEq(1).TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value).msg_versionEq(0).tox_friendpubkeyEq(friend_pubkey).readEq(false).resend_countLt(MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION).orderBySent_timestampAsc().sent_timestampLt(cutoff_sent_time).toList()
                 } else
                 {
                     // HINT: this is the specific resend for 1 friend only, when that friend comes online
-                    orma!!.selectFromMessage().directionEq(1).TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value).msg_versionEq(0).readEq(false).resend_countLt(2).orderBySent_timestampAsc().toList()
+                    orma!!.selectFromMessage().directionEq(1).TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value).msg_versionEq(0).readEq(false).resend_countLt(MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION).orderBySent_timestampAsc().toList()
                 }
                 if (m_v0 != null && m_v0.size > 0)
                 {
@@ -1075,19 +1074,19 @@ class TrifaToxService
                         {
                             if (is_friend_online_real(tox_friend_by_public_key(m_resend_v0.tox_friendpubkey)) == 0)
                             {
-                                // Log.i(TAG, "resend_old_messages:RET:01:" +
-                                //            get_friend_name_from_pubkey(m_resend_v0.tox_friendpubkey));
+                                Log.i(TAG, "resend_old_messages:RET:01:" +
+                                            get_friend_name_from_pubkey(m_resend_v0.tox_friendpubkey))
                                 continue
                             }
                         }
                         if (get_friend_msgv3_capability(m_resend_v0.tox_friendpubkey) == 1L)
                         {
-                            // Log.i(TAG, "resend_old_messages:RET:02:" +
-                            //            get_friend_name_from_pubkey(m_resend_v0.tox_friendpubkey));
+                            Log.i(TAG, "resend_old_messages:RET:02:friend hash msgv3_capability:" +
+                                        get_friend_name_from_pubkey(m_resend_v0.tox_friendpubkey))
                             continue
                         }
-                        // Log.i(TAG, "resend_old_messages:tox_friend_resend_msgv3_wrapper:" + m_resend_v0.text + " : m=" +
-                        //            m_resend_v0 + " : " + get_friend_name_from_pubkey(m_resend_v0.tox_friendpubkey));
+                        Log.i(TAG, "resend_old_messages:tox_friend_resend_msgv3_wrapper:" + m_resend_v0.text + " : m=" +
+                                    m_resend_v0 + " : " + get_friend_name_from_pubkey(m_resend_v0.tox_friendpubkey))
                         tox_friend_resend_msgv3_wrapper(m_resend_v0)
                         cur_resend_count_per_iteration++
                         if (cur_resend_count_per_iteration >= max_resend_count_per_iteration)
