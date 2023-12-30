@@ -140,7 +140,7 @@ private fun GrouppeerItemViewInfo(grouppeerItem: GroupPeerItem) = Column(
 ) {
     Text(
         text = grouppeerItem.name,
-        style = TextStyle(fontSize = 15.sp),
+        style = if (grouppeerItem.name.length > 14) MaterialTheme.typography.body1.copy(fontSize = 12.sp) else MaterialTheme.typography.body1,
         maxLines = 1,
         overflow = Ellipsis,
     )
