@@ -1009,6 +1009,8 @@ class TrifaToxService
                         Log.i(TAG, "resend_v3_messages:get_friend_msgv3_capability=" + get_friend_msgv3_capability(m_resend_v1.tox_friendpubkey))
                         if (get_friend_msgv3_capability(m_resend_v1.tox_friendpubkey) != 1L)
                         {
+                            Log.i(TAG, "resend_v3_messages:RET:02:friend hash msgv3_capability:" +
+                                    get_friend_name_from_pubkey(m_resend_v1.tox_friendpubkey))
                             continue
                         }
                         Log.i(TAG, "resend_v3_messages:tox_friend_resend_msgv3_wrapper:" + m_resend_v1.text + " : m=" +
