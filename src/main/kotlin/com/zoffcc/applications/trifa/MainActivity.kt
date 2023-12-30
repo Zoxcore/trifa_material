@@ -7,7 +7,6 @@ import SnackBarToast
 import UIGroupMessage
 import UIMessage
 import User
-import androidx.compose.ui.text.toUpperCase
 import avstatestore
 import avstatestorecallstate
 import avstatestorevcapfpsstate
@@ -30,6 +29,7 @@ import com.zoffcc.applications.trifa.HelperFiletransfer.update_filetransfer_db_f
 import com.zoffcc.applications.trifa.HelperFriend.add_friend_avatar_chunk
 import com.zoffcc.applications.trifa.HelperFriend.add_pushurl_for_friend
 import com.zoffcc.applications.trifa.HelperFriend.del_friend_avatar
+import com.zoffcc.applications.trifa.HelperFriend.get_friend_name_from_num
 import com.zoffcc.applications.trifa.HelperFriend.main_get_friend
 import com.zoffcc.applications.trifa.HelperFriend.remove_pushurl_for_friend
 import com.zoffcc.applications.trifa.HelperFriend.send_friend_msg_receipt_v2_wrapper
@@ -58,6 +58,7 @@ import com.zoffcc.applications.trifa.HelperGroup.sync_group_message_history
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupnum__wrapper
 import com.zoffcc.applications.trifa.HelperMessage.process_msgv3_high_level_ack
+import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_read_rcvd_timestamp_rawmsgbytes
 import com.zoffcc.applications.trifa.HelperMessage.update_single_message_from_ftid
 import com.zoffcc.applications.trifa.HelperMessage.update_single_message_from_messge_id
 import com.zoffcc.applications.trifa.TRIFAGlobals.AVATAR_INCOMING_MAX_BYTE_SIZE
@@ -1335,25 +1336,25 @@ class MainActivity
         {
             if (a_TOXAV_CALL_COMM_INFO == ToxVars.TOXAV_CALL_COMM_INFO.TOXAV_CALL_COMM_DECODER_CURRENT_BITRATE.value.toLong())
             {
-                //Log.i(TAG, "call_comm_cb: fnum: " + friend_number
+                // Log.i(TAG, "call_comm_cb: fnum: " + friend_number
                 //        + " DECODER_CURRENT_BITRATE = " + comm_number)
                 avstatestorevplayfpsstate.updateDecoderVBitrate(comm_number.toInt())
             }
             else if (a_TOXAV_CALL_COMM_INFO == ToxVars.TOXAV_CALL_COMM_INFO.TOXAV_CALL_COMM_ENCODER_CURRENT_BITRATE.value.toLong())
             {
-                //Log.i(TAG, "call_comm_cb: fnum: " + friend_number
+                // Log.i(TAG, "call_comm_cb: fnum: " + friend_number
                 //        + " ENCODER_CURRENT_BITRATE = " + comm_number)
                 avstatestorevcapfpsstate.updateEncoderVBitrate(comm_number.toInt())
 
             }
             else if (a_TOXAV_CALL_COMM_INFO == ToxVars.TOXAV_CALL_COMM_INFO.TOXAV_CALL_COMM_NETWORK_ROUND_TRIP_MS.value.toLong())
             {
-                //Log.i(TAG, "call_comm_cb: fnum: " + friend_number
+                // Log.i(TAG, "call_comm_cb: fnum: " + friend_number
                 //        + " NETWORK_ROUND_TRIP_MS = " + comm_number)
             }
             else if (a_TOXAV_CALL_COMM_INFO == ToxVars.TOXAV_CALL_COMM_INFO.TOXAV_CALL_COMM_PLAY_DELAY.value.toLong())
             {
-                //Log.i(TAG, "call_comm_cb: fnum: " + friend_number
+                // Log.i(TAG, "call_comm_cb: fnum: " + friend_number
                 //        + " PLAY_DELAY = " + comm_number)
             }
             else
@@ -1542,6 +1543,42 @@ class MainActivity
         @JvmStatic
         fun android_tox_callback_friend_read_receipt_cb_method(friend_number: Long, message_id: Long)
         {
+            try
+            {
+                val toxpk = tox_friend_get_public_key(friend_number)!!.uppercase()
+                if ((toxpk == null) || (toxpk.equals("-1", true)))
+                {
+                    Log.i(TAG, "android_tox_callback_friend_read_receipt_cb_method: tox pubkey error")
+                    return
+                }
+
+                if (get_friend_msgv3_capability(toxpk) == 1L)
+                {
+                    // HINT: friend has msgV3 capability, ignore normal read receipts
+                    Log.i(TAG, "friend_read_receipt:msgV3:ignore low level ACK, friend:" + get_friend_name_from_num(friend_number));
+                    return
+                }
+                // there can be older messages with same message_id for this friend! so always take the latest one! -------
+                val m = orma!!.selectFromMessage().message_idEq(message_id).
+                    tox_friendpubkeyEq(toxpk).directionEq(1).orderByIdDesc().toList()[0]
+                // there can be older messages with same message_id for this friend! so always take the latest one! -------
+                Log.i(TAG, "friend_read_receipt:m=" + m);
+                Log.i(TAG, "friend_read_receipt:m:message_id=" + m.message_id + " text=" + m.text + " friendpubkey=" + m.tox_friendpubkey + " read=" + m.read + " direction=" + m.direction);
+                if (m != null)
+                {
+                    Log.i(TAG,
+                          "friend_read_receipt:friend:" + get_friend_name_from_num(friend_number) + " message:" + m.text +
+                          " m=" + m);
+                    m.rcvd_timestamp = System.currentTimeMillis()
+                    m.read = true
+                    update_message_in_db_read_rcvd_timestamp_rawmsgbytes(m)
+                    // TODO: update message in UI
+                }
+            } catch (e: java.lang.Exception)
+            {
+                Log.i(TAG, "friend_read_receipt:EE:" + e.message)
+                e.printStackTrace()
+            }
         }
 
         @JvmStatic
