@@ -7,7 +7,7 @@ public class CustomSemaphore extends Semaphore {
 
     private final static String TAG = "trifa.CstSemphr";
 
-    private final boolean LOGGING = false;
+    private final boolean CUSTOM_SEMAPHORE_LOGGING = false;
     private boolean acquired = false;
     private String prev_acquired_sourcefile_line = "";
     private final int BLOCKING_THRESHOLD_MS = 500;
@@ -16,7 +16,7 @@ public class CustomSemaphore extends Semaphore {
 
     public CustomSemaphore(int permits) {
         super(permits);
-        if (LOGGING) Log.i(TAG, ""+SEM_ID + " " + "create");
+        if (CUSTOM_SEMAPHORE_LOGGING) Log.i(TAG, ""+SEM_ID + " " + "create");
     }
 
     @Override
@@ -46,7 +46,7 @@ public class CustomSemaphore extends Semaphore {
             }
         }
 
-        if (LOGGING) Log.i(TAG, ""+SEM_ID + " " + "acquire:start" + callerMethodName);
+        if (CUSTOM_SEMAPHORE_LOGGING) Log.i(TAG, ""+SEM_ID + " " + "acquire:start" + callerMethodName);
         acquired = false;
         final String callerMethodName_final = callerMethodName;
         try {
@@ -65,17 +65,17 @@ public class CustomSemaphore extends Semaphore {
                          */
                     }
                 } catch (Exception e) {
-                    if (LOGGING) e.printStackTrace();
+                    if (CUSTOM_SEMAPHORE_LOGGING) e.printStackTrace();
                 }
             });
             _t.start();
         } catch (Exception e) {
-            if (LOGGING) e.printStackTrace();
+            if (CUSTOM_SEMAPHORE_LOGGING) e.printStackTrace();
         }
         super.acquire();
         prev_acquired_sourcefile_line = sourcefile_line_;
         acquired = true;
-        if (LOGGING) Log.i(TAG, ""+SEM_ID + " " + "acquire:finish" + callerMethodName);
+        if (CUSTOM_SEMAPHORE_LOGGING) Log.i(TAG, ""+SEM_ID + " " + "acquire:finish" + callerMethodName);
     }
 
     public void release_passthru()
@@ -85,8 +85,8 @@ public class CustomSemaphore extends Semaphore {
 
     @Override
     public void release() {
-        if (LOGGING) Log.i(TAG, ""+SEM_ID + " " + "release:start");
+        if (CUSTOM_SEMAPHORE_LOGGING) Log.i(TAG, ""+SEM_ID + " " + "release:start");
         super.release();
-        if (LOGGING) Log.i(TAG, ""+SEM_ID + " " + "release:finish");
+        if (CUSTOM_SEMAPHORE_LOGGING) Log.i(TAG, ""+SEM_ID + " " + "release:finish");
     }
 }
