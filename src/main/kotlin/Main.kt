@@ -109,7 +109,6 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
@@ -124,10 +123,7 @@ import com.zoffcc.applications.trifa.AudioBar
 import com.zoffcc.applications.trifa.AudioBar.audio_in_bar
 import com.zoffcc.applications.trifa.AudioBar.audio_out_bar
 import com.zoffcc.applications.trifa.CustomSemaphore
-import com.zoffcc.applications.trifa.HelperGeneric
 import com.zoffcc.applications.trifa.HelperGeneric.PubkeyShort
-import com.zoffcc.applications.trifa.HelperMessage
-import com.zoffcc.applications.trifa.HelperNotification.displayNotification
 import com.zoffcc.applications.trifa.HelperNotification.init_system_tray
 import com.zoffcc.applications.trifa.HelperNotification.set_resouces_dir
 import com.zoffcc.applications.trifa.JPictureBox
@@ -153,13 +149,7 @@ import com.zoffcc.applications.trifa.TrifaToxService.Companion.clear_grouppeers
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.load_grouppeers
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import com.zoffcc.applications.trifa_material.trifa_material.BuildConfig
-import io.github.alexzhirkevich.qrose.options.QrBallShape
 import io.github.alexzhirkevich.qrose.options.QrBrush
-import io.github.alexzhirkevich.qrose.options.QrFrameShape
-import io.github.alexzhirkevich.qrose.options.QrPixelShape
-import io.github.alexzhirkevich.qrose.options.brush
-import io.github.alexzhirkevich.qrose.options.circle
-import io.github.alexzhirkevich.qrose.options.roundCorners
 import io.github.alexzhirkevich.qrose.options.solid
 import io.github.alexzhirkevich.qrose.rememberQrCodePainter
 import kotlinx.coroutines.CoroutineScope
@@ -189,7 +179,6 @@ import org.briarproject.briar.desktop.ui.UiMode
 import org.briarproject.briar.desktop.ui.UiPlaceholder
 import org.briarproject.briar.desktop.ui.VerticalDivider
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import java.awt.Toolkit
 import java.io.File
 import java.net.URI
@@ -199,10 +188,8 @@ import java.net.http.HttpResponse
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.prefs.Preferences
-import javax.swing.JFrame
 import javax.swing.JPanel
 import javax.swing.UIManager
-import javax.swing.border.Border
 
 private const val TAG = "trifa.Main.kt"
 var tox_running_state_wrapper = "start"
