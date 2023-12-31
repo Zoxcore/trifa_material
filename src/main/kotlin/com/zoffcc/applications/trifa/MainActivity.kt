@@ -1282,7 +1282,7 @@ class MainActivity
                 //
                 if ((tox_audio_in_queue.remainingCapacity() < 1) && (!tox_a_queue_full_trigger))
                 {
-                    Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:trigger:" + tox_audio_in_queue.size)
+                    Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:xxxxx !! FULL !! xxxxx:trigger:" + tox_audio_in_queue.size)
                     tox_a_queue_full_trigger = true
                 }
                 else

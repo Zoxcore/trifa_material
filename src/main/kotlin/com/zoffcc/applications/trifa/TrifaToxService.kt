@@ -65,6 +65,8 @@ import contactstore
 import globalstore
 import grouppeerstore
 import groupstore
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import online_button_text_wrapper
 import org.briarproject.briar.desktop.contact.ContactItem
 import org.briarproject.briar.desktop.contact.GroupItem
@@ -338,6 +340,7 @@ class TrifaToxService
     fun tox_audio_play_thread_start()
     {
         var sw_t = -1L
+        var update_audio_bar = 0
         Log.i(TAG, "[]tox_audio_frame:starting Thread")
         tox_audio_play_thread = object : Thread()
         {
@@ -368,15 +371,15 @@ class TrifaToxService
                             {
                                 if (tox_a_queue_stop_trigger)
                                 {
-                                    if (tox_audio_in_queue.size >= (MainActivity.tox_audio_in_queue_max_capacity - 2))
+                                    if (tox_audio_in_queue.size >= 5)
                                     {
                                         tox_a_queue_stop_trigger = false
                                         Log.i(TAG, "[]tox_audio_frame:release:(resume playing):" + tox_audio_in_queue.size)
                                     }
                                     else
                                     {
-                                        Log.i(TAG, "[]tox_audio_frame:+++++++++:(paused):" + tox_a_queue_stop_trigger + " "
-                                        + tox_audio_in_queue.size + " " + tox_audio_in_queue.remainingCapacity())
+                                        // Log.i(TAG, "[]tox_audio_frame:+++++++++:(paused):" + tox_a_queue_stop_trigger + " "
+                                        // + tox_audio_in_queue.size + " " + tox_audio_in_queue.remainingCapacity())
                                         sleep(5)
                                     }
                                 } else
@@ -388,100 +391,45 @@ class TrifaToxService
                                         {
                                             val want_bytes = buf.size
                                             val sample_count = want_bytes / 2
-                                            try
+
+                                            // HINT: this acutally plays incoming Audio
+                                            // HINT: this may block!!
+                                            Log.i(TAG, "[]tox_audio_frame:bytes_actually_written:sourceDataLine.write:loop_delta=" + (System.currentTimeMillis() - sw_t))
+                                            sw_t = System.currentTimeMillis()
+                                            val bytes_actually_written = AudioSelectOutBox.sourceDataLine.write(buf, 0, want_bytes)
+                                            Log.i(TAG, "[]tox_audio_frame:bytes_actually_written:sourceDataLine.write:delta=" + (System.currentTimeMillis() - sw_t))
+                                            Log.i(TAG, "[]tox_audio_frame:bytes_actually_written:ms=" + AudioSelectOutBox.sourceDataLine.microsecondPosition / 1000)
+                                            if (bytes_actually_written != want_bytes)
                                             {
-                                                Log.i(TAG, "[]tox_audio_frame:SEM_ACQUIRE:001a")
-                                                AudioSelectOutBox.semaphore_audio_out_convert.acquire()
-                                                Log.i(TAG, "[]tox_audio_frame:SEM_ACQUIRE:001b")
-                                                if (AudioSelectOutBox.semaphore_audio_out_convert_active_threads >= AudioSelectOutBox.semaphore_audio_out_convert_max_active_threads)
-                                                {
-                                                    Log.i(TAG, "[]tox_audio_frame:too many threads running: " + AudioSelectOutBox.semaphore_audio_out_convert_active_threads)
-                                                    Log.i(TAG, "[]tox_audio_frame:SEM_release:001a")
-                                                    AudioSelectOutBox.semaphore_audio_out_convert.release()
-                                                    Log.i(TAG, "[]tox_audio_frame:SEM_release:001b")
-                                                    continue
-                                                }
-                                                Log.i(TAG, "[]tox_audio_frame:SEM_release:002a")
-                                                AudioSelectOutBox.semaphore_audio_out_convert.release()
-                                                Log.i(TAG, "[]tox_audio_frame:SEM_release:002b")
-                                            } catch (e: java.lang.Exception)
+                                                Log.i(TAG, "[]tox_audio_frame:bytes_actually_written:ERR:=" + bytes_actually_written + " want_bytes=" + want_bytes)
+                                            }
+                                            else
                                             {
-                                                Log.i(TAG, "[]tox_audio_frame:SEM_release:003a")
-                                                AudioSelectOutBox.semaphore_audio_out_convert.release()
-                                                Log.i(TAG, "[]tox_audio_frame:SEM_release:003b")
+                                                Log.i(TAG, "[]tox_audio_frame:bytes_actually_written:OK:=" + bytes_actually_written + " want_bytes=" + want_bytes)
+                                                // sleep(30)
                                             }
 
-                                            val t_tox_audio_pcm_play = Thread{
-                                                try
-                                                {
-                                                    Log.i(TAG, "[]tox_audio_frame:SEM_ACQUIRE:t004a")
-                                                    AudioSelectOutBox.semaphore_audio_out_convert.acquire()
-                                                    Log.i(TAG, "[]tox_audio_frame:SEM_ACQUIRE:t004b")
-                                                    AudioSelectOutBox.semaphore_audio_out_convert_active_threads++
-                                                    Log.i(TAG, "[]tox_audio_frame:SEM_release:t004a")
-                                                    AudioSelectOutBox.semaphore_audio_out_convert.release()
-                                                    Log.i(TAG, "[]tox_audio_frame:SEM_release:t004b")
-                                                } catch (e: java.lang.Exception)
-                                                {
-                                                    Log.i(TAG, "[]tox_audio_frame:SEM_release:t005a")
-                                                    AudioSelectOutBox.semaphore_audio_out_convert.release()
-                                                    Log.i(TAG, "[]tox_audio_frame:SEM_release:t005b")
-                                                }
-                                                // HINT: this acutally plays incoming Audio
-                                                // HINT: this may block!!
-                                                try
-                                                {
-                                                    Log.i(TAG, "[]tox_audio_frame:bytes_actually_written:sourceDataLine.write:loop_delta=" + (System.currentTimeMillis() - sw_t))
-                                                    sw_t = System.currentTimeMillis()
-                                                    val bytes_actually_written = AudioSelectOutBox.sourceDataLine.write(buf, 0, want_bytes)
-                                                    Log.i(TAG, "[]tox_audio_frame:bytes_actually_written:sourceDataLine.write:delta=" + (System.currentTimeMillis() - sw_t))
-                                                    if (bytes_actually_written != want_bytes)
+                                            update_audio_bar++
+                                            if (update_audio_bar == 2)
+                                            {
+                                                update_audio_bar = 0
+                                                GlobalScope.launch {
+                                                    var global_audio_out_vu: Float = MainActivity.AUDIO_VU_MIN_VALUE
+                                                    if (sample_count > 0)
                                                     {
-                                                        Log.i(TAG, "[]tox_audio_frame:bytes_actually_written:ERR:=" + bytes_actually_written + " want_bytes=" + want_bytes)
+                                                        val vu_value = AudioBar.audio_vu(buf, sample_count)
+                                                        global_audio_out_vu = if (vu_value > MainActivity.AUDIO_VU_MIN_VALUE)
+                                                        {
+                                                            vu_value
+                                                        } else
+                                                        {
+                                                            0f
+                                                        }
                                                     }
-                                                    else
-                                                    {
-                                                        Log.i(TAG, "[]tox_audio_frame:bytes_actually_written:OK:=" + bytes_actually_written + " want_bytes=" + want_bytes)
-                                                    }
-                                                } catch (e: java.lang.Exception)
-                                                {
-                                                    Log.i(TAG, "[]tox_audio_frame:sourceDataLine.write:EE:" + e.message) // e.printStackTrace();
+                                                    val global_audio_out_vu_ = global_audio_out_vu
+                                                    AudioBar.set_cur_value(global_audio_out_vu_.toInt(), AudioBar.audio_out_bar)
                                                 }
-                                                try
-                                                {
-                                                    Log.i(TAG, "[]tox_audio_frame:SEM_ACQUIRE:t006a")
-                                                    AudioSelectOutBox.semaphore_audio_out_convert.acquire()
-                                                    Log.i(TAG, "[]tox_audio_frame:SEM_ACQUIRE:t006b")
-                                                    AudioSelectOutBox.semaphore_audio_out_convert_active_threads--
-                                                    Log.i(TAG, "[]tox_audio_frame:SEM_release:t006a")
-                                                    AudioSelectOutBox.semaphore_audio_out_convert.release()
-                                                    Log.i(TAG, "[]tox_audio_frame:SEM_release:t006b")
-                                                } catch (e: java.lang.Exception)
-                                                {
-                                                    Log.i(TAG, "[]tox_audio_frame:--:EEEEEE")
-                                                    Log.i(TAG, "[]tox_audio_frame:SEM_release:t007a")
-                                                    AudioSelectOutBox.semaphore_audio_out_convert.release()
-                                                    Log.i(TAG, "[]tox_audio_frame:SEM_release:t007b")
-                                                }
-                                                /*
-                                                var global_audio_out_vu: Float = MainActivity.AUDIO_VU_MIN_VALUE
-                                                if (sample_count > 0)
-                                                {
-                                                    val vu_value = AudioBar.audio_vu(buf, sample_count)
-                                                    global_audio_out_vu = if (vu_value > MainActivity.AUDIO_VU_MIN_VALUE)
-                                                    {
-                                                        vu_value
-                                                    } else
-                                                    {
-                                                        0f
-                                                    }
-                                                }
-                                                val global_audio_out_vu_ = global_audio_out_vu
-                                                AudioBar.set_cur_value(global_audio_out_vu_.toInt(), AudioBar.audio_out_bar)
-                                                */
                                             }
-                                            Log.i(TAG, "[]tox_audio_frame:new thread TTTTTTTTT")
-                                            t_tox_audio_pcm_play.start()
                                         }
                                         catch(e: Exception)
                                         {
@@ -502,9 +450,10 @@ class TrifaToxService
                         }
                         // -- play incoming bytes --
                         // -- play incoming bytes --
+                        //XXXXXXXXXX// sleep(59)
                         if (avstatestorecallstate.state.call_state != AVState.CALL_STATUS.CALL_STATUS_CALLING)
                         {
-                            Log.i(TAG, "[]tox_audio_frame:long sleep SSSSSSSSSS")
+                            // Log.i(TAG, "[]tox_audio_frame:long sleep SSSSSSSSSS")
                             sleep(200)
                         }
                     }
