@@ -365,7 +365,7 @@ class TrifaToxService
                             if ((tox_audio_in_queue.size < 2) && (!tox_a_queue_stop_trigger))
                             {
                                 tox_a_queue_stop_trigger = true
-                                Log.i(TAG, "[]tox_audio_frame:trigger:(PAUSE playing):" + tox_audio_in_queue.size)
+                                // Log.i(TAG, "[]tox_audio_frame:trigger:(PAUSE playing):" + tox_audio_in_queue.size)
                             }
                             else
                             {
@@ -374,15 +374,17 @@ class TrifaToxService
                                     if (tox_audio_in_queue.size >= 5)
                                     {
                                         tox_a_queue_stop_trigger = false
-                                        Log.i(TAG, "[]tox_audio_frame:release:(resume playing):" + tox_audio_in_queue.size)
+                                        // Log.i(TAG, "[]tox_audio_frame:release:(resume playing):" + tox_audio_in_queue.size)
                                     }
                                     else
                                     {
                                         // Log.i(TAG, "[]tox_audio_frame:+++++++++:(paused):" + tox_a_queue_stop_trigger + " "
                                         // + tox_audio_in_queue.size + " " + tox_audio_in_queue.remainingCapacity())
-                                        sleep(5)
+                                        sleep(4)
                                     }
-                                } else
+                                }
+
+                                if (!tox_a_queue_stop_trigger)
                                 {
                                     val buf: ByteArray = tox_audio_in_queue.poll()
                                     if (buf != null)
@@ -394,18 +396,18 @@ class TrifaToxService
 
                                             // HINT: this acutally plays incoming Audio
                                             // HINT: this may block!!
-                                            Log.i(TAG, "[]tox_audio_frame:bytes_actually_written:sourceDataLine.write:loop_delta=" + (System.currentTimeMillis() - sw_t))
+                                            // Log.i(TAG, "[]tox_audio_frame:bytes_actually_written:sourceDataLine.write:loop_delta=" + (System.currentTimeMillis() - sw_t))
                                             sw_t = System.currentTimeMillis()
                                             val bytes_actually_written = AudioSelectOutBox.sourceDataLine.write(buf, 0, want_bytes)
-                                            Log.i(TAG, "[]tox_audio_frame:bytes_actually_written:sourceDataLine.write:delta=" + (System.currentTimeMillis() - sw_t))
-                                            Log.i(TAG, "[]tox_audio_frame:bytes_actually_written:ms=" + AudioSelectOutBox.sourceDataLine.microsecondPosition / 1000)
+                                            // Log.i(TAG, "[]tox_audio_frame:bytes_actually_written:sourceDataLine.write:delta=" + (System.currentTimeMillis() - sw_t))
+                                            // Log.i(TAG, "[]tox_audio_frame:bytes_actually_written:ms=" + AudioSelectOutBox.sourceDataLine.microsecondPosition / 1000)
                                             if (bytes_actually_written != want_bytes)
                                             {
                                                 Log.i(TAG, "[]tox_audio_frame:bytes_actually_written:ERR:=" + bytes_actually_written + " want_bytes=" + want_bytes)
                                             }
                                             else
                                             {
-                                                Log.i(TAG, "[]tox_audio_frame:bytes_actually_written:OK:=" + bytes_actually_written + " want_bytes=" + want_bytes)
+                                                // Log.i(TAG, "[]tox_audio_frame:bytes_actually_written:OK:=" + bytes_actually_written + " want_bytes=" + want_bytes)
                                                 // sleep(30)
                                             }
 
