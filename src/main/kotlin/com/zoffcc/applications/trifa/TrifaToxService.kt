@@ -486,13 +486,9 @@ class TrifaToxService
 
                 try
                 {
-                    val sleep_millis: Long = 40
-                    var sleep_millis_current: Long = sleep_millis
-                    var d1: Long = 0
                     val sampling_rate = 48000
                     val channels = 1
-                    val bytes_in_40ms = 1920
-                    // val sample_count = bytes_in_40ms / 2
+                    var update_audio_bar = 0
                     audio_queue_play_trigger = true
                     while (ngc_audio_play_thread_running)
                     {
@@ -500,7 +496,7 @@ class TrifaToxService
                         // -- play incoming bytes --
                         try
                         {
-                            if ((ngc_audio_in_queue.size < 3) && (!audio_queue_play_trigger))
+                            if ((ngc_audio_in_queue.size < 2) && (!audio_queue_play_trigger))
                             {
                                 audio_queue_play_trigger = true
                                 // Log.i(TAG, "()PLAY_ngc_audio_frame:trigger:" + ngc_audio_in_queue.size)
@@ -509,7 +505,7 @@ class TrifaToxService
                             {
                                 if (audio_queue_play_trigger)
                                 {
-                                    if (ngc_audio_in_queue.size >= 6)
+                                    if (ngc_audio_in_queue.size >= 5)
                                     {
                                         audio_queue_play_trigger = false
                                         // Log.i(TAG, "()PLAY_ngc_audio_frame:release:")
@@ -518,9 +514,11 @@ class TrifaToxService
                                     {
                                         //Log.i(TAG, "()PLAY_ngc_audio_frame:+++++++++:" + audio_queue_play_trigger + " "
                                         //+ ngc_audio_in_queue.size + " " + ngc_audio_in_queue.remainingCapacity())
-                                        sleep(20)
+                                        sleep(4)
                                     }
-                                } else
+                                }
+
+                                if (!audio_queue_play_trigger)
                                 {
                                     val buf: ByteArray = ngc_audio_in_queue.poll()
                                     if (buf != null)
@@ -546,70 +544,36 @@ class TrifaToxService
                                         {
                                             val want_bytes = buf.size
                                             val sample_count = want_bytes / 2
-                                            try
+
+                                            // HINT: this acutally plays incoming Audio
+                                            // HINT: this may block!!
+                                            val bytes_actually_written = AudioSelectOutBox.sourceDataLine.write(buf, 0, want_bytes)
+                                            if (bytes_actually_written != want_bytes)
                                             {
-                                                AudioSelectOutBox.semaphore_audio_out_convert.acquire_passthru()
-                                                if (AudioSelectOutBox.semaphore_audio_out_convert_active_threads >= AudioSelectOutBox.semaphore_audio_out_convert_max_active_threads)
-                                                {
-                                                    Log.i(TAG, "()PLAY_ngc_audio_frame:too many threads running: " + AudioSelectOutBox.semaphore_audio_out_convert_active_threads)
-                                                    AudioSelectOutBox.semaphore_audio_out_convert.release_passthru()
-                                                    continue
-                                                }
-                                                AudioSelectOutBox.semaphore_audio_out_convert.release_passthru()
-                                            } catch (e: java.lang.Exception)
-                                            {
-                                                AudioSelectOutBox.semaphore_audio_out_convert.release_passthru()
+                                                // Log.i(TAG, "()PLAY_ngc_audio_frame:bytes_actually_written=" + bytes_actually_written + " want_bytes=" + want_bytes)
                                             }
 
-                                            val t_ngc_audio_pcm_play = Thread{
-                                                try
-                                                {
-                                                    AudioSelectOutBox.semaphore_audio_out_convert.acquire_passthru()
-                                                    AudioSelectOutBox.semaphore_audio_out_convert_active_threads++
-                                                    AudioSelectOutBox.semaphore_audio_out_convert.release_passthru()
-                                                } catch (e: java.lang.Exception)
-                                                {
-                                                    AudioSelectOutBox.semaphore_audio_out_convert.release_passthru()
-                                                }
-                                                // HINT: this acutally plays incoming Audio
-                                                // HINT: this may block!!
-                                                try
-                                                {
-                                                    val bytes_actually_written = AudioSelectOutBox.sourceDataLine.write(buf, 0, want_bytes)
-                                                    if (bytes_actually_written != want_bytes)
+                                            update_audio_bar++
+                                            if (update_audio_bar == 2)
+                                            {
+                                                update_audio_bar = 0
+                                                GlobalScope.launch {
+                                                    var global_audio_out_vu: Float = MainActivity.AUDIO_VU_MIN_VALUE
+                                                    if (sample_count > 0)
                                                     {
-                                                        Log.i(TAG, "()PLAY_ngc_audio_frame:bytes_actually_written=" + bytes_actually_written + " want_bytes=" + want_bytes)
+                                                        val vu_value = AudioBar.audio_vu(buf, sample_count)
+                                                        global_audio_out_vu = if (vu_value > MainActivity.AUDIO_VU_MIN_VALUE)
+                                                        {
+                                                            vu_value
+                                                        } else
+                                                        {
+                                                            0f
+                                                        }
                                                     }
-                                                } catch (e: java.lang.Exception)
-                                                {
-                                                    Log.i(TAG, "()PLAY_ngc_audio_frame:sourceDataLine.write:EE:" + e.message) // e.printStackTrace();
+                                                    val global_audio_out_vu_ = global_audio_out_vu
+                                                    AudioBar.set_cur_value(global_audio_out_vu_.toInt(), AudioBar.audio_out_bar)
                                                 }
-                                                try
-                                                {
-                                                    AudioSelectOutBox.semaphore_audio_out_convert.acquire_passthru()
-                                                    AudioSelectOutBox.semaphore_audio_out_convert_active_threads--
-                                                    AudioSelectOutBox.semaphore_audio_out_convert.release_passthru()
-                                                } catch (e: java.lang.Exception)
-                                                {
-                                                    Log.i(TAG, "()PLAY_ngc_audio_frame:--:EEEEEE")
-                                                    AudioSelectOutBox.semaphore_audio_out_convert.release_passthru()
-                                                }
-                                                var global_audio_out_vu: Float = MainActivity.AUDIO_VU_MIN_VALUE
-                                                if (sample_count > 0)
-                                                {
-                                                    val vu_value = AudioBar.audio_vu(buf, sample_count)
-                                                    global_audio_out_vu = if (vu_value > MainActivity.AUDIO_VU_MIN_VALUE)
-                                                    {
-                                                        vu_value
-                                                    } else
-                                                    {
-                                                        0f
-                                                    }
-                                                }
-                                                val global_audio_out_vu_ = global_audio_out_vu
-                                                AudioBar.set_cur_value(global_audio_out_vu_.toInt(), AudioBar.audio_out_bar)
                                             }
-                                            t_ngc_audio_pcm_play.start()
                                         }
                                         catch(e: Exception)
                                         {
@@ -623,7 +587,6 @@ class TrifaToxService
                         }
                         // -- play incoming bytes --
                         // -- play incoming bytes --
-                        sleep(20)
                         if ((HelperGeneric.ngc_video_packet_last_incoming_ts + 5000) < System.currentTimeMillis())
                         {
                             sleep(200)

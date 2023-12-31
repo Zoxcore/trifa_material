@@ -682,9 +682,9 @@ object HelperGeneric {
             //Log.i(TAG, "play_ngc_incoming_audio_frame:toxav_ngc_audio_decode:decoded_samples="
             //        + decoded_samples)
             // put pcm data into a FIFO
-            if ((ngc_audio_in_queue.remainingCapacity() < 2) && (!audio_queue_full_trigger))
+            if ((ngc_audio_in_queue.remainingCapacity() < 1) && (!audio_queue_full_trigger))
             {
-                Log.i(TAG, "play_ngc_incoming_audio_frame:trigger:" + ngc_audio_in_queue.size)
+                Log.i(TAG, "play_ngc_incoming_audio_frame:--- DROP:1 !! FULL !! :trigger:" + ngc_audio_in_queue.size)
                 audio_queue_full_trigger = true
             }
             else
@@ -694,12 +694,18 @@ object HelperGeneric {
                     if (ngc_audio_in_queue.remainingCapacity() >= ngc_audio_in_queue_max_capacity - 2)
                     {
                         audio_queue_full_trigger = false
-                        Log.i(TAG, "play_ngc_incoming_audio_frame:release:")
+                        System.arraycopy(pcm_decoded_buf, 0, pcm_decoded_buf_delta_1, 0, bytes_in_40ms * 2)
+                        ngc_audio_in_queue.offer(pcm_decoded_buf_delta_1)
+                        System.arraycopy(pcm_decoded_buf, bytes_in_40ms * 2, pcm_decoded_buf_delta_2, 0, bytes_in_40ms * 2)
+                        ngc_audio_in_queue.offer(pcm_decoded_buf_delta_2)
+                        System.arraycopy(pcm_decoded_buf, bytes_in_40ms * 2 * 2, pcm_decoded_buf_delta_3, 0, bytes_in_40ms * 2)
+                        ngc_audio_in_queue.offer(pcm_decoded_buf_delta_3)
+                        // Log.i(TAG, "play_ngc_incoming_audio_frame:release:")
                     }
                     else
                     {
-                        //Log.i(TAG, "play_ngc_incoming_audio_frame:-----------:" +
-                        //        audio_queue_full_trigger)
+                        Log.i(TAG, "play_ngc_incoming_audio_frame:--- DROP:2 ----:" +
+                                audio_queue_full_trigger)
                     }
                 }
                 else
