@@ -169,7 +169,7 @@ class MainActivity
         var tox_a_queue_full_trigger = false
         var tox_a_queue_stop_trigger = true
         var tox_audio_in_queue: BlockingQueue<ByteArray> = LinkedBlockingQueue(tox_audio_in_queue_max_capacity)
-
+        var ta_2 = -1L
         //
         var PREF__ngc_video_bitrate: Int = LOWER_NGC_VIDEO_BITRATE // ~600 kbits/s -> ~60 kbytes/s
         var PREF__ngc_video_max_quantizer: Int = LOWER_NGC_VIDEO_QUANTIZER // 47 -> default, 51 -> lowest quality, 30 -> very high quality and lots of bandwidth!
@@ -1268,6 +1268,11 @@ class MainActivity
                 return
             }
 
+            Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:LLLLLAUDIO:001:"
+                    + (System.currentTimeMillis() - ta_2) + " "
+                    + friend_number + " " + sample_count + " " + channels + " " + sampling_rate)
+            ta_2 = System.currentTimeMillis()
+
             try
             {
                 _recBuffer!!.rewind()
@@ -1284,24 +1289,23 @@ class MainActivity
                 {
                     if (tox_a_queue_full_trigger)
                     {
-                        if (tox_audio_in_queue.remainingCapacity() >= tox_audio_in_queue_max_capacity - 2)
+                        if (tox_audio_in_queue.remainingCapacity() >= (tox_audio_in_queue_max_capacity - 2))
                         {
                             tox_a_queue_full_trigger = false
-                            // Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:release:")
+                            Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:release:")
                         }
                         else
                         {
-                            // Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:-----------:" +
-                            //        audio_queue_full_trigger)
+                            Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:-----------:" +
+                                    audio_queue_full_trigger)
                         }
                     }
                     else
                     {
                         tox_audio_in_queue.offer(audio_out_byte_buffer)
-                        // Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:offer:" + tox_audio_in_queue.size)
+                        Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:offer:" + tox_audio_in_queue.size)
                     }
                 }
-                //
             }
             catch(_: Exception)
             {
