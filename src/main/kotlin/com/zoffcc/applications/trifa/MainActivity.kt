@@ -1359,8 +1359,8 @@ class MainActivity
             }
             else if (a_TOXAV_CALL_COMM_INFO == ToxVars.TOXAV_CALL_COMM_INFO.TOXAV_CALL_COMM_PLAY_DELAY.value.toLong())
             {
-                // Log.i(TAG, "call_comm_cb: fnum: " + friend_number
-                //        + " PLAY_DELAY = " + comm_number)
+                Log.i(TAG, "call_comm_cb: fnum: " + friend_number
+                        + " PLAY_DELAY = " + comm_number)
             }
             else
             {
