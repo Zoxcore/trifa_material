@@ -969,7 +969,7 @@ class TrifaToxService
                         }
                         Log.i(TAG, "resend_v3_messages:tox_friend_resend_msgv3_wrapper:" + m_resend_v1.text + " : m=" +
                                 m_resend_v1 + " : " + get_friend_name_from_pubkey(m_resend_v1.tox_friendpubkey));
-                        // ** // tox_friend_resend_msgv3_wrapper(m_resend_v1)
+                        tox_friend_resend_msgv3_wrapper(m_resend_v1)
                         cur_resend_count_per_iteration++
                         if (cur_resend_count_per_iteration >= max_resend_count_per_iteration)
                         {
