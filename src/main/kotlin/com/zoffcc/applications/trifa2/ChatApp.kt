@@ -40,7 +40,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.onExternalDrag
-import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,6 +53,7 @@ import com.zoffcc.applications.trifa.MainActivity
 import com.zoffcc.applications.trifa.MainActivity.Companion.add_ngc_outgoing_file
 import com.zoffcc.applications.trifa.MainActivity.Companion.add_outgoing_file
 import com.zoffcc.applications.trifa.MainActivity.Companion.on_call_ended_actions
+import com.zoffcc.applications.trifa.MainActivity.Companion.set_toxav_video_sending_quality
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_self_get_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_send_message
@@ -150,24 +150,7 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
                         avstatestore.state.start_av_call()
                         GlobalScope.launch {
                             delay(1000)
-                            if (MainActivity.PREF__video_super_hq == 1)
-                            {
-                                MainActivity.toxav_option_set(friendnum,
-                                    ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MIN_BITRATE.value.toLong(),
-                                    TRIFAGlobals.SUPERHIGH_GLOBAL_VIDEO_BITRATE.toLong())
-                                MainActivity.toxav_option_set(friendnum,
-                                    ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MAX_BITRATE.value.toLong(),
-                                    TRIFAGlobals.SUPERHIGH_GLOBAL_VIDEO_BITRATE.toLong())
-                            }
-                            else
-                            {
-                                MainActivity.toxav_option_set(friendnum,
-                                    ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MIN_BITRATE.value.toLong(),
-                                    90)
-                                MainActivity.toxav_option_set(friendnum,
-                                    ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MAX_BITRATE.value.toLong(),
-                                    TRIFAGlobals.GLOBAL_VIDEO_BITRATE.toLong())
-                            }
+                            set_toxav_video_sending_quality(MainActivity.PREF__video_bitrate_mode)
                             println("toxav: set 003")
                         }
                     }) {

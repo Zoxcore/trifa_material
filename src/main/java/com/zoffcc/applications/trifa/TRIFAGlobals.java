@@ -61,7 +61,12 @@ public class TRIFAGlobals
     final static int HIGHER_GLOBAL_VIDEO_BITRATE = 3500;
     public final static int NORMAL_GLOBAL_VIDEO_BITRATE = 1500;
     public final static int SUPERHIGH_GLOBAL_VIDEO_BITRATE = 8000;
+    public final static int MEDIUM_GLOBAL_VIDEO_BITRATE = 700;
     public final static int LOWER_GLOBAL_VIDEO_BITRATE = 350;
+    public final static int ABSOLUTE_MINIMUM_GLOBAL_VIDEO_BITRATE = 95;
+
+    public final static int NORMAL_GLOBAL_INCOMING_AV_BUFFER_MS = 0;
+    public final static int HIGH_GLOBAL_INCOMING_AV_BUFFER_MS = 700;
 
     final static int HIGHER_GLOBAL_AUDIO_BITRATE = 128;
     final static int NORMAL_GLOBAL_AUDIO_BITRATE = 16; // 64;
