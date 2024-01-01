@@ -21,9 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -37,10 +35,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Slider
-import androidx.compose.material.Snackbar
 import androidx.compose.material.SnackbarDuration
 import androidx.compose.material.SnackbarHostState
-import androidx.compose.material.SnackbarResult
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
@@ -51,15 +47,10 @@ import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.HighQuality
 import androidx.compose.material.icons.filled.NoiseAware
-import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.RawOff
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.filled.SignalCellular4Bar
-import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.rememberScaffoldState
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -67,7 +58,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -78,21 +68,14 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.FocusState
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.graphics.vector.VectorPainter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
@@ -133,10 +116,11 @@ import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__audio_input_filter
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__v4l2_capture_force_mjpeg
-import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__video_super_hq
+import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__video_bitrate_mode
 import com.zoffcc.applications.trifa.MainActivity.Companion.accept_incoming_av_call
 import com.zoffcc.applications.trifa.MainActivity.Companion.decline_incoming_av_call
 import com.zoffcc.applications.trifa.MainActivity.Companion.main_init
+import com.zoffcc.applications.trifa.MainActivity.Companion.set_toxav_video_sending_quality
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_name
 import com.zoffcc.applications.trifa.NodeListJS
@@ -574,40 +558,28 @@ fun App()
                                             contentDescription = "force MJPEG on video capture",
                                             tint = if (video_force_mjpeg_value == 1) Color.Red else Color.DarkGray)
 
-                                        var video_super_hq_value by remember { mutableStateOf(PREF__video_super_hq) }
+                                        var video_bitrate_mode_value by remember { mutableStateOf(PREF__video_bitrate_mode) }
                                         Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
                                             onClick = {
-                                                if (PREF__video_super_hq == 0)
+                                                if (PREF__video_bitrate_mode == 0)
                                                 {
-                                                    PREF__video_super_hq = 1
-                                                } else
-                                                {
-                                                    PREF__video_super_hq = 0
+                                                    PREF__video_bitrate_mode = 1
                                                 }
-                                                video_super_hq_value = PREF__video_super_hq
+                                                else if (PREF__video_bitrate_mode == 1)
+                                                {
+                                                    PREF__video_bitrate_mode = 2
+                                                }
+                                                else // PREF__video_bitrate_mode == 2
+                                                {
+                                                    PREF__video_bitrate_mode = 0
+                                                }
+                                                video_bitrate_mode_value = PREF__video_bitrate_mode
 
                                                 try
                                                 {
                                                     if (!savepathstore.isEnabled())
                                                     {
-                                                        val friendnum = tox_friend_by_public_key(avstatestore.state.call_with_friend_pubkey_get())
-                                                        if (PREF__video_super_hq == 1)
-                                                        {
-                                                            MainActivity.toxav_option_set(friendnum,
-                                                                ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MIN_BITRATE.value.toLong(),
-                                                                TRIFAGlobals.SUPERHIGH_GLOBAL_VIDEO_BITRATE.toLong())
-                                                            MainActivity.toxav_option_set(friendnum,
-                                                                ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MAX_BITRATE.value.toLong(),
-                                                                TRIFAGlobals.SUPERHIGH_GLOBAL_VIDEO_BITRATE.toLong())
-                                                        } else
-                                                        {
-                                                            MainActivity.toxav_option_set(friendnum,
-                                                                ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MIN_BITRATE.value.toLong(),
-                                                                90)
-                                                            MainActivity.toxav_option_set(friendnum,
-                                                                ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MAX_BITRATE.value.toLong(),
-                                                                TRIFAGlobals.GLOBAL_VIDEO_BITRATE.toLong())
-                                                        }
+                                                        set_toxav_video_sending_quality(PREF__video_bitrate_mode)
                                                     }
                                                 }
                                                 catch (_: java.lang.Exception)
@@ -615,8 +587,11 @@ fun App()
                                                 }
                                             }),
                                             imageVector = Icons.Default.HighQuality,
-                                            contentDescription = "force super HQ on video capture",
-                                            tint = if (video_super_hq_value == 1) Color.Red else Color.DarkGray)
+                                            contentDescription = "toggle video capture quality",
+                                            tint =
+                                                if (video_bitrate_mode_value == 0) Color.DarkGray
+                                                else if (video_bitrate_mode_value == 1) Color.Green
+                                                else Color.Red)
 
 
                                         val current_callstate3 by avstatestorecallstate.stateFlow.collectAsState()
