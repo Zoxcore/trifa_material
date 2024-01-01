@@ -518,8 +518,12 @@ fun App()
                                             maxLines = 1)
                                     }
                                     Column {
-                                        Icon(modifier = Modifier.padding(start = 5.dp, end = 5.dp, top = 2.dp).size(19.dp)
-                                            .combinedClickable(onClick = {
+                                        val aux_icons_start_padding = 9.dp
+                                        val aux_icons_end_padding = 9.dp
+                                        val aux_icons_top_padding = 3.dp
+                                        val aux_icons_size = 24.dp
+                                        Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
+                                            onClick = {
                                                 if (video_in_box_small)
                                                 {
                                                     video_in_box_width = VIDEO_IN_BOX_WIDTH_BIG
@@ -539,7 +543,7 @@ fun App()
                                             contentDescription = "toggle large incoming video size"
                                         )
                                         var audio_filter_current_value by remember { mutableStateOf(PREF__audio_input_filter) }
-                                        Icon(modifier = Modifier.padding(start = 5.dp, end = 5.dp, top = 2.dp).size(19.dp).combinedClickable(
+                                        Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
                                             onClick = {
                                                 if (PREF__audio_input_filter == 0)
                                                 {
@@ -555,7 +559,7 @@ fun App()
                                             contentDescription = "enable Noise Suppresion on audio capture",
                                             tint = if (audio_filter_current_value == 1) Color.Red else Color.DarkGray)
                                         var video_force_mjpeg_value by remember { mutableStateOf(PREF__v4l2_capture_force_mjpeg) }
-                                        Icon(modifier = Modifier.padding(start = 5.dp, end = 5.dp, top = 2.dp).size(19.dp).combinedClickable(
+                                        Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
                                             onClick = {
                                                 if (PREF__v4l2_capture_force_mjpeg == 0)
                                                 {
@@ -570,41 +574,8 @@ fun App()
                                             contentDescription = "force MJPEG on video capture",
                                             tint = if (video_force_mjpeg_value == 1) Color.Red else Color.DarkGray)
 
-                                        var video_low_bitrate by remember { mutableStateOf(false) }
-                                        Icon(modifier = Modifier.padding(start = 5.dp, end = 5.dp, top = 2.dp).size(19.dp).combinedClickable(
-                                            onClick = {
-                                                try
-                                                {
-                                                    if (!savepathstore.isEnabled())
-                                                    {
-                                                        val friendnum = tox_friend_by_public_key(avstatestore.state.call_with_friend_pubkey_get())
-                                                        if (avstatestore.state.call_with_friend_pubkey_get() != null)
-                                                        {
-                                                            video_low_bitrate = !video_low_bitrate
-                                                            if (video_low_bitrate)
-                                                            {
-                                                                MainActivity.toxav_option_set(friendnum,
-                                                                    ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MAX_BITRATE.value.toLong(),
-                                                                    TRIFAGlobals.LOWER_GLOBAL_VIDEO_BITRATE.toLong())
-                                                            } else
-                                                            {
-                                                                MainActivity.toxav_option_set(friendnum,
-                                                                    ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MAX_BITRATE.value.toLong(),
-                                                                    TRIFAGlobals.NORMAL_GLOBAL_VIDEO_BITRATE.toLong())
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                                catch (_: java.lang.Exception)
-                                                {
-                                                }
-                                            }),
-                                            imageVector = Icons.Default.SignalCellular4Bar,
-                                            contentDescription = "force lower video bitrate",
-                                            tint = if (video_low_bitrate) Color.Red else Color.DarkGray)
-
                                         var video_super_hq_value by remember { mutableStateOf(PREF__video_super_hq) }
-                                        Icon(modifier = Modifier.padding(start = 5.dp, end = 5.dp, top = 2.dp).size(19.dp).combinedClickable(
+                                        Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
                                             onClick = {
                                                 if (PREF__video_super_hq == 0)
                                                 {
