@@ -59,9 +59,9 @@ public class TRIFAGlobals
     final static int USE_MAX_NUMBER_OF_BOOTSTRAP_TCP_RELAYS = 40;
 
     final static int HIGHER_GLOBAL_VIDEO_BITRATE = 3500;
-    final static int NORMAL_GLOBAL_VIDEO_BITRATE = 1500;
+    public final static int NORMAL_GLOBAL_VIDEO_BITRATE = 1500;
     public final static int SUPERHIGH_GLOBAL_VIDEO_BITRATE = 8000;
-    final static int LOWER_GLOBAL_VIDEO_BITRATE = 250;
+    public final static int LOWER_GLOBAL_VIDEO_BITRATE = 350;
 
     final static int HIGHER_GLOBAL_AUDIO_BITRATE = 128;
     final static int NORMAL_GLOBAL_AUDIO_BITRATE = 16; // 64;
