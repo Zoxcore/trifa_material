@@ -16,7 +16,9 @@ data class globalstore_state(
     val mainwindow_minimized: Boolean = false,
     val mainwindow_focused: Boolean = true,
     val contacts_unread_message_count: Int = 0,
-    val contacts_unread_group_message_count: Int = 0
+    val contacts_unread_group_message_count: Int = 0,
+    val firstRun: Boolean = false,
+    val startupSelfname: String = ""
 )
 
 private val globalstore_state_lock = Any()
@@ -24,8 +26,12 @@ private val globalstore_state_lock = Any()
 interface GlobalStore {
     fun updateMinimized(value: Boolean)
     fun updateFocused(value: Boolean)
+    fun updateFirstRun(value: Boolean)
+    fun updateStartupSelfname(value: String)
     fun isMinimized(): Boolean
     fun isFocused(): Boolean
+    fun isFirstRun(): Boolean
+    fun getStartupSelfname(): String
     fun increase_unread_message_count()
     fun get_unread_message_count(): Int
     fun try_clear_unread_message_count()
@@ -54,6 +60,15 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
             mutableStateFlow.value = state.copy(mainwindow_focused = value)
         }
 
+        override fun updateFirstRun(value: Boolean)
+        {
+            mutableStateFlow.value = state.copy(firstRun = value)
+        }
+
+        override fun updateStartupSelfname(value: String)
+        {   mutableStateFlow.value = state.copy(startupSelfname = value)
+        }
+
         override fun isMinimized(): Boolean
         {
             return state.mainwindow_minimized
@@ -63,10 +78,21 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
         {
             return state.mainwindow_focused
         }
+
+        override fun isFirstRun(): Boolean
+        {
+            return state.firstRun
+        }
+        override fun getStartupSelfname(): String
+        {
+            return state.startupSelfname
+        }
+
         override fun increase_unread_message_count()
         {
             mutableStateFlow.value = state.copy(contacts_unread_message_count = (state.contacts_unread_message_count + 1))
         }
+
         override fun get_unread_message_count(): Int
         {
             return state.contacts_unread_message_count

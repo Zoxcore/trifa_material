@@ -252,6 +252,13 @@ fun App()
     println("Site config dir: " + APPDIRS.getSiteConfigDir())
     println("Site config dir (multi path): " + APPDIRS.getSiteConfigDir(multiPath = true))
     println("Shared dir: " + APPDIRS.getSharedDir())
+    try
+    {
+        println("Prefs dir (estimation for linux): " + "~/.java/.userPrefs/" + global_prefs.absolutePath())
+    }
+    catch(_: Exception)
+    {
+    }
 
     Log.i(TAG, "resources dir: " + RESOURCESDIR)
     Log.i(TAG, "resources dir canonical: " + RESOURCESDIR.canonicalPath + File.separator)
@@ -1493,6 +1500,7 @@ object AboutIcon : Painter() {
 private fun MainAppStart()
 {
     var showIntroScreen by remember { mutableStateOf(true) }
+    var firstRun by remember { mutableStateOf(true) }
     var inputTextToxSelfName by remember { mutableStateOf(RandomNameGenerator.getFullName(Random())) }
     try
     {
@@ -1500,11 +1508,23 @@ private fun MainAppStart()
         if (tmp == false)
         {
             showIntroScreen = false
+            firstRun = false
         }
     } catch (_: Exception)
     {
     }
+    println("globalstore.updateFirstRun:" + firstRun)
+    if (firstRun)
+    {
+        globalstore.updateFirstRun(firstRun)
+    }
+    // ************* DEBUG ONLY *************
+    // ************* DEBUG ONLY *************
+    // ************* DEBUG ONLY *************
     // showIntroScreen = true
+    // ************* DEBUG ONLY *************
+    // ************* DEBUG ONLY *************
+    // ************* DEBUG ONLY *************
     val appIcon = painterResource("icon-linux.png")
     if (showIntroScreen)
     { // ----------- intro screen -----------
@@ -1561,6 +1581,7 @@ private fun MainAppStart()
     { // ----------- main app screen -----------
         // ----------- main app screen -----------
         // ----------- main app screen -----------
+        globalstore.updateStartupSelfname(inputTextToxSelfName)
         var isOpen by remember { mutableStateOf(true) }
         var isAskingToClose by remember { mutableStateOf(false) }
         var state = rememberWindowState()

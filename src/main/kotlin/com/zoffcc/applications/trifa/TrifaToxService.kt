@@ -50,6 +50,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_iteration_interv
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_kill
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_connection_status
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_friend_list
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_set_name
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_util_friend_resend_message_v2
 import com.zoffcc.applications.trifa.TRIFAGlobals.GROUP_ID_LENGTH
 import com.zoffcc.applications.trifa.TRIFAGlobals.MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION
@@ -116,6 +117,21 @@ class TrifaToxService
                     init_tox_callbacks()
                     update_savedata_file_wrapper()
                 } // ------ correct startup order ------
+
+                try
+                {
+                    Log.i(TAG, "StartupSelfname: " + globalstore.getStartupSelfname())
+                    Log.i(TAG, "FirstRun: " + globalstore.isFirstRun())
+                    if (globalstore.isFirstRun())
+                    {
+                        globalstore.updateFirstRun(false)
+                        tox_self_set_name(globalstore.getStartupSelfname())
+                        update_savedata_file_wrapper()
+                    }
+                }
+                catch(_: Exception)
+                {
+                }
                 clear_friends()
                 load_friends()
                 clear_groups()
