@@ -20,6 +20,7 @@ import com.zoffcc.applications.trifa.StateContacts
 import com.zoffcc.applications.trifa.StateGroups
 import contactstore
 import globalstore
+import groupsettingsstore
 import groupstore
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -52,6 +53,7 @@ fun GroupList(
             ) { item ->
                 ListItemView(
                     onSelect = {
+                        groupsettingsstore.visible(false)
                         GlobalScope.launch { globalstore.try_clear_unread_group_message_count() }
                         groupstore.select(item.groupId)
                                },

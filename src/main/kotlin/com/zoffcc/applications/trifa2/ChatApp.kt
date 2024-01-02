@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Screenshot
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
@@ -70,6 +71,7 @@ import com.zoffcc.applications.trifa.createAVStateStoreVideoPlayFpsState
 import com.zoffcc.applications.trifa.createContactStore
 import com.zoffcc.applications.trifa.createGlobalStore
 import com.zoffcc.applications.trifa.createGroupPeerStore
+import com.zoffcc.applications.trifa.createGroupSettingsStore
 import com.zoffcc.applications.trifa.createGroupStore
 import com.zoffcc.applications.trifa.createSavepathStore
 import com.zoffcc.applications.trifa.createToxDataStore
@@ -93,6 +95,7 @@ val globalstore = CoroutineScope(SupervisorJob()).createGlobalStore()
 val groupmessagestore = CoroutineScope(SupervisorJob()).createGroupMessageStore()
 val contactstore = CoroutineScope(SupervisorJob()).createContactStore()
 val grouppeerstore = CoroutineScope(SupervisorJob()).createGroupPeerStore()
+val groupsettingsstore = CoroutineScope(SupervisorJob()).createGroupSettingsStore()
 val groupstore = CoroutineScope(SupervisorJob()).createGroupStore()
 val savepathstore = CoroutineScope(SupervisorJob()).createSavepathStore()
 val toxdatastore = CoroutineScope(SupervisorJob()).createToxDataStore()
@@ -180,6 +183,11 @@ fun GroupAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boole
             TopAppBar(
                 title = {
                     groupList.selectedGroup?.let { Text(it.name) }
+                },
+                actions = {
+                    IconButton(onClick = { groupsettingsstore.visible(true) }) {
+                        Icon(Icons.Filled.Settings, null)
+                    }
                 },
                 backgroundColor = MaterialTheme.colors.background,
                 modifier = Modifier.height(40.dp)
