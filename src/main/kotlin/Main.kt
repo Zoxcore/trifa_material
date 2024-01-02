@@ -107,6 +107,7 @@ import com.zoffcc.applications.trifa.AudioBar
 import com.zoffcc.applications.trifa.AudioBar.audio_in_bar
 import com.zoffcc.applications.trifa.AudioBar.audio_out_bar
 import com.zoffcc.applications.trifa.CustomSemaphore
+import com.zoffcc.applications.trifa.GroupSettingDetails
 import com.zoffcc.applications.trifa.HelperGeneric.PubkeyShort
 import com.zoffcc.applications.trifa.HelperNotification.init_system_tray
 import com.zoffcc.applications.trifa.HelperNotification.set_resouces_dir
@@ -951,6 +952,7 @@ fun App()
                     {
                         UiMode.CONTACTS ->
                         {
+                            groupsettingsstore.visible(false)
                             contactstore.visible(true)
                             groupstore.visible(false)
                             val focusRequester = remember { FocusRequester() }
@@ -983,51 +985,64 @@ fun App()
                             Row(modifier = Modifier.fillMaxWidth()) {
                                 GroupList(groupList = groups)
                                 VerticalDivider()
-                                clear_grouppeers()
-                                if (groups.selectedGroupId != null)
+                                val groupsettings by groupsettingsstore.stateFlow.collectAsState()
+                                if ((groupsettings.visible) && (groups.selectedGroupId != null)) // show group settings
                                 {
-                                    load_grouppeers(groups.selectedGroupId!!)
+                                    GroupSettingDetails(groups.selectedGroupId)
                                 }
-                                GroupPeerList(grouppeerList = grouppeers)
-                                VerticalDivider()
-                                if (groups.selectedGroupId == null)
+                                else // -- show group messages and peer
                                 {
-                                    ExplainerGroup()
-                                } else
-                                {
-                                    Log.i(TAG, "GROUPS -> draw")
-                                    load_groupmessages_for_friend(groups.selectedGroupId)
-                                    GlobalScope.launch { globalstore.try_clear_unread_group_message_count() }
-                                    GroupAppWithScaffold(focusRequester = groupfocusRequester, groupList = groups, ui_scale = ui_scale)
-                                    //LaunchedEffect(groups.selectedGroupId) {
-                                    //    groupfocusRequester.requestFocus()
-                                    //}
+                                    clear_grouppeers()
+                                    if (groups.selectedGroupId != null)
+                                    {
+                                        load_grouppeers(groups.selectedGroupId!!)
+                                    }
+                                    GroupPeerList(grouppeerList = grouppeers)
+                                    VerticalDivider()
+                                    if (groups.selectedGroupId == null)
+                                    {
+                                        ExplainerGroup()
+                                    } else
+                                    {
+                                        Log.i(TAG, "GROUPS -> draw")
+                                        load_groupmessages_for_friend(groups.selectedGroupId)
+                                        GlobalScope.launch { globalstore.try_clear_unread_group_message_count() }
+                                        GroupAppWithScaffold(focusRequester = groupfocusRequester, groupList = groups, ui_scale = ui_scale)
+                                        //LaunchedEffect(groups.selectedGroupId) {
+                                        //    groupfocusRequester.requestFocus()
+                                        //}
+                                    }
                                 }
                             }
                         }
                         UiMode.ADDFRIEND -> {
+                            groupsettingsstore.visible(false)
                             contactstore.visible(false)
                             groupstore.visible(false)
                             if (tox_running_state == "running") AddFriend()
                             else ExplainerToxNotRunning()
                         }
                         UiMode.ADDGROUP -> {
+                            groupsettingsstore.visible(false)
                             contactstore.visible(false)
                             groupstore.visible(false)
                             if (tox_running_state == "running") AddGroup()
                             else ExplainerToxNotRunning()
                         }
                         UiMode.SETTINGS -> {
+                            groupsettingsstore.visible(false)
                             contactstore.visible(false)
                             groupstore.visible(false)
                             SettingDetails()
                         }
                         UiMode.ABOUT -> {
+                            groupsettingsstore.visible(false)
                             contactstore.visible(false)
                             groupstore.visible(false)
                             AboutScreen()
                         }
                         else -> {
+                            groupsettingsstore.visible(false)
                             contactstore.visible(false)
                             groupstore.visible(false)
                             UiPlaceholder()
