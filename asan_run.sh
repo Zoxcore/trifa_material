@@ -5,6 +5,7 @@ h=$(echo $HOME)
 
 if [ "$1""x" == "buildx" ]; then
   cp -av resources/common/libffmpeg_av_jni.so__ASAN resources/common/libffmpeg_av_jni.so
+  cp -av resources/common/libjni_notifications.so__ASAN resources/common/libjni_notifications.so
   cp -av resources/common/libjni-c-toxcore.so__ASAN resources/common/libjni-c-toxcore.so
   ./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64/ packageDistributionForCurrentOS
   ./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64/ packageUberJarForCurrentOS
