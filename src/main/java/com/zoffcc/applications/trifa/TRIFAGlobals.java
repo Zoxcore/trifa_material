@@ -130,7 +130,7 @@ public class TRIFAGlobals
     public static final int TOX_NGC_HISTORY_SYNC_MAX_PEERNAME_BYTES = 25;
     public static final int TOX_NGC_HISTORY_SYNC_MAX_SECONDS_BACK = 130 * 60; // 130 minutes
 
-    static int MESSAGE_GROUP_HISTORY_SYNC_DOUBLE_INTERVAL_SECS = 60 * 24 * 1; // 1 day
+    static int MESSAGE_GROUP_HISTORY_SYNC_DOUBLE_INTERVAL_SECS = 60 * 60 * 24 * 1; // 1 day
 
     static long global_last_activity_outgoung_ft_ts = -1;
 
