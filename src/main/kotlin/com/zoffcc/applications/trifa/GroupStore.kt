@@ -44,7 +44,7 @@ fun CoroutineScope.createGroupStore(): GroupStore
 
         override fun add(item: GroupItem)
         {
-            launch {
+            //launch {
                 global_semaphore_grouplist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var found = false
                 state.groups.forEach {
@@ -68,12 +68,12 @@ fun CoroutineScope.createGroupStore(): GroupStore
                     mutableStateFlow.value = state.copy(groups = new_groups)
                 }
                 global_semaphore_grouplist_ui.release()
-            }
+            //}
         }
 
         override fun remove(item: GroupItem)
         {
-            launch {
+            //launch {
                 global_semaphore_grouplist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var sel_groupid = state.selectedGroupId
                 var sel_item = state.selectedGroup
@@ -104,12 +104,12 @@ fun CoroutineScope.createGroupStore(): GroupStore
                 mutableStateFlow.value = state.copy(groups = new_groups,
                     selectedGroup = sel_item, selectedGroupId = sel_groupid)
                 global_semaphore_grouplist_ui.release()
-            }
+            //}
         }
 
         override fun select(groupId: String?)
         {
-            launch {
+            //launch {
                 global_semaphore_grouplist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var wanted_group_item: GroupItem? = null
                 state.groups.forEach {
@@ -125,7 +125,7 @@ fun CoroutineScope.createGroupStore(): GroupStore
                 }
                 mutableStateFlow.value = state.copy(groups = state.groups, selectedGroupId = used_groupid, selectedGroup = wanted_group_item)
                 global_semaphore_grouplist_ui.release()
-            }
+            //}
         }
 
         override fun visible(value: Boolean)
@@ -137,7 +137,7 @@ fun CoroutineScope.createGroupStore(): GroupStore
 
         override fun update(item: GroupItem)
         {
-            launch {
+            //launch {
                 global_semaphore_grouplist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var update_item: GroupItem? = null
                 state.groups.forEach {
@@ -169,16 +169,16 @@ fun CoroutineScope.createGroupStore(): GroupStore
                     mutableStateFlow.value = state.copy(groups = (state.groups + item), selectedGroupId = state.selectedGroupId, selectedGroup = state.selectedGroup)
                 }
                 global_semaphore_grouplist_ui.release()
-            }
+            //}
         }
 
         override fun clear()
         {
-            launch {
+            //launch {
                 global_semaphore_grouplist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 mutableStateFlow.value = state.copy(groups = emptyList(), selectedGroupId = null, selectedGroup = null)
                 global_semaphore_grouplist_ui.release()
-            }
+            //}
         }
     }
 }
