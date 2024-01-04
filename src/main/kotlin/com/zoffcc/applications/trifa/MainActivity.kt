@@ -2387,7 +2387,7 @@ class MainActivity
                     if (f.kind == ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_AVATAR.value)
                     {
                         val avatar_chunk_hex = bytesToHex(data!!, 0, length.toInt()).uppercase()
-                        Log.i(TAG, "callback_file_recv_chunk_cb:incoming avatar chunk: " + position + " " + length + " " + avatar_chunk_hex)
+                        Log.i(TAG, "callback_file_recv_chunk_cb:incoming avatar chunk: " + position + " " + length) // + " " + avatar_chunk_hex)
                         add_friend_avatar_chunk(friend_pk, avatar_chunk_hex, (position == 0L))
                     }
                     else
