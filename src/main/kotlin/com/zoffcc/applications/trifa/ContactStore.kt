@@ -43,7 +43,7 @@ fun CoroutineScope.createContactStore(): ContactStore
 
         override fun add(item: ContactItem)
         {
-            launch {
+            //launch {
                 global_semaphore_contactlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var found = false
                 state.contacts.forEach {
@@ -67,12 +67,12 @@ fun CoroutineScope.createContactStore(): ContactStore
                     mutableStateFlow.value = state.copy(contacts = new_contacts)
                 }
                 global_semaphore_contactlist_ui.release()
-            }
+            //}
         }
 
         override fun remove(item: ContactItem)
         {
-            launch {
+            //launch {
                 global_semaphore_contactlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var sel_pubkey = state.selectedContactPubkey
                 var sel_item = state.selectedContact
@@ -103,12 +103,12 @@ fun CoroutineScope.createContactStore(): ContactStore
                 mutableStateFlow.value = state.copy(contacts = new_contacts,
                     selectedContact = sel_item, selectedContactPubkey = sel_pubkey)
                 global_semaphore_contactlist_ui.release()
-            }
+            //}
         }
 
         override fun select(pubkey: String?)
         {
-            launch {
+            //launch {
                 global_semaphore_contactlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var wanted_contact_item: ContactItem? = null
                 state.contacts.forEach {
@@ -124,7 +124,7 @@ fun CoroutineScope.createContactStore(): ContactStore
                 }
                 mutableStateFlow.value = state.copy(contacts = state.contacts, selectedContactPubkey = used_pubkey, selectedContact = wanted_contact_item)
                 global_semaphore_contactlist_ui.release()
-            }
+            //}
         }
 
         override fun visible(value: Boolean)
@@ -136,7 +136,7 @@ fun CoroutineScope.createContactStore(): ContactStore
 
         override fun update(item: ContactItem)
         {
-            launch {
+            //launch {
                 global_semaphore_contactlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var update_item: ContactItem? = null
                 state.contacts.forEach {
@@ -168,16 +168,16 @@ fun CoroutineScope.createContactStore(): ContactStore
                     mutableStateFlow.value = state.copy(contacts = (state.contacts + item), selectedContactPubkey = state.selectedContactPubkey, selectedContact = state.selectedContact)
                 }
                 global_semaphore_contactlist_ui.release()
-            }
+            //}
         }
 
         override fun clear()
         {
-            launch {
+            //launch {
                 global_semaphore_contactlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 mutableStateFlow.value = state.copy(contacts = emptyList(), selectedContactPubkey = null, selectedContact = null)
                 global_semaphore_contactlist_ui.release()
-            }
+            //}
         }
     }
 }

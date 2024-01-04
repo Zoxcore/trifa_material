@@ -35,7 +35,7 @@ fun CoroutineScope.createGroupPeerStore(): GroupPeerStore
 
         override fun add(item: GroupPeerItem)
         {
-            launch {
+            //launch {
                 global_semaphore_grouppeerlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var found = false
                 state.grouppeers.forEach {
@@ -61,12 +61,12 @@ fun CoroutineScope.createGroupPeerStore(): GroupPeerStore
                     mutableStateFlow.value = state.copy(grouppeers = new_peers)
                 }
                 global_semaphore_grouppeerlist_ui.release()
-            }
+            //}
         }
 
         override fun remove(item: GroupPeerItem)
         {
-            launch {
+            //launch {
                 global_semaphore_grouppeerlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var sel_pubkey = state.selectedGrouppeerPubkey
                 var sel_item = state.selectedGrouppeer
@@ -99,12 +99,12 @@ fun CoroutineScope.createGroupPeerStore(): GroupPeerStore
                 mutableStateFlow.value = state.copy(grouppeers = new_peers,
                     selectedGrouppeer = sel_item, selectedGrouppeerPubkey = sel_pubkey)
                 global_semaphore_grouppeerlist_ui.release()
-            }
+            //}
         }
 
         override fun select(pubkey: String?)
         {
-            launch {
+            //launch {
                 global_semaphore_grouppeerlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var wanted_contact_item: GroupPeerItem? = null
                 state.grouppeers.forEach {
@@ -121,12 +121,12 @@ fun CoroutineScope.createGroupPeerStore(): GroupPeerStore
                 mutableStateFlow.value = state.copy(grouppeers = state.grouppeers,
                     selectedGrouppeerPubkey = used_pubkey, selectedGrouppeer = wanted_contact_item)
                 global_semaphore_grouppeerlist_ui.release()
-            }
+            //}
         }
 
         override fun update(item: GroupPeerItem)
         {
-            launch {
+            //launch {
                 global_semaphore_grouppeerlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var update_item: GroupPeerItem? = null
                 state.grouppeers.forEach {
@@ -164,17 +164,17 @@ fun CoroutineScope.createGroupPeerStore(): GroupPeerStore
                         selectedGrouppeer = state.selectedGrouppeer)
                 }
                 global_semaphore_grouppeerlist_ui.release()
-            }
+            //}
         }
 
         override fun clear()
         {
-            launch {
+            //launch {
                 global_semaphore_grouppeerlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 mutableStateFlow.value = state.copy(grouppeers = emptyList(),
                     selectedGrouppeerPubkey = null, selectedGrouppeer = null)
                 global_semaphore_grouppeerlist_ui.release()
-            }
+            //}
         }
     }
 }
