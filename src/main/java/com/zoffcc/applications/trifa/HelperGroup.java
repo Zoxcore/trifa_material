@@ -144,7 +144,11 @@ public class HelperGroup {
         String msg_id_hash;
     }
 
-    static incoming_group_file_meta_data handle_incoming_group_file(String msg_id_hash_string, String sender_peer_name, String sender_peer_pubkey, boolean was_synced, long timestamp, long group_number, long sender_peer_num, byte[] data, long length, long header)
+    static incoming_group_file_meta_data handle_incoming_group_file(String msg_id_hash_string,
+                        String sender_peer_name,
+                        String sender_peer_pubkey, boolean was_synced,
+                        long timestamp, long group_number, long sender_peer_num, byte[] data,
+                        long length, long header)
     {
         incoming_group_file_meta_data ret = new incoming_group_file_meta_data();
         ret.message_text = null;
@@ -1063,7 +1067,7 @@ public class HelperGroup {
                             original_sender_peerpubkey,
                             true, timestamp, group_number,
                             sender_peer_num, file_byte_buf, file_byte_buf.length,
-                            header_ngc_histsync_and_files);
+                            0);
 
             if (incoming_group_file_meta_data == null)
             {
