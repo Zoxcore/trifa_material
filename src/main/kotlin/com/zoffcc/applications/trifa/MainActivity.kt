@@ -2785,7 +2785,8 @@ class MainActivity
             val header_ngc_video_v1 = (6 + 1 + 1 + 1 + 1 + 1).toLong()
             val header_ngc_video_v2 = (6 + 1 + 1 + 1 + 1 + 1 + 2 + 1).toLong()
             val header_ngc_histsync_and_files = (6 + 1 + 1 + 32 + 32 + 4 + 25 + 255).toLong()
-            if (length <= TOX_MAX_NGC_FILE_AND_HEADER_SIZE && length >= header_ngc_histsync_and_files + 1)
+            val header_ngc_files = (6 + 1 + 1 + 32 + 4 + 255).toLong()
+            if (length <= TOX_MAX_NGC_FILE_AND_HEADER_SIZE && length >= header_ngc_files + 1)
             {
                 // @formatter:off
                 /*
@@ -2819,7 +2820,7 @@ class MainActivity
                                 tox_peer_name,
                                 tox_peerpk,
                                 false, msg_timestamp, group_number, peer_id, data,
-                                length, header_ngc_histsync_and_files)
+                                length, header_ngc_files)
 
                         if (incoming_group_file_meta_data != null)
                         {
