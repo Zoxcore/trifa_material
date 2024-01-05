@@ -428,7 +428,7 @@ class TrifaToxService
                                             }
 
                                             update_audio_bar++
-                                            if (update_audio_bar == 2)
+                                            if (update_audio_bar >= 1)
                                             {
                                                 update_audio_bar = 0
                                                 GlobalScope.launch {
@@ -570,7 +570,7 @@ class TrifaToxService
                                             }
 
                                             update_audio_bar++
-                                            if (update_audio_bar == 2)
+                                            if (update_audio_bar >= 1)
                                             {
                                                 update_audio_bar = 0
                                                 GlobalScope.launch {
