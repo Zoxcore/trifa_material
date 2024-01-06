@@ -238,7 +238,6 @@ fun App()
 {
     var start_button_text by remember { mutableStateOf("start") }
     var tox_running_state: String by remember { mutableStateOf("stopped") }
-    var ui_scale by remember { mutableStateOf(1.0f) }
 
     println("User data dir: " + APPDIRS.getUserDataDir())
     println("User data dir (roaming): " + APPDIRS.getUserDataDir(roaming = true))
@@ -264,23 +263,13 @@ fun App()
     Log.i(TAG, "resources dir canonical: " + RESOURCESDIR.canonicalPath + File.separator)
 
     Log.i(TAG, "CCCC:" + PrefsSettings::class.java)
-    ui_scale = 1.0f
 
-    try
-    {
-        val tmp = global_prefs.get("main.ui_scale_factor", null)
-        if (tmp != null)
-        {
-            ui_scale = tmp.toFloat()
-        }
-    } catch (_: Exception)
-    {
-    }
+    globalstore.loadUiScale()
+    var ui_scale by remember { mutableStateOf(globalstore.getUiScale()) }
     MaterialTheme {
         scaffoldState = rememberScaffoldState()
         ScaffoldCoroutineScope = rememberCoroutineScope()
         Scaffold(scaffoldState = scaffoldState) {
-
             Row() {
                 var uiMode by remember { mutableStateOf(UiMode.CONTACTS) }
                 var main_top_tab_height by remember { mutableStateOf(MAIN_TOP_TAB_HEIGHT) }
@@ -494,13 +483,11 @@ fun App()
                                             }
                                         )
                                         val current_vplayfps_state by avstatestorevplayfpsstate.stateFlow.collectAsState()
-
                                         /*
                                         Text(if (current_vplayfps_state.videoplayfps_state == 0) "" else (" fps: " + current_vplayfps_state.videoplayfps_state),
                                             fontSize = 13.sp,
                                             modifier = Modifier.height(20.dp),
                                             maxLines = 1)
-
                                         Text(if (current_vplayfps_state.videocap_dec_bitrate == 0) "" else (" BR: " + current_vplayfps_state.videocap_dec_bitrate),
                                             fontSize = 13.sp,
                                             maxLines = 1)
@@ -508,7 +495,7 @@ fun App()
                                         Text(" " + current_vplayfps_state.incomingResolution,
                                             fontSize = 13.sp,
                                             maxLines = 1)
-                                    }
+                                        }
                                     Column {
                                         val aux_icons_start_padding = 9.dp
                                         val aux_icons_end_padding = 9.dp
@@ -946,7 +933,7 @@ fun App()
                             Icon(Icons.Default.FormatSize, null, Modifier.scale(0.7f))
                             Slider(value = ui_scale, onValueChange = {
                                 ui_scale = it
-                                global_prefs.putFloat("main.ui_scale_factor", ui_scale)
+                                globalstore.updateUiScale(it)
                                 Log.i(TAG, "density: $ui_scale")
                             }, onValueChangeFinished = { }, valueRange = 0.6f..3f, steps = 6, // todo: without setting the width explicitly,
                                 //  the slider takes up the whole remaining space

@@ -719,15 +719,15 @@ fun CoroutineScope.createAVStateStoreVideoCaptureFpsState(): AVStateStoreVideoCa
 
         override fun updateSourceResolution(sourceResolution: String)
         {
-            launch {
+            //launch {
                 mutableStateFlow.value = state.copy(sourceResolution = sourceResolution)
-            }
+            //}
         }
         override fun updateSourceFormat(sourceFormat: String)
         {
-            launch {
+            //launch {
                 mutableStateFlow.value = state.copy(sourceFormat = sourceFormat)
-            }
+            //}
         }
     }
 }
@@ -751,7 +751,7 @@ fun CoroutineScope.createAVStateStoreVideoPlayFpsState(): AVStateStoreVideoPlayF
         override fun update(fps: Int)
         {
             //launch {
-            //    mutableStateFlow.value = state.copy(videoplayfps_state = fps)
+            // mutableStateFlow.value = state.copy(videoplayfps_state = fps)
             //}
         }
         override fun updateDecoderVBitrate(bitrate: Int)
@@ -763,9 +763,9 @@ fun CoroutineScope.createAVStateStoreVideoPlayFpsState(): AVStateStoreVideoPlayF
 
         override fun updateIncomingResolution(incomingResolution: String)
         {
-            launch {
+            //launch {
                 mutableStateFlow.value = state.copy(incomingResolution = incomingResolution)
-            }
+            //}
         }
     }
 }
@@ -786,9 +786,9 @@ fun CoroutineScope.createAVStateStoreCallState(): AVStateStoreCallState
         override val stateFlow: StateFlow<AVStateCallState> = mutableStateFlow
         override fun update(status: AVState.CALL_STATUS)
         {
-            launch {
+            //launch {
                 mutableStateFlow.value = state.copy(call_state = status)
-            }
+            //}
         }
     }
 }
