@@ -4,7 +4,10 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__database_files
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__tox_savefile_dir
 import com.zoffcc.applications.trifa.TRIFAGlobals.VFS_FILE_DIR
 import com.zoffcc.applications.trifa.TRIFAGlobals.VFS_TMP_FILE_DIR
+import global_prefs
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,7 +21,8 @@ data class globalstore_state(
     val contacts_unread_message_count: Int = 0,
     val contacts_unread_group_message_count: Int = 0,
     val firstRun: Boolean = false,
-    val startupSelfname: String = ""
+    val startupSelfname: String = "",
+    val ui_scale: Float = 1.0f
 )
 
 private val globalstore_state_lock = Any()
@@ -28,10 +32,13 @@ interface GlobalStore {
     fun updateFocused(value: Boolean)
     fun updateFirstRun(value: Boolean)
     fun updateStartupSelfname(value: String)
+    fun updateUiScale(value: Float)
     fun isMinimized(): Boolean
     fun isFocused(): Boolean
     fun isFirstRun(): Boolean
     fun getStartupSelfname(): String
+    fun loadUiScale()
+    fun getUiScale(): Float
     fun increase_unread_message_count()
     fun get_unread_message_count(): Int
     fun try_clear_unread_message_count()
@@ -44,6 +51,7 @@ interface GlobalStore {
     val state get() = stateFlow.value
 }
 
+@OptIn(DelicateCoroutinesApi::class)
 fun CoroutineScope.createGlobalStore(): GlobalStore {
     val mutableStateFlow = MutableStateFlow(globalstore_state())
     return object : GlobalStore
@@ -66,7 +74,22 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
         }
 
         override fun updateStartupSelfname(value: String)
-        {   mutableStateFlow.value = state.copy(startupSelfname = value)
+        {
+            mutableStateFlow.value = state.copy(startupSelfname = value)
+        }
+
+        override fun updateUiScale(value: Float)
+        {
+            GlobalScope.launch {
+                try
+                {
+                    global_prefs.putFloat("main.ui_scale_factor", value)
+                }
+                catch(_: Exception)
+                {
+                }
+            }
+            mutableStateFlow.value = state.copy(ui_scale = value)
         }
 
         override fun isMinimized(): Boolean
@@ -83,9 +106,32 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
         {
             return state.firstRun
         }
+
         override fun getStartupSelfname(): String
         {
             return state.startupSelfname
+        }
+
+        override fun loadUiScale()
+        {
+            var value = 1.0f
+            try
+            {
+                val tmp = global_prefs.get("main.ui_scale_factor", null)
+                if (tmp != null)
+                {
+                    value = tmp.toFloat()
+                    Log.i(TAG, "density: $value")
+                }
+            } catch (_: Exception)
+            {
+            }
+            mutableStateFlow.value = state.copy(ui_scale = value)
+        }
+
+        override fun getUiScale(): Float
+        {
+            return state.ui_scale
         }
 
         override fun increase_unread_message_count()
