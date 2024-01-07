@@ -519,21 +519,25 @@ object HelperGeneric {
             }
             if (result.msg_v2)
             {
+                Log.i(TAG, "send_message_onclick:2: msg_v2=" + m.msg_version)
                 m.msg_version = 1
             } else
             {
+                Log.i(TAG, "send_message_onclick:2: msg_v2=" + m.msg_version)
                 m.msg_version = 0
             }
             if (result.msg_hash_hex != null && !result.msg_hash_hex.equals("", true))
             {
                 // msgV2 message -----------
                 m.msg_id_hash = result.msg_hash_hex
+                Log.i(TAG, "send_message_onclick:2: msg_id_hash=" + m.msg_id_hash)
                 // msgV2 message -----------
             }
             if (result.msg_hash_v3_hex != null && !result.msg_hash_v3_hex.equals("", true))
             {
                 // msgV3 message -----------
                 m.msg_idv3_hash = result.msg_hash_v3_hex
+                Log.i(TAG, "send_message_onclick:2: msg_idv3_hash=" + m.msg_idv3_hash)
                 // msgV3 message -----------
             }
             if (result.raw_message_buf_hex != null && !result.raw_message_buf_hex.equals("", true))
@@ -541,6 +545,7 @@ object HelperGeneric {
                 // save raw message bytes of this v2 msg into the database
                 // we need it if we want to resend it later
                 m.raw_msgv2_bytes = result.raw_message_buf_hex
+                Log.i(TAG, "send_message_onclick:2: raw_msgv2_bytes=" + m.raw_msgv2_bytes)
             }
             // TODO: typing indicator **// stop_self_typing_indicator_s()
             var row_id: Long = -1
@@ -600,11 +605,13 @@ object HelperGeneric {
         {
             m.resend_count++
             update_message_in_db_resend_count(m)
+            Log.i(TAG, "tox_friend_resend_msgv3_wrapper:1: msg_idv3_hash=" + m.msg_idv3_hash)
             return false
         }
         if (m.msg_idv3_hash.length < TOX_HASH_LENGTH)
         {
             m.resend_count++
+            Log.i(TAG, "tox_friend_resend_msgv3_wrapper:2: msg_idv3_hash=" + m.msg_idv3_hash)
             update_message_in_db_resend_count(m)
             return false
         }
