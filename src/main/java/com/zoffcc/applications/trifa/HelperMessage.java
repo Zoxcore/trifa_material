@@ -481,19 +481,25 @@ public class HelperMessage {
     public static MainActivity.Companion.send_message_result tox_friend_send_message_wrapper(final String friend_pubkey, int a_TOX_MESSAGE_TYPE, String message, long timestamp_unixtime_seconds)
     {
         Log.i(TAG, "tox_friend_send_message_wrapper:" + friend_pubkey);
+        FriendList f = main_get_friend(friend_pubkey);
+        if (f == null)
+        {
+            return null;
+        }
+
         long friendnum_to_use = tox_friend_by_public_key(friend_pubkey);
         boolean need_call_push_url = false;
 
-        final long fcap = tox_friend_get_capabilities(friendnum_to_use);
         final long fconnstatus = tox_friend_get_connection_status(friendnum_to_use);
 
         boolean msgv1 = true;
-        if ((fcap & TOX_CAPABILITY_MSGV2) != 0)
+        if ((f.capabilities & TOX_CAPABILITY_MSGV2) != 0)
         {
             msgv1 = false;
         }
+        Log.i(TAG, "tox_friend_send_message_wrapper:msgv1=" + msgv1);
 
-        Log.i(TAG, "tox_friend_send_message_wrapper:f conn" + fconnstatus);
+        Log.i(TAG, "tox_friend_send_message_wrapper:f conn=" + fconnstatus);
         if (fconnstatus == TOX_CONNECTION_NONE.value)
         {
             String relay_pubkey = HelperRelay.get_relay_for_friend(friend_pubkey);
@@ -526,6 +532,7 @@ public class HelperMessage {
             result.msg_v2 = false;
             result.msg_hash_hex = "";
             result.msg_hash_v3_hex = bytebuffer_to_hexstring(hash_bytes, true);
+            Log.i(TAG, "tox_friend_send_message_wrapper:msg_hash_v3_hex=" + result.msg_hash_v3_hex);
             result.raw_message_buf_hex = "";
 
             if (need_call_push_url)

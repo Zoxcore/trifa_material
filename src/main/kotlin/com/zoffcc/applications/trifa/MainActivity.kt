@@ -1554,6 +1554,7 @@ class MainActivity
         @JvmStatic
         fun android_tox_callback_friend_read_receipt_cb_method(friend_number: Long, message_id: Long)
         {
+            Log.i(TAG, "friend_read_receipt:friend_number=" + friend_number + " message_id=" + message_id)
             try
             {
                 val toxpk = tox_friend_get_public_key(friend_number)!!.uppercase()
@@ -1577,11 +1578,11 @@ class MainActivity
                 Log.i(TAG, "friend_read_receipt:m:message_id=" + m.message_id + " text=" + m.text + " friendpubkey=" + m.tox_friendpubkey + " read=" + m.read + " direction=" + m.direction);
                 if (m != null)
                 {
+                    m.rcvd_timestamp = System.currentTimeMillis()
+                    m.read = true
                     Log.i(TAG,
                           "friend_read_receipt:friend:" + get_friend_name_from_num(friend_number) + " message:" + m.text +
                           " m=" + m);
-                    m.rcvd_timestamp = System.currentTimeMillis()
-                    m.read = true
                     update_message_in_db_read_rcvd_timestamp_rawmsgbytes(m)
                     // TODO: update message in UI
                 }
@@ -1628,7 +1629,7 @@ class MainActivity
         @JvmStatic
         fun android_tox_callback_friend_message_cb_method(friend_number: Long, message_type: Int, friend_message: String?, length: Long, msgV3hash_bin: ByteArray?, message_timestamp: Long)
         {
-            // Log.i(TAG, "android_tox_callback_friend_message_cb_method: fn=" + friend_number + " friend_message=" + friend_message)
+            // Log.i(TAG, "friend_message_cb_method: fn=" + friend_number + " friend_message=" + friend_message)
             val toxpk = tox_friend_get_public_key(friend_number)!!.uppercase()
             if ((toxpk == null) || (toxpk.equals("-1", true)))
             {
@@ -1651,6 +1652,7 @@ class MainActivity
                     // HINT: we already have received a message with this hash
                     // still send the msgV3 high level ACK, and then ignore
                     Log.i(TAG, "TOX_MESSAGEv3:ignore double message")
+                    // Log.i(TAG, "send_msgv3_high_level_ack:001")
                     HelperMessage.send_msgv3_high_level_ack(friend_number, msgV3hash_hex_string)
                     return
                 }
@@ -1662,7 +1664,8 @@ class MainActivity
                 return
             }
 
-            GlobalScope.launch(Dispatchers.IO) {
+            //GlobalScope.launch(Dispatchers.IO) {
+                var new_msgv3_cap = 0
                 if (msgV3hash_bin != null)
                 {
                     val got_messages_mirrored = orma!!.selectFromMessage().
@@ -1672,21 +1675,32 @@ class MainActivity
                     //           msgV3hash_bin + " " + msgV3hash_hex_string);
                     if (got_messages_mirrored > 0)
                     {
+                        Log.i(TAG, "update_friend_msgv3_capability:got_messages_mirrored=" + got_messages_mirrored)
                         update_friend_msgv3_capability(friend_number, 0)
-                    } else
+                        new_msgv3_cap = 0
+                    }
+                    else
                     {
                         update_friend_msgv3_capability(friend_number, 1)
+                        new_msgv3_cap = 1
                     }
                 }
                 else
                 {
                     // Log.i(TAG, "update_friend_msgv3_capability:hash0=" + msgV3hash_bin + " " + msgV3hash_hex_string);
                     update_friend_msgv3_capability(friend_number, 0)
+                    new_msgv3_cap = 0
                 }
 
                 if (msgV3hash_hex_string != null)
                 {
-                    HelperMessage.send_msgv3_high_level_ack(friend_number, msgV3hash_hex_string);
+                    // Log.i(TAG, "send_msgv3_high_level_ack:002")
+                    if (new_msgv3_cap == 1)
+                    {
+                        // send high level ack only if the friend actually understand it
+                        // and it's not a mirrored high level ACK
+                        HelperMessage.send_msgv3_high_level_ack(friend_number, msgV3hash_hex_string);
+                    }
                     try
                     {
                         // ("msgv3:"+friend_message)
@@ -1703,7 +1717,8 @@ class MainActivity
                     } catch (_: Exception)
                     {
                     }
-                } else
+                }
+                else
                 {
                     try
                     { // ("msgv1:"+friend_message)
@@ -1721,7 +1736,7 @@ class MainActivity
                     {
                     }
                 }
-            }
+            //}
         }
 
         @JvmStatic
