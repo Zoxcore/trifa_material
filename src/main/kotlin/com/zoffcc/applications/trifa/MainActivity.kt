@@ -136,8 +136,8 @@ class MainActivity
 
         // --------- global config ---------
         // --------- global config ---------
-        const val CTOXCORE_NATIVE_LOGGING = false // set "false" for release builds
-        const val AUDIO_PCM_DEBUG_FILES = false // set "false" for release builds
+        const val CTOXCORE_NATIVE_LOGGING = true // set "false" for release builds
+        const val AUDIO_PCM_DEBUG_FILES = true // set "false" for release builds
 
         // --------- global config ---------
         // --------- global config ---------
