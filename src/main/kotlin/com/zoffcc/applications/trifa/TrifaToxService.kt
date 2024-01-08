@@ -75,6 +75,7 @@ import org.briarproject.briar.desktop.contact.GroupPeerItem
 import set_tox_running_state
 import toxdatastore
 import unlock_data_dir_input
+import java.io.File
 import java.nio.ByteBuffer
 import java.util.*
 
@@ -425,6 +426,18 @@ class TrifaToxService
                                             {
                                                 // Log.i(TAG, "[]tox_audio_frame:bytes_actually_written:OK:=" + bytes_actually_written + " want_bytes=" + want_bytes)
                                                 // sleep(30)
+                                            }
+
+                                            if (MainActivity.AUDIO_PCM_DEBUG_FILES)
+                                            {
+                                                val f = File("/tmp/toxaudio_play.txt")
+                                                try
+                                                {
+                                                    f.appendBytes(buf)
+                                                } catch (e: Exception)
+                                                {
+                                                    e.printStackTrace()
+                                                }
                                             }
 
                                             update_audio_bar++
