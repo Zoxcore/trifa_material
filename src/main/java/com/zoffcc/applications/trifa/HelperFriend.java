@@ -186,7 +186,8 @@ public class HelperFriend {
         FriendList f = null;
 
         try {
-            List<FriendList> fl = TrifaToxService.Companion.getOrma().selectFromFriendList().tox_public_key_stringEq(friend_pubkey).toList();
+            List<FriendList> fl = TrifaToxService.Companion.getOrma().
+                    selectFromFriendList().tox_public_key_stringEq(friend_pubkey).toList();
 
             if (fl.size() > 0) {
                 f = fl.get(0);
@@ -348,19 +349,17 @@ public class HelperFriend {
         return false;
     }
 
-    public static void add_friend_real(final String friend_tox_id)
+    public static void add_friend_real(final String friend_pubkey)
     {
-        // nospam=8 chars, checksum=4 chars
-        String friend_public_key = friend_tox_id.substring(0, friend_tox_id.length() - 12);
         // Log.i(TAG, "add_friend_real:add friend PK:" + friend_public_key);
         FriendList f = new FriendList();
-        f.tox_public_key_string = friend_public_key.toUpperCase();
+        f.tox_public_key_string = friend_pubkey.toUpperCase();
 
         try
         {
             // set name as the last 5 char of TOXID (until we get a name sent from friend)
-            f.name = friend_public_key.substring(friend_public_key.length() - 5,
-                    friend_public_key.length());
+            f.name = friend_pubkey.substring(friend_pubkey.length() - 5,
+                    friend_pubkey.length());
         }
         catch (Exception e)
         {
