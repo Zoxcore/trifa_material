@@ -509,7 +509,7 @@ object HelperGeneric {
             m.msg_id_hash = ""
             m.raw_msgv2_bytes = ""
 
-            val result: MainActivity.Companion.send_message_result =
+            val result: MainActivity.Companion.send_message_result? =
                 tox_friend_send_message_wrapper(friendPubkey.toUpperCase(),
                     0, msg,
                     m.sent_timestamp / 1000)
