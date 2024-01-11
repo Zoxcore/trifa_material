@@ -2549,12 +2549,16 @@ class MainActivity
             val tox_peerpk = tox_group_peer_get_public_key(group_number, peer_id)!!.uppercase()
             val message_id_hex = fourbytes_of_long_to_hex(message_id)
             val message_timestamp = System.currentTimeMillis()
+            val peernum = tox_group_peer_by_public_key(group_number, tox_peerpk)
+            var fname = tox_group_peer_get_name(group_number, peernum)
+            if (fname == null)
+            {
+                fname = ""
+            }
             val msg_dbid = received_groupmessage_to_db(tox_peerpk = tox_peerpk!!,
                 groupid = group_id, message_timestamp = message_timestamp,
                 group_message = message_orig, message_id_hex = message_id_hex,
-                was_synced = false)
-            val peernum = tox_group_peer_by_public_key(group_number, tox_peerpk)
-            val fname = tox_group_peer_get_name(group_number, peernum)
+                was_synced = false, peername = fname)
             val peer_user = User(fname + " / " + PubkeyShort(tox_peerpk), picture = "friend_avatar.png", toxpk = tox_peerpk.uppercase(), color = ColorProvider.getColor(true, tox_peerpk.uppercase()))
             groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(
                 UIGroupMessage(
@@ -3050,11 +3054,10 @@ class MainActivity
             return row_id
         }
 
-        fun received_groupmessage_to_db(tox_peerpk: String, groupid: String, message_timestamp: Long, group_message: String?, message_id_hex: String, was_synced: Boolean): Long
+        fun received_groupmessage_to_db(tox_peerpk: String, groupid: String, message_timestamp: Long, group_message: String?, message_id_hex: String, was_synced: Boolean, peername: String): Long
         {
             val groupnum = tox_group_by_groupid__wrapper(groupid)
             val peernum = tox_group_peer_by_public_key(groupnum, tox_peerpk)
-            val peername = tox_group_peer_get_name(groupnum, peernum)
             val m = GroupMessage()
             m.tox_group_peer_pubkey = tox_peerpk
             m.direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value // msg received
@@ -3114,7 +3117,7 @@ class MainActivity
         {
             val message_timestamp = m.sent_timestamp
 
-            val msg_dbid = received_groupmessage_to_db(tox_peerpk = m.tox_group_peer_pubkey!!, groupid = m.group_identifier, message_timestamp = message_timestamp, group_message = m.text, message_id_hex = m.message_id_tox, was_synced = m.was_synced)
+            val msg_dbid = received_groupmessage_to_db(tox_peerpk = m.tox_group_peer_pubkey!!, groupid = m.group_identifier, message_timestamp = message_timestamp, group_message = m.text, message_id_hex = m.message_id_tox, was_synced = m.was_synced, peername = m.tox_group_peername)
             val peer_user = User(m.tox_group_peername + " / " + PubkeyShort(m.tox_group_peer_pubkey), picture = "friend_avatar.png", toxpk = m.tox_group_peer_pubkey.uppercase(), color = ColorProvider.getColor(true, m.tox_group_peer_pubkey.uppercase()))
 
             groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(
