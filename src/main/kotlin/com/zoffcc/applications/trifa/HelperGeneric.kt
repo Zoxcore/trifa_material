@@ -451,7 +451,9 @@ object HelperGeneric {
             } while (input_string.length > 0)
         } catch (e: java.lang.Exception)
         {
+            e.printStackTrace()
         }
+        Log.i(TAG, "trim_to_utf8_length_bytes: returning NULL")
         return null
     }
 
@@ -483,6 +485,13 @@ object HelperGeneric {
         {
             // send typed message to friend
             msg = trim_to_utf8_length_bytes(msg2, TOX_MSGV3_MAX_MESSAGE_LENGTH)
+
+            if (msg == null)
+            {
+                Log.i(TAG, "send_message_onclick:trimmed message is null: orig: " + msg2 + " trimmed: " + msg)
+                return false
+            }
+
             val m = Message()
             m.tox_friendpubkey = friendPubkey.toUpperCase()
             m.direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value
@@ -504,6 +513,11 @@ object HelperGeneric {
                 tox_friend_send_message_wrapper(friendPubkey.toUpperCase(),
                     0, msg,
                     m.sent_timestamp / 1000)
+            if (result == null)
+            {
+                Log.i(TAG, "send_message_onclick:tox_friend_send_message_wrapper returned null")
+                return false
+            }
 
             val res: Long = result.msg_num
             if (res > -1)
