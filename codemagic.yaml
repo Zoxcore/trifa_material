@@ -36,7 +36,10 @@ workflows:
     instance_type: mac_mini_m1
     environment:
       java: 17
-
+#    triggering:
+#      events:
+#        - push
+#        - pull_request
     scripts:
         - brew install cliclick wget
         - brew install socsieng/tap/sendkeys
@@ -73,9 +76,9 @@ workflows:
           export AWT_FORCE_HEADFUL=true
           ./gradlew run > trifa.log 2>&1 &
           pwd
-          sleep 20
+          sleep 60
           cliclick -m verbose c:77,124
-          sleep 2
+          sleep 8
           cliclick -m verbose c:139,124
           sleep 2
           cat trifa.log || echo "NO ERR"
@@ -85,11 +88,10 @@ workflows:
           /Users/builder/clone/java_tox_tester-master/do_run.sh $(cat /Users/builder/clone/toxid.txt) >/dev/null 2>/dev/null &
           sleep 58
           cliclick -m verbose c:195,347
+          sleep 90
+          sleep 100
           pwd
           ls -al /Users/builder/clone/
-
-#          sleep 90
-#          sleep 120
 
     artifacts:
       - /Users/builder/clone/*.png
