@@ -75,6 +75,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
+import java.text.SimpleDateFormat
 import java.util.*
 
 object HelperGeneric {
@@ -91,6 +92,7 @@ object HelperGeneric {
     var lookup_ngc_incoming_video_peer_list: MutableMap<String, Long> = HashMap()
     var flush_decoder = 0
     var last_video_seq_num: Long = -1
+    @JvmStatic val df_date_time_long = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 
     fun PubkeyShort(pubkey: String) : String {
         return pubkey.take(PUBKEY_SHORT_LEN)
@@ -692,7 +694,7 @@ object HelperGeneric {
         {
             System.arraycopy(encoded_audio_and_header, 10, pcm_encoded_buf, 0, pcm_encoded_length)
             //
-            //Log.i(TAG, "play_ngc_incoming_audio_frame:toxav_ngc_audio_decode:"
+            // Log.i(TAG, "play_ngc_incoming_audio_frame:toxav_ngc_audio_decode:"
             //        + pcm_encoded_buf
             //        + " " + pcm_encoded_length
             //        + " " + pcm_decoded_buf)
@@ -700,7 +702,7 @@ object HelperGeneric {
                 pcm_encoded_buf,
                 pcm_encoded_length,
                 pcm_decoded_buf)
-            //Log.i(TAG, "play_ngc_incoming_audio_frame:toxav_ngc_audio_decode:decoded_samples="
+            // Log.i(TAG, "play_ngc_incoming_audio_frame:toxav_ngc_audio_decode:decoded_samples="
             //        + decoded_samples)
             // put pcm data into a FIFO
             if ((ngc_audio_in_queue.remainingCapacity() < 1) && (!audio_queue_full_trigger))
@@ -979,6 +981,18 @@ object HelperGeneric {
         catch(_: Exception)
         {
             return false
+        }
+    }
+
+    @JvmStatic fun long_date_time_format(timestamp_in_millis: Long): String
+    {
+        return try
+        {
+            df_date_time_long.format(Date(timestamp_in_millis))
+        } catch (e: java.lang.Exception)
+        {
+            e.printStackTrace()
+            "_Datetime_ERROR_"
         }
     }
 }
