@@ -118,7 +118,7 @@ public class NTFYActivity {
         }
         catch (java.lang.UnsatisfiedLinkError e)
         {
-            Log.i(TAG, "loadLibrary ffmpeg_av_jni failed! path: " + linux_lib_filename);
+            Log.i(TAG, "loadLibrary libjni_notifications failed! path: " + linux_lib_filename);
             e.printStackTrace();
             return -1;
         }
