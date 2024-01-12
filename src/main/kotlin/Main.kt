@@ -720,9 +720,14 @@ fun App()
                                         }
                                         else
                                         {
+                                            var tmp2 = ArrayList<String>()
                                             tmp.iterator().forEach() {
-                                                audio_in_sources_get.plus(it.id)
+                                                if ((it != null) && (it.id != null))
+                                                {
+                                                    tmp2.add(it.id)
+                                                }
                                             }
+                                            audio_in_sources_get = tmp2.toTypedArray()
                                         }
                                         audio_in_sources.clear()
                                         if (audio_in_sources_get.isNotEmpty())
@@ -819,9 +824,14 @@ fun App()
                                             }
                                             else
                                             {
+                                                var tmp2 = ArrayList<String>()
                                                 tmp.iterator().forEach() {
-                                                    video_in_sources_get.plus(it.id)
+                                                    if ((it != null) && (it.id != null))
+                                                    {
+                                                        tmp2.add(it.id)
+                                                    }
                                                 }
+                                                video_in_sources_get = tmp2.toTypedArray()
                                             }
                                         }
                                         else
@@ -833,9 +843,14 @@ fun App()
                                             }
                                             else
                                             {
+                                                var tmp2 = ArrayList<String>()
                                                 tmp.iterator().forEach() {
-                                                    video_in_sources_get.plus(it.id)
+                                                    if ((it != null) && (it.id != null))
+                                                    {
+                                                        tmp2.add(it.id)
+                                                    }
                                                 }
+                                                video_in_sources_get = tmp2.toTypedArray()
                                             }
                                         }
                                         Log.i(TAG, "video_in_device=" + avstatestore.state.video_in_device_get())
