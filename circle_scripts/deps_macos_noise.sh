@@ -240,7 +240,6 @@ fi
                                          --size-limit=16384x16384 \
                                          $nasm_option \
                                          --enable-onthefly-bitpacking \
-                                         --enable-runtime-cpu-detect \
                                          --enable-realtime-only \
                                          --enable-multi-res-encoding \
                                          --enable-temporal-denoising \
@@ -249,6 +248,8 @@ fi
                                          --disable-tools \
                                          --disable-docs \
                                          --disable-unit-tests || exit 1
+
+#                                         --enable-runtime-cpu-detect \
 
   make || exit 1
   make install

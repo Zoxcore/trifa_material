@@ -392,6 +392,9 @@ class MainActivity
                 } else if (OperatingSystem.getCurrent() == OperatingSystem.MACOS)
                 {
                     libFile = File(resourcesDir, "libjni-c-toxcore${noise_jni_name_addon}.jnilib")
+                } else if (OperatingSystem.getCurrent() == OperatingSystem.MACARM)
+                {
+                    libFile = File(resourcesDir, "libjni-c-toxcore_arm64${noise_jni_name_addon}.jnilib")
                 } else
                 {
                     System.out.println("XXXXX1.1:OS:Unknown operating system:EXIT")
@@ -425,7 +428,8 @@ class MainActivity
                 }
 
                 if ((OperatingSystem.getCurrent() == OperatingSystem.LINUX)
-                    || (OperatingSystem.getCurrent() == OperatingSystem.MACOS))
+                    || (OperatingSystem.getCurrent() == OperatingSystem.MACOS)
+                    || (OperatingSystem.getCurrent() == OperatingSystem.MACARM))
                 {
                     native_notification_lib_loaded_error = jninotifications_loadjni(libdir2)
                     if (native_notification_lib_loaded_error == 0)

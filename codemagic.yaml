@@ -1,0 +1,32 @@
+workflows:
+  JNI Libs macOS silicone:
+    name: build-macos-jni-artifact
+    instance_type: mac_mini_m1
+    environment:
+      java: 17
+    triggering:
+      events:
+        - push
+        - pull_request
+    scripts:
+        - brew install git automake yasm nasm
+
+        - |
+          ls -al
+          id
+          pwd
+          ./circle_scripts/deps_macos.sh
+
+        - |
+          ls -al
+          id
+          pwd
+          ./circle_scripts/java_jni_lib_macos.sh
+
+        - pwd
+        - find . -name 'libjni-c-toxcore.jnilib'
+        - ls -al /Users/runner/ToxAndroidRefImpl/jni-c-toxcore/libjni-c-toxcore.jnilib
+        - mv -v /Users/runner/ToxAndroidRefImpl/jni-c-toxcore/libjni-c-toxcore.jnilib /Users/runner/ToxAndroidRefImpl/jni-c-toxcore/libjni-c-toxcore_arm64.jnilib
+
+    artifacts:
+      - /Users/runner/ToxAndroidRefImpl/jni-c-toxcore/libjni-c-toxcore_arm64.jnilib

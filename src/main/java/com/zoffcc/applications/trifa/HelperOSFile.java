@@ -69,7 +69,8 @@ public class HelperOSFile {
                 }
             }
         }
-        else if (OperatingSystem.getCurrent() == OperatingSystem.MACOS)
+        else if ((OperatingSystem.getCurrent() == OperatingSystem.MACOS)
+                || (OperatingSystem.getCurrent() == OperatingSystem.MACARM))
         {
             try
             {
