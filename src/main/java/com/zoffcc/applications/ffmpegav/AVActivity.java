@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 public class AVActivity {
 
     private static final String TAG = "ffmpegav.AVActivity";
-    static final String Version = "0.99.11";
+    static final String Version = "0.99.20";
 
     public static native String ffmpegav_version();
     public static native String ffmpegav_libavutil_version();
@@ -13,7 +13,7 @@ public class AVActivity {
     public static native void ffmpegav_apply_audio_filter(int apply_filter);
     public static native String[] ffmpegav_get_video_in_devices();
     public static native String[] ffmpegav_get_audio_in_devices();
-    public static native String[] ffmpegav_get_in_sources(String devicename, int is_video);
+    public static native ffmpegav_descrid[] ffmpegav_get_in_sources(String devicename, int is_video);
     public static native int ffmpegav_open_video_in_device(String deviceformat, String inputname, int wanted_width, int wanted_height, int fps, int force_mjpeg);
     public static native int ffmpegav_open_audio_in_device(String deviceformat, String inputname);
     public static native int ffmpegav_start_video_in_capture();
@@ -26,6 +26,19 @@ public class AVActivity {
     public static java.nio.ByteBuffer ffmpegav_video_buffer_2_y = null;
     public static java.nio.ByteBuffer ffmpegav_video_buffer_2_u = null;
     public static java.nio.ByteBuffer ffmpegav_video_buffer_2_v = null;
+
+    public static class ffmpegav_descrid
+    {
+        public String description;
+        public String id;
+        public ffmpegav_descrid(){
+            description    = new String("");
+            id             = new String("");
+        }
+        public String toString() {
+            return "[" + description + "," + id +"]";
+        }
+    }
 
     public static enum ffmpegav_video_source_format_name
     {
@@ -146,7 +159,7 @@ public class AVActivity {
     public enum OperatingSystem
     {
 
-        WINDOWS("windows"), MACOS("mac"), LINUX("linux"), UNIX("nix"), SOLARIS("solaris"),
+        WINDOWS("windows"), MACOS("mac"), MACARM("silicone"), LINUX("linux"), UNIX("nix"), SOLARIS("solaris"),
 
         UNKNOWN("unknown")
                 {
@@ -156,7 +169,6 @@ public class AVActivity {
                         return false;
                     }
                 };
-
 
         private String tag;
 
@@ -207,6 +219,13 @@ public class AVActivity {
             {
                 if (os.isCurrent())
                 {
+                    if (os == OperatingSystem.MACOS)
+                    {
+                        if (getArchitecture().equalsIgnoreCase("aarch64"))
+                        {
+                            return OperatingSystem.MACARM;
+                        }
+                    }
                     return os;
                 }
             }
@@ -225,6 +244,9 @@ public class AVActivity {
         } else if (OperatingSystem.getCurrent() == OperatingSystem.MACOS)
         {
             linux_lib_filename = jnilib_path + "/libffmpeg_av_jni.jnilib";
+        } else if (OperatingSystem.getCurrent() == OperatingSystem.MACARM)
+        {
+            linux_lib_filename = jnilib_path + "/libffmpeg_av_jni_arm64.jnilib";
         } else
         {
             Log.i(TAG,"OS:Unknown operating system: " + OperatingSystem.getCurrent());
@@ -275,14 +297,14 @@ public class AVActivity {
         {
             if (video_in_devices[i] != null)
             {
-                final String[] video_in_sources = ffmpegav_get_in_sources(video_in_devices[i], 1);
+                final ffmpegav_descrid[] video_in_sources = ffmpegav_get_in_sources(video_in_devices[i], 1);
                 if (video_in_sources != null)
                 {
                     for (int j=0;j<video_in_sources.length;j++)
                     {
                         if (video_in_sources[j] != null)
                         {
-                            Log.i(TAG, "ffmpeg video in source #"+i+": " + video_in_sources[j]);
+                            Log.i(TAG, "ffmpeg video in source #"+i+": " + video_in_sources[j].id);
                         }
                     }
                 }
@@ -324,19 +346,21 @@ public class AVActivity {
         {
             if (audio_in_devices[i] != null)
             {
-                final String[] audio_in_sources = ffmpegav_get_in_sources(audio_in_devices[i], 0);
+                final ffmpegav_descrid[] audio_in_sources = ffmpegav_get_in_sources(audio_in_devices[i], 0);
                 if (audio_in_sources != null)
                 {
                     for (int j=0;j<audio_in_sources.length;j++)
                     {
                         if (audio_in_sources[j] != null)
                         {
-                            Log.i(TAG, "ffmpeg audio in source #"+i+": " + audio_in_sources[j]);
+                            Log.i(TAG, "ffmpeg audio in source id=#"+i+": " + audio_in_sources[j].id);
+                            Log.i(TAG, "ffmpeg audio in source descr=#"+i+": " + audio_in_sources[j].description);
                         }
                     }
                 }
             }
         }
+
         for (int i=0;i<audio_in_devices.length;i++)
         {
             if (audio_in_devices[i] != null)
