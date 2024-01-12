@@ -4,10 +4,10 @@ workflows:
     instance_type: mac_mini_m1
     environment:
       java: 17
-    triggering:
-      events:
-        - push
-        - pull_request
+#    triggering:
+#      events:
+#        - push
+#        - pull_request
     scripts:
         - brew install git automake yasm nasm
 
