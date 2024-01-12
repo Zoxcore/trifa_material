@@ -4,7 +4,7 @@ import java.io.File;
 
 public class NTFYActivity {
     private static final String TAG = "NTFYActivity";
-    static final String Version = "0.99.9";
+    static final String Version = "0.99.1";
 
     public static native String jninotifications_version();
     public static native int jninotifications_notify(String application, String title,
@@ -20,7 +20,7 @@ public class NTFYActivity {
     public enum OperatingSystem
     {
 
-        WINDOWS("windows"), MACOS("mac"), LINUX("linux"), UNIX("nix"), SOLARIS("solaris"),
+        WINDOWS("windows"), MACOS("mac"), MACARM("silicone"), LINUX("linux"), UNIX("nix"), SOLARIS("solaris"),
 
         UNKNOWN("unknown")
                 {
@@ -30,7 +30,6 @@ public class NTFYActivity {
                         return false;
                     }
                 };
-
 
         private String tag;
 
@@ -81,6 +80,13 @@ public class NTFYActivity {
             {
                 if (os.isCurrent())
                 {
+                    if (os == OperatingSystem.MACOS)
+                    {
+                        if (getArchitecture().equalsIgnoreCase("aarch64"))
+                        {
+                            return OperatingSystem.MACARM;
+                        }
+                    }
                     return os;
                 }
             }
@@ -99,6 +105,9 @@ public class NTFYActivity {
         } else if (OperatingSystem.getCurrent() == OperatingSystem.MACOS)
         {
             linux_lib_filename = jnilib_path + "/libjni_notifications.jnilib";
+        } else if (OperatingSystem.getCurrent() == OperatingSystem.MACARM)
+        {
+            linux_lib_filename = jnilib_path + "/libjni_notifications_arm64.jnilib";
         } else
         {
             Log.i(TAG,"OS:Unknown operating system: " + OperatingSystem.getCurrent());

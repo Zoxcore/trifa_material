@@ -428,7 +428,8 @@ class MainActivity
                 }
 
                 if ((OperatingSystem.getCurrent() == OperatingSystem.LINUX)
-                    || (OperatingSystem.getCurrent() == OperatingSystem.MACOS))
+                    || (OperatingSystem.getCurrent() == OperatingSystem.MACOS)
+                    || (OperatingSystem.getCurrent() == OperatingSystem.MACARM))
                 {
                     native_notification_lib_loaded_error = jninotifications_loadjni(libdir2)
                     if (native_notification_lib_loaded_error == 0)
