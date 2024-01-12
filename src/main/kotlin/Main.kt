@@ -720,7 +720,9 @@ fun App()
                                         }
                                         else
                                         {
-                                            audio_in_sources_get = tmp
+                                            tmp.iterator().forEach() {
+                                                audio_in_sources_get.plus(it.id)
+                                            }
                                         }
                                         audio_in_sources.clear()
                                         if (audio_in_sources_get.isNotEmpty())
@@ -817,7 +819,9 @@ fun App()
                                             }
                                             else
                                             {
-                                                video_in_sources_get = tmp
+                                                tmp.iterator().forEach() {
+                                                    video_in_sources_get.plus(it.id)
+                                                }
                                             }
                                         }
                                         else
@@ -829,7 +833,9 @@ fun App()
                                             }
                                             else
                                             {
-                                                video_in_sources_get = tmp
+                                                tmp.iterator().forEach() {
+                                                    video_in_sources_get.plus(it.id)
+                                                }
                                             }
                                         }
                                         Log.i(TAG, "video_in_device=" + avstatestore.state.video_in_device_get())
