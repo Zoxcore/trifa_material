@@ -30,3 +30,64 @@ workflows:
 
     artifacts:
       - /Users/runner/ToxAndroidRefImpl/jni-c-toxcore/libjni-c-toxcore_arm64.jnilib
+
+  test macOS silicone:
+    name: macos-test
+    instance_type: mac_mini_m1
+    environment:
+      java: 17
+
+    scripts:
+        - brew install cliclick wget
+        - brew install socsieng/tap/sendkeys
+        - sw_vers -productVersion
+        - |
+          curl -L https://github.com/zoff99/java_tox_tester/archive/refs/heads/master.zip -o master.zip
+          unzip master.zip
+          pwd
+          ls -al java_tox_tester-master/
+          java -version
+          javac -version
+
+        - |
+          pwd
+          ls -al /Users/runner/
+          _HOME_="/Users/runner/"
+          ./gradlew assemble
+          cliclick -m verbose m:12,34
+          screencapture -T 1 -x -t png /Users/runner/screen01.png &
+          screencapture -T 2 -x -t png /Users/runner/screen02.png &
+          screencapture -T 3 -x -t png /Users/runner/screen03.png &
+          screencapture -T 10 -x -t png /Users/runner/screen04.png &
+          screencapture -T 25 -x -t png /Users/runner/screen05.png &
+          screencapture -T 50 -x -t png /Users/runner/screen06.png &
+          screencapture -T 60 -x -t png /Users/runner/screen07.png &
+          screencapture -T 90 -x -t png /Users/runner/screen09.png &
+          screencapture -T 110 -x -t png /Users/runner/screen10.png &
+          screencapture -T 200 -x -t png /Users/runner/screenshot-macos.png &
+          screencapture -T 230 -x -t png /Users/runner/screen12.png &
+          screencapture -T 300 -x -t png /Users/runner/screen13.png &
+          pwd
+          ls -al
+          ./gradlew run > trifa.log 2>&1 &
+          pwd
+          sleep 20
+          cliclick -m verbose c:77,124
+          sleep 2
+          cliclick -m verbose c:139,124
+          sleep 2
+          cat /Users/runner/work/trifa_material/trifa_material/toxid.txt;echo
+          cd /Users/runner/work/trifa_material/trifa_material/java_tox_tester-master/
+          ./do_compile.sh
+          ./do_run.sh $(cat /Users/runner/work/trifa_material/trifa_material/toxid.txt) >/dev/null 2>/dev/null &
+          sleep 58
+          cliclick -m verbose c:195,347
+          sleep 90
+          sleep 120
+          pwd
+          ls -al /Users/runner/
+          cp -v /Users/runner/screenshot-macos.png /Users/runner/work/trifa_material/trifa_material/screenshot-macos.png
+
+    artifacts:
+      - /Users/runner/work/trifa_material/trifa_material/*.png
+
