@@ -45,30 +45,32 @@ workflows:
           curl -L https://github.com/zoff99/java_tox_tester/archive/refs/heads/master.zip -o master.zip
           unzip master.zip
           pwd
-          ls -al java_tox_tester-master/
+          ls -al /Users/builder/clone/java_tox_tester-master/
           java -version
           javac -version
 
         - |
           pwd
-          ls -al /Users/runner/
-          _HOME_="/Users/runner/"
+          mkdir -p /Users/builder/clone/
+          ls -al /Users/builder/clone/
+          _HOME_="/Users/builder/clone/"
           ./gradlew assemble
           cliclick -m verbose m:12,34
-          screencapture -T 1 -x -t png /Users/runner/screen01.png &
-          screencapture -T 2 -x -t png /Users/runner/screen02.png &
-          screencapture -T 3 -x -t png /Users/runner/screen03.png &
-          screencapture -T 10 -x -t png /Users/runner/screen04.png &
-          screencapture -T 25 -x -t png /Users/runner/screen05.png &
-          screencapture -T 50 -x -t png /Users/runner/screen06.png &
-          screencapture -T 60 -x -t png /Users/runner/screen07.png &
-          screencapture -T 90 -x -t png /Users/runner/screen09.png &
-          screencapture -T 110 -x -t png /Users/runner/screen10.png &
-          screencapture -T 200 -x -t png /Users/runner/screenshot-macos.png &
-          screencapture -T 230 -x -t png /Users/runner/screen12.png &
-          screencapture -T 300 -x -t png /Users/runner/screen13.png &
+          screencapture -T 1 -x -t png /Users/builder/clone/screen01.png &
+          screencapture -T 2 -x -t png /Users/builder/clone/screen02.png &
+          screencapture -T 3 -x -t png /Users/builder/clone/screen03.png &
+          screencapture -T 10 -x -t png /Users/builder/clone/screen04.png &
+          screencapture -T 25 -x -t png /Users/builder/clone/screen05.png &
+          screencapture -T 50 -x -t png /Users/builder/clone/screen06.png &
+          screencapture -T 60 -x -t png /Users/builder/clone/screen07.png &
+          screencapture -T 90 -x -t png /Users/builder/clone/screen09.png &
+          screencapture -T 110 -x -t png /Users/builder/clone/screen10.png &
+          screencapture -T 200 -x -t png /Users/builder/clone/screenshot-macos.png &
+          screencapture -T 230 -x -t png /Users/builder/clone/screen12.png &
+          screencapture -T 300 -x -t png /Users/builder/clone/screen13.png &
           pwd
           ls -al
+          export AWT_FORCE_HEADFUL=true
           ./gradlew run > trifa.log 2>&1 &
           pwd
           sleep 20
@@ -76,18 +78,22 @@ workflows:
           sleep 2
           cliclick -m verbose c:139,124
           sleep 2
-          cat /Users/runner/work/trifa_material/trifa_material/toxid.txt;echo
-          cd /Users/runner/work/trifa_material/trifa_material/java_tox_tester-master/
-          ./do_compile.sh
-          ./do_run.sh $(cat /Users/runner/work/trifa_material/trifa_material/toxid.txt) >/dev/null 2>/dev/null &
+          cat trifa.log || echo "NO ERR"
+          cat /Users/builder/clone/toxid.txt;echo
+          cd /Users/builder/clone/java_tox_tester-master/
+          /Users/builder/clone/java_tox_tester-master/do_compile.sh
+          /Users/builder/clone/java_tox_tester-master/do_run.sh $(cat /Users/builder/clone/toxid.txt) >/dev/null 2>/dev/null &
           sleep 58
           cliclick -m verbose c:195,347
-          sleep 90
-          sleep 120
           pwd
-          ls -al /Users/runner/
-          cp -v /Users/runner/screenshot-macos.png /Users/runner/work/trifa_material/trifa_material/screenshot-macos.png
+          ls -al /Users/builder/clone/
+
+#          sleep 90
+#          sleep 120
 
     artifacts:
-      - /Users/runner/work/trifa_material/trifa_material/*.png
+      - /Users/builder/clone/*.png
+      - /Users/builder/clone/trifa.log
+      - /Users/builder/clone/toxid.txt
+
 
