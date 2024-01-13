@@ -159,7 +159,7 @@ public class AVActivity {
     public enum OperatingSystem
     {
 
-        WINDOWS("windows"), MACOS("mac"), MACARM("silicone"), LINUX("linux"), UNIX("nix"), SOLARIS("solaris"),
+        WINDOWS("windows"), MACOS("mac"), MACARM("silicone"), RASPI("aarm64"), LINUX("linux"), UNIX("nix"), SOLARIS("solaris"),
 
         UNKNOWN("unknown")
                 {
@@ -169,6 +169,7 @@ public class AVActivity {
                         return false;
                     }
                 };
+
 
         private String tag;
 
@@ -226,13 +227,20 @@ public class AVActivity {
                             return OperatingSystem.MACARM;
                         }
                     }
+                    else if (os == OperatingSystem.LINUX)
+                    {
+                        if (getArchitecture().equalsIgnoreCase("aarch64"))
+                        {
+                            return OperatingSystem.RASPI;
+                        }
+                    }
+
                     return os;
                 }
             }
             return UNKNOWN;
         }
     }
-
     public static int ffmpegav_loadjni(String jnilib_path) {
         String linux_lib_filename = null;
         if (OperatingSystem.getCurrent() == OperatingSystem.LINUX)
