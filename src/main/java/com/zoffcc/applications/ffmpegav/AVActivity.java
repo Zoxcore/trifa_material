@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 public class AVActivity {
 
     private static final String TAG = "ffmpegav.AVActivity";
-    static final String Version = "0.99.20";
+    static final String Version = "0.99.21";
 
     public static native String ffmpegav_version();
     public static native String ffmpegav_libavutil_version();
@@ -170,7 +170,6 @@ public class AVActivity {
                     }
                 };
 
-
         private String tag;
 
         OperatingSystem(String tag)
@@ -234,18 +233,21 @@ public class AVActivity {
                             return OperatingSystem.RASPI;
                         }
                     }
-
                     return os;
                 }
             }
             return UNKNOWN;
         }
     }
+
     public static int ffmpegav_loadjni(String jnilib_path) {
         String linux_lib_filename = null;
         if (OperatingSystem.getCurrent() == OperatingSystem.LINUX)
         {
             linux_lib_filename = jnilib_path + "/libffmpeg_av_jni.so";
+        } else if (OperatingSystem.getCurrent() == OperatingSystem.RASPI)
+        {
+            linux_lib_filename = jnilib_path + "/libffmpeg_av_jni_raspi.so";
         } else if (OperatingSystem.getCurrent() == OperatingSystem.WINDOWS)
         {
             linux_lib_filename = jnilib_path + "/ffmpeg_av_jni.dll";
