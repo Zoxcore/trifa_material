@@ -91,19 +91,19 @@ jobs:
           apt-get install -y --no-install-recommends \
           ca-certificates
 
-      - name: make script dockcross-linux-armv7
-        run: docker run --rm dockcross/linux-armv7 > ./dockcross-linux-armv7; chmod +x ./dockcross-linux-armv7
+      - name: make script dockcross-linux-arm64
+        run: docker run --rm dockcross/linux-arm64 > ./dockcross-linux-arm64; chmod +x ./dockcross-linux-arm64
 
       - name: test
-        run: ./dockcross-linux-armv7 bash -c 'ls -al;id;pwd;hostname;uname -a'
+        run: ./dockcross-linux-arm64 bash -c 'ls -al;id;pwd;hostname;uname -a'
 
       - name: build deps
         run:  |
-          ./dockcross-linux-armv7 bash -c './circle_scripts/deps_linux.sh raspi'
+          ./dockcross-linux-arm64 bash -c './circle_scripts/deps_linux.sh raspi'
 
       - name: build jni lib
         run:  |
-          ./dockcross-linux-armv7 bash -c './circle_scripts/java_jni_lib_linux.sh raspi'
+          ./dockcross-linux-arm64 bash -c './circle_scripts/java_jni_lib_linux.sh raspi'
 
       - name: sha hash of jni lib
         run:  |
