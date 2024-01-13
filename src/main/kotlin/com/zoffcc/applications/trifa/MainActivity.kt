@@ -386,6 +386,9 @@ class MainActivity
                 if (OperatingSystem.getCurrent() == OperatingSystem.LINUX)
                 {
                     libFile = File(resourcesDir, "libjni-c-toxcore${noise_jni_name_addon}.so")
+                } else if (OperatingSystem.getCurrent() == OperatingSystem.RASPI)
+                {
+                    libFile = File(resourcesDir, "libjni-c-toxcore_raspi${noise_jni_name_addon}.so")
                 } else if (OperatingSystem.getCurrent() == OperatingSystem.WINDOWS)
                 {
                     libFile = File(resourcesDir, "jni-c-toxcore${noise_jni_name_addon}.dll")

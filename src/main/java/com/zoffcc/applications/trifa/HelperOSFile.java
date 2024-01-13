@@ -45,7 +45,7 @@ public class HelperOSFile {
                 show_containing_dir_in_explorer(filename_for_windows);
             }
         }
-        else if (OperatingSystem.getCurrent() == OperatingSystem.LINUX)
+        else if ((OperatingSystem.getCurrent() == OperatingSystem.LINUX) || (OperatingSystem.getCurrent() == OperatingSystem.RASPI))
         {
             if (MainActivity.getDB_PREF__open_files_directly())
             {
