@@ -31,6 +31,7 @@ the latest Development Snapshot can be downloaded from [here](https://github.com
   -  Linux :```./gradlew run```
   -  Windows: ```gradlew.bat run```
   -  MacOS :```./gradlew run```
+  -  raspi 64bit: ```export MESA_EXTENSION_OVERRIDE="-GL_ARB_invalidate_subdata" ; ./gradlew run```
 
 
 ## Help Translate the App in your Language
