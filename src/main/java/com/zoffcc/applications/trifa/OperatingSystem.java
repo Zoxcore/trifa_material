@@ -42,7 +42,7 @@ package com.zoffcc.applications.trifa;
 public enum OperatingSystem
 {
 
-    WINDOWS("windows"), MACOS("mac"), MACARM("silicone"), LINUX("linux"), UNIX("nix"), SOLARIS("solaris"),
+    WINDOWS("windows"), MACOS("mac"), MACARM("silicone"), RASPI("aarm64"), LINUX("linux"), UNIX("nix"), SOLARIS("solaris"),
 
     UNKNOWN("unknown")
             {
@@ -110,6 +110,14 @@ public enum OperatingSystem
                         return OperatingSystem.MACARM;
                     }
                 }
+                else if (os == OperatingSystem.LINUX)
+                {
+                    if (getArchitecture().equalsIgnoreCase("aarch64"))
+                    {
+                        return OperatingSystem.RASPI;
+                    }
+                }
+
                 return os;
             }
         }
