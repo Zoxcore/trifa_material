@@ -69,11 +69,11 @@ export LDFLAGS=" "
 
   if [ "$1""x" == "raspix" ]; then
     echo "*** RASPI ***"
-  ./configure --arch="arm" \
+  ./configure --arch="aarch64" \
               --enable-gpl \
               --prefix="$_INST_" \
               --target-os="linux" \
-              --cross-prefix="armv7-unknown-linux-gnueabi-" \
+              --cross-prefix="$CROSS_COMPILE" \
               --disable-asm \
               --enable-pic \
               --disable-swscale \
@@ -281,7 +281,7 @@ cd libvpx*/
   if [ "$1""x" == "raspix" ]; then
     echo "*** RASPI ***"
 
-    ./configure --target=armv7-linux-gcc \
+    ./configure --target=arm64-linux-gcc \
                                          --prefix="$_INST_" \
                                          --disable-shared \
                                          --size-limit=16384x16384 \
