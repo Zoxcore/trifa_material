@@ -4,11 +4,11 @@ import java.io.File;
 
 public class NTFYActivity {
     private static final String TAG = "NTFYActivity";
-    static final String Version = "0.99.1";
+    static final String Version = "0.99.2";
 
     public static native String jninotifications_version();
     public static native int jninotifications_notify(String application, String title,
-                                                     String message, String icon_filename_fullpath);
+        String message, String icon_filename_fullpath);
 
     /**
      * Utility class to allow OS determination
@@ -20,7 +20,7 @@ public class NTFYActivity {
     public enum OperatingSystem
     {
 
-        WINDOWS("windows"), MACOS("mac"), MACARM("silicone"), LINUX("linux"), UNIX("nix"), SOLARIS("solaris"),
+        WINDOWS("windows"), MACOS("mac"), MACARM("silicone"), RASPI("aarm64"), LINUX("linux"), UNIX("nix"), SOLARIS("solaris"),
 
         UNKNOWN("unknown")
                 {
@@ -87,6 +87,13 @@ public class NTFYActivity {
                             return OperatingSystem.MACARM;
                         }
                     }
+                    else if (os == OperatingSystem.LINUX)
+                    {
+                        if (getArchitecture().equalsIgnoreCase("aarch64"))
+                        {
+                            return OperatingSystem.RASPI;
+                        }
+                    }
                     return os;
                 }
             }
@@ -99,6 +106,9 @@ public class NTFYActivity {
         if (OperatingSystem.getCurrent() == OperatingSystem.LINUX)
         {
             linux_lib_filename = jnilib_path + "/libjni_notifications.so";
+        } else if (OperatingSystem.getCurrent() == OperatingSystem.RASPI)
+        {
+            linux_lib_filename = jnilib_path + "/libjni_notifications_raspi.so";
         } else if (OperatingSystem.getCurrent() == OperatingSystem.WINDOWS)
         {
             linux_lib_filename = jnilib_path + "/jni_notificationsi.dll";
@@ -145,7 +155,7 @@ public class NTFYActivity {
 
         Log.i(TAG, "jninotifications version: " + jninotifications_version());
         jninotifications_notify("test application",
-                "title", "message",
-                icon_path);
+            "title", "message",
+            icon_path);
     }
 }
