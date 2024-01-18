@@ -74,7 +74,6 @@ import com.zoffcc.applications.trifa.TRIFAGlobals.MEDIUM_GLOBAL_VIDEO_BITRATE
 import com.zoffcc.applications.trifa.TRIFAGlobals.NGC_AUDIO_BITRATE
 import com.zoffcc.applications.trifa.TRIFAGlobals.NORMAL_GLOBAL_INCOMING_AV_BUFFER_MS
 import com.zoffcc.applications.trifa.TRIFAGlobals.NORMAL_GLOBAL_VIDEO_BITRATE
-import com.zoffcc.applications.trifa.TRIFAGlobals.SUPERHIGH_GLOBAL_VIDEO_BITRATE
 import com.zoffcc.applications.trifa.TRIFAGlobals.TRIFA_MSG_TYPE
 import com.zoffcc.applications.trifa.TRIFAGlobals.UINT32_MAX_JAVA
 import com.zoffcc.applications.trifa.TRIFAGlobals.UPDATE_MESSAGE_PROGRESS_AFTER_BYTES
@@ -2555,7 +2554,7 @@ class MainActivity
             val group_id = tox_group_by_groupnum__wrapper(group_number).lowercase()
             val tox_peerpk = tox_group_peer_get_public_key(group_number, peer_id)!!.uppercase()
             val message_id_hex = fourbytes_of_long_to_hex(message_id)
-            val message_timestamp = System.currentTimeMillis()
+            val message_timestamp_ms = System.currentTimeMillis()
             val peernum = tox_group_peer_by_public_key(group_number, tox_peerpk)
             var fname = tox_group_peer_get_name(group_number, peernum)
             if (fname == null)
@@ -2563,7 +2562,9 @@ class MainActivity
                 fname = ""
             }
             val msg_dbid = received_groupmessage_to_db(tox_peerpk = tox_peerpk!!,
-                groupid = group_id, message_timestamp = message_timestamp,
+                groupid = group_id,
+                rcvd_message_timestamp_ms = message_timestamp_ms,
+                sent_message_timestamp_ms = message_timestamp_ms,
                 group_message = message_orig, message_id_hex = message_id_hex,
                 was_synced = false, peername = fname)
             val peer_user = User(fname + " / " + PubkeyShort(tox_peerpk), picture = "friend_avatar.png", toxpk = tox_peerpk.uppercase(), color = ColorProvider.getColor(true, tox_peerpk.uppercase()))
@@ -2572,7 +2573,7 @@ class MainActivity
                     was_synced = false,
                     msg_id_hash = "",
                     message_id_tox = message_id_hex, msgDatabaseId = msg_dbid,
-                    user = peer_user, timeMs = message_timestamp, text = message_orig!!,
+                    user = peer_user, timeMs = message_timestamp_ms, text = message_orig!!,
                     toxpk = tox_peerpk, groupId = group_id!!.lowercase(),
                     trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
         }
@@ -3061,7 +3062,7 @@ class MainActivity
             return row_id
         }
 
-        fun received_groupmessage_to_db(tox_peerpk: String, groupid: String, message_timestamp: Long, group_message: String?, message_id_hex: String, was_synced: Boolean, peername: String): Long
+        fun received_groupmessage_to_db(tox_peerpk: String, groupid: String, rcvd_message_timestamp_ms: Long, sent_message_timestamp_ms: Long, group_message: String?, message_id_hex: String, was_synced: Boolean, peername: String): Long
         {
             val groupnum = tox_group_by_groupid__wrapper(groupid)
             val peernum = tox_group_peer_by_public_key(groupnum, tox_peerpk)
@@ -3087,8 +3088,8 @@ class MainActivity
             m.private_message = 0
             m.group_identifier = groupid.lowercase()
             m.TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value
-            m.rcvd_timestamp = System.currentTimeMillis()
-            m.sent_timestamp = System.currentTimeMillis()
+            m.rcvd_timestamp = rcvd_message_timestamp_ms
+            m.sent_timestamp = sent_message_timestamp_ms
             m.text = group_message
             m.message_id_tox = message_id_hex
             m.was_synced = was_synced
@@ -3122,9 +3123,10 @@ class MainActivity
 
         fun incoming_synced_group_text_msg(m: GroupMessage)
         {
-            val message_timestamp = m.sent_timestamp
-
-            val msg_dbid = received_groupmessage_to_db(tox_peerpk = m.tox_group_peer_pubkey!!, groupid = m.group_identifier, message_timestamp = message_timestamp, group_message = m.text, message_id_hex = m.message_id_tox, was_synced = m.was_synced, peername = m.tox_group_peername)
+            val msg_dbid = received_groupmessage_to_db(tox_peerpk = m.tox_group_peer_pubkey!!, groupid = m.group_identifier,
+                rcvd_message_timestamp_ms = m.rcvd_timestamp,
+                sent_message_timestamp_ms = m.sent_timestamp,
+                group_message = m.text, message_id_hex = m.message_id_tox, was_synced = m.was_synced, peername = m.tox_group_peername)
             val peer_user = User(m.tox_group_peername + " / " + PubkeyShort(m.tox_group_peer_pubkey), picture = "friend_avatar.png", toxpk = m.tox_group_peer_pubkey.uppercase(), color = ColorProvider.getColor(true, m.tox_group_peer_pubkey.uppercase()))
 
             groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(
@@ -3132,7 +3134,7 @@ class MainActivity
                     was_synced = true,
                     msg_id_hash = m.msg_id_hash,
                     message_id_tox = m.message_id_tox, msgDatabaseId = msg_dbid,
-                    user = peer_user, timeMs = message_timestamp, text = m.text,
+                    user = peer_user, timeMs = m.sent_timestamp, text = m.text,
                     toxpk = m.tox_group_peer_pubkey, groupId = m.group_identifier,
                     trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
         }
