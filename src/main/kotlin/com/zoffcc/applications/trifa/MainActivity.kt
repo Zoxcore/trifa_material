@@ -1715,7 +1715,10 @@ class MainActivity
                         {
                             timestamp_wrap = System.currentTimeMillis()
                         }
-                        val msg_id_db = received_message_to_db(toxpk, timestamp_wrap, friend_message)
+                        val msg_id_db = received_message_to_db(toxpk = toxpk,
+                            sent_message_timestamp_ms = timestamp_wrap,
+                            rcvd_message_timestamp_ms = System.currentTimeMillis(),
+                            friend_message = friend_message)
                         val friendnum = tox_friend_by_public_key(toxpk)
                         val fname = tox_friend_get_name(friendnum)
                         val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk)
@@ -1733,7 +1736,10 @@ class MainActivity
                         {
                             timestamp_wrap = System.currentTimeMillis()
                         }
-                        val msg_id_db = received_message_to_db(toxpk, timestamp_wrap, friend_message)
+                        val msg_id_db = received_message_to_db(toxpk = toxpk,
+                            sent_message_timestamp_ms = timestamp_wrap,
+                            rcvd_message_timestamp_ms = timestamp_wrap,
+                            friend_message = friend_message)
                         val friendnum = tox_friend_by_public_key(toxpk)
                         val fname = tox_friend_get_name(friendnum)
                         val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk!!)
@@ -1785,7 +1791,10 @@ class MainActivity
             try
             {
                 val message_timestamp = ts_sec * 1000
-                val msg_id_db = received_message_to_db(toxpk, message_timestamp, friend_message)
+                val msg_id_db = received_message_to_db(toxpk = toxpk,
+                    sent_message_timestamp_ms = message_timestamp,
+                    rcvd_message_timestamp_ms = pin_timestamp,
+                    friend_message = friend_message)
                 val friendnum = tox_friend_by_public_key(toxpk)
                 val fname = tox_friend_get_name(friendnum)
                 val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk!!)
@@ -3009,7 +3018,10 @@ class MainActivity
         /*
          * put an incoming 1-on-1 text message into the database
          */
-        fun received_message_to_db(toxpk: String?, message_timestamp: Long, friend_message: String?): Long
+        fun received_message_to_db(toxpk: String?,
+                                   sent_message_timestamp_ms: Long,
+                                   rcvd_message_timestamp_ms: Long,
+                                   friend_message: String?): Long
         {
             val m = com.zoffcc.applications.sorm.Message()
             m.tox_friendpubkey = toxpk
@@ -3023,15 +3035,9 @@ class MainActivity
                 m.is_new = false
             }
             m.TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value
-            if (message_timestamp > 0)
-            {
-                m.rcvd_timestamp = message_timestamp
-            } else
-            {
-                m.rcvd_timestamp = System.currentTimeMillis()
-            }
+            m.rcvd_timestamp = rcvd_message_timestamp_ms
             m.rcvd_timestamp_ms = 0
-            m.sent_timestamp = message_timestamp
+            m.sent_timestamp = sent_message_timestamp_ms
             m.sent_timestamp_ms = 0
             m.text = friend_message
             m.msg_version = 0
