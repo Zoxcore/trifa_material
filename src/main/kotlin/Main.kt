@@ -177,6 +177,11 @@ import java.util.prefs.Preferences
 import javax.swing.JPanel
 import javax.swing.UIManager
 
+import com.vanniktech.emoji.EmojiManager
+import com.vanniktech.emoji.emojiInformation
+import com.vanniktech.emoji.ios.IosEmojiProvider
+import com.vanniktech.emoji.search.SearchEmojiManager
+
 private const val TAG = "trifa.Main.kt"
 var tox_running_state_wrapper = "start"
 var start_button_text_wrapper = "stopped"
@@ -215,6 +220,8 @@ val SAVEDATA_PATH_WIDTH = 200.dp
 val SAVEDATA_PATH_HEIGHT = 50.dp
 val MYTOXID_WIDTH = 200.dp
 val MYTOXID_HEIGHT = 50.dp
+const val MSG_TEXT_FONT_SIZE_MIXED = 14.0f
+const val MSG_TEXT_FONT_SIZE_EMOJI_ONLY = 55.0f
 const val MAX_ONE_ON_ONE_MESSAGES_TO_SHOW = 20000
 const val MAX_GROUP_MESSAGES_TO_SHOW = 20000
 const val SNACKBAR_TOAST_MS_DURATION: Long = 1000
@@ -1341,6 +1348,15 @@ fun main() = application(exitProcessOnExit = true) {
     try {
         set_resouces_dir(RESOURCESDIR.canonicalPath)
     } catch(e: Exception) {}
+
+    try
+    {
+        EmojiManager.install(IosEmojiProvider())
+    }
+    catch (_: Exception)
+    {
+
+    }
 
     // ------- set UI look and feel to "system" for java AWT ----------
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())

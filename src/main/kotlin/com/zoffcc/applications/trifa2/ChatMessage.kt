@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.vanniktech.emoji.emojiInformation
 import com.zoffcc.applications.trifa.HelperFiletransfer.check_filename_is_image
 import com.zoffcc.applications.trifa.HelperGeneric
 import com.zoffcc.applications.trifa.HelperGeneric.cancel_ft_from_ui
@@ -118,10 +119,22 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                         Spacer(Modifier.size(3.dp))
                         SelectionContainer()
                         {
+                            var msg_fontsize = MSG_TEXT_FONT_SIZE_MIXED
+                            try
+                            {
+                                val emojiInformation = message.text.emojiInformation()
+                                if (emojiInformation.isOnlyEmojis)
+                                {
+                                    msg_fontsize = MSG_TEXT_FONT_SIZE_EMOJI_ONLY
+                                }
+                            }
+                            catch(_: Exception)
+                            {
+                            }
                             Text(
                                 text = message.text,
                                 style = MaterialTheme.typography.body1.copy(
-                                    fontSize = ((14.0 * ui_scale) as Double).sp,
+                                    fontSize = ((msg_fontsize * ui_scale).toDouble()).sp,
                                     letterSpacing = 0.sp
                                 )
                             )

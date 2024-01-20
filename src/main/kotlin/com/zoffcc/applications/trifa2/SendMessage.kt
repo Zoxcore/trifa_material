@@ -35,11 +35,16 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.vanniktech.emoji.EmojiManager
+import com.vanniktech.emoji.EmojiProvider
+import com.vanniktech.emoji.search.SearchEmojiManager
 import com.zoffcc.applications.trifa.HelperFiletransfer.get_incoming_filetransfer_local_filename
+import com.zoffcc.applications.trifa.HelperGeneric.replace_emojis_in_text
 import com.zoffcc.applications.trifa.HelperMessage.getImageFromClipboard
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity.Companion.add_outgoing_file
 import com.zoffcc.applications.trifa.TRIFAGlobals
+import org.jetbrains.compose.resources.stringArrayResource
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
@@ -131,7 +136,7 @@ fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?, 
             Text(text = "Type message...", fontSize = 14.sp)
         },
         onValueChange = {
-            inputText = it
+            inputText = replace_emojis_in_text(it)
         },
         trailingIcon = {
             if (inputText.isNotEmpty()) {
@@ -155,3 +160,4 @@ fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?, 
         }
     ).run { }
 }
+
