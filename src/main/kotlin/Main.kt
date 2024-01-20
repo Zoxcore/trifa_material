@@ -226,6 +226,7 @@ const val MAX_ONE_ON_ONE_MESSAGES_TO_SHOW = 20000
 const val MAX_GROUP_MESSAGES_TO_SHOW = 20000
 const val SNACKBAR_TOAST_MS_DURATION: Long = 1000
 var emojis_cat_0_gropued: ArrayList<ArrayList<String>> = ArrayList()
+val emojis_per_row = 6
 val ImageloaderDispatcher = Executors.newFixedThreadPool(5).asCoroutineDispatcher()
 var global_semaphore_contactlist_ui = CustomSemaphore(1)
 var global_semaphore_grouppeerlist_ui = CustomSemaphore(1)
@@ -1355,7 +1356,6 @@ fun main() = application(exitProcessOnExit = true) {
         EmojiManager.install(IosEmojiProvider())
 
         val emojis_cat_0 = com.vanniktech.emoji.ios.IosEmojiProvider().categories[0].emojis
-        val emojis_per_row = 6
         val grouped_entries = emojis_cat_0.size / emojis_per_row
         val remain = emojis_cat_0.size - (grouped_entries * emojis_per_row)
         for (i in 0..(grouped_entries - 1)) {

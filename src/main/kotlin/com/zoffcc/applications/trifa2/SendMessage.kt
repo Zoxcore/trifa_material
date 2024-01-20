@@ -73,8 +73,6 @@ import com.zoffcc.applications.trifa.HelperMessage.getImageFromClipboard
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity.Companion.add_outgoing_file
 import com.zoffcc.applications.trifa.TRIFAGlobals
-import org.briarproject.briar.desktop.contact.ContactItem
-import org.jetbrains.compose.resources.stringArrayResource
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
@@ -231,12 +229,16 @@ fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?, 
             }
             if (show_emoji_popup)
             {
+                val emoji_box_width_dp = 250.dp
+                val emoji_box_height_dp = 500.dp
+                val emoji_box_offset_x_px = 100.dp.DpAsPx.toInt()
+                val emoji_box_offset_y_px = -(emoji_box_height_dp + 10.dp).DpAsPx.toInt()
                 Popup(alignment = Alignment.TopCenter,
                     onDismissRequest = {},
-                    offset = IntOffset(100.dp.DpAsPx.toInt(), -310.dp.DpAsPx.toInt())) {
+                    offset = IntOffset(emoji_box_offset_x_px, emoji_box_offset_y_px)) {
                     Box(
                         Modifier
-                            .size(250.dp, 300.dp)
+                            .size(emoji_box_width_dp, emoji_box_height_dp)
                             .padding(top = 1.dp, bottom = 1.dp)
                             .background(MaterialTheme.colors.background)
                             .border(1.dp, color = Color.Black, RoundedCornerShape(10.dp))
@@ -249,7 +251,7 @@ fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?, 
                             val listState = rememberLazyListState()
                             Box(Modifier.fillMaxSize()) {
                                 LazyColumn(
-                                    modifier = Modifier.fillMaxHeight().padding(start = 1.dp, end = 10.dp),
+                                    modifier = Modifier.fillMaxSize().padding(start = 1.dp, end = 10.dp),
                                     verticalArrangement = Arrangement.spacedBy(5.dp),
                                     state = listState,
                                 ) {
@@ -258,8 +260,8 @@ fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?, 
                                             for (k in 0..(it.size - 1))
                                             {
                                                 IconButton(modifier = Modifier.width(40.dp).height(40.dp),
-                                                    onClick = { inputText = inputText + it[k]}) {
-                                                    Text(text = it[k], fontSize = 30.sp)
+                                                    onClick = { inputText = inputText + it[k] }) {
+                                                    Text(text = it[k], fontSize = 30.sp, maxLines = 1)
                                                 }
                                             }
                                         }
