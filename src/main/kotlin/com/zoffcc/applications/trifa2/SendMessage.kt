@@ -1,24 +1,47 @@
+import androidx.compose.foundation.ContextMenuArea
+import androidx.compose.foundation.ContextMenuItem
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.Button
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.InsertEmoticon
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterEnd
+import androidx.compose.ui.Alignment.Companion.End
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -32,9 +55,15 @@ import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import com.vanniktech.emoji.EmojiManager
 import com.vanniktech.emoji.EmojiProvider
 import com.vanniktech.emoji.search.SearchEmojiManager
@@ -44,6 +73,7 @@ import com.zoffcc.applications.trifa.HelperMessage.getImageFromClipboard
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity.Companion.add_outgoing_file
 import com.zoffcc.applications.trifa.TRIFAGlobals
+import org.briarproject.briar.desktop.contact.ContactItem
 import org.jetbrains.compose.resources.stringArrayResource
 import java.awt.image.BufferedImage
 import java.io.File
@@ -59,6 +89,7 @@ fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?, 
         // Log.i(TAG, "selected friend changed, reset input text")
         inputText = ""
     }
+    var show_emoji_popup by remember { mutableStateOf(false) }
     TextField(
         modifier = Modifier.fillMaxWidth()
             .background(MaterialTheme.colors.background)
@@ -140,24 +171,119 @@ fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?, 
         },
         trailingIcon = {
             if (inputText.isNotEmpty()) {
-                Row(
-                    modifier = Modifier
-                        .clickable {
-                            sendMessage(inputText)
-                            inputText = ""
+                Row() {
+                    Row(
+                        modifier = Modifier
+                            .clickable {
+                                sendMessage(inputText)
+                                inputText = ""
+                            }
+                            .padding(10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Send,
+                            contentDescription = "Send",
+                            tint = MaterialTheme.colors.primary
+                        )
+                        Text("Send")
+                    }
+                    IconButton(
+                        icon = Icons.Filled.InsertEmoticon,
+                        iconTint = Color.DarkGray,
+                        iconSize = 25.dp,
+                        modifier = Modifier.width(40.dp).padding(end = 8.dp),
+                        contentDescription = "",
+                        onClick = {
+                            if (show_emoji_popup == true)
+                            {
+                                show_emoji_popup = false
+                            }
+                            else
+                            {
+                                show_emoji_popup = true
+                            }
                         }
-                        .padding(10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Send,
-                        contentDescription = "Send",
-                        tint = MaterialTheme.colors.primary
                     )
-                    Text("Send")
+                }
+            }
+            else
+            {
+                Row(modifier = Modifier.padding(end = 0.dp)) {
+                    IconButton(
+                        icon = Icons.Filled.InsertEmoticon,
+                        iconTint = Color.DarkGray,
+                        iconSize = 25.dp,
+                        modifier = Modifier.width(40.dp),
+                        contentDescription = "",
+                        onClick = {
+                            if (show_emoji_popup == true)
+                            {
+                                show_emoji_popup = false
+                            }
+                            else
+                            {
+                                show_emoji_popup = true
+                            }
+                        }
+                    )
+                }
+            }
+            if (show_emoji_popup)
+            {
+                Popup(alignment = Alignment.TopCenter,
+                    onDismissRequest = {},
+                    offset = IntOffset(100.dp.DpAsPx.toInt(), -310.dp.DpAsPx.toInt())) {
+                    Box(
+                        Modifier
+                            .size(250.dp, 300.dp)
+                            .padding(top = 1.dp, bottom = 1.dp)
+                            .background(MaterialTheme.colors.background)
+                            .border(1.dp, color = Color.Black, RoundedCornerShape(10.dp))
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxSize().padding(top = 4.dp, bottom = 4.dp, end = 1.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Top
+                        ) {
+                            val listState = rememberLazyListState()
+                            Box(Modifier.fillMaxSize()) {
+                                LazyColumn(
+                                    modifier = Modifier.fillMaxHeight().padding(start = 1.dp, end = 10.dp),
+                                    verticalArrangement = Arrangement.spacedBy(5.dp),
+                                    state = listState,
+                                ) {
+                                    items(items = emojis_cat_0_gropued) {
+                                        Row(modifier = Modifier.fillMaxWidth().height(40.dp)) {
+                                            for (k in 0..(it.size - 1))
+                                            {
+                                                IconButton(modifier = Modifier.width(40.dp).height(40.dp),
+                                                    onClick = { inputText = inputText + it[k]}) {
+                                                    Text(text = it[k], fontSize = 30.sp)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                VerticalScrollbar(
+                                    adapter = rememberScrollbarAdapter(listState),
+                                    modifier = Modifier.fillMaxHeight().align(CenterEnd).width(10.dp)
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
     ).run { }
 }
 
+val Int.pxAsDp
+    @ReadOnlyComposable
+    @Composable
+    get() = with(LocalDensity.current) { toFloat().toDp() }
+
+val Dp.DpAsPx
+@ReadOnlyComposable
+@Composable
+get() = LocalDensity.current.density * value

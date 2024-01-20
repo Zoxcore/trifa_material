@@ -225,6 +225,7 @@ const val MSG_TEXT_FONT_SIZE_EMOJI_ONLY = 55.0f
 const val MAX_ONE_ON_ONE_MESSAGES_TO_SHOW = 20000
 const val MAX_GROUP_MESSAGES_TO_SHOW = 20000
 const val SNACKBAR_TOAST_MS_DURATION: Long = 1000
+var emojis_cat_0_gropued: ArrayList<ArrayList<String>> = ArrayList()
 val ImageloaderDispatcher = Executors.newFixedThreadPool(5).asCoroutineDispatcher()
 var global_semaphore_contactlist_ui = CustomSemaphore(1)
 var global_semaphore_grouppeerlist_ui = CustomSemaphore(1)
@@ -1352,6 +1353,29 @@ fun main() = application(exitProcessOnExit = true) {
     try
     {
         EmojiManager.install(IosEmojiProvider())
+
+        val emojis_cat_0 = com.vanniktech.emoji.ios.IosEmojiProvider().categories[0].emojis
+        val emojis_per_row = 6
+        val grouped_entries = emojis_cat_0.size / emojis_per_row
+        val remain = emojis_cat_0.size - (grouped_entries * emojis_per_row)
+        for (i in 0..(grouped_entries - 1)) {
+            val pos = i * emojis_per_row
+            var e: ArrayList<String> = ArrayList()
+            for (j in 0..(emojis_per_row - 1)) {
+                e.add(emojis_cat_0[pos + j].unicode)
+            }
+            emojis_cat_0_gropued.add(e)
+        }
+        if (remain > 0)
+        {
+            val pos = grouped_entries * emojis_per_row
+            var e: ArrayList<String> = ArrayList()
+            for (j in 0..(remain - 1)) {
+                e.add(emojis_cat_0[pos + j].unicode)
+            }
+            emojis_cat_0_gropued.add(e)
+        }
+
     }
     catch (_: Exception)
     {
