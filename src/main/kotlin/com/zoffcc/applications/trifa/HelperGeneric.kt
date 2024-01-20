@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.Density
 import avstatestore
 import com.sksamuel.scrimage.ImmutableImage
 import com.sksamuel.scrimage.webp.WebpWriter
+import com.vanniktech.emoji.search.SearchEmojiManager
 import com.zoffcc.applications.sorm.Filetransfer
 import com.zoffcc.applications.sorm.Message
 import com.zoffcc.applications.trifa.HelperFiletransfer.get_filetransfer_filenum_from_id
@@ -994,6 +995,32 @@ object HelperGeneric {
             e.printStackTrace()
             "_Datetime_ERROR_"
         }
+    }
+
+    fun replace_emojis_in_text(input: String): String
+    {
+        var output = input
+        val strings = arrayOf<String>("smile", "sad", "thumbsup", "thumbsdown", "heart")
+        val emojis = arrayOf<String>("slightly_smiling_face", "slightly_frowning_face", "thumbsup", "thumbsdown", "heart")
+        for (i in 0..(strings.size - 1))
+        {
+            try
+            {
+                Log.i(TAG, "i=" + i + " s=" + strings[i])
+                if (strings[i].equals("thumbsup", ignoreCase = false))
+                {
+                    output = output.replace(":" + strings[i] + ":", SearchEmojiManager().search(query = emojis[i]).first().emoji.variants.get(1).unicode, ignoreCase = true)
+                }
+                else
+                {
+                    output = output.replace(":" + strings[i] + ":", SearchEmojiManager().search(query = emojis[i]).first().emoji.unicode, ignoreCase = true)
+                }
+            } catch (e: Exception)
+            {
+                e.printStackTrace()
+            }
+        }
+        return output
     }
 }
 

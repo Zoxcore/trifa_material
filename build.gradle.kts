@@ -77,6 +77,7 @@ dependencies {
     implementation("com.sksamuel.scrimage:scrimage-webp:4.1.1")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("io.github.alexzhirkevich:qrose:1.0.0-beta3")
+    implementation("com.vanniktech:emoji-ios:0.18.0")
     // implementation("io.github.theapache64:rebugger:1.0.0-rc02")
 }
 

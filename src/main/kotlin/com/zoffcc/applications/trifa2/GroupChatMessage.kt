@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.vanniktech.emoji.emojiInformation
 import com.zoffcc.applications.trifa.HelperFiletransfer
 import com.zoffcc.applications.trifa.HelperGeneric.AsyncImage
 import com.zoffcc.applications.trifa.HelperGeneric.loadImageBitmap
@@ -105,10 +106,22 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                         Spacer(Modifier.size(3.dp))
                         SelectionContainer()
                         {
+                            var msg_fontsize = MSG_TEXT_FONT_SIZE_MIXED
+                            try
+                            {
+                                val emojiInformation = groupmessage.text.emojiInformation()
+                                if (emojiInformation.isOnlyEmojis)
+                                {
+                                    msg_fontsize = MSG_TEXT_FONT_SIZE_EMOJI_ONLY
+                                }
+                            }
+                            catch(_: Exception)
+                            {
+                            }
                             Text(
                                 text = groupmessage.text,
                                 style = MaterialTheme.typography.body1.copy(
-                                    fontSize = ((14.0 * ui_scale) as Double).sp,
+                                    fontSize = ((msg_fontsize * ui_scale).toDouble()).sp,
                                     letterSpacing = 0.sp
                                 )
                             )
