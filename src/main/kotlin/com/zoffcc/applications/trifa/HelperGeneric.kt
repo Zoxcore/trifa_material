@@ -1006,7 +1006,7 @@ object HelperGeneric {
         {
             try
             {
-                Log.i(TAG, "i=" + i + " s=" + strings[i])
+                // Log.i(TAG, "i=" + i + " s=" + strings[i])
                 if (strings[i].equals("thumbsup", ignoreCase = false))
                 {
                     output = output.replace(":" + strings[i] + ":", SearchEmojiManager().search(query = emojis[i]).first().emoji.variants.get(1).unicode, ignoreCase = true)
