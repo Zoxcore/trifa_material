@@ -230,7 +230,7 @@ fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?, 
             if (show_emoji_popup)
             {
                 val emoji_box_width_dp = 250.dp
-                val emoji_box_height_dp = 500.dp
+                val emoji_box_height_dp = 230.dp
                 val emoji_box_offset_x_px = 100.dp.DpAsPx.toInt()
                 val emoji_box_offset_y_px = -(emoji_box_height_dp + 10.dp).DpAsPx.toInt()
                 Popup(alignment = Alignment.TopCenter,
