@@ -37,6 +37,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
@@ -73,6 +74,9 @@ import com.zoffcc.applications.trifa.HelperMessage.getImageFromClipboard
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity.Companion.add_outgoing_file
 import com.zoffcc.applications.trifa.TRIFAGlobals
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
@@ -259,9 +263,17 @@ fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?, 
                                         Row(modifier = Modifier.fillMaxWidth().height(40.dp)) {
                                             for (k in 0..(it.size - 1))
                                             {
+                                                val emojistr = it[k]
+                                                val placeholder = "?"
+                                                var curtext by remember { mutableStateOf(placeholder) }
+                                                val scope = rememberCoroutineScope()
                                                 IconButton(modifier = Modifier.width(40.dp).height(40.dp),
                                                     onClick = { inputText = inputText + it[k] }) {
-                                                    Text(text = it[k], fontSize = 30.sp, maxLines = 1)
+                                                    Text(text = curtext, fontSize = 30.sp, maxLines = 1)
+                                                    scope.launch {
+                                                        delay(62)
+                                                        curtext = emojistr
+                                                    }
                                                 }
                                             }
                                         }
