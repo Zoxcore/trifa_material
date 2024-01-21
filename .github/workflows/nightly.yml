@@ -592,8 +592,9 @@ jobs:
                printf './do_run.sh $(cat /home/runner/work/trifa_material/trifa_material/toxid.txt) >/dev/null 2>/dev/null &\n' >> /tmp/a.sh
                printf 'sleep 220\n' >> /tmp/a.sh
                printf 'xdotool mousemove --sync 214 295 click 1\n' >> /tmp/a.sh
-               printf 'sleep 2\n' >> /tmp/a.sh
+               printf 'sleep 4\n' >> /tmp/a.sh
                printf 'xdotool mousemove --sync 750 643 click 1\n' >> /tmp/a.sh
+               printf 'sleep 2\n' >> /tmp/a.sh
                printf 'import -window root /tmp/screenshot-linux_before_wm.png\n' >> /tmp/a.sh
                printf 'sleep 40\n' >> /tmp/a.sh
                printf 'fvwm2 &' >> /tmp/a.sh
