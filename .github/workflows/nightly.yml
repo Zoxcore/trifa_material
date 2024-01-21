@@ -594,6 +594,7 @@ jobs:
                printf 'xdotool mousemove --sync 214 295 click 1\n' >> /tmp/a.sh
                printf 'sleep 2\n' >> /tmp/a.sh
                printf 'xdotool mousemove --sync 750 643 click 1\n' >> /tmp/a.sh
+               printf 'import -window root /tmp/screenshot-linux_before_wm.png\n' >> /tmp/a.sh
                printf 'sleep 40\n' >> /tmp/a.sh
                printf 'fvwm2 &' >> /tmp/a.sh
                printf 'sleep 20\n' >> /tmp/a.sh
@@ -614,6 +615,12 @@ jobs:
           with:
             name: screenshot-linux
             path: /tmp/screenshot-linux.png
+
+        - name: upload-screenshots
+          uses: actions/upload-artifact@v3
+          with:
+            name: screenshot-linux
+            path: /tmp/screenshot-linux_before_wm.png
 
         - name: Upload to nightly release
           uses: ncipollo/release-action@v1
