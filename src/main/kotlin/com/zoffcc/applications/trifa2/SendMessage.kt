@@ -238,6 +238,7 @@ fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?, 
                 val emoji_box_offset_x_px = 100.dp.DpAsPx.toInt()
                 val emoji_box_offset_y_px = -(emoji_box_height_dp + 10.dp).DpAsPx.toInt()
                 Popup(alignment = Alignment.TopCenter,
+                    properties = PopupProperties(focusable = false, dismissOnClickOutside = true),
                     onDismissRequest = {},
                     offset = IntOffset(emoji_box_offset_x_px, emoji_box_offset_y_px)) {
                     Box(
