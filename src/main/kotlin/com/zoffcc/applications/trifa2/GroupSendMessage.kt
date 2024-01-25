@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import com.zoffcc.applications.trifa.Log
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -180,6 +181,7 @@ fun GroupSendMessage(focusRequester: FocusRequester, selectedGroupId: String?, s
                 val emoji_box_offset_x_px = 100.dp.DpAsPx.toInt()
                 val emoji_box_offset_y_px = -(emoji_box_height_dp + 10.dp).DpAsPx.toInt()
                 Popup(alignment = Alignment.TopCenter,
+                    properties = PopupProperties(focusable = false, dismissOnClickOutside = true),
                     onDismissRequest = {},
                     offset = IntOffset(emoji_box_offset_x_px, emoji_box_offset_y_px)) {
                     Box(
