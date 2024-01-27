@@ -25,14 +25,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -92,9 +96,11 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                     Column {
                         if(!isMyMessage) {
                             Row(verticalAlignment = Alignment.Bottom) {
+                                // println("NNN:" + groupmessage.user.name + "CCC:" +groupmessage.user.color.luminance())
                                 Text(
                                     text = groupmessage.user.name,
                                     style = MaterialTheme.typography.body1.copy(
+                                        shadow = if (groupmessage.user.color.luminance() > 0.935f) Shadow(Color.Black, offset = Offset.Zero, blurRadius = 2.4f) else Shadow(),
                                         fontWeight = FontWeight.SemiBold,
                                         letterSpacing = 0.sp,
                                         fontSize = 14.sp
