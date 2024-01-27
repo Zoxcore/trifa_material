@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -261,10 +262,11 @@ fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?, 
                                     IconButton(modifier = Modifier.width(30.dp).height(30.dp),
                                         onClick = { cur_emoji_cat = k }) {
                                         Text(text = emojis_cat_all_cat_emoji.get(k),
-                                        fontSize = 20.sp, maxLines = 1)
+                                            color = Color.Black, fontSize = 20.sp, maxLines = 1)
                                     }
                                 }
                             }
+                            Spacer(Modifier.fillMaxWidth().height(2.dp).background(Color.LightGray))
                             val listState = rememberLazyListState()
                             Box(Modifier.fillMaxSize()) {
                                 LazyColumn(
@@ -282,7 +284,7 @@ fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?, 
                                                 val scope = rememberCoroutineScope()
                                                 IconButton(modifier = Modifier.width(40.dp).height(40.dp),
                                                     onClick = { inputText = inputText + it[k] }) {
-                                                    Text(text = curtext, fontSize = 30.sp, maxLines = 1)
+                                                    Text(text = curtext, color = Color.Black, fontSize = 30.sp, maxLines = 1)
                                                     scope.launch {
                                                         delay(62)
                                                         curtext = emojistr
