@@ -100,6 +100,7 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import ca.gosyer.appdirs.AppDirs
 import com.google.gson.Gson
+import com.vanniktech.emoji.Emoji
 import com.zoffcc.applications.ffmpegav.AVActivity
 import com.zoffcc.applications.sorm.BootstrapNodeEntryDB
 import com.zoffcc.applications.trifa.AVState
@@ -178,7 +179,6 @@ import javax.swing.JPanel
 import javax.swing.UIManager
 
 import com.vanniktech.emoji.EmojiManager
-import com.vanniktech.emoji.emojiInformation
 import com.vanniktech.emoji.ios.IosEmojiProvider
 import com.vanniktech.emoji.search.SearchEmojiManager
 
@@ -225,7 +225,9 @@ const val MSG_TEXT_FONT_SIZE_EMOJI_ONLY = 55.0f
 const val MAX_ONE_ON_ONE_MESSAGES_TO_SHOW = 20000
 const val MAX_GROUP_MESSAGES_TO_SHOW = 20000
 const val SNACKBAR_TOAST_MS_DURATION: Long = 1000
-var emojis_cat_0_gropued: ArrayList<ArrayList<String>> = ArrayList()
+var emojis_cat_all_gropued: ArrayList<ArrayList<ArrayList<String>>> = ArrayList()
+var emojis_cat_all_cat_names: ArrayList<String> = ArrayList()
+var emojis_cat_all_cat_emoji: ArrayList<String> = ArrayList()
 val emojis_per_row = 6
 val ImageloaderDispatcher = Executors.newFixedThreadPool(5).asCoroutineDispatcher()
 var global_semaphore_contactlist_ui = CustomSemaphore(1)
@@ -1354,32 +1356,77 @@ fun main() = application(exitProcessOnExit = true) {
     try
     {
         EmojiManager.install(IosEmojiProvider())
-
-        val emojis_cat_0 = com.vanniktech.emoji.ios.IosEmojiProvider().categories[0].emojis
-        val grouped_entries = emojis_cat_0.size / emojis_per_row
-        val remain = emojis_cat_0.size - (grouped_entries * emojis_per_row)
-        for (i in 0..(grouped_entries - 1)) {
-            val pos = i * emojis_per_row
-            var e: ArrayList<String> = ArrayList()
-            for (j in 0..(emojis_per_row - 1)) {
-                e.add(emojis_cat_0[pos + j].unicode)
-            }
-            emojis_cat_0_gropued.add(e)
-        }
-        if (remain > 0)
+        // ------
+        var emojis_cat_: List<Emoji>
+        var grouped_entries: Int
+        var remain: Int
+        // ------
+        // --- loop ---
+        for(j in 0..(IosEmojiProvider().categories.size - 1))
         {
-            val pos = grouped_entries * emojis_per_row
-            var e: ArrayList<String> = ArrayList()
-            for (j in 0..(remain - 1)) {
-                e.add(emojis_cat_0[pos + j].unicode)
+            Log.i(TAG, "adding emoji category: " + j + " : " + IosEmojiProvider().categories[j].categoryNames.values.elementAt(0))
+            val emojis_cat_gropued: ArrayList<ArrayList<String>> = ArrayList()
+            emojis_cat_ = IosEmojiProvider().categories[j].emojis
+            grouped_entries = emojis_cat_.size / emojis_per_row
+            remain = emojis_cat_.size - (grouped_entries * emojis_per_row)
+            for (i in 0..(grouped_entries - 1))
+            {
+                val pos = i * emojis_per_row
+                val e: ArrayList<String> = ArrayList()
+                for (j in 0..(emojis_per_row - 1))
+                {
+                    // Log.i(TAG, "emoji name(s): " + emojis_cat_[pos + j].shortcodes)
+                    // Log.i(TAG, "emoji: " + emojis_cat_[pos + j].unicode)
+                    e.add(emojis_cat_[pos + j].unicode)
+                }
+                emojis_cat_gropued.add(e)
             }
-            emojis_cat_0_gropued.add(e)
+            if (remain > 0)
+            {
+                val pos = grouped_entries * emojis_per_row
+                val e: ArrayList<String> = ArrayList()
+                for (j in 0..(remain - 1))
+                {
+                    e.add(emojis_cat_[pos + j].unicode)
+                }
+                emojis_cat_gropued.add(e)
+            }
+            emojis_cat_all_gropued.add(emojis_cat_gropued)
+            val cat_name = IosEmojiProvider().categories[j].categoryNames.values.elementAt(0)
+            emojis_cat_all_cat_names.add(cat_name)
+            var cat_emoji: String
+            try
+            {
+                var search_str = "slightly_smiling_face"
+                when (cat_name.lowercase())
+                {
+                    "faces" -> search_str = "slightly_smiling_face"
+                    "nature" -> search_str = "panda"
+                    "food" -> search_str = "cup"
+                    "activities" -> search_str = "soccer"
+                    "places" -> search_str = "car"
+                    "objects" -> search_str = "bulb"
+                    "symbols" -> search_str = "abc"
+                    "flags" -> search_str = "flag-at"
+                    else ->
+                    {
+                    }
+                }
+                cat_emoji = SearchEmojiManager().search(query = search_str).first().emoji.unicode
+                emojis_cat_all_cat_emoji.add(cat_emoji)
+            }
+            catch(e3: Exception)
+            {
+                cat_emoji = SearchEmojiManager().search(query = "smile").first().emoji.unicode
+                emojis_cat_all_cat_emoji.add(cat_emoji)
+            }
+            Log.i(TAG, "emoji cat: " + cat_name + " emoji: " + cat_emoji)
         }
-
+        // --- loop ---
     }
-    catch (_: Exception)
+    catch (e: Exception)
     {
-
+        e.printStackTrace()
     }
 
     // ------- set UI look and feel to "system" for java AWT ----------

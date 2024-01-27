@@ -180,6 +180,7 @@ fun GroupSendMessage(focusRequester: FocusRequester, selectedGroupId: String?, s
                 val emoji_box_height_dp = 230.dp
                 val emoji_box_offset_x_px = 100.dp.DpAsPx.toInt()
                 val emoji_box_offset_y_px = -(emoji_box_height_dp + 10.dp).DpAsPx.toInt()
+                var cur_emoji_cat by remember { mutableStateOf(0) }
                 Popup(alignment = Alignment.TopCenter,
                     properties = PopupProperties(focusable = false, dismissOnClickOutside = true),
                     onDismissRequest = {},
@@ -196,6 +197,16 @@ fun GroupSendMessage(focusRequester: FocusRequester, selectedGroupId: String?, s
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Top
                         ) {
+                            Row() {
+                                for(k in 0..(emojis_cat_all_gropued.size - 1))
+                                {
+                                    IconButton(modifier = Modifier.width(30.dp).height(30.dp),
+                                        onClick = { cur_emoji_cat = k }) {
+                                        Text(text = emojis_cat_all_cat_emoji.get(k),
+                                            fontSize = 20.sp, maxLines = 1)
+                                    }
+                                }
+                            }
                             val listState = rememberLazyListState()
                             Box(Modifier.fillMaxSize()) {
                                 LazyColumn(
@@ -203,7 +214,7 @@ fun GroupSendMessage(focusRequester: FocusRequester, selectedGroupId: String?, s
                                     verticalArrangement = Arrangement.spacedBy(5.dp),
                                     state = listState,
                                 ) {
-                                    items(items = emojis_cat_0_gropued) {
+                                    items(items = emojis_cat_all_gropued.get(cur_emoji_cat)) {
                                         Row(modifier = Modifier.fillMaxWidth().height(40.dp)) {
                                             for (k in 0..(it.size - 1))
                                             {
