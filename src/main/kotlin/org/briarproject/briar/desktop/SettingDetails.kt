@@ -350,6 +350,7 @@ fun SettingDetails()
 
 
             // ---- windows dshow audio in source name ----
+            /*
             var windows_dshow_audio_in_source_name by remember { mutableStateOf("Microphone") }
             try
             {
@@ -377,6 +378,7 @@ fun SettingDetails()
                         windows_dshow_audio_in_source_name = it
                     })
             }
+            */
             // ---- windows dshow audio in source name ----
 
         }
