@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 public class AVActivity {
 
     private static final String TAG = "ffmpegav.AVActivity";
-    static final String Version = "0.99.21";
+    static final String Version = "0.99.22";
 
     public static native String ffmpegav_version();
     public static native String ffmpegav_libavutil_version();
