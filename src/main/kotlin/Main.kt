@@ -740,6 +740,10 @@ fun App()
                                             }
                                             audio_in_sources_get = tmp2.toTypedArray()
                                         }
+                                        if (avstatestore.state.audio_in_device_get() == "dshow")
+                                        {
+                                            audio_in_sources_get += listOf("audio=" + MainActivity.DB_PREF__windows_audio_in_source + "")
+                                        }
                                         audio_in_sources.clear()
                                         if (audio_in_sources_get.isNotEmpty())
                                         {

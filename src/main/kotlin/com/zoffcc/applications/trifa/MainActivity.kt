@@ -160,7 +160,8 @@ class MainActivity
         var PREF__force_udp_only = 0
         @JvmStatic var DB_PREF__open_files_directly = false
         @JvmStatic var DB_PREF__notifications_active = true
-        @JvmStatic var DB_PREF__U_keep_nospam = true;
+        @JvmStatic var DB_PREF__windows_audio_in_source = "Microphone"
+        @JvmStatic var DB_PREF__U_keep_nospam = true
         var incoming_messages_queue: BlockingQueue<String> = LinkedBlockingQueue()
         @JvmStatic var video_play_count_frames: Long = 0
         @JvmStatic var video_play_last_timestamp: Long = 0
