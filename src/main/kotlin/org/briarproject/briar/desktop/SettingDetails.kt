@@ -68,6 +68,7 @@ import com.zoffcc.applications.trifa.HelperOSFile.show_containing_dir_in_explore
 import com.zoffcc.applications.trifa.MainActivity
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__notifications_active
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__open_files_directly
+import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__windows_audio_in_source
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_name
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_set_name
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
@@ -343,6 +344,40 @@ fun SettingDetails()
                 }
             }
             // ---- change own name for one-on-one chats ----
+
+
+
+
+
+            // ---- windows dshow audio in source name ----
+            var windows_dshow_audio_in_source_name by remember { mutableStateOf("Microphone") }
+            try
+            {
+                if (get_g_opts("DB_PREF__windows_audio_in_source") != null)
+                {
+                    windows_dshow_audio_in_source_name = get_g_opts("DB_PREF__windows_audio_in_source")
+                }
+            } catch (e: java.lang.Exception)
+            {
+                e.printStackTrace()
+            }
+            Row(Modifier.wrapContentHeight().fillMaxWidth().padding(start = 15.dp)) {
+                TextField(enabled = true, singleLine = true,
+                    textStyle = TextStyle(fontSize = 16.sp),
+                    modifier = Modifier.padding(0.dp).weight(1.0f),
+                    colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White),
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.None,
+                        autoCorrect = false,
+                    ), value = windows_dshow_audio_in_source_name,
+                    onValueChange = {
+                        set_g_opts("DB_PREF__windows_audio_in_source", it)
+                        println("DB_PREF__windows_audio_in_source=" + it)
+                        DB_PREF__windows_audio_in_source = it
+                        windows_dshow_audio_in_source_name = it
+                    })
+            }
+            // ---- windows dshow audio in source name ----
 
         }
         // database prefs ===================
