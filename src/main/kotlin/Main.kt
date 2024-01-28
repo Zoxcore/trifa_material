@@ -672,9 +672,9 @@ fun App()
                         var expanded_as by remember { mutableStateOf(false) }
                         var expanded_vs by remember { mutableStateOf(false) }
                         val audio_in_devices by remember { mutableStateOf(ArrayList<String>()) }
-                        val audio_in_sources by remember { mutableStateOf(ArrayList<String>()) }
+                        val audio_in_sources by remember { mutableStateOf(ArrayList<AVActivity.ffmpegav_descrid>()) }
                         var video_in_devices by remember { mutableStateOf(ArrayList<String>()) }
-                        val video_in_sources by remember { mutableStateOf(ArrayList<String>()) }
+                        val video_in_sources by remember { mutableStateOf(ArrayList<AVActivity.ffmpegav_descrid>()) }
                         Column(modifier = Modifier.padding(5.dp)) {
                             Text(text = "audio capture: " + avstatestore.state.audio_in_device_get() + " " + avstatestore.state.audio_in_source_get()
                                 , fontSize = 12.sp, modifier = Modifier.fillMaxWidth(),
@@ -723,7 +723,7 @@ fun App()
                                     if ((avstatestore.state.audio_in_device_get() != null) && (avstatestore.state.audio_in_device_get() != ""))
                                     {
                                         avstatestore.state.ffmpeg_init_do()
-                                        var audio_in_sources_get: Array<String> = emptyArray()
+                                        var audio_in_sources_get: Array<AVActivity.ffmpegav_descrid> = emptyArray()
                                         val tmp = AVActivity.ffmpegav_get_in_sources(avstatestore.state.audio_in_device_get(), 0)
                                         if (tmp == null)
                                         {
@@ -731,11 +731,11 @@ fun App()
                                         }
                                         else
                                         {
-                                            var tmp2 = ArrayList<String>()
+                                            var tmp2 = ArrayList<AVActivity.ffmpegav_descrid>()
                                             tmp.iterator().forEach() {
                                                 if ((it != null) && (it.id != null))
                                                 {
-                                                    tmp2.add(it.id)
+                                                    tmp2.add(it)
                                                 }
                                             }
                                             audio_in_sources_get = tmp2.toTypedArray()
@@ -765,8 +765,8 @@ fun App()
                                         audio_in_sources.forEach() {
                                             if (it != null)
                                             {
-                                                DropdownMenuItem(onClick = { avstatestore.state.audio_in_source_set(it);expanded_as = false }) {
-                                                    Text(""+it)
+                                                DropdownMenuItem(onClick = { avstatestore.state.audio_in_source_set(it.id);expanded_as = false }) {
+                                                    Text(if (it.description.isEmpty()) it.id else it.description + " ("+it.id+")")
                                                 }
                                             }
                                         }
@@ -829,7 +829,7 @@ fun App()
                                     if ((avstatestore.state.video_in_device_get() != null) && (avstatestore.state.video_in_device_get() != ""))
                                     {
                                         avstatestore.state.ffmpeg_init_do()
-                                        var video_in_sources_get: Array<String> = emptyArray()
+                                        var video_in_sources_get: Array<AVActivity.ffmpegav_descrid> = emptyArray()
                                         if (avstatestore.state.video_in_device_get() == "video4linux2,v4l2")
                                         {
                                             val tmp = AVActivity.ffmpegav_get_in_sources("v4l2", 1)
@@ -839,11 +839,11 @@ fun App()
                                             }
                                             else
                                             {
-                                                var tmp2 = ArrayList<String>()
+                                                var tmp2 = ArrayList<AVActivity.ffmpegav_descrid>()
                                                 tmp.iterator().forEach() {
                                                     if ((it != null) && (it.id != null))
                                                     {
-                                                        tmp2.add(it.id)
+                                                        tmp2.add(it)
                                                     }
                                                 }
                                                 video_in_sources_get = tmp2.toTypedArray()
@@ -858,11 +858,11 @@ fun App()
                                             }
                                             else
                                             {
-                                                var tmp2 = ArrayList<String>()
+                                                var tmp2 = ArrayList<AVActivity.ffmpegav_descrid>()
                                                 tmp.iterator().forEach() {
                                                     if ((it != null) && (it.id != null))
                                                     {
-                                                        tmp2.add(it.id)
+                                                        tmp2.add(it)
                                                     }
                                                 }
                                                 video_in_sources_get = tmp2.toTypedArray()
@@ -871,7 +871,24 @@ fun App()
                                         Log.i(TAG, "video_in_device=" + avstatestore.state.video_in_device_get())
                                         if (avstatestore.state.video_in_device_get() == "x11grab")
                                         {
-                                            video_in_sources_get += listOf(":0.0", ":1.0", ":2.0", ":3.0", ":4.0", ":5.0")
+                                            val tmp0 = AVActivity.ffmpegav_descrid()
+                                            tmp0.id = ":0.0"
+                                            video_in_sources_get += listOf(tmp0)
+                                            val tmp1 = AVActivity.ffmpegav_descrid()
+                                            tmp1.id = ":1.0"
+                                            video_in_sources_get += listOf(tmp1)
+                                            val tmp2 = AVActivity.ffmpegav_descrid()
+                                            tmp2.id = ":2.0"
+                                            video_in_sources_get += listOf(tmp2)
+                                            val tmp3 = AVActivity.ffmpegav_descrid()
+                                            tmp3.id = ":3.0"
+                                            video_in_sources_get += listOf(tmp3)
+                                            val tmp4 = AVActivity.ffmpegav_descrid()
+                                            tmp4.id = ":4.0"
+                                            video_in_sources_get += listOf(tmp4)
+                                            val tmp5 = AVActivity.ffmpegav_descrid()
+                                            tmp5.id = ":5.0"
+                                            video_in_sources_get += listOf(tmp5)
                                         }
                                         video_in_sources.clear()
                                         if (video_in_sources_get.isNotEmpty())
@@ -894,8 +911,8 @@ fun App()
                                         video_in_sources.forEach() {
                                             if (it != null)
                                             {
-                                                DropdownMenuItem(onClick = { avstatestore.state.video_in_source_set(it);expanded_vs = false }) {
-                                                    Text(""+it)
+                                                DropdownMenuItem(onClick = { avstatestore.state.video_in_source_set(it.id);expanded_vs = false }) {
+                                                    Text(if (it.description.isEmpty()) it.id else it.description + " ("+it.id+")")
                                                 }
                                             }
                                         }
