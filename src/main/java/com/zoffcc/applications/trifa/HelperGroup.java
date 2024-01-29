@@ -1258,7 +1258,7 @@ public class HelperGroup {
 
                 long peernum = tox_group_peer_by_public_key(group_number, original_sender_peerpubkey);
                 final String peer_name_saved = tox_group_peer_get_name(group_number, peernum);
-                if (peer_name_saved != null)
+                if ((peer_name_saved != null) && (peer_name_saved.length() > 0))
                 {
                     // HINT: use saved name instead of name from sync message
                     Log.i(TAG,"handle_incoming_sync_group_message:use saved name instead of name from sync message:" + peer_name_saved);
