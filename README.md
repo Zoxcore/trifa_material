@@ -43,6 +43,27 @@ https://hosted.weblate.org/projects/trifa-a-tox-client-for-android/trifa-materia
 check instructions on how to do it here:
 https://github.com/floe/backscrub
 
+## Add Acoustic Echo Cancellation (AEC) to your microphone input (Linux only!)
+
+you need to have an audio in source already plugged in (like a headset with a microphone)
+
+```
+pactl unload-module module-echo-cancel
+pactl load-module module-echo-cancel \
+ aec_method=webrtc \
+ aec_args='noise_suppression=1,intelligibility_enhancer=0,comfort_noise=0' \
+ source_name=echocancel sink_name=echocancel1
+
+pacmd set-default-source echocancel
+pacmd set-default-sink echocancel1
+```
+
+to unload the AEC again
+```
+pactl unload-module module-echo-cancel
+```
+
+
 <br>
 Any use of this project's code by GitHub Copilot, past or present, is done
 without our permission.  We do not consent to GitHub's use of this project's
