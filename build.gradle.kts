@@ -148,6 +148,9 @@ compose.desktop {
                 iconFile.set(iconsRoot.resolve("icon-linux.png"))
                 println("iconFile=" + iconsRoot.resolve("icon-linux.png"))
             }
+
+            jvmArgs += "-splash:" + iconsRoot.resolve("splash_screen.png")
+            println("jvmArgs=" + jvmArgs)
             println("targetFormats=" + targetFormats)
         }
     }
