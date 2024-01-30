@@ -115,6 +115,8 @@ compose.desktop {
             licenseFile.set(project.file("LICENSE"))
             println("licenseFile=" + project.file("LICENSE"))
             appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
+            jvmArgs += "-splash:resources/splash_screen.png"
+            println("jvmArgs=" + jvmArgs)
 
             targetFormats(
                 TargetFormat.Msi, TargetFormat.Exe,
@@ -149,8 +151,6 @@ compose.desktop {
                 println("iconFile=" + iconsRoot.resolve("icon-linux.png"))
             }
 
-            jvmArgs += "-splash:" + iconsRoot.resolve("splash_screen.png")
-            println("jvmArgs=" + jvmArgs)
             println("targetFormats=" + targetFormats)
         }
     }
