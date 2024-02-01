@@ -1,3 +1,4 @@
+import org.gradle.initialization.Environment
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.de.undercouch.gradle.tasks.download.Download
 import java.time.format.DateTimeFormatter
@@ -115,9 +116,11 @@ compose.desktop {
             licenseFile.set(project.file("LICENSE"))
             println("licenseFile=" + project.file("LICENSE"))
             appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
-            jvmArgs += "-splash:resources/splash_screen.png"
-            // jvmArgs += "-splash:${'$'}APPDIR/resources/splash_screen.png"
+            // jvmArgs += "-splash:resources/splash_screen.png"
+            jvmArgs += "-splash:${'$'}APPDIR/app/resources/splash_screen.png"
             println("jvmArgs=" + jvmArgs)
+            val ENV = System.getenv()
+            println("ENV_all=" + ENV.keys)
 
             targetFormats(
                 TargetFormat.Msi, TargetFormat.Exe,
