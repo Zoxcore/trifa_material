@@ -116,6 +116,7 @@ compose.desktop {
             println("licenseFile=" + project.file("LICENSE"))
             appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
             jvmArgs += "-splash:resources/splash_screen.png"
+            // jvmArgs += "-splash:${'$'}APPDIR/resources/splash_screen.png"
             println("jvmArgs=" + jvmArgs)
 
             targetFormats(
@@ -160,6 +161,12 @@ val appImageTool = project.file("deps/appimagetool.AppImage")
 val linuxAppDir = project.file("build/compose/binaries/main/app")
 val desktopFile = project.file("resources/trifa_material.desktop")
 val linuxIconFile = project.file("resources/icon-linux.png")
+
+tasks.withType<org.gradle.jvm.tasks.Jar> {
+    manifest {
+        attributes["SplashScreen-Image"] = "splash_screen.png"
+    }
+}
 
 tasks {
     val downloadAppImageBuilder by registering(Download::class) {
