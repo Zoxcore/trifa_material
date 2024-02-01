@@ -116,11 +116,6 @@ compose.desktop {
             licenseFile.set(project.file("LICENSE"))
             println("licenseFile=" + project.file("LICENSE"))
             appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
-            // jvmArgs += "-splash:resources/splash_screen.png"
-            jvmArgs += "-splash:${'$'}APPDIR/app/resources/splash_screen.png"
-            println("jvmArgs=" + jvmArgs)
-            val ENV = System.getenv()
-            println("ENV_all=" + ENV.keys)
 
             targetFormats(
                 TargetFormat.Msi, TargetFormat.Exe,
@@ -156,6 +151,13 @@ compose.desktop {
             }
 
             println("targetFormats=" + targetFormats)
+
+            // jvmArgs += "-splash:resources/splash_screen.png"
+            // jvmArgs += "-splash:${'$'}APPDIR/app/resources/splash_screen.png"
+            jvmArgs += "-splash:" + iconsRoot.resolve("splash_screen.png")
+            println("jvmArgs=" + jvmArgs)
+            // val ENV = System.getenv()
+            // println("ENV_all=" + ENV.keys)
         }
     }
 }
