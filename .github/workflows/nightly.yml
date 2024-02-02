@@ -66,9 +66,9 @@ jobs:
         run:  type -a java;java -version
 
       - name: build package
-        run:  id;pwd;ls -al;./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64 packageDistributionForCurrentOS
+        run:  id;pwd;ls -al;./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64 packageReleaseDistributionForCurrentOS
       - name: build jar
-        run:  id;pwd;ls -al;./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64 packageUberJarForCurrentOS
+        run:  id;pwd;ls -al;./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64 packageReleaseUberJarForCurrentOS
 
       - name: check jar
         run:  id;pwd;ls -hal ./build/compose/jars/trifa_material-linux-x64-*.jar
@@ -246,7 +246,7 @@ jobs:
           ls -al
           id
           pwd
-          ./gradlew packageDistributionForCurrentOS || cat /Users/runner/work/trifa_material/trifa_material/build/compose/logs/createDistributable/codesign-2*txt
+          ./gradlew packageReleaseDistributionForCurrentOS || cat /Users/runner/work/trifa_material/trifa_material/build/compose/logs/createDistributable/codesign-2*txt
       - name: Rename artifact for nightly upload
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
@@ -313,7 +313,7 @@ jobs:
           ls -al || echo "_"
           id || echo "_"
           pwd || echo "_"
-          ./gradlew packageDistributionForCurrentOS
+          ./gradlew packageReleaseDistributionForCurrentOS
 
       - name: Rename artifact for nightly upload
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
