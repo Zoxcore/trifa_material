@@ -74,17 +74,17 @@ jobs:
         run:  id;pwd;ls -hal ./build/compose/jars/trifa_material-linux-x64-*.jar
 
       - name: check deb
-        run:  id;pwd;ls -hal ./build/compose/binaries/main/deb/trifa-material_*-1_amd64.deb
+        run:  id;pwd;ls -hal ./build/compose/binaries/main*/deb/trifa-material_*-1_amd64.deb
 
       - name: check rpm
-        run:  id;pwd;ls -hal ./build/compose/binaries/main/rpm/trifa_material-*.x86_64.rpm
+        run:  id;pwd;ls -hal ./build/compose/binaries/main*/rpm/trifa_material-*.x86_64.rpm
 
 
       - name: Rename artifact for nightly upload
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
-          cp -v ./build/compose/binaries/main/deb/trifa-material_*_amd64.deb trifa-material_nightly.deb
-          cp -v ./build/compose/binaries/main/rpm/trifa_material-*.x86_64.rpm trifa-material_nightly.rpm
+          cp -v ./build/compose/binaries/main*/deb/trifa-material_*_amd64.deb trifa-material_nightly.deb
+          cp -v ./build/compose/binaries/main*/rpm/trifa_material-*.x86_64.rpm trifa-material_nightly.rpm
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
@@ -99,8 +99,8 @@ jobs:
       - name: Rename artifact for release upload
         if: contains(github.ref, 'refs/tags/v')
         run: |
-          cp -v ./build/compose/binaries/main/deb/trifa-material_*_amd64.deb trifa-material.deb
-          cp -v ./build/compose/binaries/main/rpm/trifa_material-*.x86_64.rpm trifa-material.rpm
+          cp -v ./build/compose/binaries/main*/deb/trifa-material_*_amd64.deb trifa-material.deb
+          cp -v ./build/compose/binaries/main*/rpm/trifa_material-*.x86_64.rpm trifa-material.rpm
       - name: Upload to versioned release
         if: contains(github.ref, 'refs/tags/v')
         uses: ncipollo/release-action@v1
@@ -250,7 +250,7 @@ jobs:
       - name: Rename artifact for nightly upload
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
-          cp -v /Users/runner/work/trifa_material/trifa_material/build/compose/binaries/main/dmg/trifa_material-*.dmg trifa-material_nightly.dmg
+          cp -v /Users/runner/work/trifa_material/trifa_material/build/compose/binaries/main*/dmg/trifa_material-*.dmg trifa-material_nightly.dmg
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
@@ -260,7 +260,7 @@ jobs:
       - name: Rename artifact for release upload
         if: contains(github.ref, 'refs/tags/v')
         run: |
-          cp -v /Users/runner/work/trifa_material/trifa_material/build/compose/binaries/main/dmg/trifa_material-*.dmg trifa-material.dmg
+          cp -v /Users/runner/work/trifa_material/trifa_material/build/compose/binaries/main*/dmg/trifa_material-*.dmg trifa-material.dmg
       - name: Upload to versioned release
         if: contains(github.ref, 'refs/tags/v')
         uses: ncipollo/release-action@v1
@@ -318,8 +318,8 @@ jobs:
       - name: Rename artifact for nightly upload
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
-          cp -v ./build/compose/binaries/main/msi/trifa*material*.msi trifa-material_nightly.msi
-          cp -v ./build/compose/binaries/main/exe/trifa_material-*.exe trifa-material_nightly.exe
+          cp -v ./build/compose/binaries/main*/msi/trifa*material*.msi trifa-material_nightly.msi
+          cp -v ./build/compose/binaries/main*/exe/trifa_material-*.exe trifa-material_nightly.exe
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
@@ -334,7 +334,7 @@ jobs:
       - name: Rename artifact for nightly upload for tags
         if: contains(github.ref, 'refs/tags/v')
         run: |
-          cp -v ./build/compose/binaries/main/msi/trifa*material*.msi trifa-material_nightly.msi
+          cp -v ./build/compose/binaries/main*/msi/trifa*material*.msi trifa-material_nightly.msi
       - name: Upload artifact for tags
         uses: actions/upload-artifact@v3
         with:
@@ -344,8 +344,8 @@ jobs:
       - name: Rename artifact for release upload
         if: contains(github.ref, 'refs/tags/v')
         run: |
-          cp -v ./build/compose/binaries/main/msi/trifa*material*.msi trifa-material.msi
-          cp -v ./build/compose/binaries/main/exe/trifa_material-*.exe trifa-material.exe
+          cp -v ./build/compose/binaries/main*/msi/trifa*material*.msi trifa-material.msi
+          cp -v ./build/compose/binaries/main*/exe/trifa_material-*.exe trifa-material.exe
       - name: Upload to versioned release
         if: contains(github.ref, 'refs/tags/v')
         uses: ncipollo/release-action@v1
