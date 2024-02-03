@@ -1,3 +1,4 @@
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -59,9 +60,11 @@ import androidx.compose.ui.window.PopupProperties
 import com.zoffcc.applications.trifa.Log
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.briarproject.briar.desktop.ui.Tooltip
 
 private const val TAG = "trifa.SendGroupMessage"
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun GroupSendMessage(focusRequester: FocusRequester, selectedGroupId: String?, sendGroupMessage: (String) -> Unit) {
     var inputText by remember { mutableStateOf("") }
@@ -201,10 +204,12 @@ fun GroupSendMessage(focusRequester: FocusRequester, selectedGroupId: String?, s
                             Row() {
                                 for(k in 0..(emojis_cat_all_gropued.size - 1))
                                 {
-                                    IconButton(modifier = Modifier.width(30.dp).height(30.dp),
-                                        onClick = { cur_emoji_cat = k }) {
-                                        Text(text = emojis_cat_all_cat_emoji.get(k),
-                                            color = Color.Black, fontSize = 20.sp, maxLines = 1)
+                                    Tooltip(text = emojis_cat_all_cat_names.get(k)) {
+                                        IconButton(modifier = Modifier.width(30.dp).height(30.dp),
+                                            onClick = { cur_emoji_cat = k }) {
+                                            Text(text = emojis_cat_all_cat_emoji.get(k),
+                                                color = Color.Black, fontSize = 20.sp, maxLines = 1)
+                                        }
                                     }
                                 }
                             }
@@ -224,12 +229,14 @@ fun GroupSendMessage(focusRequester: FocusRequester, selectedGroupId: String?, s
                                                 val placeholder = "?"
                                                 var curtext by remember { mutableStateOf(placeholder) }
                                                 val scope = rememberCoroutineScope()
-                                                IconButton(modifier = Modifier.width(40.dp).height(40.dp),
-                                                    onClick = { inputText = inputText + it[k] }) {
-                                                    Text(text = curtext, color = Color.Black, fontSize = 30.sp, maxLines = 1)
-                                                    scope.launch {
-                                                        delay(62)
-                                                        curtext = emojistr
+                                                Tooltip(text = if (emojistr.name.isEmpty()) "" else emojistr.name) {
+                                                    IconButton(modifier = Modifier.width(40.dp).height(40.dp),
+                                                        onClick = { inputText = inputText + it[k].char }) {
+                                                        Text(text = curtext, color = Color.Black, fontSize = 30.sp, maxLines = 1)
+                                                        scope.launch {
+                                                            delay(62)
+                                                            curtext = emojistr.char
+                                                        }
                                                     }
                                                 }
                                             }
