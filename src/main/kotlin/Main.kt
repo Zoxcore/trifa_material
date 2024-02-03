@@ -181,6 +181,7 @@ import javax.swing.UIManager
 import com.vanniktech.emoji.EmojiManager
 import com.vanniktech.emoji.ios.IosEmojiProvider
 import com.vanniktech.emoji.search.SearchEmojiManager
+import com.zoffcc.applications.trifa.EmojiStrAndName
 
 private const val TAG = "trifa.Main.kt"
 var tox_running_state_wrapper = "start"
@@ -225,7 +226,7 @@ const val MSG_TEXT_FONT_SIZE_EMOJI_ONLY = 55.0f
 const val MAX_ONE_ON_ONE_MESSAGES_TO_SHOW = 20000
 const val MAX_GROUP_MESSAGES_TO_SHOW = 20000
 const val SNACKBAR_TOAST_MS_DURATION: Long = 1000
-var emojis_cat_all_gropued: ArrayList<ArrayList<ArrayList<String>>> = ArrayList()
+var emojis_cat_all_gropued: ArrayList<ArrayList<ArrayList<EmojiStrAndName>>> = ArrayList()
 var emojis_cat_all_cat_names: ArrayList<String> = ArrayList()
 var emojis_cat_all_cat_emoji: ArrayList<String> = ArrayList()
 val emojis_per_row = 6
@@ -1386,29 +1387,49 @@ fun main() = application(exitProcessOnExit = true) {
         for(j in 0..(IosEmojiProvider().categories.size - 1))
         {
             Log.i(TAG, "adding emoji category: " + j + " : " + IosEmojiProvider().categories[j].categoryNames.values.elementAt(0))
-            val emojis_cat_gropued: ArrayList<ArrayList<String>> = ArrayList()
+            val emojis_cat_gropued: ArrayList<ArrayList<EmojiStrAndName>> = ArrayList()
             emojis_cat_ = IosEmojiProvider().categories[j].emojis
             grouped_entries = emojis_cat_.size / emojis_per_row
             remain = emojis_cat_.size - (grouped_entries * emojis_per_row)
             for (i in 0..(grouped_entries - 1))
             {
                 val pos = i * emojis_per_row
-                val e: ArrayList<String> = ArrayList()
+                val e: ArrayList<EmojiStrAndName> = ArrayList()
                 for (j in 0..(emojis_per_row - 1))
                 {
                     // Log.i(TAG, "emoji name(s): " + emojis_cat_[pos + j].shortcodes)
                     // Log.i(TAG, "emoji: " + emojis_cat_[pos + j].unicode)
-                    e.add(emojis_cat_[pos + j].unicode)
+                    val em = EmojiStrAndName()
+                    em.char = emojis_cat_[pos + j].unicode
+                    em.name = ""
+                    try
+                    {
+                        em.name = emojis_cat_[pos + j].shortcodes.get(0)
+                    }
+                    catch(_: java.lang.Exception)
+                    {
+                    }
+                    e.add(em)
                 }
                 emojis_cat_gropued.add(e)
             }
             if (remain > 0)
             {
                 val pos = grouped_entries * emojis_per_row
-                val e: ArrayList<String> = ArrayList()
+                val e: ArrayList<EmojiStrAndName> = ArrayList()
                 for (j in 0..(remain - 1))
                 {
-                    e.add(emojis_cat_[pos + j].unicode)
+                    val em = EmojiStrAndName()
+                    em.char = emojis_cat_[pos + j].unicode
+                    em.name = ""
+                    try
+                    {
+                        em.name = emojis_cat_[pos + j].shortcodes.get(0)
+                    }
+                    catch(_: java.lang.Exception)
+                    {
+                    }
+                    e.add(em)
                 }
                 emojis_cat_gropued.add(e)
             }

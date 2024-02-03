@@ -1,5 +1,6 @@
 import androidx.compose.foundation.ContextMenuArea
 import androidx.compose.foundation.ContextMenuItem
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -79,12 +80,14 @@ import com.zoffcc.applications.trifa.TRIFAGlobals
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.briarproject.briar.desktop.ui.Tooltip
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
 
 private const val TAG = "trifa.SendMessage"
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?, sendMessage: (String) -> Unit) {
     var inputText by remember { mutableStateOf("") }
@@ -171,7 +174,8 @@ fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?, 
             Text(text = "Type message...", fontSize = 14.sp)
         },
         onValueChange = {
-            inputText = replace_emojis_in_text(it)
+            // inputText = replace_emojis_in_text(it)
+            inputText = it
         },
         trailingIcon = {
             if (inputText.isNotEmpty()) {
@@ -259,10 +263,12 @@ fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?, 
                             Row() {
                                 for(k in 0..(emojis_cat_all_gropued.size - 1))
                                 {
-                                    IconButton(modifier = Modifier.width(30.dp).height(30.dp),
-                                        onClick = { cur_emoji_cat = k }) {
-                                        Text(text = emojis_cat_all_cat_emoji.get(k),
-                                            color = Color.Black, fontSize = 20.sp, maxLines = 1)
+                                    Tooltip(text = emojis_cat_all_cat_names.get(k)) {
+                                        IconButton(modifier = Modifier.width(30.dp).height(30.dp),
+                                            onClick = { cur_emoji_cat = k }) {
+                                            Text(text = emojis_cat_all_cat_emoji.get(k),
+                                                color = Color.Black, fontSize = 20.sp, maxLines = 1)
+                                        }
                                     }
                                 }
                             }
@@ -282,12 +288,14 @@ fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?, 
                                                 val placeholder = "?"
                                                 var curtext by remember { mutableStateOf(placeholder) }
                                                 val scope = rememberCoroutineScope()
-                                                IconButton(modifier = Modifier.width(40.dp).height(40.dp),
-                                                    onClick = { inputText = inputText + it[k] }) {
-                                                    Text(text = curtext, color = Color.Black, fontSize = 30.sp, maxLines = 1)
-                                                    scope.launch {
-                                                        delay(62)
-                                                        curtext = emojistr
+                                                Tooltip(text = if (emojistr.name.isEmpty()) "" else emojistr.name) {
+                                                    IconButton(modifier = Modifier.width(40.dp).height(40.dp),
+                                                        onClick = { inputText = inputText + it[k].char }) {
+                                                        Text(text = curtext, color = Color.Black, fontSize = 30.sp, maxLines = 1)
+                                                        scope.launch {
+                                                            delay(62)
+                                                            curtext = emojistr.char
+                                                        }
                                                     }
                                                 }
                                             }
