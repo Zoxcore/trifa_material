@@ -1,5 +1,6 @@
 package com.zoffcc.applications.trifa
 
+import androidx.compose.ui.text.toLowerCase
 import global_semaphore_grouppeerlist_ui
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -188,7 +189,7 @@ fun getListWithGroupingAndSorting(peerlist: ArrayList<GroupPeerItem>, self_group
     return ArrayList(peerlist.sortedWith(
         compareBy<GroupPeerItem> { selfOrder[it.pubkey == self_group_pubkey] }.
         thenBy { rolesOrder[it.peerRole] }.
-        thenByDescending { it.pubkey }
+        thenBy { it.name.toLowerCase() }
     )
     )
 }
