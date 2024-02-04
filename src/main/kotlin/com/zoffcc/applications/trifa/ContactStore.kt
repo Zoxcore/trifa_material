@@ -1,5 +1,6 @@
 package com.zoffcc.applications.trifa
 
+import androidx.compose.ui.text.toLowerCase
 import global_semaphore_contactlist_ui
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -193,7 +194,7 @@ fun getFriendListWithGroupingAndSorting(friendlist: ArrayList<ContactItem>)
 {
     return ArrayList(friendlist.sortedWith(
         compareBy<ContactItem> { friendsRolesOrder[it.isConnected] }.
-        thenBy { it.name }
+        thenBy { it.name.toLowerCase() }
     )
     )
 }
