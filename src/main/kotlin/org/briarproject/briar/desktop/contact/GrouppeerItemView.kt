@@ -139,7 +139,7 @@ private fun GrouppeerItemViewInfo(grouppeerItem: GroupPeerItem) = Column(
     modifier = Modifier.padding(start = 0.dp)
 ) {
     Text(
-        text = grouppeerItem.name,
+        text = if (grouppeerItem.name.isEmpty()) grouppeerItem.pubkey.toUpperCase().take(6) else grouppeerItem.name,
         style = if (grouppeerItem.name.length > 14) MaterialTheme.typography.body1.copy(fontSize = 12.sp) else MaterialTheme.typography.body1,
         maxLines = 1,
         overflow = Ellipsis,
