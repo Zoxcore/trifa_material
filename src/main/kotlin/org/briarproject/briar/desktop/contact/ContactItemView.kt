@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
+import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
@@ -74,7 +75,7 @@ private fun ContactItemViewInfo(contactItem: ContactItem) = Column(
     modifier = Modifier.padding(start = 6.dp)
 ) {
     Text(
-        text = contactItem.name,
+        text = if (contactItem.name.isEmpty()) contactItem.pubkey.toUpperCase().take(6) else contactItem.name,
         style = if (contactItem.name.length > 14) MaterialTheme.typography.body1.copy(fontSize = 13.sp) else MaterialTheme.typography.body1,
         maxLines = 1,
         overflow = Ellipsis,
