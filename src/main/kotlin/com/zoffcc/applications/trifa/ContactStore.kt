@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.briarproject.briar.desktop.contact.ContactItem
+import org.briarproject.briar.desktop.contact.GroupPeerItem
 
 data class StateContacts(val contacts: List<ContactItem> = emptyList(), val visible: Boolean = false, val selectedContactPubkey: String? = null, val selectedContact: ContactItem? = null)
 
@@ -63,7 +64,8 @@ fun CoroutineScope.createContactStore(): ContactStore
                         }
                     }
                     new_contacts.add(item)
-                    new_contacts.sortBy { it.pubkey }
+                    // new_contacts.sortBy { it.pubkey }
+                    new_contacts = getFriendListWithGroupingAndSorting(new_contacts)
                     mutableStateFlow.value = state.copy(contacts = new_contacts)
                 }
                 global_semaphore_contactlist_ui.release()
@@ -99,7 +101,8 @@ fun CoroutineScope.createContactStore(): ContactStore
                 {
                     new_contacts.remove(to_remove_item)
                 }
-                new_contacts.sortBy { it.pubkey }
+                // new_contacts.sortBy { it.pubkey }
+                new_contacts = getFriendListWithGroupingAndSorting(new_contacts)
                 mutableStateFlow.value = state.copy(contacts = new_contacts,
                     selectedContact = sel_item, selectedContactPubkey = sel_pubkey)
                 global_semaphore_contactlist_ui.release()
@@ -161,7 +164,8 @@ fun CoroutineScope.createContactStore(): ContactStore
                         new_contacts.remove(to_remove_item)
                     }
                     new_contacts.add(item)
-                    new_contacts.sortBy { it.pubkey }
+                    // new_contacts.sortBy { it.pubkey }
+                    new_contacts = getFriendListWithGroupingAndSorting(new_contacts)
                     mutableStateFlow.value = state.copy(contacts = new_contacts, selectedContactPubkey = state.selectedContactPubkey, selectedContact = state.selectedContact)
                 } else
                 {
@@ -180,4 +184,16 @@ fun CoroutineScope.createContactStore(): ContactStore
             //}
         }
     }
+}
+
+val friendsRolesOrder = mapOf(0 to 3, 1 to 1, 2 to 0)
+
+fun getFriendListWithGroupingAndSorting(friendlist: ArrayList<ContactItem>)
+        : ArrayList<ContactItem>
+{
+    return ArrayList(friendlist.sortedWith(
+        compareBy<ContactItem> { friendsRolesOrder[it.isConnected] }.
+        thenBy { it.name }
+    )
+    )
 }
