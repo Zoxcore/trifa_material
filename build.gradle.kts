@@ -154,7 +154,9 @@ compose.desktop {
 
             // jvmArgs += "-splash:resources/splash_screen.png"
             // jvmArgs += "-splash:${'$'}APPDIR/app/resources/splash_screen.png"
-            jvmArgs += "-splash:" + iconsRoot.resolve("splash_screen.png")
+            // jvmArgs += "-splash:" + iconsRoot.resolve("splash_screen.png")
+            jvmArgs += "-splash:${'$'}APPDIR/resources/splash_screen.png"
+            jvmArgs += "-splash:resources/splash_screen.png"
             println("jvmArgs=" + jvmArgs)
             // val ENV = System.getenv()
             // println("ENV_all=" + ENV.keys)
