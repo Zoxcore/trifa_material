@@ -107,12 +107,12 @@ data class AVState(val a: Int)
                 if ((audio_in_source != null) && (audio_in_source != ""))
                 {
                     println("ffmpeg audio in device: " + audio_in_device + " " + audio_in_source)
-                    val res_ad = AVActivity.ffmpegav_open_audio_in_device(audio_in_device, audio_in_source)
+                    val res_ad = AVActivity.ffmpegav_open_audio_in_device_wrapper(audio_in_device, audio_in_source)
                     println("ffmpeg open audio capture device: $res_ad")
                 }
             }
             AVActivity.ffmpegav_start_video_in_capture()
-            AVActivity.ffmpegav_start_audio_in_capture()
+            AVActivity.ffmpegav_start_audio_in_capture_wrapper()
         }
         semaphore_avstate.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
         devices_state = CALL_DEVICES_STATE.CALL_DEVICES_STATE_ACTIVE
@@ -129,10 +129,10 @@ data class AVState(val a: Int)
             if (devices_state_copy == CALL_DEVICES_STATE.CALL_DEVICES_STATE_ACTIVE)
             {
                 Log.i(TAG, "ffmpeg_devices_stop:ffmpegav_stop_audio_in_capture")
-                AVActivity.ffmpegav_stop_audio_in_capture()
+                AVActivity.ffmpegav_stop_audio_in_capture_wrapper()
                 //Thread.sleep(20)
                 Log.i(TAG, "ffmpeg_devices_stop:ffmpegav_close_audio_in_device")
-                AVActivity.ffmpegav_close_audio_in_device()
+                AVActivity.ffmpegav_close_audio_in_device_wrapper()
                 //Thread.sleep(20)
                 Log.i(TAG, "ffmpeg_devices_stop:ffmpegav_stop_video_in_capture")
                 AVActivity.ffmpegav_stop_video_in_capture()
@@ -495,13 +495,13 @@ data class AVState(val a: Int)
                 if ((audio_in_source != null) && (audio_in_source != ""))
                 {
                     println("ffmpeg audio in device: " + audio_in_device + " " + audio_in_source)
-                    val res_ad = AVActivity.ffmpegav_open_audio_in_device(audio_in_device, audio_in_source)
+                    val res_ad = AVActivity.ffmpegav_open_audio_in_device_wrapper(audio_in_device, audio_in_source)
                     println("ffmpeg open audio capture device: $res_ad")
                 }
             }
             val buffer_size_in_bytes2 = 50000 // TODO: don't hardcode this
             var audio_buffer_1 = ByteBuffer.allocateDirect(buffer_size_in_bytes2)
-            AVActivity.ffmpegav_set_JNI_audio_buffer2(audio_buffer_1)
+            AVActivity.ffmpegav_set_JNI_audio_buffer2_wrapper(audio_buffer_1)
 
             AVActivity.ffmpegav_set_audio_capture_callback(object : AVActivity.audio_capture_callback
             {
@@ -595,7 +595,7 @@ data class AVState(val a: Int)
                 override fun onBufferTooSmall(audio_buffer_size: Int)
                 {
                     audio_buffer_1 = ByteBuffer.allocateDirect(audio_buffer_size)
-                    AVActivity.ffmpegav_set_JNI_audio_buffer2(audio_buffer_1)
+                    AVActivity.ffmpegav_set_JNI_audio_buffer2_wrapper(audio_buffer_1)
                 }
 
                 override fun onError()
@@ -663,7 +663,7 @@ data class AVState(val a: Int)
             })
 
             AVActivity.ffmpegav_start_video_in_capture()
-            AVActivity.ffmpegav_start_audio_in_capture()
+            AVActivity.ffmpegav_start_audio_in_capture_wrapper()
         }
         semaphore_avstate.acquire()
         devices_state = CALL_DEVICES_STATE.CALL_DEVICES_STATE_ACTIVE

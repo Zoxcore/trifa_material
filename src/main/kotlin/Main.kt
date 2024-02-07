@@ -181,6 +181,7 @@ import javax.swing.UIManager
 import com.vanniktech.emoji.EmojiManager
 import com.vanniktech.emoji.ios.IosEmojiProvider
 import com.vanniktech.emoji.search.SearchEmojiManager
+import com.zoffcc.applications.ffmpegav.AVActivity.JAVA_AUDIO_IN_DEVICE_NAME
 import com.zoffcc.applications.trifa.EmojiStrAndName
 
 private const val TAG = "trifa.Main.kt"
@@ -683,7 +684,7 @@ fun App()
                             Box {
                                 IconButton(onClick = {
                                     avstatestore.state.ffmpeg_init_do()
-                                    val audio_in_devices_get = AVActivity.ffmpegav_get_audio_in_devices()
+                                    val audio_in_devices_get = AVActivity.ffmpegav_get_audio_in_devices_wrapper()
                                     println("ffmpeg audio in devices: " + audio_in_devices_get.size)
                                     audio_in_devices.clear()
                                     audio_in_devices.addAll(audio_in_devices_get)
@@ -728,7 +729,32 @@ fun App()
                                         val tmp = AVActivity.ffmpegav_get_in_sources(avstatestore.state.audio_in_device_get(), 0)
                                         if (tmp == null)
                                         {
-                                            audio_in_sources_get = emptyArray()
+                                            if (avstatestore.state.audio_in_device_get() == JAVA_AUDIO_IN_DEVICE_NAME)
+                                            {
+                                                val tmp0 = AVActivity.ffmpegav_descrid()
+                                                tmp0.id = "default"
+                                                var tmp2 = ArrayList<AVActivity.ffmpegav_descrid>()
+                                                tmp2.add(tmp0)
+                                                audio_in_sources_get = tmp2.toTypedArray()
+                                            }
+                                            else
+                                            {
+                                                audio_in_sources_get = emptyArray()
+                                            }
+                                        }
+                                        else if (avstatestore.state.audio_in_device_get() == JAVA_AUDIO_IN_DEVICE_NAME)
+                                        {
+                                            var tmp2 = ArrayList<AVActivity.ffmpegav_descrid>()
+                                            tmp.iterator().forEach() {
+                                                if ((it != null) && (it.id != null))
+                                                {
+                                                    tmp2.add(it)
+                                                }
+                                            }
+                                            val tmp0 = AVActivity.ffmpegav_descrid()
+                                            tmp0.id = "default"
+                                            tmp2.add(tmp0)
+                                            audio_in_sources_get = tmp2.toTypedArray()
                                         }
                                         else
                                         {
