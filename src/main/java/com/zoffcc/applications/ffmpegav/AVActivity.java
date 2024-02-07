@@ -350,201 +350,135 @@ public class AVActivity {
             }
         }
 
+        final String want_test_audio_device = "dshow";
         final String[] audio_in_devices = ffmpegav_get_audio_in_devices();
         Log.i(TAG, "ffmpeg audio in devices: " + audio_in_devices.length);
+        ffmpegav_descrid[] audio_in_sources = null;
         for (int i=0;i<audio_in_devices.length;i++)
         {
             if (audio_in_devices[i] != null)
             {
-                final ffmpegav_descrid[] audio_in_sources = ffmpegav_get_in_sources(audio_in_devices[i], 0);
-                if (audio_in_sources != null)
+                if (audio_in_devices[i].compareTo(want_test_audio_device) == 0)
                 {
-                    for (int j=0;j<audio_in_sources.length;j++)
+                    audio_in_sources = ffmpegav_get_in_sources(audio_in_devices[i], 0);
+                    if (audio_in_sources != null)
                     {
-                        if (audio_in_sources[j] != null)
+                        for (int j=0;j<audio_in_sources.length;j++)
                         {
-                            Log.i(TAG, "ffmpeg audio in source id=#"+i+": " + audio_in_sources[j].id);
-                            Log.i(TAG, "ffmpeg audio in source descr=#"+i+": " + audio_in_sources[j].description);
+                            if (audio_in_sources[j] != null)
+                            {
+                                Log.i(TAG, "ffmpeg audio in source id=#"+i+": " + audio_in_sources[j].id);
+                                Log.i(TAG, "ffmpeg audio in source descr=#"+i+": " + audio_in_sources[j].description);
+                            }
                         }
                     }
                 }
             }
         }
 
-        for (int i=0;i<audio_in_devices.length;i++)
+        if ((audio_in_sources == null) || (audio_in_sources.length < 1))
         {
-            if (audio_in_devices[i] != null)
-            {
-                Log.i(TAG, "ffmpeg audio in device #"+i+": " + audio_in_devices[i]);
-                if (i == 1)
-                {
-                    adevice = audio_in_devices[i];
-                    asource = "default";
-                    final int res_ad = ffmpegav_open_audio_in_device(audio_in_devices[i],
-                            "default");
-                    Log.i(TAG, "ffmpeg open audio capture device: " + res_ad);
-                }
-            }
+            System.exit(2);
         }
 
-        final int frame_width_px1 = 640;
-        final int frame_height_px1 = 480;
-        final int buffer_size_in_bytes1 = ((frame_width_px1 * frame_height_px1) * 3) / 2;
-        final java.nio.ByteBuffer video_buffer_1_y = java.nio.ByteBuffer.allocateDirect(buffer_size_in_bytes1);
-        ffmpegav_set_JNI_video_buffer(video_buffer_1_y, frame_width_px1, frame_height_px1);
+        for (int j=0;j<audio_in_sources.length;j++)
+        {
+            if (audio_in_sources[j] != null)
+            {
+                Log.i(TAG, "ffmpeg audio in source id=#"+j+": " + audio_in_sources[j].id);
+                Log.i(TAG, "ffmpeg audio in source descr=#"+j+": " + audio_in_sources[j].description);
+                adevice = want_test_audio_device;
+                asource = audio_in_sources[j].id;
+                final int res_ad = ffmpegav_open_audio_in_device(adevice, asource);
+                Log.i(TAG, "\n\n\n\n");
+                Log.i(TAG, "==============================================================");
+                Log.i(TAG, "==============================================================");
+                Log.i(TAG, "ffmpeg open audio capture " + audio_in_sources[j].id + " device: " + res_ad);
 
-        final int frame_width_px2 = 640;
-        final int frame_height_px2 = 480;
-        final int buffer_size_in_bytes2 = 10; // ((frame_width_px2 * frame_height_px2) * 3) / 2;
-        ffmpegav_video_buffer_2_y = java.nio.ByteBuffer.allocateDirect(buffer_size_in_bytes2);
-        ffmpegav_video_buffer_2_u = java.nio.ByteBuffer.allocateDirect(buffer_size_in_bytes2);
-        ffmpegav_video_buffer_2_v = java.nio.ByteBuffer.allocateDirect(buffer_size_in_bytes2);
-        ffmpegav_set_JNI_video_buffer2(ffmpegav_video_buffer_2_y, ffmpegav_video_buffer_2_u, ffmpegav_video_buffer_2_v, frame_width_px2, frame_height_px2);
+                final int frame_width_px1 = 640;
+                final int frame_height_px1 = 480;
+                final int buffer_size_in_bytes1 = ((frame_width_px1 * frame_height_px1) * 3) / 2;
+                final java.nio.ByteBuffer video_buffer_1_y = java.nio.ByteBuffer.allocateDirect(buffer_size_in_bytes1);
+                ffmpegav_set_JNI_video_buffer(video_buffer_1_y, frame_width_px1, frame_height_px1);
 
-
-        ffmpegav_set_JNI_audio_buffer2(audio_buffer_2);
-
-        ffmpegav_set_video_capture_callback(new video_capture_callback() {
-            @Override
-            public void onSuccess(long width, long height, long source_width, long source_height, long pts, int fps, int source_format) {
-                Log.i(TAG, "ffmpeg open video capture onSuccess:" + width + " " + height + " " +
-                        source_width + " " + source_height + " " + pts + " fps: " + fps +
-                        " source_format: " + ffmpegav_video_source_format_name.value_str(source_format));
-            }
-            @Override
-            public void onError() {
-            }
-            @Override
-            public void onBufferTooSmall(int y_buffer_size, int u_buffer_size, int v_buffer_size) {
-                Log.i(TAG, "Video buffer too small, needed sizes: " + y_buffer_size
-                        + " " + u_buffer_size + " "+ v_buffer_size);
-                ffmpegav_video_buffer_2_y = java.nio.ByteBuffer.allocateDirect(y_buffer_size);
-                ffmpegav_video_buffer_2_u = java.nio.ByteBuffer.allocateDirect(u_buffer_size);
-                ffmpegav_video_buffer_2_v = java.nio.ByteBuffer.allocateDirect(v_buffer_size);
+                final int frame_width_px2 = 640;
+                final int frame_height_px2 = 480;
+                final int buffer_size_in_bytes2 = 10; // ((frame_width_px2 * frame_height_px2) * 3) / 2;
+                ffmpegav_video_buffer_2_y = java.nio.ByteBuffer.allocateDirect(buffer_size_in_bytes2);
+                ffmpegav_video_buffer_2_u = java.nio.ByteBuffer.allocateDirect(buffer_size_in_bytes2);
+                ffmpegav_video_buffer_2_v = java.nio.ByteBuffer.allocateDirect(buffer_size_in_bytes2);
                 ffmpegav_set_JNI_video_buffer2(ffmpegav_video_buffer_2_y, ffmpegav_video_buffer_2_u, ffmpegav_video_buffer_2_v, frame_width_px2, frame_height_px2);
-            }
-        });
 
-        ffmpegav_set_audio_capture_callback(new audio_capture_callback() {
-            @Override
-            public void onSuccess(long read_bytes, int out_samples, int out_channels, int out_sample_rate, long pts) {
-                Log.i(TAG, "ffmpeg open audio capture onSuccess:" + read_bytes + " " + out_samples + " " + out_channels + " " + out_sample_rate + " " + pts);
+
+                ffmpegav_set_JNI_audio_buffer2(audio_buffer_2);
+
+                ffmpegav_set_video_capture_callback(new video_capture_callback() {
+                    @Override
+                    public void onSuccess(long width, long height, long source_width, long source_height, long pts, int fps, int source_format) {
+                        Log.i(TAG, "ffmpeg open video capture onSuccess:" + width + " " + height + " " +
+                                source_width + " " + source_height + " " + pts + " fps: " + fps +
+                                " source_format: " + ffmpegav_video_source_format_name.value_str(source_format));
+                    }
+                    @Override
+                    public void onError() {
+                    }
+                    @Override
+                    public void onBufferTooSmall(int y_buffer_size, int u_buffer_size, int v_buffer_size) {
+                        Log.i(TAG, "Video buffer too small, needed sizes: " + y_buffer_size
+                                + " " + u_buffer_size + " "+ v_buffer_size);
+                        ffmpegav_video_buffer_2_y = java.nio.ByteBuffer.allocateDirect(y_buffer_size);
+                        ffmpegav_video_buffer_2_u = java.nio.ByteBuffer.allocateDirect(u_buffer_size);
+                        ffmpegav_video_buffer_2_v = java.nio.ByteBuffer.allocateDirect(v_buffer_size);
+                        ffmpegav_set_JNI_video_buffer2(ffmpegav_video_buffer_2_y, ffmpegav_video_buffer_2_u, ffmpegav_video_buffer_2_v, frame_width_px2, frame_height_px2);
+                    }
+                });
+
+                ffmpegav_set_audio_capture_callback(new audio_capture_callback() {
+                    @Override
+                    public void onSuccess(long read_bytes, int out_samples, int out_channels, int out_sample_rate, long pts) {
+                        Log.i(TAG, "ffmpeg open audio capture onSuccess:" + read_bytes + " " + out_samples + " " + out_channels + " " + out_sample_rate + " " + pts);
+                        try
+                        {
+                            audio_buffer_2.rewind();
+                            final ffmpegav_ByteBufferCompat audio_buffer_2_ = new ffmpegav_ByteBufferCompat(audio_buffer_2);
+                            Log.i(TAG, "audiobytes:" + bytesToHex(audio_buffer_2_.array(), 0, 100));
+                        }
+                        catch(Exception e)
+                        {
+                            e.printStackTrace();
+                        }
+                    }
+                    @Override
+                    public void onError() {
+                    }
+                    @Override
+                    public void onBufferTooSmall(int audio_buffer_size) {
+                        Log.i(TAG, "Audio buffer too small, needed size=" + audio_buffer_size);
+                    }
+                });
+
+                ffmpegav_apply_audio_filter(1);
+                ffmpegav_start_audio_in_capture();
                 try
                 {
-                    audio_buffer_2.rewind();
-                    final ffmpegav_ByteBufferCompat audio_buffer_2_ = new ffmpegav_ByteBufferCompat(audio_buffer_2);
-                    Log.i(TAG, "audiobytes:" + bytesToHex(audio_buffer_2_.array(), 0, 100));
+                    Thread.sleep(1000);
                 }
                 catch(Exception e)
                 {
-                    e.printStackTrace();
                 }
+                //
+                //
+                ffmpegav_stop_audio_in_capture();
+                ffmpegav_stop_video_in_capture();
+                int res_aclose = ffmpegav_close_audio_in_device();
+                Log.i(TAG, "ffmpeg open close audio capture device: " + res_aclose);
+                int res_vclose = ffmpegav_close_video_in_device();
+                Log.i(TAG, "ffmpeg open close video capture device: " + res_vclose);
+
             }
-            @Override
-            public void onError() {
-            }
-            @Override
-            public void onBufferTooSmall(int audio_buffer_size) {
-                Log.i(TAG, "Audio buffer too small, needed size=" + audio_buffer_size);
-            }
-        });
-
-        ffmpegav_start_video_in_capture();
-        ffmpegav_apply_audio_filter(1);
-        ffmpegav_start_audio_in_capture();
-        try
-        {
-            Thread.sleep(1000);
-        }
-        catch(Exception e)
-        {
-        }
-        //
-        //
-        ffmpegav_stop_audio_in_capture();
-        ffmpegav_stop_video_in_capture();
-        int res_aclose = ffmpegav_close_audio_in_device();
-        Log.i(TAG, "ffmpeg open close audio capture device: " + res_aclose);
-        int res_vclose = ffmpegav_close_video_in_device();
-        Log.i(TAG, "ffmpeg open close video capture device: " + res_vclose);
-        //
-        //
-        // test if calling stop and close again does something bad
-        //
-        Log.i(TAG, "ffmpeg ========= stop and close again =========");
-        Log.i(TAG, "ffmpeg ========= stop and close again =========");
-        Log.i(TAG, "ffmpeg ========= stop and close again =========");
-        Log.i(TAG, "ffmpeg ========= stop and close again =========");
-        ffmpegav_stop_audio_in_capture();
-        ffmpegav_stop_video_in_capture();
-        res_aclose = ffmpegav_close_audio_in_device();
-        Log.i(TAG, "ffmpeg open close audio capture device: " + res_aclose);
-        res_vclose = ffmpegav_close_video_in_device();
-        Log.i(TAG, "ffmpeg open close video capture device: " + res_vclose);
-        Log.i(TAG, "ffmpeg ========= stop and close again =========");
-        Log.i(TAG, "ffmpeg ========= stop and close again =========");
-        Log.i(TAG, "ffmpeg ========= stop and close again =========");
-        //
-        //
-        try
-        {
-            Thread.sleep(100);
-        }
-        catch(Exception e)
-        {
         }
 
-        // -----------------------
-        // -----------------------
-        final int res_vd2 = ffmpegav_open_video_in_device(vdevice,
-                vsource, 640, 480, 15, 0);
-        Log.i(TAG, "ffmpeg open video capture device: " + res_vd2);
 
-        final int res_ad2 = ffmpegav_open_audio_in_device(adevice,
-                asource);
-        Log.i(TAG, "ffmpeg open audio capture device: " + res_ad2);
-        ffmpegav_start_video_in_capture();
-        ffmpegav_start_audio_in_capture();
-        try
-        {
-            Thread.sleep(1000);
-        }
-        catch(Exception e)
-        {
-        }
-        ffmpegav_stop_audio_in_capture();
-        ffmpegav_stop_video_in_capture();
-        ffmpegav_close_audio_in_device();
-        ffmpegav_close_video_in_device();
-        // -----------------------
-        // -----------------------
-
-
-        // -----------------------
-        // -----------------------
-        Log.i(TAG, "ffmpeg ========= test with empty parameters =========");
-        Log.i(TAG, "ffmpeg ========= test with empty parameters =========");
-        Log.i(TAG, "ffmpeg ========= test with empty parameters =========");
-        final int res_vd3 = ffmpegav_open_video_in_device("",
-                "", 640, 480, 30, 0);
-        Log.i(TAG, "ffmpeg open video capture device: " + res_vd3);
-
-        final int res_ad3 = ffmpegav_open_audio_in_device("",
-                "");
-        Log.i(TAG, "ffmpeg open audio capture device: " + res_ad3);
-        ffmpegav_start_video_in_capture();
-        ffmpegav_start_audio_in_capture();
-        try
-        {
-            Thread.sleep(1000);
-        }
-        catch(Exception e)
-        {
-        }
-        ffmpegav_stop_audio_in_capture();
-        ffmpegav_stop_video_in_capture();
-        ffmpegav_close_audio_in_device();
-        ffmpegav_close_video_in_device();
         // -----------------------
         // -----------------------
         Log.i(TAG, "ffmpeg ========= all OK =========");
