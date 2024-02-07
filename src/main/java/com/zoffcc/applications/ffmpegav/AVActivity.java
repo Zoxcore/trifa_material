@@ -1,31 +1,46 @@
 package com.zoffcc.applications.ffmpegav;
 
+import javax.sound.sampled.*;
 import java.nio.ByteBuffer;
 
 public class AVActivity {
 
     private static final String TAG = "ffmpegav.AVActivity";
-    static final String Version = "0.99.22";
+    static final String Version = "0.99.23";
+    public static final String JAVA_AUDIO_IN_DEVICE_NAME = "Java Audio in (-fallback-)";
 
+    private static boolean java_audio_in_device_used = false;
     public static native String ffmpegav_version();
     public static native String ffmpegav_libavutil_version();
     public static native int ffmpegav_init(String resources_dir);
-    public static native void ffmpegav_apply_audio_filter(int apply_filter);
-    public static native String[] ffmpegav_get_video_in_devices();
-    public static native String[] ffmpegav_get_audio_in_devices();
     public static native ffmpegav_descrid[] ffmpegav_get_in_sources(String devicename, int is_video);
+
+    public static native String[] ffmpegav_get_video_in_devices();
     public static native int ffmpegav_open_video_in_device(String deviceformat, String inputname, int wanted_width, int wanted_height, int fps, int force_mjpeg);
-    public static native int ffmpegav_open_audio_in_device(String deviceformat, String inputname);
     public static native int ffmpegav_start_video_in_capture();
-    public static native int ffmpegav_start_audio_in_capture();
     public static native int ffmpegav_stop_video_in_capture();
-    public static native int ffmpegav_stop_audio_in_capture();
-    public static native int ffmpegav_close_audio_in_device();
     public static native int ffmpegav_close_video_in_device();
+
+    private static native String[] ffmpegav_get_audio_in_devices();
+    private static native int ffmpegav_open_audio_in_device(String deviceformat, String inputname);
+    private static native int ffmpegav_start_audio_in_capture();
+    private static native int ffmpegav_stop_audio_in_capture();
+    private static native int ffmpegav_close_audio_in_device();
+    public static native void ffmpegav_apply_audio_filter(int apply_filter);
 
     public static java.nio.ByteBuffer ffmpegav_video_buffer_2_y = null;
     public static java.nio.ByteBuffer ffmpegav_video_buffer_2_u = null;
     public static java.nio.ByteBuffer ffmpegav_video_buffer_2_v = null;
+
+    private static TargetDataLine targetDataLine = null;
+    private static AudioFormat audioformat = null;
+    private static Thread t_audio_rec = null;
+    private static java.nio.ByteBuffer java_api_audio_capture_buffer = null;
+    private static boolean ffmpegav_java_audio_capture_running = false;
+    private final static int AUDIO_FRAMEDURATION_MS = 60; // fixed ms interval for outgoing audio
+    private final static int AUDIO_REC_SAMPLE_RATE = 48000;
+    private final static int AUDIO_REC_CHANNELS = 1;
+    private final static int AUDIO_REC_SAMPLE_SIZE_BIT = 16;
 
     public static class ffmpegav_descrid
     {
@@ -83,6 +98,84 @@ public class AVActivity {
         }
     }
 
+    /*
+     * add the java fallback audio input device to the end of the list
+     */
+    public static String[] ffmpegav_get_audio_in_devices_wrapper()
+    {
+        // this will always return a string array with 64 entries
+        // some or all of the strings in the array may be NULL
+        String[] audio_devices_list = ffmpegav_get_audio_in_devices();
+        if ((audio_devices_list == null) || (audio_devices_list.length == 0))
+        {
+            // HINT: should never get here. but just to be safe
+            return audio_devices_list;
+        }
+        String[] audio_devices_list_with_j_fallback = new String[audio_devices_list.length + 1];
+        int i = 0;
+        for (i=0;i<audio_devices_list.length;i++)
+        {
+            audio_devices_list_with_j_fallback[i] = audio_devices_list[i];
+        }
+        audio_devices_list_with_j_fallback[i] = JAVA_AUDIO_IN_DEVICE_NAME;
+        return audio_devices_list_with_j_fallback;
+    }
+
+    public static int ffmpegav_open_audio_in_device_wrapper(String deviceformat, String inputname)
+    {
+        if (deviceformat.equals(JAVA_AUDIO_IN_DEVICE_NAME)) {
+            Log.i(TAG, "ffmpegav_open_audio_in_device_wrapper ... JAVA" + deviceformat + " " + inputname);
+            java_audio_in_device_used = true;
+            ffmpegav_open_java_audio_in_device();
+            return 0;
+        } else {
+            Log.i(TAG, "ffmpegav_open_audio_in_device_wrapper ... regular" + deviceformat + " " + inputname);
+            java_audio_in_device_used = false;
+            return ffmpegav_open_audio_in_device(deviceformat, inputname);
+        }
+    }
+
+    public static int ffmpegav_start_audio_in_capture_wrapper()
+    {
+        if (java_audio_in_device_used) {
+            Log.i(TAG, "ffmpegav_start_audio_in_capture_wrapper ... JAVA");
+            ffmpegav_start_java_audio_in_capture();
+            return 0;
+        } else {
+            Log.i(TAG, "ffmpegav_start_audio_in_capture_wrapper ... regular");
+            return ffmpegav_start_audio_in_capture();
+        }
+    }
+
+    public static int ffmpegav_stop_audio_in_capture_wrapper()
+    {
+        if (java_audio_in_device_used) {
+            Log.i(TAG, "ffmpegav_stop_audio_in_capture_wrapper ... JAVA");
+            ffmpegav_stop_java_audio_in_capture();
+            return 0;
+        } else {
+            Log.i(TAG, "ffmpegav_stop_audio_in_capture_wrapper ... regular");
+            return ffmpegav_stop_audio_in_capture();
+        }
+    }
+
+    /*
+     * check if the java fallback audio input device is in use
+     */
+    public static int ffmpegav_close_audio_in_device_wrapper()
+    {
+        if (java_audio_in_device_used) {
+            Log.i(TAG, "ffmpegav_close_audio_in_device_wrapper ... JAVA");
+            ffmpegav_close_java_audio_in_device();
+            java_audio_in_device_used = false;
+            return 0;
+        } else {
+            Log.i(TAG, "ffmpegav_close_audio_in_device_wrapper ... regular");
+            java_audio_in_device_used = false;
+            return ffmpegav_close_audio_in_device();
+        }
+    }
+
     final static int audio_buffer_size_in_bytes2 = 20000;
     final static java.nio.ByteBuffer audio_buffer_2 = java.nio.ByteBuffer.allocateDirect(audio_buffer_size_in_bytes2);
 
@@ -107,7 +200,14 @@ public class AVActivity {
     // audio_buffer is for playing audio
     public static native void ffmpegav_set_JNI_audio_buffer(java.nio.ByteBuffer audio_buffer);
     // audio_buffer2 is for capturing audio
-    public static native void ffmpegav_set_JNI_audio_buffer2(java.nio.ByteBuffer audio_buffer2);
+    private static native void ffmpegav_set_JNI_audio_buffer2(java.nio.ByteBuffer audio_buffer2);
+
+    public static void ffmpegav_set_JNI_audio_buffer2_wrapper(java.nio.ByteBuffer audio_buffer2)
+    {
+        // HINT: save the buffer object for java audio
+        java_api_audio_capture_buffer = audio_buffer2;
+        ffmpegav_set_JNI_audio_buffer2(audio_buffer2);
+    }
 
     public static void ffmpegav_set_video_capture_callback(video_capture_callback callback)
     {
@@ -122,11 +222,10 @@ public class AVActivity {
         }
     }
 
-    public static void ffmpegav_callback_audio_capture_frame_pts_cb_method(long read_bytes, int out_samples, int out_channels, int out_sample_rate, long pts)
+    public static void ffmpegav_callback_video_capture_frame_too_small_cb_method(int y_buffer_size, int u_buffer_size, int v_buffer_size)
     {
-        // Log.i(TAG, "capture audio frame bytes: " + read_bytes + " samples: " + out_samples + " channels: " + out_channels + " sample_rate: " + out_sample_rate);
-        if (audio_capture_callback_function != null) {
-            audio_capture_callback_function.onSuccess(read_bytes, out_samples, out_channels, out_sample_rate, pts);
+        if (video_capture_callback_function != null) {
+            video_capture_callback_function.onBufferTooSmall(y_buffer_size, u_buffer_size, v_buffer_size);
         }
     }
 
@@ -135,10 +234,11 @@ public class AVActivity {
         audio_capture_callback_function = callback;
     }
 
-    public static void ffmpegav_callback_video_capture_frame_too_small_cb_method(int y_buffer_size, int u_buffer_size, int v_buffer_size)
+    public static void ffmpegav_callback_audio_capture_frame_pts_cb_method(long read_bytes, int out_samples, int out_channels, int out_sample_rate, long pts)
     {
-        if (video_capture_callback_function != null) {
-            video_capture_callback_function.onBufferTooSmall(y_buffer_size, u_buffer_size, v_buffer_size);
+        // Log.i(TAG, "capture audio frame bytes: " + read_bytes + " samples: " + out_samples + " channels: " + out_channels + " sample_rate: " + out_sample_rate);
+        if (audio_capture_callback_function != null) {
+            audio_capture_callback_function.onSuccess(read_bytes, out_samples, out_channels, out_sample_rate, pts);
         }
     }
 
@@ -146,6 +246,260 @@ public class AVActivity {
     {
         if (audio_capture_callback_function != null) {
             audio_capture_callback_function.onBufferTooSmall(audio_buffer_size);
+        }
+    }
+
+    private static void ffmpegav_open_java_audio_in_device()
+    {
+        audioformat = new AudioFormat(AUDIO_REC_SAMPLE_RATE,
+                AUDIO_REC_SAMPLE_SIZE_BIT, AUDIO_REC_CHANNELS,
+                true,false);
+        // final Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();
+        final DataLine.Info targetDLInfo = new DataLine.Info(TargetDataLine.class, audioformat);
+        try {
+            targetDataLine = (TargetDataLine) AudioSystem.getLine(targetDLInfo);
+        } catch (Exception e) {
+            Log.i(TAG, "no working audio input found");
+            targetDataLine = null;
+        }
+    }
+
+    private static void ffmpegav_close_java_audio_in_device()
+    {
+        targetDataLine = null;
+    }
+
+    private static void ffmpegav_start_java_audio_in_capture()
+    {
+        ffmpegav_start_java_target_line();
+        try {
+            if (t_audio_rec != null)
+            {
+                    t_audio_rec.join(1000);
+            }
+        } catch (Exception ignored) {
+        } finally {
+            t_audio_rec = null;
+        }
+
+        ffmpegav_java_audio_capture_running = true;
+        t_audio_rec = new Thread() {
+            @Override
+            public void run() {
+                Log.i(TAG, "capturing java audio ... starting");
+                this.setName("t_a_rec");
+
+                final int sample_count2 = ((AUDIO_REC_SAMPLE_RATE * AUDIO_FRAMEDURATION_MS) / 1000);
+                final int want_numBytesRead = sample_count2 * AUDIO_REC_CHANNELS * 2;
+                final byte[] data = new byte[want_numBytesRead];
+                int sample_count = 0;
+                int numBytesRead = 0;
+
+                while (ffmpegav_java_audio_capture_running)
+                {
+                    try
+                    {
+                        if (targetDataLine != null) {
+                            if (targetDataLine.isOpen()) {
+                                // HINT: this may block. but it's ok it will not block any Tox or UI threads
+                                numBytesRead = targetDataLine.read(data, 0, data.length);
+                                sample_count = ((numBytesRead / 2) / AUDIO_REC_CHANNELS);
+
+                                java_api_audio_capture_buffer.rewind();
+                                if (java_api_audio_capture_buffer.capacity() < data.length) {
+                                    ffmpegav_callback_audio_capture_frame_too_small_cb_method(data.length);
+                                } else {
+                                    java_api_audio_capture_buffer.put(data, 0, data.length);
+                                }
+
+                                ffmpegav_callback_audio_capture_frame_pts_cb_method(
+                                        numBytesRead, sample_count,
+                                        AUDIO_REC_CHANNELS, AUDIO_REC_SAMPLE_RATE, 0);
+                                /*
+                                Log.i(TAG, "sample_count=" + sample_count + " sample_count2=" + sample_count2 +
+                                           " frameduration_ms=" + AUDIO_FRAMEDURATION_MS + " want_numBytesRead=" +
+                                           want_numBytesRead);
+
+                                Log.i(TAG, "t_audio_rec:read:" + numBytesRead + " isRunning=" +
+                                           targetDataLine.isRunning());
+                                 */
+                            } else {
+                                Thread.sleep(50);
+                            }
+                        } else {
+                            Thread.sleep(50);
+                        }
+                    }
+                    catch(Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+                Log.i(TAG, "capturing java audio ... finished");
+            }
+        };
+        t_audio_rec.start();
+    }
+
+    private static void ffmpegav_stop_java_audio_in_capture()
+    {
+        ffmpegav_java_audio_capture_running = false;
+        try {
+            if (t_audio_rec != null)
+            {
+                t_audio_rec.join(1000);
+            }
+        } catch (Exception ignored) {
+        } finally {
+            t_audio_rec = null;
+        }
+        ffmpegav_close_java_target_line();
+    }
+
+    private static synchronized void ffmpegav_close_java_target_line() {
+        try {
+            if (targetDataLine != null) {
+                try {
+                    targetDataLine.stop();
+                } catch (Exception e2) {
+                    e2.printStackTrace();
+                }
+
+                try {
+                    targetDataLine.flush();
+                } catch (Exception e2) {
+                    e2.printStackTrace();
+                }
+
+                try {
+                    targetDataLine.close();
+                    Log.i(TAG, "select audio in:" + "close old line");
+                } catch (Exception e2) {
+                    e2.printStackTrace();
+                }
+            }
+        }
+        catch(Exception e)
+        {
+            Log.i(TAG, "error closing java target line");
+        }
+    }
+
+    private static synchronized void ffmpegav_start_java_target_line()
+    {
+        try {
+            if (targetDataLine.isRunning())
+            {
+                Log.i(TAG, "isRunning:TRUE");
+            }
+            else
+            {
+                Log.i(TAG, "isRunning:**false**");
+            }
+
+            targetDataLine.open(audioformat);
+            targetDataLine.start();
+            Log.i(TAG, "getBufferSize=" + targetDataLine.getBufferSize());
+        } catch(Exception e)
+        {
+            Log.i(TAG, "error starting java target line");
+        }
+    }
+
+    private static synchronized void ffmpegav_change_java_audio_device(Mixer.Info i)
+    {
+        Log.i(TAG, "AA::IN::change_device:001:" + i.getDescription());
+        Log.i(TAG, "select audio in:" + i.getDescription());
+
+        try
+        {
+            Mixer currentMixer = AudioSystem.getMixer(i);
+            Log.i(TAG, "select audio in:" + "sel:" + i.getDescription());
+
+            if (targetDataLine != null)
+            {
+                try
+                {
+                    targetDataLine.stop();
+                }
+                catch (Exception e2)
+                {
+                    e2.printStackTrace();
+                }
+
+                try
+                {
+                    targetDataLine.flush();
+                }
+                catch (Exception e2)
+                {
+                    e2.printStackTrace();
+                }
+
+                try
+                {
+                    targetDataLine.close();
+                    Log.i(TAG, "select audio in:" + "close old line");
+                }
+                catch (Exception e2)
+                {
+                    e2.printStackTrace();
+                }
+
+                targetDataLine = null;
+            }
+
+            DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, audioformat);
+            try
+            {
+                if (currentMixer.isLineSupported(dataLineInfo))
+                {
+                    Log.i(TAG, "linesupported:TRUE");
+                }
+                else
+                {
+                    Log.i(TAG, "linesupported:**false**");
+                }
+
+                if (dataLineInfo.isFormatSupported(audioformat))
+                {
+                    Log.i(TAG, "linesupported:TRUE");
+                }
+                else
+                {
+                    Log.i(TAG, "linesupported:**false**");
+                }
+
+                // targetDataLine = (TargetDataLine) currentMixer.getLine(dataLineInfo);
+                targetDataLine = (TargetDataLine) AudioSystem.getLine(dataLineInfo);
+
+                if (targetDataLine.isRunning())
+                {
+                    Log.i(TAG, "isRunning:TRUE");
+                }
+                else
+                {
+                    Log.i(TAG, "isRunning:**false**");
+                }
+
+                targetDataLine.open(audioformat);
+                targetDataLine.start();
+                Log.i(TAG, "getBufferSize=" + targetDataLine.getBufferSize());
+            }
+            catch (SecurityException se1)
+            {
+                se1.printStackTrace();
+                Log.i(TAG, "select audio in:EE3:" + se1.getMessage());
+            }
+            catch (Exception e1)
+            {
+                e1.printStackTrace();
+                Log.i(TAG, "select audio in:EE2:" + e1.getMessage());
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
         }
     }
 
