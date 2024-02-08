@@ -22,7 +22,9 @@ the latest Development Snapshot can be downloaded from [here](https://github.com
 <a href="https://github.com/Zoxcore/trifa_material/releases/download/nightly/trifa-material_nightly-x86_64.appimage
 "><img src="https://raw.githubusercontent.com/Zoxcore/trifa_material/master/images/on_github_nightly.png" width="200"></a>
 
-## Installation & starting the App [Linux, Windows and MacOS]
+## Installation & starting the App [Linux, RasperryPi, Windows and MacOS]
+
+<img src="https://raw.githubusercontent.com/Zoxcore/trifa_material/master/images/Tux.svg" height="45">&nbsp;<img src="https://raw.githubusercontent.comZoxcore/trifa_material/master/images/Raspberry_Pi_Logo.svg" height="45">&nbsp;<img src="https://raw.githubusercontent.com/Zoxcore/trifa_material/master/images/Windows_logo_-_2012.svg" height="45">&nbsp;<img src="https://raw.githubusercontent.com/Zoxcore/trifa_material/master/images/Apple_logo_black.svg" height="45">
 
 - Install (minimum) JDK 17 as your default java
 - Download or checkout the source repository
