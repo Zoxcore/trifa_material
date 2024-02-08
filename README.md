@@ -40,6 +40,7 @@ the latest Development Snapshot can be downloaded from [here](https://github.com
 - Drag & Drop for File transfers with friends
 - Group Images in NGC group chats
 - Group History Sync
+- Notifications
 - File transfers
 - Screensharing
 - Audio calls
