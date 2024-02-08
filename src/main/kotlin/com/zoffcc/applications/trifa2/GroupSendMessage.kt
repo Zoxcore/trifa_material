@@ -39,6 +39,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -51,12 +52,15 @@ import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
+import com.vanniktech.emoji.search.SearchEmojiManager
 import com.zoffcc.applications.trifa.Log
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -67,13 +71,99 @@ private const val TAG = "trifa.SendGroupMessage"
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun GroupSendMessage(focusRequester: FocusRequester, selectedGroupId: String?, sendGroupMessage: (String) -> Unit) {
-    var inputText by remember { mutableStateOf("") }
+    var inputTextV by remember {
+        val textFieldValue = TextFieldValue(text = "")
+        mutableStateOf(textFieldValue)
+    }
     LaunchedEffect(selectedGroupId)
     {
         // Log.i(TAG, "selected group changed, reset input text")
-        inputText = ""
+        inputTextV = TextFieldValue(text = "")
     }
+    val emoji_typing_box_offset_x_px_init = 2.dp.DpAsPx.toInt()
     var show_emoji_popup by remember { mutableStateOf(false) }
+    var show_typing_emoji_popup by remember { mutableStateOf(true) }
+    var emoji_typing_box_offset_x_px by remember { mutableStateOf(emoji_typing_box_offset_x_px_init) }
+    var emoji_typing_box_offset_y_px by remember { mutableStateOf(0) }
+    emoji_typing_box_offset_x_px = emoji_typing_box_offset_x_px_init
+    emoji_typing_box_offset_y_px = -(70.dp).DpAsPx.toInt()
+    val single_letter = 5.dp.DpAsPx.toInt()
+    if (show_typing_emoji_popup)
+    {
+        Popup(alignment = Alignment.BottomStart,
+            properties = PopupProperties(focusable = false, dismissOnClickOutside = true),
+            onDismissRequest = {},
+            offset = IntOffset(emoji_typing_box_offset_x_px, emoji_typing_box_offset_y_px)) {
+            Row(
+                Modifier
+                    .size(305.dp, 40.dp)
+                    .randomDebugBorder()
+                    .padding(top = 1.dp, bottom = 1.dp)
+                    .clip(RoundedCornerShape(18.dp, 18.dp, 18.dp, 18.dp))
+                    .background(MaterialTheme.colors.background)
+            )
+            {
+                var li = -1
+                try {
+                    li = inputTextV.text.lastIndexOf(string = ":", ignoreCase = true)
+                } catch(_: Exception)
+                {}
+                if (li != -1)
+                {
+                    var emoji_search_str = ""
+                    try {
+                        if ((inputTextV.text.length - li) <= MAX_EMOJI_POP_SEARCH_LEN)
+                        {
+                            emoji_search_str = inputTextV.text.takeLast(inputTextV.text.length - li - 1)
+                        }
+                    } catch(_: Exception)
+                    {}
+                    SearchEmojiManager().search(query = emoji_search_str).take(MAX_EMOJI_POP_RESULT)
+                        .forEach {
+                            Row(modifier = Modifier.fillMaxWidth().height(40.dp).randomDebugBorder()) {
+                                val emojistr = it.emoji.unicode
+                                val placeholder = "?"
+                                var curtext by remember { mutableStateOf(placeholder) }
+                                val scope = rememberCoroutineScope()
+                                Tooltip(text = it.shortcode) {
+                                    Log.i(TAG, "" + it.shortcode + "  " + emojistr)
+                                    IconButton(modifier = Modifier.width(40.dp).height(40.dp),
+                                        onClick = {
+                                            var li2 = -1
+                                            try
+                                            {
+                                                li2 = inputTextV.text.lastIndexOf(string = ":", ignoreCase = true)
+                                            } catch (_: Exception)
+                                            {
+                                            }
+                                            if (li2 != -1)
+                                            {
+                                                try
+                                                {
+                                                    if ((inputTextV.text.length - li2) <= MAX_EMOJI_POP_SEARCH_LEN)
+                                                    {
+                                                        val new_input_text = inputTextV.text.take(li2) + emojistr
+                                                        val new_selection = TextRange(new_input_text.length)
+                                                        inputTextV = TextFieldValue(text = new_input_text, selection = new_selection)
+                                                    }
+                                                } catch (_: Exception)
+                                                {
+                                                }
+                                            }
+                                        }) {
+                                        Text(text = curtext, color = Color.Black, fontSize = 30.sp, maxLines = 1)
+                                        scope.launch {
+                                            delay(62)
+                                            curtext = emojistr
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                }
+            }
+        }
+    }
     TextField(
         modifier = Modifier.fillMaxWidth()
             .background(MaterialTheme.colors.background)
@@ -82,18 +172,18 @@ fun GroupSendMessage(focusRequester: FocusRequester, selectedGroupId: String?, s
             .onPreviewKeyEvent {
                 when {
                     (!it.isMetaPressed && !it.isAltPressed && !it.isCtrlPressed && !it.isShiftPressed && it.key == Key.Enter && it.type == KeyEventType.KeyDown) -> {
-                        if (inputText.isNotEmpty())
+                        if (inputTextV.text.isNotEmpty())
                         {
-                            sendGroupMessage(inputText)
-                            inputText = ""
+                            sendGroupMessage(inputTextV.text)
+                            inputTextV = TextFieldValue(text = "")
                         }
                         true
                     }
                     (!it.isMetaPressed && !it.isAltPressed && !it.isCtrlPressed && !it.isShiftPressed && it.key == Key.NumPadEnter && it.type == KeyEventType.KeyDown) -> {
-                        if (inputText.isNotEmpty())
+                        if (inputTextV.text.isNotEmpty())
                         {
-                            sendGroupMessage(inputText)
-                            inputText = ""
+                            sendGroupMessage(inputTextV.text)
+                            inputTextV = TextFieldValue(text = "")
                         }
                         true
                     }
@@ -111,21 +201,21 @@ fun GroupSendMessage(focusRequester: FocusRequester, selectedGroupId: String?, s
             capitalization = KeyboardCapitalization.None,
             autoCorrect = false,
         ),
-        value = inputText,
+        value = inputTextV,
         placeholder = {
             Text(text = "Type Group Message...", fontSize = 14.sp)
         },
         onValueChange = {
-            inputText = it
+            inputTextV = it
         },
         trailingIcon = {
-            if (inputText.isNotEmpty()) {
+            if (inputTextV.text.isNotEmpty()) {
                 Row() {
                     Row(
                     modifier = Modifier
                         .clickable {
-                            sendGroupMessage(inputText)
-                            inputText = ""
+                            sendGroupMessage(inputTextV.text)
+                            inputTextV = TextFieldValue(text = "")
                         }
                         .padding(10.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -231,7 +321,7 @@ fun GroupSendMessage(focusRequester: FocusRequester, selectedGroupId: String?, s
                                                 val scope = rememberCoroutineScope()
                                                 Tooltip(text = if (emojistr.name.isEmpty()) "" else emojistr.name) {
                                                     IconButton(modifier = Modifier.width(40.dp).height(40.dp),
-                                                        onClick = { inputText = inputText + it[k].char }) {
+                                                        onClick = { inputTextV = TextFieldValue(text = inputTextV.text + it[k].char) }) {
                                                         Text(text = curtext, color = Color.Black, fontSize = 30.sp, maxLines = 1)
                                                         scope.launch {
                                                             delay(62)
