@@ -34,6 +34,21 @@ the latest Development Snapshot can be downloaded from [here](https://github.com
   -  raspi 64bit: ```export MESA_EXTENSION_OVERRIDE="-GL_ARB_invalidate_subdata" ; ./gradlew run```
   -  [Asahi Linux](https://asahilinux.org/): ```export MESA_EXTENSION_OVERRIDE="-GL_ARB_invalidate_subdata" ; export MESA_GL_VERSION_OVERRIDE=3.0 ; ./gradlew run```
 
+##  Features
+- One to one chat with friends
+- NGC (new group chats)
+- Drag & Drop for File transfers with friends
+- Group Images in NGC group chats
+- Group History Sync
+- File transfers
+- Screensharing
+- Audio calls
+- Noise Suppression for Audio Calls
+- Video calls
+- Screenshots
+- Emoticons
+- And many more options!
+
 
 ## Help Translate the App in your Language
 Use Weblate:
