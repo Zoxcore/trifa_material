@@ -44,7 +44,7 @@ jobs:
       run:  |
             pwd
             $(which ruby) $(which github_changelog_generator) -u Zoxcore -p trifa_material \
-            --exclude-tags "$(git tag -l 'trifajni*'| tr '\n' ',')nightly" \
+            --exclude-tags "nightly" \
                --token "$CHANGELOG_GEN_TOKEN"
 
     - name: chmod
