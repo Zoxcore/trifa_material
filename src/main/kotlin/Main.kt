@@ -72,6 +72,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.painter.Painter
@@ -183,6 +184,7 @@ import com.vanniktech.emoji.ios.IosEmojiProvider
 import com.vanniktech.emoji.search.SearchEmojiManager
 import com.zoffcc.applications.ffmpegav.AVActivity.JAVA_AUDIO_IN_DEVICE_NAME
 import com.zoffcc.applications.trifa.EmojiStrAndName
+import com.zoffcc.applications.trifa.MainActivity.Companion.DEBUG_COMPOSE_UI_UPDATES
 
 private const val TAG = "trifa.Main.kt"
 var tox_running_state_wrapper = "start"
@@ -282,15 +284,15 @@ fun App()
     MaterialTheme {
         scaffoldState = rememberScaffoldState()
         ScaffoldCoroutineScope = rememberCoroutineScope()
-        Scaffold(scaffoldState = scaffoldState) {
-            Row() {
+        Scaffold(modifier = Modifier.randomDebugBorder(), scaffoldState = scaffoldState) {
+            Row(modifier = Modifier.randomDebugBorder()) {
                 var uiMode by remember { mutableStateOf(UiMode.CONTACTS) }
                 var main_top_tab_height by remember { mutableStateOf(MAIN_TOP_TAB_HEIGHT) }
                 BriarSidebar(uiMode = uiMode, setUiMode = { uiMode = it })
                 VerticalDivider()
-                Column(Modifier.fillMaxSize()) {
-                    Row(modifier = Modifier.fillMaxWidth().height(main_top_tab_height)) {
-                        Column{
+                Column(Modifier.randomDebugBorder().fillMaxSize()) {
+                    Row(modifier = Modifier.randomDebugBorder().fillMaxWidth().height(main_top_tab_height)) {
+                        Column(modifier = Modifier.randomDebugBorder()) {
                             Row(Modifier.wrapContentHeight(), Arrangement.spacedBy(5.dp)) {
                                 Button(modifier = Modifier.width(140.dp), onClick = { // start/stop tox button
                                     if (tox_running_state == "running")
@@ -466,7 +468,7 @@ fun App()
                             AVState.CALL_STATUS.CALL_STATUS_CALLING,
                             AVState.CALL_STATUS.CALL_STATUS_ENDING ->
                             {
-                                Row() {
+                                Row(modifier = Modifier.randomDebugBorder().padding(3.dp)) {
                                     var video_in_box_width by remember { mutableStateOf(VIDEO_IN_BOX_WIDTH_SMALL) }
                                     var video_in_box_height by remember { mutableStateOf(VIDEO_IN_BOX_HEIGHT_SMALL) }
                                     var video_in_box_small by remember { mutableStateOf(true) }
@@ -677,7 +679,7 @@ fun App()
                         val audio_in_sources by remember { mutableStateOf(ArrayList<AVActivity.ffmpegav_descrid>()) }
                         var video_in_devices by remember { mutableStateOf(ArrayList<String>()) }
                         val video_in_sources by remember { mutableStateOf(ArrayList<AVActivity.ffmpegav_descrid>()) }
-                        Column(modifier = Modifier.padding(5.dp)) {
+                        Column(modifier = Modifier.padding(5.dp).randomDebugBorder()) {
                             Text(text = "audio capture: " + avstatestore.state.audio_in_device_get() + " " + avstatestore.state.audio_in_source_get()
                                 , fontSize = 12.sp, modifier = Modifier.fillMaxWidth(),
                                 maxLines = 1)
@@ -981,28 +983,30 @@ fun App()
                             }
                         }
                     }
-                    val audio_bar_bgcolor = MaterialTheme.colors.background
-                    SwingPanel(
-                        modifier = Modifier.size(200.dp,5.dp),
-                        factory = {
-                            JPanel(SingleComponentAspectRatioKeeperLayout(), true).apply {
-                                add(AudioBar.audio_out_bar)
-                                AudioBar.set_bar_bgcolor(audio_bar_bgcolor.toArgb(), audio_out_bar)
-                            }
-                        },
-                        update = { }
-                    )
-                    Spacer(modifier = Modifier.height(5.dp))
-                    SwingPanel(
-                        modifier = Modifier.size(200.dp,5.dp),
-                        factory = {
-                            JPanel(SingleComponentAspectRatioKeeperLayout(), true).apply {
-                                add(AudioBar.audio_in_bar)
-                                AudioBar.set_bar_bgcolor(audio_bar_bgcolor.toArgb(), audio_in_bar)
-                            }
-                        },
-                        update = { }
-                    )
+                    Column(modifier = Modifier.randomDebugBorder().padding(4.dp)) {
+                        val audio_bar_bgcolor = MaterialTheme.colors.background
+                        SwingPanel(
+                            modifier = Modifier.size(200.dp, 5.dp),
+                            factory = {
+                                JPanel(SingleComponentAspectRatioKeeperLayout(), true).apply {
+                                    add(AudioBar.audio_out_bar)
+                                    AudioBar.set_bar_bgcolor(audio_bar_bgcolor.toArgb(), audio_out_bar)
+                                }
+                            },
+                            update = { }
+                        )
+                        Spacer(modifier = Modifier.height(5.dp))
+                        SwingPanel(
+                            modifier = Modifier.size(200.dp, 5.dp),
+                            factory = {
+                                JPanel(SingleComponentAspectRatioKeeperLayout(), true).apply {
+                                    add(AudioBar.audio_in_bar)
+                                    AudioBar.set_bar_bgcolor(audio_bar_bgcolor.toArgb(), audio_in_bar)
+                                }
+                            },
+                            update = { }
+                        )
+                    }
                     UIScaleItem(
                         label = i18n("ui.ui_scale"),
                         description = "${i18n("ui.current_value")}: "
@@ -1030,7 +1034,7 @@ fun App()
                             contactstore.visible(true)
                             groupstore.visible(false)
                             val focusRequester = remember { FocusRequester() }
-                            Row(modifier = Modifier.fillMaxWidth()) {
+                            Row(modifier = Modifier.fillMaxWidth().randomDebugBorder()) {
                                 val contacts by contactstore.stateFlow.collectAsState()
                                 ContactList(contactList = contacts)
                                 VerticalDivider()
@@ -1056,7 +1060,7 @@ fun App()
                             val groupfocusRequester = remember { FocusRequester() }
                             val groups by groupstore.stateFlow.collectAsState()
                             val grouppeers by grouppeerstore.stateFlow.collectAsState()
-                            Row(modifier = Modifier.fillMaxWidth()) {
+                            Row(modifier = Modifier.fillMaxWidth().randomDebugBorder()) {
                                 GroupList(groupList = groups)
                                 VerticalDivider()
                                 val groupsettings by groupsettingsstore.stateFlow.collectAsState()
@@ -1875,7 +1879,7 @@ fun UIScaleItem(
     label: String,
     description: String,
     setting: @Composable (RowScope.() -> Unit),
-) = Row(Modifier.fillMaxWidth().height(UISCALE_ITEM_HEIGHT)
+) = Row(Modifier.randomDebugBorder().fillMaxWidth().height(UISCALE_ITEM_HEIGHT)
     .padding(horizontal = 16.dp).
     semantics(mergeDescendants = true) { // it would be nicer to derive the contentDescriptions from the descendants automatically
     // which is currently not supported in Compose for Desktop
@@ -1913,6 +1917,21 @@ fun DragAndDropDescription(modifier: Modifier, color: Color) {
         color = color
     )
 }
+
+fun Modifier.randomDebugBorder(): Modifier =
+    if (DEBUG_COMPOSE_UI_UPDATES)
+    {
+        Modifier.padding(3.dp).border(width = 4.dp,
+            color = Color(
+                Random().nextInt(0, 255),
+                Random().nextInt(0, 255),
+                Random().nextInt(0, 255)),
+            shape = RectangleShape)
+    }
+    else
+    {
+        Modifier
+    }
 
 fun Modifier.dashedBorder(strokeWidth: Dp, color: Color, cornerRadiusDp: Dp) = composed(
     factory = {

@@ -20,6 +20,7 @@ import grouppeerstore
 import org.briarproject.briar.desktop.ui.ListItemView
 import org.briarproject.briar.desktop.ui.VerticallyScrollableArea
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
+import randomDebugBorder
 import kotlin.math.max
 import kotlin.math.min
 
@@ -29,7 +30,7 @@ fun GroupPeerList(
 ) = Column(
     modifier = Modifier.fillMaxHeight().width(GROUP_PEER_COLUMN_WIDTH).background(Color.Transparent),
 ) {
-    VerticallyScrollableArea(modifier = Modifier.fillMaxSize()) { scrollState ->
+    VerticallyScrollableArea(modifier = Modifier.randomDebugBorder().fillMaxSize()) { scrollState ->
         LazyColumn(
             state = scrollState,
             modifier = Modifier

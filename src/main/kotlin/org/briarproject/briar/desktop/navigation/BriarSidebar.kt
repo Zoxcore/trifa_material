@@ -53,6 +53,7 @@ import org.briarproject.briar.desktop.navigation.SidebarButtonState.UnreadMessag
 import org.briarproject.briar.desktop.navigation.SidebarButtonState.Warning
 import org.briarproject.briar.desktop.ui.UiMode
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
+import randomDebugBorder
 
 val SIDEBAR_WIDTH = 56.dp
 
@@ -86,7 +87,8 @@ fun BriarSidebar(
     )
 
     Column(
-        modifier = Modifier.width(SIDEBAR_WIDTH).fillMaxHeight().padding(vertical = 4.dp).selectableGroup(),
+        modifier = Modifier.randomDebugBorder().width(SIDEBAR_WIDTH)
+            .fillMaxHeight().padding(vertical = 4.dp).selectableGroup(),
         verticalArrangement = spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) { // profile button

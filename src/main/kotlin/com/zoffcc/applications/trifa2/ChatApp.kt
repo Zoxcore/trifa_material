@@ -205,7 +205,7 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
 {
     Theme {
         Surface {
-            Box(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize().randomDebugBorder()) {
                 Image(painterResource("background.jpg"), modifier = Modifier.fillMaxSize(), contentDescription = null, contentScale = ContentScale.Crop)
                 Column(modifier = Modifier.fillMaxSize()) {
                     var isDragging by remember { mutableStateOf(false) }
@@ -309,7 +309,7 @@ fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, s
 {
     Theme {
         Surface {
-            Box(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize().randomDebugBorder()) {
                 Image(painterResource("background.jpg"), modifier = Modifier.fillMaxSize(),
                     contentDescription = null, contentScale = ContentScale.Crop)
                 Column(modifier = Modifier.fillMaxSize()) {

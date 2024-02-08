@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 import org.briarproject.briar.desktop.ui.ListItemView
 import org.briarproject.briar.desktop.ui.VerticallyScrollableArea
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
+import randomDebugBorder
 
 @Composable
 fun ContactList(
@@ -32,7 +33,7 @@ fun ContactList(
 ) = Column(
     modifier = Modifier.fillMaxHeight().width(CONTACT_COLUMN_WIDTH).background(Color.Transparent),
 ) {
-    VerticallyScrollableArea(modifier = Modifier.fillMaxSize()) { scrollState ->
+    VerticallyScrollableArea(modifier = Modifier.randomDebugBorder().fillMaxSize()) { scrollState ->
         LazyColumn(
             state = scrollState,
             modifier = Modifier
