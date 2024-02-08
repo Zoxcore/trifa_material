@@ -44,8 +44,8 @@ check instructions on how to do it here:
 https://github.com/floe/backscrub
 
 ## Add Acoustic Echo Cancellation (AEC) to your microphone input (Linux only!)
-
-you need to have an audio in source already plugged in (like a headset with a microphone)
+Activate AEC on Linux with pulseaudio.<br>
+You need to have an audio in source already plugged in (like a headset with a microphone)
 
 ```
 pactl unload-module module-echo-cancel
@@ -63,6 +63,13 @@ to unload the AEC again
 pactl unload-module module-echo-cancel
 ```
 
+## Capture Video and Audio
+ffmpeg lib is used to capture Video and Audio.<br>
+The Java and JNI parts are built here: https://github.com/zoff99/ffmpeg_av_jni
+
+## Notifications
+Java can do Notifications on Windows properly, but on macOS and Linux a native library is needed.<br>
+The Java and JNI parts are built here: https://github.com/zoff99/jni_notifications
 
 <br>
 Any use of this project's code by GitHub Copilot, past or present, is done
