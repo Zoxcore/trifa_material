@@ -24,7 +24,7 @@ the latest Development Snapshot can be downloaded from [here](https://github.com
 
 ## Installation & starting the App [Linux, RasperryPi, Windows and MacOS]
 
-<img src="https://raw.githubusercontent.com/Zoxcore/trifa_material/master/images/Tux.svg" height="45">&nbsp;<img src="https://raw.githubusercontent.comZoxcore/trifa_material/master/images/Raspberry_Pi_Logo.svg" height="45">&nbsp;<img src="https://raw.githubusercontent.com/Zoxcore/trifa_material/master/images/Windows_logo_-_2012.svg" height="45">&nbsp;<img src="https://raw.githubusercontent.com/Zoxcore/trifa_material/master/images/Apple_logo_black.svg" height="45">
+<img src="https://raw.githubusercontent.com/Zoxcore/trifa_material/master/images/Tux.svg" height="45">&nbsp;<img src="https://raw.githubusercontent.com/Zoxcore/trifa_material/master/images/Raspberry_Pi_Logo.svg" height="45">&nbsp;<img src="https://raw.githubusercontent.com/Zoxcore/trifa_material/master/images/Windows_logo_-_2012.svg" height="45">&nbsp;<img src="https://raw.githubusercontent.com/Zoxcore/trifa_material/master/images/Apple_logo_black.svg" height="45">
 
 - Install (minimum) JDK 17 as your default java
 - Download or checkout the source repository
