@@ -1,4 +1,3 @@
-import org.gradle.initialization.Environment
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.de.undercouch.gradle.tasks.download.Download
 import java.time.format.DateTimeFormatter
