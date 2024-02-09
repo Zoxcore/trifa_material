@@ -1416,11 +1416,11 @@ fun main() = application(exitProcessOnExit = true) {
         var remain: Int
         // ------
         // --- loop ---
-        for(j in 0..(IosEmojiProvider().categories.size - 1))
+        for(j1 in 0..(IosEmojiProvider().categories.size - 1))
         {
-            Log.i(TAG, "adding emoji category: " + j + " : " + IosEmojiProvider().categories[j].categoryNames.values.elementAt(0))
+            Log.i(TAG, "adding emoji category: " + j1 + " : " + IosEmojiProvider().categories[j1].categoryNames.values.elementAt(0))
             val emojis_cat_gropued: ArrayList<ArrayList<EmojiStrAndName>> = ArrayList()
-            emojis_cat_ = IosEmojiProvider().categories[j].emojis
+            emojis_cat_ = IosEmojiProvider().categories[j1].emojis
             grouped_entries = emojis_cat_.size / emojis_per_row
             remain = emojis_cat_.size - (grouped_entries * emojis_per_row)
             for (i in 0..(grouped_entries - 1))
@@ -1466,7 +1466,7 @@ fun main() = application(exitProcessOnExit = true) {
                 emojis_cat_gropued.add(e)
             }
             emojis_cat_all_gropued.add(emojis_cat_gropued)
-            val cat_name = IosEmojiProvider().categories[j].categoryNames.values.elementAt(0)
+            val cat_name = IosEmojiProvider().categories[j1].categoryNames.values.elementAt(0)
             emojis_cat_all_cat_names.add(cat_name)
             var cat_emoji: String
             try
