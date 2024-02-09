@@ -39,12 +39,14 @@ the latest Development Snapshot can be downloaded from [here](https://github.com
 
 ##  Features
 - One to one chat with friends
-- NGC (new group chats)
+- use Tor Proxy (to hide your IP address)
+- reliable File transfers
 - Drag & Drop for File transfers with friends
+- NGC (new group chats)
 - Group Images in NGC group chats
-- Group History Sync
+- Drag & Drop for Images in NGC group chats
+- Group History Sync (the last 130 minutes)
 - Notifications
-- File transfers
 - Screensharing
 - Audio calls
 - Noise Suppression for Audio Calls
