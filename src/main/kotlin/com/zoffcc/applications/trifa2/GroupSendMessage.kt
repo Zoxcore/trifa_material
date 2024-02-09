@@ -61,7 +61,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.vanniktech.emoji.search.SearchEmojiManager
-import com.zoffcc.applications.trifa.Log
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.briarproject.briar.desktop.ui.Tooltip
@@ -82,11 +81,12 @@ fun GroupSendMessage(focusRequester: FocusRequester, selectedGroupId: String?, s
     }
     val emoji_typing_box_offset_x_px_init = 2.dp.DpAsPx.toInt()
     var show_emoji_popup by remember { mutableStateOf(false) }
-    var show_typing_emoji_popup by remember { mutableStateOf(true) }
+    val show_typing_emoji_popup by remember { mutableStateOf(true) }
     var emoji_typing_box_offset_x_px by remember { mutableStateOf(emoji_typing_box_offset_x_px_init) }
     var emoji_typing_box_offset_y_px by remember { mutableStateOf(0) }
     emoji_typing_box_offset_x_px = emoji_typing_box_offset_x_px_init
     emoji_typing_box_offset_y_px = -(70.dp).DpAsPx.toInt()
+    @Suppress("UNUSED_VARIABLE")
     val single_letter = 5.dp.DpAsPx.toInt()
     if (show_typing_emoji_popup)
     {
@@ -126,7 +126,7 @@ fun GroupSendMessage(focusRequester: FocusRequester, selectedGroupId: String?, s
                                 var curtext by remember { mutableStateOf(placeholder) }
                                 val scope = rememberCoroutineScope()
                                 Tooltip(text = it.shortcode) {
-                                    Log.i(TAG, "" + it.shortcode + "  " + emojistr)
+                                    // Log.i(TAG, "" + it.shortcode + "  " + emojistr)
                                     IconButton(modifier = Modifier.width(40.dp).height(40.dp),
                                         onClick = {
                                             var li2 = -1
