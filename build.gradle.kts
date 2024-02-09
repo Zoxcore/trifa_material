@@ -7,7 +7,7 @@ plugins {
     kotlin("jvm")
     // kotlin("multiplatform")
     id("org.jetbrains.compose")
-    id("com.github.gmazzo.buildconfig") version "4.2.0"
+    id("com.github.gmazzo.buildconfig") version "5.3.5"
     id("org.ajoberstar.grgit") version "5.2.1"
 }
 
