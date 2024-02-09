@@ -23,7 +23,6 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.InsertEmoticon
 import androidx.compose.material.icons.filled.Screenshot
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Videocam
@@ -77,6 +76,7 @@ import com.zoffcc.applications.trifa.createGroupStore
 import com.zoffcc.applications.trifa.createSavepathStore
 import com.zoffcc.applications.trifa.createToxDataStore
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
@@ -105,6 +105,7 @@ val avstatestorecallstate = CoroutineScope(SupervisorJob()).createAVStateStoreCa
 val avstatestorevcapfpsstate = CoroutineScope(SupervisorJob()).createAVStateStoreVideoCaptureFpsState()
 val avstatestorevplayfpsstate = CoroutineScope(SupervisorJob()).createAVStateStoreVideoPlayFpsState()
 
+@OptIn(DelicateCoroutinesApi::class)
 @Composable
 fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolean = true, contactList: StateContacts, ui_scale: Float)
 {
@@ -218,8 +219,8 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                                 isDragging = false
                                 // Log.i(TAG, "dropping file here")
                                 if (value.dragData is DragData.FilesList) {
-                                    val newFiles = (value.dragData as DragData.FilesList).readFiles().mapNotNull {
-                                        URI(it).toPath().takeIf { it.exists(LinkOption.NOFOLLOW_LINKS) }
+                                    val newFiles = (value.dragData as DragData.FilesList).readFiles().mapNotNull { it1: String ->
+                                        URI(it1).toPath().takeIf { it.exists(LinkOption.NOFOLLOW_LINKS) }
                                     }
                                     newFiles.forEach{
                                         // Log.i(TAG, "dropped file: " + it.toAbsolutePath() + " " + it.parent.normalize().name + " " + it.fileName.name)
@@ -323,8 +324,8 @@ fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, s
                                 isDragging = false
                                 // Log.i(TAG, "dropping file here")
                                 if (value.dragData is DragData.FilesList) {
-                                    val newFiles = (value.dragData as DragData.FilesList).readFiles().mapNotNull {
-                                        URI(it).toPath().takeIf { it.exists(LinkOption.NOFOLLOW_LINKS) }
+                                    val newFiles = (value.dragData as DragData.FilesList).readFiles().mapNotNull { it1: String ->
+                                        URI(it1).toPath().takeIf { it.exists(LinkOption.NOFOLLOW_LINKS) }
                                     }
                                     newFiles.forEach{
                                         // Log.i(TAG, "dropped file: " + it.toAbsolutePath() + " " + it.parent.normalize().name + " " + it.fileName.name)

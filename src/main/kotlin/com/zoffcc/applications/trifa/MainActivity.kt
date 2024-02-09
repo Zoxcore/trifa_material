@@ -167,7 +167,7 @@ class MainActivity
         @JvmStatic var video_play_count_frames: Long = 0
         @JvmStatic var video_play_last_timestamp: Long = 0
         var video_play_fps_value: Int = 0
-        @JvmStatic val video_play_measure_after_frame = 5;
+        @JvmStatic val video_play_measure_after_frame = 5
         const val ngc_audio_in_queue_max_capacity = 10
         var audio_queue_full_trigger = false
         var audio_queue_play_trigger = true
@@ -239,7 +239,7 @@ class MainActivity
             try
             {
                 Thread.currentThread().name = "t_main"
-            } catch (e: Exception)
+            } catch (_: Exception)
             {
             }
             Log.i(TAG, "java.library.path:" + System.getProperty("java.library.path"))
@@ -442,7 +442,7 @@ class MainActivity
                         {
                             Log.i(TAG, "jninotifications version: " + NTFYActivity.jninotifications_version())
                         }
-                        catch(e: Exception)
+                        catch(_: Exception)
                         {
                         }
                     }
@@ -452,17 +452,17 @@ class MainActivity
 
         class send_message_result
         {
-            @kotlin.jvm.JvmField
+            @JvmField
             var msg_num: Long = 0
-            @kotlin.jvm.JvmField
+            @JvmField
             var msg_v2 = false
-            @kotlin.jvm.JvmField
+            @JvmField
             var msg_hash_hex: String? = null
-            @kotlin.jvm.JvmField
+            @JvmField
             var msg_hash_v3_hex: String? = null
-            @kotlin.jvm.JvmField
+            @JvmField
             var raw_message_buf_hex: String? = null
-            @kotlin.jvm.JvmField
+            @JvmField
             var error_num: Long = 0
         }
 
@@ -1073,6 +1073,7 @@ class MainActivity
         // -------- called by AV native methods --------
         // -------- called by AV native methods --------
         // -------- called by AV native methods --------
+        @Suppress("unused")
         @JvmStatic
         fun android_toxav_callback_call_cb_method(friend_number: Long, audio_enabled: Int, video_enabled: Int)
         {
@@ -1106,7 +1107,7 @@ class MainActivity
             if (avstatestore.state.calling_state_get() != AVState.CALL_STATUS.CALL_STATUS_CALLING)
             {
                 // we are not in a call, ignore incoming video frames
-                return;
+                return
             }
 
             val y_layer_size = Math.max(frame_width_px, Math.abs(ystride)).toInt() * frame_height_px.toInt()
@@ -1137,12 +1138,13 @@ class MainActivity
                     avstatestorevplayfpsstate.updateIncomingResolution("" + frame_width_px + "x" + frame_height_px)
                 }
             }
-            catch(e: Exception)
+            catch(_: Exception)
             {
             }
         }
 
         @OptIn(DelicateCoroutinesApi::class)
+        @Suppress("unused")
         @JvmStatic
         fun android_toxav_callback_call_state_cb_method(friend_number: Long, a_TOXAV_FRIEND_CALL_STATE: Int)
         {
@@ -1233,6 +1235,7 @@ class MainActivity
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_toxav_callback_bit_rate_status_cb_method(friend_number: Long, audio_bit_rate: Long, video_bit_rate: Long)
         {
         }
@@ -1257,12 +1260,12 @@ class MainActivity
                 (channels != AudioSelectOutBox.CHANNELS) || (_recBuffer == null) ||
                 (sample_count.toInt() == 0))
             {
-                Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:11:1");
-                _recBuffer = ByteBuffer.allocateDirect((10000 * 2 * channels));
+                Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:11:1")
+                _recBuffer = ByteBuffer.allocateDirect((10000 * 2 * channels))
                 set_JNI_audio_buffer2(_recBuffer)
                 AudioSelectOutBox.init()
                 AudioSelectOutBox.change_audio_format(sampling_rate.toInt(), channels)
-                Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:11:2");
+                Log.i(TAG, "android_toxav_callback_audio_receive_frame_cb_method:11:2")
             }
 
             if (sampling_rate.toInt() != AudioSelectOutBox.SAMPLE_RATE ||
@@ -1328,29 +1331,34 @@ class MainActivity
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_toxav_callback_audio_receive_frame_pts_cb_method(friend_number: Long, sample_count: Long, channels: Int, sampling_rate: Long, pts: Long)
         {
             android_toxav_callback_audio_receive_frame_cb_method(friend_number, sample_count, channels, sampling_rate)
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_toxav_callback_video_receive_frame_pts_cb_method(friend_number: Long, frame_width_px: Long, frame_height_px: Long, ystride: Long, ustride: Long, vstride: Long, pts: Long)
         {
             android_toxav_callback_video_receive_frame_cb_method(friend_number, frame_width_px, frame_height_px, ystride,
-                ustride, vstride);
+                ustride, vstride)
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_toxav_callback_video_receive_frame_h264_cb_method(friend_number: Long, buf_size: Long)
         {
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_toxav_callback_group_audio_receive_frame_cb_method(conference_number: Long, peer_number: Long, sample_count: Long, channels: Int, sampling_rate: Long)
         {
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_toxav_callback_call_comm_cb_method(friend_number: Long, a_TOXAV_CALL_COMM_INFO: Long, comm_number: Long)
         {
             if (a_TOXAV_CALL_COMM_INFO == ToxVars.TOXAV_CALL_COMM_INFO.TOXAV_CALL_COMM_DECODER_CURRENT_BITRATE.value.toLong())
@@ -1391,22 +1399,23 @@ class MainActivity
         // -------- called by native methods --------
         // -------- called by native methods --------
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_self_connection_status_cb_method(a_TOX_CONNECTION: Int)
         {
             global_self_connection_status = a_TOX_CONNECTION
             // Log.i(TAG, "android_tox_callback_self_connection_status_cb_method: " + a_TOX_CONNECTION)
             update_savedata_file_wrapper()
-            if (a_TOX_CONNECTION == ToxVars.TOX_CONNECTION.TOX_CONNECTION_TCP.value)
+            if (a_TOX_CONNECTION == TOX_CONNECTION.TOX_CONNECTION_TCP.value)
             {
-                global_self_last_went_offline_timestamp = -1;
+                global_self_last_went_offline_timestamp = -1
                 set_tox_online_state("tcp")
-            } else if (a_TOX_CONNECTION == ToxVars.TOX_CONNECTION.TOX_CONNECTION_UDP.value)
+            } else if (a_TOX_CONNECTION == TOX_CONNECTION.TOX_CONNECTION_UDP.value)
             {
-                global_self_last_went_offline_timestamp = -1;
+                global_self_last_went_offline_timestamp = -1
                 set_tox_online_state("udp")
             } else
             {
-                global_self_last_went_offline_timestamp = System.currentTimeMillis();
+                global_self_last_went_offline_timestamp = System.currentTimeMillis()
                 set_tox_online_state("offline")
                 if (avstatestore.state.call_with_friend_pubkey_get() != null)
                 {
@@ -1420,6 +1429,7 @@ class MainActivity
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_friend_name_cb_method(friend_number: Long, friend_name: String?, length: Long)
         {
             try
@@ -1431,6 +1441,7 @@ class MainActivity
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_friend_status_message_cb_method(friend_number: Long, status_message: String?, length: Long)
         {
             try
@@ -1447,6 +1458,7 @@ class MainActivity
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_friend_lossless_packet_cb_method(friend_number: Long, data: ByteArray?, length: Long)
         {
             if (length > 0)
@@ -1470,7 +1482,7 @@ class MainActivity
                 {
                     Log.i(TAG,
                           "android_tox_callback_friend_lossless_packet_cb_method:CONTROL_PROXY_MESSAGE_TYPE_PUSH_URL_FOR_FRIEND:len=" +
-                          length);
+                          length)
                     if (length > "https://".length + 1)
                     {
                         val pushurl = String(Arrays.copyOfRange(data, 1, data.size), StandardCharsets.UTF_8)
@@ -1490,10 +1502,12 @@ class MainActivity
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_friend_status_cb_method(friend_number: Long, a_TOX_USER_STATUS: Int)
         {
         }
 
+        @Suppress("unused")
         @JvmStatic
         fun android_tox_callback_friend_connection_status_cb_method(friend_number: Long, a_TOX_CONNECTION: Int)
         {
@@ -1523,7 +1537,7 @@ class MainActivity
                 try
                 {
                     val fpubkey = tox_friend_get_public_key(friend_number)
-                    var f = main_get_friend(friend_number)
+                    val f = main_get_friend(friend_number)
                     if (f != null)
                     {
                         val friend_capabilities = tox_friend_get_capabilities(friend_number)
@@ -1555,11 +1569,13 @@ class MainActivity
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_friend_typing_cb_method(friend_number: Long, typing: Int)
         {
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_friend_read_receipt_cb_method(friend_number: Long, message_id: Long)
         {
             Log.i(TAG, "friend_read_receipt:friend_number=" + friend_number + " message_id=" + message_id)
@@ -1575,22 +1591,22 @@ class MainActivity
                 if (get_friend_msgv3_capability(toxpk) == 1L)
                 {
                     // HINT: friend has msgV3 capability, ignore normal read receipts
-                    Log.i(TAG, "friend_read_receipt:msgV3:ignore low level ACK, friend:" + get_friend_name_from_num(friend_number));
+                    Log.i(TAG, "friend_read_receipt:msgV3:ignore low level ACK, friend:" + get_friend_name_from_num(friend_number))
                     return
                 }
                 // there can be older messages with same message_id for this friend! so always take the latest one! -------
                 val m = orma!!.selectFromMessage().message_idEq(message_id).
                     tox_friendpubkeyEq(toxpk).directionEq(1).orderByIdDesc().toList()[0]
                 // there can be older messages with same message_id for this friend! so always take the latest one! -------
-                Log.i(TAG, "friend_read_receipt:m=" + m);
-                Log.i(TAG, "friend_read_receipt:m:message_id=" + m.message_id + " text=" + m.text + " friendpubkey=" + m.tox_friendpubkey + " read=" + m.read + " direction=" + m.direction);
+                Log.i(TAG, "friend_read_receipt:m=" + m)
+                Log.i(TAG, "friend_read_receipt:m:message_id=" + m.message_id + " text=" + m.text + " friendpubkey=" + m.tox_friendpubkey + " read=" + m.read + " direction=" + m.direction)
                 if (m != null)
                 {
                     m.rcvd_timestamp = System.currentTimeMillis()
                     m.read = true
                     Log.i(TAG,
                           "friend_read_receipt:friend:" + get_friend_name_from_num(friend_number) + " message:" + m.text +
-                          " m=" + m);
+                          " m=" + m)
                     update_message_in_db_read_rcvd_timestamp_rawmsgbytes(m)
                     // TODO: update message in UI
                 }
@@ -1602,6 +1618,7 @@ class MainActivity
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_friend_request_cb_method(friend_public_key: String?, friend_request_message: String?, length: Long)
         {
             Log.i(TAG, "android_tox_callback_friend_request_cb_method: friend_public_key=" + friend_public_key)
@@ -1616,7 +1633,7 @@ class MainActivity
                         if (friend_public_key != null)
                         {
                             HelperFriend.add_friend_to_system(friend_public_key.toUpperCase(),
-                                false, null);
+                                false, null)
                         }
                     }
                     catch(_: Exception)
@@ -1635,6 +1652,7 @@ class MainActivity
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_friend_message_cb_method(friend_number: Long, message_type: Int, friend_message: String?, length: Long, msgV3hash_bin: ByteArray?, message_timestamp: Long)
         {
             // Log.i(TAG, "friend_message_cb_method: fn=" + friend_number + " friend_message=" + friend_message)
@@ -1668,7 +1686,7 @@ class MainActivity
 
             if (message_type == ToxVars.TOX_MESSAGE_TYPE.TOX_MESSAGE_TYPE_HIGH_LEVEL_ACK.value)
             {
-                process_msgv3_high_level_ack(friend_number, msgV3hash_hex_string, message_timestamp);
+                process_msgv3_high_level_ack(friend_number, msgV3hash_hex_string, message_timestamp)
                 return
             }
 
@@ -1707,7 +1725,7 @@ class MainActivity
                     {
                         // send high level ack only if the friend actually understand it
                         // and it's not a mirrored high level ACK
-                        HelperMessage.send_msgv3_high_level_ack(friend_number, msgV3hash_hex_string);
+                        HelperMessage.send_msgv3_high_level_ack(friend_number, msgV3hash_hex_string)
                     }
                     try
                     {
@@ -1754,6 +1772,7 @@ class MainActivity
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_friend_message_v2_cb_method(friend_number: Long, friend_message: String?, length: Long, ts_sec: Long, ts_ms: Long, raw_message: ByteArray?, raw_message_length: Long)
         {
             val toxpk = tox_friend_get_public_key(friend_number)!!.uppercase()
@@ -1805,20 +1824,23 @@ class MainActivity
             {
             }
             send_friend_msg_receipt_v2_wrapper(friend_number, msg_type,
-                msg_id_buffer, (pin_timestamp / 1000));
+                msg_id_buffer, (pin_timestamp / 1000))
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_friend_sync_message_v2_cb_method(friend_number: Long, ts_sec: Long, ts_ms: Long, raw_message: ByteArray?, raw_message_length: Long, raw_data: ByteArray?, raw_data_length: Long)
         {
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun sync_messagev2_send(friend_number: Long, raw_data: ByteArray?, raw_data_length: Long, raw_message_buf_wrapped: ByteBuffer?, msg_id_buffer: ByteBuffer?, real_sender_as_hex_string: String?)
         {
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_friend_read_receipt_message_v2_cb_method(friend_number: Long, ts_sec: Long, msg_id: ByteArray?)
         {
             val msg_id_buffer = ByteBuffer.allocateDirect(TOX_HASH_LENGTH)
@@ -1877,6 +1899,7 @@ class MainActivity
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_file_recv_control_cb_method(friend_number: Long, file_number: Long, a_TOX_FILE_CONTROL: Int)
         {
             if (a_TOX_FILE_CONTROL == ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_CANCEL.value)
@@ -1933,6 +1956,7 @@ class MainActivity
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_file_chunk_request_cb_method(friend_number: Long, file_number: Long, position: Long, length: Long)
         {
             global_last_activity_outgoung_ft_ts = System.currentTimeMillis()
@@ -2032,7 +2056,7 @@ class MainActivity
                                         {
                                             update_single_message_from_ftid(ft, true)
                                         }
-                                    } catch (e: java.lang.Exception)
+                                    } catch (_: java.lang.Exception)
                                     {
                                     }
                                 }
@@ -2185,6 +2209,7 @@ class MainActivity
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_file_recv_cb_method(friend_number: Long, file_number: Long, a_TOX_FILE_KIND: Int, file_size: Long, filename: String?, filename_length: Long)
         {
             if (a_TOX_FILE_KIND == ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_AVATAR.value)
@@ -2240,7 +2265,7 @@ class MainActivity
                     val ft_id: Long = insert_into_filetransfer_db(f)
                     f.id = ft_id
                     // TODO: we just accept incoming avatar, maybe make some checks first?
-                    tox_file_control(friend_number, file_number, ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_RESUME.value);
+                    tox_file_control(friend_number, file_number, ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_RESUME.value)
                 }
             } else  // DATA file ft
             {
@@ -2261,7 +2286,7 @@ class MainActivity
                 f.ft_outgoing_started = false // dummy for incoming FTs, but still set it here
                 f.current_position = 0
                 f.message_id = -1
-                val ft_id: Long = HelperFiletransfer.insert_into_filetransfer_db(f)
+                val ft_id: Long = insert_into_filetransfer_db(f)
                 Log.i(TAG, "file_recv:ft_id=$ft_id") // @formatter:off
                 Log.i(TAG, "DEBUG_FT:IN:file_recv:file_number=" +
                             file_number.toString() +
@@ -2285,7 +2310,7 @@ class MainActivity
                 m.ft_outgoing_queued = false
                 m.rcvd_timestamp = System.currentTimeMillis()
                 m.sent_timestamp = m.rcvd_timestamp
-                m.text = filename_corrected + "\n" + file_size + " bytes";
+                m.text = filename_corrected + "\n" + file_size + " bytes"
                 if (a_TOX_FILE_KIND == ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_FTV2.value)
                 {
                     m.filetransfer_kind = ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_FTV2.value
@@ -2298,7 +2323,7 @@ class MainActivity
                 try
                 {
                     new_msg_id = orma!!.insertIntoMessage(m)
-                } catch (e: Exception)
+                } catch (_: Exception)
                 {
                 }
                 m.id = new_msg_id
@@ -2337,10 +2362,12 @@ class MainActivity
             Log.i(TAG, "file_recv:incoming regular file:999")
         }
 
+        @OptIn(DelicateCoroutinesApi::class)
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_file_recv_chunk_cb_method(friend_number: Long, file_number: Long, position: Long, data: ByteArray?, length: Long)
         {
-            global_last_activity_outgoung_ft_ts = System.currentTimeMillis();
+            global_last_activity_outgoung_ft_ts = System.currentTimeMillis()
             val friend_pk = tox_friend_get_public_key(friend_number)
             var f: Filetransfer? = null
 
@@ -2404,12 +2431,12 @@ class MainActivity
                                 update_single_message_from_messge_id(msg_id, f.filesize, true)
                                 Log.i(TAG, "update FT ----==========>>> file DONE " + VFS_FILE_DIR + "/" + f.tox_public_key_string + "/" + f.file_name)
                             }
-                        } catch (e: java.lang.Exception)
+                        } catch (_: java.lang.Exception)
                         {
                         }
                     } // remove FT from DB
                     HelperFiletransfer.delete_filetransfers_from_friendnum_and_filenum(friend_number, file_number)
-                } catch (e2: java.lang.Exception)
+                } catch (_: java.lang.Exception)
                 {
                 }
             } else  // normal chunck recevied ---------- (NOT start, and NOT end)
@@ -2439,7 +2466,7 @@ class MainActivity
                                     fos.write(data)
                                     fos.close()
                                 }
-                            } catch (ex: java.lang.Exception)
+                            } catch (_: java.lang.Exception)
                             {
                             }
                         }
@@ -2460,7 +2487,7 @@ class MainActivity
                                                 // Log.i(TAG, "update FT ----==========>>> file pos=" + position + " " + VFS_FILE_DIR + "/" + f.tox_public_key_string + "/" + f.file_name)
                                             }
                                         }
-                                    } catch (e: java.lang.Exception)
+                                    } catch (_: java.lang.Exception)
                                     {
                                     }
                                 }
@@ -2483,25 +2510,26 @@ class MainActivity
 
                                             }
                                         }
-                                    } catch (e: java.lang.Exception)
+                                    } catch (_: java.lang.Exception)
                                     {
                                     }
                                 }
                             }
                         }
                     }
-                } catch (e: java.lang.Exception)
+                } catch (_: java.lang.Exception)
                 {
                 }
             }
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_log_cb_method(a_TOX_LOG_LEVEL: Int, file: String?, line: Long, function: String?, message: String?)
         {
             if (CTOXCORE_NATIVE_LOGGING)
             {
-                Log.i(TAG, "C-TOXCORE:" + ToxVars.TOX_LOG_LEVEL.value_str(a_TOX_LOG_LEVEL) + ":file=" + file + ":linenum=" + line + ":func=" + function + ":msg=" + message);
+                Log.i(TAG, "C-TOXCORE:" + ToxVars.TOX_LOG_LEVEL.value_str(a_TOX_LOG_LEVEL) + ":file=" + file + ":linenum=" + line + ":func=" + function + ":msg=" + message)
             }
         }
 
@@ -2512,36 +2540,43 @@ class MainActivity
         // -------- called by native Conference methods --------
         // -------- called by native Conference methods --------
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_conference_invite_cb_method(friend_number: Long, a_TOX_CONFERENCE_TYPE: Int, cookie_buffer: ByteArray?, cookie_length: Long)
         {
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_conference_connected_cb_method(conference_number: Long)
         {
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_conference_message_cb_method(conference_number: Long, peer_number: Long, a_TOX_MESSAGE_TYPE: Int, message_orig: String?, length: Long)
         {
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_conference_title_cb_method(conference_number: Long, peer_number: Long, title: String?, title_length: Long)
         {
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_conference_peer_name_cb_method(conference_number: Long, peer_number: Long, name: String?, name_length: Long)
         {
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_conference_peer_list_changed_cb_method(conference_number: Long)
         {
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_conference_namelist_change_cb_method(conference_number: Long, peer_number: Long, a_TOX_CONFERENCE_STATE_CHANGE: Int)
         {
         }
@@ -2552,8 +2587,8 @@ class MainActivity
         // -------- called by native new Group methods --------
         // -------- called by native new Group methods --------
         // -------- called by native new Group methods --------
-        @OptIn(DelicateCoroutinesApi::class)
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_group_message_cb_method(group_number: Long, peer_id: Long, a_TOX_MESSAGE_TYPE: Int, message_orig: String?, length: Long, message_id: Long)
         {
             val res = tox_group_self_get_peer_id(group_number)
@@ -2590,12 +2625,14 @@ class MainActivity
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_group_private_message_cb_method(group_number: Long, peer_id: Long, a_TOX_MESSAGE_TYPE: Int, message_orig: String?, length: Long)
         {
             // TODO: write me!!
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_group_privacy_state_cb_method(group_number: Long, a_TOX_GROUP_PRIVACY_STATE: Int)
         {
             try
@@ -2613,6 +2650,7 @@ class MainActivity
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_group_invite_cb_method(friend_number: Long, invite_data: ByteArray?, invite_data_length: Long, group_name: String?)
         {
             val invite_data_buf_wrapped = ByteBuffer.allocateDirect(invite_data_length.toInt())
@@ -2637,6 +2675,7 @@ class MainActivity
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_group_peer_join_cb_method(group_number: Long, peer_id: Long)
         {
             val group_id = tox_group_by_groupnum__wrapper(group_number)
@@ -2679,6 +2718,7 @@ class MainActivity
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_group_peer_exit_cb_method(group_number: Long, peer_id: Long, a_Tox_Group_Exit_Type: Int)
         {
             try
@@ -2711,6 +2751,7 @@ class MainActivity
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_group_peer_name_cb_method(group_number: Long, peer_id: Long)
         {
             try
@@ -2735,6 +2776,7 @@ class MainActivity
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_group_join_fail_cb_method(group_number: Long, a_Tox_Group_Join_Fail: Int)
         {
             try
@@ -2752,6 +2794,7 @@ class MainActivity
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_group_self_join_cb_method(group_number: Long)
         {
             try
@@ -2770,12 +2813,14 @@ class MainActivity
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_group_moderation_cb_method(group_number: Long, source_peer_id: Long, target_peer_id: Long, a_Tox_Group_Mod_Event: Int)
         {
             // ** this happens non stop, so don't save here ** // update_savedata_file_wrapper()
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_group_connection_status_cb_method(group_number: Long, a_TOX_GROUP_CONNECTION_STATUS: Int)
         {
             try
@@ -2792,17 +2837,19 @@ class MainActivity
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_group_topic_cb_method(group_number: Long, peer_id: Long, topic: String?, topic_length: Long)
         {
             update_savedata_file_wrapper()
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_group_custom_packet_cb_method(group_number: Long, peer_id: Long, data: ByteArray?, length: Long)
         {
             if (data == null)
             {
-                return;
+                return
             }
 
             try
@@ -2814,7 +2861,7 @@ class MainActivity
                     Log.i(TAG, "group_custom_packet_cb:gn=$group_number peerid=$peer_id ignoring own packet")
                     return
                 }
-            } catch (e: java.lang.Exception)
+            } catch (_: java.lang.Exception)
             {
             }
 
@@ -2935,6 +2982,7 @@ class MainActivity
         }
 
         @JvmStatic
+        @Suppress("unused")
         fun android_tox_callback_group_custom_private_packet_cb_method(group_number: Long, peer_id: Long, data: ByteArray?, length: Long)
         {
             try
@@ -2946,7 +2994,7 @@ class MainActivity
                     Log.i(TAG, "group_custom_private_packet_cb:gn=$group_number peerid=$peer_id ignoring own packet")
                     return
                 }
-            } catch (e: java.lang.Exception)
+            } catch (_: java.lang.Exception)
             {
             }
             // check for correct signature of packets
@@ -2980,7 +3028,7 @@ class MainActivity
                     val privacy_state = tox_group_get_privacy_state(group_number)
                     if (privacy_state == ToxVars.TOX_GROUP_PRIVACY_STATE.TOX_GROUP_PRIVACY_STATE_PUBLIC.value)
                     {
-                        sync_group_message_history(group_number, peer_id);
+                        sync_group_message_history(group_number, peer_id)
                     } else
                     {
                         Log.i(TAG, "group_custom_private_packet_cb: only sync history for public groups!")
@@ -2991,15 +3039,15 @@ class MainActivity
                     if (length >= header_syncmsg + 1)
                     {
                         // Log.i(TAG, "group_custom_private_packet_cb: got ngch_syncmsg");
-                        handle_incoming_sync_group_message(group_number, peer_id, data, length);
+                        handle_incoming_sync_group_message(group_number, peer_id, data, length)
                     }
                 } else if (data[6] == 0x1.toByte() && data[7] == 0x3.toByte())
                 {
                     val header_syncfile = 6 + 1 + 1 + 32 + 32 + 4 + 25 + 255
                     if (length >= header_syncfile + 1)
                     {
-                        Log.i(TAG, "group_custom_private_packet_cb: got ngch_syncfile");
-                        handle_incoming_sync_group_file(group_number, peer_id, data, length);
+                        Log.i(TAG, "group_custom_private_packet_cb: got ngch_syncfile")
+                        handle_incoming_sync_group_file(group_number, peer_id, data, length)
                     }
                 }
             }
@@ -3063,7 +3111,7 @@ class MainActivity
                     HelperNotification.displayNotification("new Message" + fname)
                     globalstore.increase_unread_message_count()
                 }
-            } catch (e: Exception)
+            } catch (_: Exception)
             {
             }
 
@@ -3122,7 +3170,7 @@ class MainActivity
                     HelperNotification.displayNotification("new Group Message" + grptitle)
                     globalstore.increase_unread_group_message_count()
                 }
-            } catch (e: Exception)
+            } catch (_: Exception)
             {
             }
 
@@ -3253,7 +3301,7 @@ class MainActivity
             m.was_synced = false
             m.path_name = ofw.filepath_wrapped
             m.file_name = ofw.filename_wrapped
-            m.filename_fullpath = File(ofw.filepath_wrapped + "/" + ofw.filename_wrapped).getAbsolutePath()
+            m.filename_fullpath = File(ofw.filepath_wrapped + "/" + ofw.filename_wrapped).absolutePath
             try
             {
                 m.filesize = File(ofw.filepath_wrapped + "/" + ofw.filename_wrapped).length()
@@ -3269,7 +3317,7 @@ class MainActivity
             try
             {
                 row_id = orma!!.insertIntoGroupMessage(m)
-            } catch (e: Exception)
+            } catch (_: Exception)
             {
             }
             Log.i(TAG, "add_outgoing_file:090")
@@ -3357,7 +3405,7 @@ class MainActivity
             try
             {
                 new_msg_id = orma!!.insertIntoMessage(m)
-            } catch (e: Exception)
+            } catch (_: Exception)
             {
             }
             m.id = new_msg_id
@@ -3404,8 +3452,8 @@ class MainActivity
             {
                 m.tox_group_peername = peername
             }
-            m.private_message = 0;
-            m.group_identifier = groupid;
+            m.private_message = 0
+            m.group_identifier = groupid
             m.TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value
             m.sent_timestamp = System.currentTimeMillis()
             m.rcvd_timestamp = System.currentTimeMillis() // since we do not have anything better assume "now"
@@ -3416,7 +3464,7 @@ class MainActivity
             try
             {
                 row_id = orma!!.insertIntoGroupMessage(m)
-            } catch (e: Exception)
+            } catch (_: Exception)
             {
             }
 

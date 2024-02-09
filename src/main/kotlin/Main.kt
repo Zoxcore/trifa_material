@@ -203,17 +203,17 @@ val GROUPS_COLUMN_WIDTH = 200.dp
 val GROUP_PEER_COLUMN_WIDTH = 180.dp
 val MESAGE_INPUT_LINE_HEIGHT = 58.dp
 val MAIN_TOP_TAB_HEIGHT = 160.dp
-val IMAGE_PREVIEW_SIZE = 70f
-val AVATAR_SIZE = 40f
-val MAX_AVATAR_SIZE = 70f
+const val IMAGE_PREVIEW_SIZE = 70f
+const val AVATAR_SIZE = 40f
+const val MAX_AVATAR_SIZE = 70f
 val SPACE_AFTER_LAST_MESSAGE = 2.dp
 val SPACE_BEFORE_FIRST_MESSAGE = 10.dp
-val CAPTURE_VIDEO_FPS = 15
-val CAPTURE_VIDEO_HIGH_FPS = 30
+const val CAPTURE_VIDEO_FPS = 15
+const val CAPTURE_VIDEO_HIGH_FPS = 30
 val VIDEO_IN_BOX_WIDTH_SMALL = 80.dp
 val VIDEO_IN_BOX_HEIGHT_SMALL = 80.dp
-val VIDEO_IN_BOX_WIDTH_FRACTION_SMALL = 0.3f
-val VIDEO_IN_BOX_WIDTH_FRACTION_BIG = 0.9f
+const val VIDEO_IN_BOX_WIDTH_FRACTION_SMALL = 0.3f
+const val VIDEO_IN_BOX_WIDTH_FRACTION_BIG = 0.9f
 val VIDEO_IN_BOX_WIDTH_BIG = 800.dp
 val VIDEO_IN_BOX_HEIGHT_BIG = 3000.dp
 val VIDEO_OUT_BOX_WIDTH_SMALL = 130.dp
@@ -234,7 +234,7 @@ const val SNACKBAR_TOAST_MS_DURATION: Long = 1000
 var emojis_cat_all_gropued: ArrayList<ArrayList<ArrayList<EmojiStrAndName>>> = ArrayList()
 var emojis_cat_all_cat_names: ArrayList<String> = ArrayList()
 var emojis_cat_all_cat_emoji: ArrayList<String> = ArrayList()
-val emojis_per_row = 6
+const val emojis_per_row = 6
 val ImageloaderDispatcher = Executors.newFixedThreadPool(5).asCoroutineDispatcher()
 var global_semaphore_contactlist_ui = CustomSemaphore(1)
 var global_semaphore_grouppeerlist_ui = CustomSemaphore(1)
@@ -311,15 +311,15 @@ fun App()
                                         start_button_text = tox_running_state
                                         tox_running_state_wrapper = tox_running_state
                                         start_button_text_wrapper = start_button_text
-                                        Log.i(TAG, "----> tox_running_state = $tox_running_state_wrapper");
+                                        Log.i(TAG, "----> tox_running_state = $tox_running_state_wrapper")
                                         Thread {
-                                            Log.i(TAG, "waiting to stop ...");
+                                            Log.i(TAG, "waiting to stop ...")
                                             while (tox_running_state_wrapper != "stopped")
                                             {
                                                 Thread.sleep(100)
-                                                Log.i(TAG, "waiting ...");
+                                                Log.i(TAG, "waiting ...")
                                             }
-                                            Log.i(TAG, "is stopped now");
+                                            Log.i(TAG, "is stopped now")
                                             tox_running_state = tox_running_state_wrapper
                                             start_button_text = "start"
                                         }.start()
@@ -331,15 +331,15 @@ fun App()
                                         start_button_text = tox_running_state
                                         tox_running_state_wrapper = tox_running_state
                                         start_button_text_wrapper = start_button_text
-                                        Log.i(TAG, "----> tox_running_state = $tox_running_state_wrapper");
+                                        Log.i(TAG, "----> tox_running_state = $tox_running_state_wrapper")
                                         Thread {
-                                            Log.i(TAG, "waiting to startup ...");
+                                            Log.i(TAG, "waiting to startup ...")
                                             while (tox_running_state_wrapper != "running")
                                             {
                                                 Thread.sleep(100)
-                                                Log.i(TAG, "waiting ...");
+                                                Log.i(TAG, "waiting ...")
                                             }
-                                            Log.i(TAG, "is started now");
+                                            Log.i(TAG, "is started now")
                                             tox_running_state = tox_running_state_wrapper
                                             start_button_text = "stop"
                                         }.start()
@@ -679,7 +679,7 @@ fun App()
                         var expanded_vs by remember { mutableStateOf(false) }
                         val audio_in_devices by remember { mutableStateOf(ArrayList<String>()) }
                         val audio_in_sources by remember { mutableStateOf(ArrayList<AVActivity.ffmpegav_descrid>()) }
-                        var video_in_devices by remember { mutableStateOf(ArrayList<String>()) }
+                        val video_in_devices by remember { mutableStateOf(ArrayList<String>()) }
                         val video_in_sources by remember { mutableStateOf(ArrayList<AVActivity.ffmpegav_descrid>()) }
                         Column(modifier = Modifier.padding(5.dp).randomDebugBorder()) {
                             Text(text = "audio capture: " + avstatestore.state.audio_in_device_get() + " " + avstatestore.state.audio_in_source_get()
@@ -737,7 +737,7 @@ fun App()
                                             {
                                                 val tmp0 = AVActivity.ffmpegav_descrid()
                                                 tmp0.id = "default"
-                                                var tmp2 = ArrayList<AVActivity.ffmpegav_descrid>()
+                                                val tmp2 = ArrayList<AVActivity.ffmpegav_descrid>()
                                                 tmp2.add(tmp0)
                                                 audio_in_sources_get = tmp2.toTypedArray()
                                             }
@@ -748,7 +748,7 @@ fun App()
                                         }
                                         else if (avstatestore.state.audio_in_device_get() == JAVA_AUDIO_IN_DEVICE_NAME)
                                         {
-                                            var tmp2 = ArrayList<AVActivity.ffmpegav_descrid>()
+                                            val tmp2 = ArrayList<AVActivity.ffmpegav_descrid>()
                                             tmp.iterator().forEach() {
                                                 if ((it != null) && (it.id != null))
                                                 {
@@ -762,7 +762,7 @@ fun App()
                                         }
                                         else
                                         {
-                                            var tmp2 = ArrayList<AVActivity.ffmpegav_descrid>()
+                                            val tmp2 = ArrayList<AVActivity.ffmpegav_descrid>()
                                             tmp.iterator().forEach() {
                                                 if ((it != null) && (it.id != null))
                                                 {
@@ -870,7 +870,7 @@ fun App()
                                             }
                                             else
                                             {
-                                                var tmp2 = ArrayList<AVActivity.ffmpegav_descrid>()
+                                                val tmp2 = ArrayList<AVActivity.ffmpegav_descrid>()
                                                 tmp.iterator().forEach() {
                                                     if ((it != null) && (it.id != null))
                                                     {
@@ -889,7 +889,7 @@ fun App()
                                             }
                                             else
                                             {
-                                                var tmp2 = ArrayList<AVActivity.ffmpegav_descrid>()
+                                                val tmp2 = ArrayList<AVActivity.ffmpegav_descrid>()
                                                 tmp.iterator().forEach() {
                                                     if ((it != null) && (it.id != null))
                                                     {
@@ -991,7 +991,7 @@ fun App()
                             modifier = Modifier.size(200.dp, 5.dp),
                             factory = {
                                 JPanel(SingleComponentAspectRatioKeeperLayout(), true).apply {
-                                    add(AudioBar.audio_out_bar)
+                                    add(audio_out_bar)
                                     AudioBar.set_bar_bgcolor(audio_bar_bgcolor.toArgb(), audio_out_bar)
                                 }
                             },
@@ -1002,7 +1002,7 @@ fun App()
                             modifier = Modifier.size(200.dp, 5.dp),
                             factory = {
                                 JPanel(SingleComponentAspectRatioKeeperLayout(), true).apply {
-                                    add(AudioBar.audio_in_bar)
+                                    add(audio_in_bar)
                                     AudioBar.set_bar_bgcolor(audio_bar_bgcolor.toArgb(), audio_in_bar)
                                 }
                             },
@@ -1248,7 +1248,7 @@ fun load_groupmessages_for_friend(selectedGroupId: String?)
             }
             // Thread.sleep(4000)
             groupmessagestore.send(GroupMessageAction.ReceiveMessagesBulkWithClear(uigroupmessages, groupid))
-        } catch (e: Exception)
+        } catch (_: Exception)
         {
         }
     }
@@ -1346,7 +1346,7 @@ fun set_tox_running_state(new_state: String)
 {
     tox_running_state_wrapper = new_state
     start_button_text_wrapper = tox_running_state_wrapper
-    Log.i(TAG, "----> tox_running_state = $tox_running_state_wrapper");
+    Log.i(TAG, "----> tox_running_state = $tox_running_state_wrapper")
     if (tox_running_state_wrapper == "stopped")
     {
         online_button_color_wrapper = Color.White.toArgb()
@@ -1374,7 +1374,7 @@ fun set_tox_online_state(new_state: String)
     {
         online_button_color_wrapper = Color.Red.toArgb()
     }
-    Log.i(TAG, "----> tox_online_state = $online_button_text_wrapper");
+    Log.i(TAG, "----> tox_online_state = $online_button_text_wrapper")
 }
 
 fun main() = application(exitProcessOnExit = true) {
@@ -1405,7 +1405,7 @@ fun main() = application(exitProcessOnExit = true) {
 
     try {
         set_resouces_dir(RESOURCESDIR.canonicalPath)
-    } catch(e: Exception) {}
+    } catch(_: Exception) {}
 
     try
     {
@@ -1436,7 +1436,7 @@ fun main() = application(exitProcessOnExit = true) {
                     em.name = ""
                     try
                     {
-                        em.name = emojis_cat_[pos + j].shortcodes.get(0)
+                        em.name = emojis_cat_[pos + j].shortcodes[0]
                     }
                     catch(_: java.lang.Exception)
                     {
@@ -1808,19 +1808,19 @@ private fun MainAppStart()
                                 set_tox_running_state("stopping ...")
                                 TrifaToxService.stop_me = true
                                 runBlocking(Dispatchers.Default) {
-                                    Log.i(TAG, "waiting to shutdown ...");
+                                    Log.i(TAG, "waiting to shutdown ...")
                                     while (tox_running_state_wrapper != "stopped")
                                     {
                                         delay(100)
-                                        Log.i(TAG, "waiting ...");
+                                        Log.i(TAG, "waiting ...")
                                     }
-                                    Log.i(TAG, "closing application");
+                                    Log.i(TAG, "closing application")
                                     closing_application = true
                                     isOpen = false
                                 }
                             } else
                             {
-                                Log.i(TAG, "closing application");
+                                Log.i(TAG, "closing application")
                                 isOpen = false
                                 closing_application = true
                             }

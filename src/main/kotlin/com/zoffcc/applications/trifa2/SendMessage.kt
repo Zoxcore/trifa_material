@@ -31,6 +31,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.InsertEmoticon
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.Composable
@@ -107,11 +108,12 @@ fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?, 
     }
     val emoji_typing_box_offset_x_px_init = 2.dp.DpAsPx.toInt()
     var show_emoji_popup by remember { mutableStateOf(false) }
-    var show_typing_emoji_popup by remember { mutableStateOf(true) }
+    val show_typing_emoji_popup by remember { mutableStateOf(true) }
     var emoji_typing_box_offset_x_px by remember { mutableStateOf(emoji_typing_box_offset_x_px_init) }
     var emoji_typing_box_offset_y_px by remember { mutableStateOf(0) }
     emoji_typing_box_offset_x_px = emoji_typing_box_offset_x_px_init
     emoji_typing_box_offset_y_px = -(70.dp).DpAsPx.toInt()
+    @Suppress("UNUSED_VARIABLE")
     val single_letter = 5.dp.DpAsPx.toInt()
     if (show_typing_emoji_popup)
     {
@@ -151,7 +153,7 @@ fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?, 
                                 var curtext by remember { mutableStateOf(placeholder) }
                                 val scope = rememberCoroutineScope()
                                 Tooltip(text = it.shortcode) {
-                                    Log.i(TAG, "" + it.shortcode + "  " + emojistr)
+                                    // Log.i(TAG, "" + it.shortcode + "  " + emojistr)
                                     IconButton(modifier = Modifier.width(40.dp).height(40.dp),
                                         onClick = {
                                             var li2 = -1
@@ -282,7 +284,7 @@ fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?, 
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Send,
+                            imageVector = Icons.AutoMirrored.Filled.Send,
                             contentDescription = "Send",
                             tint = MaterialTheme.colors.primary
                         )
