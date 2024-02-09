@@ -28,6 +28,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.InsertEmoticon
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.Composable
@@ -221,7 +222,7 @@ fun GroupSendMessage(focusRequester: FocusRequester, selectedGroupId: String?, s
                     verticalAlignment = Alignment.CenterVertically,
                         ) {
                         Icon(
-                            imageVector = Icons.Default.Send,
+                            imageVector = Icons.AutoMirrored.Filled.Send,
                             contentDescription = "Send",
                             tint = MaterialTheme.colors.primary
                         )
