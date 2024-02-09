@@ -8,7 +8,7 @@ plugins {
     // kotlin("multiplatform")
     id("org.jetbrains.compose")
     id("com.github.gmazzo.buildconfig") version "4.2.0"
-    id("org.ajoberstar.grgit") version "4.1.0"
+    id("org.ajoberstar.grgit") version "5.2.1"
 }
 
 group = "com.zoffcc.applications.trifa_material"
