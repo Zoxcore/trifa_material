@@ -1,12 +1,35 @@
 # Changelog
 
-## [Unreleased](https://github.com/Zoxcore/trifa_material/tree/HEAD)
+## [v1.0.20](https://github.com/Zoxcore/trifa_material/tree/v1.0.20) (2024-02-10)
 
-[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.19...HEAD)
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.19...v1.0.20)
+
+**Closed issues:**
+
+- Feedback [\#81](https://github.com/Zoxcore/trifa_material/issues/81)
 
 **Merged pull requests:**
 
+- fix CI upload action upgrade [\#147](https://github.com/Zoxcore/trifa_material/pull/147) ([zoff99](https://github.com/zoff99))
+- update gradle wrapper [\#146](https://github.com/Zoxcore/trifa_material/pull/146) ([zoff99](https://github.com/zoff99))
+- add some suppressions, fix some warnings, revert vector image, remove some unused imports [\#145](https://github.com/Zoxcore/trifa_material/pull/145) ([zoff99](https://github.com/zoff99))
+- update dependencies and fix some warnings [\#144](https://github.com/Zoxcore/trifa_material/pull/144) ([zoff99](https://github.com/zoff99))
+- Bump actions/upload-artifact from 3 to 4 [\#143](https://github.com/Zoxcore/trifa_material/pull/143) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump actions/checkout from 3 to 4 [\#142](https://github.com/Zoxcore/trifa_material/pull/142) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump actions/download-artifact from 3 to 4 [\#141](https://github.com/Zoxcore/trifa_material/pull/141) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump gradle/wrapper-validation-action from 1 to 2 [\#140](https://github.com/Zoxcore/trifa_material/pull/140) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump actions/setup-java from 3 to 4 [\#139](https://github.com/Zoxcore/trifa_material/pull/139) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump com.github.gmazzo.buildconfig from 4.2.0 to 5.3.5 [\#138](https://github.com/Zoxcore/trifa_material/pull/138) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump org.ajoberstar.grgit from 4.1.0 to 5.2.1 [\#137](https://github.com/Zoxcore/trifa_material/pull/137) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update to compose.version 1.6.0-beta02 [\#136](https://github.com/Zoxcore/trifa_material/pull/136) ([zoff99](https://github.com/zoff99))
+- Update README.md [\#135](https://github.com/Zoxcore/trifa_material/pull/135) ([zoff99](https://github.com/zoff99))
+- emoji search while typing popup and updates [\#134](https://github.com/Zoxcore/trifa_material/pull/134) ([zoff99](https://github.com/zoff99))
+- Update README.md [\#133](https://github.com/Zoxcore/trifa_material/pull/133) ([zoff99](https://github.com/zoff99))
+- update ffmpeg\_av [\#132](https://github.com/Zoxcore/trifa_material/pull/132) ([zoff99](https://github.com/zoff99))
+- add debugging for compose recomposing [\#131](https://github.com/Zoxcore/trifa_material/pull/131) ([zoff99](https://github.com/zoff99))
+- add changelog generator [\#130](https://github.com/Zoxcore/trifa_material/pull/130) ([zoff99](https://github.com/zoff99))
 - add changelog generator [\#129](https://github.com/Zoxcore/trifa_material/pull/129) ([zoff99](https://github.com/zoff99))
+- Translations update from Hosted Weblate [\#123](https://github.com/Zoxcore/trifa_material/pull/123) ([weblate](https://github.com/weblate))
 
 ## [v1.0.19](https://github.com/Zoxcore/trifa_material/tree/v1.0.19) (2024-02-08)
 
