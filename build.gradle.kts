@@ -8,6 +8,7 @@ plugins {
     id("org.jetbrains.compose")
     id("com.github.gmazzo.buildconfig") version "5.3.5"
     id("org.ajoberstar.grgit") version "5.2.1"
+    id("io.gitlab.arturbosch.detekt") version("1.23.3")
 }
 
 group = "com.zoffcc.applications.trifa_material"
@@ -18,6 +19,10 @@ repositories {
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     google()
+}
+
+detekt {
+    config.setFrom(file("config/detekt/detekt.yml"))
 }
 
 buildConfig {
