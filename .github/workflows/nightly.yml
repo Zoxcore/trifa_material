@@ -340,6 +340,7 @@ jobs:
         with:
           name: trifa-material_nightly.msi
           path: trifa-material_nightly.msi
+          overwrite: true
 
       - name: Rename artifact for release upload
         if: contains(github.ref, 'refs/tags/v')
