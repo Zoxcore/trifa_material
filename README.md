@@ -53,6 +53,7 @@ the latest Development Snapshot can be downloaded from [here](https://github.com
 - Video calls
 - Screenshots
 - Emoticons
+- Emoji Popup while you type (activate by typing ```:smile``` for example)
 - And many more options!
 
 
