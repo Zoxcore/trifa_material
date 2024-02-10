@@ -620,7 +620,7 @@ jobs:
         - name: upload-screenshots
           uses: actions/upload-artifact@v4
           with:
-            name: screenshot-linux
+            name: screenshot-linux_before_wm
             path: /tmp/screenshot-linux_before_wm.png
 
         - name: Upload to nightly release
