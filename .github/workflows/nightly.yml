@@ -620,8 +620,9 @@ jobs:
         - name: upload-screenshots
           uses: actions/upload-artifact@v4
           with:
-            name: screenshot-linux_before_wm
+            name: screenshot-linux
             path: /tmp/screenshot-linux_before_wm.png
+            overwrite: true
 
         - name: Upload to nightly release
           uses: ncipollo/release-action@v1
