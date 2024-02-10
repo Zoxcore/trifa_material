@@ -100,7 +100,7 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                                 Text(
                                     text = groupmessage.user.name,
                                     style = MaterialTheme.typography.body1.copy(
-                                        shadow = if (groupmessage.user.color.luminance() > 0.935f) Shadow(Color.Black, offset = Offset.Zero, blurRadius = 2.4f) else Shadow(),
+                                        shadow = if (groupmessage.user.color.luminance() > NGC_PEER_LUMINANCE_THRESHOLD_FOR_SHADOW) Shadow(Color.Black, offset = Offset.Zero, blurRadius = 2.4f) else Shadow(),
                                         fontWeight = FontWeight.SemiBold,
                                         letterSpacing = 0.sp,
                                         fontSize = 14.sp
