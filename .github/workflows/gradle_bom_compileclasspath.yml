@@ -1,0 +1,58 @@
+name: "BOM compileclasspath"
+
+on:
+  push:
+    paths-ignore:
+     - 'README.md'
+     - 'CHANGELOG.md'
+  pull_request:
+    paths-ignore:
+     - 'README.md'
+     - 'CHANGELOG.md'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: dummy
+        default: dummy
+
+jobs:
+  validation:
+    name: "BOM compileclasspath"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: pwd
+        run:  pwd; id -a
+
+      - name: generate BOM
+        run: |
+             ./gradlew -q dependencies --configuration compileClasspath
+
+      - name: save BOM to file
+        run: |
+             ./gradlew -q dependencies --configuration compileClasspath > bom_compileclasspath.txt
+
+
+      - name: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: bom_compileclasspath
+          path: |
+            bom_compileclasspath.txt
+
+      - name: Upload to nightly release
+        uses: ncipollo/release-action@v1
+        if: github.ref == 'refs/heads/master'
+        with:
+          allowUpdates: true
+          tag: nightly
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          prerelease: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "bom_compileclasspath.txt"
+

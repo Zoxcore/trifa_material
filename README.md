@@ -96,6 +96,17 @@ The Java and JNI parts are built here: https://github.com/zoff99/jni_notificatio
 ## arm64 macOS toxcore lib
 The lib for arm64 macOS is built on https://codemagic.io/
 
+## BOM (Bill of materials)
+What dependencies are used by trifa material:<br>
+https://github.com/Zoxcore/trifa_material/releases/download/nightly/bom_implementation.txt
+
+Full list of compile time dependencies:<br>
+https://github.com/Zoxcore/trifa_material/releases/download/nightly/bom_compileclasspath.txt
+
+Full list of run time dependencies:<br>
+https://github.com/Zoxcore/trifa_material/releases/download/nightly/bom_runtimeclasspath.txt
+
+
 <br>
 Any use of this project's code by GitHub Copilot, past or present, is done
 without our permission.  We do not consent to GitHub's use of this project's
