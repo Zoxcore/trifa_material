@@ -86,12 +86,12 @@ jobs:
           cp -v ./build/compose/binaries/main*/deb/trifa-material_*_amd64.deb trifa-material_nightly.deb
           cp -v ./build/compose/binaries/main*/rpm/trifa_material-*.x86_64.rpm trifa-material_nightly.rpm
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: trifa-material_nightly.deb
           path: trifa-material_nightly.deb
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: trifa-material_nightly.rpm
           path: trifa-material_nightly.rpm
@@ -178,7 +178,7 @@ jobs:
         run: |
           cp -v ./trifa*material*AppImage trifa-material_nightly-x86_64.appimage
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: trifa-material_nightly-x86_64.appimage
           path: trifa-material_nightly-x86_64.appimage
@@ -252,7 +252,7 @@ jobs:
         run: |
           cp -v /Users/runner/work/trifa_material/trifa_material/build/compose/binaries/main*/dmg/trifa_material-*.dmg trifa-material_nightly.dmg
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: trifa-material_nightly.dmg
           path: trifa-material_nightly.dmg
@@ -321,12 +321,12 @@ jobs:
           cp -v ./build/compose/binaries/main*/msi/trifa*material*.msi trifa-material_nightly.msi
           cp -v ./build/compose/binaries/main*/exe/trifa_material-*.exe trifa-material_nightly.exe
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: trifa-material_nightly.msi
           path: trifa-material_nightly.msi
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: trifa-material_nightly.exe
           path: trifa-material_nightly.exe
@@ -336,7 +336,7 @@ jobs:
         run: |
           cp -v ./build/compose/binaries/main*/msi/trifa*material*.msi trifa-material_nightly.msi
       - name: Upload artifact for tags
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: trifa-material_nightly.msi
           path: trifa-material_nightly.msi
@@ -526,7 +526,7 @@ jobs:
            cp -v /Users/runner/screenshot-macos.png /Users/runner/work/trifa_material/trifa_material/screenshot-macos.png
 
     - name: upload-screenshots
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: screenshot-macos
         path: |
@@ -612,13 +612,13 @@ jobs:
                cp -av /tmp/screenshot-linux.png screenshot-linux.png
 
         - name: upload-screenshots
-          uses: actions/upload-artifact@v3
+          uses: actions/upload-artifact@v4
           with:
             name: screenshot-linux
             path: /tmp/screenshot-linux.png
 
         - name: upload-screenshots
-          uses: actions/upload-artifact@v3
+          uses: actions/upload-artifact@v4
           with:
             name: screenshot-linux
             path: /tmp/screenshot-linux_before_wm.png
@@ -751,7 +751,7 @@ jobs:
           Write-Output D:\a\trifa_material\trifa_material\screenshot-windows.png
 
       - name: upload-screenshots
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: screenshot-windows
           path: |
