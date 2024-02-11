@@ -520,6 +520,11 @@ jobs:
            cliclick -m verbose c:195,347
            sleep 1
            cliclick -m verbose c:745,645
+           sleep 1
+           cliclick -m verbose c:367,641
+           sleep 1
+           sendkeys apps
+           sendkeys -a "TRIfA" -c ":smile"
            sleep 90
            sleep 120
            pwd
