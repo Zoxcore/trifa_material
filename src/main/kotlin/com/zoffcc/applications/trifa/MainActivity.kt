@@ -151,6 +151,7 @@ class MainActivity
         var PREF__udp_enabled = 1
         var PREF__audio_play_volume_percent = 100
         var PREF__audio_input_filter = 0
+        var PREF__do_not_sync_av = 0
         var PREF__v4l2_capture_force_mjpeg: Int = 0 // 0 -> auto, 1 -> force MJPEG video capture with v4l2 devices
         var PREF__video_bitrate_mode: Int = 0 // 0 -> low, 1 -> normal, 2 -> high quality video capture and sending
         var PREF__orbot_enabled_to_int = 0
