@@ -11,6 +11,7 @@ import com.zoffcc.applications.ffmpegav.AVActivity.ffmpegav_init
 import com.zoffcc.applications.trifa.MainActivity.Companion.AUDIO_PCM_DEBUG_FILES
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__audio_input_filter
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__audio_play_volume_percent
+import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__do_not_sync_av
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__v4l2_capture_force_mjpeg
 import com.zoffcc.applications.trifa.MainActivity.Companion.set_audio_play_volume_percent
 import global_prefs
@@ -430,11 +431,13 @@ data class AVState(val a: Int)
 
         if (friendpubkey == null)
         {
-            println("start_outgoing_video: friend pubkey is null!! ERROR !!");
+            println("start_outgoing_video: friend pubkey is null!! ERROR !!")
             return
         }
 
         MainActivity.set_av_call_status(1)
+        MainActivity.tox_set_do_not_sync_av(PREF__do_not_sync_av)
+        println("tox_set_do_not_sync_av:1: " +  PREF__do_not_sync_av)
         ffmpegav_apply_audio_filter(PREF__audio_input_filter)
         set_audio_play_volume_percent(PREF__audio_play_volume_percent)
 
