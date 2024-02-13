@@ -13,12 +13,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
+import org.briarproject.briar.desktop.navigation.SidebarButtonState
 import java.io.File
+import java.util.*
 
 data class globalstore_state(
     val mainwindow_minimized: Boolean = false,
     val mainwindow_focused: Boolean = true,
     val contacts_unread_message_count: Int = 0,
+    // val contacts_unread_per_group_message_count: HashMap<String, Int> = HashMap(),
     val contacts_unread_group_message_count: Int = 0,
     val firstRun: Boolean = false,
     val startupSelfname: String = "",
@@ -44,8 +47,11 @@ interface GlobalStore {
     fun try_clear_unread_message_count()
     fun hard_clear_unread_message_count()
     fun increase_unread_group_message_count()
+    // fun increase_unread_per_group_message_count(groupid: String)
     fun get_unread_group_message_count(): Int
+    // fun get_unread_per_group_message_count(groupid: String): Int
     fun try_clear_unread_group_message_count()
+    // fun try_clear_unread_per_group_message_count(groupid: String)
     fun hard_clear_unread_group_message_count()
     val stateFlow: StateFlow<globalstore_state>
     val state get() = stateFlow.value
@@ -174,6 +180,7 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
         {
             mutableStateFlow.value = state.copy(contacts_unread_group_message_count = (state.contacts_unread_group_message_count + 1))
         }
+
         override fun get_unread_group_message_count(): Int
         {
             return state.contacts_unread_group_message_count
