@@ -10,18 +10,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.zoffcc.applications.trifa.HelperGeneric
-import com.zoffcc.applications.trifa.StateContacts
 import com.zoffcc.applications.trifa.StateGroups
-import contactstore
 import globalstore
 import groupsettingsstore
 import groupstore
+import globalgrpstoreunreadmsgs
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -54,7 +55,10 @@ fun GroupList(
                 ListItemView(
                     onSelect = {
                         groupsettingsstore.visible(false)
-                        GlobalScope.launch { globalstore.try_clear_unread_group_message_count() }
+                        GlobalScope.launch {
+                            globalstore.try_clear_unread_group_message_count()
+                        }
+                        globalgrpstoreunreadmsgs.hard_clear_unread_per_group_message_count(item.groupId)
                         groupstore.select(item.groupId)
                                },
                     selected = (groupList.selectedGroupId == item.groupId)

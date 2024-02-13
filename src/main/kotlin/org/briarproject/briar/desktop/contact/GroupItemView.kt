@@ -26,21 +26,25 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.Alignment.Companion.Bottom
+import androidx.compose.ui.Alignment.Companion.BottomStart
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Alignment.Companion.Start
-import androidx.compose.ui.Alignment.Companion.Top
+import androidx.compose.ui.Alignment.Companion.TopStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zoffcc.applications.trifa.HelperGroup
-import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_peer_count
-import com.zoffcc.applications.trifa.ToxVars
+import com.zoffcc.applications.trifa.Log
+import com.zoffcc.applications.trifa.TAG
+import globalgrpstoreunreadmsgs
+import org.briarproject.briar.desktop.ui.NumberBadge
+import randomDebugBorder
 
 @Composable
 fun GroupItemView(
@@ -49,18 +53,27 @@ fun GroupItemView(
 ) = Row(
     horizontalArrangement = spacedBy(8.dp),
     verticalAlignment = CenterVertically,
-    modifier = modifier
-        // allows content to be bottom-aligned
-        .height(IntrinsicSize.Min)
+    modifier = modifier.height(IntrinsicSize.Min)
 ) {
     Row(
-        verticalAlignment = CenterVertically,
+        verticalAlignment = Bottom,
         horizontalArrangement = spacedBy(0.dp),
         modifier = Modifier.weight(1f, fill = true),
     ) {
-        GroupItemViewInfo(
-            groupItem = groupItem,
-        )
+        Box() {
+            Column(Modifier.align(BottomStart).randomDebugBorder()) {
+                Spacer(modifier = Modifier.height(16.dp))
+                GroupItemViewInfo(
+                    groupItem = groupItem,
+                )
+            }
+            val current_groupstorerunreadmessagesstore by globalgrpstoreunreadmsgs.stateFlow.collectAsState()
+            val num_unread = current_groupstorerunreadmessagesstore.unread_per_group_message_count.get(groupItem.groupId)
+            NumberBadge(
+                num = if (num_unread == null) 0 else num_unread,
+                modifier = Modifier.align(TopStart).offset(6.dp, (-3).dp)
+            )
+        }
     }
     ConnectionIndicator(
         modifier = Modifier.padding(end = 1.dp).requiredSize(16.dp),

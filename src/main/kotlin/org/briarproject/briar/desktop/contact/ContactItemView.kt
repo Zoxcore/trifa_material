@@ -24,9 +24,12 @@ import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Alignment.Companion.Start
 import androidx.compose.ui.Alignment.Companion.Top
+import androidx.compose.ui.Alignment.Companion.TopEnd
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
@@ -34,6 +37,8 @@ import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import globalstore
+import org.briarproject.briar.desktop.ui.NumberBadge
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 
 @Composable
@@ -52,12 +57,15 @@ fun ContactItemView(
         horizontalArrangement = spacedBy(0.dp),
         modifier = Modifier.weight(1f, fill = true),
     ) {
+
         Box(Modifier.align(Top).padding(vertical = 0.dp)) {
             ProfileCircle(45.dp, contactItem)
-            //NumberBadge(
-            //    num = contactItem.unread,
-            //    modifier = Modifier.align(TopEnd).offset(6.dp, (-6).dp)
-            //)
+            // TODO: write code for unread badge
+            val current_globalstate by globalstore.stateFlow.collectAsState()
+            NumberBadge(
+                num = 0,
+                modifier = Modifier.align(TopEnd).offset(6.dp, (-6).dp)
+            )
         }
         ContactItemViewInfo(
             contactItem = contactItem,

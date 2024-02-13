@@ -105,9 +105,9 @@ fun BriarSidebar(
 
 sealed class SidebarButtonState
 {
-    object None : SidebarButtonState()
+    data object None : SidebarButtonState()
     class UnreadMessages(val messageCount: Int) : SidebarButtonState()
-    object Warning : SidebarButtonState()
+    data object Warning : SidebarButtonState()
 }
 
 @Composable

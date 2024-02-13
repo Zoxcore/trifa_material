@@ -63,6 +63,7 @@ import com.zoffcc.applications.trifa.TRIFAGlobals.global_last_activity_outgoung_
 import com.zoffcc.applications.trifa.TRIFAGlobals.global_self_connection_status
 import com.zoffcc.applications.trifa.TRIFAGlobals.global_self_last_went_offline_timestamp
 import contactstore
+import globalgrpstoreunreadmsgs
 import globalstore
 import grouppeerstore
 import groupstore
@@ -108,6 +109,7 @@ class TrifaToxService
                     globalstore.try_clear_unread_group_message_count()
                 } catch(_: Exception) {
                 }
+
                 val old_is_tox_started = is_tox_started
                 Log.i(TAG, "is_tox_started:==============================")
                 Log.i(TAG, "is_tox_started=" + is_tox_started)
@@ -1263,6 +1265,11 @@ class TrifaToxService
                     groupstore.add(item = GroupItem(numPeers = group_num_peers.toInt(), name = group_name, isConnected = is_connected, groupId = group_identifier, privacyState = new_privacy_state))
                 } catch (_: Exception)
                 {
+                }
+
+                try {
+                    globalgrpstoreunreadmsgs.try_clear_unread_per_group_message_count(group_identifier)
+                } catch(_: Exception) {
                 }
             }
             conf_++

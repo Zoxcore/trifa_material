@@ -103,6 +103,7 @@ import globalstore
 import groupmessagestore
 import grouppeerstore
 import groupstore
+import globalgrpstoreunreadmsgs
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -3170,6 +3171,7 @@ class MainActivity
                     }
                     HelperNotification.displayNotification("new Group Message" + grptitle)
                     globalstore.increase_unread_group_message_count()
+                    globalgrpstoreunreadmsgs.increase_unread_per_group_message_count(groupid.lowercase())
                 }
             } catch (_: Exception)
             {

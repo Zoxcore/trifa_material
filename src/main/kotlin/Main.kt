@@ -1116,7 +1116,12 @@ fun App()
                                     {
                                         Log.i(TAG, "GROUPS -> draw")
                                         load_groupmessages_for_friend(groups.selectedGroupId)
-                                        GlobalScope.launch { globalstore.try_clear_unread_group_message_count() }
+                                        GlobalScope.launch {
+                                            globalstore.try_clear_unread_group_message_count()
+                                        }
+                                        GlobalScope.launch {
+                                            globalgrpstoreunreadmsgs.try_clear_unread_per_group_message_count(groups.selectedGroupId)
+                                        }
                                         GroupAppWithScaffold(focusRequester = groupfocusRequester, groupList = groups, ui_scale = ui_scale)
                                         //LaunchedEffect(groups.selectedGroupId) {
                                         //    groupfocusRequester.requestFocus()
