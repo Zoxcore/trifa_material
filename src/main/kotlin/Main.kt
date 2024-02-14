@@ -1078,6 +1078,9 @@ fun App()
                                     Log.i(TAG, "CONTACTS -> draw")
                                     load_messages_for_friend(contacts.selectedContactPubkey)
                                     GlobalScope.launch { globalstore.try_clear_unread_message_count() }
+                                    GlobalScope.launch {
+                                        globalfrndstoreunreadmsgs.try_clear_unread_per_friend_message_count(contacts.selectedContactPubkey)
+                                    }
                                     ChatAppWithScaffold(focusRequester = focusRequester, contactList = contacts, ui_scale = ui_scale)
                                     //LaunchedEffect(contacts.selectedContactPubkey) {
                                     //    focusRequester.requestFocus()

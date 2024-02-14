@@ -63,6 +63,7 @@ import com.zoffcc.applications.trifa.TRIFAGlobals.global_last_activity_outgoung_
 import com.zoffcc.applications.trifa.TRIFAGlobals.global_self_connection_status
 import com.zoffcc.applications.trifa.TRIFAGlobals.global_self_last_went_offline_timestamp
 import contactstore
+import globalfrndstoreunreadmsgs
 import globalgrpstoreunreadmsgs
 import globalstore
 import grouppeerstore
@@ -1234,6 +1235,11 @@ class TrifaToxService
                 contactstore.add(item = ContactItem(name = fname, isConnected = 0, pubkey = tox_friend_get_public_key(it)!!))
             } catch (_: Exception)
             {
+            }
+
+            try {
+                globalfrndstoreunreadmsgs.try_clear_unread_per_friend_message_count(tox_friend_get_public_key(it)!!)
+            } catch(_: Exception) {
             }
         }
     }

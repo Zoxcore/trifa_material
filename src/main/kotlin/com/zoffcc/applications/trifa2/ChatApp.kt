@@ -76,6 +76,7 @@ import com.zoffcc.applications.trifa.createGroupStore
 import com.zoffcc.applications.trifa.createGroupstoreUnreadMessages
 import com.zoffcc.applications.trifa.createSavepathStore
 import com.zoffcc.applications.trifa.createToxDataStore
+import com.zoffcc.applications.trifa.createUnreadMessages
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -94,6 +95,7 @@ private const val TAG = "trifa.Chatapp"
 val myUser = User("Me", picture = null, toxpk = "AAA")
 val messagestore = CoroutineScope(SupervisorJob()).createMessageStore()
 val globalstore = CoroutineScope(SupervisorJob()).createGlobalStore()
+val globalfrndstoreunreadmsgs = CoroutineScope(SupervisorJob()).createUnreadMessages()
 val globalgrpstoreunreadmsgs = CoroutineScope(SupervisorJob()).createGroupstoreUnreadMessages()
 val groupmessagestore = CoroutineScope(SupervisorJob()).createGroupMessageStore()
 val contactstore = CoroutineScope(SupervisorJob()).createContactStore()

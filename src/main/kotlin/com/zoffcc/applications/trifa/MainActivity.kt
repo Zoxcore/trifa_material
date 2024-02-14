@@ -99,6 +99,7 @@ import com.zoffcc.applications.trifa.VideoInFrame.setup_video_in_resolution
 import com.zoffcc.applications.trifa_material.trifa_material.BuildConfig
 import contactstore
 import global_prefs
+import globalfrndstoreunreadmsgs
 import globalstore
 import groupmessagestore
 import grouppeerstore
@@ -3112,6 +3113,7 @@ class MainActivity
                     }
                     HelperNotification.displayNotification("new Message" + fname)
                     globalstore.increase_unread_message_count()
+                    globalfrndstoreunreadmsgs.increase_unread_per_friend_message_count(toxpk!!)
                 }
             } catch (_: Exception)
             {

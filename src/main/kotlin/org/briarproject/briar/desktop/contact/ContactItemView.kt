@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import globalfrndstoreunreadmsgs
 import globalstore
 import org.briarproject.briar.desktop.ui.NumberBadge
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
@@ -60,10 +61,10 @@ fun ContactItemView(
 
         Box(Modifier.align(Top).padding(vertical = 0.dp)) {
             ProfileCircle(45.dp, contactItem)
-            // TODO: write code for unread badge
-            val current_globalstate by globalstore.stateFlow.collectAsState()
+            val current_friendtorerunreadmessagesstore by globalfrndstoreunreadmsgs.stateFlow.collectAsState()
+            val num_unread = current_friendtorerunreadmessagesstore.unread_per_friend_message_count.get(contactItem.pubkey)
             NumberBadge(
-                num = 0,
+                num = if (num_unread == null) 0 else num_unread,
                 modifier = Modifier.align(TopEnd).offset(6.dp, (-6).dp)
             )
         }
