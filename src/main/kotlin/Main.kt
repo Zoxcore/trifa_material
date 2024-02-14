@@ -1068,6 +1068,7 @@ fun App()
                             val focusRequester = remember { FocusRequester() }
                             Row(modifier = Modifier.fillMaxWidth().randomDebugBorder()) {
                                 val contacts by contactstore.stateFlow.collectAsState()
+                                val ContactListScope = rememberCoroutineScope()
                                 ContactList(contactList = contacts)
                                 VerticalDivider()
                                 if (contacts.selectedContactPubkey == null)
@@ -1077,8 +1078,8 @@ fun App()
                                 {
                                     Log.i(TAG, "CONTACTS -> draw")
                                     load_messages_for_friend(contacts.selectedContactPubkey)
-                                    GlobalScope.launch { globalstore.try_clear_unread_message_count() }
-                                    GlobalScope.launch {
+                                    ContactListScope.launch {
+                                        globalstore.try_clear_unread_message_count()
                                         globalfrndstoreunreadmsgs.try_clear_unread_per_friend_message_count(contacts.selectedContactPubkey)
                                     }
                                     ChatAppWithScaffold(focusRequester = focusRequester, contactList = contacts, ui_scale = ui_scale)
@@ -1110,6 +1111,7 @@ fun App()
                                     {
                                         load_grouppeers(groups.selectedGroupId!!)
                                     }
+                                    val GroupPeerListScope = rememberCoroutineScope()
                                     GroupPeerList(grouppeerList = grouppeers)
                                     VerticalDivider()
                                     if (groups.selectedGroupId == null)
@@ -1119,10 +1121,8 @@ fun App()
                                     {
                                         Log.i(TAG, "GROUPS -> draw")
                                         load_groupmessages_for_friend(groups.selectedGroupId)
-                                        GlobalScope.launch {
+                                        GroupPeerListScope.launch {
                                             globalstore.try_clear_unread_group_message_count()
-                                        }
-                                        GlobalScope.launch {
                                             globalgrpstoreunreadmsgs.try_clear_unread_per_group_message_count(groups.selectedGroupId)
                                         }
                                         GroupAppWithScaffold(focusRequester = groupfocusRequester, groupList = groups, ui_scale = ui_scale)
