@@ -12,6 +12,7 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
@@ -52,10 +53,11 @@ fun GroupList(
                 key = { item -> item.groupId },
                 contentType = { item -> item::class }
             ) { item ->
+                val ListItemViewScope = rememberCoroutineScope()
                 ListItemView(
                     onSelect = {
                         groupsettingsstore.visible(false)
-                        GlobalScope.launch {
+                        ListItemViewScope.launch {
                             globalstore.try_clear_unread_group_message_count()
                         }
                         globalgrpstoreunreadmsgs.hard_clear_unread_per_group_message_count(item.groupId)

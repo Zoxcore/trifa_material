@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
@@ -50,9 +51,10 @@ fun ContactList(
                 key = { item -> item.pubkey },
                 contentType = { item -> item::class }
             ) { item ->
+                val ListItemViewScope = rememberCoroutineScope()
                 ListItemView(
                     onSelect = {
-                                GlobalScope.launch { globalstore.try_clear_unread_message_count() }
+                                ListItemViewScope.launch { globalstore.try_clear_unread_message_count() }
                                 globalfrndstoreunreadmsgs.hard_clear_unread_per_friend_message_count(item.pubkey)
                                 contactstore.select(item.pubkey)
                                },
