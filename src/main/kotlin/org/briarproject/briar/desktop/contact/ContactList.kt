@@ -18,7 +18,9 @@ import androidx.compose.ui.unit.dp
 import com.zoffcc.applications.trifa.HelperGeneric.delete_friend_wrapper
 import com.zoffcc.applications.trifa.StateContacts
 import contactstore
+import globalfrndstoreunreadmsgs
 import globalstore
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -27,6 +29,7 @@ import org.briarproject.briar.desktop.ui.VerticallyScrollableArea
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import randomDebugBorder
 
+@OptIn(DelicateCoroutinesApi::class)
 @Composable
 fun ContactList(
     contactList: StateContacts,
@@ -50,6 +53,7 @@ fun ContactList(
                 ListItemView(
                     onSelect = {
                                 GlobalScope.launch { globalstore.try_clear_unread_message_count() }
+                                globalfrndstoreunreadmsgs.hard_clear_unread_per_friend_message_count(item.pubkey)
                                 contactstore.select(item.pubkey)
                                },
                     selected = (contactList.selectedContactPubkey == item.pubkey)
