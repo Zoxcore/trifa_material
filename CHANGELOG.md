@@ -1,5 +1,19 @@
 # Changelog
 
+## [v1.0.21](https://github.com/Zoxcore/trifa_material/tree/v1.0.21) (2024-02-15)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.20...v1.0.21)
+
+**Merged pull requests:**
+
+- update asan version of libs [\#154](https://github.com/Zoxcore/trifa_material/pull/154) ([zoff99](https://github.com/zoff99))
+- unread messages badges, add button to turn off AV sync and add some tooltips [\#153](https://github.com/Zoxcore/trifa_material/pull/153) ([zoff99](https://github.com/zoff99))
+- Bump github/codeql-action from 2 to 3 [\#152](https://github.com/Zoxcore/trifa_material/pull/152) ([dependabot[bot]](https://github.com/apps/dependabot))
+- show emoji while typing on macos screenshot [\#151](https://github.com/Zoxcore/trifa_material/pull/151) ([zoff99](https://github.com/zoff99))
+- update ffmpeg\_av JNI libs [\#150](https://github.com/Zoxcore/trifa_material/pull/150) ([zoff99](https://github.com/zoff99))
+- put threshold value into a const, add kotlin code scanner io.gitlab.arturbosch.detekt [\#149](https://github.com/Zoxcore/trifa_material/pull/149) ([zoff99](https://github.com/zoff99))
+- generate BOM files and add links in README.md [\#148](https://github.com/Zoxcore/trifa_material/pull/148) ([zoff99](https://github.com/zoff99))
+
 ## [v1.0.20](https://github.com/Zoxcore/trifa_material/tree/v1.0.20) (2024-02-10)
 
 [Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.19...v1.0.20)
