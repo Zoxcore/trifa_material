@@ -1406,7 +1406,7 @@ class MainActivity
         fun android_tox_callback_self_connection_status_cb_method(a_TOX_CONNECTION: Int)
         {
             global_self_connection_status = a_TOX_CONNECTION
-            // Log.i(TAG, "android_tox_callback_self_connection_status_cb_method: " + a_TOX_CONNECTION)
+            Log.i(TAG, "android_tox_callback_self_connection_status_cb_method: " + a_TOX_CONNECTION)
             update_savedata_file_wrapper()
             if (a_TOX_CONNECTION == TOX_CONNECTION.TOX_CONNECTION_TCP.value)
             {
@@ -1420,6 +1420,7 @@ class MainActivity
             {
                 global_self_last_went_offline_timestamp = System.currentTimeMillis()
                 set_tox_online_state("offline")
+                Log.i(TAG, "android_tox_callback_self_connection_status_cb_method: setting global_self_last_went_offline_timestamp")
                 if (avstatestore.state.call_with_friend_pubkey_get() != null)
                 {
                     val fnum = tox_friend_by_public_key(avstatestore.state.call_with_friend_pubkey_get())
