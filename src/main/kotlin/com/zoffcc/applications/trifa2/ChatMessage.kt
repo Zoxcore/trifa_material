@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vanniktech.emoji.emojiInformation
@@ -102,13 +104,15 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                         .background(color = if (!isMyMessage) ChatColorsConfig.OTHERS_MESSAGE else ChatColorsConfig.MY_MESSAGE)
                         .padding(start = 10.dp, top = 5.dp, end = 10.dp, bottom = 5.dp),
                 ) {
-                    Column {
+                    Column(Modifier.randomDebugBorder().padding(all = 0.dp),
+                        verticalArrangement = Arrangement.spacedBy(0.dp)) {
                         if(!isMyMessage) {
                             Row(verticalAlignment = Alignment.Bottom) {
                                 Text(
                                     text = message.user.name,
                                     style = MaterialTheme.typography.body1.copy(
                                         fontWeight = FontWeight.SemiBold,
+                                        lineHeight = TextUnit.Unspecified,
                                         letterSpacing = 0.sp,
                                         fontSize = 14.sp
                                     ),
@@ -116,8 +120,7 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                 )
                             }
                         }
-                        Spacer(Modifier.size(3.dp))
-                        SelectionContainer()
+                        SelectionContainer(modifier = Modifier.padding(all = 0.dp))
                         {
                             var msg_fontsize = MSG_TEXT_FONT_SIZE_MIXED
                             try
@@ -133,8 +136,10 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                             }
                             Text(
                                 text = message.text,
+                                modifier = Modifier.randomDebugBorder(),
                                 style = MaterialTheme.typography.body1.copy(
                                     fontSize = ((msg_fontsize * ui_scale).toDouble()).sp,
+                                    lineHeight = TextUnit.Unspecified,
                                     letterSpacing = 0.sp
                                 )
                             )
@@ -174,7 +179,7 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                                 HelperGeneric.loadImageBitmap(File(message.filename_fullpath))
                                             }, painterFor = { remember { BitmapPainter(it) } },
                                                 contentDescription = "Image",
-                                                modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp).
+                                                modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale).
                                                 combinedClickable(
                                                     onClick = { show_file_in_explorer_or_open(message.filename_fullpath) },
                                                     onLongClick = { show_containing_dir_in_explorer(message.filename_fullpath) }))
@@ -182,7 +187,7 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                         else
                                         {
                                             Icon(
-                                                modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp).
+                                                modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale).
                                                 combinedClickable(
                                                     onClick = { show_file_in_explorer_or_open(message.filename_fullpath) },
                                                     onLongClick = { show_containing_dir_in_explorer(message.filename_fullpath) }),
@@ -195,7 +200,7 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                     else
                                     {
                                         Icon(
-                                            modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp),
+                                            modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale),
                                             imageVector = Icons.Default.BrokenImage,
                                             contentDescription = "failed",
                                             tint = MaterialTheme.colors.primary
@@ -242,7 +247,7 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                                 HelperGeneric.loadImageBitmap(File(message.filename_fullpath))
                                             }, painterFor = { remember { BitmapPainter(it) } },
                                                 contentDescription = "Image",
-                                                modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp).
+                                                modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale).
                                                 combinedClickable(
                                                     onClick = { show_file_in_explorer_or_open(message.filename_fullpath) },
                                                     onLongClick = { show_containing_dir_in_explorer(message.filename_fullpath) }))
@@ -250,7 +255,7 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                         else
                                         {
                                             Icon(
-                                                modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp).
+                                                modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale).
                                                 combinedClickable(
                                                     onClick = { show_file_in_explorer_or_open(message.filename_fullpath) },
                                                     onLongClick = { show_containing_dir_in_explorer(message.filename_fullpath) }),
@@ -283,15 +288,15 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                 }
                             }
                         }
-                        Spacer(Modifier.size(4.dp))
                         Row(
                             horizontalArrangement = Arrangement.End,
-                            modifier = Modifier.align(Alignment.End)
+                            modifier = Modifier.randomDebugBorder().padding(all = 0.dp).align(Alignment.End)
                         ) {
                             Text(
+                                modifier = Modifier.padding(all = 0.dp),
                                 text = timeToString(message.timeMs),
                                 textAlign = TextAlign.End,
-                                style = MaterialTheme.typography.subtitle1.copy(fontSize = 10.sp),
+                                style = MaterialTheme.typography.subtitle1.copy(fontSize = 10.sp, lineHeight = TextUnit.Unspecified),
                                 color = ChatColorsConfig.TIME_TEXT
                             )
                         }
@@ -299,7 +304,7 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                 }
                 Box(Modifier.size(10.dp))
             }
-            if(isMyMessage) {
+            if (isMyMessage) {
                 Column {
                     Triangle(false, ChatColorsConfig.MY_MESSAGE)
                 }
