@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vanniktech.emoji.emojiInformation
@@ -93,7 +94,8 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                         .background(color = if (!isMyMessage) ChatColorsConfig.OTHERS_MESSAGE else ChatColorsConfig.MY_MESSAGE)
                         .padding(start = 10.dp, top = 5.dp, end = 10.dp, bottom = 5.dp),
                 ) {
-                    Column {
+                    Column(Modifier.randomDebugBorder().padding(all = 0.dp),
+                        verticalArrangement = Arrangement.spacedBy(0.dp)) {
                         if(!isMyMessage) {
                             Row(verticalAlignment = Alignment.Bottom) {
                                 // println("NNN:" + groupmessage.user.name + "CCC:" +groupmessage.user.color.luminance())
@@ -102,6 +104,7 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                                     style = MaterialTheme.typography.body1.copy(
                                         shadow = if (groupmessage.user.color.luminance() > NGC_PEER_LUMINANCE_THRESHOLD_FOR_SHADOW) Shadow(Color.Black, offset = Offset.Zero, blurRadius = 2.4f) else Shadow(),
                                         fontWeight = FontWeight.SemiBold,
+                                        lineHeight = TextUnit.Unspecified,
                                         letterSpacing = 0.sp,
                                         fontSize = 14.sp
                                     ),
@@ -109,8 +112,7 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                                 )
                             }
                         }
-                        Spacer(Modifier.size(3.dp))
-                        SelectionContainer()
+                        SelectionContainer(modifier = Modifier.padding(all = 0.dp))
                         {
                             var msg_fontsize = MSG_TEXT_FONT_SIZE_MIXED
                             try
@@ -126,8 +128,10 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                             }
                             Text(
                                 text = groupmessage.text,
+                                modifier = Modifier.randomDebugBorder(),
                                 style = MaterialTheme.typography.body1.copy(
                                     fontSize = ((msg_fontsize * ui_scale).toDouble()).sp,
+                                    lineHeight = TextUnit.Unspecified,
                                     letterSpacing = 0.sp
                                 )
                             )
@@ -142,7 +146,7 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                                         loadImageBitmap(File(groupmessage.filename_fullpath))
                                     }, painterFor = { remember { BitmapPainter(it) } },
                                         contentDescription = "Image",
-                                        modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp).
+                                        modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale).
                                         combinedClickable(
                                             onClick = { show_file_in_explorer_or_open(groupmessage.filename_fullpath) },
                                             onLongClick = { show_containing_dir_in_explorer(groupmessage.filename_fullpath) }))
@@ -150,7 +154,7 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                                 else
                                 {
                                     Icon(
-                                        modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp).
+                                        modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale).
                                         combinedClickable(
                                             onClick = { show_file_in_explorer_or_open(groupmessage.filename_fullpath) },
                                             onLongClick = { show_containing_dir_in_explorer(groupmessage.filename_fullpath) }),
@@ -163,17 +167,16 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                             else
                             {
                                 Icon(
-                                    modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp),
+                                    modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale),
                                     imageVector = Icons.Default.BrokenImage,
                                     contentDescription = "failed",
                                     tint = MaterialTheme.colors.primary
                                 )
                             }
                         }
-                        Spacer(Modifier.size(4.dp))
                         Row(
                             horizontalArrangement = Arrangement.End,
-                            modifier = Modifier.align(Alignment.End)
+                            modifier = Modifier.randomDebugBorder().padding(all = 0.dp).align(Alignment.End)
                         ) {
                             if (groupmessage.was_synced)
                             {
@@ -189,9 +192,10 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                                 Spacer(modifier = Modifier.width(10.dp))
                             }
                             Text(
+                                modifier = Modifier.padding(all = 0.dp),
                                 text = timeToString(groupmessage.timeMs),
                                 textAlign = TextAlign.End,
-                                style = MaterialTheme.typography.subtitle1.copy(fontSize = 10.sp),
+                                style = MaterialTheme.typography.subtitle1.copy(fontSize = 10.sp, lineHeight = TextUnit.Unspecified),
                                 color = ChatColorsConfig.TIME_TEXT
                             )
                         }
@@ -199,7 +203,7 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                 }
                 Box(Modifier.size(10.dp))
             }
-            if(isMyMessage) {
+            if (isMyMessage) {
                 Column {
                     Triangle(false, ChatColorsConfig.MY_MESSAGE)
                 }
