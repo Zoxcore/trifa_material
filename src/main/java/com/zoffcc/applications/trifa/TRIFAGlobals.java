@@ -31,7 +31,7 @@ public class TRIFAGlobals
     static String global_my_status_message = "";
     static boolean bootstrapping = false;
     static long global_self_last_went_online_timestamp = -1;
-    static long global_self_last_went_offline_timestamp = -1;
+    static long global_self_last_went_offline_timestamp = 0;
     // bootstrap again after 30 seconds offline
     final static int TOX_BOOTSTRAP_AGAIN_AFTER_OFFLINE_MILLIS = 30 * 1000;
 
