@@ -185,6 +185,7 @@ import com.vanniktech.emoji.ios.IosEmojiProvider
 import com.vanniktech.emoji.search.SearchEmojiManager
 import com.zoffcc.applications.ffmpegav.AVActivity.JAVA_AUDIO_IN_DEVICE_NAME
 import com.zoffcc.applications.trifa.EmojiStrAndName
+import com.zoffcc.applications.trifa.FriendSettingDetails
 import com.zoffcc.applications.trifa.MainActivity.Companion.DEBUG_COMPOSE_UI_UPDATES
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__do_not_sync_av
 import org.briarproject.briar.desktop.ui.Tooltip
@@ -1071,26 +1072,35 @@ fun App()
                                 val ContactListScope = rememberCoroutineScope()
                                 ContactList(contactList = contacts)
                                 VerticalDivider()
-                                if (contacts.selectedContactPubkey == null)
+                                val friendsettings by friendsettingsstore.stateFlow.collectAsState()
+                                if ((friendsettings.visible) && (contacts.selectedContactPubkey != null)) // show friend settings
                                 {
-                                    ExplainerChat()
-                                } else
+                                    FriendSettingDetails(contacts.selectedContactPubkey)
+                                }
+                                else // -- show friend messages
                                 {
-                                    Log.i(TAG, "CONTACTS -> draw")
-                                    load_messages_for_friend(contacts.selectedContactPubkey)
-                                    ContactListScope.launch {
-                                        globalstore.try_clear_unread_message_count()
-                                        globalfrndstoreunreadmsgs.try_clear_unread_per_friend_message_count(contacts.selectedContactPubkey)
+                                    if (contacts.selectedContactPubkey == null)
+                                    {
+                                        ExplainerChat()
+                                    } else
+                                    {
+                                        Log.i(TAG, "CONTACTS -> draw")
+                                        load_messages_for_friend(contacts.selectedContactPubkey)
+                                        ContactListScope.launch {
+                                            globalstore.try_clear_unread_message_count()
+                                            globalfrndstoreunreadmsgs.try_clear_unread_per_friend_message_count(contacts.selectedContactPubkey)
+                                        }
+                                        ChatAppWithScaffold(focusRequester = focusRequester, contactList = contacts, ui_scale = ui_scale)
+                                        //LaunchedEffect(contacts.selectedContactPubkey) {
+                                        //    focusRequester.requestFocus()
+                                        //}
                                     }
-                                    ChatAppWithScaffold(focusRequester = focusRequester, contactList = contacts, ui_scale = ui_scale)
-                                    //LaunchedEffect(contacts.selectedContactPubkey) {
-                                    //    focusRequester.requestFocus()
-                                    //}
                                 }
                             }
                         }
                         UiMode.GROUPS ->
                         {
+                            friendsettingsstore.visible(false)
                             contactstore.visible(false)
                             groupstore.visible(true)
                             val groupfocusRequester = remember { FocusRequester() }
@@ -1135,6 +1145,7 @@ fun App()
                         }
                         UiMode.ADDFRIEND -> {
                             groupsettingsstore.visible(false)
+                            friendsettingsstore.visible(false)
                             contactstore.visible(false)
                             groupstore.visible(false)
                             if (tox_running_state == "running") AddFriend()
@@ -1142,6 +1153,7 @@ fun App()
                         }
                         UiMode.ADDGROUP -> {
                             groupsettingsstore.visible(false)
+                            friendsettingsstore.visible(false)
                             contactstore.visible(false)
                             groupstore.visible(false)
                             if (tox_running_state == "running") AddGroup()
@@ -1149,18 +1161,21 @@ fun App()
                         }
                         UiMode.SETTINGS -> {
                             groupsettingsstore.visible(false)
+                            friendsettingsstore.visible(false)
                             contactstore.visible(false)
                             groupstore.visible(false)
                             SettingDetails()
                         }
                         UiMode.ABOUT -> {
                             groupsettingsstore.visible(false)
+                            friendsettingsstore.visible(false)
                             contactstore.visible(false)
                             groupstore.visible(false)
                             AboutScreen()
                         }
                         else -> {
                             groupsettingsstore.visible(false)
+                            friendsettingsstore.visible(false)
                             contactstore.visible(false)
                             groupstore.visible(false)
                             UiPlaceholder()

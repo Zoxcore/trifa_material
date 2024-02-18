@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.zoffcc.applications.trifa.HelperGeneric.delete_friend_wrapper
 import com.zoffcc.applications.trifa.StateContacts
 import contactstore
+import friendsettingsstore
 import globalfrndstoreunreadmsgs
 import globalstore
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -54,6 +55,7 @@ fun ContactList(
                 val ListItemViewScope = rememberCoroutineScope()
                 ListItemView(
                     onSelect = {
+                                friendsettingsstore.visible(false)
                                 ListItemViewScope.launch { globalstore.try_clear_unread_message_count() }
                                 globalfrndstoreunreadmsgs.hard_clear_unread_per_friend_message_count(item.pubkey)
                                 contactstore.select(item.pubkey)
