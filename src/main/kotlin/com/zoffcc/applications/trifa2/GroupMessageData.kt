@@ -3,6 +3,9 @@ import kotlin.random.Random
 data class UIGroupMessage private constructor(
     val user: User,
     val timeMs: Long,
+    val sentTimeMs: Long,
+    val rcvdTimeMs: Long,
+    val syncdTimeMs: Long,
     val text: String,
     val id: Long,
     val msgDatabaseId: Long,
@@ -17,6 +20,9 @@ data class UIGroupMessage private constructor(
     constructor(
         user: User,
         timeMs: Long,
+        sentTimeMs: Long,
+        rcvdTimeMs: Long,
+        syncdTimeMs: Long,
         text: String,
         msgDatabaseId: Long,
         msg_id_hash: String?,
@@ -29,6 +35,9 @@ data class UIGroupMessage private constructor(
     ) : this(
         user = user,
         timeMs = timeMs,
+        sentTimeMs = sentTimeMs,
+        rcvdTimeMs = rcvdTimeMs,
+        syncdTimeMs = syncdTimeMs,
         text = text,
         id = msgDatabaseId,
         msgDatabaseId = msgDatabaseId,

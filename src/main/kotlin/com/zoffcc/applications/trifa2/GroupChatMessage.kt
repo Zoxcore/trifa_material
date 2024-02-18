@@ -194,7 +194,10 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                                 )
                                 Spacer(modifier = Modifier.width(10.dp))
                             }
-                            Tooltip("Message sent at: " + timeToString(groupmessage.timeMs)) {
+                            Tooltip("Message sent at: " + timeToString(groupmessage.timeMs) + "\n" +
+                                         "Message ID: " + groupmessage.message_id_tox + "\n" +
+                                         "Sender Peer Pubkey: " + groupmessage.toxpk + "\n" +
+                                         "was synced: " + groupmessage.was_synced.toString()) {
                                 Text(
                                     modifier = Modifier.padding(all = 0.dp),
                                     text = timeToString(groupmessage.timeMs),
