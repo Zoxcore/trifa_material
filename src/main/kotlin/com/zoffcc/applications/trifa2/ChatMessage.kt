@@ -293,7 +293,10 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                             horizontalArrangement = Arrangement.End,
                             modifier = Modifier.randomDebugBorder().padding(all = 0.dp).align(Alignment.End)
                         ) {
-                            Tooltip("Message sent at: " + timeToString(message.timeMs)) {
+                            Tooltip("Message sent at: " + timeToString(message.sentTimeMs) + "\n" +
+                                         "Message rcvd at: " + timeToString(message.recvTimeMs) + "\n" +
+                                         "The clocks on both sides are not synchronized for security reasons, " + "\n" +
+                                         "therfore the timestamps may not be accurate") {
                                 Text(
                                     modifier = Modifier.padding(all = 0.dp),
                                     text = timeToString(message.timeMs),

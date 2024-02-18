@@ -1746,7 +1746,10 @@ class MainActivity
                         val friendnum = tox_friend_by_public_key(toxpk)
                         val fname = tox_friend_get_name(friendnum)
                         val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk)
-                        messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value, user = friend_user, timeMs = timestamp_wrap, text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, msgDatabaseId = msg_id_db, filename_fullpath = null)))
+                        messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value, user = friend_user, timeMs = timestamp_wrap,
+                            recvTimeMs = System.currentTimeMillis(),
+                            sentTimeMs = timestamp_wrap,
+                            text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, msgDatabaseId = msg_id_db, filename_fullpath = null)))
                     } catch (_: Exception)
                     {
                     }
@@ -1767,7 +1770,10 @@ class MainActivity
                         val friendnum = tox_friend_by_public_key(toxpk)
                         val fname = tox_friend_get_name(friendnum)
                         val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk!!)
-                        messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value, user = friend_user, timeMs = timestamp_wrap, text = friend_message!!, toxpk = toxpk!!, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, msgDatabaseId = msg_id_db, filename_fullpath = null)))
+                        messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value, user = friend_user, timeMs = timestamp_wrap,
+                            recvTimeMs = timestamp_wrap,
+                            sentTimeMs = timestamp_wrap,
+                            text = friend_message!!, toxpk = toxpk!!, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, msgDatabaseId = msg_id_db, filename_fullpath = null)))
                     } catch (_: Exception)
                     {
                     }
@@ -1823,7 +1829,10 @@ class MainActivity
                 val friendnum = tox_friend_by_public_key(toxpk)
                 val fname = tox_friend_get_name(friendnum)
                 val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk!!)
-                messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value, user = friend_user, timeMs = message_timestamp, text = friend_message!!, toxpk = toxpk!!, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, msgDatabaseId = msg_id_db, filename_fullpath = null)))
+                messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value, user = friend_user, timeMs = message_timestamp,
+                    recvTimeMs = pin_timestamp,
+                    sentTimeMs = message_timestamp,
+                    text = friend_message!!, toxpk = toxpk!!, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, msgDatabaseId = msg_id_db, filename_fullpath = null)))
             } catch (_: Exception)
             {
             }
@@ -2361,7 +2370,10 @@ class MainActivity
                 val friendnum = tox_friend_by_public_key(friend_pk)
                 val fname = tox_friend_get_name(friendnum)
                 val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = friend_pk!!)
-                messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value, user = friend_user, timeMs = timestampMs(), text = m.text, toxpk = friend_pk!!, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value, msgDatabaseId = new_msg_id, filename_fullpath = null, file_state = m.state)))
+                messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value, user = friend_user, timeMs = timestampMs(),
+                    recvTimeMs = System.currentTimeMillis(),
+                    sentTimeMs = timestampMs(),
+                    text = m.text, toxpk = friend_pk!!, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value, msgDatabaseId = new_msg_id, filename_fullpath = null, file_state = m.state)))
             }
             Log.i(TAG, "file_recv:incoming regular file:999")
         }
@@ -3432,7 +3444,10 @@ class MainActivity
             messagestore.send(MessageAction.SendMessage(UIMessage(
                 direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value,
                 msgDatabaseId = new_msg_id, user = myUser,
-                timeMs = m.sent_timestamp, text = m.text,
+                timeMs = m.sent_timestamp,
+                recvTimeMs = m.rcvd_timestamp,
+                sentTimeMs = m.sent_timestamp,
+                text = m.text,
                 toxpk = friend_pubkey.uppercase(), trifaMsgType = m.TRIFA_MESSAGE_TYPE,
                 file_state = m.state,
                 filename_fullpath = m.filename_fullpath)))
