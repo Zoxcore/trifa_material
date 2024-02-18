@@ -18,6 +18,8 @@
 
 package org.briarproject.briar.desktop.contact
 
+import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement.spacedBy
@@ -40,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import globalfrndstoreunreadmsgs
 import globalstore
 import org.briarproject.briar.desktop.ui.NumberBadge
+import org.briarproject.briar.desktop.ui.Tooltip
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 
 @Composable
@@ -78,15 +81,21 @@ fun ContactItemView(
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ContactItemViewInfo(contactItem: ContactItem) = Column(
     horizontalAlignment = Start,
     modifier = Modifier.padding(start = 6.dp)
 ) {
-    Text(
-        text = if (contactItem.name.isEmpty()) contactItem.pubkey.toUpperCase().take(6) else contactItem.name,
-        style = if (contactItem.name.length > 14) MaterialTheme.typography.body1.copy(fontSize = 13.sp) else MaterialTheme.typography.body1,
-        maxLines = 1,
-        overflow = Ellipsis,
-    )
+    val show_name = if (contactItem.name.isEmpty()) contactItem.pubkey.toUpperCase().take(6) else contactItem.name
+    val tooltip_name = if (contactItem.name.isEmpty()) "" else contactItem.name
+    val name_style = if (contactItem.name.length > 14) MaterialTheme.typography.body1.copy(fontSize = 13.sp) else MaterialTheme.typography.body1
+    Tooltip(text = "Name: " + tooltip_name + "\n" + "Pubkey: " + contactItem.pubkey) {
+        Text(
+            text = show_name,
+            style = name_style,
+            maxLines = 1,
+            overflow = Ellipsis,
+        )
+    }
 }
