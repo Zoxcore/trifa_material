@@ -52,6 +52,7 @@ import com.zoffcc.applications.trifa.HelperOSFile.show_file_in_explorer_or_open
 import com.zoffcc.applications.trifa.TRIFAGlobals
 import org.briarproject.briar.desktop.ui.Tooltip
 import java.io.File
+import java.nio.charset.Charset
 
 @Composable
 fun GroupTriangle(risingToTheRight: Boolean, background: Color) {
@@ -194,9 +195,18 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                                 )
                                 Spacer(modifier = Modifier.width(10.dp))
                             }
+                            var message_size_in_bytes = 0
+                            try
+                            {
+                                message_size_in_bytes = groupmessage.text.toByteArray().size
+                            }
+                            catch(_: Exception)
+                            {
+                            }
                             Tooltip("Message sent at: " + timeToString(groupmessage.timeMs) + "\n" +
                                          "Message ID: " + groupmessage.message_id_tox + "\n" +
                                          "Sender Peer Pubkey: " + groupmessage.toxpk + "\n" +
+                                         "Message size in bytes: " + (if (message_size_in_bytes == 0) "unknown" else message_size_in_bytes) + "\n" +
                                          "was synced: " + groupmessage.was_synced.toString()) {
                                 Text(
                                     modifier = Modifier.padding(all = 0.dp),

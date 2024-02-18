@@ -293,8 +293,17 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                             horizontalArrangement = Arrangement.End,
                             modifier = Modifier.randomDebugBorder().padding(all = 0.dp).align(Alignment.End)
                         ) {
+                            var message_size_in_bytes = 0
+                            try
+                            {
+                                message_size_in_bytes = message.text.toByteArray().size
+                            }
+                            catch(_: Exception)
+                            {
+                            }
                             Tooltip("Message sent at: " + timeToString(message.sentTimeMs) + "\n" +
                                          "Message rcvd at: " + timeToString(message.recvTimeMs) + "\n" +
+                                         "Message size in bytes: " + (if (message_size_in_bytes == 0) "unknown" else message_size_in_bytes) + "\n" +
                                          "The clocks on both sides are not synchronized for security reasons, " + "\n" +
                                          "therfore the timestamps may not be accurate") {
                                 Text(
