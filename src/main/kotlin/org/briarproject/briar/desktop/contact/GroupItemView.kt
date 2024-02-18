@@ -18,13 +18,20 @@
 
 package org.briarproject.briar.desktop.contact
 
+import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LockPerson
+import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,12 +47,19 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zoffcc.applications.trifa.Log
-import com.zoffcc.applications.trifa.TAG
+import com.zoffcc.applications.trifa.ToxVars.TOX_GROUP_PRIVACY_STATE
 import globalgrpstoreunreadmsgs
 import org.briarproject.briar.desktop.ui.NumberBadge
+import org.briarproject.briar.desktop.ui.Tooltip
 import randomDebugBorder
 
+@Composable
+@Preview
+fun test__peercount_circle() = Row() {
+    PeerCountCircle(peerCount = 236)
+}
+
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun GroupItemView(
     groupItem: GroupItem,
@@ -60,9 +74,20 @@ fun GroupItemView(
         horizontalArrangement = spacedBy(0.dp),
         modifier = Modifier.weight(1f, fill = true),
     ) {
+        var icon = Icons.Filled.Public
+        var description = "Public Group"
+        if (groupItem.privacyState == TOX_GROUP_PRIVACY_STATE.TOX_GROUP_PRIVACY_STATE_PRIVATE.value)
+        {
+            icon = Icons.Filled.LockPerson
+            description = "Private Group"
+        }
+        Tooltip(text = description) {
+            Icon(imageVector = icon, modifier = Modifier.height(20.dp), contentDescription = description)
+        }
+        Spacer(modifier = Modifier.randomDebugBorder().width(2.dp))
         Box() {
             Column(Modifier.align(BottomStart).randomDebugBorder()) {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.randomDebugBorder().height(16.dp))
                 GroupItemViewInfo(
                     groupItem = groupItem,
                 )
@@ -104,7 +129,7 @@ fun PeerCountCircle(
 @Composable
 private fun GroupItemViewInfo(groupItem: GroupItem) = Column(
     horizontalAlignment = Start,
-    modifier = Modifier.padding(start = 6.dp)
+    modifier = Modifier.padding(start = 0.dp).randomDebugBorder()
 ) {
     Text(
         text = groupItem.name,

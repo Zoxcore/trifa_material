@@ -18,6 +18,7 @@
 
 package org.briarproject.briar.desktop.contact
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -40,6 +41,7 @@ import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.briarproject.briar.desktop.ui.Tooltip
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 
@@ -93,6 +95,26 @@ fun GroupPeerItemRoleCircle(
     )
 }
 
+fun GroupPeerRoleAsStringLong(peerRole: Int) : String
+{
+    if (peerRole == 0) // Founder
+    {
+        return "Founder"
+    }
+    else if (peerRole == 1) // Moderator
+    {
+        return "Moderator"
+    }
+    else if (peerRole == 2) // User
+    {
+        return "User"
+    }
+    else // Observer (muted)
+    {
+        return "Observer (muted)"
+    }
+}
+
 fun GroupPeerRoleAsStringShort(peerRole: Int) : String
 {
     if (peerRole == 0) // Founder
@@ -133,15 +155,23 @@ fun GroupPeerRoleAsBgColor(peerRole: Int) : Color
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun GrouppeerItemViewInfo(grouppeerItem: GroupPeerItem) = Column(
     horizontalAlignment = Start,
     modifier = Modifier.padding(start = 0.dp)
 ) {
-    Text(
-        text = if (grouppeerItem.name.isEmpty()) grouppeerItem.pubkey.toUpperCase().take(6) else grouppeerItem.name,
-        style = if (grouppeerItem.name.length > 14) MaterialTheme.typography.body1.copy(fontSize = 12.sp) else MaterialTheme.typography.body1,
-        maxLines = 1,
-        overflow = Ellipsis,
-    )
+    val show_peer_name = if (grouppeerItem.name.isEmpty()) grouppeerItem.pubkey.toUpperCase().take(6) else grouppeerItem.name
+    val tooltip_name = if (grouppeerItem.name.isEmpty()) "" else grouppeerItem.name
+    val name_style = if (grouppeerItem.name.length > 14) MaterialTheme.typography.body1.copy(fontSize = 12.sp) else MaterialTheme.typography.body1
+    Tooltip(text = "Peer Name: " + tooltip_name + "\n"
+            + "Peer Role: " + GroupPeerRoleAsStringLong(grouppeerItem.peerRole) + "\n"
+            + "Pubkey: " + grouppeerItem.pubkey) {
+        Text(
+            text = show_peer_name,
+            style = name_style,
+            maxLines = 1,
+            overflow = Ellipsis,
+        )
+    }
 }
