@@ -50,6 +50,7 @@ import com.zoffcc.applications.trifa.HelperOSFile.show_file_in_explorer_or_open
 import com.zoffcc.applications.trifa.TRIFAGlobals
 import com.zoffcc.applications.trifa.TRIFAGlobals.TRIFA_MSG_TYPE
 import com.zoffcc.applications.trifa.ToxVars
+import org.briarproject.briar.desktop.ui.Tooltip
 import java.io.File
 import kotlin.random.Random
 
@@ -292,13 +293,15 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                             horizontalArrangement = Arrangement.End,
                             modifier = Modifier.randomDebugBorder().padding(all = 0.dp).align(Alignment.End)
                         ) {
-                            Text(
-                                modifier = Modifier.padding(all = 0.dp),
-                                text = timeToString(message.timeMs),
-                                textAlign = TextAlign.End,
-                                style = MaterialTheme.typography.subtitle1.copy(fontSize = 10.sp, lineHeight = TextUnit.Unspecified),
-                                color = ChatColorsConfig.TIME_TEXT
-                            )
+                            Tooltip("Message sent at: " + timeToString(message.timeMs)) {
+                                Text(
+                                    modifier = Modifier.padding(all = 0.dp),
+                                    text = timeToString(message.timeMs),
+                                    textAlign = TextAlign.End,
+                                    style = MaterialTheme.typography.subtitle1.copy(fontSize = 10.sp, lineHeight = TextUnit.Unspecified),
+                                    color = ChatColorsConfig.TIME_TEXT
+                                )
+                            }
                         }
                     }
                 }

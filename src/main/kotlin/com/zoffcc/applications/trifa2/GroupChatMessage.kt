@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -49,6 +50,7 @@ import com.zoffcc.applications.trifa.HelperGeneric.loadImageBitmap
 import com.zoffcc.applications.trifa.HelperOSFile.show_containing_dir_in_explorer
 import com.zoffcc.applications.trifa.HelperOSFile.show_file_in_explorer_or_open
 import com.zoffcc.applications.trifa.TRIFAGlobals
+import org.briarproject.briar.desktop.ui.Tooltip
 import java.io.File
 
 @Composable
@@ -182,22 +184,25 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                             {
                                 IconButton(
                                     modifier = Modifier.size(15.dp),
-                                    icon = Icons.Filled.Check,
+                                    icon = Icons.Filled.QuestionMark,
                                     iconTint = Color.Magenta,
                                     enabled = false,
                                     iconSize = 13.dp,
-                                    contentDescription = "synced",
+                                    contentDescription = "Message synced via History sync by other Peers" + "\n" +
+                                            "Message contents cat not be fully verified",
                                     onClick = {}
                                 )
                                 Spacer(modifier = Modifier.width(10.dp))
                             }
-                            Text(
-                                modifier = Modifier.padding(all = 0.dp),
-                                text = timeToString(groupmessage.timeMs),
-                                textAlign = TextAlign.End,
-                                style = MaterialTheme.typography.subtitle1.copy(fontSize = 10.sp, lineHeight = TextUnit.Unspecified),
-                                color = ChatColorsConfig.TIME_TEXT
-                            )
+                            Tooltip("Message sent at: " + timeToString(groupmessage.timeMs)) {
+                                Text(
+                                    modifier = Modifier.padding(all = 0.dp),
+                                    text = timeToString(groupmessage.timeMs),
+                                    textAlign = TextAlign.End,
+                                    style = MaterialTheme.typography.subtitle1.copy(fontSize = 10.sp, lineHeight = TextUnit.Unspecified),
+                                    color = ChatColorsConfig.TIME_TEXT
+                                )
+                            }
                         }
                     }
                 }
