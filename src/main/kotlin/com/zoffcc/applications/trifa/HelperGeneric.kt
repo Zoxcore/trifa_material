@@ -577,6 +577,8 @@ object HelperGeneric {
                 direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value,
                 user = myUser,
                 timeMs = timestamp,
+                recvTimeMs = 0L,
+                sentTimeMs = timestamp,
                 text = msg!!, toxpk = friendPubkey.toUpperCase(),
                 trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value,
                 msgDatabaseId = row_id,

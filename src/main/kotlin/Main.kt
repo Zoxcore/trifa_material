@@ -1228,6 +1228,8 @@ fun load_messages_for_friend(selectedContactPubkey: String?)
                         val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = selectedContactPubkey, color = ColorProvider.getColor(false))
                         uimessages.add(UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value,
                             user = friend_user, timeMs = it.rcvd_timestamp,
+                            recvTimeMs = it.rcvd_timestamp,
+                            sentTimeMs = it.sent_timestamp,
                             text = it.text, toxpk = it.tox_friendpubkey.uppercase(),
                             trifaMsgType = it.TRIFA_MESSAGE_TYPE, msgDatabaseId = it.id,
                             filename_fullpath = it.filename_fullpath, file_state = it.state))
@@ -1236,6 +1238,8 @@ fun load_messages_for_friend(selectedContactPubkey: String?)
                     {
                         uimessages.add(UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value,
                             user = myUser, timeMs = it.sent_timestamp,
+                            recvTimeMs = it.rcvd_timestamp,
+                            sentTimeMs = it.sent_timestamp,
                             text = it.text, toxpk = it.tox_friendpubkey.uppercase(),
                             trifaMsgType = it.TRIFA_MESSAGE_TYPE, msgDatabaseId = it.id,
                             filename_fullpath = it.filename_fullpath, file_state = it.state))

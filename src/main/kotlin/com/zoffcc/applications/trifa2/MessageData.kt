@@ -5,6 +5,8 @@ import com.zoffcc.applications.trifa.ToxVars
 data class UIMessage private constructor(
     val user: User,
     val timeMs: Long,
+    val sentTimeMs: Long,
+    val recvTimeMs: Long,
     var text: String,
     val id: Long,
     val direction: Int,
@@ -21,6 +23,8 @@ data class UIMessage private constructor(
     constructor(
         user: User,
         timeMs: Long,
+        sentTimeMs: Long,
+        recvTimeMs: Long,
         text: String,
         direction: Int,
         read: Boolean = false,
@@ -35,6 +39,8 @@ data class UIMessage private constructor(
     ) : this(
         user = user,
         timeMs = timeMs,
+        sentTimeMs = sentTimeMs,
+        recvTimeMs = recvTimeMs,
         text = text,
         direction = direction,
         read = read,
