@@ -393,6 +393,9 @@ fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, s
                                         groupmessagestore.send(GroupMessageAction.SendGroupMessage(
                                             UIGroupMessage(
                                                 was_synced = false,
+                                                sentTimeMs = timestamp,
+                                                rcvdTimeMs = timestamp,
+                                                syncdTimeMs = timestamp,
                                                 msg_id_hash = "",
                                                 message_id_tox = message_id_hex, msgDatabaseId = db_msgid,
                                                 user = myUser, timeMs = timestamp, text = text,

@@ -2633,6 +2633,9 @@ class MainActivity
             groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(
                 UIGroupMessage(
                     was_synced = false,
+                    sentTimeMs = message_timestamp_ms,
+                    rcvdTimeMs = message_timestamp_ms,
+                    syncdTimeMs = message_timestamp_ms,
                     msg_id_hash = "",
                     message_id_tox = message_id_hex, msgDatabaseId = msg_dbid,
                     user = peer_user, timeMs = message_timestamp_ms, text = message_orig!!,
@@ -3206,6 +3209,9 @@ class MainActivity
             groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(
                 UIGroupMessage(
                     was_synced = true,
+                    sentTimeMs = m.sent_timestamp,
+                    rcvdTimeMs = m.rcvd_timestamp,
+                    syncdTimeMs = m.rcvd_timestamp,
                     msg_id_hash = m.msg_id_hash,
                     message_id_tox = m.message_id_tox, msgDatabaseId = msg_dbid,
                     user = peer_user, timeMs = m.sent_timestamp, text = m.text,
@@ -3236,6 +3242,9 @@ class MainActivity
             groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(
                 UIGroupMessage(
                     was_synced = was_synced,
+                    sentTimeMs = msg_timestamp,
+                    rcvdTimeMs = msg_timestamp,
+                    syncdTimeMs = msg_timestamp,
                     msg_id_hash = msg_id_hash,
                     message_id_tox = "", msgDatabaseId = file_meta_data.rowid,
                     user = peer_user, timeMs = msg_timestamp,
@@ -3350,6 +3359,9 @@ class MainActivity
                 GroupMessageAction.SendGroupMessage(
                 UIGroupMessage(
                     was_synced = m.was_synced,
+                    sentTimeMs = m.sent_timestamp,
+                    rcvdTimeMs = m.rcvd_timestamp,
+                    syncdTimeMs = m.sent_timestamp,
                     msg_id_hash = m.msg_id_hash,
                     message_id_tox = m.message_id_tox, msgDatabaseId = row_id,
                     user = myUser, timeMs = m.sent_timestamp, text = m.text,
