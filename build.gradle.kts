@@ -77,7 +77,7 @@ dependencies {
     //
     //
     implementation("org.xerial:sqlite-jdbc:3.45.1.0")
-    implementation("ca.gosyer:kotlin-multiplatform-appdirs:1.1.1")
+    implementation("ca.gosyer:kotlin-multiplatform-appdirs:1.2.0")
     implementation("com.sksamuel.scrimage:scrimage-core:4.1.1")
     implementation("com.sksamuel.scrimage:scrimage-webp:4.1.1")
     implementation("com.google.code.gson:gson:2.10.1")
