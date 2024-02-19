@@ -316,37 +316,28 @@ jobs:
           ./gradlew packageReleaseDistributionForCurrentOS
 
       - name: Rename artifact for nightly upload
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
           cp -v ./build/compose/binaries/main*/msi/trifa*material*.msi trifa-material_nightly.msi
           cp -v ./build/compose/binaries/main*/exe/trifa_material-*.exe trifa-material_nightly.exe
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: trifa-material_nightly.msi
           path: trifa-material_nightly.msi
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: trifa-material_nightly.exe
           path: trifa-material_nightly.exe
 
-      - name: Rename artifact for nightly upload for tags
-        if: contains(github.ref, 'refs/tags/v')
-        run: |
-          cp -v ./build/compose/binaries/main*/msi/trifa*material*.msi trifa-material_nightly.msi
-      - name: Upload artifact for tags
-        uses: actions/upload-artifact@v4
-        with:
-          name: trifa-material_nightly.msi
-          path: trifa-material_nightly.msi
-          overwrite: true
-
       - name: Rename artifact for release upload
         if: contains(github.ref, 'refs/tags/v')
         run: |
           cp -v ./build/compose/binaries/main*/msi/trifa*material*.msi trifa-material.msi
           cp -v ./build/compose/binaries/main*/exe/trifa_material-*.exe trifa-material.exe
+
       - name: Upload to versioned release
         if: contains(github.ref, 'refs/tags/v')
         uses: ncipollo/release-action@v1
