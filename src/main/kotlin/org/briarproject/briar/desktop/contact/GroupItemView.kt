@@ -47,7 +47,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoffcc.applications.trifa.Log
+import com.zoffcc.applications.trifa.TAG
 import com.zoffcc.applications.trifa.ToxVars.TOX_GROUP_PRIVACY_STATE
+import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import globalgrpstoreunreadmsgs
 import org.briarproject.briar.desktop.ui.NumberBadge
 import org.briarproject.briar.desktop.ui.Tooltip
@@ -126,15 +129,18 @@ fun PeerCountCircle(
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun GroupItemViewInfo(groupItem: GroupItem) = Column(
     horizontalAlignment = Start,
     modifier = Modifier.padding(start = 0.dp).randomDebugBorder()
 ) {
-    Text(
-        text = groupItem.name,
-        style = if (groupItem.name.length > 14) MaterialTheme.typography.body1.copy(fontSize = 13.sp) else MaterialTheme.typography.body1,
-        maxLines = 1,
-        overflow = Ellipsis,
-    )
+    Tooltip(text = "Group Name: " + groupItem.name) {
+        Text(
+            text = groupItem.name,
+            style = if (groupItem.name.length > 14) MaterialTheme.typography.body1.copy(fontSize = 13.sp) else MaterialTheme.typography.body1,
+            maxLines = 1,
+            overflow = Ellipsis,
+        )
+    }
 }
