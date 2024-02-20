@@ -20,8 +20,11 @@ package org.briarproject.briar.desktop
 
 import SETTINGS_HEADER_SIZE
 import SnackBarToast
+import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -37,6 +40,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
@@ -45,6 +49,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,7 +57,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.DefaultShadowColor
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
@@ -132,6 +140,7 @@ fun SettingDetails()
         } catch (_: Exception)
         {
         }
+
         DetailItem(label = i18n("UDP mode"),
             description = (if (tox_udp_mode) i18n("UDP mode enabled") else i18n("UDP mode disabled"))) {
             Switch(
@@ -142,6 +151,7 @@ fun SettingDetails()
                 },
             )
         }
+
         // ---- UDP ----
 
         // ---- LAN discovery ----
@@ -462,11 +472,24 @@ fun DetailItem(
     label: String,
     description: String,
     setting: @Composable (RowScope.() -> Unit),
-) = Row(Modifier.fillMaxWidth().height(SETTINGS_HEADER_SIZE).padding(horizontal = 16.dp).semantics(mergeDescendants = true) { // it would be nicer to derive the contentDescriptions from the descendants automatically
-    // which is currently not supported in Compose for Desktop
-    // see https://github.com/JetBrains/compose-jb/issues/2111
-    contentDescription = description
-}, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-    Text(label)
-    setting()
+) = Box(modifier = Modifier.padding(start = 15.dp, end = 22.dp, top = 5.dp, bottom = 2.dp)) {
+    Box(
+        modifier = Modifier
+            .shadow(
+                elevation = 4.dp,
+                shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 8.dp, bottomEnd = 8.dp)
+            )
+            .background(Color.White),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(Modifier.fillMaxWidth()
+            .height(SETTINGS_HEADER_SIZE)
+            .padding(horizontal = 16.dp)
+            .semantics(mergeDescendants = true) {
+                contentDescription = description
+            }, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(label)
+            setting()
+        }
+    }
 }
