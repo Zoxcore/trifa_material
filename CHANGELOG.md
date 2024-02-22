@@ -1,5 +1,23 @@
 # Changelog
 
+## [v1.0.22](https://github.com/Zoxcore/trifa_material/tree/v1.0.22) (2024-02-22)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.21...v1.0.22)
+
+**Merged pull requests:**
+
+- update to compose dev version. TextField cursor animation uses a lot of CPU. [\#165](https://github.com/Zoxcore/trifa_material/pull/165) ([zoff99](https://github.com/zoff99))
+- Update README.md [\#164](https://github.com/Zoxcore/trifa_material/pull/164) ([zoff99](https://github.com/zoff99))
+- update to compose.version 1.6.0-rc02, again [\#163](https://github.com/Zoxcore/trifa_material/pull/163) ([zoff99](https://github.com/zoff99))
+- put settings into boxes, show number of group messages in group settings view [\#162](https://github.com/Zoxcore/trifa_material/pull/162) ([zoff99](https://github.com/zoff99))
+- fix windows zip artifact generation and upload [\#161](https://github.com/Zoxcore/trifa_material/pull/161) ([zoff99](https://github.com/zoff99))
+- show utf-8 length in bytes of text messages [\#160](https://github.com/Zoxcore/trifa_material/pull/160) ([zoff99](https://github.com/zoff99))
+- Bump org.ajoberstar.grgit from 5.2.1 to 5.2.2 [\#159](https://github.com/Zoxcore/trifa_material/pull/159) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump ca.gosyer:kotlin-multiplatform-appdirs from 1.1.1 to 1.2.0 [\#158](https://github.com/Zoxcore/trifa_material/pull/158) ([dependabot[bot]](https://github.com/apps/dependabot))
+- add more tooltips and infos [\#157](https://github.com/Zoxcore/trifa_material/pull/157) ([zoff99](https://github.com/zoff99))
+- Revert "update to compose.version 1.6.0-rc02" [\#156](https://github.com/Zoxcore/trifa_material/pull/156) ([zoff99](https://github.com/zoff99))
+- fix lineheight on compose 1.6.x, fix bootstrapping issues in edge cases, create new public groups [\#155](https://github.com/Zoxcore/trifa_material/pull/155) ([zoff99](https://github.com/zoff99))
+
 ## [v1.0.21](https://github.com/Zoxcore/trifa_material/tree/v1.0.21) (2024-02-15)
 
 [Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.20...v1.0.21)
