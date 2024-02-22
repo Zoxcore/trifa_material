@@ -42,6 +42,16 @@ data class AVState(val a: Int)
         CALL_STATUS_CALLING,
         CALL_STATUS_ENDING
     }
+
+    /*
+    enum class NGC_CALL_STATUS {
+        CALL_STATUS_NONE,
+        CALL_STATUS_INCOMING,
+        CALL_STATUS_CALLING,
+        CALL_STATUS_ENDING
+    }
+     */
+
     enum class CALLVIDEO {
         CALLVIDEO_NONE,
         CALLVIDEO_INCOMING,
