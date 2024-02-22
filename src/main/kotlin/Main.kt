@@ -1091,9 +1091,9 @@ fun App()
                                             globalfrndstoreunreadmsgs.try_clear_unread_per_friend_message_count(contacts.selectedContactPubkey)
                                         }
                                         ChatAppWithScaffold(focusRequester = focusRequester, contactList = contacts, ui_scale = ui_scale)
-                                        //LaunchedEffect(contacts.selectedContactPubkey) {
-                                        //    focusRequester.requestFocus()
-                                        //}
+                                        LaunchedEffect(contacts.selectedContactPubkey) {
+                                            focusRequester.requestFocus()
+                                        }
                                     }
                                 }
                             }
@@ -1136,9 +1136,9 @@ fun App()
                                             globalgrpstoreunreadmsgs.try_clear_unread_per_group_message_count(groups.selectedGroupId)
                                         }
                                         GroupAppWithScaffold(focusRequester = groupfocusRequester, groupList = groups, ui_scale = ui_scale)
-                                        //LaunchedEffect(groups.selectedGroupId) {
-                                        //    groupfocusRequester.requestFocus()
-                                        //}
+                                        LaunchedEffect(groups.selectedGroupId) {
+                                            groupfocusRequester.requestFocus()
+                                        }
                                     }
                                 }
                             }
