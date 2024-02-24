@@ -1614,7 +1614,8 @@ class MainActivity
                           "friend_read_receipt:friend:" + get_friend_name_from_num(friend_number) + " message:" + m.text +
                           " m=" + m)
                     update_message_in_db_read_rcvd_timestamp_rawmsgbytes(m)
-                    // TODO: update message in UI
+                    // update message in UI
+                    modify_text_message(m)
                 }
             } catch (e: java.lang.Exception)
             {
@@ -1742,6 +1743,9 @@ class MainActivity
                             timestamp_wrap = System.currentTimeMillis()
                         }
                         val msg_id_db = received_message_to_db(toxpk = toxpk,
+                            msg_idv3_hash = msgV3hash_hex_string,
+                            msg_id_hash = "",
+                            msg_version = 0,
                             sent_message_timestamp_ms = timestamp_wrap,
                             rcvd_message_timestamp_ms = System.currentTimeMillis(),
                             friend_message = friend_message)
@@ -1749,6 +1753,10 @@ class MainActivity
                         val fname = tox_friend_get_name(friendnum)
                         val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk)
                         messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value, user = friend_user, timeMs = timestamp_wrap,
+                            read = false,
+                            msg_id_hash = "",
+                            msg_idv3_hash = msgV3hash_hex_string,
+                            msg_version = 0,
                             recvTimeMs = System.currentTimeMillis(),
                             sentTimeMs = timestamp_wrap,
                             text = friend_message!!, toxpk = toxpk, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, msgDatabaseId = msg_id_db, filename_fullpath = null)))
@@ -1768,11 +1776,18 @@ class MainActivity
                         val msg_id_db = received_message_to_db(toxpk = toxpk,
                             sent_message_timestamp_ms = timestamp_wrap,
                             rcvd_message_timestamp_ms = timestamp_wrap,
+                            msg_idv3_hash = "",
+                            msg_id_hash = "",
+                            msg_version = 0,
                             friend_message = friend_message)
                         val friendnum = tox_friend_by_public_key(toxpk)
                         val fname = tox_friend_get_name(friendnum)
                         val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk!!)
                         messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value, user = friend_user, timeMs = timestamp_wrap,
+                            read = false,
+                            msg_id_hash = "",
+                            msg_idv3_hash = "",
+                            msg_version = 0,
                             recvTimeMs = timestamp_wrap,
                             sentTimeMs = timestamp_wrap,
                             text = friend_message!!, toxpk = toxpk!!, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, msgDatabaseId = msg_id_db, filename_fullpath = null)))
@@ -1801,8 +1816,13 @@ class MainActivity
             tox_messagev2_get_message_id(raw_message_buf, msg_id_buffer) // val ts_sec = tox_messagev2_get_ts_sec(raw_message_buf)
             // val ts_ms = tox_messagev2_get_ts_ms(raw_message_buf)
             val msg_id_buffer_compat = ByteBufferCompat(msg_id_buffer)
-            val msg_id_as_hex_string: String? = msg_id_buffer_compat.array()?.let {
-                bytesToHex(it, msg_id_buffer_compat.arrayOffset(), msg_id_buffer_compat.limit())
+            var msg_id_as_hex_string: String = ""
+            try
+            {
+                msg_id_as_hex_string = bytesToHex(msg_id_buffer_compat.array()!!, msg_id_buffer_compat.arrayOffset(), msg_id_buffer_compat.limit())
+            }
+            catch(_: Exception)
+            {
             }
             Log.i(TAG, "TOX_FILE_KIND_MESSAGEV2:MSGv2HASH:2=" + msg_id_as_hex_string)
 
@@ -1827,11 +1847,18 @@ class MainActivity
                 val msg_id_db = received_message_to_db(toxpk = toxpk,
                     sent_message_timestamp_ms = message_timestamp,
                     rcvd_message_timestamp_ms = pin_timestamp,
+                    msg_id_hash = msg_id_as_hex_string,
+                    msg_idv3_hash = "",
+                    msg_version = 1,
                     friend_message = friend_message)
                 val friendnum = tox_friend_by_public_key(toxpk)
                 val fname = tox_friend_get_name(friendnum)
                 val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk!!)
                 messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value, user = friend_user, timeMs = message_timestamp,
+                    read = false,
+                    msg_id_hash = msg_id_as_hex_string,
+                    msg_idv3_hash = "",
+                    msg_version = 1,
                     recvTimeMs = pin_timestamp,
                     sentTimeMs = message_timestamp,
                     text = friend_message!!, toxpk = toxpk!!, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, msgDatabaseId = msg_id_db, filename_fullpath = null)))
@@ -1900,6 +1927,8 @@ class MainActivity
                         update_message_in_db_read_rcvd_timestamp_rawmsgbytes(m)
                         m.resend_count = TRIFAGlobals.MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION
                         HelperMessage.update_message_in_db_resend_count(m)
+                        // update message in UI
+                        modify_text_message(m)
                     }
                     catch(_: Exception)
                     {
@@ -2373,6 +2402,10 @@ class MainActivity
                 val fname = tox_friend_get_name(friendnum)
                 val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = friend_pk!!)
                 messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value, user = friend_user, timeMs = timestampMs(),
+                    read = false,
+                    msg_id_hash = "",
+                    msg_idv3_hash = "",
+                    msg_version = 0,
                     recvTimeMs = System.currentTimeMillis(),
                     sentTimeMs = timestampMs(),
                     text = m.text, toxpk = friend_pk!!, trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value, msgDatabaseId = new_msg_id, filename_fullpath = null, file_state = m.state)))
@@ -3090,6 +3123,9 @@ class MainActivity
          * put an incoming 1-on-1 text message into the database
          */
         fun received_message_to_db(toxpk: String?,
+                                   msg_version: Int,
+                                   msg_id_hash: String,
+                                   msg_idv3_hash: String,
                                    sent_message_timestamp_ms: Long,
                                    rcvd_message_timestamp_ms: Long,
                                    friend_message: String?): Long
@@ -3111,8 +3147,9 @@ class MainActivity
             m.sent_timestamp = sent_message_timestamp_ms
             m.sent_timestamp_ms = 0
             m.text = friend_message
-            m.msg_version = 0
-            m.msg_idv3_hash = ""
+            m.msg_version = msg_version
+            m.msg_idv3_hash = msg_idv3_hash
+            m.msg_id_hash = msg_id_hash
             m.sent_push = 0
             var row_id: Long = -1
             try
@@ -3433,6 +3470,7 @@ class MainActivity
             m.text = filename + "\n" + file_size + " bytes"
             m.is_new = false // no notification for outgoing filetransfers
             m.filetransfer_kind = ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_DATA.value
+            m.read = false
             var new_msg_id: Long = -1
             try
             {
@@ -3459,6 +3497,10 @@ class MainActivity
                 direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value,
                 msgDatabaseId = new_msg_id, user = myUser,
                 timeMs = m.sent_timestamp,
+                read = m.read,
+                msg_id_hash = "",
+                msg_idv3_hash = "",
+                msg_version = 0,
                 recvTimeMs = m.rcvd_timestamp,
                 sentTimeMs = m.sent_timestamp,
                 text = m.text,
@@ -3509,6 +3551,12 @@ class MainActivity
         @JvmStatic fun modify_message_with_ft(message: Message, filetransfer: Filetransfer?)
         {
             messagestore.send(MessageAction.UpdateMessage(message, filetransfer))
+        }
+
+        // Warning: this does NOT update all fields of the message!
+        @JvmStatic fun modify_text_message(message: Message)
+        {
+            messagestore.send(MessageAction.UpdateTextMessage(message))
         }
 
         @JvmStatic fun modify_message_with_finished_ft(message: Message, file_size: Long)

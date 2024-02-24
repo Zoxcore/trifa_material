@@ -12,6 +12,7 @@ sealed interface MessageAction
     data class ReceiveMessagesBulkWithClear(val messages: List<UIMessage>, val toxpk: String) : MessageAction
     data class ReceiveMessage(val message: UIMessage) : MessageAction
     data class UpdateMessage(val message_db: Message, val filetransfer_db: Filetransfer?) : MessageAction
+    data class UpdateTextMessage(val message_db: Message) : MessageAction
     data class Clear(val dummy: Int) : MessageAction
 }
 
@@ -74,13 +75,36 @@ fun chatReducer(state: MessageState, action: MessageAction): MessageState = when
         catch (e: Exception)
         {
         }
-        Log.i(com.zoffcc.applications.trifa.TAG, "MessageAction.UpdateMessage")
+        Log.i(TAG, "MessageAction.UpdateMessage")
+        state.copy(messages = state.messages)
+    }
+    is MessageAction.UpdateTextMessage ->
+    {
+        val TAG = "UpdateTextMessage"
+        try
+        {
+            val m = state.messages.toList()
+            val item_position = m.binarySearchBy(action.message_db.id) { it.id }
+            val item = m[item_position]
+            state.messages[item_position] = item.copy(sentTimeMs = action.message_db.sent_timestamp,
+                recvTimeMs = action.message_db.rcvd_timestamp,
+                read = action.message_db.read,
+                is_new = action.message_db.is_new,
+                msg_version = action.message_db.msg_version,
+                msg_id_hash = action.message_db.msg_id_hash,
+                msg_idv3_hash = action.message_db.msg_idv3_hash
+            )
+        }
+        catch (e: Exception)
+        {
+        }
+        Log.i(TAG, "MessageAction.UpdateTextMessage")
         state.copy(messages = state.messages)
     }
     else ->
     {
         // state.messages.clear()
         Log.i(com.zoffcc.applications.trifa.TAG, "MessageAction.Default -> Clear")
-        state.copy(mutableStateListOf())
+        state.copy(messages = mutableStateListOf())
     }
 }

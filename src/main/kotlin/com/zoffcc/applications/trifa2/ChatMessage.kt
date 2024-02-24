@@ -7,9 +7,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Icon
@@ -293,6 +294,50 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                             horizontalArrangement = Arrangement.End,
                             modifier = Modifier.randomDebugBorder().padding(all = 0.dp).align(Alignment.End)
                         ) {
+                            var msg_version_int: Int = 1
+                            if (message.msg_version == 1) {
+                                msg_version_int = 2
+                            } else {
+                                if (message.msg_idv3_hash.isNullOrEmpty()) {
+                                    msg_version_int = 1
+                                } else {
+                                    msg_version_int = 3
+                                }
+                            }
+
+                            if (isMyMessage) {
+                                if (message.read)
+                                {
+                                    val color1 = Color(0xFF2684A7)
+                                    IconButton(
+                                        modifier = Modifier.size(11.dp)
+                                            .align(Alignment.Bottom)
+                                            .background(Color.Transparent, CircleShape),
+                                        icon = Icons.Filled.Check,
+                                        iconTint = color1,
+                                        enabled = false,
+                                        iconSize = 10.dp,
+                                        contentDescription = "Message delivered",
+                                        onClick = {}
+                                    )
+                                    if (msg_version_int == 2)
+                                    {
+                                        val color2 = Color(0xFF2684A7)
+                                        IconButton(
+                                            modifier = Modifier.size(11.dp)
+                                                .align(Alignment.Bottom)
+                                                .background(Color.Transparent, CircleShape),
+                                            icon = Icons.Filled.Check,
+                                            iconTint = color2,
+                                            enabled = false,
+                                            iconSize = 10.dp,
+                                            contentDescription = "Message delivery (confirmed)",
+                                            onClick = {}
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                }
+                            }
                             var message_size_in_bytes = 0
                             try
                             {
@@ -301,9 +346,16 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                             catch(_: Exception)
                             {
                             }
+
+                            val msg_v2_hash_str = if (message.msg_id_hash.isNullOrEmpty()) "" else message.msg_id_hash
+                            val msg_v3_hash_str = if (message.msg_idv3_hash.isNullOrEmpty()) "" else message.msg_idv3_hash
+
                             Tooltip("Message sent at: " + timeToString(message.sentTimeMs) + "\n" +
                                          "Message rcvd at: " + timeToString(message.recvTimeMs) + "\n" +
                                          "Message size in bytes: " + (if (message_size_in_bytes == 0) "unknown" else message_size_in_bytes) + "\n" +
+                                         "Message version: " + msg_version_int + "\n" +
+                                         "Message V2 Hash: " + msg_v2_hash_str + "\n" +
+                                         "Message V3 Hash: " + msg_v3_hash_str + "\n" +
                                          "The clocks on both sides are not synchronized for security reasons, " + "\n" +
                                          "therfore the timestamps may not be accurate") {
                                 Text(
