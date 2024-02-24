@@ -168,7 +168,6 @@ class MainActivity
         @JvmStatic var DB_PREF__U_keep_nospam = true
         @JvmStatic var DB_PREF__send_push_notifications = false
 
-        var incoming_messages_queue: BlockingQueue<String> = LinkedBlockingQueue()
         @JvmStatic var video_play_count_frames: Long = 0
         @JvmStatic var video_play_last_timestamp: Long = 0
         var video_play_fps_value: Int = 0
