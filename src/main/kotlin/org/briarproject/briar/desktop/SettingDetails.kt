@@ -76,6 +76,7 @@ import com.zoffcc.applications.trifa.HelperOSFile.show_containing_dir_in_explore
 import com.zoffcc.applications.trifa.MainActivity
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__notifications_active
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__open_files_directly
+import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__send_push_notifications
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__windows_audio_in_source
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_name
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_set_name
@@ -307,6 +308,37 @@ fun SettingDetails()
                 )
             }
             // ---- notifications active ----
+
+
+            // ---- send push notifications active ----
+            var push_notifications_active by remember { mutableStateOf(false) }
+            try
+            {
+                if (get_g_opts("DB_PREF__send_push_notifications") != null)
+                {
+                    if (get_g_opts("DB_PREF__send_push_notifications").equals("true"))
+                    {
+                        push_notifications_active = true
+                    }
+                }
+            } catch (e: java.lang.Exception)
+            {
+                e.printStackTrace()
+            }
+
+            DetailItem(label = i18n("send push notifications"),
+                description = (if (push_notifications_active) i18n("enabled") else i18n("disabled"))) {
+                Switch(
+                    checked = push_notifications_active,
+                    onCheckedChange = {
+                        set_g_opts("DB_PREF__send_push_notifications", it.toString().lowercase())
+                        println("DB_PREF__send_push_notifications="+it.toString().lowercase())
+                        DB_PREF__send_push_notifications = it
+                        push_notifications_active = it
+                    },
+                )
+            }
+            // ---- send push notifications active ----
 
 
 
