@@ -11,6 +11,7 @@ import com.zoffcc.applications.sorm.FriendList
 import com.zoffcc.applications.sorm.Message
 import com.zoffcc.applications.sorm.OrmaDatabase
 import com.zoffcc.applications.trifa.HelperFiletransfer.start_outgoing_ft
+import com.zoffcc.applications.trifa.HelperFriend.friend_call_push_url
 import com.zoffcc.applications.trifa.HelperFriend.get_friend_name_from_pubkey
 import com.zoffcc.applications.trifa.HelperGeneric.get_friend_msgv3_capability
 import com.zoffcc.applications.trifa.HelperGeneric.is_friend_online_real
@@ -21,7 +22,7 @@ import com.zoffcc.applications.trifa.HelperMessage.tox_friend_send_message_wrapp
 import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_messageid
 import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_no_read_recvedts
 import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_resend_count
-import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__udp_enabled
+import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__send_push_notifications
 import com.zoffcc.applications.trifa.MainActivity.Companion.add_tcp_relay_single_wrapper
 import com.zoffcc.applications.trifa.MainActivity.Companion.audio_queue_play_trigger
 import com.zoffcc.applications.trifa.MainActivity.Companion.bootstrap_single_wrapper
@@ -220,32 +221,35 @@ class TrifaToxService
                     {
                         if ((last_resend_pending_messages4_ms + (5 * 1000)) < System.currentTimeMillis())
                         {
-                            last_resend_pending_messages4_ms = System.currentTimeMillis();
-                            // TODO // resend_push_for_v3_messages();
+                            last_resend_pending_messages4_ms = System.currentTimeMillis()
+                            if (DB_PREF__send_push_notifications == true)
+                            {
+                                resend_push_for_v3_messages()
+                            }
                         }
 
                         if ((last_resend_pending_messages0_ms + (30 * 1000)) < System.currentTimeMillis())
                         {
                             last_resend_pending_messages0_ms = System.currentTimeMillis();
-                            resend_old_messages(null);
+                            resend_old_messages(null)
                         }
 
                         if ((last_resend_pending_messages1_ms + (30 * 1000)) < System.currentTimeMillis())
                         {
                             last_resend_pending_messages1_ms = System.currentTimeMillis();
-                            resend_v3_messages(null);
+                            resend_v3_messages(null)
                         }
 
                         if ((last_resend_pending_messages2_ms + (30 * 1000)) < System.currentTimeMillis())
                         {
                             last_resend_pending_messages2_ms = System.currentTimeMillis();
-                            resend_v2_messages(false);
+                            resend_v2_messages(false)
                         }
 
                         if ((last_resend_pending_messages3_ms + (120 * 1000)) < System.currentTimeMillis())
                         {
                             last_resend_pending_messages3_ms = System.currentTimeMillis();
-                            resend_v2_messages(true);
+                            resend_v2_messages(true)
                         }
                     }
                     // --- send pending 1-on-1 text messages here --------------
@@ -484,7 +488,7 @@ class TrifaToxService
                         }
                         // -- play incoming bytes --
                         // -- play incoming bytes --
-                        //XXXXXXXXXX// sleep(59)
+                        // XXXXXXXXXX// sleep(59)
                         if (avstatestorecallstate.state.call_state != AVState.CALL_STATUS.CALL_STATUS_CALLING)
                         {
                             // Log.i(TAG, "[]tox_audio_frame:long sleep SSSSSSSSSS")
@@ -544,7 +548,7 @@ class TrifaToxService
                                     }
                                     else
                                     {
-                                        //Log.i(TAG, "()PLAY_ngc_audio_frame:+++++++++:" + audio_queue_play_trigger + " "
+                                        // Log.i(TAG, "()PLAY_ngc_audio_frame:+++++++++:" + audio_queue_play_trigger + " "
                                         //+ ngc_audio_in_queue.size + " " + ngc_audio_in_queue.remainingCapacity())
                                         sleep(4)
                                     }
@@ -886,6 +890,40 @@ class TrifaToxService
                     {
                     }
                 }
+            }
+        }
+
+        fun resend_push_for_v3_messages()
+        {
+            try
+            {
+                // HINT: if we have not received a "read receipt" for msgV3 within 10 seconds, then we trigger a push again
+                val cutoff_sent_time = System.currentTimeMillis() - (10 * 1000)
+                val m_push: List<Message>? = orma!!.selectFromMessage().directionEq(1).
+                msg_versionEq(0).
+                TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value).
+                sent_pushEq(0).
+                readEq(false).
+                orderBySent_timestampAsc().
+                sent_timestampLt(cutoff_sent_time).
+                toList()
+
+                if ((m_push != null) && (m_push.size > 0))
+                {
+                    val ii = m_push.iterator()
+                    while (ii.hasNext())
+                    {
+                        val m_resend_push = ii.next()
+                        if ((m_resend_push.msg_idv3_hash != null) && (m_resend_push.msg_idv3_hash.length > 3))
+                        {
+                            friend_call_push_url(m_resend_push.tox_friendpubkey, m_resend_push.sent_timestamp)
+                        }
+                    }
+                }
+            } catch (e: java.lang.Exception)
+            {
+                e.printStackTrace()
+                Log.i(TAG, "resend_push_for_v3_messages:EE:" + e.message)
             }
         }
 

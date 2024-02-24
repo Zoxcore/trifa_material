@@ -270,6 +270,11 @@ public class HelperFriend {
     }
 
     static void friend_call_push_url(final String friend_pubkey, final long message_timestamp_circa) {
+        if (MainActivity.getDB_PREF__send_push_notifications() == false)
+        {
+            return;
+        }
+
         try {
             final String pushurl_for_friend = get_pushurl_for_friend(friend_pubkey);
 
