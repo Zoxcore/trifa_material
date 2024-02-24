@@ -22,7 +22,9 @@ data class globalstore_state(
     val contacts_unread_group_message_count: Int = 0,
     val firstRun: Boolean = false,
     val startupSelfname: String = "",
-    val ui_scale: Float = 1.0f
+    val ui_scale: Float = 1.0f,
+    val toxRunning: Boolean = false,
+    val ormaRunning: Boolean = false
 )
 
 private val globalstore_state_lock = Any()
@@ -39,6 +41,10 @@ interface GlobalStore {
     fun getStartupSelfname(): String
     fun loadUiScale()
     fun getUiScale(): Float
+    fun setToxRunning(value: Boolean)
+    fun getToxRunning(): Boolean
+    fun setOrmaRunning(value: Boolean)
+    fun getOrmaRunning(): Boolean
     fun increase_unread_message_count()
     fun get_unread_message_count(): Int
     fun try_clear_unread_message_count()
@@ -110,6 +116,26 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
         override fun getStartupSelfname(): String
         {
             return state.startupSelfname
+        }
+
+        override fun getToxRunning(): Boolean
+        {
+            return state.toxRunning
+        }
+
+        override fun setToxRunning(value: Boolean)
+        {
+            mutableStateFlow.value = state.copy(toxRunning = value)
+        }
+
+        override fun getOrmaRunning(): Boolean
+        {
+            return state.ormaRunning
+        }
+
+        override fun setOrmaRunning(value: Boolean)
+        {
+            mutableStateFlow.value = state.copy(ormaRunning = value)
         }
 
         override fun loadUiScale()

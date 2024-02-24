@@ -64,6 +64,7 @@ import com.zoffcc.applications.trifa.HelperFriend.set_g_opts
 import com.zoffcc.applications.trifa.HelperGeneric
 import com.zoffcc.applications.trifa.HelperNotification
 import com.zoffcc.applications.trifa.HelperOSFile.show_containing_dir_in_explorer
+import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__notifications_active
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__open_files_directly
@@ -71,8 +72,11 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__send_push_n
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__use_other_toxproxies
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_name
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_set_name
+import com.zoffcc.applications.trifa.TAG
+import com.zoffcc.applications.trifa.TrifaToxService
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import global_prefs
+import globalstore
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.briarproject.briar.desktop.ui.VerticallyScrollableArea
@@ -85,12 +89,19 @@ import java.io.File
 fun SettingDetails()
 {
     SettingDetail(i18n("ui.settings_headline")) {
-        set_own_name()
-        Spacer(modifier = Modifier.height(60.dp))
+        val global_store by globalstore.stateFlow.collectAsState()
+        if (global_store.toxRunning)
+        {
+            set_own_name()
+            Spacer(modifier = Modifier.height(60.dp))
+        }
         tox_settings()
         Spacer(modifier = Modifier.height(60.dp))
-        database_settings()
-        Spacer(modifier = Modifier.height(60.dp))
+        if (global_store.ormaRunning)
+        {
+            database_settings()
+            Spacer(modifier = Modifier.height(60.dp))
+        }
         button_settings()
         Spacer(modifier = Modifier.height(60.dp))
         //
