@@ -9,13 +9,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import org.briarproject.briar.desktop.utils.InternationalizationUtils
+import org.briarproject.briar.desktop.contact.ContactItem
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 
 @Composable
 fun ExplainerChat() {
     Theme {
         Explainer(headline = i18n("ui.no_contacts_selected"), text = i18n("ui.select_contact_to_start_chatting"))
+    }
+}
+
+@Composable
+fun ExplainerInfoIsRelay(selectedContact: ContactItem?)
+{
+    Theme {
+        Explainer(headline = i18n("ui.tox_proxy_selected"), text = i18n("ui.explain_what_toxproxy_is"))
     }
 }
 

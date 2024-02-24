@@ -61,6 +61,7 @@ import com.zoffcc.applications.trifa.HelperMessage.process_msgv3_high_level_ack
 import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_read_rcvd_timestamp_rawmsgbytes
 import com.zoffcc.applications.trifa.HelperMessage.update_single_message_from_ftid
 import com.zoffcc.applications.trifa.HelperMessage.update_single_message_from_messge_id
+import com.zoffcc.applications.trifa.HelperRelay.is_any_relay
 import com.zoffcc.applications.trifa.TRIFAGlobals.ABSOLUTE_MINIMUM_GLOBAL_VIDEO_BITRATE
 import com.zoffcc.applications.trifa.TRIFAGlobals.AVATAR_INCOMING_MAX_BYTE_SIZE
 import com.zoffcc.applications.trifa.TRIFAGlobals.GLOBAL_AUDIO_BITRATE
@@ -1440,7 +1441,11 @@ class MainActivity
         {
             try
             {
-                contactstore.update(item = ContactItem(name = friend_name!!, isConnected = tox_friend_get_connection_status(friend_number), pubkey = tox_friend_get_public_key(friend_number)!!))
+                val friend_pubkey = tox_friend_get_public_key(friend_number)!!
+                val is_relay = is_any_relay(friend_pubkey)
+                contactstore.update(item = ContactItem(name = friend_name!!,
+                    isConnected = tox_friend_get_connection_status(friend_number), pubkey = friend_pubkey,
+                    is_relay = is_relay))
             } catch (_: Exception)
             {
             }
@@ -1457,7 +1462,12 @@ class MainActivity
                 {
                     fname = "Friend"
                 }
-                contactstore.update(item = ContactItem(name = fname, isConnected = tox_friend_get_connection_status(friend_number), pubkey = tox_friend_get_public_key(friend_number)!!))
+                val friend_pubkey = tox_friend_get_public_key(friend_number)!!
+                val is_relay = is_any_relay(friend_pubkey)
+                contactstore.update(item = ContactItem(name = fname,
+                    isConnected = tox_friend_get_connection_status(friend_number),
+                    pubkey = friend_pubkey,
+                    is_relay = is_relay))
             } catch (_: Exception)
             {
             }
@@ -1479,10 +1489,30 @@ class MainActivity
                 {
                     if (length == (TOX_PUBLIC_KEY_SIZE + 1).toLong())
                     {
-                        Log.i(TAG, "friend_lossless_packet_cb:recevied CONTROL_PROXY_MESSAGE_TYPE_PROXY_PUBKEY_FOR_FRIEND")
                         val relay_pubkey: String = bytes_to_hex(data).substring(2)
-                        Log.i(TAG, "friend_lossless_packet_cb:recevied pubkey:" + relay_pubkey.uppercase())
-                        // TODO: add relays // HelperFriend.add_friend_to_system(relay_pubkey.uppercase(), true, fpubkey)
+                        val new_friendnumber = tox_friend_add_norequest(relay_pubkey)
+                        if (new_friendnumber > -1)
+                        {
+                            if (new_friendnumber != UINT32_MAX_JAVA)
+                            {
+                                update_savedata_file_wrapper()
+
+                                Log.i(TAG, "friend_lossless_packet_cb:recevied CONTROL_PROXY_MESSAGE_TYPE_PROXY_PUBKEY_FOR_FRIEND")
+                                Log.i(TAG, "friend_lossless_packet_cb:recevied pubkey:" + relay_pubkey.uppercase())
+                                HelperFriend.add_friend_to_system(relay_pubkey.uppercase(), true, fpubkey)
+
+                                try
+                                {
+                                    contactstore.add(item = ContactItem(name = "Relay #" + relay_pubkey.uppercase().take(6),
+                                        isConnected = 0,
+                                        pubkey = relay_pubkey.uppercase(),
+                                        is_relay = true))
+                                } catch (_: Exception)
+                                {
+                                }
+                                SnackBarToast("Friend Relay updated or added")
+                            }
+                        }
                     }
                 } else if (data[0].toUByte().toInt() == TRIFAGlobals.CONTROL_PROXY_MESSAGE_TYPE.CONTROL_PROXY_MESSAGE_TYPE_PUSH_URL_FOR_FRIEND.value)
                 {
@@ -1526,7 +1556,12 @@ class MainActivity
                 {
                     fname = "Friend"
                 }
-                contactstore.update(item = ContactItem(name = fname, isConnected = tox_friend_get_connection_status(friend_number), pubkey = tox_friend_get_public_key(friend_number)!!))
+                val friend_pubkey = tox_friend_get_public_key(friend_number)!!
+                val is_relay = is_any_relay(friend_pubkey)
+                contactstore.update(item = ContactItem(name = fname,
+                    isConnected = tox_friend_get_connection_status(friend_number),
+                    pubkey = friend_pubkey,
+                    is_relay = is_relay))
             } catch (_: Exception)
             {
             }
@@ -1649,7 +1684,10 @@ class MainActivity
 
                     try
                     {
-                        contactstore.add(item = ContactItem(name = "new Friend #" + new_friendnumber, isConnected = 0, pubkey = friend_public_key!!))
+                        contactstore.add(item = ContactItem(name = "new Friend #" + new_friendnumber,
+                            isConnected = 0,
+                            pubkey = friend_public_key!!,
+                            is_relay = false))
                     } catch (_: Exception)
                     {
                     }

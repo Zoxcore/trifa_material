@@ -21,7 +21,8 @@ package org.briarproject.briar.desktop.contact
 data class ContactItem(
     val name: String,
     val isConnected: Int,
-    val pubkey: String
+    val pubkey: String,
+    val is_relay: Boolean
 ) {
     fun updateName(n: String) =
         copy(name = n)

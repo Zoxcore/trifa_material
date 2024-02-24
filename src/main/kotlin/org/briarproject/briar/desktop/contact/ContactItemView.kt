@@ -65,7 +65,8 @@ fun ContactItemView(
         Box(Modifier.align(Top).padding(vertical = 0.dp)) {
             ProfileCircle(45.dp, contactItem)
             val current_friendtorerunreadmessagesstore by globalfrndstoreunreadmsgs.stateFlow.collectAsState()
-            val num_unread = current_friendtorerunreadmessagesstore.unread_per_friend_message_count.get(contactItem.pubkey)
+            var num_unread = current_friendtorerunreadmessagesstore.unread_per_friend_message_count.get(contactItem.pubkey)
+            if (contactItem.is_relay) num_unread = 0
             NumberBadge(
                 num = if (num_unread == null) 0 else num_unread,
                 modifier = Modifier.align(TopEnd).offset(6.dp, (-6).dp)

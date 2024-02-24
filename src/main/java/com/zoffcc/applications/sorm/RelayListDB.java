@@ -35,25 +35,25 @@ public class RelayListDB
 
     // pubkey is always saved as UPPER CASE hex string!! -----------------
     @PrimaryKey
-    String tox_public_key_string = "";
+    public String tox_public_key_string = "";
     // pubkey is always saved as UPPER CASE hex string!! -----------------
 
     @Column(indexed = true, defaultExpr = "0", helpers = Column.Helpers.ALL)
-    int TOX_CONNECTION; // 0 --> NONE (offline), 1 --> TCP (online), 2 --> UDP (online)
+    public int TOX_CONNECTION; // 0 --> NONE (offline), 1 --> TCP (online), 2 --> UDP (online)
 
     @Column(indexed = true, defaultExpr = "0", helpers = Column.Helpers.ALL)
-    int TOX_CONNECTION_on_off; // 0 --> offline, 1 --> online
+    public int TOX_CONNECTION_on_off; // 0 --> offline, 1 --> online
 
     @Column(indexed = true, defaultExpr = "false", helpers = Column.Helpers.ALL)
-    boolean own_relay = false; // false --> friends relay, true --> my relay
+    public boolean own_relay = false; // false --> friends relay, true --> my relay
 
     @Column(indexed = true, defaultExpr = "-1", helpers = Column.Helpers.ALL)
-    long last_online_timestamp = -1L;
+    public long last_online_timestamp = -1L;
 
     // pubkey is always saved as UPPER CASE hex string!! -----------------
     @Column(indexed = true, defaultExpr = "", helpers = Column.Helpers.ALL)
     @Nullable
-    String tox_public_key_string_of_owner = "";
+    public String tox_public_key_string_of_owner = "";
     // pubkey is always saved as UPPER CASE hex string!! -----------------
 
     static RelayListDB deep_copy(RelayListDB in)

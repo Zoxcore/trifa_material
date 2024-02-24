@@ -416,7 +416,7 @@ public class HelperFriend {
         if (as_friends_relay)
         {
             // add relay for friend to DB
-            // TODO // HelperRelay.add_or_update_friend_relay(friend_public_key, owner_public_key);
+            HelperRelay.add_or_update_friend_relay(friend_public_key, owner_public_key);
         }
 
         if (MainActivity.getDB_PREF__U_keep_nospam() == false)

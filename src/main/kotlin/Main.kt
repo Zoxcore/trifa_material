@@ -191,6 +191,7 @@ import com.zoffcc.applications.trifa.FriendSettingDetails
 import com.zoffcc.applications.trifa.HelperGeneric.ngc_video_frame_last_incoming_ts
 import com.zoffcc.applications.trifa.MainActivity.Companion.DEBUG_COMPOSE_UI_UPDATES
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__do_not_sync_av
+import org.briarproject.briar.desktop.ui.ExplainerInfoIsRelay
 import org.briarproject.briar.desktop.ui.Tooltip
 
 private const val TAG = "trifa.Main.kt"
@@ -239,6 +240,7 @@ const val MAX_EMOJI_POP_RESULT = 15
 const val MAX_ONE_ON_ONE_MESSAGES_TO_SHOW = 20000
 const val MAX_GROUP_MESSAGES_TO_SHOW = 20000
 const val SNACKBAR_TOAST_MS_DURATION: Long = 1200
+val BG_COLOR_RELAY_CONTACT_ITEM = 0x448ABEB9
 val MESSAGE_CHECKMARKS_ICON_SIZE = 12.dp
 val MESSAGE_CHECKMARKS_CONTAINER_SIZE = 12.dp
 var emojis_cat_all_gropued: ArrayList<ArrayList<ArrayList<EmojiStrAndName>>> = ArrayList()
@@ -1127,6 +1129,10 @@ fun App()
                                     if (contacts.selectedContactPubkey == null)
                                     {
                                         ExplainerChat()
+                                    }
+                                    if ((contacts.selectedContact != null) && (contacts.selectedContact!!.is_relay))
+                                    {
+                                        ExplainerInfoIsRelay(contacts.selectedContact)
                                     } else
                                     {
                                         Log.i(TAG, "CONTACTS -> draw")
