@@ -34,8 +34,17 @@ the latest Development Snapshot can be downloaded from [here](https://github.com
   -  Linux: ```./gradlew run```
   -  Windows: ```gradlew.bat run```
   -  MacOS: ```./gradlew run```
-  -  raspi 64bit: ```export MESA_EXTENSION_OVERRIDE="-GL_ARB_invalidate_subdata" ; ./gradlew run```
-  -  [Asahi Linux](https://asahilinux.org/): ```export MESA_EXTENSION_OVERRIDE="-GL_ARB_invalidate_subdata" ; export MESA_GL_VERSION_OVERRIDE=3.0 ; ./gradlew run```
+  -  raspi 64bit:
+     ```
+     export MESA_EXTENSION_OVERRIDE="-GL_ARB_invalidate_subdata"
+     ./gradlew run
+     ```
+  -  [Asahi Linux](https://asahilinux.org/):
+     ```
+     export MESA_EXTENSION_OVERRIDE="-GL_ARB_invalidate_subdata"
+     export MESA_GL_VERSION_OVERRIDE=3.0
+     ./gradlew run
+     ```
   -  NixOS:
      ```
      chmod a+x trifa-material-x86_64.appimage
