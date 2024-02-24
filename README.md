@@ -36,6 +36,12 @@ the latest Development Snapshot can be downloaded from [here](https://github.com
   -  MacOS: ```./gradlew run```
   -  raspi 64bit: ```export MESA_EXTENSION_OVERRIDE="-GL_ARB_invalidate_subdata" ; ./gradlew run```
   -  [Asahi Linux](https://asahilinux.org/): ```export MESA_EXTENSION_OVERRIDE="-GL_ARB_invalidate_subdata" ; export MESA_GL_VERSION_OVERRIDE=3.0 ; ./gradlew run```
+  -  NixOS:
+     ```
+     chmod a+x trifa-material-x86_64.appimage
+     nix-shell -p appimage-run
+     appimage-run trifa-material-x86_64.appimage
+     ```
 
 or download any of the release [packages](https://github.com/Zoxcore/trifa_material/releases/latest)
 
