@@ -1487,30 +1487,33 @@ class MainActivity
 
                 if (data!![0].toUByte().toInt() == TRIFAGlobals.CONTROL_PROXY_MESSAGE_TYPE.CONTROL_PROXY_MESSAGE_TYPE_PROXY_PUBKEY_FOR_FRIEND.value)
                 {
-                    if (length == (TOX_PUBLIC_KEY_SIZE + 1).toLong())
+                    if (DB_PREF__use_other_toxproxies)
                     {
-                        val relay_pubkey: String = bytes_to_hex(data).substring(2)
-                        val new_friendnumber = tox_friend_add_norequest(relay_pubkey)
-                        if (new_friendnumber > -1)
+                        if (length == (TOX_PUBLIC_KEY_SIZE + 1).toLong())
                         {
-                            if (new_friendnumber != UINT32_MAX_JAVA)
+                            val relay_pubkey: String = bytes_to_hex(data).substring(2)
+                            val new_friendnumber = tox_friend_add_norequest(relay_pubkey)
+                            if (new_friendnumber > -1)
                             {
-                                update_savedata_file_wrapper()
-
-                                Log.i(TAG, "friend_lossless_packet_cb:recevied CONTROL_PROXY_MESSAGE_TYPE_PROXY_PUBKEY_FOR_FRIEND")
-                                Log.i(TAG, "friend_lossless_packet_cb:recevied pubkey:" + relay_pubkey.uppercase())
-                                HelperFriend.add_friend_to_system(relay_pubkey.uppercase(), true, fpubkey)
-
-                                try
+                                if (new_friendnumber != UINT32_MAX_JAVA)
                                 {
-                                    contactstore.add(item = ContactItem(name = "Relay #" + relay_pubkey.uppercase().take(6),
-                                        isConnected = 0,
-                                        pubkey = relay_pubkey.uppercase(),
-                                        is_relay = true))
-                                } catch (_: Exception)
-                                {
+                                    update_savedata_file_wrapper()
+
+                                    Log.i(TAG, "friend_lossless_packet_cb:recevied CONTROL_PROXY_MESSAGE_TYPE_PROXY_PUBKEY_FOR_FRIEND")
+                                    Log.i(TAG, "friend_lossless_packet_cb:recevied pubkey:" + relay_pubkey.uppercase())
+                                    HelperFriend.add_friend_to_system(relay_pubkey.uppercase(), true, fpubkey)
+
+                                    try
+                                    {
+                                        contactstore.add(item = ContactItem(name = "Relay #" + relay_pubkey.uppercase().take(6),
+                                            isConnected = 0,
+                                            pubkey = relay_pubkey.uppercase(),
+                                            is_relay = true))
+                                    } catch (_: Exception)
+                                    {
+                                    }
+                                    SnackBarToast("Friend Relay updated or added")
                                 }
-                                SnackBarToast("Friend Relay updated or added")
                             }
                         }
                     }
