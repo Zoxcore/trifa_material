@@ -319,6 +319,21 @@ class TrifaToxService
                 {
                     e.printStackTrace()
                 }
+
+                update_savedata_file_wrapper()
+                is_tox_started = false
+
+                clear_friends()
+                clear_groups()
+                try {
+                    globalstore.hard_clear_unread_message_count()
+                } catch(_: Exception) {
+                }
+                try {
+                    globalstore.hard_clear_unread_group_message_count()
+                } catch(_: Exception) {
+                }
+
                 try
                 {
                     tox_kill()
@@ -333,10 +348,9 @@ class TrifaToxService
                 {
                     e.printStackTrace()
                 }
-                update_savedata_file_wrapper()
 
-                is_tox_started = false
                 set_tox_running_state("stopped")
+
                 clear_friends()
                 clear_groups()
                 try {
@@ -347,6 +361,7 @@ class TrifaToxService
                     globalstore.hard_clear_unread_group_message_count()
                 } catch(_: Exception) {
                 }
+
                 orma = null
                 com.zoffcc.applications.sorm.OrmaDatabase.shutdown()
                 unlock_data_dir_input()
