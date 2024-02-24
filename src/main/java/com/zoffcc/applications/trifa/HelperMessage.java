@@ -80,7 +80,8 @@ public class HelperMessage {
                 }
                 m.read = true;
                 update_message_in_db_read_rcvd_timestamp_rawmsgbytes(m);
-                // TODO: update message in UI
+                // update message in UI
+                modify_text_message(m);
             }
             catch (Exception e)
             {

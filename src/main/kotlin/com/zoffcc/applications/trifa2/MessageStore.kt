@@ -43,6 +43,12 @@ fun CoroutineScope.createMessageStore(): MessageStore
                     {
                         channel.send(action)
                     }
+                } else if (action is MessageAction.UpdateTextMessage)
+                {
+                    if (contactstore.state.selectedContactPubkey == action.message_db.tox_friendpubkey)
+                    {
+                        channel.send(action)
+                    }
                 } else if (action is MessageAction.ReceiveMessagesBulkWithClear)
                 {
                     if (contactstore.state.selectedContactPubkey == action.toxpk)
