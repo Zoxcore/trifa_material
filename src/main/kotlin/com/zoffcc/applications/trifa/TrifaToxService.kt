@@ -683,6 +683,21 @@ class TrifaToxService
         {
             e.printStackTrace()
         }
+
+        MainActivity.DB_PREF__use_other_toxproxies = false
+        try
+        {
+            if (HelperFriend.get_g_opts("DB_PREF__use_other_toxproxies") != null)
+            {
+                if (HelperFriend.get_g_opts("DB_PREF__use_other_toxproxies").equals("true"))
+                {
+                    MainActivity.DB_PREF__use_other_toxproxies = true
+                }
+            }
+        } catch (e: java.lang.Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     private fun check_if_need_bootstrap_again()
