@@ -75,7 +75,7 @@ fun CoroutineScope.createUnreadMessages(): UnreadMessages {
             }
             catch (e: Exception)
             {
-                e.printStackTrace()
+                // e.printStackTrace()
             }
             val tmp = HashMap(state.unread_per_friend_message_count)
             tmp.remove(friend_pubkey)

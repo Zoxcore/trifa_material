@@ -1,5 +1,6 @@
 package org.briarproject.briar.desktop.contact
 
+import BG_COLOR_RELAY_CONTACT_ITEM
 import CONTACTITEM_HEIGHT
 import CONTACT_COLUMN_WIDTH
 import androidx.compose.foundation.ContextMenuArea
@@ -62,15 +63,20 @@ fun ContactList(
                                },
                     selected = (contactList.selectedContactPubkey == item.pubkey)
                 ) {
+                    val bgcolor = if (item.is_relay) Color(BG_COLOR_RELAY_CONTACT_ITEM) else Color.Transparent
                     val modifier = Modifier
                         .heightIn(min = CONTACTITEM_HEIGHT)
                         .fillMaxWidth()
+                        .background(bgcolor)
                         .padding(vertical = 8.dp)
                         .padding(start = 16.dp, end = 4.dp)
                     ContextMenuArea(items = {
                         listOf(
                             ContextMenuItem("delete") {
-                                contactstore.remove(item = ContactItem(name = "", isConnected = 0, pubkey = item.pubkey))
+                                contactstore.remove(item = ContactItem(name = "",
+                                    isConnected = 0,
+                                    is_relay = false,
+                                    pubkey = item.pubkey))
                                 GlobalScope.launch(Dispatchers.IO) {
                                     delete_friend_wrapper(item.pubkey)
                                 }

@@ -1323,7 +1323,10 @@ class TrifaToxService
 
             try
             {
-                contactstore.add(item = ContactItem(name = fname, isConnected = 0, pubkey = tox_friend_get_public_key(it)!!))
+                contactstore.add(item = ContactItem(name = fname,
+                    isConnected = 0,
+                    pubkey = tox_friend_get_public_key(it)!!,
+                    is_relay = f.is_relay))
             } catch (_: Exception)
             {
             }

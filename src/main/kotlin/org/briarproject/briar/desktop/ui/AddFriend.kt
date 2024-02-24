@@ -82,7 +82,10 @@ fun AddFriend() = Box {
                             catch(_: java.lang.Exception)
                             {
                             }
-                            contactstore.add(item = ContactItem(name = "new Friend #" + friendnum, isConnected = 0, pubkey = friend_pubkey!!))
+                            contactstore.add(item = ContactItem(name = "new Friend #" + friendnum,
+                                isConnected = 0,
+                                pubkey = friend_pubkey!!,
+                                is_relay = false))
                         } catch (_: Exception)
                         {
                         }

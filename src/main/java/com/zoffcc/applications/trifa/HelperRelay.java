@@ -19,12 +19,15 @@
 
 package com.zoffcc.applications.trifa;
 
+import com.zoffcc.applications.sorm.FriendList;
 import com.zoffcc.applications.sorm.OrmaDatabase;
+import com.zoffcc.applications.sorm.RelayListDB;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
 
 import static com.zoffcc.applications.sorm.OrmaDatabase.s;
+import static com.zoffcc.applications.trifa.MainActivity.tox_friend_by_public_key;
 import static com.zoffcc.applications.trifa.TRIFAGlobals.*;
 import static com.zoffcc.applications.trifa.TRIFAGlobals.NOTIFICATION_NTFY_PUSH_URL_PREFIX;
 
@@ -121,5 +124,144 @@ public class HelperRelay
 
         // anything else is not allowed at this time!
         return false;
+    }
+
+    static boolean is_any_relay(String friend_pubkey)
+    {
+        try
+        {
+            Statement statement = OrmaDatabase.getSqldb().createStatement();
+            ResultSet rs = statement.executeQuery(
+                    "select count(*) as count from FriendList where tox_public_key_string='" +
+                            s(friend_pubkey.toUpperCase()) +
+                            "' and is_relay='1'");
+            if (rs.next())
+            {
+                int count = rs.getInt("count");
+                if (count > 0)
+                {
+                    try
+                    {
+                        statement.close();
+                    }
+                    catch (Exception ignored)
+                    {
+                    }
+                    return true;
+                }
+            }
+            else
+            {
+                try
+                {
+                    statement.close();
+                }
+                catch (Exception ignored)
+                {
+                }
+                return false;
+            }
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+
+        return false;
+    }
+
+    static void delete_friend_current_relay(String friend_pubkey)
+    {
+        try
+        {
+            //**// TODO:
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    static void add_or_update_friend_relay(String relay_public_key_string, String friend_pubkey)
+    {
+        Log.i(TAG, "add_or_update_friend_relay:001");
+        if (relay_public_key_string == null)
+        {
+            Log.i(TAG, "add_or_update_friend_relay:ret01");
+            return;
+        }
+
+        if (friend_pubkey == null)
+        {
+            Log.i(TAG, "add_or_update_friend_relay:ret02");
+            return;
+        }
+
+        try
+        {
+            if (!is_any_relay(friend_pubkey))
+            {
+                String friend_old_relay_pubkey = get_relay_for_friend(friend_pubkey);
+
+                if (friend_old_relay_pubkey != null)
+                {
+                    // delete old relay
+                    delete_friend_current_relay(friend_pubkey);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        try
+        {
+            if (!is_any_relay(friend_pubkey))
+            {
+                FriendList fl = HelperFriend.main_get_friend(
+                        tox_friend_by_public_key(friend_pubkey));
+
+                if (fl != null)
+                {
+                    // add relay to DB table
+                    RelayListDB new_relay = new RelayListDB();
+                    new_relay.own_relay = false;
+                    new_relay.TOX_CONNECTION = fl.TOX_CONNECTION;
+                    new_relay.TOX_CONNECTION_on_off = fl.TOX_CONNECTION_on_off;
+                    new_relay.last_online_timestamp = fl.last_online_timestamp;
+                    new_relay.tox_public_key_string = relay_public_key_string.toUpperCase();
+                    new_relay.tox_public_key_string_of_owner = friend_pubkey;
+
+                    //
+                    try
+                    {
+                        TrifaToxService.Companion.getOrma().insertIntoRelayListDB(new_relay);
+                        Log.i(TAG, "add_or_update_friend_relay:+ADD friend relay+ owner pubkey=" + friend_pubkey);
+                    }
+                    catch (Exception e2)
+                    {
+                        // e2.printStackTrace();
+                    }
+
+                    // friend exists -> update
+                    try
+                    {
+                        TrifaToxService.Companion.getOrma().updateFriendList().
+                                tox_public_key_stringEq(relay_public_key_string).
+                                is_relay(true).
+                                execute();
+                    }
+                    catch (Exception e2)
+                    {
+                        // e2.printStackTrace();
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 }

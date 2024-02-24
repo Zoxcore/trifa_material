@@ -193,7 +193,8 @@ fun getFriendListWithGroupingAndSorting(friendlist: ArrayList<ContactItem>)
         : ArrayList<ContactItem>
 {
     return ArrayList(friendlist.sortedWith(
-        compareBy<ContactItem> { friendsRolesOrder[it.isConnected] }.
+        compareBy<ContactItem> { it.is_relay }.
+        thenBy<ContactItem> { friendsRolesOrder[it.isConnected] }.
         thenBy { it.name.toLowerCase() }
     )
     )
