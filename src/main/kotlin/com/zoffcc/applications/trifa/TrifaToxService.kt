@@ -101,6 +101,7 @@ class TrifaToxService
                 com.zoffcc.applications.sorm.OrmaDatabase.init()
                 // ------ correct startup order ------
                 orma = com.zoffcc.applications.sorm.OrmaDatabase()
+                globalstore.setOrmaRunning(true)
                 load_db_prefs()
                 try {
                     globalstore.try_clear_unread_message_count()
@@ -170,6 +171,7 @@ class TrifaToxService
                 // ------- MAIN TOX LOOP ---------------------------------------------------------------
                 // ------- MAIN TOX LOOP ---------------------------------------------------------------
                 set_tox_running_state("running")
+                globalstore.setToxRunning(true)
                 while (!stop_me)
                 {
                     try
@@ -350,6 +352,7 @@ class TrifaToxService
                 }
 
                 set_tox_running_state("stopped")
+                globalstore.setToxRunning(false)
 
                 clear_friends()
                 clear_groups()
@@ -362,6 +365,7 @@ class TrifaToxService
                 } catch(_: Exception) {
                 }
 
+                globalstore.setOrmaRunning(false)
                 orma = null
                 com.zoffcc.applications.sorm.OrmaDatabase.shutdown()
                 unlock_data_dir_input()
