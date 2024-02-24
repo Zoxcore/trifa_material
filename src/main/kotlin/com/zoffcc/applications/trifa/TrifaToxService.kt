@@ -1097,6 +1097,10 @@ class TrifaToxService
                         val m_resend_v2 = ii.next()
                         if (is_friend_online_real(tox_friend_by_public_key(m_resend_v2.tox_friendpubkey)) == 0)
                         {
+                            if (m_resend_v2.sent_push == 0)
+                            {
+                                friend_call_push_url(m_resend_v2.tox_friendpubkey, m_resend_v2.sent_timestamp)
+                            }
                             continue
                         }
                         if (m_resend_v2.msg_id_hash == null ||
@@ -1111,12 +1115,12 @@ class TrifaToxService
                                 {
                                     m_resend_v2.resend_count = 1 // we sent the message successfully
                                     m_resend_v2.message_id = res
-                                    Log.i(TAG, "resend_v2_messages:1: message_id=" + res)
+                                    Log.i(TAG, "resend_v2_messages:A: message_id=" + res)
                                 } else
                                 {
                                     m_resend_v2.resend_count = 0 // sending was NOT successfull
                                     m_resend_v2.message_id = -1
-                                    Log.i(TAG, "resend_v2_messages:2: message_id=" + "-1")
+                                    Log.i(TAG, "resend_v2_messages:B: message_id=" + "-1")
                                 }
                                 if (result.msg_v2)
                                 {

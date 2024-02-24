@@ -1754,6 +1754,7 @@ class MainActivity
                         val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk)
                         messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value, user = friend_user, timeMs = timestamp_wrap,
                             read = false,
+                            sent_push = 0,
                             msg_id_hash = "",
                             msg_idv3_hash = msgV3hash_hex_string,
                             msg_version = 0,
@@ -1785,6 +1786,7 @@ class MainActivity
                         val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk!!)
                         messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value, user = friend_user, timeMs = timestamp_wrap,
                             read = false,
+                            sent_push = 0,
                             msg_id_hash = "",
                             msg_idv3_hash = "",
                             msg_version = 0,
@@ -1856,6 +1858,7 @@ class MainActivity
                 val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = toxpk!!)
                 messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value, user = friend_user, timeMs = message_timestamp,
                     read = false,
+                    sent_push = 0,
                     msg_id_hash = msg_id_as_hex_string,
                     msg_idv3_hash = "",
                     msg_version = 1,
@@ -2403,6 +2406,7 @@ class MainActivity
                 val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = friend_pk!!)
                 messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value, user = friend_user, timeMs = timestampMs(),
                     read = false,
+                    sent_push = 0,
                     msg_id_hash = "",
                     msg_idv3_hash = "",
                     msg_version = 0,
@@ -3498,6 +3502,7 @@ class MainActivity
                 msgDatabaseId = new_msg_id, user = myUser,
                 timeMs = m.sent_timestamp,
                 read = m.read,
+                sent_push = m.sent_push,
                 msg_id_hash = "",
                 msg_idv3_hash = "",
                 msg_version = 0,
