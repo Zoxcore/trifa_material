@@ -664,6 +664,21 @@ class TrifaToxService
         {
             e.printStackTrace()
         }
+
+        MainActivity.DB_PREF__send_push_notifications = false
+        try
+        {
+            if (HelperFriend.get_g_opts("DB_PREF__send_push_notifications") != null)
+            {
+                if (HelperFriend.get_g_opts("DB_PREF__send_push_notifications").equals("true"))
+                {
+                    MainActivity.DB_PREF__send_push_notifications = true
+                }
+            }
+        } catch (e: java.lang.Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     private fun check_if_need_bootstrap_again()
