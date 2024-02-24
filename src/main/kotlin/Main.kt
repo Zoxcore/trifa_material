@@ -239,6 +239,8 @@ const val MAX_EMOJI_POP_RESULT = 15
 const val MAX_ONE_ON_ONE_MESSAGES_TO_SHOW = 20000
 const val MAX_GROUP_MESSAGES_TO_SHOW = 20000
 const val SNACKBAR_TOAST_MS_DURATION: Long = 1200
+val MESSAGE_CHECKMARKS_ICON_SIZE = 12.dp
+val MESSAGE_CHECKMARKS_CONTAINER_SIZE = 12.dp
 var emojis_cat_all_gropued: ArrayList<ArrayList<ArrayList<EmojiStrAndName>>> = ArrayList()
 var emojis_cat_all_cat_names: ArrayList<String> = ArrayList()
 var emojis_cat_all_cat_emoji: ArrayList<String> = ArrayList()
@@ -1272,6 +1274,7 @@ fun load_messages_for_friend(selectedContactPubkey: String?)
                         uimessages.add(UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value,
                             user = friend_user, timeMs = it.rcvd_timestamp,
                             read = it.read,
+                            sent_push = it.sent_push,
                             msg_id_hash = it.msg_id_hash,
                             msg_idv3_hash = it.msg_idv3_hash,
                             msg_version = it.msg_version,
@@ -1288,6 +1291,7 @@ fun load_messages_for_friend(selectedContactPubkey: String?)
                             recvTimeMs = it.rcvd_timestamp,
                             sentTimeMs = it.sent_timestamp,
                             read = it.read,
+                            sent_push = it.sent_push,
                             msg_id_hash = it.msg_id_hash,
                             msg_idv3_hash = it.msg_idv3_hash,
                             msg_version = it.msg_version,

@@ -579,6 +579,7 @@ object HelperGeneric {
                 timeMs = timestamp,
                 recvTimeMs = 0L,
                 read = m.read,
+                sent_push = m.sent_push,
                 msg_id_hash = m.msg_id_hash,
                 msg_idv3_hash = m.msg_idv3_hash,
                 msg_version = m.msg_version,

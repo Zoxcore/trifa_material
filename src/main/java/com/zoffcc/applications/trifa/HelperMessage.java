@@ -643,15 +643,12 @@ public class HelperMessage {
 
             // Log.i(TAG, "update_message_in_db_sent_push_set:ts=" + sent_timestamp + " m=" + m);
 
-            TrifaToxService.Companion.getOrma().updateMessage().
-                    tox_friendpubkeyEq(friend_pubkey).
-                    idEq(m.id).
-                    sent_push(1).
-                    execute();
-
-            m.sent_push = 1;
-
-            //*** TODO: ****// update_single_message(m, true);
+            if (m.sent_push != 1) {
+                TrifaToxService.Companion.getOrma().updateMessage().tox_friendpubkeyEq(friend_pubkey).idEq(m.id).sent_push(1).execute();
+                m.sent_push = 1;
+                // update message in UI
+                modify_text_message(m);
+            }
         }
         catch (Exception e)
         {

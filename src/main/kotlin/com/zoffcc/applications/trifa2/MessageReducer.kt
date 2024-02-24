@@ -90,6 +90,7 @@ fun chatReducer(state: MessageState, action: MessageAction): MessageState = when
                 recvTimeMs = action.message_db.rcvd_timestamp,
                 read = action.message_db.read,
                 is_new = action.message_db.is_new,
+                sent_push = action.message_db.sent_push,
                 msg_version = action.message_db.msg_version,
                 msg_id_hash = action.message_db.msg_id_hash,
                 msg_idv3_hash = action.message_db.msg_idv3_hash

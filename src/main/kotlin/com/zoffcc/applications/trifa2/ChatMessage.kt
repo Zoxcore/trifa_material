@@ -18,6 +18,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowCircleUp
 import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.filled.Cancel
@@ -310,13 +311,13 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                 {
                                     val color1 = Color(0xFF2684A7)
                                     IconButton(
-                                        modifier = Modifier.size(11.dp)
+                                        modifier = Modifier.size(MESSAGE_CHECKMARKS_CONTAINER_SIZE)
                                             .align(Alignment.Bottom)
                                             .background(Color.Transparent, CircleShape),
                                         icon = Icons.Filled.Check,
                                         iconTint = color1,
                                         enabled = false,
-                                        iconSize = 10.dp,
+                                        iconSize = MESSAGE_CHECKMARKS_ICON_SIZE,
                                         contentDescription = "Message delivered",
                                         onClick = {}
                                     )
@@ -324,19 +325,36 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                     {
                                         val color2 = Color(0xFF2684A7)
                                         IconButton(
-                                            modifier = Modifier.size(11.dp)
+                                            modifier = Modifier.size(MESSAGE_CHECKMARKS_CONTAINER_SIZE)
                                                 .align(Alignment.Bottom)
                                                 .background(Color.Transparent, CircleShape),
                                             icon = Icons.Filled.Check,
                                             iconTint = color2,
                                             enabled = false,
-                                            iconSize = 10.dp,
+                                            iconSize = MESSAGE_CHECKMARKS_ICON_SIZE,
                                             contentDescription = "Message delivery (confirmed)",
                                             onClick = {}
                                         )
                                     }
-                                    Spacer(modifier = Modifier.width(10.dp))
                                 }
+                                else if (message.sent_push == 1)
+                                {
+                                    val color2 = Color(0xFF2684A7)
+                                    IconButton(
+                                        modifier = Modifier.size(MESSAGE_CHECKMARKS_CONTAINER_SIZE)
+                                            .align(Alignment.Bottom)
+                                            .background(Color.Transparent, CircleShape),
+                                        icon = Icons.Filled.ArrowCircleUp,
+                                        iconTint = color2,
+                                        enabled = false,
+                                        iconSize = MESSAGE_CHECKMARKS_ICON_SIZE,
+                                        contentDescription = "Push Notification sent" + "\n"
+                                                + "The Push Notification does not contain any data," + "\n"
+                                                + "it is only a trigger to wake up the device of the friend",
+                                        onClick = {}
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(10.dp))
                             }
                             var message_size_in_bytes = 0
                             try
