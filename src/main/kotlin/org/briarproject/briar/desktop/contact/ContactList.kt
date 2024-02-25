@@ -1,5 +1,6 @@
 package org.briarproject.briar.desktop.contact
 
+import BG_COLOR_OWN_RELAY_CONTACT_ITEM
 import BG_COLOR_RELAY_CONTACT_ITEM
 import CONTACTITEM_HEIGHT
 import CONTACT_COLUMN_WIDTH
@@ -21,7 +22,10 @@ import com.zoffcc.applications.trifa.HelperGeneric.delete_friend_wrapper
 import com.zoffcc.applications.trifa.HelperRelay
 import com.zoffcc.applications.trifa.HelperRelay.delete_relay
 import com.zoffcc.applications.trifa.HelperRelay.is_any_relay
+import com.zoffcc.applications.trifa.HelperRelay.is_own_relay
+import com.zoffcc.applications.trifa.HelperRelay.remove_own_relay_in_db
 import com.zoffcc.applications.trifa.StateContacts
+import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import contactstore
 import friendsettingsstore
 import globalfrndstoreunreadmsgs
@@ -34,6 +38,7 @@ import org.briarproject.briar.desktop.ui.ListItemView
 import org.briarproject.briar.desktop.ui.VerticallyScrollableArea
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import randomDebugBorder
+import java.lang.Exception
 
 @OptIn(DelicateCoroutinesApi::class)
 @Composable
@@ -66,7 +71,17 @@ fun ContactList(
                                },
                     selected = (contactList.selectedContactPubkey == item.pubkey)
                 ) {
-                    val bgcolor = if (item.is_relay) Color(BG_COLOR_RELAY_CONTACT_ITEM) else Color.Transparent
+                    var bgcolor = if (item.is_relay) Color(BG_COLOR_RELAY_CONTACT_ITEM) else Color.Transparent
+                    try
+                    {
+                        if (is_own_relay(item.pubkey))
+                        {
+                            bgcolor = Color(BG_COLOR_OWN_RELAY_CONTACT_ITEM)
+                        }
+                    }
+                    catch(_: Exception)
+                    {
+                    }
                     val modifier = Modifier
                         .heightIn(min = CONTACTITEM_HEIGHT)
                         .fillMaxWidth()
@@ -83,7 +98,11 @@ fun ContactList(
                                 GlobalScope.launch(Dispatchers.IO) {
                                     if (is_any_relay(item.pubkey))
                                     {
-                                        delete_relay(item.pubkey, true)
+                                        if (is_own_relay(item.pubkey)) {
+                                            remove_own_relay_in_db()
+                                        } else {
+                                            delete_relay(item.pubkey, true)
+                                        }
                                     } else {
                                         delete_friend_wrapper(item.pubkey, "Friend removed")
                                     }

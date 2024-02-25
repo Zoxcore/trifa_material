@@ -25,9 +25,12 @@ import com.zoffcc.applications.sorm.RelayListDB;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.List;
 
 import static com.zoffcc.applications.sorm.OrmaDatabase.s;
-import static com.zoffcc.applications.trifa.HelperGeneric.delete_friend_wrapper;
+import static com.zoffcc.applications.trifa.HelperFriend.add_friend_to_system;
+import static com.zoffcc.applications.trifa.HelperGeneric.*;
+import static com.zoffcc.applications.trifa.MainActivity.tox_friend_add_norequest;
 import static com.zoffcc.applications.trifa.MainActivity.tox_friend_by_public_key;
 import static com.zoffcc.applications.trifa.TRIFAGlobals.*;
 import static com.zoffcc.applications.trifa.TRIFAGlobals.NOTIFICATION_NTFY_PUSH_URL_PREFIX;
@@ -171,6 +174,57 @@ public class HelperRelay
         return false;
     }
 
+    public static boolean have_own_relay()
+    {
+        boolean ret = false;
+        int num = TrifaToxService.Companion.getOrma().selectFromRelayListDB()
+                .own_relayEq(true).count();
+        if (num == 1)
+        {
+            ret = true;
+        }
+        return ret;
+    }
+
+    public static String get_own_relay_pubkey()
+    {
+        String ret = null;
+
+        try
+        {
+            ret = TrifaToxService.Companion.getOrma().selectFromRelayListDB()
+                    .own_relayEq(true).get(0).tox_public_key_string;
+        }
+        catch (Exception e)
+        {
+        }
+
+        return ret;
+    }
+
+    public static boolean is_own_relay(String friend_pubkey)
+    {
+        boolean ret = false;
+
+        try
+        {
+            String own_relay_pubkey = get_own_relay_pubkey();
+
+            if (own_relay_pubkey != null)
+            {
+                if (friend_pubkey.equals(own_relay_pubkey) == true)
+                {
+                    ret = true;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+        }
+
+        return ret;
+    }
+
     public static void delete_relay(String relay_pubkey, boolean delete_from_friends)
     {
         try
@@ -208,6 +262,91 @@ public class HelperRelay
         {
             e.printStackTrace();
         }
+    }
+
+    public static boolean remove_own_relay_in_db()
+    {
+        boolean ret = false;
+        try
+        {
+            final List<RelayListDB> rl = TrifaToxService.Companion.getOrma()
+                    .selectFromRelayListDB().own_relayEq(true).toList();
+
+            if ((rl != null) && (rl.size() > 0))
+            {
+                for (RelayListDB r : rl) {
+                    try {
+                        delete_friend_wrapper(r.tox_public_key_string.toUpperCase(), null);
+                    } catch (Exception e2) {
+                    }
+                }
+                TrifaToxService.Companion.getOrma()
+                        .deleteFromRelayListDB().own_relayEq(true).execute();
+                JavaSnackBarToast("Own Relay deleted");
+                ret = true;
+            }
+        }
+        catch (Exception e1)
+        {
+            Log.i(TAG, "remove_own_relay_in_db:EE3:" + e1.getMessage());
+        }
+        return ret;
+    }
+
+    public static boolean set_friend_as_own_relay_in_db(String friend_public_key)
+    {
+        boolean ret = false;
+
+        if (friend_public_key == null) {
+            return false;
+        }
+
+        final String own_relay_pubkey_current = get_own_relay_pubkey();
+        if ((own_relay_pubkey_current != null) &&
+                (own_relay_pubkey_current.toUpperCase().equals(friend_public_key.toUpperCase()))) {
+            JavaSnackBarToast("this is already your own Relay");
+            Log.i(TAG, "friend_as_relay_own_in_db: this is already your relay");
+            return true;
+        }
+
+        if (own_relay_pubkey_current != null) {
+            remove_own_relay_in_db();
+            Log.i(TAG, "friend_as_relay_own_in_db: fully removing old relay");
+        }
+
+        try
+        {
+            final List<FriendList> fl = TrifaToxService.Companion.getOrma().selectFromFriendList()
+                    .tox_public_key_stringEq(friend_public_key).toList();
+
+            if (fl.size() == 1)
+            {
+                // add relay to DB table
+                RelayListDB new_relay = new RelayListDB();
+                new_relay.own_relay = true;
+                new_relay.TOX_CONNECTION = fl.get(0).TOX_CONNECTION;
+                new_relay.TOX_CONNECTION_on_off = fl.get(0).TOX_CONNECTION_on_off;
+                new_relay.last_online_timestamp = fl.get(0).last_online_timestamp;
+                new_relay.tox_public_key_string = friend_public_key;
+                new_relay.tox_public_key_string_of_owner = "-- OWN RELAY --";
+                //
+                TrifaToxService.Companion.getOrma().insertIntoRelayListDB(new_relay);
+                // Log.i(TAG, "friend_as_relay_own_in_db:+ADD own relay+");
+                // friend exists -> update
+                TrifaToxService.Companion.getOrma().updateFriendList()
+                        .tox_public_key_stringEq(friend_public_key).is_relay(true).execute();
+                // Log.i(TAG, "friend_as_relay_own_in_db:+UPDATE friend+");
+                ret = true;
+
+                JavaSnackBarToast("add own Relay");
+            }
+        }
+        catch (Exception e1)
+        {
+            Log.i(TAG, "friend_as_relay_own_in_db:EE3:" + e1.getMessage());
+        }
+
+        return ret;
     }
 
     static void delete_friend_current_relay(String friend_pubkey, boolean delete_from_friends)
@@ -248,6 +387,31 @@ public class HelperRelay
         catch (Exception e)
         {
             e.printStackTrace();
+        }
+    }
+
+    static void add_or_update_own_relay(String relay_public_key_string)
+    {
+        Log.i(TAG, "add_or_update_own_relay:001");
+        if (relay_public_key_string == null)
+        {
+            Log.i(TAG, "add_or_update_own_relay:ret01");
+            return;
+        }
+
+        final long new_friendnumber = tox_friend_add_norequest(relay_public_key_string.toUpperCase());
+        if (new_friendnumber > -1) {
+            if (new_friendnumber != UINT32_MAX_JAVA) {
+                update_savedata_file_wrapper();
+            }
+        }
+
+        add_friend_to_system(relay_public_key_string.toUpperCase(),
+                false, null);
+
+        try {
+            set_friend_as_own_relay_in_db(relay_public_key_string);
+        } catch(Exception e) {
         }
     }
 
