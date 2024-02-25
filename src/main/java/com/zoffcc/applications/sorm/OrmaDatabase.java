@@ -1013,5 +1013,11 @@ public class OrmaDatabase
         ret.sql_start = "DELETE FROM BootstrapNodeEntryDB";
         return ret;
     }
+
+    public RelayListDB deleteFromRelayListDB() {
+        RelayListDB ret = new RelayListDB();
+        ret.sql_start = "DELETE FROM RelayListDB";
+        return ret;
+    }
 }
 
