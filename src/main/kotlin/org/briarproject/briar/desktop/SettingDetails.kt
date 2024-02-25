@@ -64,7 +64,9 @@ import com.zoffcc.applications.trifa.HelperFriend.set_g_opts
 import com.zoffcc.applications.trifa.HelperGeneric
 import com.zoffcc.applications.trifa.HelperNotification
 import com.zoffcc.applications.trifa.HelperOSFile.show_containing_dir_in_explorer
-import com.zoffcc.applications.trifa.Log
+import com.zoffcc.applications.trifa.HelperRelay.add_or_update_own_relay
+import com.zoffcc.applications.trifa.HelperRelay.get_own_relay_pubkey
+import com.zoffcc.applications.trifa.HelperRelay.remove_own_relay_in_db
 import com.zoffcc.applications.trifa.MainActivity
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__notifications_active
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__open_files_directly
@@ -72,8 +74,6 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__send_push_n
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__use_other_toxproxies
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_name
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_set_name
-import com.zoffcc.applications.trifa.TAG
-import com.zoffcc.applications.trifa.TrifaToxService
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import global_prefs
 import globalstore
@@ -93,6 +93,11 @@ fun SettingDetails()
         if (global_store.toxRunning)
         {
             set_own_name()
+            Spacer(modifier = Modifier.height(60.dp))
+        }
+        if ((global_store.toxRunning) && (global_store.ormaRunning))
+        {
+            own_relay_settings()
             Spacer(modifier = Modifier.height(60.dp))
         }
         tox_settings()
@@ -478,6 +483,44 @@ private fun set_own_name()
             })
         {
             Text("Update your Name")
+        }
+    }
+    // ---- change own name for one-on-one chats ----
+}
+
+@Composable
+private fun own_relay_settings()
+{
+    // ---- change own name for one-on-one chats ----
+    var own_relay_toxid by remember { mutableStateOf(get_own_relay_pubkey()) }
+
+    Row(Modifier.wrapContentHeight().fillMaxWidth().padding(start = 15.dp)) {
+        TextField(enabled = true, singleLine = true,
+            textStyle = TextStyle(fontSize = 16.sp),
+            modifier = Modifier.padding(0.dp).weight(1.0f),
+            colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White),
+            keyboardOptions = KeyboardOptions(
+                capitalization = KeyboardCapitalization.None,
+                autoCorrect = false,
+            ), value = if (own_relay_toxid.isNullOrEmpty()) "" else own_relay_toxid,
+            onValueChange = {
+                own_relay_toxid = if (it.isNullOrEmpty()) "" else it
+            })
+
+        Button(modifier = Modifier.width(300.dp).padding(start = 20.dp, end = 20.dp),
+            enabled = true,
+            onClick = {
+                if (own_relay_toxid.isNullOrEmpty())
+                {
+                    remove_own_relay_in_db()
+                }
+                else
+                {
+                    add_or_update_own_relay(own_relay_toxid.uppercase())
+                }
+            })
+        {
+            Text("Add or Update your own Relay (ToxProxy)")
         }
     }
     // ---- change own name for one-on-one chats ----
