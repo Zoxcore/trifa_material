@@ -18,6 +18,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.zoffcc.applications.trifa.HelperGeneric.delete_friend_wrapper
+import com.zoffcc.applications.trifa.HelperRelay
+import com.zoffcc.applications.trifa.HelperRelay.delete_relay
+import com.zoffcc.applications.trifa.HelperRelay.is_any_relay
 import com.zoffcc.applications.trifa.StateContacts
 import contactstore
 import friendsettingsstore
@@ -78,7 +81,12 @@ fun ContactList(
                                     is_relay = false,
                                     pubkey = item.pubkey))
                                 GlobalScope.launch(Dispatchers.IO) {
-                                    delete_friend_wrapper(item.pubkey)
+                                    if (is_any_relay(item.pubkey))
+                                    {
+                                        delete_relay(item.pubkey, true)
+                                    } else {
+                                        delete_friend_wrapper(item.pubkey, "Friend removed")
+                                    }
                                 }
                                  // delete a contact including all messages
                             },
