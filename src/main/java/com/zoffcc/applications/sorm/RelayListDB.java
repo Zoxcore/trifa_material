@@ -282,4 +282,9 @@ public class RelayListDB
         this.sql_where = this.sql_where + " and  tox_public_key_string='" + s(tox_public_key_string) + "' ";
         return this;
     }
+
+    public RelayListDB tox_public_key_string_of_ownerEq(String tox_public_key_string_of_owner) {
+        this.sql_where = this.sql_where + " and  tox_public_key_string_of_owner='" + s(tox_public_key_string_of_owner) + "' ";
+        return this;
+    }
 }
