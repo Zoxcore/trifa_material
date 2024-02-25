@@ -257,7 +257,7 @@ object HelperGeneric {
         return out
     }
 
-    fun update_savedata_file_wrapper() {
+    @JvmStatic fun update_savedata_file_wrapper() {
         var callerMethodName = ""
         try {
             val stacktrace = Thread.currentThread().stackTrace
@@ -1004,6 +1004,15 @@ object HelperGeneric {
         {
             e.printStackTrace()
             "_Datetime_ERROR_"
+        }
+    }
+
+    @JvmStatic
+    fun JavaSnackBarToast(text: String?)
+    {
+        if (!text.isNullOrEmpty())
+        {
+            SnackBarToast(text)
         }
     }
 
