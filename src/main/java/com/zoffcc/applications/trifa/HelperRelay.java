@@ -30,10 +30,11 @@ import java.util.List;
 import static com.zoffcc.applications.sorm.OrmaDatabase.s;
 import static com.zoffcc.applications.trifa.HelperFriend.add_friend_to_system;
 import static com.zoffcc.applications.trifa.HelperGeneric.*;
-import static com.zoffcc.applications.trifa.MainActivity.tox_friend_add_norequest;
-import static com.zoffcc.applications.trifa.MainActivity.tox_friend_by_public_key;
+import static com.zoffcc.applications.trifa.MainActivity.*;
 import static com.zoffcc.applications.trifa.TRIFAGlobals.*;
 import static com.zoffcc.applications.trifa.TRIFAGlobals.NOTIFICATION_NTFY_PUSH_URL_PREFIX;
+import static com.zoffcc.applications.trifa.ToxVars.TOX_ADDRESS_SIZE;
+import static com.zoffcc.applications.trifa.ToxVars.TOX_PUBLIC_KEY_SIZE;
 
 public class HelperRelay
 {
@@ -302,6 +303,7 @@ public class HelperRelay
         }
 
         final String own_relay_pubkey_current = get_own_relay_pubkey();
+        // Log.i(TAG, "friend_as_relay_own_in_db: own_relay_pubkey_current=" + own_relay_pubkey_current + " friend_public_key=" + friend_public_key);
         if ((own_relay_pubkey_current != null) &&
                 (own_relay_pubkey_current.toUpperCase().equals(friend_public_key.toUpperCase()))) {
             JavaSnackBarToast("this is already your own Relay");
@@ -390,28 +392,38 @@ public class HelperRelay
         }
     }
 
-    static void add_or_update_own_relay(String relay_public_key_string)
+    public static void add_or_update_own_relay(String relay_public_toxid_string)
     {
-        Log.i(TAG, "add_or_update_own_relay:001");
-        if (relay_public_key_string == null)
-        {
-            Log.i(TAG, "add_or_update_own_relay:ret01");
-            return;
-        }
-
-        final long new_friendnumber = tox_friend_add_norequest(relay_public_key_string.toUpperCase());
-        if (new_friendnumber > -1) {
-            if (new_friendnumber != UINT32_MAX_JAVA) {
-                update_savedata_file_wrapper();
-            }
-        }
-
-        add_friend_to_system(relay_public_key_string.toUpperCase(),
-                false, null);
-
         try {
-            set_friend_as_own_relay_in_db(relay_public_key_string);
-        } catch(Exception e) {
+            // Log.i(TAG, "add_or_update_own_relay:001:toxid=" + relay_public_toxid_string);
+            if ((relay_public_toxid_string == null)
+                    || (relay_public_toxid_string.length() != (TOX_ADDRESS_SIZE * 2))) {
+                JavaSnackBarToast("Relay ToxID is empty or wrong length");
+                Log.i(TAG, "add_or_update_own_relay:relay toxid null or wrong length");
+                return;
+            }
+
+            final String relay_public_key_string =
+                    relay_public_toxid_string.toUpperCase().substring(0, (TOX_PUBLIC_KEY_SIZE * 2));
+            // Log.i(TAG, "add_or_update_own_relay:002:toxpk=" + relay_public_key_string);
+            final long friendnum = tox_friend_add(relay_public_toxid_string.toUpperCase(), "please add me");
+            boolean add_no_request_needed = true;
+            if (friendnum > -1) {
+                if (friendnum != UINT32_MAX_JAVA) {
+                    add_no_request_needed = false;
+                }
+            }
+            if (add_no_request_needed) {
+                tox_friend_add_norequest(relay_public_key_string.toUpperCase());
+            }
+            update_savedata_file_wrapper();
+            add_friend_to_system(relay_public_key_string.toUpperCase(), false, null);
+
+            try {
+                set_friend_as_own_relay_in_db(relay_public_key_string);
+            } catch (Exception e) {
+            }
+        } catch (Exception e3) {
         }
     }
 
