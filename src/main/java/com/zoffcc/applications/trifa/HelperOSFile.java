@@ -2,6 +2,7 @@ package com.zoffcc.applications.trifa;
 
 import java.awt.*;
 import java.io.File;
+import java.net.URI;
 
 public class HelperOSFile {
 
@@ -27,6 +28,20 @@ public class HelperOSFile {
         catch (Exception e2)
         {
             e2.printStackTrace();
+        }
+    }
+
+    public static void open_webpage(String url_string) {
+        if (url_string == null) {
+            return;
+        }
+        Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+        if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+            try {
+                desktop.browse(new URI(url_string));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
