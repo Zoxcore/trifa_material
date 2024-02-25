@@ -1,3 +1,4 @@
+import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -12,7 +13,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -25,7 +29,11 @@ import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,8 +43,13 @@ import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
@@ -47,6 +60,7 @@ import com.zoffcc.applications.trifa.HelperFiletransfer.check_filename_is_image
 import com.zoffcc.applications.trifa.HelperGeneric
 import com.zoffcc.applications.trifa.HelperGeneric.cancel_ft_from_ui
 import com.zoffcc.applications.trifa.HelperMessage.set_message_queueing_from_id
+import com.zoffcc.applications.trifa.HelperOSFile.open_webpage
 import com.zoffcc.applications.trifa.HelperOSFile.show_containing_dir_in_explorer
 import com.zoffcc.applications.trifa.HelperOSFile.show_file_in_explorer_or_open
 import com.zoffcc.applications.trifa.TRIFAGlobals
@@ -123,6 +137,8 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                 )
                             }
                         }
+                        var show_link_click by remember { mutableStateOf(false) }
+                        var link_str by remember { mutableStateOf("") }
                         SelectionContainer(modifier = Modifier.padding(all = 0.dp))
                         {
                             var msg_fontsize = MSG_TEXT_FONT_SIZE_MIXED
@@ -137,7 +153,7 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                             catch(_: Exception)
                             {
                             }
-                            Text(
+                            UrlHighlightTextView(
                                 text = message.text,
                                 modifier = Modifier.randomDebugBorder(),
                                 style = MaterialTheme.typography.body1.copy(
@@ -145,8 +161,29 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                     lineHeight = TextUnit.Unspecified,
                                     letterSpacing = 0.sp
                                 )
-                            )
+                            ) {
+                                show_link_click = true
+                                link_str = it
+                            }
                         }
+
+                        if (show_link_click)
+                        {
+                            AlertDialog(onDismissRequest = { link_str = "" ; show_link_click = false },
+                                title = { Text("Open this URL ?") },
+                                confirmButton = {
+                                    Button(onClick = { open_webpage(link_str) ; link_str = "" ; show_link_click = false }) {
+                                        Text("Yes")
+                                    }
+                                },
+                                dismissButton = {
+                                    Button(onClick = { link_str = "" ; show_link_click = false }) {
+                                        Text("No")
+                                    }
+                                },
+                                text = { Text("This could be potentially dangerous!" + "\n\n" + link_str) })
+                        }
+
                         // Filetransfer
                         if (message.trifaMsgType == TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value)
                         {
@@ -396,6 +433,127 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
             }
         }
     }
+}
+
+
+@Preview
+@Composable
+fun PreviewTest() {
+    val string = "I am #hashtags or #hashtags# and @mentions in Jetpack Compose."
+    UrlHighlightTextView(string, Modifier.padding(16.dp),
+        style = MaterialTheme.typography.body1.copy(
+            fontSize = 13.sp,
+            lineHeight = TextUnit.Unspecified,
+            letterSpacing = 0.sp
+        )) {
+        println(it)
+    }
+}
+
+@Preview
+@Composable
+fun AlertDialogTest()
+{
+    AlertDialog(onDismissRequest = {},
+        title = { Text("Hello title") },
+        confirmButton = {
+            Button(onClick = {
+            }) {
+                Text("Confirm")
+            }
+        },
+        dismissButton = {
+            Button(onClick = {
+            }) {
+                Text("Dismiss")
+            }
+        },
+        text = { Text("Hello text") })
+}
+
+@Composable
+fun UrlHighlightTextView(text: String, modifier: Modifier = Modifier, style: TextStyle, onClick: (String) -> Unit) {
+
+    val colorScheme = MaterialTheme.colors
+    val textStyle = SpanStyle(color = colorScheme.onBackground)
+    val urlStyle = SpanStyle(color = Color(URL_TEXTVIEW_URL_COLOR))
+
+    // -----------------------------------------------------
+    // works ok
+    // val hashtags = Regex("((?=[^\\w!])[#@][\\u4e00-\\u9fa5\\w]+)")
+    // -----------------------------------------------------
+    // does not really work good
+    // val urls = Regex("""(https://www\.|http://www\.|https://|http://)?[a-zA-Z]{2,}(\.[a-zA-Z]{2,})(\.[a-zA-Z]{2,})?/[a-zA-Z0-9]{2,}|((https://www\.|http://www\.|https://|http://)?[a-zA-Z]{2,}(\.[a-zA-Z]{2,})(\.[a-zA-Z]{2,})?)|(https://www\.|http://www\.|https://|http://)?[a-zA-Z0-9]{2,}\.[a-zA-Z0-9]{2,}\.[a-zA-Z0-9]{2,}(\.[a-zA-Z0-9]{2,})?""")
+    // -----------------------------------------------------
+    // works ok
+    val urls = Regex("^https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)$")
+    // -----------------------------------------------------
+
+    val annotatedStringList = remember {
+
+        var lastIndex = 0
+        val annotatedStringList = mutableStateListOf<AnnotatedString.Range<String>>()
+
+        // Add a text range for urls
+        for (match in urls.findAll(text)) {
+
+            val start = match.range.first
+            val end = match.range.last + 1
+            val string = text.substring(start, end)
+
+            if (start > lastIndex) {
+                annotatedStringList.add(
+                    AnnotatedString.Range(
+                        text.substring(lastIndex, start),
+                        lastIndex,
+                        start,
+                        "text"
+                    )
+                )
+            }
+            annotatedStringList.add(
+                AnnotatedString.Range(string, start, end, "link")
+            )
+            lastIndex = end
+        }
+
+        // Add remaining text
+        if (lastIndex < text.length) {
+            annotatedStringList.add(
+                AnnotatedString.Range(
+                    text.substring(lastIndex, text.length),
+                    lastIndex,
+                    text.length,
+                    "text"
+                )
+            )
+        }
+        annotatedStringList
+    }
+
+    // Build an annotated string
+    val annotatedString = buildAnnotatedString {
+        annotatedStringList.forEach {
+            if (it.tag == "link") {
+                pushStringAnnotation(tag = it.tag, annotation = it.item)
+                withStyle(style = urlStyle) { append(it.item) }
+                pop()
+            } else {
+                withStyle(style = textStyle) { append(it.item) }
+            }
+        }
+    }
+
+    ClickableText(
+        text = annotatedString,
+        style = style,
+        modifier = modifier,
+        onClick = { position ->
+            val annotatedStringRange =
+                annotatedStringList.first { it.start < position && position < it.end }
+            if (annotatedStringRange.tag == "link") onClick(annotatedStringRange.item)
+        }
+    )
 }
 
 

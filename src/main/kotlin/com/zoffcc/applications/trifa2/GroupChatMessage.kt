@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -19,10 +21,12 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.BrokenImage
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,7 +41,6 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
@@ -47,12 +50,12 @@ import com.vanniktech.emoji.emojiInformation
 import com.zoffcc.applications.trifa.HelperFiletransfer
 import com.zoffcc.applications.trifa.HelperGeneric.AsyncImage
 import com.zoffcc.applications.trifa.HelperGeneric.loadImageBitmap
+import com.zoffcc.applications.trifa.HelperOSFile.open_webpage
 import com.zoffcc.applications.trifa.HelperOSFile.show_containing_dir_in_explorer
 import com.zoffcc.applications.trifa.HelperOSFile.show_file_in_explorer_or_open
 import com.zoffcc.applications.trifa.TRIFAGlobals
 import org.briarproject.briar.desktop.ui.Tooltip
 import java.io.File
-import java.nio.charset.Charset
 
 @Composable
 fun GroupTriangle(risingToTheRight: Boolean, background: Color) {
@@ -115,6 +118,8 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                                 )
                             }
                         }
+                        var show_link_click by remember { mutableStateOf(false) }
+                        var link_str by remember { mutableStateOf("") }
                         SelectionContainer(modifier = Modifier.padding(all = 0.dp))
                         {
                             var msg_fontsize = MSG_TEXT_FONT_SIZE_MIXED
@@ -129,7 +134,7 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                             catch(_: Exception)
                             {
                             }
-                            Text(
+                            UrlHighlightTextView(
                                 text = groupmessage.text,
                                 modifier = Modifier.randomDebugBorder(),
                                 style = MaterialTheme.typography.body1.copy(
@@ -137,7 +142,27 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                                     lineHeight = TextUnit.Unspecified,
                                     letterSpacing = 0.sp
                                 )
-                            )
+                            ) {
+                                show_link_click = true
+                                link_str = it
+                            }
+
+                            if (show_link_click)
+                            {
+                                AlertDialog(onDismissRequest = { link_str = "" ; show_link_click = false },
+                                    title = { Text("Open this URL ?") },
+                                    confirmButton = {
+                                        Button(onClick = { open_webpage(link_str) ; link_str = "" ; show_link_click = false }) {
+                                            Text("Yes")
+                                        }
+                                    },
+                                    dismissButton = {
+                                        Button(onClick = { link_str = "" ; show_link_click = false }) {
+                                            Text("No")
+                                        }
+                                    },
+                                    text = { Text("This could be potentially dangerous!" + "\n\n" + link_str) })
+                            }
                         }
                         if (groupmessage.trifaMsgType == TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value)
                         {
