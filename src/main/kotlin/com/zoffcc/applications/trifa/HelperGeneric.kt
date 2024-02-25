@@ -160,7 +160,7 @@ object HelperGeneric {
         SnackBarToast("Group removed")
     }
 
-    fun delete_friend_wrapper(friend_pubkey: String)
+    @JvmStatic fun delete_friend_wrapper(friend_pubkey: String, toast_message: String?)
     {
         val friend_num_temp: Long = tox_friend_by_public_key(friend_pubkey)
         delete_friend_all_filetransfers(friend_pubkey)
@@ -171,7 +171,10 @@ object HelperGeneric {
             tox_friend_delete(friend_num_temp)
             update_savedata_file_wrapper()
         }
-        SnackBarToast("Friend removed")
+        if (!toast_message.isNullOrEmpty())
+        {
+            SnackBarToast(toast_message)
+        }
     }
 
     @JvmStatic fun bytesToHex(bytes: ByteArray, start: Int, len: Int): String {

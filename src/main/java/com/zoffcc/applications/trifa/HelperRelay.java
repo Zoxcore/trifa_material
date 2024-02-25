@@ -27,6 +27,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 
 import static com.zoffcc.applications.sorm.OrmaDatabase.s;
+import static com.zoffcc.applications.trifa.HelperGeneric.delete_friend_wrapper;
 import static com.zoffcc.applications.trifa.MainActivity.tox_friend_by_public_key;
 import static com.zoffcc.applications.trifa.TRIFAGlobals.*;
 import static com.zoffcc.applications.trifa.TRIFAGlobals.NOTIFICATION_NTFY_PUSH_URL_PREFIX;
@@ -126,7 +127,7 @@ public class HelperRelay
         return false;
     }
 
-    static boolean is_any_relay(String friend_pubkey)
+    public static boolean is_any_relay(String friend_pubkey)
     {
         try
         {
@@ -170,11 +171,79 @@ public class HelperRelay
         return false;
     }
 
-    static void delete_friend_current_relay(String friend_pubkey)
+    public static void delete_relay(String relay_pubkey, boolean delete_from_friends)
     {
         try
         {
-            //**// TODO:
+            if (relay_pubkey != null)
+            {
+                try
+                {
+                    TrifaToxService.Companion.getOrma().updateFriendList()
+                            .tox_public_key_stringEq(relay_pubkey)
+                            .is_relay(false).execute();
+                }
+                catch (Exception e1)
+                {
+                    e1.printStackTrace();
+                }
+
+                try
+                {
+                    TrifaToxService.Companion.getOrma().deleteFromRelayListDB()
+                            .tox_public_key_stringEq(relay_pubkey).execute();
+                }
+                catch (Exception e1)
+                {
+                    e1.printStackTrace();
+                }
+            }
+
+            if (delete_from_friends)
+            {
+                delete_friend_wrapper(relay_pubkey, "Relay removed");
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    static void delete_friend_current_relay(String friend_pubkey, boolean delete_from_friends)
+    {
+        try
+        {
+            String friend_current_relay_pubkey = get_relay_for_friend(friend_pubkey).toUpperCase();
+
+            if (friend_current_relay_pubkey != null)
+            {
+                try
+                {
+                    TrifaToxService.Companion.getOrma().updateFriendList()
+                            .tox_public_key_stringEq(friend_current_relay_pubkey)
+                            .is_relay(false).execute();
+                }
+                catch (Exception e1)
+                {
+                    e1.printStackTrace();
+                }
+
+                try
+                {
+                    TrifaToxService.Companion.getOrma().deleteFromRelayListDB()
+                            .tox_public_key_string_of_ownerEq(friend_pubkey).execute();
+                }
+                catch (Exception e1)
+                {
+                    e1.printStackTrace();
+                }
+            }
+
+            if (delete_from_friends)
+            {
+                delete_friend_wrapper(friend_current_relay_pubkey, "Relay removed");
+            }
         }
         catch (Exception e)
         {
@@ -206,7 +275,7 @@ public class HelperRelay
                 if (friend_old_relay_pubkey != null)
                 {
                     // delete old relay
-                    delete_friend_current_relay(friend_pubkey);
+                    delete_friend_current_relay(friend_pubkey, false);
                 }
             }
         }
