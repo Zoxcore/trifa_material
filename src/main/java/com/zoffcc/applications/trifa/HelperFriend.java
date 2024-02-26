@@ -129,7 +129,7 @@ public class HelperFriend {
         catch (Exception e)
         {
             friend_alias_name = "";
-            e.printStackTrace();
+            // e.printStackTrace();
         }
 
         if ((friend_alias_name == null) || (friend_alias_name.equals("")))
@@ -143,7 +143,7 @@ public class HelperFriend {
             catch (Exception e)
             {
                 friend_name = "";
-                e.printStackTrace();
+                // e.printStackTrace();
             }
 
             if ((friend_name != null) && (!friend_name.equals("")))

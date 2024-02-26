@@ -98,6 +98,7 @@ object HelperGeneric {
     fun PubkeyShort(pubkey: String) : String {
         return pubkey.take(PUBKEY_SHORT_LEN)
     }
+
     fun bytebuffer_to_hexstring(`in`: ByteBuffer, upper_case: Boolean): String?
     {
         return try
@@ -231,6 +232,7 @@ object HelperGeneric {
         }
         return null
     }
+
     fun read_chunk_from_SD_file(file_name_with_path: String?, position: Long, file_chunk_length: Long): ByteArray?
     {
         if (file_name_with_path == null)
