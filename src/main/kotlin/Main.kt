@@ -98,6 +98,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowExceptionHandler
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
@@ -1832,7 +1833,8 @@ private fun MainAppStart()
     // ************* DEBUG ONLY *************
     val appIcon = painterResource("icon-linux.png")
     if (showIntroScreen)
-    { // ----------- intro screen -----------
+    {
+        // ----------- intro screen -----------
         // ----------- intro screen -----------
         // ----------- intro screen -----------
         var isOpen by remember { mutableStateOf(true) }
@@ -1841,6 +1843,8 @@ private fun MainAppStart()
         if (isOpen)
         {
             Window(onCloseRequest = { isAskingToClose = true }, title = "TRIfA Material - Welcome", icon = appIcon) {
+                @OptIn(ExperimentalComposeUiApi::class)
+                window.exceptionHandler = WindowExceptionHandler { e -> println("Exception in Compose: $e") }
                 Column(Modifier.fillMaxSize()) {
                     Button(onClick = {
                         global_prefs.putBoolean("main.show_intro_screen", false)
@@ -1879,11 +1883,13 @@ private fun MainAppStart()
                     }
                 }
             }
-        } // ----------- intro screen -----------
+        }
+        // ----------- intro screen -----------
         // ----------- intro screen -----------
         // ----------- intro screen -----------
     } else
-    { // ----------- main app screen -----------
+    {
+        // ----------- main app screen -----------
         // ----------- main app screen -----------
         // ----------- main app screen -----------
         globalstore.updateStartupSelfname(inputTextToxSelfName)
@@ -1932,6 +1938,8 @@ private fun MainAppStart()
                     }
                 }
             ) {
+                @OptIn(ExperimentalComposeUiApi::class)
+                window.exceptionHandler = WindowExceptionHandler { e -> println("Exception in Compose: $e") }
                 if (isAskingToClose)
                 {
                     Dialog(
@@ -1978,7 +1986,8 @@ private fun MainAppStart()
                 }
                 App()
             }
-        } // ----------- main app screen -----------
+        }
+        // ----------- main app screen -----------
         // ----------- main app screen -----------
         // ----------- main app screen -----------
     }
