@@ -36,7 +36,7 @@ public class GroupDB
 
     // group id is always saved as lower case hex string!! -----------------
     @PrimaryKey
-    String group_identifier = "";
+    public String group_identifier = "";
     // group id is always saved as lower case hex string!! -----------------
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
