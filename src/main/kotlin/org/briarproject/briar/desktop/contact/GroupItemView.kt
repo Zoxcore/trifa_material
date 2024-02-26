@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.TAG
+import com.zoffcc.applications.trifa.ToxVars
 import com.zoffcc.applications.trifa.ToxVars.TOX_GROUP_PRIVACY_STATE
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import globalgrpstoreunreadmsgs
@@ -135,7 +136,14 @@ private fun GroupItemViewInfo(groupItem: GroupItem) = Column(
     horizontalAlignment = Start,
     modifier = Modifier.padding(start = 0.dp).randomDebugBorder()
 ) {
-    Tooltip(text = "Group Name: " + groupItem.name) {
+    var p_state = "private"
+    if (groupItem.privacyState == ToxVars.TOX_GROUP_PRIVACY_STATE.TOX_GROUP_PRIVACY_STATE_PUBLIC.value) {
+        p_state = "public"
+    }
+    Tooltip(text = "Group Name: " + groupItem.name + "\n"
+            + "Group ID: " + groupItem.groupId + "\n"
+            + "Group Privacy State: " + p_state + "\n"
+    ) {
         Text(
             text = groupItem.name,
             style = if (groupItem.name.length > 14) MaterialTheme.typography.body1.copy(fontSize = 13.sp) else MaterialTheme.typography.body1,
