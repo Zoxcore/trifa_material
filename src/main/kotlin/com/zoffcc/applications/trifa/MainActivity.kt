@@ -31,6 +31,7 @@ import com.zoffcc.applications.trifa.HelperFriend.add_friend_avatar_chunk
 import com.zoffcc.applications.trifa.HelperFriend.add_pushurl_for_friend
 import com.zoffcc.applications.trifa.HelperFriend.del_friend_avatar
 import com.zoffcc.applications.trifa.HelperFriend.get_friend_name_from_num
+import com.zoffcc.applications.trifa.HelperFriend.get_friend_name_from_pubkey
 import com.zoffcc.applications.trifa.HelperFriend.main_get_friend
 import com.zoffcc.applications.trifa.HelperFriend.remove_pushurl_for_friend
 import com.zoffcc.applications.trifa.HelperFriend.send_friend_msg_receipt_v2_wrapper
@@ -50,6 +51,7 @@ import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
 import com.zoffcc.applications.trifa.HelperGroup.bytebuffer_to_hexstring
 import com.zoffcc.applications.trifa.HelperGroup.bytes_to_hex
 import com.zoffcc.applications.trifa.HelperGroup.fourbytes_of_long_to_hex
+import com.zoffcc.applications.trifa.HelperGroup.get_last_group_message_in_this_group_within_n_seconds_from_sender_pubkey
 import com.zoffcc.applications.trifa.HelperGroup.handle_incoming_group_file
 import com.zoffcc.applications.trifa.HelperGroup.handle_incoming_sync_group_file
 import com.zoffcc.applications.trifa.HelperGroup.handle_incoming_sync_group_message
@@ -59,18 +61,20 @@ import com.zoffcc.applications.trifa.HelperGroup.sync_group_message_history
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupnum__wrapper
 import com.zoffcc.applications.trifa.HelperMessage.process_msgv3_high_level_ack
+import com.zoffcc.applications.trifa.HelperMessage.sync_messagev2_answer
 import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_read_rcvd_timestamp_rawmsgbytes
 import com.zoffcc.applications.trifa.HelperMessage.update_single_message_from_ftid
 import com.zoffcc.applications.trifa.HelperMessage.update_single_message_from_messge_id
 import com.zoffcc.applications.trifa.HelperRelay.get_own_relay_pubkey
 import com.zoffcc.applications.trifa.HelperRelay.have_own_relay
 import com.zoffcc.applications.trifa.HelperRelay.invite_to_all_groups_own_relay
-import com.zoffcc.applications.trifa.HelperRelay.send_all_friend_pubkeys_to_relay
 import com.zoffcc.applications.trifa.HelperRelay.is_any_relay
 import com.zoffcc.applications.trifa.HelperRelay.is_own_relay
+import com.zoffcc.applications.trifa.HelperRelay.send_all_friend_pubkeys_to_relay
 import com.zoffcc.applications.trifa.HelperRelay.send_friend_pubkey_to_relay
 import com.zoffcc.applications.trifa.HelperRelay.send_pushtoken_to_relay
 import com.zoffcc.applications.trifa.HelperRelay.send_relay_pubkey_to_friend
+import com.zoffcc.applications.trifa.Log.i
 import com.zoffcc.applications.trifa.TRIFAGlobals.ABSOLUTE_MINIMUM_GLOBAL_VIDEO_BITRATE
 import com.zoffcc.applications.trifa.TRIFAGlobals.AVATAR_INCOMING_MAX_BYTE_SIZE
 import com.zoffcc.applications.trifa.TRIFAGlobals.GLOBAL_AUDIO_BITRATE
@@ -81,6 +85,7 @@ import com.zoffcc.applications.trifa.TRIFAGlobals.LOWER_GLOBAL_VIDEO_BITRATE
 import com.zoffcc.applications.trifa.TRIFAGlobals.LOWER_NGC_VIDEO_BITRATE
 import com.zoffcc.applications.trifa.TRIFAGlobals.LOWER_NGC_VIDEO_QUANTIZER
 import com.zoffcc.applications.trifa.TRIFAGlobals.MEDIUM_GLOBAL_VIDEO_BITRATE
+import com.zoffcc.applications.trifa.TRIFAGlobals.MESSAGE_GROUP_HISTORY_SYNC_DOUBLE_INTERVAL_SECS
 import com.zoffcc.applications.trifa.TRIFAGlobals.NGC_AUDIO_BITRATE
 import com.zoffcc.applications.trifa.TRIFAGlobals.NORMAL_GLOBAL_INCOMING_AV_BUFFER_MS
 import com.zoffcc.applications.trifa.TRIFAGlobals.NORMAL_GLOBAL_VIDEO_BITRATE
@@ -1591,7 +1596,6 @@ class MainActivity
                 try
                 {
                     val fpubkey = tox_friend_get_public_key(friend_number)
-                    val f = main_get_friend(friend_number)
                     if (f != null)
                     {
                         val friend_capabilities = tox_friend_get_capabilities(friend_number)
@@ -1967,12 +1971,263 @@ class MainActivity
         @Suppress("unused")
         fun android_tox_callback_friend_sync_message_v2_cb_method(friend_number: Long, ts_sec: Long, ts_ms: Long, raw_message: ByteArray?, raw_message_length: Long, raw_data: ByteArray?, raw_data_length: Long)
         {
+            Log.i(TAG, "friend_sync_message_v2_cb::IN:fn=" + get_friend_name_from_num(friend_number))
+
+            if (!is_own_relay(tox_friend_get_public_key(friend_number)))
+            {
+                // sync message only accepted from my own relay
+                return
+            }
+            val raw_message_buf_wrapped = ByteBuffer.allocateDirect(raw_data_length.toInt())
+            raw_message_buf_wrapped.put(raw_data, 0, raw_data_length.toInt())
+            val raw_message_buf = ByteBuffer.allocateDirect(raw_message_length.toInt())
+            raw_message_buf.put(raw_message, 0, raw_message_length.toInt())
+            val msg_sec = tox_messagev2_get_ts_sec(raw_message_buf)
+            val msg_ms = tox_messagev2_get_ts_ms(raw_message_buf)
+            Log.i(TAG, "friend_sync_message_v2_cb:sec=" + msg_sec + " ms=" + msg_ms);
+            val msg_id_buffer = ByteBuffer.allocateDirect(TOX_HASH_LENGTH)
+            tox_messagev2_get_message_id(raw_message_buf, msg_id_buffer)
+            val msg_id_buffer_compat = ByteBufferCompat(msg_id_buffer)
+            val msg_id_as_hex_string = bytesToHex(msg_id_buffer_compat.array()!!,
+                msg_id_buffer_compat.arrayOffset(),
+                msg_id_buffer_compat.limit())
+            Log.i(TAG, "friend_sync_message_v2_cb:MSGv2HASH=" + msg_id_as_hex_string)
+            val real_sender_as_hex_string = tox_messagev2_get_sync_message_pubkey(raw_message_buf)
+            Log.i(TAG, "friend_sync_message_v2_cb:real sender pubkey=" + real_sender_as_hex_string + " " +
+                       get_friend_name_from_pubkey(real_sender_as_hex_string))
+            val msgv2_type = tox_messagev2_get_sync_message_type(raw_message_buf)
+            Log.i(TAG, "friend_sync_message_v2_cb:msg type=" +
+                    ToxVars.TOX_FILE_KIND.value_str(msgv2_type.toInt()))
+            val msg_id_buffer_wrapped = ByteBuffer.allocateDirect(TOX_HASH_LENGTH)
+            tox_messagev2_get_message_id(raw_message_buf_wrapped, msg_id_buffer_wrapped)
+            val msg_id_buffer_wrapped_compat = ByteBufferCompat(msg_id_buffer_wrapped)
+            val msg_id_as_hex_string_wrapped = bytesToHex(msg_id_buffer_wrapped_compat.array()!!,
+                msg_id_buffer_wrapped_compat.arrayOffset(),
+                msg_id_buffer_wrapped_compat.limit())
+            Log.i(TAG, "friend_sync_message_v2_cb:MSGv2HASH=" + msg_id_as_hex_string_wrapped + " len=" +
+                       msg_id_as_hex_string_wrapped.length)
+
+            if (msgv2_type.toInt() == ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_MESSAGEV2_SEND.value)
+            {
+                sync_messagev2_send(friend_number, raw_data, raw_data_length,
+                    raw_message_buf_wrapped, msg_id_buffer,
+                    real_sender_as_hex_string)
+            }
+            else if (msgv2_type.toInt() == ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_MESSAGEV2_ANSWER.value)
+            {
+                sync_messagev2_answer(raw_message_buf_wrapped, friend_number,
+                    msg_id_buffer,
+                    real_sender_as_hex_string, msg_id_as_hex_string_wrapped)
+            }
         }
 
         @JvmStatic
         @Suppress("unused")
         fun sync_messagev2_send(friend_number: Long, raw_data: ByteArray?, raw_data_length: Long, raw_message_buf_wrapped: ByteBuffer?, msg_id_buffer: ByteBuffer?, real_sender_as_hex_string: String?)
         {
+            val msg_wrapped_sec = tox_messagev2_get_ts_sec(raw_message_buf_wrapped)
+            val msg_wrapped_ms = tox_messagev2_get_ts_ms(raw_message_buf_wrapped)
+            Log.i(TAG, "friend_sync_message_v2_cb:sec=" + msg_wrapped_sec + " ms=" + msg_wrapped_ms);
+            val msg_text_buffer_wrapped = ByteBuffer.allocateDirect(raw_data_length.toInt())
+            val text_length = tox_messagev2_get_message_text(raw_message_buf_wrapped,
+                raw_data_length, 0, 0,
+                msg_text_buffer_wrapped)
+            val msg_text_buffer_wrapped_compat = ByteBufferCompat(msg_text_buffer_wrapped)
+            var wrapped_msg_text_as_string = ""
+
+            try
+            {
+                wrapped_msg_text_as_string = String(msg_text_buffer_wrapped_compat.array()!!,
+                    msg_text_buffer_wrapped_compat.arrayOffset(), text_length.toInt(),
+                    StandardCharsets.UTF_8)
+            } catch (e: java.lang.Exception)
+            {
+                e.printStackTrace()
+            }
+            val msg_text_as_hex_string_wrapped = bytesToHex(msg_text_buffer_wrapped_compat.array()!!,
+                msg_text_buffer_wrapped_compat.arrayOffset(),
+                msg_text_buffer_wrapped_compat.limit())
+            Log.i(TAG, "friend_sync_message_v2_cb:len=" + text_length + " wrapped msg text str=" +
+                        wrapped_msg_text_as_string)
+             Log.i(TAG, "friend_sync_message_v2_cb:wrapped msg text hex=" + msg_text_as_hex_string_wrapped)
+
+            try
+            {
+                if (tox_friend_by_public_key(real_sender_as_hex_string) == -1L)
+                {
+                    // pubkey does NOT belong to a friend. it is probably a group id
+                    // check it here
+                    val real_conference_id = real_sender_as_hex_string!!.lowercase()
+                    val group_num = tox_group_by_groupid__wrapper(real_conference_id)
+                    if (group_num > -1)
+                    {
+                        // sync message is a group (NGC) message
+                        val real_sender_peer_pubkey = wrapped_msg_text_as_string.substring(0, 64)
+                        val real_text_length = (text_length - 64)
+                        val real_sender_text_ = wrapped_msg_text_as_string.substring(64)
+                        var real_sender_text = ""
+                        var real_send_message_id = ""
+
+
+                        if ((real_sender_text_.length > 8) && (real_sender_text_.startsWith(":", 8)))
+                        {
+                            real_sender_text = real_sender_text_.substring(9)
+                            real_send_message_id = real_sender_text_.substring(0, 8).toLowerCase()
+                        } else
+                        {
+                            real_sender_text = real_sender_text_
+                            real_send_message_id = ""
+                        }
+                        val sync_msg_received_timestamp = (msg_wrapped_sec * 1000) + msg_wrapped_ms
+
+                        // add text as conference message
+                        val sender_peer_num = HelperGroup.get_group_peernum_from_peer_pubkey(real_conference_id,
+                            real_sender_peer_pubkey)
+                        val gm = get_last_group_message_in_this_group_within_n_seconds_from_sender_pubkey(
+                            real_conference_id, real_sender_peer_pubkey, sync_msg_received_timestamp,
+                            real_send_message_id, MESSAGE_GROUP_HISTORY_SYNC_DOUBLE_INTERVAL_SECS.toLong(), real_sender_text)
+
+                        Log.i(TAG, "m.message_id_tox=" + real_send_message_id)
+
+                        if (gm != null)
+                        {
+                            Log.i(TAG, "friend_sync_message_v2_cb:potentially double message:2")
+                            // ok it's a "potentially" double message
+                            // just ignore it, but still send "receipt" to proxy so it won't send this message again
+                            send_friend_msg_receipt_v2_wrapper(friend_number, 3, msg_id_buffer,
+                                (System.currentTimeMillis() / 1000))
+                            return
+                        }
+
+                        var syncer_pubkey: String? = null
+                        try
+                        {
+                            syncer_pubkey = tox_friend_get_public_key(friend_number)
+                        }
+                        catch(_: Exception)
+                        {
+                        }
+
+                        var peer_name: String? = null
+                        val peer_name_saved = tox_group_peer_get_name(group_num, sender_peer_num)
+                        if ((peer_name_saved != null) && (peer_name_saved.length > 0))
+                        {
+                                // HINT: use saved name instead of name from sync message
+                                peer_name = peer_name_saved
+                        }
+
+                        HelperGroup.group_message_add_from_sync(real_conference_id, syncer_pubkey,
+                            sender_peer_num, real_sender_peer_pubkey,
+                            TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, real_sender_text, real_text_length,
+                            sync_msg_received_timestamp, real_send_message_id,
+                            TRIFAGlobals.TRIFA_SYNC_TYPE.TRIFA_SYNC_TYPE_TOXPROXY.value,
+                            peer_name)
+
+                        send_friend_msg_receipt_v2_wrapper(friend_number, 3, msg_id_buffer,
+                            (System.currentTimeMillis() / 1000))
+                        return
+                    }
+                    else
+                    {
+                        // sync message from unkown original sender (or conference, which is not implemented in this client)
+                        // still send "receipt" to our relay, or else it will send us this message forever
+                        Log.i(TAG, "friend_sync_message_v2_cb:send receipt for unknown message");
+                        send_friend_msg_receipt_v2_wrapper(friend_number, 4, msg_id_buffer,
+                            (System.currentTimeMillis() / 1000))
+                    }
+                    return
+                }
+                else // sync of friend message
+                {
+                    receive_incoming_message(2, 0,
+                        tox_friend_by_public_key(real_sender_as_hex_string),
+                        wrapped_msg_text_as_string, raw_data!!, raw_data_length,
+                        real_sender_as_hex_string!!,
+                        null, 0)
+                }
+            }
+            catch(e: Exception)
+            {
+                e.printStackTrace()
+            }
+
+            // send message receipt v2 to own relay
+            send_friend_msg_receipt_v2_wrapper(friend_number, 4, msg_id_buffer, (System.currentTimeMillis() / 1000))
+        }
+
+        fun receive_incoming_message(msg_type: Int, tox_message_type: Int, friend_number: Long,
+                                     friend_message_text_utf8: String, raw_message: ByteArray,
+                                     raw_message_length: Long, original_sender_pubkey: String,
+                                     msgV3hash_bin: ByteArray?, message_timestamp: Long)
+        {
+            // msgV2 relay message
+            val friend_number_real_sender: Long = tox_friend_by_public_key(original_sender_pubkey)
+
+            val raw_message_buf = ByteBuffer.allocateDirect(raw_message_length.toInt())
+            raw_message_buf.put(raw_message, 0, raw_message_length.toInt())
+            val msg_id_buffer = ByteBuffer.allocateDirect(TOX_HASH_LENGTH)
+            tox_messagev2_get_message_id(raw_message_buf, msg_id_buffer)
+            val msg_id_buffer_compat = ByteBufferCompat(msg_id_buffer)
+
+            val ts_sec = tox_messagev2_get_ts_sec(raw_message_buf)
+            val ts_ms = tox_messagev2_get_ts_ms(raw_message_buf)
+            i(TAG, "receive_incoming_message:TOX_FILE_KIND_MESSAGEV2_SEND:raw_msg=" + bytes_to_hex(raw_message))
+
+            val msg_id_as_hex_string = bytesToHex(msg_id_buffer_compat.array()!!,
+                msg_id_buffer_compat.arrayOffset(),
+                msg_id_buffer_compat.limit())
+            i(TAG, "receive_incoming_message:TOX_FILE_KIND_MESSAGEV2_SEND:MSGv2HASH:2=$msg_id_as_hex_string")
+
+            val already_have_message: Int = orma!!.selectFromMessage()
+                .tox_friendpubkeyEq(tox_friend_get_public_key(friend_number_real_sender))
+                .msg_id_hashEq(msg_id_as_hex_string).count()
+
+            val pin_timestamp = System.currentTimeMillis()
+
+            if (already_have_message > 0)
+            {
+                // it's a double send, ignore it
+                // send message receipt v2, most likely the other party did not get it yet
+                // Log.i(TAG,
+                //      "receive_incoming_message:ACK1:" + get_friend_name_from_num(friend_number_real_sender) + " " +
+                //      msg_id_as_hex_string);
+                send_friend_msg_receipt_v2_wrapper(friend_number_real_sender, msg_type, msg_id_buffer,
+                    (pin_timestamp / 1000))
+                return
+            }
+
+            try
+            {
+                val message_timestamp = ts_sec * 1000
+                val msg_id_db = received_message_to_db(toxpk = original_sender_pubkey,
+                    sent_message_timestamp_ms = message_timestamp,
+                    rcvd_message_timestamp_ms = pin_timestamp,
+                    msg_id_hash = msg_id_as_hex_string,
+                    msg_idv3_hash = "",
+                    msg_version = 1,
+                    friend_message = friend_message_text_utf8)
+                val friendnum = tox_friend_by_public_key(original_sender_pubkey)
+                val fname = tox_friend_get_name(friendnum)
+                val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = original_sender_pubkey)
+                messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value,
+                    user = friend_user, timeMs = message_timestamp,
+                    read = false,
+                    sent_push = 0,
+                    msg_id_hash = msg_id_as_hex_string,
+                    msg_idv3_hash = "",
+                    msg_version = 1,
+                    recvTimeMs = pin_timestamp,
+                    sentTimeMs = message_timestamp,
+                    text = friend_message_text_utf8, toxpk = original_sender_pubkey,
+                    trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value,
+                    msgDatabaseId = msg_id_db, filename_fullpath = null)))
+            } catch (_: Exception)
+            {
+            }
+
+            send_friend_msg_receipt_v2_wrapper(friend_number_real_sender,
+                msg_type, msg_id_buffer,
+                (pin_timestamp / 1000))
         }
 
         @JvmStatic
