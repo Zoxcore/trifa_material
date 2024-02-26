@@ -16,6 +16,7 @@ import com.zoffcc.applications.jninotifications.NTFYActivity
 import com.zoffcc.applications.jninotifications.NTFYActivity.jninotifications_loadjni
 import com.zoffcc.applications.sorm.FileDB
 import com.zoffcc.applications.sorm.Filetransfer
+import com.zoffcc.applications.sorm.FriendList
 import com.zoffcc.applications.sorm.GroupMessage
 import com.zoffcc.applications.sorm.Message
 import com.zoffcc.applications.trifa.AudioBar.audio_in_bar
@@ -61,7 +62,15 @@ import com.zoffcc.applications.trifa.HelperMessage.process_msgv3_high_level_ack
 import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_read_rcvd_timestamp_rawmsgbytes
 import com.zoffcc.applications.trifa.HelperMessage.update_single_message_from_ftid
 import com.zoffcc.applications.trifa.HelperMessage.update_single_message_from_messge_id
+import com.zoffcc.applications.trifa.HelperRelay.get_own_relay_pubkey
+import com.zoffcc.applications.trifa.HelperRelay.have_own_relay
+import com.zoffcc.applications.trifa.HelperRelay.invite_to_all_groups_own_relay
+import com.zoffcc.applications.trifa.HelperRelay.send_all_friend_pubkeys_to_relay
 import com.zoffcc.applications.trifa.HelperRelay.is_any_relay
+import com.zoffcc.applications.trifa.HelperRelay.is_own_relay
+import com.zoffcc.applications.trifa.HelperRelay.send_friend_pubkey_to_relay
+import com.zoffcc.applications.trifa.HelperRelay.send_pushtoken_to_relay
+import com.zoffcc.applications.trifa.HelperRelay.send_relay_pubkey_to_friend
 import com.zoffcc.applications.trifa.TRIFAGlobals.ABSOLUTE_MINIMUM_GLOBAL_VIDEO_BITRATE
 import com.zoffcc.applications.trifa.TRIFAGlobals.AVATAR_INCOMING_MAX_BYTE_SIZE
 import com.zoffcc.applications.trifa.TRIFAGlobals.GLOBAL_AUDIO_BITRATE
@@ -101,11 +110,11 @@ import com.zoffcc.applications.trifa_material.trifa_material.BuildConfig
 import contactstore
 import global_prefs
 import globalfrndstoreunreadmsgs
+import globalgrpstoreunreadmsgs
 import globalstore
 import groupmessagestore
 import grouppeerstore
 import groupstore
-import globalgrpstoreunreadmsgs
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -1568,6 +1577,7 @@ class MainActivity
             } catch (_: Exception)
             {
             }
+            val f: FriendList? = main_get_friend(friend_number)
 
             if (a_TOX_CONNECTION == TOX_CONNECTION.TOX_CONNECTION_NONE.value)
             {
@@ -1608,6 +1618,46 @@ class MainActivity
                     }
                 } catch (_: java.lang.Exception)
                 {
+                }
+            }
+
+            if (f == null)
+            {
+                return
+            }
+
+            if (f.TOX_CONNECTION != a_TOX_CONNECTION)
+            {
+                if (f.TOX_CONNECTION == TOX_CONNECTION.TOX_CONNECTION_NONE.value)
+                {
+                    // ******** friend just came online ********
+                    if (have_own_relay())
+                    {
+                        if (!is_any_relay(f.tox_public_key_string))
+                        {
+                            if (DB_PREF__use_other_toxproxies)
+                            {
+                                send_relay_pubkey_to_friend(get_own_relay_pubkey(),
+                                    f.tox_public_key_string)
+
+                                send_friend_pubkey_to_relay(get_own_relay_pubkey(),
+                                    f.tox_public_key_string)
+                            }
+                        }
+                        else
+                        {
+                            if (is_own_relay(f.tox_public_key_string))
+                            {
+                                invite_to_all_groups_own_relay(get_own_relay_pubkey())
+                                send_all_friend_pubkeys_to_relay(get_own_relay_pubkey())
+                            }
+                        }
+
+                        if (is_own_relay(f.tox_public_key_string))
+                        {
+                            send_pushtoken_to_relay()
+                        }
+                    }
                 }
             }
         }
@@ -1738,7 +1788,7 @@ class MainActivity
                 return
             }
 
-            //GlobalScope.launch(Dispatchers.IO) {
+            // GlobalScope.launch(Dispatchers.IO) {
                 var new_msgv3_cap = 0
                 if (msgV3hash_bin != null)
                 {

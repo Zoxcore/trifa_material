@@ -23,6 +23,7 @@ import com.zoffcc.applications.sorm.FriendList;
 import com.zoffcc.applications.sorm.OrmaDatabase;
 import com.zoffcc.applications.sorm.RelayListDB;
 
+import java.nio.ByteBuffer;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.List;
@@ -30,8 +31,11 @@ import java.util.List;
 import static com.zoffcc.applications.sorm.OrmaDatabase.s;
 import static com.zoffcc.applications.trifa.HelperFriend.add_friend_to_system;
 import static com.zoffcc.applications.trifa.HelperGeneric.*;
+import static com.zoffcc.applications.trifa.HelperGroup.hex_to_bytes;
+import static com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper;
 import static com.zoffcc.applications.trifa.MainActivity.*;
 import static com.zoffcc.applications.trifa.TRIFAGlobals.*;
+import static com.zoffcc.applications.trifa.TRIFAGlobals.CONTROL_PROXY_MESSAGE_TYPE.*;
 import static com.zoffcc.applications.trifa.TRIFAGlobals.NOTIFICATION_NTFY_PUSH_URL_PREFIX;
 import static com.zoffcc.applications.trifa.ToxVars.TOX_ADDRESS_SIZE;
 import static com.zoffcc.applications.trifa.ToxVars.TOX_PUBLIC_KEY_SIZE;
@@ -508,5 +512,86 @@ public class HelperRelay
         {
             e.printStackTrace();
         }
+    }
+
+    static void send_relay_pubkey_to_friend(String relay_public_key_string, String friend_pubkey)
+    {
+        int i = 0;
+        long friend_num = tox_friend_by_public_key(friend_pubkey);
+        byte[] data = hex_to_bytes("FF" + relay_public_key_string);
+        data[0] = (byte) CONTROL_PROXY_MESSAGE_TYPE_PROXY_PUBKEY_FOR_FRIEND.value;
+        // Log.d(TAG, "send_relay_pubkey_to_friend:data=" + data);
+        int result = tox_friend_send_lossless_packet(friend_num, data, TOX_PUBLIC_KEY_SIZE + 1);
+        // Log.d(TAG, "send_relay_pubkey_to_friend:res=" + result);
+    }
+
+    static void send_friend_pubkey_to_relay(String relay_public_key_string, String friend_pubkey)
+    {
+        int i = 0;
+        long friend_num = tox_friend_by_public_key(relay_public_key_string);
+        byte[] data = hex_to_bytes("FF" + friend_pubkey);
+        data[0] = (byte) CONTROL_PROXY_MESSAGE_TYPE_FRIEND_PUBKEY_FOR_PROXY.value;
+        // Log.d(TAG, "send_friend_pubkey_to_relay:data=" + data);
+        int result = tox_friend_send_lossless_packet(friend_num, data, TOX_PUBLIC_KEY_SIZE + 1);
+        // Log.d(TAG, "send_friend_pubkey_to_relay:res=" + result);
+    }
+
+    static void invite_to_all_groups_own_relay(String relay_public_key_string)
+    {
+        try
+        {
+            long num_groups = tox_group_get_number_groups();
+            long[] group_numbers = tox_group_get_grouplist();
+            ByteBuffer groupid_buf3 = ByteBuffer.allocateDirect(GROUP_ID_LENGTH * 2);
+            int conf_ = 0;
+            while (conf_ < num_groups)
+            {
+                groupid_buf3.clear();
+                if (tox_group_get_chat_id(group_numbers[conf_], groupid_buf3) == 0)
+                {
+                    byte[] groupid_buffer = new byte[GROUP_ID_LENGTH];
+                    groupid_buf3.get(groupid_buffer, 0, GROUP_ID_LENGTH);
+                    String group_identifier = HelperGeneric.bytesToHex(groupid_buffer, 0, GROUP_ID_LENGTH).toLowerCase();
+                    Log.i(TAG, "invite_to_all_groups_own_relay: group_identifier=" + group_identifier);
+                    final long group_num = tox_group_by_groupid__wrapper(group_identifier);
+                    int res = tox_group_invite_friend(group_num,
+                            tox_friend_by_public_key(relay_public_key_string));
+                    update_savedata_file_wrapper();
+                }
+                conf_++;
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    static void send_all_friend_pubkeys_to_relay(String relay_public_key_string)
+    {
+        List<FriendList> fl = TrifaToxService.Companion.getOrma().selectFromFriendList()
+                .is_relayNotEq(true).toList();
+
+        if (fl != null)
+        {
+            if (fl.size() > 0)
+            {
+                int i = 0;
+                long friend_num = tox_friend_by_public_key(relay_public_key_string);
+
+                for (i = 0; i < fl.size(); i++)
+                {
+                    FriendList n = fl.get(i);
+                    byte[] data = hex_to_bytes("FF" + n.tox_public_key_string);
+                    data[0] = (byte) CONTROL_PROXY_MESSAGE_TYPE_FRIEND_PUBKEY_FOR_PROXY.value;
+                    tox_friend_send_lossless_packet(friend_num, data, TOX_PUBLIC_KEY_SIZE + 1);
+                }
+            }
+        }
+    }
+
+    static void send_pushtoken_to_relay()
+    {
+        // HINT: no push token on desktop
     }
 }
