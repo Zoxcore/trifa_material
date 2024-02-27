@@ -2108,7 +2108,7 @@ class MainActivity
                         {
                         }
 
-                        var peer_name: String? = null
+                        var peer_name: String = ""
                         val peer_name_saved = tox_group_peer_get_name(group_num, sender_peer_num)
                         if ((peer_name_saved != null) && (peer_name_saved.length > 0))
                         {
@@ -2207,8 +2207,12 @@ class MainActivity
                     msg_version = 1,
                     friend_message = friend_message_text_utf8)
                 val friendnum = tox_friend_by_public_key(original_sender_pubkey)
-                val fname = tox_friend_get_name(friendnum)
-                val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = original_sender_pubkey)
+                var fname = tox_friend_get_name(friendnum)
+                if (fname.isNullOrEmpty())
+                {
+                   fname = "unknown"
+                }
+                val friend_user = User(fname, picture = "friend_avatar.png", toxpk = original_sender_pubkey)
                 messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value,
                     user = friend_user, timeMs = message_timestamp,
                     read = false,
