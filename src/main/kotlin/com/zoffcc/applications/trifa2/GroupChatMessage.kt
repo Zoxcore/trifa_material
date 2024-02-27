@@ -54,6 +54,9 @@ import com.zoffcc.applications.trifa.HelperOSFile.open_webpage
 import com.zoffcc.applications.trifa.HelperOSFile.show_containing_dir_in_explorer
 import com.zoffcc.applications.trifa.HelperOSFile.show_file_in_explorer_or_open
 import com.zoffcc.applications.trifa.TRIFAGlobals
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.briarproject.briar.desktop.ui.Tooltip
 import java.io.File
 
@@ -68,7 +71,7 @@ fun GroupTriangle(risingToTheRight: Boolean, background: Color) {
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, DelicateCoroutinesApi::class)
 @Composable
 inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, ui_scale: Float) {
     Box(
@@ -146,24 +149,24 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                                 show_link_click = true
                                 link_str = it
                             }
-
-                            if (show_link_click)
-                            {
-                                AlertDialog(onDismissRequest = { link_str = "" ; show_link_click = false },
-                                    title = { Text("Open this URL ?") },
-                                    confirmButton = {
-                                        Button(onClick = { open_webpage(link_str) ; link_str = "" ; show_link_click = false }) {
-                                            Text("Yes")
-                                        }
-                                    },
-                                    dismissButton = {
-                                        Button(onClick = { link_str = "" ; show_link_click = false }) {
-                                            Text("No")
-                                        }
-                                    },
-                                    text = { Text("This could be potentially dangerous!" + "\n\n" + link_str) })
-                            }
                         }
+                        if (show_link_click)
+                        {
+                            AlertDialog(onDismissRequest = { link_str = "" ; show_link_click = false },
+                                title = { Text("Open this URL ?") },
+                                confirmButton = {
+                                    Button(onClick = { open_webpage(link_str) ; link_str = "" ; show_link_click = false }) {
+                                        Text("Yes")
+                                    }
+                                },
+                                dismissButton = {
+                                    Button(onClick = { link_str = "" ; show_link_click = false }) {
+                                        Text("No")
+                                    }
+                                },
+                                text = { Text("This could be potentially dangerous!" + "\n\n" + link_str) })
+                        }
+
                         if (groupmessage.trifaMsgType == TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value)
                         {
                             if (groupmessage.filename_fullpath != null)
