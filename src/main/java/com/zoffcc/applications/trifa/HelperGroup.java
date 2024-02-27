@@ -1428,6 +1428,7 @@ public class HelperGroup {
         m.text = message;
         m.message_id_tox = message_id;
         m.was_synced = true;
+        m.private_message = 0;
 
         if (m.tox_group_peername == null)
         {
