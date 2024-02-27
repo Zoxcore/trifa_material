@@ -74,7 +74,6 @@ import com.zoffcc.applications.trifa.HelperRelay.send_all_friend_pubkeys_to_rela
 import com.zoffcc.applications.trifa.HelperRelay.send_friend_pubkey_to_relay
 import com.zoffcc.applications.trifa.HelperRelay.send_pushtoken_to_relay
 import com.zoffcc.applications.trifa.HelperRelay.send_relay_pubkey_to_friend
-import com.zoffcc.applications.trifa.Log.i
 import com.zoffcc.applications.trifa.TRIFAGlobals.ABSOLUTE_MINIMUM_GLOBAL_VIDEO_BITRATE
 import com.zoffcc.applications.trifa.TRIFAGlobals.AVATAR_INCOMING_MAX_BYTE_SIZE
 import com.zoffcc.applications.trifa.TRIFAGlobals.GLOBAL_AUDIO_BITRATE
@@ -2171,12 +2170,12 @@ class MainActivity
 
             val ts_sec = tox_messagev2_get_ts_sec(raw_message_buf)
             val ts_ms = tox_messagev2_get_ts_ms(raw_message_buf)
-            i(TAG, "receive_incoming_message:TOX_FILE_KIND_MESSAGEV2_SEND:raw_msg=" + bytes_to_hex(raw_message))
+            Log.i(TAG, "receive_incoming_message:TOX_FILE_KIND_MESSAGEV2_SEND:raw_msg=" + bytes_to_hex(raw_message))
 
             val msg_id_as_hex_string = bytesToHex(msg_id_buffer_compat.array()!!,
                 msg_id_buffer_compat.arrayOffset(),
                 msg_id_buffer_compat.limit())
-            i(TAG, "receive_incoming_message:TOX_FILE_KIND_MESSAGEV2_SEND:MSGv2HASH:2=$msg_id_as_hex_string")
+            Log.i(TAG, "receive_incoming_message:TOX_FILE_KIND_MESSAGEV2_SEND:MSGv2HASH:2=$msg_id_as_hex_string")
 
             val already_have_message: Int = orma!!.selectFromMessage()
                 .tox_friendpubkeyEq(tox_friend_get_public_key(friend_number_real_sender))
