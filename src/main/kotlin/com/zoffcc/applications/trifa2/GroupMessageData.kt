@@ -15,7 +15,8 @@ data class UIGroupMessage private constructor(
     val groupId: String,
     val was_synced: Boolean,
     val trifaMsgType: Int,
-    val filename_fullpath: String?
+    val filename_fullpath: String?,
+    val is_private_msg: Int
 ) {
     constructor(
         user: User,
@@ -31,7 +32,8 @@ data class UIGroupMessage private constructor(
         groupId: String,
         was_synced: Boolean,
         trifaMsgType: Int,
-        filename_fullpath: String?
+        filename_fullpath: String?,
+        is_private_msg: Int
     ) : this(
         user = user,
         timeMs = timeMs,
@@ -47,6 +49,7 @@ data class UIGroupMessage private constructor(
         groupId = groupId,
         was_synced = was_synced,
         trifaMsgType = trifaMsgType,
-        filename_fullpath = filename_fullpath
+        filename_fullpath = filename_fullpath,
+        is_private_msg = is_private_msg
     )
 }

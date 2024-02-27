@@ -244,6 +244,7 @@ const val SNACKBAR_TOAST_MS_DURATION: Long = 1200
 const val BG_COLOR_RELAY_CONTACT_ITEM = 0x448ABEB9
 const val BG_COLOR_OWN_RELAY_CONTACT_ITEM = 0x44FFFFB9
 const val URL_TEXTVIEW_URL_COLOR = 0xFF223DDC
+const val NGC_PRIVATE_MSG_INDICATOR_COLOR = 0xFFFFA255
 val MESSAGE_CHECKMARKS_ICON_SIZE = 12.dp
 val MESSAGE_CHECKMARKS_CONTAINER_SIZE = 12.dp
 var emojis_cat_all_gropued: ArrayList<ArrayList<ArrayList<EmojiStrAndName>>> = ArrayList()
@@ -1347,12 +1348,14 @@ fun load_groupmessages_for_friend(selectedGroupId: String?)
                         {
                             TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value ->
                                 uigroupmessages.add(UIGroupMessage(was_synced = it.was_synced,
+                                    is_private_msg = it.private_message,
                                     sentTimeMs = it.sent_timestamp,
                                     rcvdTimeMs = it.rcvd_timestamp,
                                     syncdTimeMs = it.rcvd_timestamp,
                                     msg_id_hash = it.msg_id_hash, message_id_tox = it.message_id_tox, msgDatabaseId = it.id, user = friend_user, timeMs = it.sent_timestamp, text = it.text, toxpk = it.tox_group_peer_pubkey.uppercase(), groupId = it.group_identifier.lowercase(), trifaMsgType = it.TRIFA_MESSAGE_TYPE, filename_fullpath = it.filename_fullpath))
                             TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value ->
                                 uigroupmessages.add(UIGroupMessage(was_synced = it.was_synced,
+                                    is_private_msg = it.private_message,
                                     sentTimeMs = it.sent_timestamp,
                                     rcvdTimeMs = it.rcvd_timestamp,
                                     syncdTimeMs = it.rcvd_timestamp,
@@ -1366,12 +1369,14 @@ fun load_groupmessages_for_friend(selectedGroupId: String?)
                         {
                             TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value ->
                                 uigroupmessages.add(UIGroupMessage(was_synced = it.was_synced,
+                                    is_private_msg = it.private_message,
                                     sentTimeMs = it.sent_timestamp,
                                     rcvdTimeMs = it.rcvd_timestamp,
                                     syncdTimeMs = it.rcvd_timestamp,
                                     msg_id_hash = it.msg_id_hash, message_id_tox = it.message_id_tox, msgDatabaseId = it.id, user = myUser, timeMs = it.sent_timestamp, text = it.text, toxpk = it.tox_group_peer_pubkey.uppercase(), groupId = it.group_identifier.lowercase(), trifaMsgType = it.TRIFA_MESSAGE_TYPE, filename_fullpath = it.filename_fullpath))
                             TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value ->
                                 uigroupmessages.add(UIGroupMessage(was_synced = it.was_synced,
+                                    is_private_msg = it.private_message,
                                     sentTimeMs = it.sent_timestamp,
                                     rcvdTimeMs = it.rcvd_timestamp,
                                     syncdTimeMs = it.rcvd_timestamp,

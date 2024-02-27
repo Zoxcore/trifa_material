@@ -9,5 +9,6 @@ object ChatColorsConfig {
     val TOP_GRADIENT = listOf(0xFFEEEFF3, 0xFFE6F0F2)
     val MY_MESSAGE = Color(0xFFE5FEFB)
     val OTHERS_MESSAGE = Color.White
+    val OTHERS_PRIVATE_MESSAGE = Color(0xFFFFF8E9)
     val TIME_TEXT = Color(0xFF979797)
 }

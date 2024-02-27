@@ -1,5 +1,6 @@
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -7,9 +8,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.AlertDialog
@@ -57,6 +60,7 @@ import com.zoffcc.applications.trifa.TRIFAGlobals
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.briarproject.briar.desktop.contact.getConnectionColor
 import org.briarproject.briar.desktop.ui.Tooltip
 import java.io.File
 
@@ -91,6 +95,8 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
             }
 
             Column {
+                val col_msg_other = if (groupmessage.is_private_msg == 0)
+                    ChatColorsConfig.OTHERS_MESSAGE else ChatColorsConfig.OTHERS_PRIVATE_MESSAGE
                 Box(
                     Modifier.clip(
                         RoundedCornerShape(
@@ -100,13 +106,29 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                             if (!isMyMessage) 0.dp else 10.dp
                         )
                     )
-                        .background(color = if (!isMyMessage) ChatColorsConfig.OTHERS_MESSAGE else ChatColorsConfig.MY_MESSAGE)
+                        .background(color = if (!isMyMessage) col_msg_other else ChatColorsConfig.MY_MESSAGE)
                         .padding(start = 10.dp, top = 5.dp, end = 10.dp, bottom = 5.dp),
                 ) {
                     Column(Modifier.randomDebugBorder().padding(all = 0.dp),
                         verticalArrangement = Arrangement.spacedBy(0.dp)) {
                         if(!isMyMessage) {
                             Row(verticalAlignment = Alignment.Bottom) {
+                                if (groupmessage.is_private_msg == 1)
+                                {
+                                    Column() {
+                                        Tooltip(text = "private Message") {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(12.dp)
+                                                    .border(1.dp, Color.Black, CircleShape)
+                                                    .background(Color(NGC_PRIVATE_MSG_INDICATOR_COLOR),
+                                                        CircleShape)
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.height(3.dp))
+                                    }
+                                    Spacer(modifier = Modifier.width(5.dp))
+                                }
                                 // println("NNN:" + groupmessage.user.name + "CCC:" +groupmessage.user.color.luminance())
                                 Text(
                                     text = groupmessage.user.name,
@@ -137,8 +159,9 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                             catch(_: Exception)
                             {
                             }
+                            var text_str = groupmessage.text
                             UrlHighlightTextView(
-                                text = groupmessage.text,
+                                text = text_str,
                                 modifier = Modifier.randomDebugBorder(),
                                 style = MaterialTheme.typography.body1.copy(
                                     fontSize = ((msg_fontsize * ui_scale).toDouble()).sp,
@@ -231,8 +254,10 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                             catch(_: Exception)
                             {
                             }
+                            val is_prv_msg = if (groupmessage.is_private_msg == 1) "yes" else "no"
                             Tooltip("Message sent at: " + timeToString(groupmessage.timeMs) + "\n" +
                                          "Message ID: " + groupmessage.message_id_tox + "\n" +
+                                         "is private Message: " + is_prv_msg + "\n" +
                                          "Sender Peer Pubkey: " + groupmessage.toxpk + "\n" +
                                          "Message size in bytes: " + (if (message_size_in_bytes == 0) "unknown" else message_size_in_bytes) + "\n" +
                                          "was synced: " + groupmessage.was_synced.toString()) {

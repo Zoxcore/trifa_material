@@ -3013,6 +3013,7 @@ class MainActivity
             }
             val msg_dbid = received_groupmessage_to_db(tox_peerpk = tox_peerpk!!,
                 groupid = group_id,
+                is_private_msg = 0,
                 rcvd_message_timestamp_ms = message_timestamp_ms,
                 sent_message_timestamp_ms = message_timestamp_ms,
                 group_message = message_orig, message_id_hex = message_id_hex,
@@ -3021,6 +3022,7 @@ class MainActivity
             groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(
                 UIGroupMessage(
                     was_synced = false,
+                    is_private_msg = 0,
                     sentTimeMs = message_timestamp_ms,
                     rcvdTimeMs = message_timestamp_ms,
                     syncdTimeMs = message_timestamp_ms,
@@ -3035,7 +3037,42 @@ class MainActivity
         @Suppress("unused")
         fun android_tox_callback_group_private_message_cb_method(group_number: Long, peer_id: Long, a_TOX_MESSAGE_TYPE: Int, message_orig: String?, length: Long)
         {
-            // TODO: write me!!
+            val res = tox_group_self_get_peer_id(group_number)
+            if (res == peer_id)
+            { // do not process our own sent group messages (again)
+                return
+            }
+
+            val group_id = tox_group_by_groupnum__wrapper(group_number).lowercase()
+            val tox_peerpk = tox_group_peer_get_public_key(group_number, peer_id)!!.uppercase()
+            val message_id_hex = "" // HINT: no message ID for ngc private messages
+            val message_timestamp_ms = System.currentTimeMillis()
+            val peernum = tox_group_peer_by_public_key(group_number, tox_peerpk)
+            var fname = tox_group_peer_get_name(group_number, peernum)
+            if (fname == null)
+            {
+                fname = ""
+            }
+            val msg_dbid = received_groupmessage_to_db(tox_peerpk = tox_peerpk!!,
+                is_private_msg = 1,
+                groupid = group_id,
+                rcvd_message_timestamp_ms = message_timestamp_ms,
+                sent_message_timestamp_ms = message_timestamp_ms,
+                group_message = message_orig, message_id_hex = message_id_hex,
+                was_synced = false, peername = fname)
+            val peer_user = User(fname + " / " + PubkeyShort(tox_peerpk), picture = "friend_avatar.png", toxpk = tox_peerpk.uppercase(), color = ColorProvider.getColor(true, tox_peerpk.uppercase()))
+            groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(
+                UIGroupMessage(
+                    was_synced = false,
+                    is_private_msg = 1,
+                    sentTimeMs = message_timestamp_ms,
+                    rcvdTimeMs = message_timestamp_ms,
+                    syncdTimeMs = message_timestamp_ms,
+                    msg_id_hash = "",
+                    message_id_tox = message_id_hex, msgDatabaseId = msg_dbid,
+                    user = peer_user, timeMs = message_timestamp_ms, text = message_orig!!,
+                    toxpk = tox_peerpk, groupId = group_id!!.lowercase(),
+                    trifaMsgType = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value, filename_fullpath = null)))
         }
 
         @JvmStatic
@@ -3530,7 +3567,7 @@ class MainActivity
             return row_id
         }
 
-        fun received_groupmessage_to_db(tox_peerpk: String, groupid: String, rcvd_message_timestamp_ms: Long, sent_message_timestamp_ms: Long, group_message: String?, message_id_hex: String, was_synced: Boolean, peername: String): Long
+        fun received_groupmessage_to_db(tox_peerpk: String, is_private_msg: Int, groupid: String, rcvd_message_timestamp_ms: Long, sent_message_timestamp_ms: Long, group_message: String?, message_id_hex: String, was_synced: Boolean, peername: String): Long
         {
             val groupnum = tox_group_by_groupid__wrapper(groupid)
             val peernum = tox_group_peer_by_public_key(groupnum, tox_peerpk)
@@ -3553,7 +3590,7 @@ class MainActivity
             {
                 m.tox_group_peername = peername
             }
-            m.private_message = 0
+            m.private_message = is_private_msg
             m.group_identifier = groupid.lowercase()
             m.TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value
             m.rcvd_timestamp = rcvd_message_timestamp_ms
@@ -3595,12 +3632,15 @@ class MainActivity
             val msg_dbid = received_groupmessage_to_db(tox_peerpk = m.tox_group_peer_pubkey!!, groupid = m.group_identifier,
                 rcvd_message_timestamp_ms = m.rcvd_timestamp,
                 sent_message_timestamp_ms = m.sent_timestamp,
-                group_message = m.text, message_id_hex = m.message_id_tox, was_synced = m.was_synced, peername = m.tox_group_peername)
+                is_private_msg = m.private_message,
+                group_message = m.text, message_id_hex = m.message_id_tox, was_synced = m.was_synced,
+                peername = m.tox_group_peername)
             val peer_user = User(m.tox_group_peername + " / " + PubkeyShort(m.tox_group_peer_pubkey), picture = "friend_avatar.png", toxpk = m.tox_group_peer_pubkey.uppercase(), color = ColorProvider.getColor(true, m.tox_group_peer_pubkey.uppercase()))
 
             groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(
                 UIGroupMessage(
                     was_synced = true,
+                    is_private_msg = m.private_message,
                     sentTimeMs = m.sent_timestamp,
                     rcvdTimeMs = m.rcvd_timestamp,
                     syncdTimeMs = m.rcvd_timestamp,
@@ -3633,6 +3673,7 @@ class MainActivity
 
             groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(
                 UIGroupMessage(
+                    is_private_msg = 0,
                     was_synced = was_synced,
                     sentTimeMs = msg_timestamp,
                     rcvdTimeMs = msg_timestamp,
@@ -3751,6 +3792,7 @@ class MainActivity
                 GroupMessageAction.SendGroupMessage(
                 UIGroupMessage(
                     was_synced = m.was_synced,
+                    is_private_msg = m.private_message,
                     sentTimeMs = m.sent_timestamp,
                     rcvdTimeMs = m.rcvd_timestamp,
                     syncdTimeMs = m.sent_timestamp,
