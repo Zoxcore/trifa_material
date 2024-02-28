@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
@@ -65,6 +66,13 @@ fun GroupSettingDetails(selectedGroupId: String?)
         }
         var tox_own_name_in_group by remember { mutableStateOf(self_name_in_group) }
 
+        if (!selectedGroupId.isNullOrEmpty())
+        {
+            GroupDetailItem(selectable_text = true,
+                label = "Group ID: " + selectedGroupId.lowercase(), description = "ID of this group")
+            Spacer(modifier = Modifier.height(5.dp))
+        }
+
         var num_messages = "?"
         try
         {
@@ -73,7 +81,7 @@ fun GroupSettingDetails(selectedGroupId: String?)
         catch(_: Exception)
         {
         }
-        GroupDetailItem(label = "Number of Messages: " + num_messages, description = "xy")
+        GroupDetailItem(label = "Number of Messages: " + num_messages, description = "Number of Messages in this group")
         Spacer(modifier = Modifier.height(5.dp))
         Row(Modifier.wrapContentHeight().fillMaxWidth().padding(start = 15.dp)) {
             TextField(enabled = true, singleLine = true,
@@ -137,6 +145,7 @@ fun SettingDetail(header: String, content: @Composable (ColumnScope.() -> Unit))
 fun GroupDetailItem(
     label: String,
     description: String,
+    selectable_text: Boolean = false,
 ) = Box(modifier = Modifier.padding(start = 15.dp, end = 22.dp, top = 5.dp, bottom = 2.dp)) {
         Box(
             modifier = Modifier
@@ -153,7 +162,15 @@ fun GroupDetailItem(
                 .semantics(mergeDescendants = true) {
                     contentDescription = description
                 }, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(label)
+                if (selectable_text)
+                {
+                    SelectionContainer(modifier = Modifier.padding(all = 0.dp))
+                    {
+                        Text(label)
+                    }
+                } else {
+                    Text(label)
+                }
             }
         }
 }
