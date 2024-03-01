@@ -64,6 +64,7 @@ or download any of the release [packages](https://github.com/Zoxcore/trifa_mater
 - Drag & Drop for Images in NGC group chats
 - Group History Sync (the last 130 minutes)
 - Notifications
+- Multiaccount Support
 - Screensharing
 - Audio calls
 - Noise Suppression for Audio Calls
