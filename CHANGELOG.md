@@ -1,8 +1,8 @@
 # Changelog
 
-## [Unreleased](https://github.com/Zoxcore/trifa_material/tree/HEAD)
+## [v1.0.23](https://github.com/Zoxcore/trifa_material/tree/v1.0.23) (2024-03-01)
 
-[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.22...HEAD)
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.22...v1.0.23)
 
 **Merged pull requests:**
 
