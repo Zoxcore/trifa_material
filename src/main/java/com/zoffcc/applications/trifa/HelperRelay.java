@@ -44,7 +44,7 @@ public class HelperRelay
 {
     private static final String TAG = "trifa.Hlp.Relay";
 
-    static String get_relay_for_friend(String friend_pubkey)
+    public static String get_relay_for_friend(String friend_pubkey)
     {
         try
         {
