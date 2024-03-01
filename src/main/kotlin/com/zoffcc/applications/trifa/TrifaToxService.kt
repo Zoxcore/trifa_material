@@ -221,7 +221,7 @@ class TrifaToxService
                     // --- send pending 1-on-1 text messages here --------------
                     if (online_button_text_wrapper != "offline")
                     {
-                        if ((last_resend_pending_messages4_ms + (5 * 1000)) < System.currentTimeMillis())
+                        if ((last_resend_pending_messages4_ms + (10 * 1000)) < System.currentTimeMillis())
                         {
                             last_resend_pending_messages4_ms = System.currentTimeMillis()
                             if (DB_PREF__send_push_notifications == true)
@@ -933,6 +933,23 @@ class TrifaToxService
             {
                 // HINT: if we have not received a "read receipt" for msgV3 within 10 seconds, then we trigger a push again
                 val cutoff_sent_time = System.currentTimeMillis() - (10 * 1000)
+
+                // first check:
+                val m_push_count = orma!!.selectFromMessage().directionEq(1).
+                msg_versionEq(0).
+                TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value).
+                sent_pushEq(0).
+                readEq(false).
+                orderBySent_timestampAsc().
+                sent_timestampLt(cutoff_sent_time).
+                count()
+
+                Log.i(TAG, "resend_push_for_v3_messages:m_push_count=" + m_push_count)
+                if (m_push_count < 1)
+                {
+                    return
+                }
+
                 val m_push: List<Message>? = orma!!.selectFromMessage().directionEq(1).
                 msg_versionEq(0).
                 TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value).
