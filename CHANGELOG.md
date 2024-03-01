@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased](https://github.com/Zoxcore/trifa_material/tree/HEAD)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.22...HEAD)
+
+**Merged pull requests:**
+
+- update to compose.version 1.6.10-dev1457, update to kotlin.version 2.0.0-Beta4, push notifications, relays \(ToxProxy\) [\#170](https://github.com/Zoxcore/trifa_material/pull/170) ([zoff99](https://github.com/zoff99))
+- Translations update from Hosted Weblate [\#169](https://github.com/Zoxcore/trifa_material/pull/169) ([weblate](https://github.com/weblate))
+- add nixos logo [\#168](https://github.com/Zoxcore/trifa_material/pull/168) ([zoff99](https://github.com/zoff99))
+- Translations update from Hosted Weblate [\#167](https://github.com/Zoxcore/trifa_material/pull/167) ([weblate](https://github.com/weblate))
+- show placeholder for in and out video boxes if no video is active [\#166](https://github.com/Zoxcore/trifa_material/pull/166) ([zoff99](https://github.com/zoff99))
+
 ## [v1.0.22](https://github.com/Zoxcore/trifa_material/tree/v1.0.22) (2024-02-22)
 
 [Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.21...v1.0.22)
