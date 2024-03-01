@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoffcc.applications.trifa.HelperRelay.get_relay_for_friend
 import globalfrndstoreunreadmsgs
 import globalstore
 import org.briarproject.briar.desktop.ui.NumberBadge
@@ -91,7 +92,9 @@ private fun ContactItemViewInfo(contactItem: ContactItem) = Column(
     val show_name = if (contactItem.name.isEmpty()) contactItem.pubkey.toUpperCase().take(6) else contactItem.name
     val tooltip_name = if (contactItem.name.isEmpty()) "" else contactItem.name
     val name_style = if (contactItem.name.length > 14) MaterialTheme.typography.body1.copy(fontSize = 13.sp) else MaterialTheme.typography.body1
-    Tooltip(text = "Name: " + tooltip_name + "\n" + "Pubkey: " + contactItem.pubkey) {
+    val friend_relay = get_relay_for_friend(contactItem.pubkey.toUpperCase())
+    val relay_str = if (friend_relay.isNullOrEmpty()) "" else ("\n" + "Relay (ToxProxy): " + friend_relay)
+    Tooltip(text = "Name: " + tooltip_name + "\n" + "Pubkey: " + contactItem.pubkey + relay_str) {
         Text(
             text = show_name,
             style = name_style,
