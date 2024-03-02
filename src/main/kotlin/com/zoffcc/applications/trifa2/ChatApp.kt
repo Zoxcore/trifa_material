@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -33,23 +34,28 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.DragData
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.ExternalDragValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.onExternalDrag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.trifa.AVState
+import com.zoffcc.applications.trifa.HelperGeneric
 import com.zoffcc.applications.trifa.HelperGeneric.send_message_onclick
 import com.zoffcc.applications.trifa.HelperGroup
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
 import com.zoffcc.applications.trifa.HelperMessage.take_screen_shot_with_selection
+import com.zoffcc.applications.trifa.HelperOSFile
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity
 import com.zoffcc.applications.trifa.MainActivity.Companion.add_ngc_outgoing_file
@@ -91,7 +97,9 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 import java.io.File
 import java.net.URI
 import java.nio.file.LinkOption
+import java.nio.file.Path
 import kotlin.io.path.exists
+import kotlin.io.path.name
 import kotlin.io.path.toPath
 
 private const val TAG = "trifa.Chatapp"
@@ -227,12 +235,18 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                 Image(painterResource("background.jpg"), modifier = Modifier.fillMaxSize(), contentDescription = null, contentScale = ContentScale.Crop)
                 Column(modifier = Modifier.fillMaxSize()) {
                     var isDragging by remember { mutableStateOf(false) }
+                    var drag_value: ExternalDragValue? by remember { mutableStateOf(null) }
                     Box(Modifier.weight(1f)
                         .background(color = if (isDragging) Color.LightGray else Color.Transparent)
                         .onExternalDrag(
-                            onDragStart = { isDragging = true  },
-                            onDragExit = { isDragging = false },
+                            onDragStart = { value ->
+                                drag_value = value
+                                isDragging = true  },
+                            onDragExit = {
+                                drag_value = null
+                                isDragging = false },
                             onDrop = { value ->
+                                drag_value = null
                                 isDragging = false
                                 // Log.i(TAG, "dropping file here")
                                 if (value.dragData is DragData.FilesList) {
@@ -255,6 +269,7 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                             })) {
                         if (isDragging)
                         {
+                            val scope = rememberCoroutineScope()
                             Column(modifier = Modifier.fillMaxSize()
                                 .padding(all = 10.dp)
                                 .dashedBorder(color = if (isDragging) DragAndDropColors.active else Color.Transparent,
@@ -265,7 +280,53 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                                     modifier = Modifier.align(Alignment.CenterHorizontally),
                                     color = DragAndDropColors.active
                                 )
+                                if (false)
+                                {
+                                    Spacer(modifier = Modifier.weight(0.1f))
+                                    if (drag_value != null)
+                                    {
+                                        if (drag_value!!.dragData is DragData.FilesList)
+                                        {
+                                            var newFiles: List<Path>? = null
+                                            try
+                                            {
+                                                println("YYYYYYYYYYYYYYY11:drag_value=" + drag_value)
+                                                println("YYYYYYYYYYYYYYY22:drag_value=" + drag_value!!.dragData)
+                                                println("YYYYYYYYYYYYYYY33:drag_value=" + drag_value!!.dragData as DragData.FilesList)
+                                                println("YYYYYYYYYYYYYYY44:drag_value=" + (drag_value!!.dragData as DragData.FilesList).readFiles())
+                                                newFiles = (drag_value!!.dragData as DragData.FilesList).readFiles().mapNotNull { it1: String ->
+                                                    URI(it1).toPath().takeIf { it.exists(LinkOption.NOFOLLOW_LINKS) }
+                                                }
+                                            } catch (e: Exception)
+                                            {
+                                                // e.printStackTrace()
+                                            }
+                                            if (newFiles != null)
+                                            {
+                                                newFiles!!.forEach {
+                                                    if (it.toAbsolutePath().toString().isNotEmpty())
+                                                    {
+                                                        Log.i(TAG, "dropped file: " + it.toAbsolutePath() + " "
+                                                                + it.parent.normalize().name + " " + it.fileName.name)
+
+                                                        HelperGeneric.AsyncImage(load = {
+                                                            HelperGeneric.loadImageBitmap(File(it.toAbsolutePath().toString()))
+                                                        }, painterFor = { remember { BitmapPainter(it) } },
+                                                            contentDescription = "Image",
+                                                            modifier = Modifier.size(150.dp)
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                                 Spacer(modifier = Modifier.weight(0.6f))
+                            }
+                            scope.launch {
+                                if (drag_value != null) {
+                                    println("XXXXXXXXXXXXXXXdrag_value=" + drag_value)
+                                }
                             }
                         }
                         else
