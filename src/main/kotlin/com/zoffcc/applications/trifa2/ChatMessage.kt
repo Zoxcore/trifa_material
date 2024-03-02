@@ -1,6 +1,7 @@
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,6 +43,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.text.AnnotatedString
@@ -347,21 +349,19 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                             if (isMyMessage) {
                                 if (message.read)
                                 {
-                                    val color1 = Color(0xFF2684A7)
                                     if (msg_version_int == 2)
                                     {
-                                        val color2 = Color(0xFF2684A7)
-                                        IconButton(
+                                        Box(
                                             modifier = Modifier.height(MESSAGE_CHECKMARKS_CONTAINER_SIZE)
                                                 .align(Alignment.Bottom)
                                                 .background(Color.Transparent, CircleShape),
-                                            enabled = false,
-                                            onClick = {}
                                         ) {
-                                            Tooltip(text = "Message delivery (confirmed)") {
-                                                Icon(Icons.Filled.Check, tint = color1, contentDescription = "Message delivered")
-                                                Icon(Icons.Filled.Check, tint = color2,
-                                                    modifier = Modifier.padding(start = MESSAGE_CHECKMARKS_CONTAINER_SIZE / 2),
+                                            Tooltip(text = "Message delivery (confirmed)", textcolor = Color.Black) {
+                                                Icon(Icons.Filled.Check, tint = DELIVERY_CHECKMARK_COLOR,
+                                                    contentDescription = "Message delivered")
+                                                Icon(Icons.Filled.Check, tint = DELIVERY_CONFIRM_CHECKMARK_COLOR,
+                                                    modifier = Modifier.padding(
+                                                        start = MESSAGE_CHECKMARKS_CONTAINER_SIZE * 0.4f),
                                                     contentDescription = "Message delivery (confirmed)")
                                             }
                                         }
@@ -373,7 +373,7 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                                 .align(Alignment.Bottom)
                                                 .background(Color.Transparent, CircleShape),
                                             icon = Icons.Filled.Check,
-                                            iconTint = color1,
+                                            iconTint = DELIVERY_CHECKMARK_COLOR,
                                             enabled = false,
                                             iconSize = MESSAGE_CHECKMARKS_ICON_SIZE,
                                             contentDescription = "Message delivered",
@@ -383,13 +383,12 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                 }
                                 else if (message.sent_push == 1)
                                 {
-                                    val color2 = Color(0xFF2684A7)
                                     IconButton(
                                         modifier = Modifier.size(MESSAGE_CHECKMARKS_CONTAINER_SIZE)
                                             .align(Alignment.Bottom)
                                             .background(Color.Transparent, CircleShape),
                                         icon = Icons.Filled.ArrowCircleUp,
-                                        iconTint = color2,
+                                        iconTint = MESSAGE_PUSH_CHECKMARK_COLOR,
                                         enabled = false,
                                         iconSize = MESSAGE_CHECKMARKS_ICON_SIZE,
                                         contentDescription = "Push Notification sent" + "\n"
