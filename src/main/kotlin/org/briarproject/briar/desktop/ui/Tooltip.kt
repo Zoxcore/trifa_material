@@ -29,6 +29,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 
@@ -36,6 +37,7 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalFoundationApi::class)
 fun Tooltip(
     text: String?,
+    textcolor: Color? = null,
     modifier: Modifier = Modifier,
     delayMillis: Int = 500,
     tooltipPlacement: TooltipPlacement = TooltipPlacement.CursorPoint(
@@ -54,10 +56,21 @@ fun Tooltip(
                     modifier = Modifier.shadow(4.dp),
                     shape = RoundedCornerShape(4.dp),
                 ) {
-                    Text(
-                        text = text,
-                        modifier = Modifier.padding(4.dp),
-                    )
+                    if (textcolor != null)
+                    {
+                        Text(
+                            color = textcolor,
+                            text = text,
+                            modifier = Modifier.padding(4.dp),
+                        )
+                    }
+                    else
+                    {
+                        Text(
+                            text = text,
+                            modifier = Modifier.padding(4.dp),
+                        )
+                    }
                 }
             },
             delayMillis = delayMillis,
