@@ -944,7 +944,7 @@ class TrifaToxService
                 sent_timestampLt(cutoff_sent_time).
                 count()
 
-                Log.i(TAG, "resend_push_for_v3_messages:m_push_count=" + m_push_count)
+                // Log.i(TAG, "resend_push_for_v3_messages:m_push_count=" + m_push_count)
                 if (m_push_count < 1)
                 {
                     return
