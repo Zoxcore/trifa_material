@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -347,29 +348,35 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                 if (message.read)
                                 {
                                     val color1 = Color(0xFF2684A7)
-                                    IconButton(
-                                        modifier = Modifier.size(MESSAGE_CHECKMARKS_CONTAINER_SIZE)
-                                            .align(Alignment.Bottom)
-                                            .background(Color.Transparent, CircleShape),
-                                        icon = Icons.Filled.Check,
-                                        iconTint = color1,
-                                        enabled = false,
-                                        iconSize = MESSAGE_CHECKMARKS_ICON_SIZE,
-                                        contentDescription = "Message delivered",
-                                        onClick = {}
-                                    )
                                     if (msg_version_int == 2)
                                     {
                                         val color2 = Color(0xFF2684A7)
+                                        IconButton(
+                                            modifier = Modifier.height(MESSAGE_CHECKMARKS_CONTAINER_SIZE)
+                                                .align(Alignment.Bottom)
+                                                .background(Color.Transparent, CircleShape),
+                                            enabled = false,
+                                            onClick = {}
+                                        ) {
+                                            Tooltip(text = "Message delivery (confirmed)") {
+                                                Icon(Icons.Filled.Check, tint = color1, contentDescription = "Message delivered")
+                                                Icon(Icons.Filled.Check, tint = color2,
+                                                    modifier = Modifier.padding(start = MESSAGE_CHECKMARKS_CONTAINER_SIZE / 2),
+                                                    contentDescription = "Message delivery (confirmed)")
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
                                         IconButton(
                                             modifier = Modifier.size(MESSAGE_CHECKMARKS_CONTAINER_SIZE)
                                                 .align(Alignment.Bottom)
                                                 .background(Color.Transparent, CircleShape),
                                             icon = Icons.Filled.Check,
-                                            iconTint = color2,
+                                            iconTint = color1,
                                             enabled = false,
                                             iconSize = MESSAGE_CHECKMARKS_ICON_SIZE,
-                                            contentDescription = "Message delivery (confirmed)",
+                                            contentDescription = "Message delivered",
                                             onClick = {}
                                         )
                                     }
