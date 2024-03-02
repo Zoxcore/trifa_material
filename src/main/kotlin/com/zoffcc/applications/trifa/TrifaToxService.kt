@@ -868,19 +868,19 @@ class TrifaToxService
         }
 
         @JvmStatic
-        fun safe_string(`in`: ByteArray?): String
+        fun safe_string(input: ByteArray?): String
         { // Log.i(TAG, "safe_string:in=" + in);
             var out = ""
             try
             {
-                out = String(`in`!!, charset("UTF-8")) // Best way to decode using "UTF-8"
+                out = String(input!!, charset("UTF-8")) // Best way to decode using "UTF-8"
             } catch (e: Exception)
             {
                 e.printStackTrace()
                 Log.i(TAG, "safe_string:EE:" + e.message)
                 try
                 {
-                    out = String(`in`!!)
+                    out = String(input!!)
                 } catch (e2: Exception)
                 {
                     e2.printStackTrace()
@@ -989,6 +989,21 @@ class TrifaToxService
                     max_resend_count_per_iteration = 20
                 }
                 var cur_resend_count_per_iteration = 0
+
+                // HINT: check if there is anything to resend first --------
+                var check_count = 0
+                try {
+                    check_count = orma!!.selectFromMessage().directionEq(1)
+                        .msg_versionEq(0)
+                        .TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value)
+                        .resend_countLt(MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION).readEq(false)
+                        .count()
+                }
+                catch (_: Exception) {}
+                if (check_count == 0) { return }
+                // HINT: check if there is anything to resend first --------
+
+                Log.i(TAG, "resend_v3_messages: -- SQL --")
                 var m_v1: List<Message>? = null
                 m_v1 = if (friend_pubkey != null)
                 {
@@ -997,6 +1012,7 @@ class TrifaToxService
                 {
                     orma!!.selectFromMessage().directionEq(1).msg_versionEq(0).TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value).resend_countLt(MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION).readEq(false).orderBySent_timestampAsc().toList()
                 }
+                Log.i(TAG, "resend_v3_messages: -- SQL --")
                 if (m_v1 != null && m_v1.size > 0)
                 {
                     Log.i(TAG, "resend_v3_messages: we have " + m_v1.size + " messages to resend")
@@ -1058,6 +1074,21 @@ class TrifaToxService
                 var cur_resend_count_per_iteration = 0
                 // HINT: cutoff time "now" minus 25 seconds
                 val cutoff_sent_time = System.currentTimeMillis() - 25 * 1000
+
+                // HINT: check if there is anything to resend first --------
+                var check_count = 0
+                try {
+                    check_count = orma!!.selectFromMessage().directionEq(1)
+                        .TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value)
+                        .msg_versionEq(0).readEq(false)
+                        .resend_countLt(MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION)
+                        .count()
+                }
+                catch (_: Exception) {}
+                if (check_count == 0) { return }
+                // HINT: check if there is anything to resend first --------
+
+                Log.i(TAG, "resend_old_messages: -- SQL --")
                 var m_v0: List<Message>? = null
                 m_v0 = if (friend_pubkey != null)
                 {
@@ -1070,6 +1101,7 @@ class TrifaToxService
                     // HINT: this is the specific resend for 1 friend only, when that friend comes online
                     orma!!.selectFromMessage().directionEq(1).TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value).msg_versionEq(0).readEq(false).resend_countLt(MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION).orderBySent_timestampAsc().toList()
                 }
+                Log.i(TAG, "resend_old_messages: -- SQL --")
                 if (m_v0 != null && m_v0.size > 0)
                 {
                     Log.i(TAG, "resend_old_messages: we have " + m_v0.size + " messages to resend")
@@ -1125,10 +1157,25 @@ class TrifaToxService
             {
                 val max_resend_count_per_iteration = 10
                 var cur_resend_count_per_iteration = 0
+
+                // HINT: check if there is anything to resend first --------
+                var check_count = 0
+                try {
+                    check_count = orma!!.selectFromMessage().
+                    directionEq(1).TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value)
+                        .msg_versionEq(1).readEq(false).
+                        msg_at_relayEq(at_relay).count()
+                }
+                catch (_: Exception) {}
+                if (check_count == 0) { return }
+                // HINT: check if there is anything to resend first --------
+
+                Log.i(TAG, "resend_v2_messages: -- SQL --")
                 val m_v1 = orma!!.selectFromMessage().
                 directionEq(1).TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value)
                     .msg_versionEq(1).readEq(false).
                     msg_at_relayEq(at_relay).orderBySent_timestampAsc().toList()
+                Log.i(TAG, "resend_v2_messages: -- SQL --")
                 if (m_v1 != null && m_v1.size > 0)
                 {
                     Log.i(TAG, "resend_v2_messages: we have " + m_v1.size + " messages to resend")
