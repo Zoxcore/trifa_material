@@ -565,9 +565,18 @@ fun UrlHighlightTextView(text: String, modifier: Modifier = Modifier, style: Tex
         style = style,
         modifier = modifier,
         onClick = { position ->
-            val annotatedStringRange =
-                annotatedStringList.first { it.start < position && position < it.end }
-            if (annotatedStringRange.tag == "link") onClick(annotatedStringRange.item)
+            try
+            {
+                val annotatedStringRange =
+                    annotatedStringList.first { it.start < position && position < it.end }
+                if (annotatedStringRange.tag == "link")
+                {
+                    onClick(annotatedStringRange.item)
+                }
+            }
+            catch(_: Exception)
+            {
+            }
         }
     )
 }
