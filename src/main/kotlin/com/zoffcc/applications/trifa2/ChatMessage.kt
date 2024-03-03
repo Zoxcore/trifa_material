@@ -110,7 +110,6 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                     Triangle(true, ChatColorsConfig.OTHERS_MESSAGE)
                 }
             }
-
             Column {
                 Box(
                     Modifier.clip(
@@ -124,6 +123,9 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                         .background(color = if (!isMyMessage) ChatColorsConfig.OTHERS_MESSAGE else ChatColorsConfig.MY_MESSAGE)
                         .padding(start = 10.dp, top = 5.dp, end = 10.dp, bottom = 5.dp),
                 ) {
+                    // -------- Message Content Box --------
+                    // -------- Message Content Box --------
+                    // -------- Message Content Box --------
                     Column(Modifier.randomDebugBorder().padding(all = 0.dp),
                         verticalArrangement = Arrangement.spacedBy(0.dp)) {
                         if(!isMyMessage) {
@@ -141,66 +143,20 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                             }
                         }
 
-
-
-
-
                         var show_link_click by remember { mutableStateOf(false) }
                         var link_str by remember { mutableStateOf("") }
-                        // ---------------- actual message text box ----------------
-                        // ---------------- actual message text box ----------------
-                        SelectionContainer(modifier = Modifier.padding(all = 0.dp))
-                        {
-                            var msg_fontsize = MSG_TEXT_FONT_SIZE_MIXED
-                            try
-                            {
-                                val emojiInformation = message.text.emojiInformation()
-                                if (emojiInformation.isOnlyEmojis)
-                                {
-                                    msg_fontsize = MSG_TEXT_FONT_SIZE_EMOJI_ONLY
-                                }
-                            }
-                            catch(_: Exception)
-                            {
-                            }
-                            UrlHighlightTextView(
-                                text = message.text,
-                                modifier = Modifier.randomDebugBorder(),
-                                style = MaterialTheme.typography.body1.copy(
-                                    fontSize = ((msg_fontsize * ui_scale).toDouble()).sp,
-                                    lineHeight = TextUnit.Unspecified,
-                                    letterSpacing = 0.sp
-                                )
-                            ) {
-                                show_link_click = true
-                                link_str = it
-                            }
-                        }
-                        // ---------------- actual message text box ----------------
-                        // ---------------- actual message text box ----------------
 
-                        // ---------------- show open-url dialog ----------------
-                        // ---------------- show open-url dialog ----------------
-                        if (show_link_click)
-                        {
-                            AlertDialog(onDismissRequest = { link_str = "" ; show_link_click = false },
-                                title = { Text("Open this URL ?") },
-                                confirmButton = {
-                                    Button(onClick = { open_webpage(link_str) ; link_str = "" ; show_link_click = false }) {
-                                        Text("Yes")
-                                    }
-                                },
-                                dismissButton = {
-                                    Button(onClick = { link_str = "" ; show_link_click = false }) {
-                                        Text("No")
-                                    }
-                                },
-                                text = { Text("This could be potentially dangerous!" + "\n\n" + link_str) })
+                        message_text_block(message, ui_scale) { show_link_click_, link_str_ ->
+                            show_link_click = show_link_click_
+                            link_str = link_str_
                         }
-                        // ---------------- show open-url dialog ----------------
-                        // ---------------- show open-url dialog ----------------
+                        show_open_link_dialog(show_link_click, link_str) { show_link_click_, link_str_ ->
+                            show_link_click = show_link_click_
+                            link_str = link_str_
+                        }
 
-                        // Filetransfer
+                        // ---------------- Filetransfer ----------------
+                        // ---------------- Filetransfer ----------------
                         if (message.trifaMsgType == TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value)
                         {
                             if (message.direction == TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value)
@@ -344,6 +300,8 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                 }
                             }
                         }
+                        // ---------------- Filetransfer ----------------
+                        // ---------------- Filetransfer ----------------
 
 
                         Row(
@@ -451,6 +409,9 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                             // ---------------- message timestamp and info tooltip ----------------
                         }
                     }
+                    // -------- Message Content Box --------
+                    // -------- Message Content Box --------
+                    // -------- Message Content Box --------
                 }
                 Box(Modifier.size(10.dp))
             }
@@ -463,6 +424,62 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
     }
 }
 
+@Composable
+fun show_open_link_dialog(show_link_click: Boolean, link_str: String, setLinkVars: (Boolean, String) -> Unit)
+{
+    var show_link_click1 = show_link_click
+    var link_str1 = link_str
+    if (show_link_click1)
+    {
+        AlertDialog(onDismissRequest = { link_str1 = ""; show_link_click1 = false; setLinkVars(show_link_click1, link_str1) },
+            title = { Text("Open this URL ?") },
+            confirmButton = {
+                Button(onClick = { open_webpage(link_str1); link_str1 = ""; show_link_click1 = false; setLinkVars(show_link_click1, link_str1) }) {
+                    Text("Yes")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { link_str1 = ""; show_link_click1 = false;setLinkVars(show_link_click1, link_str1) }) {
+                    Text("No")
+                }
+            },
+            text = { Text("This could be potentially dangerous!" + "\n\n" + link_str1) })
+    }
+}
+
+@Composable
+fun message_text_block(message: UIMessage, ui_scale: Float, setLinkVars: (Boolean, String) -> Unit)
+{
+    var show_link_click1 = false
+    var link_str1 = ""
+    SelectionContainer(modifier = Modifier.padding(all = 0.dp))
+    {
+        var msg_fontsize = MSG_TEXT_FONT_SIZE_MIXED
+        try
+        {
+            val emojiInformation = message.text.emojiInformation()
+            if (emojiInformation.isOnlyEmojis)
+            {
+                msg_fontsize = MSG_TEXT_FONT_SIZE_EMOJI_ONLY
+            }
+        } catch (_: Exception)
+        {
+        }
+        UrlHighlightTextView(
+            text = message.text,
+            modifier = Modifier.randomDebugBorder(),
+            style = MaterialTheme.typography.body1.copy(
+                fontSize = ((msg_fontsize * ui_scale).toDouble()).sp,
+                lineHeight = TextUnit.Unspecified,
+                letterSpacing = 0.sp
+            )
+        ) {
+            show_link_click1 = true
+            link_str1 = it
+            setLinkVars(show_link_click1, link_str1)
+        }
+    }
+}
 
 @Preview
 @Composable
