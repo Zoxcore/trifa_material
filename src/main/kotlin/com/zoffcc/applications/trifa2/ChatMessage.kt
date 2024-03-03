@@ -154,156 +154,21 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                             show_link_click = show_link_click_
                             link_str = link_str_
                         }
-
                         // ---------------- Filetransfer ----------------
                         // ---------------- Filetransfer ----------------
                         if (message.trifaMsgType == TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value)
                         {
                             if (message.direction == TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value)
                             {
-                                if ((message.filesize > 0.0f) && (message.currentfilepos < message.filesize))
-                                {
-                                    LinearProgressIndicator(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        progress = (message.currentfilepos.toFloat() / message.filesize.toFloat())
-                                    )
-                                    Column (modifier = Modifier.fillMaxWidth()) {
-                                        Spacer(Modifier.size(10.dp).align(Alignment.Start))
-                                        IconButton(
-                                            icon = Icons.Filled.Cancel,
-                                            iconTint = Color.Red,
-                                            iconSize = 30.dp,
-                                            modifier = Modifier.align(Alignment.Start),
-                                            contentDescription = "cancel",
-                                            onClick = {
-                                                cancel_ft_from_ui(message)
-                                            }
-                                        )
-                                    }
-                                }
-                                else
-                                {
-                                    if (message.filename_fullpath != null)
-                                    {
-                                        if (check_filename_is_image(message.filename_fullpath))
-                                        {
-                                            HelperGeneric.AsyncImage(load = {
-                                                HelperGeneric.loadImageBitmap(File(message.filename_fullpath))
-                                            }, painterFor = { remember { BitmapPainter(it) } },
-                                                contentDescription = "Image",
-                                                modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale).
-                                                combinedClickable(
-                                                    onClick = { show_file_in_explorer_or_open(message.filename_fullpath) },
-                                                    onLongClick = { show_containing_dir_in_explorer(message.filename_fullpath) }))
-                                        }
-                                        else
-                                        {
-                                            Icon(
-                                                modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale).
-                                                combinedClickable(
-                                                    onClick = { show_file_in_explorer_or_open(message.filename_fullpath) },
-                                                    onLongClick = { show_containing_dir_in_explorer(message.filename_fullpath) }),
-                                                imageVector = Icons.Default.Attachment,
-                                                contentDescription = "File",
-                                                tint = MaterialTheme.colors.primary
-                                            )
-                                        }
-                                    }
-                                    else
-                                    {
-                                        Icon(
-                                            modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale),
-                                            imageVector = Icons.Default.BrokenImage,
-                                            contentDescription = "failed",
-                                            tint = MaterialTheme.colors.primary
-                                        )
-                                    }
-                                }
+                                incoming_filetransfer(message, ui_scale)
                             }
                             else
                             {
-                                if (message.filename_fullpath != null)
-                                {
-                                    if (message.file_state == ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_PAUSE.value)
-                                    {
-                                        // we have the option to start or cancel the outgoing FT here
-                                        Column (modifier = Modifier.fillMaxWidth()) {
-                                            Spacer(Modifier.size(10.dp).align(Alignment.Start))
-                                            Row (modifier = Modifier.align(Alignment.Start)){
-                                                IconButton(
-                                                    icon = Icons.Filled.Check,
-                                                    iconTint = Color.Green,
-                                                    iconSize = 30.dp,
-                                                    contentDescription = "start",
-                                                    onClick = {
-                                                        set_message_queueing_from_id(message.msgDatabaseId, true)
-                                                    }
-                                                )
-                                                IconButton(
-                                                    icon = Icons.Filled.Cancel,
-                                                    iconTint = Color.Red,
-                                                    iconSize = 30.dp,
-                                                    contentDescription = "cancel",
-                                                    onClick = {
-                                                        cancel_ft_from_ui(message)
-                                                    }
-                                                )
-                                            }
-                                        }
-                                    }
-                                    else if (message.file_state == ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_CANCEL.value)
-                                    {
-                                        if (check_filename_is_image(message.filename_fullpath))
-                                        {
-                                            HelperGeneric.AsyncImage(load = {
-                                                HelperGeneric.loadImageBitmap(File(message.filename_fullpath))
-                                            }, painterFor = { remember { BitmapPainter(it) } },
-                                                contentDescription = "Image",
-                                                modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale).
-                                                combinedClickable(
-                                                    onClick = { show_file_in_explorer_or_open(message.filename_fullpath) },
-                                                    onLongClick = { show_containing_dir_in_explorer(message.filename_fullpath) }))
-                                        }
-                                        else
-                                        {
-                                            Icon(
-                                                modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale).
-                                                combinedClickable(
-                                                    onClick = { show_file_in_explorer_or_open(message.filename_fullpath) },
-                                                    onLongClick = { show_containing_dir_in_explorer(message.filename_fullpath) }),
-                                                imageVector = Icons.Default.Attachment,
-                                                contentDescription = "File",
-                                                tint = MaterialTheme.colors.primary
-                                            )
-                                        }
-                                    }
-                                    else // TOX_FILE_CONTROL_RESUME
-                                    {
-                                        LinearProgressIndicator(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            progress = (message.currentfilepos.toFloat() / message.filesize.toFloat())
-                                        )
-                                        Column (modifier = Modifier.fillMaxWidth()) {
-                                            Spacer(Modifier.size(10.dp).align(Alignment.Start))
-                                            IconButton(
-                                                icon = Icons.Filled.Cancel,
-                                                iconTint = Color.Red,
-                                                iconSize = 30.dp,
-                                                modifier = Modifier.align(Alignment.Start),
-                                                contentDescription = "cancel",
-                                                onClick = {
-                                                    cancel_ft_from_ui(message)
-                                                }
-                                            )
-                                        }
-                                    }
-                                }
+                                outgoing_filetransfer(message, ui_scale)
                             }
                         }
                         // ---------------- Filetransfer ----------------
                         // ---------------- Filetransfer ----------------
-
-
                         Row(
                             horizontalArrangement = Arrangement.End,
                             modifier = Modifier.randomDebugBorder().padding(all = 0.dp).align(Alignment.End)
@@ -391,6 +256,142 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                     Triangle(false, ChatColorsConfig.MY_MESSAGE)
                 }
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun outgoing_filetransfer(message: UIMessage, ui_scale: Float)
+{
+    if (message.filename_fullpath != null)
+    {
+        if (message.file_state == ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_PAUSE.value)
+        {
+            // we have the option to start or cancel the outgoing FT here
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Spacer(Modifier.size(10.dp).align(Alignment.Start))
+                Row(modifier = Modifier.align(Alignment.Start)) {
+                    IconButton(
+                        icon = Icons.Filled.Check,
+                        iconTint = Color.Green,
+                        iconSize = 30.dp,
+                        contentDescription = "start",
+                        onClick = {
+                            set_message_queueing_from_id(message.msgDatabaseId, true)
+                        }
+                    )
+                    IconButton(
+                        icon = Icons.Filled.Cancel,
+                        iconTint = Color.Red,
+                        iconSize = 30.dp,
+                        contentDescription = "cancel",
+                        onClick = {
+                            cancel_ft_from_ui(message)
+                        }
+                    )
+                }
+            }
+        } else if (message.file_state == ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_CANCEL.value)
+        {
+            if (check_filename_is_image(message.filename_fullpath))
+            {
+                HelperGeneric.AsyncImage(load = {
+                    HelperGeneric.loadImageBitmap(File(message.filename_fullpath))
+                }, painterFor = { remember { BitmapPainter(it) } },
+                    contentDescription = "Image",
+                    modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale).combinedClickable(
+                        onClick = { show_file_in_explorer_or_open(message.filename_fullpath) },
+                        onLongClick = { show_containing_dir_in_explorer(message.filename_fullpath) }))
+            } else
+            {
+                Icon(
+                    modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale).combinedClickable(
+                        onClick = { show_file_in_explorer_or_open(message.filename_fullpath) },
+                        onLongClick = { show_containing_dir_in_explorer(message.filename_fullpath) }),
+                    imageVector = Icons.Default.Attachment,
+                    contentDescription = "File",
+                    tint = MaterialTheme.colors.primary
+                )
+            }
+        } else // TOX_FILE_CONTROL_RESUME
+        {
+            LinearProgressIndicator(
+                modifier = Modifier.fillMaxWidth(),
+                progress = (message.currentfilepos.toFloat() / message.filesize.toFloat())
+            )
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Spacer(Modifier.size(10.dp).align(Alignment.Start))
+                IconButton(
+                    icon = Icons.Filled.Cancel,
+                    iconTint = Color.Red,
+                    iconSize = 30.dp,
+                    modifier = Modifier.align(Alignment.Start),
+                    contentDescription = "cancel",
+                    onClick = {
+                        cancel_ft_from_ui(message)
+                    }
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun incoming_filetransfer(message: UIMessage, ui_scale: Float)
+{
+    if ((message.filesize > 0.0f) && (message.currentfilepos < message.filesize))
+    {
+        LinearProgressIndicator(
+            modifier = Modifier.fillMaxWidth(),
+            progress = (message.currentfilepos.toFloat() / message.filesize.toFloat())
+        )
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Spacer(Modifier.size(10.dp).align(Alignment.Start))
+            IconButton(
+                icon = Icons.Filled.Cancel,
+                iconTint = Color.Red,
+                iconSize = 30.dp,
+                modifier = Modifier.align(Alignment.Start),
+                contentDescription = "cancel",
+                onClick = {
+                    cancel_ft_from_ui(message)
+                }
+            )
+        }
+    } else
+    {
+        if (message.filename_fullpath != null)
+        {
+            if (check_filename_is_image(message.filename_fullpath))
+            {
+                HelperGeneric.AsyncImage(load = {
+                    HelperGeneric.loadImageBitmap(File(message.filename_fullpath))
+                }, painterFor = { remember { BitmapPainter(it) } },
+                    contentDescription = "Image",
+                    modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale).combinedClickable(
+                        onClick = { show_file_in_explorer_or_open(message.filename_fullpath) },
+                        onLongClick = { show_containing_dir_in_explorer(message.filename_fullpath) }))
+            } else
+            {
+                Icon(
+                    modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale).combinedClickable(
+                        onClick = { show_file_in_explorer_or_open(message.filename_fullpath) },
+                        onLongClick = { show_containing_dir_in_explorer(message.filename_fullpath) }),
+                    imageVector = Icons.Default.Attachment,
+                    contentDescription = "File",
+                    tint = MaterialTheme.colors.primary
+                )
+            }
+        } else
+        {
+            Icon(
+                modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale),
+                imageVector = Icons.Default.BrokenImage,
+                contentDescription = "failed",
+                tint = MaterialTheme.colors.primary
+            )
         }
     }
 }
