@@ -55,7 +55,6 @@ import com.zoffcc.applications.trifa.HelperGeneric.send_message_onclick
 import com.zoffcc.applications.trifa.HelperGroup
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
 import com.zoffcc.applications.trifa.HelperMessage.take_screen_shot_with_selection
-import com.zoffcc.applications.trifa.HelperOSFile
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity
 import com.zoffcc.applications.trifa.MainActivity.Companion.add_ngc_outgoing_file
@@ -347,7 +346,7 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                                 }
                             }
                         }
-                        Box(Modifier.width(80.dp).height(MESAGE_INPUT_LINE_HEIGHT).
+                        Box(Modifier.width(80.dp).height(MESSAGE_INPUT_LINE_HEIGHT).
                         background(MaterialTheme.colors.background)) {
                             Row(modifier = Modifier.width(80.dp)){
                                 IconButton(
@@ -473,7 +472,7 @@ fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, s
                                 }
                             }
                         }
-                        Box(Modifier.width(40.dp).height(MESAGE_INPUT_LINE_HEIGHT).
+                        Box(Modifier.width(40.dp).height(MESSAGE_INPUT_LINE_HEIGHT).
                         background(MaterialTheme.colors.background)) {
                             Row(modifier = Modifier.width(40.dp)){
                                 IconButton(
