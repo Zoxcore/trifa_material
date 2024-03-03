@@ -18,6 +18,7 @@
 
 package org.briarproject.briar.desktop.contact
 
+import GROUP_PEER_COLUMN_PEERNAME_LEN_THRESHOLD
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -163,7 +164,8 @@ private fun GrouppeerItemViewInfo(grouppeerItem: GroupPeerItem) = Column(
 ) {
     val show_peer_name = if (grouppeerItem.name.isEmpty()) grouppeerItem.pubkey.toUpperCase().take(6) else grouppeerItem.name
     val tooltip_name = if (grouppeerItem.name.isEmpty()) "" else grouppeerItem.name
-    val name_style = if (grouppeerItem.name.length > 14) MaterialTheme.typography.body1.copy(fontSize = 12.sp) else MaterialTheme.typography.body1
+    val name_style = if (grouppeerItem.name.length > GROUP_PEER_COLUMN_PEERNAME_LEN_THRESHOLD)
+        MaterialTheme.typography.body1.copy(fontSize = 12.sp) else MaterialTheme.typography.body1
     Tooltip(text = "Peer Name: " + tooltip_name + "\n"
             + "Peer Role: " + GroupPeerRoleAsStringLong(grouppeerItem.peerRole) + "\n"
             + "Pubkey: " + grouppeerItem.pubkey) {

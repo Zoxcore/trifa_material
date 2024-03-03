@@ -18,6 +18,7 @@
 
 package org.briarproject.briar.desktop.contact
 
+import GROUPS_COLUMN_GROUPNAME_LEN_THRESHOLD
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -146,7 +147,8 @@ private fun GroupItemViewInfo(groupItem: GroupItem) = Column(
     ) {
         Text(
             text = groupItem.name,
-            style = if (groupItem.name.length > 14) MaterialTheme.typography.body1.copy(fontSize = 13.sp) else MaterialTheme.typography.body1,
+            style = if (groupItem.name.length > GROUPS_COLUMN_GROUPNAME_LEN_THRESHOLD)
+                MaterialTheme.typography.body1.copy(fontSize = 13.sp) else MaterialTheme.typography.body1,
             maxLines = 1,
             overflow = Ellipsis,
         )
