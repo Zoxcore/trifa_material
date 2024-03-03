@@ -46,6 +46,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -54,6 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -74,10 +76,10 @@ import java.io.File
 import kotlin.random.Random
 
 @Composable
-fun Triangle(risingToTheRight: Boolean, background: Color) {
+fun Triangle(risingToTheRight: Boolean, background: Color, padding_bottom: Dp = 10.dp) {
     Box(
         Modifier
-            .padding(bottom = 10.dp, start = 0.dp)
+            .padding(bottom = padding_bottom, start = 0.dp)
             .clip(TriangleEdgeShape(risingToTheRight))
             .background(background)
             .size(6.dp)
@@ -107,10 +109,29 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                 }
                 Spacer(Modifier.size(2.dp))
                 Column {
-                    Triangle(true, ChatColorsConfig.OTHERS_MESSAGE)
+                    Triangle(true, ChatColorsConfig.OTHERS_MESSAGE, MESSAGE_BOX_BOTTOM_PADDING)
                 }
             }
             Column {
+                var image_save_ui_space = false
+                if (message.trifaMsgType == TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value)
+                {
+                    if (message.direction == TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value)
+                    {
+                        if (is_filetransfer_finished_or_canceled(message, true))
+                        {
+                            if (check_filename_is_image(message.filename_fullpath))
+                            {
+                                image_save_ui_space = true
+                            }
+                        }
+                    }
+                }
+
+                var start_padding = 10.dp
+                var start_top = 5.dp
+                var start_end = 10.dp
+                var start_bottom = 5.dp
                 Box(
                     Modifier.clip(
                         RoundedCornerShape(
@@ -121,12 +142,12 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                         )
                     )
                         .background(color = if (!isMyMessage) ChatColorsConfig.OTHERS_MESSAGE else ChatColorsConfig.MY_MESSAGE)
-                        .padding(start = 10.dp, top = 5.dp, end = 10.dp, bottom = 5.dp),
+                        .padding(start = start_padding, top = start_top, end = start_end, bottom = start_bottom),
                 ) {
                     // -------- Message Content Box --------
                     // -------- Message Content Box --------
                     // -------- Message Content Box --------
-                    Column(Modifier.randomDebugBorder().padding(all = 0.dp),
+                    Column(Modifier.padding(all = 0.dp),
                         verticalArrangement = Arrangement.spacedBy(0.dp)) {
                         if(!isMyMessage) {
                             Row(verticalAlignment = Alignment.Bottom) {
@@ -136,7 +157,7 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                         fontWeight = FontWeight.SemiBold,
                                         lineHeight = TextUnit.Unspecified,
                                         letterSpacing = 0.sp,
-                                        fontSize = 14.sp
+                                        fontSize = ((MSG_TEXT_FONT_SIZE_MIXED * ui_scale / 1.285f).toDouble()).sp
                                     ),
                                     color = message.user.color
                                 )
@@ -145,14 +166,16 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
 
                         var show_link_click by remember { mutableStateOf(false) }
                         var link_str by remember { mutableStateOf("") }
-
-                        message_text_block(message, ui_scale) { show_link_click_, link_str_ ->
-                            show_link_click = show_link_click_
-                            link_str = link_str_
-                        }
-                        show_open_link_dialog(show_link_click, link_str) { show_link_click_, link_str_ ->
-                            show_link_click = show_link_click_
-                            link_str = link_str_
+                        if (!image_save_ui_space)
+                        {
+                            message_text_block(message, ui_scale) { show_link_click_, link_str_ ->
+                                show_link_click = show_link_click_
+                                link_str = link_str_
+                            }
+                            show_open_link_dialog(show_link_click, link_str) { show_link_click_, link_str_ ->
+                                show_link_click = show_link_click_
+                                link_str = link_str_
+                            }
                         }
                         // ---------------- Filetransfer ----------------
                         // ---------------- Filetransfer ----------------
@@ -249,11 +272,11 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                     // -------- Message Content Box --------
                     // -------- Message Content Box --------
                 }
-                Box(Modifier.size(10.dp))
+                Box(Modifier.size(MESSAGE_BOX_BOTTOM_PADDING))
             }
             if (isMyMessage) {
                 Column {
-                    Triangle(false, ChatColorsConfig.MY_MESSAGE)
+                    Triangle(false, ChatColorsConfig.MY_MESSAGE, MESSAGE_BOX_BOTTOM_PADDING)
                 }
             }
         }
@@ -269,7 +292,18 @@ fun outgoing_filetransfer(message: UIMessage, ui_scale: Float)
         if (message.file_state == ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_PAUSE.value)
         {
             // we have the option to start or cancel the outgoing FT here
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Column() {
+                if (check_filename_is_image(message.filename_fullpath))
+                {
+                    show_filetransfer_image(ui_scale = ui_scale, clickable = true,
+                        fullpath = message.filename_fullpath, description = "Image")
+                } else
+                {
+                    show_filetransfer_image(ui_scale = ui_scale, clickable = true,
+                        icon = Icons.Default.Attachment,
+                        tint = MaterialTheme.colors.primary,
+                        fullpath = message.filename_fullpath, description = "File")
+                }
                 Spacer(Modifier.size(10.dp).align(Alignment.Start))
                 Row(modifier = Modifier.align(Alignment.Start)) {
                     IconButton(
@@ -294,26 +328,40 @@ fun outgoing_filetransfer(message: UIMessage, ui_scale: Float)
             }
         } else if (message.file_state == ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_CANCEL.value)
         {
+            // filetransfer finished (either because of CANCEL or OK) ------------
+            // filetransfer finished (either because of CANCEL or OK) ------------
             if (check_filename_is_image(message.filename_fullpath))
             {
-                HelperGeneric.AsyncImage(load = {
-                    HelperGeneric.loadImageBitmap(File(message.filename_fullpath))
-                }, painterFor = { remember { BitmapPainter(it) } },
-                    contentDescription = "Image",
-                    modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale).combinedClickable(
-                        onClick = { show_file_in_explorer_or_open(message.filename_fullpath) },
-                        onLongClick = { show_containing_dir_in_explorer(message.filename_fullpath) }))
+                var file_name_without_path = ""
+                try
+                {
+                    file_name_without_path = File(message.filename_fullpath).name
+                }
+                catch(_: Exception)
+                {
+                }
+                var file_size_in_bytes = "???"
+                try
+                {
+                    file_size_in_bytes = File(message.filename_fullpath).length().toString()                }
+                catch(_: Exception)
+                {
+                }
+                Tooltip(text = "Filename: " + file_name_without_path + "\n"
+                        + "Filesize: " + file_size_in_bytes + " Bytes",
+                    textcolor = Color.Black) {
+                    show_filetransfer_image(ui_scale = ui_scale, clickable = true,
+                        fullpath = message.filename_fullpath, description = "Image")
+                }
             } else
             {
-                Icon(
-                    modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale).combinedClickable(
-                        onClick = { show_file_in_explorer_or_open(message.filename_fullpath) },
-                        onLongClick = { show_containing_dir_in_explorer(message.filename_fullpath) }),
-                    imageVector = Icons.Default.Attachment,
-                    contentDescription = "File",
-                    tint = MaterialTheme.colors.primary
-                )
+                show_filetransfer_image(ui_scale = ui_scale, clickable = true,
+                    icon = Icons.Default.Attachment,
+                    tint = MaterialTheme.colors.primary,
+                    fullpath = message.filename_fullpath, description = "File")
             }
+            // filetransfer finished (either because of CANCEL or OK) ------------
+            // filetransfer finished (either because of CANCEL or OK) ------------
         } else // TOX_FILE_CONTROL_RESUME
         {
             LinearProgressIndicator(
@@ -341,7 +389,7 @@ fun outgoing_filetransfer(message: UIMessage, ui_scale: Float)
 @Composable
 fun incoming_filetransfer(message: UIMessage, ui_scale: Float)
 {
-    if ((message.filesize > 0.0f) && (message.currentfilepos < message.filesize))
+    if (is_filetransfer_in_progress(message))
     {
         LinearProgressIndicator(
             modifier = Modifier.fillMaxWidth(),
@@ -366,33 +414,94 @@ fun incoming_filetransfer(message: UIMessage, ui_scale: Float)
         {
             if (check_filename_is_image(message.filename_fullpath))
             {
-                HelperGeneric.AsyncImage(load = {
-                    HelperGeneric.loadImageBitmap(File(message.filename_fullpath))
-                }, painterFor = { remember { BitmapPainter(it) } },
-                    contentDescription = "Image",
-                    modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale).combinedClickable(
-                        onClick = { show_file_in_explorer_or_open(message.filename_fullpath) },
-                        onLongClick = { show_containing_dir_in_explorer(message.filename_fullpath) }))
+                show_filetransfer_image(ui_scale = ui_scale, clickable = true,
+                    fullpath = message.filename_fullpath, description = "Image")
             } else
             {
-                Icon(
-                    modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale).combinedClickable(
-                        onClick = { show_file_in_explorer_or_open(message.filename_fullpath) },
-                        onLongClick = { show_containing_dir_in_explorer(message.filename_fullpath) }),
-                    imageVector = Icons.Default.Attachment,
-                    contentDescription = "File",
-                    tint = MaterialTheme.colors.primary
-                )
+                show_filetransfer_image(ui_scale = ui_scale, clickable = true,
+                    icon = Icons.Default.Attachment,
+                    tint = MaterialTheme.colors.primary,
+                    fullpath = message.filename_fullpath, description = "File")
             }
         } else
         {
-            Icon(
-                modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale),
-                imageVector = Icons.Default.BrokenImage,
-                contentDescription = "failed",
-                tint = MaterialTheme.colors.primary
-            )
+            show_filetransfer_image(ui_scale = ui_scale, tint = MaterialTheme.colors.primary)
         }
+    }
+}
+
+fun is_filetransfer_in_progress(message: UIMessage): Boolean
+{
+    if ((message.filesize > 0.0f) && (message.currentfilepos < message.filesize))
+    {
+        return true
+    }
+    else
+    {
+        return false
+    }
+}
+
+fun is_filetransfer_finished_or_canceled(message: UIMessage, direction_outgoing: Boolean): Boolean
+{
+    if (direction_outgoing)
+    {
+        if (message.filename_fullpath != null)
+        {
+            if (message.file_state == ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_CANCEL.value)
+            {
+                // filetransfer finished (either because of CANCEL or OK) ------------
+                return true
+            }
+        }
+    }
+    return false
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun show_filetransfer_image(ui_scale: Float,
+                                    clickable: Boolean = false,
+                                    icon: ImageVector? = null,
+                                    tint: Color = MaterialTheme.colors.primary,
+                                    fullpath: String? = null,
+                                    description: String = "failed")
+{
+    if (fullpath == null) {
+        Icon(
+            modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale),
+            imageVector = Icons.Default.BrokenImage,
+            contentDescription = description,
+            tint = tint
+        )
+    } else if (icon != null) {
+        Icon(
+            modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale).combinedClickable(
+                onClick = { show_file_in_explorer_or_open(fullpath) },
+                onLongClick = { show_containing_dir_in_explorer(fullpath) }),
+            imageVector = icon,
+            contentDescription = description,
+            tint = tint
+        )
+    } else
+    {
+        HelperGeneric.AsyncImage(load = {
+            HelperGeneric.loadImageBitmap(File(fullpath))
+        }, painterFor = { remember { BitmapPainter(it) } },
+            contentDescription = description,
+            modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale).combinedClickable(
+                onClick = {
+                    if (clickable)
+                    {
+                        show_file_in_explorer_or_open(fullpath)
+                    }
+                },
+                onLongClick = {
+                    if (clickable)
+                    {
+                        show_containing_dir_in_explorer(fullpath)
+                    }
+                }))
     }
 }
 
@@ -468,8 +577,24 @@ fun message_text_block(message: UIMessage, ui_scale: Float, setLinkVars: (Boolea
         } catch (_: Exception)
         {
         }
+
+        var message_text_string = message.text
+        if (message.trifaMsgType == TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value)
+        {
+            if (message.direction == TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value)
+            {
+                if (is_filetransfer_finished_or_canceled(message, true))
+                {
+                    if (check_filename_is_image(message.filename_fullpath))
+                    {
+                        message_text_string = ""
+                    }
+                }
+            }
+        }
+
         UrlHighlightTextView(
-            text = message.text,
+            text = message_text_string,
             modifier = Modifier.randomDebugBorder(),
             style = MaterialTheme.typography.body1.copy(
                 fontSize = ((msg_fontsize * ui_scale).toDouble()).sp,
