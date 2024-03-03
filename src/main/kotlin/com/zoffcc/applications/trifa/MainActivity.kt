@@ -243,6 +243,7 @@ class MainActivity
                 println("java.vendor:" + System.getProperty("java.vendor"))
                 println("java.version:" + System.getProperty("java.version"))
                 println("java.specification.vendor:" + System.getProperty("java.specification.vendor"))
+                println("java.vendor.version:" + System.getProperty("java.vendor.version"))
             } catch (e: Exception)
             {
                 e.printStackTrace()
