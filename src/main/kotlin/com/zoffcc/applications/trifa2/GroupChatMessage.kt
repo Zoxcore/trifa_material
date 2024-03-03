@@ -241,7 +241,7 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                                     enabled = false,
                                     iconSize = 13.dp,
                                     contentDescription = "Message synced via History sync by other Peers" + "\n" +
-                                            "Message contents cat not be fully verified",
+                                            "Message contents can not be fully verified",
                                     onClick = {}
                                 )
                                 Spacer(modifier = Modifier.width(10.dp))
