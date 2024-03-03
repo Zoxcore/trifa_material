@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -65,10 +66,10 @@ import org.briarproject.briar.desktop.ui.Tooltip
 import java.io.File
 
 @Composable
-fun GroupTriangle(risingToTheRight: Boolean, background: Color) {
+fun GroupTriangle(risingToTheRight: Boolean, background: Color, padding_bottom: Dp = 10.dp) {
     Box(
         Modifier
-            .padding(bottom = 10.dp, start = 0.dp)
+            .padding(bottom = padding_bottom, start = 0.dp)
             .clip(GroupTriangleEdgeShape(risingToTheRight))
             .background(background)
             .size(6.dp)
@@ -90,7 +91,7 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                 }
                 Spacer(Modifier.size(2.dp))
                 Column {
-                    GroupTriangle(true, ChatColorsConfig.OTHERS_MESSAGE)
+                    GroupTriangle(true, ChatColorsConfig.OTHERS_MESSAGE, MESSAGE_BOX_BOTTOM_PADDING)
                 }
             }
 
@@ -137,7 +138,7 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                                         fontWeight = FontWeight.SemiBold,
                                         lineHeight = TextUnit.Unspecified,
                                         letterSpacing = 0.sp,
-                                        fontSize = 14.sp
+                                        fontSize = ((MSG_TEXT_FONT_SIZE_MIXED * ui_scale / 1.285f).toDouble()).sp
                                     ),
                                     color = groupmessage.user.color
                                 )
@@ -272,11 +273,11 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                         }
                     }
                 }
-                Box(Modifier.size(10.dp))
+                Box(Modifier.size(MESSAGE_BOX_BOTTOM_PADDING))
             }
             if (isMyMessage) {
                 Column {
-                    Triangle(false, ChatColorsConfig.MY_MESSAGE)
+                    Triangle(false, ChatColorsConfig.MY_MESSAGE, MESSAGE_BOX_BOTTOM_PADDING)
                 }
             }
         }

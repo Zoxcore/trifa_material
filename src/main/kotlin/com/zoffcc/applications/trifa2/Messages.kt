@@ -31,7 +31,7 @@ internal fun Messages(ui_scale: Float, selectedContactPubkey: String?) {
     Box(Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(start = 4.dp, end = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(0.dp),
             state = listState,
         ) {
             item { Spacer(Modifier.size(SPACE_BEFORE_FIRST_MESSAGE)) }
