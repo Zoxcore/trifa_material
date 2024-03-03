@@ -377,36 +377,7 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                             // ---------------- message checkmarks (push, delivery) ----------------
                             // ---------------- message checkmarks (push, delivery) ----------------
 
-                            // ---------------- message timestamp and info tooltip ----------------
-                            // ---------------- message timestamp and info tooltip ----------------
-                            var message_size_in_bytes = 0
-                            try
-                            {
-                                message_size_in_bytes = message.text.toByteArray().size
-                            }
-                            catch(_: Exception)
-                            {
-                            }
-                            val msg_v2_hash_str = if (message.msg_id_hash.isNullOrEmpty()) "" else message.msg_id_hash
-                            val msg_v3_hash_str = if (message.msg_idv3_hash.isNullOrEmpty()) "" else message.msg_idv3_hash
-                            Tooltip("Message sent at: " + timeToString(message.sentTimeMs) + "\n" +
-                                         "Message rcvd at: " + timeToString(message.recvTimeMs) + "\n" +
-                                         "Message size in bytes: " + (if (message_size_in_bytes == 0) "unknown" else message_size_in_bytes) + "\n" +
-                                         "Message version: " + msg_version_int + "\n" +
-                                         "Message V2 Hash: " + msg_v2_hash_str + "\n" +
-                                         "Message V3 Hash: " + msg_v3_hash_str + "\n" +
-                                         "The clocks on both sides are not synchronized for security reasons, " + "\n" +
-                                         "therfore the timestamps may not be accurate") {
-                                Text(
-                                    modifier = Modifier.padding(all = 0.dp),
-                                    text = timeToString(message.timeMs),
-                                    textAlign = TextAlign.End,
-                                    style = MaterialTheme.typography.subtitle1.copy(fontSize = 10.sp, lineHeight = TextUnit.Unspecified),
-                                    color = ChatColorsConfig.TIME_TEXT
-                                )
-                            }
-                            // ---------------- message timestamp and info tooltip ----------------
-                            // ---------------- message timestamp and info tooltip ----------------
+                            message_timestamp_and_info(message, msg_version_int)
                         }
                     }
                     // -------- Message Content Box --------
@@ -421,6 +392,37 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                 }
             }
         }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun message_timestamp_and_info(message: UIMessage, msg_version_int: Int)
+{
+    var message_size_in_bytes = 0
+    try
+    {
+        message_size_in_bytes = message.text.toByteArray().size
+    } catch (_: Exception)
+    {
+    }
+    val msg_v2_hash_str = if (message.msg_id_hash.isNullOrEmpty()) "" else message.msg_id_hash
+    val msg_v3_hash_str = if (message.msg_idv3_hash.isNullOrEmpty()) "" else message.msg_idv3_hash
+    Tooltip("Message sent at: " + timeToString(message.sentTimeMs) + "\n" +
+            "Message rcvd at: " + timeToString(message.recvTimeMs) + "\n" +
+            "Message size in bytes: " + (if (message_size_in_bytes == 0) "unknown" else message_size_in_bytes) + "\n" +
+            "Message version: " + msg_version_int + "\n" +
+            "Message V2 Hash: " + msg_v2_hash_str + "\n" +
+            "Message V3 Hash: " + msg_v3_hash_str + "\n" +
+            "The clocks on both sides are not synchronized for security reasons, " + "\n" +
+            "therfore the timestamps may not be accurate") {
+        Text(
+            modifier = Modifier.padding(all = 0.dp),
+            text = timeToString(message.timeMs),
+            textAlign = TextAlign.End,
+            style = MaterialTheme.typography.subtitle1.copy(fontSize = 10.sp, lineHeight = TextUnit.Unspecified),
+            color = ChatColorsConfig.TIME_TEXT
+        )
     }
 }
 
