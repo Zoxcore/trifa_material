@@ -140,8 +140,15 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                 )
                             }
                         }
+
+
+
+
+
                         var show_link_click by remember { mutableStateOf(false) }
                         var link_str by remember { mutableStateOf("") }
+                        // ---------------- actual message text box ----------------
+                        // ---------------- actual message text box ----------------
                         SelectionContainer(modifier = Modifier.padding(all = 0.dp))
                         {
                             var msg_fontsize = MSG_TEXT_FONT_SIZE_MIXED
@@ -169,7 +176,11 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                 link_str = it
                             }
                         }
+                        // ---------------- actual message text box ----------------
+                        // ---------------- actual message text box ----------------
 
+                        // ---------------- show open-url dialog ----------------
+                        // ---------------- show open-url dialog ----------------
                         if (show_link_click)
                         {
                             AlertDialog(onDismissRequest = { link_str = "" ; show_link_click = false },
@@ -186,6 +197,8 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                 },
                                 text = { Text("This could be potentially dangerous!" + "\n\n" + link_str) })
                         }
+                        // ---------------- show open-url dialog ----------------
+                        // ---------------- show open-url dialog ----------------
 
                         // Filetransfer
                         if (message.trifaMsgType == TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value)
@@ -331,6 +344,8 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                 }
                             }
                         }
+
+
                         Row(
                             horizontalArrangement = Arrangement.End,
                             modifier = Modifier.randomDebugBorder().padding(all = 0.dp).align(Alignment.End)
@@ -346,6 +361,8 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                 }
                             }
 
+                            // ---------------- message checkmarks (push, delivery) ----------------
+                            // ---------------- message checkmarks (push, delivery) ----------------
                             if (isMyMessage) {
                                 if (message.read)
                                 {
@@ -399,6 +416,11 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                 }
                                 Spacer(modifier = Modifier.width(10.dp))
                             }
+                            // ---------------- message checkmarks (push, delivery) ----------------
+                            // ---------------- message checkmarks (push, delivery) ----------------
+
+                            // ---------------- message timestamp and info tooltip ----------------
+                            // ---------------- message timestamp and info tooltip ----------------
                             var message_size_in_bytes = 0
                             try
                             {
@@ -407,10 +429,8 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                             catch(_: Exception)
                             {
                             }
-
                             val msg_v2_hash_str = if (message.msg_id_hash.isNullOrEmpty()) "" else message.msg_id_hash
                             val msg_v3_hash_str = if (message.msg_idv3_hash.isNullOrEmpty()) "" else message.msg_idv3_hash
-
                             Tooltip("Message sent at: " + timeToString(message.sentTimeMs) + "\n" +
                                          "Message rcvd at: " + timeToString(message.recvTimeMs) + "\n" +
                                          "Message size in bytes: " + (if (message_size_in_bytes == 0) "unknown" else message_size_in_bytes) + "\n" +
@@ -427,6 +447,8 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                     color = ChatColorsConfig.TIME_TEXT
                                 )
                             }
+                            // ---------------- message timestamp and info tooltip ----------------
+                            // ---------------- message timestamp and info tooltip ----------------
                         }
                     }
                 }
