@@ -1,7 +1,6 @@
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,7 +42,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -193,8 +191,9 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                         // ---------------- Filetransfer ----------------
                         // ---------------- Filetransfer ----------------
                         Row(
-                            horizontalArrangement = Arrangement.End,
-                            modifier = Modifier.randomDebugBorder().padding(all = 0.dp).align(Alignment.End)
+                            horizontalArrangement = if (isMyMessage) Arrangement.End else Arrangement.Start,
+                            modifier = Modifier.randomDebugBorder().padding(all = 0.dp)
+                                .align(if (isMyMessage) Alignment.End else Alignment.Start)
                         ) {
                             var msg_version_int: Int = 1
                             if (message.msg_version == 1) {
@@ -207,65 +206,13 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                                 }
                             }
 
-                            // ---------------- message checkmarks (push, delivery) ----------------
-                            // ---------------- message checkmarks (push, delivery) ----------------
                             if (isMyMessage) {
-                                if (message.read)
-                                {
-                                    if (msg_version_int == 2)
-                                    {
-                                        Box(
-                                            modifier = Modifier.height(MESSAGE_CHECKMARKS_CONTAINER_SIZE)
-                                                .align(Alignment.Bottom)
-                                                .background(Color.Transparent, CircleShape),
-                                        ) {
-                                            Tooltip(text = "Message delivery (confirmed)", textcolor = Color.Black) {
-                                                Icon(Icons.Filled.Check, tint = DELIVERY_CHECKMARK_COLOR,
-                                                    contentDescription = "Message delivered")
-                                                Icon(Icons.Filled.Check, tint = DELIVERY_CONFIRM_CHECKMARK_COLOR,
-                                                    modifier = Modifier.padding(
-                                                        start = MESSAGE_CHECKMARKS_CONTAINER_SIZE * 0.4f),
-                                                    contentDescription = "Message delivery (confirmed)")
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        IconButton(
-                                            modifier = Modifier.size(MESSAGE_CHECKMARKS_CONTAINER_SIZE)
-                                                .align(Alignment.Bottom)
-                                                .background(Color.Transparent, CircleShape),
-                                            icon = Icons.Filled.Check,
-                                            iconTint = DELIVERY_CHECKMARK_COLOR,
-                                            enabled = false,
-                                            iconSize = MESSAGE_CHECKMARKS_ICON_SIZE,
-                                            contentDescription = "Message delivered",
-                                            onClick = {}
-                                        )
-                                    }
-                                }
-                                else if (message.sent_push == 1)
-                                {
-                                    IconButton(
-                                        modifier = Modifier.size(MESSAGE_CHECKMARKS_CONTAINER_SIZE)
-                                            .align(Alignment.Bottom)
-                                            .background(Color.Transparent, CircleShape),
-                                        icon = Icons.Filled.ArrowCircleUp,
-                                        iconTint = MESSAGE_PUSH_CHECKMARK_COLOR,
-                                        enabled = false,
-                                        iconSize = MESSAGE_CHECKMARKS_ICON_SIZE,
-                                        contentDescription = "Push Notification sent" + "\n"
-                                                + "The Push Notification does not contain any data," + "\n"
-                                                + "it is only a trigger to wake up the device of the friend",
-                                        onClick = {}
-                                    )
-                                }
-                                Spacer(modifier = Modifier.width(10.dp))
+                                message_checkmarks(isMyMessage, message, msg_version_int)
+                                message_timestamp_and_info(message, msg_version_int)
+                            } else {
+                                message_timestamp_and_info(message, msg_version_int)
+                                message_checkmarks(isMyMessage, message, msg_version_int)
                             }
-                            // ---------------- message checkmarks (push, delivery) ----------------
-                            // ---------------- message checkmarks (push, delivery) ----------------
-
-                            message_timestamp_and_info(message, msg_version_int)
                         }
                     }
                     // -------- Message Content Box --------
@@ -280,6 +227,61 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                 }
             }
         }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun message_checkmarks(isMyMessage: Boolean, message: UIMessage, msg_version_int: Int)
+{
+    if (isMyMessage)
+    {
+        if (message.read)
+        {
+            if (msg_version_int == 2)
+            {
+                Box(
+                    modifier = Modifier.height(MESSAGE_CHECKMARKS_CONTAINER_SIZE)
+                        .background(Color.Transparent, CircleShape),
+                ) {
+                    Tooltip(text = "Message delivery (confirmed)", textcolor = Color.Black) {
+                        Icon(Icons.Filled.Check, tint = DELIVERY_CHECKMARK_COLOR,
+                            contentDescription = "Message delivered")
+                        Icon(Icons.Filled.Check, tint = DELIVERY_CONFIRM_CHECKMARK_COLOR,
+                            modifier = Modifier.padding(
+                                start = MESSAGE_CHECKMARKS_CONTAINER_SIZE * 0.4f),
+                            contentDescription = "Message delivery (confirmed)")
+                    }
+                }
+            } else
+            {
+                IconButton(
+                    modifier = Modifier.size(MESSAGE_CHECKMARKS_CONTAINER_SIZE)
+                        .background(Color.Transparent, CircleShape),
+                    icon = Icons.Filled.Check,
+                    iconTint = DELIVERY_CHECKMARK_COLOR,
+                    enabled = false,
+                    iconSize = MESSAGE_CHECKMARKS_ICON_SIZE,
+                    contentDescription = "Message delivered",
+                    onClick = {}
+                )
+            }
+        } else if (message.sent_push == 1)
+        {
+            IconButton(
+                modifier = Modifier.size(MESSAGE_CHECKMARKS_CONTAINER_SIZE)
+                    .background(Color.Transparent, CircleShape),
+                icon = Icons.Filled.ArrowCircleUp,
+                iconTint = MESSAGE_PUSH_CHECKMARK_COLOR,
+                enabled = false,
+                iconSize = MESSAGE_CHECKMARKS_ICON_SIZE,
+                contentDescription = "Push Notification sent" + "\n"
+                        + "The Push Notification does not contain any data," + "\n"
+                        + "it is only a trigger to wake up the device of the friend",
+                onClick = {}
+            )
+        }
+        Spacer(modifier = Modifier.width(10.dp))
     }
 }
 
