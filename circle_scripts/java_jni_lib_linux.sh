@@ -72,7 +72,7 @@ echo "JAVADIR1:""$JAVADIR1"
 echo "JAVADIR2:""$JAVADIR2"
 
 
-CFLAGS_ADDON='-O2 -g -fPIC -D_FORTIFY_SOURCE=2'
+CFLAGS_ADDON='-O2 -g -fPIC -D_FORTIFY_SOURCE=2 -fstack-clash-protection -fcf-protection=full'
 CFLAGS_MORE="--param=ssp-buffer-size=1 -fstack-protector-all -std=gnu99 -I$_INST_/include/ -L$_INST_/lib"
 
 # if [ "$1""x" == "localx" ]; then
