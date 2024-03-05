@@ -24,7 +24,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.BrokenImage
-import androidx.compose.material.icons.filled.QuestionMark
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -59,9 +59,6 @@ import com.zoffcc.applications.trifa.HelperOSFile.show_containing_dir_in_explore
 import com.zoffcc.applications.trifa.HelperOSFile.show_file_in_explorer_or_open
 import com.zoffcc.applications.trifa.TRIFAGlobals
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import org.briarproject.briar.desktop.contact.getConnectionColor
 import org.briarproject.briar.desktop.ui.Tooltip
 import java.io.File
 
@@ -230,45 +227,16 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                             }
                         }
                         Row(
-                            horizontalArrangement = Arrangement.End,
-                            modifier = Modifier.randomDebugBorder().padding(all = 0.dp).align(Alignment.End)
+                            horizontalArrangement = if (isMyMessage) Arrangement.End else Arrangement.Start,
+                            modifier = Modifier.randomDebugBorder().padding(all = 0.dp)
+                                .align(if (isMyMessage) Alignment.End else Alignment.Start)
                         ) {
-                            if (groupmessage.was_synced)
-                            {
-                                IconButton(
-                                    modifier = Modifier.size(15.dp),
-                                    icon = Icons.Filled.QuestionMark,
-                                    iconTint = Color.Magenta,
-                                    enabled = false,
-                                    iconSize = 13.dp,
-                                    contentDescription = "Message synced via History sync by other Peers" + "\n" +
-                                            "Message contents can not be fully verified",
-                                    onClick = {}
-                                )
-                                Spacer(modifier = Modifier.width(10.dp))
-                            }
-                            var message_size_in_bytes = 0
-                            try
-                            {
-                                message_size_in_bytes = groupmessage.text.toByteArray().size
-                            }
-                            catch(_: Exception)
-                            {
-                            }
-                            val is_prv_msg = if (groupmessage.is_private_msg == 1) "yes" else "no"
-                            Tooltip("Message sent at: " + timeToString(groupmessage.timeMs) + "\n" +
-                                         "Message ID: " + groupmessage.message_id_tox + "\n" +
-                                         "is private Message: " + is_prv_msg + "\n" +
-                                         "Sender Peer Pubkey: " + groupmessage.toxpk + "\n" +
-                                         "Message size in bytes: " + (if (message_size_in_bytes == 0) "unknown" else message_size_in_bytes) + "\n" +
-                                         "was synced: " + groupmessage.was_synced.toString()) {
-                                Text(
-                                    modifier = Modifier.padding(all = 0.dp),
-                                    text = timeToString(groupmessage.timeMs),
-                                    textAlign = TextAlign.End,
-                                    style = MaterialTheme.typography.subtitle1.copy(fontSize = 10.sp, lineHeight = TextUnit.Unspecified),
-                                    color = ChatColorsConfig.TIME_TEXT
-                                )
+                            if (isMyMessage) {
+                                message_checkmarks(groupmessage, isMyMessage)
+                                message_timestamp_and_info(groupmessage)
+                            } else {
+                                message_timestamp_and_info(groupmessage)
+                                message_checkmarks(groupmessage, isMyMessage)
                             }
                         }
                     }
@@ -284,7 +252,57 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun message_timestamp_and_info(groupmessage: UIGroupMessage)
+{
+    var message_size_in_bytes = 0
+    try
+    {
+        message_size_in_bytes = groupmessage.text.toByteArray().size
+    } catch (_: Exception)
+    {
+    }
+    val is_prv_msg = if (groupmessage.is_private_msg == 1) "yes" else "no"
+    Tooltip("Message sent at: " + timeToString(groupmessage.timeMs) + "\n" +
+            "Message ID: " + groupmessage.message_id_tox + "\n" +
+            "is private Message: " + is_prv_msg + "\n" +
+            "Sender Peer Pubkey: " + groupmessage.toxpk + "\n" +
+            "Message size in bytes: " + (if (message_size_in_bytes == 0) "unknown" else message_size_in_bytes) + "\n" +
+            "was synced: " + groupmessage.was_synced.toString()) {
+        Text(
+            modifier = Modifier.padding(all = 0.dp),
+            text = timeToString(groupmessage.timeMs),
+            textAlign = TextAlign.End,
+            style = MaterialTheme.typography.subtitle1.copy(fontSize = 10.sp, lineHeight = TextUnit.Unspecified),
+            color = ChatColorsConfig.TIME_TEXT
+        )
+    }
+}
 
+@Composable
+fun message_checkmarks(groupmessage: UIGroupMessage, isMyMessage: Boolean)
+{
+    if (groupmessage.was_synced)
+    {
+        if (!isMyMessage) {
+            Spacer(modifier = Modifier.width(10.dp))
+        }
+        IconButton(
+            modifier = Modifier.size(15.dp),
+            icon = Icons.Filled.Info,
+            iconTint = Color.Magenta,
+            enabled = false,
+            iconSize = 13.dp,
+            contentDescription = "Message synced via History sync by other Peers" + "\n" +
+                    "Message contents can not be fully verified",
+            onClick = {}
+        )
+        if (isMyMessage) {
+            Spacer(modifier = Modifier.width(10.dp))
+        }
+    }
+}
 
 // Adapted from https://stackoverflow.com/questions/65965852/jetpack-compose-create-chat-bubble-with-arrow-and-border-elevation
 class GroupTriangleEdgeShape(val risingToTheRight: Boolean) : Shape {
