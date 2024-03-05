@@ -28,8 +28,8 @@ export MAKEFLAGS
 WGET_OPTIONS="--timeout=10"
 export WGET_OPTIONS
 
-CXXFLAGS_ADDON='-O2 -g -fPIC -D_FORTIFY_SOURCE=2 -fstack-clash-protection -fcf-protection=full'
-CFLAGS_ADDON='-O2 -g -fPIC -D_FORTIFY_SOURCE=2 -fstack-clash-protection -fcf-protection=full'
+CXXFLAGS_ADDON='-O2 -g -fPIC -D_FORTIFY_SOURCE=2 -fstack-protector-strong'
+CFLAGS_ADDON='-O2 -g -fPIC -D_FORTIFY_SOURCE=2 -fstack-protector-strong'
 CFLAGS_MORE='--param=ssp-buffer-size=1 -fstack-protector-all'
 # ----------- config ------------
 
