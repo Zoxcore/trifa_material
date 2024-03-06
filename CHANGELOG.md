@@ -1,5 +1,17 @@
 # Changelog
 
+## [v1.0.24](https://github.com/Zoxcore/trifa_material/tree/v1.0.24) (2024-03-06)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.23...v1.0.24)
+
+**Merged pull requests:**
+
+- refactor group message view, put others messages date and checkmarks … [\#175](https://github.com/Zoxcore/trifa_material/pull/175) ([zoff99](https://github.com/zoff99))
+- opus 1.5.1 for linux [\#174](https://github.com/Zoxcore/trifa_material/pull/174) ([zoff99](https://github.com/zoff99))
+- Bump io.github.alexzhirkevich:qrose from 1.0.0-beta3 to 1.0.0 [\#173](https://github.com/Zoxcore/trifa_material/pull/173) ([dependabot[bot]](https://github.com/apps/dependabot))
+- tweak layout a bit to save more space [\#172](https://github.com/Zoxcore/trifa_material/pull/172) ([zoff99](https://github.com/zoff99))
+- small refactoring and UI tweaks [\#171](https://github.com/Zoxcore/trifa_material/pull/171) ([zoff99](https://github.com/zoff99))
+
 ## [v1.0.23](https://github.com/Zoxcore/trifa_material/tree/v1.0.23) (2024-03-01)
 
 [Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.22...v1.0.23)
