@@ -2,11 +2,12 @@ package com.zoffcc.applications.ffmpegav;
 
 import javax.sound.sampled.*;
 import java.nio.ByteBuffer;
+import java.util.Random;
 
 public class AVActivity {
 
     private static final String TAG = "ffmpegav.AVActivity";
-    static final String Version = "0.99.23";
+    static final String Version = "0.99.24";
     public static final String JAVA_AUDIO_IN_DEVICE_NAME = "Java Audio in (-fallback-)";
 
     private static boolean java_audio_in_device_used = false;
@@ -41,6 +42,8 @@ public class AVActivity {
     private final static int AUDIO_REC_SAMPLE_RATE = 48000;
     private final static int AUDIO_REC_CHANNELS = 1;
     private final static int AUDIO_REC_SAMPLE_SIZE_BIT = 16;
+
+    private static boolean mult_thr_test_finish = false;
 
     public static class ffmpegav_descrid
     {
@@ -275,7 +278,7 @@ public class AVActivity {
         try {
             if (t_audio_rec != null)
             {
-                t_audio_rec.join(1000);
+                    t_audio_rec.join(1000);
             }
         } catch (Exception ignored) {
         } finally {
@@ -762,8 +765,8 @@ public class AVActivity {
             @Override
             public void onSuccess(long width, long height, long source_width, long source_height, long pts, int fps, int source_format) {
                 Log.i(TAG, "ffmpeg open video capture onSuccess:" + width + " " + height + " " +
-                        source_width + " " + source_height + " " + pts + " fps: " + fps +
-                        " source_format: " + ffmpegav_video_source_format_name.value_str(source_format));
+                source_width + " " + source_height + " " + pts + " fps: " + fps +
+                " source_format: " + ffmpegav_video_source_format_name.value_str(source_format));
             }
             @Override
             public void onError() {
@@ -771,7 +774,7 @@ public class AVActivity {
             @Override
             public void onBufferTooSmall(int y_buffer_size, int u_buffer_size, int v_buffer_size) {
                 Log.i(TAG, "Video buffer too small, needed sizes: " + y_buffer_size
-                        + " " + u_buffer_size + " "+ v_buffer_size);
+                    + " " + u_buffer_size + " "+ v_buffer_size);
                 ffmpegav_video_buffer_2_y = java.nio.ByteBuffer.allocateDirect(y_buffer_size);
                 ffmpegav_video_buffer_2_u = java.nio.ByteBuffer.allocateDirect(u_buffer_size);
                 ffmpegav_video_buffer_2_v = java.nio.ByteBuffer.allocateDirect(v_buffer_size);
@@ -851,11 +854,11 @@ public class AVActivity {
         // -----------------------
         // -----------------------
         final int res_vd2 = ffmpegav_open_video_in_device(vdevice,
-                vsource, 640, 480, 15, 0);
+            vsource, 640, 480, 15, 0);
         Log.i(TAG, "ffmpeg open video capture device: " + res_vd2);
 
         final int res_ad2 = ffmpegav_open_audio_in_device_wrapper(adevice,
-                asource);
+            asource);
         Log.i(TAG, "ffmpeg open audio capture device: " + res_ad2);
         ffmpegav_start_video_in_capture();
         ffmpegav_start_audio_in_capture_wrapper();
@@ -905,6 +908,231 @@ public class AVActivity {
         Log.i(TAG, "ffmpeg ========= all OK =========");
         Log.i(TAG, "ffmpeg ========= all OK =========");
 
+
+        Log.i(TAG, "ffmpeg ========= multi thread test START =========");
+        final String vdevice_ = vdevice;
+        final String vsource_ = vsource;
+        final String adevice_ = adevice;
+        final String asource_ = asource;
+        mult_thr_test_finish = false;
+
+        Thread t1 = new Thread() {
+            @Override
+            public void run() {
+                Random r = new Random();
+                while (!mult_thr_test_finish) {
+                    try
+                    {
+                        Log.i(TAG, "T1: ffmpeg open video capture device:start");
+                        final int res_vd2 = ffmpegav_open_video_in_device(vdevice_,
+                            vsource_, 640, 480, 15, 0);
+                        Log.i(TAG, "T1: ffmpeg open video capture device:done");
+                        int low = 10;
+                        int high = 80;
+                        int result = r.nextInt(high-low) + low;
+                        Thread.sleep(result);
+                        Log.i(TAG, "T1: ffmpeg close video capture device:start");
+                        ffmpegav_close_video_in_device();
+                        Log.i(TAG, "T1: ffmpeg close video capture device:done");
+                    }
+                    catch(Exception e) {}
+                }
+            }
+        };
+        Thread t2 = new Thread() {
+            @Override
+            public void run() {
+                Random r = new Random();
+                while (!mult_thr_test_finish) {
+                    try
+                    {
+                        Log.i(TAG, "T2: ffmpeg open audio capture device:start");
+                        final int res_ad2 = ffmpegav_open_audio_in_device_wrapper(adevice_, asource_);
+                        Log.i(TAG, "T2: ffmpeg open audio capture device:done");
+                        int low = 10;
+                        int high = 80;
+                        int result = r.nextInt(high-low) + low;
+                        Thread.sleep(result);
+                        Log.i(TAG, "T2: ffmpeg close audio capture device:start");
+                        ffmpegav_close_audio_in_device_wrapper();
+                        Log.i(TAG, "T2: ffmpeg close audio capture device:done");
+                    }
+                    catch(Exception e) {}
+                }
+            }
+        };
+        Thread t3 = new Thread() {
+            @Override
+            public void run() {
+                Random r = new Random();
+                while (!mult_thr_test_finish) {
+                    try
+                    {
+                        Log.i(TAG, "T3: ffmpeg open video capture device:start");
+                        final int res_vd2 = ffmpegav_open_video_in_device(vdevice_,
+                            vsource_, 640, 480, 15, 0);
+                        Log.i(TAG, "T3: ffmpeg open video capture device:done");
+                        int low = 10;
+                        int high = 80;
+                        int result = r.nextInt(high-low) + low;
+                        Thread.sleep(result);
+                        Log.i(TAG, "T3: ffmpeg close video capture device:start");
+                        ffmpegav_close_video_in_device();
+                        Log.i(TAG, "T3: ffmpeg close video capture device:done");
+                    }
+                    catch(Exception e) {}
+                }
+            }
+        };
+        Thread t4 = new Thread() {
+            @Override
+            public void run() {
+                Random r = new Random();
+                while (!mult_thr_test_finish) {
+                    try
+                    {
+                        Log.i(TAG, "T4: ffmpeg open audio capture device:start");
+                        final int res_ad2 = ffmpegav_open_audio_in_device_wrapper(adevice_, asource_);
+                        Log.i(TAG, "T4: ffmpeg open audio capture device:done");
+                        int low = 10;
+                        int high = 80;
+                        int result = r.nextInt(high-low) + low;
+                        Thread.sleep(result);
+                        Log.i(TAG, "T4: ffmpeg close audio capture device:start");
+                        ffmpegav_close_audio_in_device_wrapper();
+                        Log.i(TAG, "T4: ffmpeg close audio capture device:done");
+                    }
+                    catch(Exception e) {}
+                }
+            }
+        };
+        Thread t5 = new Thread() {
+            @Override
+            public void run() {
+                Random r = new Random();
+                while (!mult_thr_test_finish) {
+                    try
+                    {
+                        Log.i(TAG, "T5: ffmpeg start video capture: start");
+                        ffmpegav_start_video_in_capture();
+                        Log.i(TAG, "T5: ffmpeg start video capture: done");
+                        int low = 10;
+                        int high = 80;
+                        int result = r.nextInt(high-low) + low;
+                        Thread.sleep(result);
+                        Log.i(TAG, "T5: ffmpeg stop video capture: start");
+                        ffmpegav_stop_video_in_capture();
+                        Log.i(TAG, "T5: ffmpeg stop video capture: done");
+                    }
+                    catch(Exception e) {}
+                }
+            }
+        };
+        Thread t6 = new Thread() {
+            @Override
+            public void run() {
+                Random r = new Random();
+                while (!mult_thr_test_finish) {
+                    try
+                    {
+                        Log.i(TAG, "T6: ffmpeg start audio capture: start");
+                        ffmpegav_start_audio_in_capture_wrapper();
+                        Log.i(TAG, "T6: ffmpeg start audio capture: done");
+                        int low = 10;
+                        int high = 80;
+                        int result = r.nextInt(high-low) + low;
+                        Thread.sleep(result);
+                        Log.i(TAG, "T6: ffmpeg stop audio capture: start");
+                        ffmpegav_stop_audio_in_capture_wrapper();
+                        Log.i(TAG, "T6: ffmpeg stop audio capture: done");
+                    }
+                    catch(Exception e) {}
+                }
+            }
+        };
+        Thread t7 = new Thread() {
+            @Override
+            public void run() {
+                Random r = new Random();
+                while (!mult_thr_test_finish) {
+                    try
+                    {
+                        Log.i(TAG, "T7: ffmpeg start video capture: start");
+                        ffmpegav_start_video_in_capture();
+                        Log.i(TAG, "T7: ffmpeg start video capture: done");
+                        int low = 10;
+                        int high = 80;
+                        int result = r.nextInt(high-low) + low;
+                        Thread.sleep(result);
+                        Log.i(TAG, "T7: ffmpeg stop video capture: start");
+                        ffmpegav_stop_video_in_capture();
+                        Log.i(TAG, "T7: ffmpeg stop video capture: done");
+                    }
+                    catch(Exception e) {}
+                }
+            }
+        };
+        Thread t8 = new Thread() {
+            @Override
+            public void run() {
+                Random r = new Random();
+                while (!mult_thr_test_finish) {
+                    try
+                    {
+                        Log.i(TAG, "T8: ffmpeg start audio capture: start");
+                        ffmpegav_start_audio_in_capture_wrapper();
+                        Log.i(TAG, "T8: ffmpeg start audio capture: done");
+                        int low = 10;
+                        int high = 80;
+                        int result = r.nextInt(high-low) + low;
+                        Thread.sleep(result);
+                        Log.i(TAG, "T8: ffmpeg stop audio capture: start");
+                        ffmpegav_stop_audio_in_capture_wrapper();
+                        Log.i(TAG, "T8: ffmpeg stop audio capture: done");
+                    }
+                    catch(Exception e) {}
+                }
+            }
+        };
+        Log.i(TAG, "ffmpeg ========= multi thread test RUN ===========");
+        t1.start();
+        t2.start();
+        t3.start();
+        t4.start();
+        t5.start();
+        t6.start();
+        t7.start();
+        t8.start();
+        try
+        {
+            Thread.sleep(100000);
+        }
+        catch(Exception e)
+        {
+        }
+        Log.i(TAG, "ffmpeg ========= multi thread test STOP ==========");
+        mult_thr_test_finish = true;
+        ffmpegav_stop_video_in_capture();
+        ffmpegav_stop_audio_in_capture();
+        try
+        {
+            t1.join();
+            t2.join();
+            t3.join();
+            t4.join();
+            t5.join();
+            t6.join();
+            t7.join();
+            t8.join();
+        }
+        catch(Exception e)
+        {
+        }
+        ffmpegav_stop_audio_in_capture_wrapper();
+        ffmpegav_stop_video_in_capture();
+        ffmpegav_close_audio_in_device_wrapper();
+        ffmpegav_close_video_in_device();
+        Log.i(TAG, "ffmpeg ========= multi thread test OK ============");
     }
 
     public static String bytesToHex(byte[] bytes, int start, int len)
