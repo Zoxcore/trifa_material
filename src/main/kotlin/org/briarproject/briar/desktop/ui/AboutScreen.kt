@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,11 +50,14 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.libavutil_version
 import com.zoffcc.applications.trifa.MainActivity.Companion.libopus_version
 import com.zoffcc.applications.trifa.MainActivity.Companion.libvpx_version
 import com.zoffcc.applications.trifa.MainActivity.Companion.libsodium_version
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_number_groups
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_version_major
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_version_minor
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_version_patch
 import com.zoffcc.applications.trifa.MainActivity.Companion.x264_version
+import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import com.zoffcc.applications.trifa_material.trifa_material.BuildConfig
+import globalstore
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import org.sqlite.SQLiteJDBCLoader
 
@@ -111,6 +115,7 @@ private fun GeneralInfo() {
     // format date
     // val commitTime = Instant.ofEpochMilli(BuildData.GIT_TIME).atZone(ZoneId.systemDefault()).toLocalDateTime()
 
+    val global_store by globalstore.stateFlow.collectAsState()
     // rows displayed in table
     val lines = buildList {
         // add(Entry(i18n("about.copyright"), Strings.APP_AUTHORS))
@@ -129,6 +134,39 @@ private fun GeneralInfo() {
         add(Entry(i18n("about.git_commit_date"), BuildConfig.GIT_COMMIT_DATE))
         add(Entry(i18n("about.git_commit_msg"), BuildConfig.GIT_COMMIT_MSG))
         add(Entry(i18n("about.website"), "https://github.com/Zoxcore/trifa_material", true))
+        if (global_store.ormaRunning)
+        {
+            try
+            {
+                add(Entry(i18n("about.number_of_friend_messages"), orma!!.selectFromMessage().count().toString()))
+            } catch (_: Exception)
+            {
+            }
+            try
+            {
+                add(Entry(i18n("about.number_of_group_messages"), orma!!.selectFromGroupMessage().count().toString()))
+            } catch (_: Exception)
+            {
+            }
+            try
+            {
+                add(Entry(i18n("about.number_of_friends"), orma!!.selectFromFriendList().count().toString()))
+            } catch (_: Exception)
+            {
+            }
+        }
+
+        try
+        {
+            if (global_store.toxRunning)
+            {
+                // add(Entry(i18n("about.number_of_groups"), orma!!.selectFromGroupDB().count().toString()))
+                add(Entry(i18n("about.number_of_groups"), tox_group_get_number_groups().toString()))
+            }
+        } catch (_: Exception)
+        {
+        }
+
 
         try
         {
