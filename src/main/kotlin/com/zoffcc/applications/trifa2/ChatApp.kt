@@ -246,25 +246,31 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                                 isDragging = false },
                             onDrop = { value ->
                                 drag_value = null
-                                isDragging = false
                                 // Log.i(TAG, "dropping file here")
-                                if (value.dragData is DragData.FilesList) {
-                                    val newFiles = (value.dragData as DragData.FilesList).readFiles().mapNotNull { it1: String ->
-                                        URI(it1).toPath().takeIf { it.exists(LinkOption.NOFOLLOW_LINKS) }
-                                    }
-                                    newFiles.forEach{
-                                        // Log.i(TAG, "dropped file: " + it.toAbsolutePath() + " " + it.parent.normalize().name + " " + it.fileName.name)
-                                        if (it.toAbsolutePath().toString().isNotEmpty())
-                                        {
-                                            // Log.i(TAG," " + it.toAbsolutePath().parent.toString() + " "
-                                            //        + it.toAbsolutePath().fileName.toString() + " " + selectedContactPubkey)
-                                            add_outgoing_file(it.toAbsolutePath().parent.toString(),
-                                                it.toAbsolutePath().fileName.toString(),
-                                                selectedContactPubkey)
+                                try
+                                {
+                                    if (value.dragData is DragData.FilesList)
+                                    {
+                                        val newFiles = (value.dragData as DragData.FilesList).readFiles().mapNotNull { it1: String ->
+                                            URI(it1).toPath().takeIf { it.exists(LinkOption.NOFOLLOW_LINKS) }
+                                        }
+                                        newFiles.forEach {
+                                            // Log.i(TAG, "dropped file: " + it.toAbsolutePath() + " " + it.parent.normalize().name + " " + it.fileName.name)
+                                            if (it.toAbsolutePath().toString().isNotEmpty())
+                                            {
+                                                // Log.i(TAG," " + it.toAbsolutePath().parent.toString() + " "
+                                                //        + it.toAbsolutePath().fileName.toString() + " " + selectedContactPubkey)
+                                                add_outgoing_file(it.toAbsolutePath().parent.toString(),
+                                                    it.toAbsolutePath().fileName.toString(),
+                                                    selectedContactPubkey)
+                                            }
                                         }
                                     }
                                 }
-
+                                catch(_: Exception)
+                                {
+                                }
+                                isDragging = false
                             })) {
                         if (isDragging)
                         {
@@ -279,53 +285,7 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                                     modifier = Modifier.align(Alignment.CenterHorizontally),
                                     color = DragAndDropColors.active
                                 )
-                                if (false)
-                                {
-                                    Spacer(modifier = Modifier.weight(0.1f))
-                                    if (drag_value != null)
-                                    {
-                                        if (drag_value!!.dragData is DragData.FilesList)
-                                        {
-                                            var newFiles: List<Path>? = null
-                                            try
-                                            {
-                                                println("YYYYYYYYYYYYYYY11:drag_value=" + drag_value)
-                                                println("YYYYYYYYYYYYYYY22:drag_value=" + drag_value!!.dragData)
-                                                println("YYYYYYYYYYYYYYY33:drag_value=" + drag_value!!.dragData as DragData.FilesList)
-                                                println("YYYYYYYYYYYYYYY44:drag_value=" + (drag_value!!.dragData as DragData.FilesList).readFiles())
-                                                newFiles = (drag_value!!.dragData as DragData.FilesList).readFiles().mapNotNull { it1: String ->
-                                                    URI(it1).toPath().takeIf { it.exists(LinkOption.NOFOLLOW_LINKS) }
-                                                }
-                                            } catch (e: Exception)
-                                            {
-                                                // e.printStackTrace()
-                                            }
-                                            if (newFiles != null)
-                                            {
-                                                newFiles!!.forEach {
-                                                    if (it.toAbsolutePath().toString().isNotEmpty())
-                                                    {
-                                                        Log.i(TAG, "dropped file: " + it.toAbsolutePath() + " "
-                                                                + it.parent.normalize().name + " " + it.fileName.name)
-
-                                                        HelperGeneric.AsyncImage(load = {
-                                                            HelperGeneric.loadImageBitmap(File(it.toAbsolutePath().toString()))
-                                                        }, painterFor = { remember { BitmapPainter(it) } },
-                                                            contentDescription = "Image",
-                                                            modifier = Modifier.size(150.dp)
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
                                 Spacer(modifier = Modifier.weight(0.6f))
-                            }
-                            scope.launch {
-                                if (drag_value != null) {
-                                    println("XXXXXXXXXXXXXXXdrag_value=" + drag_value)
-                                }
                             }
                         }
                         else
@@ -398,24 +358,30 @@ fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, s
                             onDragStart = { isDragging = true  },
                             onDragExit = { isDragging = false },
                             onDrop = { value ->
-                                isDragging = false
                                 // Log.i(TAG, "dropping file here")
-                                if (value.dragData is DragData.FilesList) {
-                                    val newFiles = (value.dragData as DragData.FilesList).readFiles().mapNotNull { it1: String ->
-                                        URI(it1).toPath().takeIf { it.exists(LinkOption.NOFOLLOW_LINKS) }
-                                    }
-                                    newFiles.forEach{
-                                        // Log.i(TAG, "dropped file: " + it.toAbsolutePath() + " " + it.parent.normalize().name + " " + it.fileName.name)
-                                        if (it.toAbsolutePath().toString().isNotEmpty())
-                                        {
-                                            // Log.i(TAG," " + it.toAbsolutePath().parent.toString() + " "
-                                            //        + it.toAbsolutePath().fileName.toString() + " " + selectedContactPubkey)
-                                            add_ngc_outgoing_file(it.toAbsolutePath().parent.toString(),
-                                                it.toAbsolutePath().fileName.toString(), selectedGroupId)
+                                try
+                                {
+                                    if (value.dragData is DragData.FilesList)
+                                    {
+                                        val newFiles = (value.dragData as DragData.FilesList).readFiles().mapNotNull { it1: String ->
+                                            URI(it1).toPath().takeIf { it.exists(LinkOption.NOFOLLOW_LINKS) }
+                                        }
+                                        newFiles.forEach {
+                                            // Log.i(TAG, "dropped file: " + it.toAbsolutePath() + " " + it.parent.normalize().name + " " + it.fileName.name)
+                                            if (it.toAbsolutePath().toString().isNotEmpty())
+                                            {
+                                                // Log.i(TAG," " + it.toAbsolutePath().parent.toString() + " "
+                                                //        + it.toAbsolutePath().fileName.toString() + " " + selectedContactPubkey)
+                                                add_ngc_outgoing_file(it.toAbsolutePath().parent.toString(),
+                                                    it.toAbsolutePath().fileName.toString(), selectedGroupId)
+                                            }
                                         }
                                     }
                                 }
-
+                                catch(_: Exception)
+                                {
+                                }
+                                isDragging = false
                             })) {
                         if (isDragging)
                         {
