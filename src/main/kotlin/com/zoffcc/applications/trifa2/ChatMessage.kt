@@ -114,14 +114,11 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                 var image_save_ui_space = false
                 if (message.trifaMsgType == TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value)
                 {
-                    if (message.direction == TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value)
+                    if (is_filetransfer_finished_or_canceled(message, true))
                     {
-                        if (is_filetransfer_finished_or_canceled(message, true))
+                        if (check_filename_is_image(message.filename_fullpath))
                         {
-                            if (check_filename_is_image(message.filename_fullpath))
-                            {
-                                image_save_ui_space = true
-                            }
+                            image_save_ui_space = true
                         }
                     }
                 }
@@ -416,8 +413,27 @@ fun incoming_filetransfer(message: UIMessage, ui_scale: Float)
         {
             if (check_filename_is_image(message.filename_fullpath))
             {
-                show_filetransfer_image(ui_scale = ui_scale, clickable = true,
-                    fullpath = message.filename_fullpath, description = "Image")
+                var file_name_without_path = ""
+                try
+                {
+                    file_name_without_path = File(message.filename_fullpath).name
+                }
+                catch(_: Exception)
+                {
+                }
+                var file_size_in_bytes = "???"
+                try
+                {
+                    file_size_in_bytes = File(message.filename_fullpath).length().toString()                }
+                catch(_: Exception)
+                {
+                }
+                Tooltip(text = "Filename: " + file_name_without_path + "\n"
+                        + "Filesize: " + file_size_in_bytes + " Bytes",
+                    textcolor = Color.Black) {
+                    show_filetransfer_image(ui_scale = ui_scale, clickable = true,
+                        fullpath = message.filename_fullpath, description = "Image")
+                }
             } else
             {
                 show_filetransfer_image(ui_scale = ui_scale, clickable = true,
