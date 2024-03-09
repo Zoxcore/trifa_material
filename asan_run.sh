@@ -4,7 +4,7 @@
 #
 # config:
 #
-java_17_or_newer_dir=/usr/lib/jvm/java-17-openjdk-amd64/
+java_17_or_newer_dir=/usr/lib/jvm/java-21-openjdk-amd64/
 asan_runtime_lib=/usr/lib/x86_64-linux-gnu/libasan.so.6.0.0
 #
 #
