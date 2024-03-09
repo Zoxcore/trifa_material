@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
@@ -52,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vanniktech.emoji.emojiInformation
 import com.zoffcc.applications.trifa.HelperFiletransfer
+import com.zoffcc.applications.trifa.HelperGeneric
 import com.zoffcc.applications.trifa.HelperGeneric.AsyncImage
 import com.zoffcc.applications.trifa.HelperGeneric.loadImageBitmap
 import com.zoffcc.applications.trifa.HelperOSFile.open_webpage
@@ -91,10 +93,25 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                     GroupTriangle(true, ChatColorsConfig.OTHERS_MESSAGE, MESSAGE_BOX_BOTTOM_PADDING)
                 }
             }
-
             Column {
+                var image_save_ui_space = false
+                if (groupmessage.trifaMsgType == TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value)
+                {
+                    if (groupmessage.filename_fullpath != null)
+                    {
+                        if (HelperFiletransfer.check_filename_is_image(groupmessage.filename_fullpath))
+                        {
+                            image_save_ui_space = true
+                        }
+                    }
+                }
+
                 val col_msg_other = if (groupmessage.is_private_msg == 0)
                     ChatColorsConfig.OTHERS_MESSAGE else ChatColorsConfig.OTHERS_PRIVATE_MESSAGE
+                var start_padding = 10.dp
+                var start_top = 5.dp
+                var start_end = 10.dp
+                var start_bottom = 5.dp
                 Box(
                     Modifier.clip(
                         RoundedCornerShape(
@@ -105,8 +122,11 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                         )
                     )
                         .background(color = if (!isMyMessage) col_msg_other else ChatColorsConfig.MY_MESSAGE)
-                        .padding(start = 10.dp, top = 5.dp, end = 10.dp, bottom = 5.dp),
+                        .padding(start = start_padding, top = start_top, end = start_end, bottom = start_bottom),
                 ) {
+                    // -------- GroupMessage Content Box --------
+                    // -------- GroupMessage Content Box --------
+                    // -------- GroupMessage Content Box --------
                     Column(Modifier.randomDebugBorder().padding(all = 0.dp),
                         verticalArrangement = Arrangement.spacedBy(0.dp)) {
                         if(!isMyMessage) {
@@ -143,89 +163,34 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                         }
                         var show_link_click by remember { mutableStateOf(false) }
                         var link_str by remember { mutableStateOf("") }
-                        SelectionContainer(modifier = Modifier.padding(all = 0.dp))
+                        if (!image_save_ui_space)
                         {
-                            var msg_fontsize = MSG_TEXT_FONT_SIZE_MIXED
-                            try
-                            {
-                                val emojiInformation = groupmessage.text.emojiInformation()
-                                if (emojiInformation.isOnlyEmojis)
-                                {
-                                    msg_fontsize = MSG_TEXT_FONT_SIZE_EMOJI_ONLY
-                                }
+                            group_message_text_block(groupmessage, ui_scale) { show_link_click_, link_str_ ->
+                                show_link_click = show_link_click_
+                                link_str = link_str_
                             }
-                            catch(_: Exception)
-                            {
+                            group_show_open_link_dialog(show_link_click, link_str) { show_link_click_, link_str_ ->
+                                show_link_click = show_link_click_
+                                link_str = link_str_
                             }
-                            var text_str = groupmessage.text
-                            UrlHighlightTextView(
-                                text = text_str,
-                                modifier = Modifier.randomDebugBorder(),
-                                style = MaterialTheme.typography.body1.copy(
-                                    fontSize = ((msg_fontsize * ui_scale).toDouble()).sp,
-                                    lineHeight = TextUnit.Unspecified,
-                                    letterSpacing = 0.sp
-                                )
-                            ) {
-                                show_link_click = true
-                                link_str = it
-                            }
-                        }
-                        if (show_link_click)
-                        {
-                            AlertDialog(onDismissRequest = { link_str = "" ; show_link_click = false },
-                                title = { Text("Open this URL ?") },
-                                confirmButton = {
-                                    Button(onClick = { open_webpage(link_str) ; link_str = "" ; show_link_click = false }) {
-                                        Text("Yes")
-                                    }
-                                },
-                                dismissButton = {
-                                    Button(onClick = { link_str = "" ; show_link_click = false }) {
-                                        Text("No")
-                                    }
-                                },
-                                text = { Text("This could be potentially dangerous!" + "\n\n" + link_str) })
                         }
 
+                        // ---------------- Filetransfer ----------------
+                        // ---------------- Filetransfer ----------------
                         if (groupmessage.trifaMsgType == TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value)
                         {
-                            if (groupmessage.filename_fullpath != null)
+                            if (!isMyMessage)
                             {
-                                if (HelperFiletransfer.check_filename_is_image(groupmessage.filename_fullpath))
-                                {
-                                    AsyncImage(load = {
-                                        loadImageBitmap(File(groupmessage.filename_fullpath))
-                                    }, painterFor = { remember { BitmapPainter(it) } },
-                                        contentDescription = "Image",
-                                        modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale).
-                                        combinedClickable(
-                                            onClick = { show_file_in_explorer_or_open(groupmessage.filename_fullpath) },
-                                            onLongClick = { show_containing_dir_in_explorer(groupmessage.filename_fullpath) }))
-                                }
-                                else
-                                {
-                                    Icon(
-                                        modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale).
-                                        combinedClickable(
-                                            onClick = { show_file_in_explorer_or_open(groupmessage.filename_fullpath) },
-                                            onLongClick = { show_containing_dir_in_explorer(groupmessage.filename_fullpath) }),
-                                        imageVector = Icons.Default.Attachment,
-                                        contentDescription = "File",
-                                        tint = MaterialTheme.colors.primary
-                                    )
-                                }
+                                group_incoming_filetransfer(groupmessage, ui_scale)
                             }
                             else
                             {
-                                Icon(
-                                    modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale),
-                                    imageVector = Icons.Default.BrokenImage,
-                                    contentDescription = "failed",
-                                    tint = MaterialTheme.colors.primary
-                                )
+                                group_outgoing_filetransfer(groupmessage, ui_scale)
                             }
                         }
+                        // ---------------- Filetransfer ----------------
+                        // ---------------- Filetransfer ----------------
+
                         Row(
                             horizontalArrangement = if (isMyMessage) Arrangement.End else Arrangement.Start,
                             modifier = Modifier.randomDebugBorder().padding(all = 0.dp)
@@ -239,6 +204,9 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                                 message_checkmarks(groupmessage, isMyMessage)
                             }
                         }
+                        // -------- GroupMessage Content Box --------
+                        // -------- GroupMessage Content Box --------
+                        // -------- GroupMessage Content Box --------
                     }
                 }
                 Box(Modifier.size(MESSAGE_BOX_BOTTOM_PADDING))
@@ -248,6 +216,206 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                     Triangle(false, ChatColorsConfig.MY_MESSAGE, MESSAGE_BOX_BOTTOM_PADDING)
                 }
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun group_outgoing_filetransfer(groupmessage: UIGroupMessage, ui_scale: Float)
+{
+    if (groupmessage.filename_fullpath != null)
+    {
+        if (HelperFiletransfer.check_filename_is_image(groupmessage.filename_fullpath))
+        {
+            var file_name_without_path = ""
+            try
+            {
+                file_name_without_path = File(groupmessage.filename_fullpath).name
+            }
+            catch(_: Exception)
+            {
+            }
+            var file_size_in_bytes = "???"
+            try
+            {
+                file_size_in_bytes = File(groupmessage.filename_fullpath).length().toString()                }
+            catch(_: Exception)
+            {
+            }
+            Tooltip(text = "Filename: " + file_name_without_path + "\n"
+                    + "Filesize: " + file_size_in_bytes + " Bytes",
+                textcolor = Color.Black) {
+                group_show_filetransfer_image(ui_scale = ui_scale, clickable = true,
+                    fullpath = groupmessage.filename_fullpath, description = "Image")
+            }
+        }
+        else
+        {
+            group_show_filetransfer_image(ui_scale = ui_scale, clickable = true,
+                icon = Icons.Default.Attachment,
+                tint = MaterialTheme.colors.primary,
+                fullpath = groupmessage.filename_fullpath, description = "File")
+        }
+    }
+    else
+    {
+        group_show_filetransfer_image(ui_scale = ui_scale, clickable = true,
+            icon = Icons.Default.BrokenImage,
+            tint = MaterialTheme.colors.primary,
+            description = "failed")
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun group_show_filetransfer_image(ui_scale: Float,
+                                  clickable: Boolean = false,
+                                  icon: ImageVector? = null,
+                                  tint: Color = MaterialTheme.colors.primary,
+                                  fullpath: String? = null,
+                                  description: String = "failed")
+{
+    if (fullpath == null) {
+        Icon(
+            modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale),
+            imageVector = Icons.Default.BrokenImage,
+            contentDescription = description,
+            tint = tint
+        )
+    } else if (icon != null) {
+        Icon(
+            modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale).combinedClickable(
+                onClick = { show_file_in_explorer_or_open(fullpath) },
+                onLongClick = { show_containing_dir_in_explorer(fullpath) }),
+            imageVector = icon,
+            contentDescription = description,
+            tint = tint
+        )
+    } else
+    {
+        HelperGeneric.AsyncImage(load = {
+            HelperGeneric.loadImageBitmap(File(fullpath))
+        }, painterFor = { remember { BitmapPainter(it) } },
+            contentDescription = description,
+            modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale).combinedClickable(
+                onClick = {
+                    if (clickable)
+                    {
+                        show_file_in_explorer_or_open(fullpath)
+                    }
+                },
+                onLongClick = {
+                    if (clickable)
+                    {
+                        show_containing_dir_in_explorer(fullpath)
+                    }
+                }))
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun group_incoming_filetransfer(groupmessage: UIGroupMessage, ui_scale: Float)
+{
+    if (groupmessage.filename_fullpath != null)
+    {
+        if (HelperFiletransfer.check_filename_is_image(groupmessage.filename_fullpath))
+        {
+            var file_name_without_path = ""
+            try
+            {
+                file_name_without_path = File(groupmessage.filename_fullpath).name
+            }
+            catch(_: Exception)
+            {
+            }
+            var file_size_in_bytes = "???"
+            try
+            {
+                file_size_in_bytes = File(groupmessage.filename_fullpath).length().toString()                }
+            catch(_: Exception)
+            {
+            }
+            Tooltip(text = "Filename: " + file_name_without_path + "\n"
+                    + "Filesize: " + file_size_in_bytes + " Bytes",
+                textcolor = Color.Black) {
+                group_show_filetransfer_image(ui_scale = ui_scale, clickable = true,
+                    fullpath = groupmessage.filename_fullpath, description = "Image")
+            }
+        }
+        else
+        {
+            group_show_filetransfer_image(ui_scale = ui_scale, clickable = true,
+                icon = Icons.Default.Attachment,
+                tint = MaterialTheme.colors.primary,
+                fullpath = groupmessage.filename_fullpath, description = "File")
+        }
+    }
+    else
+    {
+        group_show_filetransfer_image(ui_scale = ui_scale, clickable = true,
+            icon = Icons.Default.BrokenImage,
+            tint = MaterialTheme.colors.primary,
+            description = "failed")
+    }
+}
+
+@Composable
+fun group_show_open_link_dialog(show_link_click: Boolean, link_str: String, setLinkVars: (Boolean, String) -> Unit)
+{
+    var show_link_click1 = show_link_click
+    var link_str1 = link_str
+    if (show_link_click1)
+    {
+        AlertDialog(onDismissRequest = { link_str1 = ""; show_link_click1 = false; setLinkVars(show_link_click1, link_str1) },
+            title = { Text("Open this URL ?") },
+            confirmButton = {
+                Button(onClick = { open_webpage(link_str1); link_str1 = ""; show_link_click1 = false; setLinkVars(show_link_click1, link_str1) }) {
+                    Text("Yes")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { link_str1 = ""; show_link_click1 = false;setLinkVars(show_link_click1, link_str1) }) {
+                    Text("No")
+                }
+            },
+            text = { Text("This could be potentially dangerous!" + "\n\n" + link_str1) })
+    }
+}
+
+@Composable
+fun group_message_text_block(groupmessage: UIGroupMessage, ui_scale: Float, setLinkVars: (Boolean, String) -> Unit)
+{
+    var show_link_click1 = false
+    var link_str1 = ""
+    SelectionContainer(modifier = Modifier.padding(all = 0.dp))
+    {
+        var msg_fontsize = MSG_TEXT_FONT_SIZE_MIXED
+        try
+        {
+            val emojiInformation = groupmessage.text.emojiInformation()
+            if (emojiInformation.isOnlyEmojis)
+            {
+                msg_fontsize = MSG_TEXT_FONT_SIZE_EMOJI_ONLY
+            }
+        }
+        catch(_: Exception)
+        {
+        }
+        var text_str = groupmessage.text
+        UrlHighlightTextView(
+            text = text_str,
+            modifier = Modifier.randomDebugBorder(),
+            style = MaterialTheme.typography.body1.copy(
+                fontSize = ((msg_fontsize * ui_scale).toDouble()).sp,
+                lineHeight = TextUnit.Unspecified,
+                letterSpacing = 0.sp
+            )
+        ) {
+            show_link_click1 = true
+            link_str1 = it
+            setLinkVars(show_link_click1, link_str1)
         }
     }
 }
