@@ -1075,28 +1075,45 @@ fun App()
                         }
                     }
                     Column(modifier = Modifier.randomDebugBorder().padding(4.dp)) {
+                        val current_callstate3 by avstatestorecallstate.stateFlow.collectAsState()
                         val audio_bar_bgcolor = MaterialTheme.colors.background
-                        SwingPanel(
-                            modifier = Modifier.size(200.dp, 5.dp),
-                            factory = {
-                                JPanel(SingleComponentAspectRatioKeeperLayout(), true).apply {
-                                    add(audio_out_bar)
-                                    AudioBar.set_bar_bgcolor(audio_bar_bgcolor.toArgb(), audio_out_bar)
-                                }
-                            },
-                            update = { }
-                        )
+                        if ((current_callstate3.call_state == AVState.CALL_STATUS.CALL_STATUS_NONE) &&
+                            ((ngc_video_frame_last_incoming_ts + 2000) < System.currentTimeMillis()))
+                        {
+                            Box(modifier = Modifier.size(200.dp, 5.dp))
+                        }
+                        else
+                        {
+                            SwingPanel(
+                                modifier = Modifier.size(200.dp, 5.dp),
+                                factory = {
+                                    JPanel(SingleComponentAspectRatioKeeperLayout(), true).apply {
+                                        add(audio_out_bar)
+                                        AudioBar.set_bar_bgcolor(audio_bar_bgcolor.toArgb(), audio_out_bar)
+                                    }
+                                },
+                                update = { }
+                            )
+                        }
                         Spacer(modifier = Modifier.height(5.dp))
-                        SwingPanel(
-                            modifier = Modifier.size(200.dp, 5.dp),
-                            factory = {
-                                JPanel(SingleComponentAspectRatioKeeperLayout(), true).apply {
-                                    add(audio_in_bar)
-                                    AudioBar.set_bar_bgcolor(audio_bar_bgcolor.toArgb(), audio_in_bar)
-                                }
-                            },
-                            update = { }
-                        )
+                        if ((current_callstate3.call_state == AVState.CALL_STATUS.CALL_STATUS_NONE) &&
+                            ((ngc_video_frame_last_incoming_ts + 2000) < System.currentTimeMillis()))
+                        {
+                            Box(modifier = Modifier.size(200.dp, 5.dp))
+                        }
+                        else
+                        {
+                            SwingPanel(
+                                modifier = Modifier.size(200.dp, 5.dp),
+                                factory = {
+                                    JPanel(SingleComponentAspectRatioKeeperLayout(), true).apply {
+                                        add(audio_in_bar)
+                                        AudioBar.set_bar_bgcolor(audio_bar_bgcolor.toArgb(), audio_in_bar)
+                                    }
+                                },
+                                update = { }
+                            )
+                        }
                     }
                     UIScaleItem(
                         label = i18n("ui.ui_scale"),
