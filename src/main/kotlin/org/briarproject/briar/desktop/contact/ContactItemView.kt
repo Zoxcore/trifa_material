@@ -41,6 +41,8 @@ import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.trifa.HelperRelay.get_relay_for_friend
+import com.zoffcc.applications.trifa.Log
+import com.zoffcc.applications.trifa.TAG
 import globalfrndstoreunreadmsgs
 import globalstore
 import org.briarproject.briar.desktop.ui.NumberBadge
@@ -97,9 +99,11 @@ private fun ContactItemViewInfo(contactItem: ContactItem) = Column(
     val friend_relay = get_relay_for_friend(contactItem.pubkey.toUpperCase())
     val relay_str = if (friend_relay.isNullOrEmpty()) "" else ("\n" + "Relay (ToxProxy): " + friend_relay)
     val ip_addr_str =  contactItem.ip_addr
+    Log.i(TAG, "ContactItemViewInfo: ip_addr_str=" + ip_addr_str + " name=" + show_name)
     if (ip_addr_str.length > 0) {
         show_name = show_name + "\n" + ip_addr_str
         name_style = name_style.copy(fontSize = (name_style.fontSize.value - 4).sp)
+        Log.i(TAG, "ContactItemViewInfo: show_name2=" + show_name)
     }
     Tooltip(text = "Name: " + tooltip_name + "\n" +
             "Pubkey: " + contactItem.pubkey + relay_str + "\n" +
