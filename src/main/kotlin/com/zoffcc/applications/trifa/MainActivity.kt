@@ -395,7 +395,7 @@ class MainActivity
                 } catch (_: Exception)
                 {
                 }
-                PREF__toxnoise_enabled_to_int_used_for_init = use_tox_noise
+                PREF__toxnoise_enabled_to_int_used_for_init = 0 // HINT: noise setting disabled for now // use_tox_noise
 
                 var noise_jni_name_addon = ""
                 if (use_tox_noise == 1)
@@ -629,6 +629,9 @@ class MainActivity
 
         @JvmStatic
         external fun tox_friend_get_connection_status(friend_number: Long): Int
+
+        @JvmStatic
+        external fun tox_friend_get_connection_ip(friend_number: Long): String?
 
         @JvmStatic
         external fun tox_friend_delete(friend_number: Long): Int
@@ -1663,6 +1666,25 @@ class MainActivity
                         }
                     }
                 }
+            }
+
+            if (a_TOX_CONNECTION == TOX_CONNECTION.TOX_CONNECTION_UDP.value)
+            {
+                val friend_ip_addresses = tox_friend_get_connection_ip(friend_number)
+                try
+                {
+                    val ip_addr = friend_ip_addresses!!.toByteArray(StandardCharsets.UTF_8).filterNot { it == 0.toByte() }.toByteArray()
+                    val ip_addr_str = ip_addr.toString(StandardCharsets.UTF_8)
+                    // Log.i(TAG, "android_tox_callback_friend_connection_status_cb_method: name=" + f.name + " friend_ip_addresses2=" + ip_addr_str)
+                    contactstore.update_ipaddr(pubkey = f.tox_public_key_string, ipaddr = ip_addr_str)
+                }
+                catch(_: Exception)
+                {
+                }
+            }
+            else
+            {
+                contactstore.update_ipaddr(pubkey = f.tox_public_key_string, ipaddr = "")
             }
         }
 
