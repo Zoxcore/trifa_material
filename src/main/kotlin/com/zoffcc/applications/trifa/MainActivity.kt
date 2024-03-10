@@ -1675,7 +1675,7 @@ class MainActivity
                 {
                     val ip_addr = friend_ip_addresses!!.toByteArray(StandardCharsets.UTF_8).filterNot { it == 0.toByte() }.toByteArray()
                     val ip_addr_str = ip_addr.toString(StandardCharsets.UTF_8)
-                    Log.i(TAG, "android_tox_callback_friend_connection_status_cb_method: name=" + f.name + " friend_ip_addresses2=" + ip_addr_str)
+                    Log.i(TAG, "android_tox_callback_friend_connection_status_cb_method: name=" + f.name + " friend_ip_addresses2=" + ip_addr_str + " tox_public_key_string=" + f.tox_public_key_string)
                     contactstore.update_ipaddr(pubkey = f.tox_public_key_string, ipaddr = ip_addr_str)
                 }
                 catch(_: Exception)
