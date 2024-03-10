@@ -22,7 +22,8 @@ data class ContactItem(
     val name: String,
     val isConnected: Int,
     val pubkey: String,
-    val is_relay: Boolean
+    val is_relay: Boolean,
+    var ip_addr: String = ""
 ) {
     fun updateName(n: String) =
         copy(name = n)
