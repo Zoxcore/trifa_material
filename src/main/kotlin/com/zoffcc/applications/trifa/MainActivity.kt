@@ -1460,8 +1460,10 @@ class MainActivity
             {
                 val friend_pubkey = tox_friend_get_public_key(friend_number)!!
                 val is_relay = is_any_relay(friend_pubkey)
+                val ip_addr_str = get_friend_ip_str(friend_number)
                 contactstore.update(item = ContactItem(name = friend_name!!,
                     isConnected = tox_friend_get_connection_status(friend_number), pubkey = friend_pubkey,
+                    ip_addr = ip_addr_str,
                     is_relay = is_relay))
             } catch (_: Exception)
             {
@@ -1481,9 +1483,11 @@ class MainActivity
                 }
                 val friend_pubkey = tox_friend_get_public_key(friend_number)!!
                 val is_relay = is_any_relay(friend_pubkey)
+                val ip_addr_str = get_friend_ip_str(friend_number)
                 contactstore.update(item = ContactItem(name = fname,
                     isConnected = tox_friend_get_connection_status(friend_number),
                     pubkey = friend_pubkey,
+                    ip_addr = ip_addr_str,
                     is_relay = is_relay))
             } catch (_: Exception)
             {
@@ -1522,9 +1526,11 @@ class MainActivity
 
                                     try
                                     {
+                                        val ip_addr_str = get_friend_ip_str(friend_number)
                                         contactstore.add(item = ContactItem(name = "Relay #" + relay_pubkey.uppercase().take(6),
                                             isConnected = 0,
                                             pubkey = relay_pubkey.uppercase(),
+                                            ip_addr = ip_addr_str,
                                             is_relay = true))
                                     } catch (_: Exception)
                                     {
@@ -1578,9 +1584,11 @@ class MainActivity
                 }
                 val friend_pubkey = tox_friend_get_public_key(friend_number)!!
                 val is_relay = is_any_relay(friend_pubkey)
+                val ip_addr_str = get_friend_ip_str(friend_number)
                 contactstore.update(item = ContactItem(name = fname,
                     isConnected = tox_friend_get_connection_status(friend_number),
                     pubkey = friend_pubkey,
+                    ip_addr = ip_addr_str,
                     is_relay = is_relay))
             } catch (_: Exception)
             {
@@ -1670,18 +1678,14 @@ class MainActivity
 
             if (a_TOX_CONNECTION == TOX_CONNECTION.TOX_CONNECTION_UDP.value)
             {
-                val friend_ip_addresses = tox_friend_get_connection_ip(friend_number)
                 try
                 {
-                    val ip_addr = friend_ip_addresses!!.toByteArray(StandardCharsets.UTF_8).filterNot { it == 0.toByte() }.toByteArray()
-                    val ip_addr_str = ip_addr.toString(StandardCharsets.UTF_8)
-                    Log.i(TAG, "android_tox_callback_friend_connection_status_cb_method: name=" + f.name + " friend_ip_addresses2=" + ip_addr_str + " tox_public_key_string=" + f.tox_public_key_string)
+                    val ip_addr_str = get_friend_ip_str(friend_number)
                     contactstore.update_ipaddr(pubkey = f.tox_public_key_string, ipaddr = ip_addr_str)
                 }
-                catch(e: Exception)
+                catch(_: Exception)
                 {
-                    Log.i(TAG, "android_tox_callback_friend_connection_status_cb_method:EE:001:" + e.message)
-                    e.printStackTrace()
+                    contactstore.update_ipaddr(pubkey = f.tox_public_key_string, ipaddr = "")
                 }
             }
             else
@@ -3967,6 +3971,20 @@ class MainActivity
             }
 
             return row_id
+        }
+
+        private fun get_friend_ip_str(friend_number: Long): String
+        {
+            val friend_ip_addresses = tox_friend_get_connection_ip(friend_number)
+            var ip_addr_str = ""
+            try
+            {
+                val ip_addr = friend_ip_addresses!!.toByteArray(StandardCharsets.UTF_8).filterNot { it == 0.toByte() }.toByteArray()
+                ip_addr_str = ip_addr.toString(StandardCharsets.UTF_8)
+            } catch (e: Exception)
+            {
+            }
+            return ip_addr_str
         }
 
         @JvmStatic fun modify_message_with_ft(message: Message, filetransfer: Filetransfer?)

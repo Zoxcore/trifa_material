@@ -177,13 +177,11 @@ fun CoroutineScope.createContactStore(): ContactStore
         override fun update_ipaddr(pubkey: String, ipaddr: String)
         {
             global_semaphore_contactlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
-            Log.i(TAG, "update_ipaddr: item: " + pubkey + " " + ipaddr)
             var update_item: ContactItem? = null
             state.contacts.forEach {
                 if (pubkey == it.pubkey)
                 {
                     update_item = it.copy()
-                    Log.i(TAG, "update_ipaddr: found item1")
                 }
             }
             if (update_item != null)
@@ -194,7 +192,6 @@ fun CoroutineScope.createContactStore(): ContactStore
                     if (item2.pubkey == update_item!!.pubkey)
                     {
                         item2.ip_addr = ipaddr
-                        Log.i(TAG, "update_ipaddr: found item2: " + item2.pubkey + " " + item2.ip_addr)
                     }
                 }
                 new_contacts = getFriendListWithGroupingAndSorting(new_contacts)
