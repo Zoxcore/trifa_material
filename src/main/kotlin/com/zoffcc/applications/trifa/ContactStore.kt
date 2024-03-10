@@ -1,13 +1,10 @@
 package com.zoffcc.applications.trifa
 
-import androidx.compose.ui.text.toLowerCase
 import global_semaphore_contactlist_ui
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import org.briarproject.briar.desktop.contact.ContactItem
-import org.briarproject.briar.desktop.contact.GroupPeerItem
 
 data class StateContacts(val contacts: List<ContactItem> = emptyList(), val visible: Boolean = false, val selectedContactPubkey: String? = null, val selectedContact: ContactItem? = null)
 
@@ -21,6 +18,7 @@ interface ContactStore
     fun visible(value: Boolean)
     fun clear()
     fun update(item: ContactItem)
+    fun update_ipaddr(pubkey: String, ipaddr: String)
     val stateFlow: StateFlow<StateContacts>
     val state get() = stateFlow.value
 }
@@ -174,6 +172,32 @@ fun CoroutineScope.createContactStore(): ContactStore
                 }
                 global_semaphore_contactlist_ui.release()
             //}
+        }
+
+        override fun update_ipaddr(pubkey: String, ipaddr: String)
+        {
+            global_semaphore_contactlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
+            var update_item: ContactItem? = null
+            state.contacts.forEach {
+                if (pubkey == it.pubkey)
+                {
+                    update_item = it.copy()
+                }
+            }
+            if (update_item != null)
+            {
+                var new_contacts: ArrayList<ContactItem> = ArrayList()
+                new_contacts.addAll(state.contacts)
+                new_contacts.forEach { item2 ->
+                    if (item2.pubkey == update_item!!.pubkey)
+                    {
+                        item2.ip_addr = ipaddr
+                    }
+                }
+                new_contacts = getFriendListWithGroupingAndSorting(new_contacts)
+                mutableStateFlow.value = state.copy(contacts = new_contacts, selectedContactPubkey = state.selectedContactPubkey, selectedContact = state.selectedContact)
+            }
+            global_semaphore_contactlist_ui.release()
         }
 
         override fun clear()

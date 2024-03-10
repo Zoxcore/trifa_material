@@ -90,17 +90,24 @@ private fun ContactItemViewInfo(contactItem: ContactItem) = Column(
     horizontalAlignment = Start,
     modifier = Modifier.padding(start = 6.dp)
 ) {
-    val show_name = if (contactItem.name.isEmpty()) contactItem.pubkey.toUpperCase().take(6) else contactItem.name
+    var show_name = if (contactItem.name.isEmpty()) contactItem.pubkey.toUpperCase().take(6) else contactItem.name
     val tooltip_name = if (contactItem.name.isEmpty()) "" else contactItem.name
-    val name_style = if (contactItem.name.length > CONTACT_COLUMN_CONTACTNAME_LEN_THRESHOLD)
+    var name_style = if (contactItem.name.length > CONTACT_COLUMN_CONTACTNAME_LEN_THRESHOLD)
         MaterialTheme.typography.body1.copy(fontSize = 13.sp) else MaterialTheme.typography.body1
     val friend_relay = get_relay_for_friend(contactItem.pubkey.toUpperCase())
     val relay_str = if (friend_relay.isNullOrEmpty()) "" else ("\n" + "Relay (ToxProxy): " + friend_relay)
-    Tooltip(text = "Name: " + tooltip_name + "\n" + "Pubkey: " + contactItem.pubkey + relay_str) {
+    val ip_addr_str =  contactItem.ip_addr
+    if (ip_addr_str.length > 0) {
+        show_name = show_name + "\n" + ip_addr_str
+        name_style = name_style.copy(fontSize = (name_style.fontSize.value - 4).sp)
+    }
+    Tooltip(text = "Name: " + tooltip_name + "\n" +
+            "Pubkey: " + contactItem.pubkey + relay_str + "\n" +
+            "IP: " + ip_addr_str) {
         Text(
             text = show_name,
             style = name_style,
-            maxLines = 1,
+            maxLines = 2,
             overflow = Ellipsis,
         )
     }
