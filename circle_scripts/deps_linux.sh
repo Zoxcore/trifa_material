@@ -37,7 +37,7 @@ CFLAGS_MORE='--param=ssp-buffer-size=1 -fstack-protector-all'
 # ------- deps verisions ---------
 NASM_VERSION="nasm-2.15.05" # "nasm-2.16.01"
 FFMPEG_VERSION="n6.1.1"
-OPUS_VERSION="v1.5.1"
+OPUS_VERSION="v1.4"
 SODIUM_VERSION="1.0.19"
 VPX_VERSION="v1.13.1"
 _X264_VERSION_="baee400fa9ced6f5481a728138fed6e867b0ff7f"
@@ -176,7 +176,6 @@ fi
 if [ 1 == 1 ]; then
 
 cd "$_SRC_"
-
 
 OPUS_FILENAME="$OPUS_VERSION.tar.gz"
 rm -f "opus"*.tar.gz
@@ -402,6 +401,10 @@ fi
 cd "$_SRC_"
 
 if [ "$1""x" == "localx" ]; then
+    echo "**** LOCAL BUILD ****"
+    echo "**** LOCAL BUILD ****"
+    echo "**** LOCAL BUILD ****"
+    echo "**** LOCAL BUILD ****"
     cp -av /c-toxcore ./
     LOGG=" -DMIN_LOGGER_LEVEL=LOGGER_LEVEL_DEBUG "
 else
