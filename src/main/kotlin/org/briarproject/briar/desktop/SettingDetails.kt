@@ -419,6 +419,7 @@ private fun tox_settings()
     }
     // ---- tor proxy ----
     // ---- enable noise ----
+    /*
     var tox_noise by remember { mutableStateOf(false) }
     try
     {
@@ -439,6 +440,7 @@ private fun tox_settings()
             },
         )
     }
+     */
     // ---- enable noise ----
 }
 
