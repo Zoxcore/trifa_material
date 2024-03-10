@@ -75,9 +75,17 @@ echo "JAVADIR2:""$JAVADIR2"
 CFLAGS_ADDON='-O2 -g -fPIC -D_FORTIFY_SOURCE=2'
 CFLAGS_MORE="--param=ssp-buffer-size=1 -fstack-protector-all -std=gnu99 -I$_INST_/include/ -L$_INST_/lib"
 
-# if [ "$1""x" == "localx" ]; then
-#     export CFLAGS=" $CFLAGS -pg "
-# fi
+if [ "$1""x" == "localx" ]; then
+    echo "**** LOCAL BUILD ****"
+    echo "**** LOCAL BUILD ****"
+    echo "**** LOCAL BUILD ****"
+    echo "**** LOCAL BUILD ****"
+    pwd
+    ls -al /c-toxcore/
+    echo "_________"
+    ls -al /c-toxcore/jni-c-toxcore.c
+    cp -av /c-toxcore/jni-c-toxcore.c ./
+fi
 
 GCC_=gcc
 
