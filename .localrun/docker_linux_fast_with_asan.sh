@@ -55,8 +55,18 @@ ls -al
 set -x
 
 if [ "$1""x" == "localx" ]; then
-    ../circle_scripts/deps_linux.sh local || exit 1
-    ../circle_scripts/java_jni_lib_linux.sh local || exit 1
+    WITHASAN=1
+    if [ "$WITHASAN""x" == "1x" ]; then
+        echo "*******ASAN*******"
+        echo "*******ASAN*******"
+        echo "*******ASAN*******"
+        ../circle_scripts/deps_linux.sh local asan || exit 1
+        ../circle_scripts/java_jni_lib_linux.sh local asan || exit 1
+    else
+        ../circle_scripts/deps_linux.sh local || exit 1
+        ../circle_scripts/java_jni_lib_linux.sh local || exit 1
+    fi
+
 else
     WITHASAN=1
     if [ "$WITHASAN""x" == "1x" ]; then
