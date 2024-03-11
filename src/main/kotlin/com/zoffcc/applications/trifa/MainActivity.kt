@@ -1526,11 +1526,9 @@ class MainActivity
 
                                     try
                                     {
-                                        val ip_addr_str = get_friend_ip_str(friend_number)
                                         contactstore.add(item = ContactItem(name = "Relay #" + relay_pubkey.uppercase().take(6),
                                             isConnected = 0,
                                             pubkey = relay_pubkey.uppercase(),
-                                            ip_addr = ip_addr_str,
                                             is_relay = true))
                                     } catch (_: Exception)
                                     {
@@ -1676,7 +1674,7 @@ class MainActivity
                 }
             }
 
-            if (a_TOX_CONNECTION == TOX_CONNECTION.TOX_CONNECTION_UDP.value)
+            if (a_TOX_CONNECTION != TOX_CONNECTION.TOX_CONNECTION_NONE.value)
             {
                 try
                 {
@@ -3973,7 +3971,7 @@ class MainActivity
             return row_id
         }
 
-        private fun get_friend_ip_str(friend_number: Long): String
+        fun get_friend_ip_str(friend_number: Long): String
         {
             val friend_ip_addresses = tox_friend_get_connection_ip(friend_number)
             var ip_addr_str = ""

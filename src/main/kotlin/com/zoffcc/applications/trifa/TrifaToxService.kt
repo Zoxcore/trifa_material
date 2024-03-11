@@ -26,6 +26,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__send_push_n
 import com.zoffcc.applications.trifa.MainActivity.Companion.add_tcp_relay_single_wrapper
 import com.zoffcc.applications.trifa.MainActivity.Companion.audio_queue_play_trigger
 import com.zoffcc.applications.trifa.MainActivity.Companion.bootstrap_single_wrapper
+import com.zoffcc.applications.trifa.MainActivity.Companion.get_friend_ip_str
 import com.zoffcc.applications.trifa.MainActivity.Companion.init_tox_callbacks
 import com.zoffcc.applications.trifa.MainActivity.Companion.ngc_audio_in_queue
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_a_queue_stop_trigger
@@ -288,6 +289,33 @@ class TrifaToxService
                         }
                     }
                     // --- start queued outgoing FTs here --------------
+
+                    // --- refresh IP info for friends -----------------
+                    if (last_refresh_friends_ip_info_ms + 60 * 1000 < System.currentTimeMillis())
+                    {
+                        last_refresh_friends_ip_info_ms = System.currentTimeMillis()
+                        try
+                        {
+                            tox_self_get_friend_list()?.forEach {
+                                // Log.i(TAG, "update ip status for friend:" + it)
+                                try
+                                {
+                                    val ip_addr_str = get_friend_ip_str(it)
+                                    val f_pubkey = tox_friend_get_public_key(it)
+                                    contactstore.update_ipaddr(pubkey = f_pubkey!!, ipaddr = ip_addr_str)
+                                }
+                                catch(_: Exception)
+                                {
+                                    val f_pubkey = tox_friend_get_public_key(it)
+                                    contactstore.update_ipaddr(pubkey = f_pubkey!!, ipaddr = "")
+                                }
+                            }
+                        }
+                        catch(_: java.lang.Exception)
+                        {
+                        }
+                    }
+                    // --- refresh IP info for friends -----------------
                 }
                 // ------- MAIN TOX LOOP ---------------------------------------------------------------
                 // ------- MAIN TOX LOOP ---------------------------------------------------------------
@@ -760,6 +788,7 @@ class TrifaToxService
         var last_resend_pending_messages3_ms: Long = -1
         var last_resend_pending_messages4_ms: Long = -1
         var last_start_queued_fts_ms: Long = -1
+        var last_refresh_friends_ip_info_ms: Long = -1
         var ngc_audio_play_thread_running = false
         var ngc_audio_play_thread: Thread? = null
         var tox_audio_play_thread_running = false
