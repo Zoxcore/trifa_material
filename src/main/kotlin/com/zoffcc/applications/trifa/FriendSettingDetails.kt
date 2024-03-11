@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.sorm.FriendList
+import com.zoffcc.applications.trifa.MainActivity.Companion.get_friend_ip_str
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_name
 import com.zoffcc.applications.trifa.ToxVars.TOX_CAPABILITY_DECODE
@@ -69,7 +70,8 @@ fun FriendSettingDetails(selectedContactPubkey: String?)
 
             val t = "Name: " + f_name + "\n" +
                     "Public Key: " + selectedContactPubkey + "\n" +
-                    "Capabilities: " + caps + "\n"
+                    "Capabilities: " + caps + "\n" +
+                    "IP: " + get_friend_ip_str(selectedContactPubkey)
             SelectionContainer(modifier = Modifier.padding(all = 0.dp)) {
                 Text(
                     text = t,
