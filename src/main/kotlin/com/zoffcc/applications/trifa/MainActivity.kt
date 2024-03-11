@@ -3971,6 +3971,28 @@ class MainActivity
             return row_id
         }
 
+        fun get_friend_ip_str(friend_pubkey: String?): String
+        {
+            if (friend_pubkey.isNullOrEmpty())
+            {
+                return ""
+            }
+
+            try
+            {
+                val friend_num : Long = tox_friend_by_public_key(friend_pubkey)
+                if (friend_num != -1L)
+                {
+                    return get_friend_ip_str(friend_num)
+                }
+            }
+            catch(_: Exception)
+            {
+                return ""
+            }
+            return ""
+        }
+
         fun get_friend_ip_str(friend_number: Long): String
         {
             val friend_ip_addresses = tox_friend_get_connection_ip(friend_number)
