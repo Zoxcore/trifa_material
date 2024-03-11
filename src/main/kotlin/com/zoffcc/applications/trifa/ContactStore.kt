@@ -186,16 +186,24 @@ fun CoroutineScope.createContactStore(): ContactStore
             }
             if (update_item != null)
             {
+                var need_update = false
                 var new_contacts: ArrayList<ContactItem> = ArrayList()
                 new_contacts.addAll(state.contacts)
                 new_contacts.forEach { item2 ->
                     if (item2.pubkey == update_item!!.pubkey)
                     {
-                        item2.ip_addr = ipaddr
+                        if (!item2.ip_addr.equals(ipaddr, ignoreCase = true))
+                        {
+                            item2.ip_addr = ipaddr
+                            need_update = true
+                        }
                     }
                 }
-                new_contacts = getFriendListWithGroupingAndSorting(new_contacts)
-                mutableStateFlow.value = state.copy(contacts = new_contacts, selectedContactPubkey = state.selectedContactPubkey, selectedContact = state.selectedContact)
+                if (need_update)
+                {
+                    new_contacts = getFriendListWithGroupingAndSorting(new_contacts)
+                    mutableStateFlow.value = state.copy(contacts = new_contacts, selectedContactPubkey = state.selectedContactPubkey, selectedContact = state.selectedContact)
+                }
             }
             global_semaphore_contactlist_ui.release()
         }
