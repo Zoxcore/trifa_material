@@ -128,6 +128,7 @@ $_INST_/lib/libavutil.a \
 $_INST_/lib/libopus.a \
 $_INST_/lib/libvpx.a \
 $_INST_/lib/libx264.a \
+$_INST_/lib/libx265.a \
 $_INST_/lib/libtoxav.a \
 $_INST_/lib/libtoxcore.a \
 $_INST_/lib/libtoxencryptsave.a \

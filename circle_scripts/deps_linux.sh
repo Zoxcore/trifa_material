@@ -41,7 +41,50 @@ OPUS_VERSION="v1.4"
 SODIUM_VERSION="1.0.19"
 VPX_VERSION="v1.13.1"
 _X264_VERSION_="31e19f92f00c7003fa115047ce50978bc98c3a0d"
+_X265_VERSION_="ce882936d5f62ea94c13972fa42cab6192864a7d"
 # ------- deps verisions ---------
+
+
+if [ "$1""x" == "raspix" ]; then
+  echo "*** RASPI ***"
+  sudo apt-get update && \
+          sudo apt-get install -y --no-install-recommends \
+          cmake
+fi
+
+
+
+# ---------- x264 ---------
+if [ 1 == 1 ]; then
+
+cd "$_SRC_"
+
+git clone https://bitbucket.org/multicoreware/x265_git.git
+cd x265_git/
+
+  git checkout "$_X265_VERSION_"
+  cd source/
+
+  export CXXFLAGS=${CXXFLAGS_ADDON}
+  export CFLAGS=${CFLAGS_ADDON}
+
+  if [ "$1""x" == "raspix" ]; then
+    echo "*** RASPI ***"
+    cmake . -DCMAKE_INSTALL_PREFIX="$_INST_"
+  else
+    cmake . -DCMAKE_INSTALL_PREFIX="$_INST_"
+  fi
+  make || exit 1
+  make install
+  unset CXXFLAGS
+  unset CFLAGS
+
+cd "$_HOME_"
+
+ls -hal $_INST_/lib/libx265.a || exit 1
+
+fi
+# ---------- x264 ---------
 
 
 # ---------- ffmpeg ---------
@@ -109,6 +152,8 @@ export LDFLAGS=" "
               --disable-bsfs \
               --disable-libxcb \
               --disable-libxcb-shm \
+              --enable-parser=hevc \
+              --enable-decoder=hevc \
               --enable-parser=h264 \
               --enable-decoder=h264 || exit 1
 
@@ -152,6 +197,8 @@ export LDFLAGS=" "
               --disable-bsfs \
               --disable-libxcb \
               --disable-libxcb-shm \
+              --enable-parser=hevc \
+              --enable-decoder=hevc \
               --enable-parser=h264 \
               --enable-decoder=h264 || exit 1
 
