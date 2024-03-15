@@ -21,6 +21,7 @@ RUN apt-get update && \
         git \
         gdb \
         nano \
+        cmake \
         yasm \
         openjdk-17-jdk-headless
 
