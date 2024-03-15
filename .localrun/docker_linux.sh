@@ -57,6 +57,7 @@ pkgs_Ubuntu_16_04="
     yasm
     nasm
     sudo
+    cmake
     openjdk-8-jdk-headless
 "
 
@@ -81,6 +82,7 @@ pkgs_Ubuntu_18_04="
     yasm
     nasm
     sudo
+    cmake
     openjdk-17-jdk-headless
 "
 
