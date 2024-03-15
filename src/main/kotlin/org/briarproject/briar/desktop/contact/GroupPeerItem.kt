@@ -23,7 +23,8 @@ data class GroupPeerItem(
     val connectionStatus: Int,
     val peerRole: Int,
     val groupID: String,
-    val pubkey: String
+    val pubkey: String,
+    var ip_addr: String = ""
 ) {
     fun updateName(n: String) =
         copy(name = n)

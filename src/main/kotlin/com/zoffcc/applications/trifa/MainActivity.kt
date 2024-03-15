@@ -789,6 +789,9 @@ class MainActivity
         @JvmStatic
         external fun tox_conference_set_title(conference_number: Long, title: String?): Int // --------------- Conference ------------- // --------------- Conference ------------- // --------------- Conference ------------- // --------------- new Groups ------------- // --------------- new Groups ------------- // --------------- new Groups -------------
 
+        @JvmStatic
+        external fun tox_group_get_peer_connection_ip(group_number: Long, peer_id: Long): String?
+
         /**
          * Creates a new group chat.
          *
@@ -3165,6 +3168,8 @@ class MainActivity
             {
                 if (groupstore.stateFlow.value.selectedGroupId == group_id)
                 {
+                    val ip_addr_str = get_group_peer_ip_str(group_number, peer_id)
+                    // Log.i(TAG, "android_tox_callback_group_peer_join_cb_method: ip=" + ip_addr_str)
                     val peer_pubkey = tox_group_peer_get_public_key(group_number, peer_id)
                     var peer_name = tox_group_peer_get_name(group_number, peer_id)
                     val peer_connection_status = tox_group_peer_get_connection_status(group_number, peer_id)
@@ -3173,7 +3178,7 @@ class MainActivity
                     {
                         peer_name = "peer " + peer_id
                     }
-                    grouppeerstore.update(item = GroupPeerItem(groupID = group_id, name = peer_name, connectionStatus = peer_connection_status, pubkey = peer_pubkey!!, peerRole = peer_role))
+                    grouppeerstore.update(item = GroupPeerItem(ip_addr = ip_addr_str, groupID = group_id, name = peer_name, connectionStatus = peer_connection_status, pubkey = peer_pubkey!!, peerRole = peer_role))
                 }
             } catch (_: Exception)
             {
@@ -3230,6 +3235,7 @@ class MainActivity
                 val group_id = tox_group_by_groupnum__wrapper(group_number)
                 if (groupstore.stateFlow.value.selectedGroupId == group_id)
                 {
+                    val ip_addr_str = get_group_peer_ip_str(group_number, peer_id)
                     val peer_pubkey = tox_group_peer_get_public_key(group_number, peer_id)
                     var peer_name = tox_group_peer_get_name(group_number, peer_id)
                     val peer_connection_status = tox_group_peer_get_connection_status(group_number, peer_id)
@@ -3238,7 +3244,7 @@ class MainActivity
                     {
                         peer_name = "peer " + peer_id
                     }
-                    grouppeerstore.update(item = GroupPeerItem(groupID = group_id, name = peer_name, connectionStatus = peer_connection_status, pubkey = peer_pubkey!!, peerRole = peer_role))
+                    grouppeerstore.update(item = GroupPeerItem(ip_addr = ip_addr_str, groupID = group_id, name = peer_name, connectionStatus = peer_connection_status, pubkey = peer_pubkey!!, peerRole = peer_role))
                 }
             } catch (_: Exception)
             {
@@ -4000,6 +4006,20 @@ class MainActivity
             try
             {
                 val ip_addr = friend_ip_addresses!!.toByteArray(StandardCharsets.UTF_8).filterNot { it == 0.toByte() }.toByteArray()
+                ip_addr_str = ip_addr.toString(StandardCharsets.UTF_8)
+            } catch (e: Exception)
+            {
+            }
+            return ip_addr_str
+        }
+
+        fun get_group_peer_ip_str(group_number: Long, peer_id: Long): String
+        {
+            val group_peer_ip_addresses = tox_group_get_peer_connection_ip(group_number, peer_id)
+            var ip_addr_str = ""
+            try
+            {
+                val ip_addr = group_peer_ip_addresses!!.toByteArray(StandardCharsets.UTF_8).filterNot { it == 0.toByte() }.toByteArray()
                 ip_addr_str = ip_addr.toString(StandardCharsets.UTF_8)
             } catch (e: Exception)
             {

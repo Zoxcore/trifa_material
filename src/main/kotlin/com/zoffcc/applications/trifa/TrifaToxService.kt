@@ -27,6 +27,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.add_tcp_relay_single
 import com.zoffcc.applications.trifa.MainActivity.Companion.audio_queue_play_trigger
 import com.zoffcc.applications.trifa.MainActivity.Companion.bootstrap_single_wrapper
 import com.zoffcc.applications.trifa.MainActivity.Companion.get_friend_ip_str
+import com.zoffcc.applications.trifa.MainActivity.Companion.get_group_peer_ip_str
 import com.zoffcc.applications.trifa.MainActivity.Companion.init_tox_callbacks
 import com.zoffcc.applications.trifa.MainActivity.Companion.ngc_audio_in_queue
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_a_queue_stop_trigger
@@ -937,6 +938,7 @@ class TrifaToxService
             if (num_peers > 0)
             {
                 group_peerlist!!.forEach {
+                    val ip_addr_str = get_group_peer_ip_str(groupnum, it)
                     val peer_pubkey = tox_group_peer_get_public_key(groupnum, it)
                     val peer_name = tox_group_peer_get_name(groupnum, it)
                     val peer_connection_status = tox_group_peer_get_connection_status(groupnum, it)
@@ -944,6 +946,7 @@ class TrifaToxService
                     try
                     {
                         grouppeerstore.add(item = GroupPeerItem(
+                            ip_addr = ip_addr_str,
                             name = if (peer_name != null) peer_name else ("peer " + it),
                             connectionStatus = peer_connection_status,
                             pubkey = peer_pubkey!!,
