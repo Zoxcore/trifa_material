@@ -40,8 +40,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoffcc.applications.trifa.Log
+import com.zoffcc.applications.trifa.TAG
 import org.briarproject.briar.desktop.ui.Tooltip
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
@@ -162,17 +165,24 @@ private fun GrouppeerItemViewInfo(grouppeerItem: GroupPeerItem) = Column(
     horizontalAlignment = Start,
     modifier = Modifier.padding(start = 0.dp)
 ) {
-    val show_peer_name = if (grouppeerItem.name.isEmpty()) grouppeerItem.pubkey.toUpperCase().take(6) else grouppeerItem.name
+    var show_peer_name = if (grouppeerItem.name.isEmpty()) grouppeerItem.pubkey.toUpperCase().take(6) else grouppeerItem.name
     val tooltip_name = if (grouppeerItem.name.isEmpty()) "" else grouppeerItem.name
-    val name_style = if (grouppeerItem.name.length > GROUP_PEER_COLUMN_PEERNAME_LEN_THRESHOLD)
-        MaterialTheme.typography.body1.copy(fontSize = 12.sp) else MaterialTheme.typography.body1
+    var name_style = if (grouppeerItem.name.length > GROUP_PEER_COLUMN_PEERNAME_LEN_THRESHOLD)
+        MaterialTheme.typography.body1.copy(fontSize = 12.sp, lineHeight = TextUnit.Unspecified) else MaterialTheme.typography.body1.copy(lineHeight = TextUnit.Unspecified)
+    val ip_addr_str =  grouppeerItem.ip_addr
+    Log.i(TAG, "GrouppeerItemViewInfo: ip_addr_str=" + ip_addr_str + " name=" + show_peer_name)
+    if (ip_addr_str.length > 0) {
+        show_peer_name = show_peer_name + "\n" + ip_addr_str
+        name_style = name_style.copy(fontSize = (name_style.fontSize.value - 4).sp)
+    }
     Tooltip(text = "Peer Name: " + tooltip_name + "\n"
             + "Peer Role: " + GroupPeerRoleAsStringLong(grouppeerItem.peerRole) + "\n"
-            + "Pubkey: " + grouppeerItem.pubkey) {
+            + "Pubkey: " + grouppeerItem.pubkey  + "\n" +
+            "IP: " + ip_addr_str) {
         Text(
             text = show_peer_name,
             style = name_style,
-            maxLines = 1,
+            maxLines = 2,
             overflow = Ellipsis,
         )
     }

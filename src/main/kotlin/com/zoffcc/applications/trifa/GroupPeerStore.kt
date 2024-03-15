@@ -22,6 +22,7 @@ interface GroupPeerStore
     fun select(pubkey: String?)
     fun clear()
     fun update(item: GroupPeerItem)
+    fun update_ipaddr(groupID: String, pubkey: String, ipaddr: String)
     val stateFlow: StateFlow<StateGroupPeers>
     val state get() = stateFlow.value
 }
@@ -165,6 +166,47 @@ fun CoroutineScope.createGroupPeerStore(): GroupPeerStore
                         selectedGrouppeer = state.selectedGrouppeer)
                 }
                 global_semaphore_grouppeerlist_ui.release()
+            //}
+        }
+
+        override fun update_ipaddr(groupID: String, pubkey: String, ipaddr: String)
+        {
+            //launch {
+            global_semaphore_grouppeerlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
+            var update_item: GroupPeerItem? = null
+            state.grouppeers.forEach {
+                if (pubkey == it.pubkey)
+                {
+                    update_item = it.copy()
+                }
+            }
+            if (update_item != null)
+            {
+                var need_update = false
+                var new_peers: ArrayList<GroupPeerItem> = ArrayList()
+                new_peers.addAll(state.grouppeers)
+                var to_remove_item: GroupPeerItem? = null
+                new_peers.forEach { item2 ->
+                    if (item2.pubkey == update_item!!.pubkey)
+                    {
+                        if (!item2.ip_addr.equals(ipaddr, ignoreCase = true))
+                        {
+                            item2.ip_addr = ipaddr
+                            need_update = true
+                        }
+                    }
+                }
+                if (need_update)
+                {
+                    val self_group_pubkey = MainActivity.tox_group_self_get_public_key(
+                        HelperGroup.tox_group_by_groupid__wrapper(groupID.lowercase()))
+                    new_peers = getListWithGroupingAndSorting(new_peers, self_group_pubkey)
+                    mutableStateFlow.value = state.copy(grouppeers = new_peers,
+                        selectedGrouppeerPubkey = state.selectedGrouppeerPubkey,
+                        selectedGrouppeer = state.selectedGrouppeer)
+                }
+            }
+            global_semaphore_grouppeerlist_ui.release()
             //}
         }
 
