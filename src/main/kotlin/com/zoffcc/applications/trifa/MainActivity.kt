@@ -2240,6 +2240,9 @@ class MainActivity
                 if (fname.isNullOrEmpty())
                 {
                    fname = "unknown"
+                   try {
+                      fname = main_get_friend(original_sender_pubkey).name
+                   } catch (e: Exception) {}
                 }
                 val friend_user = User(fname, picture = "friend_avatar.png", toxpk = original_sender_pubkey)
                 messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value,
