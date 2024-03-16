@@ -2141,8 +2141,14 @@ class MainActivity
                         val peer_name_saved = tox_group_peer_get_name(group_num, sender_peer_num)
                         if ((peer_name_saved != null) && (peer_name_saved.length > 0))
                         {
-                                // HINT: use saved name instead of name from sync message
+                                // HINT: use current peer name instead of name from sync message
                                 peer_name = peer_name_saved
+                        }
+
+                        if (peer_name.isNullOrEmpty())
+                        {
+                            // TODO: get peer name from ?? somewhere
+                            Log.i(TAG, "sync_messagev2_send: WARNING: we do not have a peer name")
                         }
 
                         HelperGroup.group_message_add_from_sync(real_conference_id, syncer_pubkey,
@@ -2241,10 +2247,18 @@ class MainActivity
                 {
                    fname = "unknown"
                    try {
-                      fname = main_get_friend(original_sender_pubkey).name
+                      val fname2 = main_get_friend(original_sender_pubkey).name
+                      if (fname2.isNullOrEmpty()) {
+                          fname = fname2
+                      }
                    } catch (e: Exception) {}
                 }
-                val friend_user = User(fname, picture = "friend_avatar.png", toxpk = original_sender_pubkey)
+
+                if (fname.isNullOrEmpty()) {
+                    Log.i(TAG, "receive_incoming_message:WARNING:we do not have a friend name")
+                }
+
+                val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = original_sender_pubkey)
                 messagestore.send(MessageAction.ReceiveMessage(message = UIMessage(direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value,
                     user = friend_user, timeMs = message_timestamp,
                     read = false,
