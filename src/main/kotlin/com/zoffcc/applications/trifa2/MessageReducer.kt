@@ -38,7 +38,7 @@ fun chatReducer(state: MessageState, action: MessageAction): MessageState = when
     is MessageAction.ReceiveMessagesBulkWithClear ->
     {
         // state.messages.clear()
-        Log.i(com.zoffcc.applications.trifa.TAG, "MessageAction.ReceiveMessagesBulkWithClear")
+        // Log.i(com.zoffcc.applications.trifa.TAG, "MessageAction.ReceiveMessagesBulkWithClear")
         state.copy(messages = (action.messages).toMutableStateList())
     }
     is MessageAction.ReceiveMessage ->

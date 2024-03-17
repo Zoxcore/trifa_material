@@ -552,7 +552,7 @@ public class HelperRelay
                     byte[] groupid_buffer = new byte[GROUP_ID_LENGTH];
                     groupid_buf3.get(groupid_buffer, 0, GROUP_ID_LENGTH);
                     String group_identifier = HelperGeneric.bytesToHex(groupid_buffer, 0, GROUP_ID_LENGTH).toLowerCase();
-                    Log.i(TAG, "invite_to_all_groups_own_relay: group_identifier=" + group_identifier);
+                    // Log.i(TAG, "invite_to_all_groups_own_relay: group_identifier=" + group_identifier);
                     final long group_num = tox_group_by_groupid__wrapper(group_identifier);
                     int res = tox_group_invite_friend(group_num,
                             tox_friend_by_public_key(relay_public_key_string));

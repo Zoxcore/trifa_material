@@ -1340,7 +1340,7 @@ class TrifaToxService
     fun load_friends()
     {
         tox_self_get_friend_list()?.forEach {
-            Log.i(TAG, "friend:" + it)
+            // Log.i(TAG, "friend:" + it)
 
             var f: FriendList? = null
             val f_pubkey = tox_friend_get_public_key(it)
@@ -1356,7 +1356,7 @@ class TrifaToxService
             }
             else
             {
-                f = null;
+                f = null
             }
             var exists_in_db = false
             if (f == null)
