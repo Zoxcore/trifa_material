@@ -170,7 +170,7 @@ private fun GrouppeerItemViewInfo(grouppeerItem: GroupPeerItem) = Column(
     var name_style = if (grouppeerItem.name.length > GROUP_PEER_COLUMN_PEERNAME_LEN_THRESHOLD)
         MaterialTheme.typography.body1.copy(fontSize = 12.sp, lineHeight = TextUnit.Unspecified) else MaterialTheme.typography.body1.copy(lineHeight = TextUnit.Unspecified)
     val ip_addr_str =  grouppeerItem.ip_addr
-    Log.i(TAG, "GrouppeerItemViewInfo: ip_addr_str=" + ip_addr_str + " name=" + show_peer_name)
+    // Log.i(TAG, "GrouppeerItemViewInfo: ip_addr_str=" + ip_addr_str + " name=" + show_peer_name)
     if (ip_addr_str.length > 0) {
         show_peer_name = show_peer_name + "\n" + ip_addr_str
         name_style = name_style.copy(fontSize = (name_style.fontSize.value - 4).sp)
