@@ -1093,7 +1093,7 @@ public class HelperGroup {
     {
         try
         {
-            Log.i(TAG, "handle_incoming_sync_group_message: ________________________________________________________________");
+            // Log.i(TAG, "handle_incoming_sync_group_message: ________________________________________________________________");
 
             long res = tox_group_self_get_peer_id(group_number);
             if (res == syncer_peer_id)
@@ -1111,7 +1111,7 @@ public class HelperGroup {
             ByteBufferCompat hash_bytes_compat = new ByteBufferCompat(hash_bytes);
             final String original_sender_peerpubkey = bytesToHexJava
                     (hash_bytes_compat.array(),hash_bytes_compat.arrayOffset(),hash_bytes_compat.limit()).toUpperCase();
-            Log.i(TAG, "handle_incoming_sync_group_message:peerpubkey hex=" + original_sender_peerpubkey);
+            // Log.i(TAG, "handle_incoming_sync_group_message:peerpubkey hex=" + original_sender_peerpubkey);
 
             if (tox_group_self_get_public_key(group_number).toUpperCase().equalsIgnoreCase(original_sender_peerpubkey))
             {
@@ -1122,13 +1122,13 @@ public class HelperGroup {
 
             try
             {
-                Log.i(TAG, "handle_incoming_sync_group_message:---===> syncer_name=" + tox_group_peer_get_name(group_number, syncer_peer_id));
+                // Log.i(TAG, "handle_incoming_sync_group_message:---===> syncer_name=" + tox_group_peer_get_name(group_number, syncer_peer_id));
             }
             catch(Exception e)
             {
 
             }
-            Log.i(TAG, "handle_incoming_sync_group_message:syncer_pubkey=" + syncer_pubkey);
+            // Log.i(TAG, "handle_incoming_sync_group_message:syncer_pubkey=" + syncer_pubkey);
 
             //
             //
@@ -1142,26 +1142,26 @@ public class HelperGroup {
             timestamp_byte_buffer.order(java.nio.ByteOrder.BIG_ENDIAN);
             timestamp_byte_buffer.rewind();
             long timestamp = timestamp_byte_buffer.getLong();
-            Log.i(TAG,"handle_incoming_sync_group_message:got_ts_bytes:" +
-                      HelperGeneric.bytesToHex(data, 6 + 1 + 1 + 4 + 32, 4));
+            // Log.i(TAG,"handle_incoming_sync_group_message:got_ts_bytes:" +
+            //           HelperGeneric.bytesToHex(data, 6 + 1 + 1 + 4 + 32, 4));
             timestamp_byte_buffer.rewind();
             //Log.i(TAG,"handle_incoming_sync_group_message:got_ts_bytes:bytebuffer:" +
             //          HelperGeneric.bytesToHex(timestamp_byte_buffer.array(),
             //                                   timestamp_byte_buffer.arrayOffset(),
             //                                  timestamp_byte_buffer.limit()));
 
-            Log.i(TAG, "handle_incoming_sync_group_message:timestamp=" + timestamp + " " + long_date_time_format(timestamp * 1000));
+            // Log.i(TAG, "handle_incoming_sync_group_message:timestamp=" + timestamp + " " + long_date_time_format(timestamp * 1000));
 
             if (timestamp > ((System.currentTimeMillis() / 1000) + (60 * 5)))
             {
                 long delta_t = timestamp - (System.currentTimeMillis() / 1000);
-                Log.i(TAG, "handle_incoming_sync_group_message:delta t=" + delta_t + " do NOT sync messages from the future");
+                // Log.i(TAG, "handle_incoming_sync_group_message:delta t=" + delta_t + " do NOT sync messages from the future");
                 return;
             }
             else if (timestamp < ((System.currentTimeMillis() / 1000) - (60 * 200)))
             {
                 long delta_t = (System.currentTimeMillis() / 1000) - timestamp;
-                Log.i(TAG, "handle_incoming_sync_group_message:delta t=" + (-delta_t) + " do NOT sync messages that are too old");
+                // Log.i(TAG, "handle_incoming_sync_group_message:delta t=" + (-delta_t) + " do NOT sync messages that are too old");
                 return;
             }
 
@@ -1172,7 +1172,7 @@ public class HelperGroup {
             hash_msg_id_bytes.put(data, 6 + 1 + 1, 4);
             ByteBufferCompat hash_msg_id_bytes_compat = new ByteBufferCompat(hash_msg_id_bytes);
             final String message_id_tox = bytesToHexJava(hash_msg_id_bytes_compat.array(),hash_msg_id_bytes_compat.arrayOffset(),hash_msg_id_bytes_compat.limit()).toLowerCase();
-            Log.i(TAG, "handle_incoming_sync_group_message:message_id_tox hex=" + message_id_tox);
+            // Log.i(TAG, "handle_incoming_sync_group_message:message_id_tox hex=" + message_id_tox);
             //
             //
             ByteBuffer name_buffer = ByteBuffer.allocateDirect(TOX_NGC_HISTORY_SYNC_MAX_PEERNAME_BYTES);
@@ -1181,7 +1181,7 @@ public class HelperGroup {
 
             ByteBufferCompat name_buffer_compat = new ByteBufferCompat(name_buffer);
             final String name_str_with_padding_hex = bytesToHexJava(name_buffer_compat.array(),name_buffer_compat.arrayOffset(),name_buffer_compat.limit());
-            Log.i(TAG, "handle_incoming_sync_group_message:sender_name hex=" + name_str_with_padding_hex);
+            // Log.i(TAG, "handle_incoming_sync_group_message:sender_name hex=" + name_str_with_padding_hex);
 
             String peer_name = "peer";
             try
@@ -1204,7 +1204,7 @@ public class HelperGroup {
                         break;
                     }
                 }
-                Log.i(TAG, "handle_incoming_sync_group_message:start_index=" + start_index);
+                // Log.i(TAG, "handle_incoming_sync_group_message:start_index=" + start_index);
 
                 for(int j=(TOX_NGC_HISTORY_SYNC_MAX_PEERNAME_BYTES-1);j>=0;j--)
                 {
@@ -1217,11 +1217,11 @@ public class HelperGroup {
                         break;
                     }
                 }
-                Log.i(TAG, "handle_incoming_sync_group_message:end_index=" + end_index);
+                // Log.i(TAG, "handle_incoming_sync_group_message:end_index=" + end_index);
 
                 if (end_index <= start_index)
                 {
-                    Log.i(TAG, "handle_incoming_sync_group_message:error on null byte detection in name");
+                    // Log.i(TAG, "handle_incoming_sync_group_message:error on null byte detection in name");
                 }
                 else
                 {
@@ -1229,19 +1229,19 @@ public class HelperGroup {
                     peer_name = new String(peername_byte_buf_stripped, StandardCharsets.UTF_8);
                 }
                 //
-                Log.i(TAG,"handle_incoming_sync_group_message:peer_name str=" + peer_name);
+                // Log.i(TAG,"handle_incoming_sync_group_message:peer_name str=" + peer_name);
                 //
                 final int header = 6 + 1 + 1 + 4 + 32 + 4 + 25; // 73 bytes
                 long text_size = length - header;
                 if ((text_size < 1) || (text_size > 37000))
                 {
-                    Log.i(TAG, "handle_incoming_sync_group_message: text size less than 1 byte or larger than 37000 bytes");
+                    // Log.i(TAG, "handle_incoming_sync_group_message: text size less than 1 byte or larger than 37000 bytes");
                     return;
                 }
 
                 byte[] text_byte_buf = Arrays.copyOfRange(data, header, (int)length);
                 String message_str = new String(text_byte_buf, StandardCharsets.UTF_8);
-                Log.i(TAG,"handle_incoming_sync_group_message:message str=" + message_str);
+                // Log.i(TAG,"handle_incoming_sync_group_message:message str=" + message_str);
 
                 long sender_peer_num = HelperGroup.get_group_peernum_from_peer_pubkey(group_identifier,
                         original_sender_peerpubkey);
@@ -1261,7 +1261,7 @@ public class HelperGroup {
                 if ((peer_name_saved != null) && (peer_name_saved.length() > 0))
                 {
                     // HINT: use saved name instead of name from sync message
-                    Log.i(TAG,"handle_incoming_sync_group_message:use saved name instead of name from sync message:" + peer_name_saved);
+                    // Log.i(TAG,"handle_incoming_sync_group_message:use saved name instead of name from sync message:" + peer_name_saved);
                     peer_name = peer_name_saved;
                 }
 
@@ -1274,13 +1274,13 @@ public class HelperGroup {
             catch(Exception e)
             {
                 e.printStackTrace();
-                Log.i(TAG,"handle_incoming_sync_group_message:EE002:" + e.getMessage());
+                // Log.i(TAG,"handle_incoming_sync_group_message:EE002:" + e.getMessage());
             }
         }
         catch(Exception e)
         {
             e.printStackTrace();
-            Log.i(TAG, "handle_incoming_sync_group_message:EE001:" + e.getMessage());
+            // Log.i(TAG, "handle_incoming_sync_group_message:EE001:" + e.getMessage());
         }
     }
 
@@ -1436,7 +1436,11 @@ public class HelperGroup {
         {
             try
             {
-                m.tox_group_peername = tox_group_peer_get_name(group_num_, peer_number2);
+                String peer_name_try = tox_group_peer_get_name(group_num_, peer_number2);
+                if ((peer_name_try != null) && (peer_name_try.length() > 0))
+                {
+                    m.tox_group_peername = peer_name_try;
+                }
             }
             catch (Exception e)
             {

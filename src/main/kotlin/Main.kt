@@ -190,8 +190,10 @@ import com.zoffcc.applications.ffmpegav.AVActivity.JAVA_AUDIO_IN_DEVICE_NAME
 import com.zoffcc.applications.trifa.EmojiStrAndName
 import com.zoffcc.applications.trifa.FriendSettingDetails
 import com.zoffcc.applications.trifa.HelperGeneric.ngc_video_frame_last_incoming_ts
+import com.zoffcc.applications.trifa.HelperGroup
 import com.zoffcc.applications.trifa.MainActivity.Companion.DEBUG_COMPOSE_UI_UPDATES
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__do_not_sync_av
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_peer_get_name
 import org.briarproject.briar.desktop.ui.ExplainerInfoIsRelay
 import org.briarproject.briar.desktop.ui.Tooltip
 
@@ -1163,7 +1165,7 @@ fun App()
                                         ExplainerInfoIsRelay(contacts.selectedContact)
                                     } else
                                     {
-                                        Log.i(TAG, "CONTACTS -> draw")
+                                        // Log.i(TAG, "CONTACTS -> draw")
                                         load_messages_for_friend(contacts.selectedContactPubkey)
                                         ContactListScope.launch {
                                             globalstore.try_clear_unread_message_count()
@@ -1208,8 +1210,8 @@ fun App()
                                         ExplainerGroup()
                                     } else
                                     {
-                                        Log.i(TAG, "GROUPS -> draw")
-                                        load_groupmessages_for_friend(groups.selectedGroupId)
+                                        // Log.i(TAG, "GROUPS -> draw")
+                                        load_groupmessages(groups.selectedGroupId)
                                         GroupPeerListScope.launch {
                                             globalstore.try_clear_unread_group_message_count()
                                             globalgrpstoreunreadmsgs.try_clear_unread_per_group_message_count(groups.selectedGroupId)
@@ -1286,7 +1288,7 @@ fun load_messages_for_friend(selectedContactPubkey: String?)
 {
     if (selectedContactPubkey != null)
     {
-        Log.i(TAG, "load_messages_for_friend")
+        // Log.i(TAG, "load_messages_for_friend")
         try
         {
             val toxpk = selectedContactPubkey.uppercase()
@@ -1347,11 +1349,11 @@ fun load_messages_for_friend(selectedContactPubkey: String?)
     }
 }
 
-fun load_groupmessages_for_friend(selectedGroupId: String?)
+fun load_groupmessages(selectedGroupId: String?)
 {
     if (selectedGroupId != null)
     {
-        Log.i(TAG, "load_groupmessages_for_friend")
+        // Log.i(TAG, "load_groupmessages")
         try
         {
             val groupid = selectedGroupId.lowercase()
@@ -1367,6 +1369,30 @@ fun load_groupmessages_for_friend(selectedGroupId: String?)
                 {
                     TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value ->
                     {
+                        if (it.tox_group_peername.isNullOrEmpty())
+                        {
+                            // we do not have a peername for this message, try to fix now
+                            try
+                            {
+                                val group_num = HelperGroup.tox_group_by_groupid__wrapper(selectedGroupId)
+                                val peernum = MainActivity.tox_group_peer_by_public_key(group_num, it.tox_group_peer_pubkey)
+                                val peername_try = tox_group_peer_get_name(group_num, peernum)
+                                // HINT: write found peername back to message in DB
+                                if (!peername_try.isNullOrEmpty()) {
+                                    it.tox_group_peername = peername_try
+                                    Log.i(TAG, "load_groupmessages:fill in name=" + it.tox_group_peername)
+                                    orma!!.updateGroupMessage().group_identifierEq(selectedGroupId)
+                                        .tox_group_peer_pubkeyEq(it.tox_group_peer_pubkey)
+                                        .idEq(it.id)
+                                        .tox_group_peername(it.tox_group_peername)
+                                        .execute()
+                                }
+                            }
+                            catch (_: Exception)
+                            {
+                            }
+                        }
+
                         val friend_user = User(it.tox_group_peername + " / " + PubkeyShort(it.tox_group_peer_pubkey), picture = "friend_avatar.png", toxpk = it.tox_group_peer_pubkey.uppercase(), color = ColorProvider.getColor(true, it.tox_group_peer_pubkey.uppercase()))
                         when (it.TRIFA_MESSAGE_TYPE)
                         {
@@ -2025,27 +2051,29 @@ private fun MainAppStart()
 @Suppress("UNUSED_PARAMETER")
 private fun onWindowFocused(focused: Boolean)
 {
-    println("onWindowFocused $focused")
+    // println("onWindowFocused $focused")
     globalstore.updateFocused(focused)
 }
 
 @Suppress("UNUSED_PARAMETER")
 private fun onWindowMinimised(minimised: Boolean)
 {
-    println("onWindowMinimised $minimised")
+    // println("onWindowMinimised $minimised")
     globalstore.updateMinimized(minimised)
 }
 
 @Suppress("UNUSED_PARAMETER")
 private fun onWindowResize(size: DpSize)
-{ // println("onWindowResize $size")
+{
+    // println("onWindowResize $size")
     global_prefs.put("main.window.size.width", size.width.value.toString())
     global_prefs.put("main.window.size.height", size.height.value.toString())
 }
 
 @Suppress("UNUSED_PARAMETER")
 private fun onWindowRelocate(position: WindowPosition)
-{ // println("onWindowRelocate $position")
+{
+    // println("onWindowRelocate $position")
     global_prefs.put("main.window.position.x", position.x.value.toString())
     global_prefs.put("main.window.position.y", position.y.value.toString())
 }
