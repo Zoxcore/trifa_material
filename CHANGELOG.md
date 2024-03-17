@@ -1,5 +1,22 @@
 # Changelog
 
+## [v1.0.25](https://github.com/Zoxcore/trifa_material/tree/v1.0.25) (2024-03-17)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.24...v1.0.25)
+
+**Merged pull requests:**
+
+- updates [\#186](https://github.com/Zoxcore/trifa_material/pull/186) ([zoff99](https://github.com/zoff99))
+- Bump io.github.alexzhirkevich:qrose from 1.0.0 to 1.0.1 [\#185](https://github.com/Zoxcore/trifa_material/pull/185) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Translations update from Hosted Weblate [\#183](https://github.com/Zoxcore/trifa_material/pull/183) ([weblate](https://github.com/weblate))
+- add scripts to download JNI libs dependencies, update JNI libs [\#182](https://github.com/Zoxcore/trifa_material/pull/182) ([zoff99](https://github.com/zoff99))
+- update dependencies [\#181](https://github.com/Zoxcore/trifa_material/pull/181) ([zoff99](https://github.com/zoff99))
+- layout tweaks [\#180](https://github.com/Zoxcore/trifa_material/pull/180) ([zoff99](https://github.com/zoff99))
+- update dependencies and JNI libs [\#179](https://github.com/Zoxcore/trifa_material/pull/179) ([zoff99](https://github.com/zoff99))
+- update JNI lib [\#178](https://github.com/Zoxcore/trifa_material/pull/178) ([zoff99](https://github.com/zoff99))
+- update JNI libs [\#177](https://github.com/Zoxcore/trifa_material/pull/177) ([zoff99](https://github.com/zoff99))
+- try to catch a problem on drag and drop [\#176](https://github.com/Zoxcore/trifa_material/pull/176) ([zoff99](https://github.com/zoff99))
+
 ## [v1.0.24](https://github.com/Zoxcore/trifa_material/tree/v1.0.24) (2024-03-06)
 
 [Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.23...v1.0.24)
