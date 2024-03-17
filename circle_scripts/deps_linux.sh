@@ -70,9 +70,9 @@ cd x265_git/
 
   if [ "$1""x" == "raspix" ]; then
     echo "*** RASPI ***"
-    cmake . -DCMAKE_INSTALL_PREFIX="$_INST_"
+    cmake . -DCMAKE_INSTALL_PREFIX="$_INST_" -DENABLE_PIC=ON -DENABLE_ASSEMBLY=OFF # -DCMAKE_VERBOSE_MAKEFILE=ON
   else
-    cmake . -DCMAKE_INSTALL_PREFIX="$_INST_"
+    cmake . -DCMAKE_INSTALL_PREFIX="$_INST_" -DENABLE_PIC=ON -DENABLE_ASSEMBLY=OFF # -DCMAKE_VERBOSE_MAKEFILE=ON
   fi
   make || exit 1
   make install
