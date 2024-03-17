@@ -553,4 +553,17 @@ public class GroupMessage
         this.sql_set = this.sql_set + " read='" + b(read) + "' ";
         return this;
     }
+
+    public GroupMessage tox_group_peername(String tox_group_peername) {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " tox_group_peername='" + s(tox_group_peername) + "' ";
+        return this;
+    }
 }
