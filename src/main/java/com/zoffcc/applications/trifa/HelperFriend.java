@@ -72,7 +72,7 @@ public class HelperFriend {
         }
     }
 
-    static String get_friend_name_from_num(long friendnum)
+    public static String get_friend_name_from_num(long friendnum)
     {
         String result = "Unknown";
 
@@ -114,7 +114,7 @@ public class HelperFriend {
         return result;
     }
 
-    static String get_friend_name_from_pubkey(String friend_pubkey)
+    public static String get_friend_name_from_pubkey(String friend_pubkey)
     {
         String ret = "Unknown";
         String friend_alias_name = "";
