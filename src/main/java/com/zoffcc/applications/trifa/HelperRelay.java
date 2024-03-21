@@ -57,8 +57,8 @@ public class HelperRelay
         }
         catch (Exception e)
         {
-            e.printStackTrace();
-            Log.i(TAG, "get_friend_of_relay:EE1:" + e.getMessage());
+            // e.printStackTrace();
+            // Log.i(TAG, "get_friend_of_relay:EE1:" + e.getMessage());
             return null;
         }
     }
@@ -90,8 +90,8 @@ public class HelperRelay
         }
         catch (Exception e)
         {
-            e.printStackTrace();
-            Log.i(TAG, "get_relay_for_friend:EE1:" + e.getMessage());
+            // e.printStackTrace();
+            // Log.i(TAG, "get_relay_for_friend:EE1:" + e.getMessage());
             return null;
         }
     }
