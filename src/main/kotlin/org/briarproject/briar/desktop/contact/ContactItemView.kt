@@ -41,7 +41,10 @@ import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoffcc.applications.trifa.HelperFriend.get_friend_name_from_pubkey
+import com.zoffcc.applications.trifa.HelperRelay.get_friend_of_relay
 import com.zoffcc.applications.trifa.HelperRelay.get_relay_for_friend
+import com.zoffcc.applications.trifa.HelperRelay.is_any_relay
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.TAG
 import globalfrndstoreunreadmsgs
@@ -94,26 +97,47 @@ private fun ContactItemViewInfo(contactItem: ContactItem) = Column(
     modifier = Modifier.padding(start = 6.dp)
 ) {
     var show_name = if (contactItem.name.isEmpty()) contactItem.pubkey.toUpperCase().take(6) else contactItem.name
-    val tooltip_name = if (contactItem.name.isEmpty()) "" else contactItem.name
-    var name_style = if (contactItem.name.length > CONTACT_COLUMN_CONTACTNAME_LEN_THRESHOLD)
+    var friend_name_for_relay: String? = null
+    if (is_any_relay(contactItem.pubkey.toUpperCase())) {
+        val friendpubkey_for_relay = get_friend_of_relay(contactItem.pubkey.toUpperCase())
+        if (!friendpubkey_for_relay.isNullOrEmpty()) {
+            friend_name_for_relay = get_friend_name_from_pubkey(friendpubkey_for_relay)
+            if (!friend_name_for_relay.isNullOrEmpty())
+            {
+                show_name = show_name + " (" + friend_name_for_relay + ")"
+            }
+        }
+    }
+    val tooltip_name = show_name
+    var name_style = if (show_name.length > CONTACT_COLUMN_CONTACTNAME_LEN_THRESHOLD)
         MaterialTheme.typography.body1.copy(fontSize = 13.sp, lineHeight = TextUnit.Unspecified) else MaterialTheme.typography.body1.copy(lineHeight = TextUnit.Unspecified)
     val friend_relay = get_relay_for_friend(contactItem.pubkey.toUpperCase())
     val relay_str = if (friend_relay.isNullOrEmpty()) "" else ("\n" + "Relay (ToxProxy): " + friend_relay)
     val ip_addr_str =  contactItem.ip_addr
     // Log.i(TAG, "ContactItemViewInfo: ip_addr_str=" + ip_addr_str + " name=" + show_name)
+    var show_ip = ""
+    var ip_style = MaterialTheme.typography.body1.copy(fontSize = 13.sp, lineHeight = TextUnit.Unspecified)
     if (ip_addr_str.length > 0) {
-        show_name = show_name + "\n" + ip_addr_str
-        name_style = name_style.copy(fontSize = (name_style.fontSize.value - 4).sp)
-        // Log.i(TAG, "ContactItemViewInfo: show_name2=" + show_name)
+        show_ip = ip_addr_str
+        ip_style = if (show_ip.length > CONTACT_COLUMN_CONTACTNAME_LEN_THRESHOLD)
+            MaterialTheme.typography.body1.copy(fontSize = 12.sp, lineHeight = TextUnit.Unspecified) else MaterialTheme.typography.body1.copy(lineHeight = TextUnit.Unspecified)
     }
     Tooltip(text = "Name: " + tooltip_name + "\n" +
             "Pubkey: " + contactItem.pubkey + relay_str + "\n" +
             "IP: " + ip_addr_str) {
-        Text(
-            text = show_name,
-            style = name_style,
-            maxLines = 2,
-            overflow = Ellipsis,
-        )
+        Column() {
+            Text(
+                text = show_name,
+                style = name_style,
+                maxLines = 1,
+                overflow = Ellipsis,
+            )
+            Text(
+                text = show_ip,
+                style = ip_style,
+                maxLines = 1,
+                overflow = Ellipsis,
+            )
+        }
     }
 }
