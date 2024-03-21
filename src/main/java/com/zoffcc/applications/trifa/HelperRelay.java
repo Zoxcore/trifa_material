@@ -44,6 +44,25 @@ public class HelperRelay
 {
     private static final String TAG = "trifa.Hlp.Relay";
 
+    public static String get_friend_of_relay(String relay_pubkey)
+    {
+        try
+        {
+            return TrifaToxService.Companion.getOrma().selectFromFriendList().
+                    is_relayNotEq(true).
+                    tox_public_key_stringEq(
+                    TrifaToxService.Companion.getOrma().selectFromRelayListDB().
+                            tox_public_key_stringEq(relay_pubkey).get(0).tox_public_key_string_of_owner.toUpperCase()
+                    ).get(0).tox_public_key_string.toUpperCase();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            Log.i(TAG, "get_friend_of_relay:EE1:" + e.getMessage());
+            return null;
+        }
+    }
+
     public static String get_relay_for_friend(String friend_pubkey)
     {
         try
