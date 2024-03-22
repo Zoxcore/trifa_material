@@ -487,14 +487,18 @@ else
     echo "***** ASAN *****"
     echo "***** ASAN *****"
     echo "***** ASAN *****"
+    # enable H265 encoder only on the ASAN build for linux (for now)
+    h265_feature="yes"
     CFLAGS_ASAN="-fsanitize=address -fno-omit-frame-pointer -fsanitize-recover=address -static-libasan"
   else
+    h265_feature="no"
     CFLAGS_ASAN=""
   fi
   ./configure \
      CXXFLAGS="$CXXFLAGS_ADDON" \
      CFLAGS="-fPIC $CFLAGS_ADDON $CFLAGS_MORE -DTOX_CAPABILITIES_ACTIVE $LOGG $CFLAGS_ASAN" \
     --prefix="$_INST_" \
+    --enable-feature-h265="$h265_feature" \
     --disable-soname-versions \
     --disable-shared \
     --disable-testing \
