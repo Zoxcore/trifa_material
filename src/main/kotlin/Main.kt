@@ -52,6 +52,7 @@ import androidx.compose.material.icons.filled.NoiseAware
 import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.RawOff
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.VideoLabel
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -194,6 +195,7 @@ import com.zoffcc.applications.trifa.HelperGroup
 import com.zoffcc.applications.trifa.MainActivity.Companion.DEBUG_COMPOSE_UI_UPDATES
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__do_not_sync_av
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_peer_get_name
+import com.zoffcc.applications.trifa.MainActivity.Companion.toxav_option_set
 import org.briarproject.briar.desktop.ui.ExplainerInfoIsRelay
 import org.briarproject.briar.desktop.ui.Tooltip
 
@@ -501,6 +503,7 @@ fun App()
                                     var video_in_box_height by remember { mutableStateOf(VIDEO_IN_BOX_HEIGHT_SMALL) }
                                     var video_in_box_small by remember { mutableStateOf(true) }
                                     var video_in_box_width_fraction by remember { mutableStateOf(VIDEO_IN_BOX_WIDTH_FRACTION_SMALL) }
+                                    var h265_encoder by remember { mutableStateOf(false) }
                                     Column(modifier = Modifier.fillMaxHeight(1.0f)) {
                                         if ((current_callstate2.call_state == AVState.CALL_STATUS.CALL_STATUS_NONE) &&
                                                 ((ngc_video_frame_last_incoming_ts + 2000) < System.currentTimeMillis()))
@@ -560,141 +563,161 @@ fun App()
                                             fontSize = 13.sp,
                                             maxLines = 1)
                                         }
-                                    Column {
-                                        val aux_icons_start_padding = 9.dp
-                                        val aux_icons_end_padding = 9.dp
+                                    Row() {
+                                        val aux_icons_start_padding = 5.dp
+                                        val aux_icons_end_padding = 5.dp
                                         val aux_icons_top_padding = 3.dp
                                         val aux_icons_size = 18.dp
-                                        Tooltip(text = "toggle large incoming video size") {
-                                            Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
-                                                onClick = {
-                                                    if (video_in_box_small)
-                                                    {
-                                                        video_in_box_width = VIDEO_IN_BOX_WIDTH_BIG
-                                                        video_in_box_height = VIDEO_IN_BOX_HEIGHT_BIG
-                                                        main_top_tab_height = VIDEO_IN_BOX_HEIGHT_BIG
-                                                        video_in_box_width_fraction = VIDEO_IN_BOX_WIDTH_FRACTION_BIG
-                                                    } else
-                                                    {
-                                                        video_in_box_width = VIDEO_IN_BOX_WIDTH_SMALL
-                                                        video_in_box_height = VIDEO_IN_BOX_HEIGHT_SMALL
-                                                        main_top_tab_height = MAIN_TOP_TAB_HEIGHT
-                                                        video_in_box_width_fraction = VIDEO_IN_BOX_WIDTH_FRACTION_SMALL
-                                                    }
-                                                    video_in_box_small = video_in_box_small.not()
-                                                    Log.i(TAG, "update3: " + video_in_box_small)
-                                                }), imageVector = Icons.Default.Fullscreen,
-                                                contentDescription = "toggle large incoming video size"
-                                            )
-                                        }
-                                        var audio_filter_current_value by remember { mutableStateOf(PREF__audio_input_filter) }
-                                        Tooltip(text = "enable Noise Suppresion on audio capture") {
-                                            Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
-                                                onClick = {
-                                                    if (PREF__audio_input_filter == 0)
-                                                    {
-                                                        PREF__audio_input_filter = 1
-                                                    } else
-                                                    {
-                                                        PREF__audio_input_filter = 0
-                                                    }
-                                                    audio_filter_current_value = PREF__audio_input_filter
-                                                    AVActivity.ffmpegav_apply_audio_filter(PREF__audio_input_filter)
-                                                }),
-                                                imageVector = Icons.Default.NoiseAware,
-                                                contentDescription = "enable Noise Suppresion on audio capture",
-                                                tint = if (audio_filter_current_value == 1) Color.Red else Color.DarkGray)
-                                        }
-                                        var video_force_mjpeg_value by remember { mutableStateOf(PREF__v4l2_capture_force_mjpeg) }
-                                        Tooltip(text = "force MJPEG on video capture") {
-                                            Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
-                                                onClick = {
-                                                    if (PREF__v4l2_capture_force_mjpeg == 0)
-                                                    {
-                                                        PREF__v4l2_capture_force_mjpeg = 1
-                                                    } else
-                                                    {
-                                                        PREF__v4l2_capture_force_mjpeg = 0
-                                                    }
-                                                    video_force_mjpeg_value = PREF__v4l2_capture_force_mjpeg
-                                                }),
-                                                imageVector = Icons.Default.RawOff,
-                                                contentDescription = "force MJPEG on video capture",
-                                                tint = if (video_force_mjpeg_value == 1) Color.Red else Color.DarkGray)
-                                        }
-
-                                        var do_not_sync_av_value by remember { mutableStateOf(PREF__do_not_sync_av) }
-                                        Tooltip(text = "force AV sync OFF") {
-                                            Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
-                                                onClick = {
-                                                    if (PREF__do_not_sync_av == 0)
-                                                    {
-                                                        PREF__do_not_sync_av = 1
-                                                    } else
-                                                    {
-                                                        PREF__do_not_sync_av = 0
-                                                    }
-                                                    do_not_sync_av_value = PREF__do_not_sync_av
-                                                    MainActivity.tox_set_do_not_sync_av(PREF__do_not_sync_av)
-                                                    println("tox_set_do_not_sync_av:2: " + PREF__do_not_sync_av)
-                                                }),
-                                                imageVector = Icons.Default.LinkOff,
-                                                contentDescription = "force AV sync OFF",
-                                                tint = if (do_not_sync_av_value == 1) Color.Red else Color.DarkGray)
-                                        }
-
-
-                                        var video_bitrate_mode_value by remember { mutableStateOf(PREF__video_bitrate_mode) }
-                                        Tooltip(text = "toggle video capture quality") {
-                                            Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
-                                                onClick = {
-                                                    if (PREF__video_bitrate_mode == 0)
-                                                    {
-                                                        PREF__video_bitrate_mode = 1
-                                                    } else if (PREF__video_bitrate_mode == 1)
-                                                    {
-                                                        PREF__video_bitrate_mode = 2
-                                                    } else // PREF__video_bitrate_mode == 2
-                                                    {
-                                                        PREF__video_bitrate_mode = 0
-                                                    }
-                                                    video_bitrate_mode_value = PREF__video_bitrate_mode
-
-                                                    try
-                                                    {
-                                                        if (!savepathstore.isEnabled())
+                                        Column {
+                                            Tooltip(text = "toggle large incoming video size") {
+                                                Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
+                                                    onClick = {
+                                                        if (video_in_box_small)
                                                         {
-                                                            set_toxav_video_sending_quality(PREF__video_bitrate_mode)
+                                                            video_in_box_width = VIDEO_IN_BOX_WIDTH_BIG
+                                                            video_in_box_height = VIDEO_IN_BOX_HEIGHT_BIG
+                                                            main_top_tab_height = VIDEO_IN_BOX_HEIGHT_BIG
+                                                            video_in_box_width_fraction = VIDEO_IN_BOX_WIDTH_FRACTION_BIG
+                                                        } else
+                                                        {
+                                                            video_in_box_width = VIDEO_IN_BOX_WIDTH_SMALL
+                                                            video_in_box_height = VIDEO_IN_BOX_HEIGHT_SMALL
+                                                            main_top_tab_height = MAIN_TOP_TAB_HEIGHT
+                                                            video_in_box_width_fraction = VIDEO_IN_BOX_WIDTH_FRACTION_SMALL
                                                         }
-                                                    } catch (_: java.lang.Exception)
-                                                    {
-                                                    }
-                                                }),
-                                                imageVector = Icons.Default.HighQuality,
-                                                contentDescription = "toggle video capture quality",
-                                                tint =
-                                                if (video_bitrate_mode_value == 0) Color.DarkGray
-                                                else if (video_bitrate_mode_value == 1) Color.Green
-                                                else Color.Red)
+                                                        video_in_box_small = video_in_box_small.not()
+                                                        Log.i(TAG, "update3: " + video_in_box_small)
+                                                    }), imageVector = Icons.Default.Fullscreen,
+                                                    contentDescription = "toggle large incoming video size"
+                                                )
+                                            }
+                                            var audio_filter_current_value by remember { mutableStateOf(PREF__audio_input_filter) }
+                                            Tooltip(text = "enable Noise Suppresion on audio capture") {
+                                                Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
+                                                    onClick = {
+                                                        if (PREF__audio_input_filter == 0)
+                                                        {
+                                                            PREF__audio_input_filter = 1
+                                                        } else
+                                                        {
+                                                            PREF__audio_input_filter = 0
+                                                        }
+                                                        audio_filter_current_value = PREF__audio_input_filter
+                                                        AVActivity.ffmpegav_apply_audio_filter(PREF__audio_input_filter)
+                                                    }),
+                                                    imageVector = Icons.Default.NoiseAware,
+                                                    contentDescription = "enable Noise Suppresion on audio capture",
+                                                    tint = if (audio_filter_current_value == 1) Color.Red else Color.DarkGray)
+                                            }
+                                            var video_force_mjpeg_value by remember { mutableStateOf(PREF__v4l2_capture_force_mjpeg) }
+                                            Tooltip(text = "force MJPEG on video capture") {
+                                                Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
+                                                    onClick = {
+                                                        if (PREF__v4l2_capture_force_mjpeg == 0)
+                                                        {
+                                                            PREF__v4l2_capture_force_mjpeg = 1
+                                                        } else
+                                                        {
+                                                            PREF__v4l2_capture_force_mjpeg = 0
+                                                        }
+                                                        video_force_mjpeg_value = PREF__v4l2_capture_force_mjpeg
+                                                    }),
+                                                    imageVector = Icons.Default.RawOff,
+                                                    contentDescription = "force MJPEG on video capture",
+                                                    tint = if (video_force_mjpeg_value == 1) Color.Red else Color.DarkGray)
+                                            }
+                                            var do_not_sync_av_value by remember { mutableStateOf(PREF__do_not_sync_av) }
+                                            Tooltip(text = "force AV sync OFF") {
+                                                Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
+                                                    onClick = {
+                                                        if (PREF__do_not_sync_av == 0)
+                                                        {
+                                                            PREF__do_not_sync_av = 1
+                                                        } else
+                                                        {
+                                                            PREF__do_not_sync_av = 0
+                                                        }
+                                                        do_not_sync_av_value = PREF__do_not_sync_av
+                                                        MainActivity.tox_set_do_not_sync_av(PREF__do_not_sync_av)
+                                                        println("tox_set_do_not_sync_av:2: " + PREF__do_not_sync_av)
+                                                    }),
+                                                    imageVector = Icons.Default.LinkOff,
+                                                    contentDescription = "force AV sync OFF",
+                                                    tint = if (do_not_sync_av_value == 1) Color.Red else Color.DarkGray)
+                                            }
+                                            var video_bitrate_mode_value by remember { mutableStateOf(PREF__video_bitrate_mode) }
+                                            Tooltip(text = "toggle video capture quality") {
+                                                Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
+                                                    onClick = {
+                                                        if (PREF__video_bitrate_mode == 0)
+                                                        {
+                                                            PREF__video_bitrate_mode = 1
+                                                        } else if (PREF__video_bitrate_mode == 1)
+                                                        {
+                                                            PREF__video_bitrate_mode = 2
+                                                        } else // PREF__video_bitrate_mode == 2
+                                                        {
+                                                            PREF__video_bitrate_mode = 0
+                                                        }
+                                                        video_bitrate_mode_value = PREF__video_bitrate_mode
+
+                                                        try
+                                                        {
+                                                            if (!savepathstore.isEnabled())
+                                                            {
+                                                                set_toxav_video_sending_quality(PREF__video_bitrate_mode)
+                                                            }
+                                                        } catch (_: java.lang.Exception)
+                                                        {
+                                                        }
+                                                    }),
+                                                    imageVector = Icons.Default.HighQuality,
+                                                    contentDescription = "toggle video capture quality",
+                                                    tint =
+                                                    if (video_bitrate_mode_value == 0) Color.DarkGray
+                                                    else if (video_bitrate_mode_value == 1) Color.Green
+                                                    else Color.Red)
+                                            }
+                                            val current_callstate3 by avstatestorecallstate.stateFlow.collectAsState()
+                                            if (current_callstate3.call_state == AVState.CALL_STATUS.CALL_STATUS_CALLING)
+                                            {
+                                                Icon(modifier = Modifier.size(36.dp)
+                                                    .align(Alignment.CenterHorizontally)
+                                                    .combinedClickable(
+                                                        onClick = {
+                                                            val friendnum = tox_friend_by_public_key(avstatestore.state.call_with_friend_pubkey_get())
+                                                            Log.i(com.zoffcc.applications.trifa.TAG, "ffmpeg_devices_stop:002")
+                                                            avstatestore.state.ffmpeg_devices_stop()
+                                                            MainActivity.toxav_call_control(friendnum, ToxVars.TOXAV_CALL_CONTROL.TOXAV_CALL_CONTROL_CANCEL.value)
+                                                            MainActivity.on_call_ended_actions()
+                                                        }),
+                                                    imageVector = Icons.Filled.Cancel,
+                                                    tint = Color.Red,
+                                                    contentDescription = "stop Call")
+                                            }
                                         }
+                                        Column {
+                                            Tooltip(text = "toggle H265 video encoder") {
+                                                Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
+                                                    onClick = {
+                                                        h265_encoder = h265_encoder.not()
+                                                        if (h265_encoder) {
+                                                            toxav_option_set(
+                                                                tox_friend_by_public_key(avstatestore.state.call_with_friend_pubkey_get()),
+                                                                ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_CODEC_USED.value.toLong(),
+                                                                ToxVars.TOXAV_ENCODER_CODEC_USED_VALUE.TOXAV_ENCODER_CODEC_USED_H265.value.toLong())
+                                                        } else {
+                                                            toxav_option_set(
+                                                                tox_friend_by_public_key(avstatestore.state.call_with_friend_pubkey_get()),
+                                                            ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_CODEC_USED.value.toLong(),
+                                                            ToxVars.TOXAV_ENCODER_CODEC_USED_VALUE.TOXAV_ENCODER_CODEC_USED_VP8.value.toLong())
+                                                        }
 
-
-                                        val current_callstate3 by avstatestorecallstate.stateFlow.collectAsState()
-                                        if (current_callstate3.call_state == AVState.CALL_STATUS.CALL_STATUS_CALLING)
-                                        {
-                                            Icon(modifier = Modifier.size(36.dp)
-                                                .align(Alignment.CenterHorizontally)
-                                                .combinedClickable(
-                                                onClick = {
-                                                    val friendnum = tox_friend_by_public_key(avstatestore.state.call_with_friend_pubkey_get())
-                                                    Log.i(com.zoffcc.applications.trifa.TAG, "ffmpeg_devices_stop:002")
-                                                    avstatestore.state.ffmpeg_devices_stop()
-                                                    MainActivity.toxav_call_control(friendnum, ToxVars.TOXAV_CALL_CONTROL.TOXAV_CALL_CONTROL_CANCEL.value)
-                                                    MainActivity.on_call_ended_actions()
-                                                }),
-                                                imageVector = Icons.Filled.Cancel,
-                                                tint = Color.Red,
-                                                contentDescription = "stop Call")
+                                                    }), imageVector = Icons.Default.VideoLabel,
+                                                    tint = if (h265_encoder) Color.Red else Color.DarkGray,
+                                                    contentDescription = "toggle H265 video encoder"
+                                                )
+                                            }
                                         }
                                     }
                                     Column {
