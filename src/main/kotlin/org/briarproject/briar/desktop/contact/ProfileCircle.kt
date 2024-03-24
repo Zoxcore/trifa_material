@@ -51,8 +51,7 @@ import java.io.ByteArrayInputStream
  */
 @Composable
 fun ProfileCircle(size: Dp, contactItem: ContactItem) {
-    // ProfileCircle(size)
-    ProfileCircle(size, contactItem.pubkey)
+    ProfileCircle2(size, contactItem)
 }
 
 /**
@@ -61,10 +60,18 @@ fun ProfileCircle(size: Dp, contactItem: ContactItem) {
  * @param size the size of the circle.
  */
 @Composable
-fun ProfileCircle(size: Dp, pubkey: String) {
-    if (friend_has_avatar(pubkey))
+fun ProfileCircle2(size: Dp, contactItem: ContactItem) {
+    var circle_border_width = 1.dp
+    var circle_border_color = Color.Black
+
+    if (!contactItem.push_url.isNullOrEmpty()) {
+        circle_border_width = 4.dp
+        circle_border_color = Color(0xFFFFC300)
+    }
+
+    if (friend_has_avatar(contactItem.pubkey))
     {
-        val avatar_bytes = friend_get_avatar(pubkey)
+        val avatar_bytes = friend_get_avatar(contactItem.pubkey)
         if (avatar_bytes != null)
         {
             HelperGeneric.AsyncImage(load = {
@@ -72,16 +79,16 @@ fun ProfileCircle(size: Dp, pubkey: String) {
             }, painterFor = { remember { BitmapPainter(it) } },
                 contentDescription = "Image",
                 modifier = Modifier.size(size).clip(CircleShape)
-                    .border(1.dp, Color.Black, CircleShape))
+                    .border(circle_border_width, circle_border_color, CircleShape))
         }
     }
     else
     {
         Canvas(
             Modifier.size(size).clip(CircleShape)
-                .border(1.dp, Color.Black, CircleShape)
+                .border(circle_border_width, circle_border_color, CircleShape)
         ) {
-            IdenticonKt(pubkey, this.size.width, this.size.height).draw(this)
+            IdenticonKt(contactItem.pubkey, this.size.width, this.size.height).draw(this)
         }
     }
 }
@@ -91,6 +98,7 @@ fun ProfileCircle(size: Dp, pubkey: String) {
  *
  * @param size the size of the circle.
  */
+/*
 @OptIn(ExperimentalResourceApi::class)
 @Composable
 fun ProfileCircle(size: Dp) {
@@ -102,3 +110,4 @@ fun ProfileCircle(size: Dp) {
         contentDescription = "User picture"
     )
 }
+*/
