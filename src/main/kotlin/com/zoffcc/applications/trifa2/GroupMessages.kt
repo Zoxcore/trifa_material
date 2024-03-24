@@ -1,3 +1,4 @@
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.*
@@ -26,6 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
     val listState = rememberLazyListState()
@@ -38,7 +40,8 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
         ) {
             item { Spacer(Modifier.size(SPACE_BEFORE_FIRST_MESSAGE)) }
             items(grpmsgs.groupmessages, key = { it.msgDatabaseId }) {
-                GroupChatMessage(isMyMessage = it.user == myUser, it, ui_scale)
+                GroupChatMessage(isMyMessage = it.user == myUser, it, ui_scale,
+                    modifier = Modifier.animateItemPlacement())
             }
             item {
                 Box(Modifier.height(SPACE_AFTER_LAST_MESSAGE))

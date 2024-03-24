@@ -93,10 +93,10 @@ fun randomColor() = Color(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float) {
+inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float, modifier: Modifier = Modifier) {
     val TAG = "trifa.ChatMessage"
     Box(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         contentAlignment = if (isMyMessage) Alignment.CenterEnd else Alignment.CenterStart,
     ) {
 

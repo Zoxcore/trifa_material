@@ -1,3 +1,4 @@
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.*
@@ -24,6 +25,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun Messages(ui_scale: Float, selectedContactPubkey: String?) {
     val listState = rememberLazyListState()
@@ -38,7 +40,8 @@ internal fun Messages(ui_scale: Float, selectedContactPubkey: String?) {
             // Log.i(com.zoffcc.applications.trifa.TAG, "LazyColumn --> draw")
             items(msgs.messages, key = { it.msgDatabaseId }) {
                 // Log.i(com.zoffcc.applications.trifa.TAG, "LazyColumn -> it.msgDatabaseId = " + it.msgDatabaseId)
-                ChatMessage(isMyMessage = (it.user == myUser), it, ui_scale)
+                ChatMessage(isMyMessage = (it.user == myUser), it, ui_scale,
+                    modifier = Modifier.animateItemPlacement())
             }
             item {
                 Box(Modifier.height(SPACE_AFTER_LAST_MESSAGE))
