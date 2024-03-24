@@ -69,6 +69,7 @@ import com.zoffcc.applications.trifa.HelperOSFile.show_file_in_explorer_or_open
 import com.zoffcc.applications.trifa.TRIFAGlobals
 import com.zoffcc.applications.trifa.TRIFAGlobals.TRIFA_MSG_TYPE
 import com.zoffcc.applications.trifa.ToxVars
+import com.zoffcc.applications.trifa2.timeToString
 import org.briarproject.briar.desktop.ui.Tooltip
 import java.io.File
 import kotlin.random.Random
