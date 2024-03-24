@@ -66,6 +66,7 @@ import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_read_rcv
 import com.zoffcc.applications.trifa.HelperMessage.update_single_message_from_ftid
 import com.zoffcc.applications.trifa.HelperMessage.update_single_message_from_messge_id
 import com.zoffcc.applications.trifa.HelperRelay.get_own_relay_pubkey
+import com.zoffcc.applications.trifa.HelperRelay.get_pushurl_for_friend
 import com.zoffcc.applications.trifa.HelperRelay.have_own_relay
 import com.zoffcc.applications.trifa.HelperRelay.invite_to_all_groups_own_relay
 import com.zoffcc.applications.trifa.HelperRelay.is_any_relay
@@ -1465,9 +1466,11 @@ class MainActivity
                 val friend_pubkey = tox_friend_get_public_key(friend_number)!!
                 val is_relay = is_any_relay(friend_pubkey)
                 val ip_addr_str = get_friend_ip_str(friend_number)
+                val push_url = get_pushurl_for_friend(friend_pubkey)
                 contactstore.update(item = ContactItem(name = friend_name!!,
                     isConnected = tox_friend_get_connection_status(friend_number), pubkey = friend_pubkey,
                     ip_addr = ip_addr_str,
+                    push_url = push_url,
                     is_relay = is_relay))
             } catch (_: Exception)
             {
@@ -1488,10 +1491,12 @@ class MainActivity
                 val friend_pubkey = tox_friend_get_public_key(friend_number)!!
                 val is_relay = is_any_relay(friend_pubkey)
                 val ip_addr_str = get_friend_ip_str(friend_number)
+                val push_url = get_pushurl_for_friend(friend_pubkey)
                 contactstore.update(item = ContactItem(name = fname,
                     isConnected = tox_friend_get_connection_status(friend_number),
                     pubkey = friend_pubkey,
                     ip_addr = ip_addr_str,
+                    push_url = push_url,
                     is_relay = is_relay))
             } catch (_: Exception)
             {
@@ -1533,6 +1538,7 @@ class MainActivity
                                         contactstore.add(item = ContactItem(name = "Relay #" + relay_pubkey.uppercase().take(6),
                                             isConnected = 0,
                                             pubkey = relay_pubkey.uppercase(),
+                                            push_url = "",
                                             is_relay = true))
                                     } catch (_: Exception)
                                     {
@@ -1587,10 +1593,12 @@ class MainActivity
                 val friend_pubkey = tox_friend_get_public_key(friend_number)!!
                 val is_relay = is_any_relay(friend_pubkey)
                 val ip_addr_str = get_friend_ip_str(friend_number)
+                val push_url = get_pushurl_for_friend(friend_pubkey)
                 contactstore.update(item = ContactItem(name = fname,
                     isConnected = tox_friend_get_connection_status(friend_number),
                     pubkey = friend_pubkey,
                     ip_addr = ip_addr_str,
+                    push_url = push_url,
                     is_relay = is_relay))
             } catch (_: Exception)
             {
@@ -1774,6 +1782,7 @@ class MainActivity
                         contactstore.add(item = ContactItem(name = "new Friend #" + new_friendnumber,
                             isConnected = 0,
                             pubkey = friend_public_key!!,
+                            push_url = "",
                             is_relay = false))
                     } catch (_: Exception)
                     {

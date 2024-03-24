@@ -96,7 +96,7 @@ public class HelperRelay
         }
     }
 
-    static String get_pushurl_for_friend(String friend_pubkey)
+    public static String get_pushurl_for_friend(String friend_pubkey)
     {
         String ret = null;
 

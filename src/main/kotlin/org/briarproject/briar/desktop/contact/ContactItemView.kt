@@ -19,6 +19,7 @@
 package org.briarproject.briar.desktop.contact
 
 import CONTACT_COLUMN_CONTACTNAME_LEN_THRESHOLD
+import PUSHURL_SHOW_LEN_THRESHOLD
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -112,6 +113,8 @@ private fun ContactItemViewInfo(contactItem: ContactItem) = Column(
     var name_style = if (show_name.length > CONTACT_COLUMN_CONTACTNAME_LEN_THRESHOLD)
         MaterialTheme.typography.body1.copy(fontSize = 13.sp, lineHeight = TextUnit.Unspecified) else MaterialTheme.typography.body1.copy(lineHeight = TextUnit.Unspecified)
     val friend_relay = get_relay_for_friend(contactItem.pubkey.toUpperCase())
+    var pushurl_str = if (contactItem.push_url.isNullOrEmpty()) "" else ("\n" + "Push URL: " + contactItem.push_url)
+    pushurl_str = if (pushurl_str.length > PUSHURL_SHOW_LEN_THRESHOLD) (pushurl_str.take(PUSHURL_SHOW_LEN_THRESHOLD) + "...") else pushurl_str
     val relay_str = if (friend_relay.isNullOrEmpty()) "" else ("\n" + "Relay (ToxProxy): " + friend_relay)
     val ip_addr_str =  contactItem.ip_addr
     // Log.i(TAG, "ContactItemViewInfo: ip_addr_str=" + ip_addr_str + " name=" + show_name)
@@ -123,7 +126,7 @@ private fun ContactItemViewInfo(contactItem: ContactItem) = Column(
             MaterialTheme.typography.body1.copy(fontSize = 12.sp, lineHeight = TextUnit.Unspecified) else MaterialTheme.typography.body1.copy(lineHeight = TextUnit.Unspecified)
     }
     Tooltip(text = "Name: " + tooltip_name + "\n" +
-            "Pubkey: " + contactItem.pubkey + relay_str + "\n" +
+            "Pubkey: " + contactItem.pubkey + relay_str + pushurl_str + "\n" +
             "IP: " + ip_addr_str) {
         Column() {
             Text(

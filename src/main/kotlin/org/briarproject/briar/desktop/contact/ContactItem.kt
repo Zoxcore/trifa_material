@@ -22,6 +22,7 @@ data class ContactItem(
     val name: String,
     val isConnected: Int,
     val pubkey: String,
+    val push_url: String? = "",
     val is_relay: Boolean,
     var ip_addr: String = ""
 ) {
