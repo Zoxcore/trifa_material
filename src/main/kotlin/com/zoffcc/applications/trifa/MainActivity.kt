@@ -103,6 +103,7 @@ import com.zoffcc.applications.trifa.ToxVars.TOX_CONNECTION
 import com.zoffcc.applications.trifa.ToxVars.TOX_FILE_ID_LENGTH
 import com.zoffcc.applications.trifa.ToxVars.TOX_HASH_LENGTH
 import com.zoffcc.applications.trifa.ToxVars.TOX_MAX_NGC_FILESIZE
+import com.zoffcc.applications.trifa.ToxVars.TOX_MAX_NGC_FILESIZE_IGNORE_OVER_THAT
 import com.zoffcc.applications.trifa.ToxVars.TOX_MAX_NGC_FILE_AND_HEADER_SIZE
 import com.zoffcc.applications.trifa.ToxVars.TOX_PUBLIC_KEY_SIZE
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
@@ -3764,6 +3765,13 @@ class MainActivity
             ofw.filepath_wrapped = filepath
             ofw.filename_wrapped = filename
 
+            if (file_size > TOX_MAX_NGC_FILESIZE_IGNORE_OVER_THAT)
+            {
+                Log.i(TAG, "add_outgoing_file:too large to process, size=" + ofw.file_size_wrapped)
+                SnackBarToast("Error sending file to group, file is too large to process")
+                return
+            }
+
             if (file_size > TOX_MAX_NGC_FILESIZE)
             {
                 // reducing the file size down to hopefully 37kbytes -------------------
@@ -3771,6 +3779,12 @@ class MainActivity
                 ofw = shrink_image_file(ofw, groupid)
                 Log.i(TAG, "add_outgoing_file:shrink:done:")
                 // reducing the file size down to hopefully 37kbytes -------------------
+                if (ofw.file_size_wrapped > TOX_MAX_NGC_FILESIZE)
+                {
+                    Log.i(TAG, "add_outgoing_file:failed to shrink file, size=" + ofw.file_size_wrapped)
+                    SnackBarToast("Error sending file to group, failed to shrink to allowed size")
+                    return
+                }
             }
             else
             {
