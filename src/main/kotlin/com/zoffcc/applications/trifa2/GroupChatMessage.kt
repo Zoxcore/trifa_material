@@ -77,9 +77,9 @@ fun GroupTriangle(risingToTheRight: Boolean, background: Color, padding_bottom: 
 
 @OptIn(ExperimentalFoundationApi::class, DelicateCoroutinesApi::class)
 @Composable
-inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, ui_scale: Float) {
+inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, ui_scale: Float, modifier: Modifier = Modifier) {
     Box(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         contentAlignment = if (isMyMessage) Alignment.CenterEnd else Alignment.CenterStart
     ) {
 
