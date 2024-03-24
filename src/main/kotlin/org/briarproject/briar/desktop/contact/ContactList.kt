@@ -94,6 +94,7 @@ fun ContactList(
                                 contactstore.remove(item = ContactItem(name = "",
                                     isConnected = 0,
                                     is_relay = false,
+                                    push_url = "",
                                     pubkey = item.pubkey))
                                 GlobalScope.launch(Dispatchers.IO) {
                                     if (is_any_relay(item.pubkey))

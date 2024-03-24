@@ -85,6 +85,7 @@ fun AddFriend() = Box {
                             contactstore.add(item = ContactItem(name = "new Friend #" + friendnum,
                                 isConnected = 0,
                                 pubkey = friend_pubkey!!,
+                                push_url = "",
                                 is_relay = false))
                         } catch (_: Exception)
                         {
