@@ -133,7 +133,7 @@ import org.briarproject.briar.desktop.contact.ContactItem
 import org.briarproject.briar.desktop.contact.GroupItem
 import org.briarproject.briar.desktop.contact.GroupPeerItem
 import set_tox_online_state
-import timestampMs
+import com.zoffcc.applications.trifa2.timestampMs
 import toxdatastore
 import java.io.File
 import java.io.PrintWriter
