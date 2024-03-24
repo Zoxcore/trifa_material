@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -43,14 +42,12 @@ import androidx.compose.ui.ExternalDragValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.onExternalDrag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.trifa.AVState
-import com.zoffcc.applications.trifa.HelperGeneric
 import com.zoffcc.applications.trifa.HelperGeneric.send_message_onclick
 import com.zoffcc.applications.trifa.HelperGroup
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
@@ -96,9 +93,7 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 import java.io.File
 import java.net.URI
 import java.nio.file.LinkOption
-import java.nio.file.Path
 import kotlin.io.path.exists
-import kotlin.io.path.name
 import kotlin.io.path.toPath
 
 private const val TAG = "trifa.Chatapp"
