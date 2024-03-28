@@ -2414,8 +2414,8 @@ class MainActivity
         {
             global_last_activity_outgoung_ft_ts = System.currentTimeMillis()
 
-            // try
-            // {
+            try
+            {
                 val ft = orma!!.selectFromFiletransfer().
                 directionEq(TRIFAGlobals.TRIFA_FT_DIRECTION.TRIFA_FT_DIRECTION_OUTGOING.value).
                 stateNotEq(ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_CANCEL.value).
@@ -2654,11 +2654,11 @@ class MainActivity
                         // Log.i(TAG, "file_chunk_request:ft:099:" + (System.currentTimeMillis() - ts01));
                     }
                 }
-            //} catch (e: java.lang.Exception)
-            //{
-            //    e.printStackTrace()
-            //    Log.i(TAG, "file_chunk_request:EE1:" + e.message)
-            //}
+            } catch (e: java.lang.Exception)
+            {
+                e.printStackTrace()
+                Log.i(TAG, "file_chunk_request:EE1:" + e.message)
+            }
         }
 
         @JvmStatic
