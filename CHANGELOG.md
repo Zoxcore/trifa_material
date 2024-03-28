@@ -1,5 +1,27 @@
 # Changelog
 
+## [v1.0.27](https://github.com/Zoxcore/trifa_material/tree/v1.0.27) (2024-03-28)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.26...v1.0.27)
+
+**Merged pull requests:**
+
+- bugfix: catch an exception with FTs [\#195](https://github.com/Zoxcore/trifa_material/pull/195) ([zoff99](https://github.com/zoff99))
+- update dependencies [\#194](https://github.com/Zoxcore/trifa_material/pull/194) ([zoff99](https://github.com/zoff99))
+
+## [v1.0.26](https://github.com/Zoxcore/trifa_material/tree/v1.0.26) (2024-03-25)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.25...v1.0.26)
+
+**Merged pull requests:**
+
+- updates [\#192](https://github.com/Zoxcore/trifa_material/pull/192) ([zoff99](https://github.com/zoff99))
+- color profile circle "orange" if that friend has a push url [\#191](https://github.com/Zoxcore/trifa_material/pull/191) ([zoff99](https://github.com/zoff99))
+- show friends push url in contactlist [\#190](https://github.com/Zoxcore/trifa_material/pull/190) ([zoff99](https://github.com/zoff99))
+- do not add outgoing group file to message history if shrinking failed also set a general limit at 100MByte for processing a group file [\#189](https://github.com/Zoxcore/trifa_material/pull/189) ([zoff99](https://github.com/zoff99))
+- add H265 features [\#188](https://github.com/Zoxcore/trifa_material/pull/188) ([zoff99](https://github.com/zoff99))
+- update dependencies and some small fixes [\#187](https://github.com/Zoxcore/trifa_material/pull/187) ([zoff99](https://github.com/zoff99))
+
 ## [v1.0.25](https://github.com/Zoxcore/trifa_material/tree/v1.0.25) (2024-03-17)
 
 [Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.24...v1.0.25)
