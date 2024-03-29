@@ -219,14 +219,26 @@ fun CoroutineScope.createContactStore(): ContactStore
     }
 }
 
-val friendsRolesOrder = mapOf(0 to 3, 1 to 1, 2 to 0)
+val friendsRolesOrder = mapOf(0 to 3, 4 to 2, 1 to 1, 2 to 0)
 
 fun getFriendListWithGroupingAndSorting(friendlist: ArrayList<ContactItem>)
         : ArrayList<ContactItem>
 {
     return ArrayList(friendlist.sortedWith(
         compareBy<ContactItem> { it.is_relay }.
-        thenBy<ContactItem> { friendsRolesOrder[it.isConnected] }.
+        thenBy<ContactItem> {
+            // HINT: sort by connection status
+            // if offline the also show contact with push_urls set above fully offline contacts
+            var tmp_sort_value = it.isConnected
+            if (tmp_sort_value == 0) {
+                if (!it.is_relay) {
+                    if (!it.push_url.isNullOrEmpty()) {
+                        tmp_sort_value = 4
+                    }
+                }
+            }
+            friendsRolesOrder[tmp_sort_value]
+        }.
         thenBy { it.name.toLowerCase() }
     )
     )
