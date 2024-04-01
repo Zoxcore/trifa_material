@@ -1,5 +1,5 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.de.undercouch.gradle.tasks.download.Download
+import de.undercouch.gradle.tasks.download.Download
 import java.time.format.DateTimeFormatter
 
 plugins {
@@ -9,6 +9,7 @@ plugins {
     id("com.github.gmazzo.buildconfig") version "5.3.5"
     id("org.ajoberstar.grgit") version "5.2.2"
     id("io.gitlab.arturbosch.detekt") version("1.23.3")
+    id("de.undercouch.download") version "5.6.0"
 }
 
 group = "com.zoffcc.applications.trifa_material"
