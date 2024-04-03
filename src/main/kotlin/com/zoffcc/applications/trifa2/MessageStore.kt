@@ -55,12 +55,14 @@ fun CoroutineScope.createMessageStore(): MessageStore
                     {
                         channel.send(action)
                     }
+                /*
                 } else if (action is MessageAction.SendMessagesBulk)
                 {
                     if (contactstore.state.selectedContactPubkey == action.toxpk)
                     {
                         channel.send(action)
                     }
+                */
                 } else
                 {
                     channel.send(action)

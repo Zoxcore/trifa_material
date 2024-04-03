@@ -7,7 +7,7 @@ import com.zoffcc.applications.trifa.Log
 
 sealed interface MessageAction
 {
-    data class SendMessagesBulk(val messages: List<UIMessage>, val toxpk: String) : MessageAction
+    // data class SendMessagesBulk(val messages: List<UIMessage>, val toxpk: String) : MessageAction
     data class SendMessage(val message: UIMessage) : MessageAction
     data class ReceiveMessagesBulkWithClear(val messages: List<UIMessage>, val toxpk: String) : MessageAction
     data class ReceiveMessage(val message: UIMessage) : MessageAction
@@ -21,12 +21,14 @@ data class MessageState(var messages: SnapshotStateList<UIMessage> = mutableStat
 const val maxMessages = MAX_ONE_ON_ONE_MESSAGES_TO_SHOW
 fun chatReducer(state: MessageState, action: MessageAction): MessageState = when (action)
 {
+    /*
     is MessageAction.SendMessagesBulk ->
     {
         val m = state.messages.toList()
         Log.i(com.zoffcc.applications.trifa.TAG, "MessageAction.SendMessagesBulk")
         state.copy(messages = (m + action.messages).toMutableStateList())
     }
+     */
     is MessageAction.SendMessage ->
     {
         // val m = state.messages
