@@ -51,7 +51,13 @@ buildConfig {
     }
     catch (e: Exception)
     {
-        buildConfigField("String", "GIT_BRANCH", "\"" + "????" + "\"")
+        try
+        {
+            buildConfigField("String", "GIT_BRANCH", "\"" + "????" + "\"")
+        }
+        catch (e: Exception)
+        {
+        }
         buildConfigField("String", "GIT_COMMIT_HASH", "\"" + "????" + "\"")
         buildConfigField("String", "GIT_COMMIT_DATE", "\"" + "????" + "\"")
         buildConfigField("String", "GIT_COMMIT_MSG", "\"" + "????" + "\"")

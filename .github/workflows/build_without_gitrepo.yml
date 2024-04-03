@@ -1,0 +1,66 @@
+name: Build without git repo
+
+on:
+  push:
+    paths-ignore:
+     - 'README.md'
+     - 'CHANGELOG.md'
+     - '.github/workflows/macos_pkg.yml'
+  pull_request:
+    paths-ignore:
+     - 'README.md'
+     - 'CHANGELOG.md'
+     - '.github/workflows/macos_pkg.yml'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: dummy
+        default: dummy
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build-linux-without-gitrepo:
+    name: Nightly Linux Build without git repo
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install dependencies
+        run: |
+          sudo apt-get update && \
+          sudo DEBIAN_FRONTEND=noninteractive \
+          apt-get install -y --no-install-recommends \
+          ca-certificates \
+          rpm \
+          openjdk-17-jdk \
+          openjdk-17-jdk-headless
+
+      - name: show java version
+        run:  type -a java;java -version
+
+      - name: set java version
+        run:  sudo update-java-alternatives -s java-1.17.0-openjdk-amd64
+
+      - name: show java version
+        run:  type -a java;java -version
+
+      - name: remove git repo
+        run:  ls -al ; rm -Rf .git/ ; ls -al
+
+      - name: build workaround
+        run:  git init
+
+      - name: remove git command
+        run: |
+          sudo DEBIAN_FRONTEND=noninteractive \
+          apt-get remove -y git
+
+      - name: check for git command
+        run:  type -a git || echo "git command removed"
+
+      - name: build package
+        run:  id;pwd;ls -al;./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64 build
+
