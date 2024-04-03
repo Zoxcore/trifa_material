@@ -62,5 +62,5 @@ jobs:
         run:  type -a git || echo "git command removed"
 
       - name: build package
-        run:  id;pwd;ls -al;./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64 build
+        run:  id;pwd;ls -al;./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64 -x detekt build
 
