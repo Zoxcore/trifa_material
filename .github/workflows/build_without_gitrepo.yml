@@ -50,8 +50,8 @@ jobs:
       - name: remove git repo
         run:  ls -al ; rm -Rf .git/ ; ls -al
 
-      - name: build workaround
-        run:  git init
+      # - name: build workaround
+      #   run:  git init
 
       - name: remove git command
         run: |
