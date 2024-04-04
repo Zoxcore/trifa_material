@@ -1,5 +1,6 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import de.undercouch.gradle.tasks.download.Download
+import org.ajoberstar.grgit.Grgit
 import java.time.format.DateTimeFormatter
 
 plugins {
@@ -34,15 +35,16 @@ buildConfig {
     buildConfigField("String", "COMPOSE_VERSION", "\"${project.findProperty("compose.version")}\"")
     try
     {
+        val grgit = if (extra.has("grgit")) null else the<Grgit>()
         try
         {
-            buildConfigField("String", "GIT_BRANCH", "\"" + grgit.branch.current().fullName + "\"")
+            buildConfigField("String", "GIT_BRANCH", "\"" + grgit!!.branch.current().fullName + "\"")
         }
         catch (e: Exception)
         {
             buildConfigField("String", "GIT_BRANCH", "\"" + "????" + "\"")
         }
-        buildConfigField("String", "GIT_COMMIT_HASH", "\"" + grgit.head().abbreviatedId + "\"")
+        buildConfigField("String", "GIT_COMMIT_HASH", "\"" + grgit!!.head().abbreviatedId + "\"")
         buildConfigField("String", "GIT_COMMIT_DATE", "\"" + grgit.head().dateTime.
           format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + "\"")
         buildConfigField("String", "GIT_COMMIT_MSG", "\"" + grgit.head().shortMessage.
