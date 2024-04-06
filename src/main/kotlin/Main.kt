@@ -1720,7 +1720,7 @@ fun main() = application(exitProcessOnExit = true) {
     }
 
     // ------- set UI look and feel to "system" for java AWT ----------
-    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
+    // UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
     // ------- set UI look and feel to "system" for java AWT ----------
 
     init_system_tray(RESOURCESDIR.canonicalPath + File.separator + "icon-linux.png")
