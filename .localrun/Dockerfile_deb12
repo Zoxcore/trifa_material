@@ -1,0 +1,32 @@
+# syntax=docker/dockerfile:1
+FROM debian:12
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && \
+        apt-get -y --force-yes install \
+        ca-certificates \
+        libconfig-dev \
+        wget \
+        unzip \
+        zip \
+        automake \
+        autotools-dev \
+        build-essential \
+        check \
+        checkinstall \
+        libtool \
+        pkg-config \
+        rsync \
+        git \
+        gdb \
+        nano \
+        g++ \
+        cmake \
+        yasm \
+        openjdk-17-jdk-headless
+
+RUN apt-get update && \
+        apt-get -y --force-yes install \
+        nasm \
+        sudo
