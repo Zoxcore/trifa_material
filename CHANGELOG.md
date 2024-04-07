@@ -1,5 +1,29 @@
 # Changelog
 
+## [v1.0.29](https://github.com/Zoxcore/trifa_material/tree/v1.0.29) (2024-04-07)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.28...v1.0.29)
+
+**Fixed bugs:**
+
+- Cannot build [\#199](https://github.com/Zoxcore/trifa_material/issues/199)
+
+**Merged pull requests:**
+
+- include font files and use noto font for emoji and text. tweak theme a bit. [\#202](https://github.com/Zoxcore/trifa_material/pull/202) ([zoff99](https://github.com/zoff99))
+- fixes: https://github.com/Zoxcore/trifa\_material/issues/199 [\#201](https://github.com/Zoxcore/trifa_material/pull/201) ([zoff99](https://github.com/zoff99))
+- fix build when source was not cloned from git repo [\#200](https://github.com/Zoxcore/trifa_material/pull/200) ([zoff99](https://github.com/zoff99))
+- upgrade to kotlin 2.0.0-Beta5, and use undercouch plugin directly see… [\#198](https://github.com/Zoxcore/trifa_material/pull/198) ([zoff99](https://github.com/zoff99))
+
+## [v1.0.28](https://github.com/Zoxcore/trifa_material/tree/v1.0.28) (2024-04-01)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.27...v1.0.28)
+
+**Merged pull requests:**
+
+- sort contactlist so that offline friends with push urls are shown above other offline friends [\#197](https://github.com/Zoxcore/trifa_material/pull/197) ([zoff99](https://github.com/zoff99))
+- Translations update from Hosted Weblate [\#196](https://github.com/Zoxcore/trifa_material/pull/196) ([weblate](https://github.com/weblate))
+
 ## [v1.0.27](https://github.com/Zoxcore/trifa_material/tree/v1.0.27) (2024-03-28)
 
 [Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.26...v1.0.27)
