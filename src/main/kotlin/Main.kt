@@ -92,6 +92,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontLoadingStrategy
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -198,6 +199,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.DEBUG_COMPOSE_UI_UPD
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__do_not_sync_av
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_peer_get_name
 import com.zoffcc.applications.trifa.MainActivity.Companion.toxav_option_set
+import com.zoffcc.applications.trifa.OperatingSystem
 import org.briarproject.briar.desktop.ui.ExplainerInfoIsRelay
 import org.briarproject.briar.desktop.ui.Tooltip
 
@@ -1888,14 +1890,34 @@ object AboutIcon : Painter() {
 @Composable
 private fun MainAppStart()
 {
-    NotoEmojiFont = FontFamily(
-        Font(resource = "fonts/NotoColorEmoji.ttf", FontWeight.Normal),
-    )
+    try
+    {
+        // HINT: for some reason the fonts do not load on macOS
+        if ((OperatingSystem.getCurrent() != OperatingSystem.MACOS) && (OperatingSystem.getCurrent() != OperatingSystem.MACARM))
+        {
+            NotoEmojiFont = FontFamily(
+                Font(resource = "fonts/NotoColorEmoji.ttf", FontWeight.Normal),
+            )
+        }
+    }
+    catch(_: Exception)
+    {
+    }
 
-    DefaultFont = FontFamily(
-        Font(resource = "fonts/Ubuntu-R.ttf", FontWeight.Normal, FontStyle.Normal),
-        Font(resource = "fonts/Ubuntu-B.ttf", FontWeight.Bold, FontStyle.Normal),
-    )
+    try
+    {
+        // HINT: for some reason the fonts do not load on macOS
+        if ((OperatingSystem.getCurrent() != OperatingSystem.MACOS) && (OperatingSystem.getCurrent() != OperatingSystem.MACARM))
+        {
+            DefaultFont = FontFamily(
+                Font(resource = "fonts/Ubuntu-R.ttf", FontWeight.Normal, FontStyle.Normal),
+                Font(resource = "fonts/Ubuntu-B.ttf", FontWeight.Bold, FontStyle.Normal),
+            )
+        }
+    }
+    catch(_: Exception)
+    {
+    }
 
     var showIntroScreen by remember { mutableStateOf(true) }
     var firstRun by remember { mutableStateOf(true) }
