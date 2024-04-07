@@ -151,7 +151,7 @@ fun GroupSendMessage(focusRequester: FocusRequester, selectedGroupId: String?, s
                                                 }
                                             }
                                         }) {
-                                        Text(text = curtext, fontFamily = NotoEmoji, color = Color.Black, fontSize = 30.sp, maxLines = 1)
+                                        Text(text = curtext, fontFamily = NotoEmojiFont, color = Color.Black, fontSize = 30.sp, maxLines = 1)
                                         scope.launch {
                                             delay(62)
                                             curtext = emojistr
@@ -298,7 +298,7 @@ fun GroupSendMessage(focusRequester: FocusRequester, selectedGroupId: String?, s
                                         IconButton(modifier = Modifier.width(30.dp).height(30.dp),
                                             onClick = { cur_emoji_cat = k }) {
                                             Text(text = emojis_cat_all_cat_emoji.get(k),
-                                                fontFamily = NotoEmoji,
+                                                fontFamily = NotoEmojiFont,
                                                 color = Color.Black, fontSize = 20.sp, maxLines = 1)
                                         }
                                     }
@@ -323,7 +323,7 @@ fun GroupSendMessage(focusRequester: FocusRequester, selectedGroupId: String?, s
                                                 Tooltip(text = if (emojistr.name.isEmpty()) "" else emojistr.name) {
                                                     IconButton(modifier = Modifier.width(40.dp).height(40.dp),
                                                         onClick = { inputTextV = TextFieldValue(text = inputTextV.text + it[k].char) }) {
-                                                        Text(text = curtext, fontFamily = NotoEmoji, color = Color.Black, fontSize = 30.sp, maxLines = 1)
+                                                        Text(text = curtext, fontFamily = NotoEmojiFont, color = Color.Black, fontSize = 30.sp, maxLines = 1)
                                                         scope.launch {
                                                             delay(62)
                                                             curtext = emojistr.char

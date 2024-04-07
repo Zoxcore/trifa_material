@@ -149,7 +149,7 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                                 // println("NNN:" + groupmessage.user.name + "CCC:" +groupmessage.user.color.luminance())
                                 Text(
                                     text = groupmessage.user.name,
-                                    fontFamily = NotoEmoji,
+                                    fontFamily = DefaultFont,
                                     style = MaterialTheme.typography.body1.copy(
                                         shadow = if (groupmessage.user.color.luminance() > NGC_PEER_LUMINANCE_THRESHOLD_FOR_SHADOW) Shadow(Color.Black, offset = Offset.Zero, blurRadius = 2.4f) else Shadow(),
                                         fontWeight = FontWeight.SemiBold,
@@ -389,6 +389,7 @@ fun group_message_text_block(groupmessage: UIGroupMessage, ui_scale: Float, setL
 {
     var show_link_click1 = false
     var link_str1 = ""
+    var text_is_only_emoji = false
     SelectionContainer(modifier = Modifier.padding(all = 0.dp))
     {
         var msg_fontsize = MSG_TEXT_FONT_SIZE_MIXED
@@ -398,6 +399,7 @@ fun group_message_text_block(groupmessage: UIGroupMessage, ui_scale: Float, setL
             if (emojiInformation.isOnlyEmojis)
             {
                 msg_fontsize = MSG_TEXT_FONT_SIZE_EMOJI_ONLY
+                text_is_only_emoji = true
             }
         }
         catch(_: Exception)
@@ -409,7 +411,7 @@ fun group_message_text_block(groupmessage: UIGroupMessage, ui_scale: Float, setL
             modifier = Modifier.randomDebugBorder(),
             style = MaterialTheme.typography.body1.copy(
                 fontSize = ((msg_fontsize * ui_scale).toDouble()).sp,
-                fontFamily = NotoEmoji,
+                fontFamily = if (text_is_only_emoji) NotoEmojiFont else DefaultFont,
                 lineHeight = TextUnit.Unspecified,
                 letterSpacing = 0.sp
             )
