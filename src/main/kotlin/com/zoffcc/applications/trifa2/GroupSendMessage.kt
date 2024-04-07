@@ -196,7 +196,7 @@ fun GroupSendMessage(focusRequester: FocusRequester, selectedGroupId: String?, s
                     else -> false
                 }
             },
-        colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White),
+        colors = TextFieldDefaults.textFieldColors(backgroundColor = Color(ChatColorsConfig.LIGHT__TEXTFIELD_BGCOLOR)),
         keyboardOptions = KeyboardOptions(
             capitalization = KeyboardCapitalization.None,
             autoCorrect = false,

@@ -7,8 +7,13 @@ object ChatColorsConfig {
     val SURFACE = 0xFFCC99FF
     val BACKGROUND = 0xFF663388
     val TOP_GRADIENT = listOf(0xFFEEEFF3, 0xFFE6F0F2)
+    // -------------
+    val LIGHT__FGCOLOR = 0xFFB1C2FF
+    val LIGHT__BGCOLOR = 0xFFE7E7E7
+    val LIGHT__TEXTFIELD_BGCOLOR = 0xFFE7E7E7
     val MY_MESSAGE = Color(0xFFE5FEFB)
-    val OTHERS_MESSAGE = Color.White
+    val OTHERS_MESSAGE = Color(0xFFF3F3F3)
     val OTHERS_PRIVATE_MESSAGE = Color(0xFFFFF8E9)
-    val TIME_TEXT = Color(0xFF979797)
+    val TIME_TEXT = Color(0xFF707070)
+    // -------------
 }

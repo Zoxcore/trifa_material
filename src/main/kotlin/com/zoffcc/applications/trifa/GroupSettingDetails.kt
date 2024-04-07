@@ -87,7 +87,7 @@ fun GroupSettingDetails(selectedGroupId: String?)
             TextField(enabled = true, singleLine = true,
                 textStyle = TextStyle(fontSize = 16.sp),
                 modifier = Modifier.padding(0.dp).weight(1.0f),
-                colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White),
+                colors = TextFieldDefaults.textFieldColors(backgroundColor = Color(ChatColorsConfig.LIGHT__TEXTFIELD_BGCOLOR)),
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.None,
                     autoCorrect = false,

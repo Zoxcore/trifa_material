@@ -318,7 +318,7 @@ fun App()
 
     globalstore.loadUiScale()
     var ui_scale by remember { mutableStateOf(globalstore.getUiScale()) }
-    MaterialTheme {
+    Theme {
         scaffoldState = rememberScaffoldState()
         ScaffoldCoroutineScope = rememberCoroutineScope()
         Scaffold(modifier = Modifier.randomDebugBorder(), scaffoldState = scaffoldState) {
@@ -1527,7 +1527,7 @@ private fun ToxIDTextField()
     TextField(enabled = true, readOnly = true, singleLine = true,
         textStyle = TextStyle(fontSize = 13.sp),
         modifier = Modifier.width(MYTOXID_WIDTH).height(MYTOXID_HEIGHT).padding(0.dp),
-        colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White),
+        colors = TextFieldDefaults.textFieldColors(backgroundColor = Color(ChatColorsConfig.LIGHT__TEXTFIELD_BGCOLOR)),
         keyboardOptions = KeyboardOptions(
         capitalization = KeyboardCapitalization.None,
         autoCorrect = false,
@@ -1543,7 +1543,7 @@ private fun SaveDataPath()
     TextField(enabled = savepathdata.savePathEnabled, singleLine = true,
         textStyle = TextStyle(fontSize = 13.sp),
         modifier = Modifier.width(SAVEDATA_PATH_WIDTH).height(SAVEDATA_PATH_HEIGHT).padding(0.dp),
-        colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White),
+        colors = TextFieldDefaults.textFieldColors(backgroundColor = Color(ChatColorsConfig.LIGHT__TEXTFIELD_BGCOLOR)),
         keyboardOptions = KeyboardOptions(
         capitalization = KeyboardCapitalization.None,
         autoCorrect = false,
@@ -1910,8 +1910,11 @@ private fun MainAppStart()
         if ((OperatingSystem.getCurrent() != OperatingSystem.MACOS) && (OperatingSystem.getCurrent() != OperatingSystem.MACARM))
         {
             DefaultFont = FontFamily(
-                Font(resource = "fonts/Ubuntu-R.ttf", FontWeight.Normal, FontStyle.Normal),
-                Font(resource = "fonts/Ubuntu-B.ttf", FontWeight.Bold, FontStyle.Normal),
+                // Font(resource = "fonts/Ubuntu-R.ttf", FontWeight.Normal, FontStyle.Normal),
+                // Font(resource = "fonts/Ubuntu-B.ttf", FontWeight.Bold, FontStyle.Normal),
+                Font(resource = "fonts/NotoSans-Regular.ttf", FontWeight.Normal, FontStyle.Normal),
+                Font(resource = "fonts/NotoSans-SemiBold.ttf", FontWeight.SemiBold, FontStyle.Normal),
+                Font(resource = "fonts/NotoSans-SemiBold.ttf", FontWeight.Bold, FontStyle.Normal),
             )
         }
     }
@@ -1985,7 +1988,7 @@ private fun MainAppStart()
                         readOnly = false,
                         singleLine = true,
                         textStyle = TextStyle(fontSize = 18.sp),
-                        colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White),
+                        colors = TextFieldDefaults.textFieldColors(backgroundColor = Color(ChatColorsConfig.LIGHT__TEXTFIELD_BGCOLOR)),
                         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.None,autoCorrect = false),
                         value = inputTextToxSelfName,
                         placeholder = {   Text("") },
