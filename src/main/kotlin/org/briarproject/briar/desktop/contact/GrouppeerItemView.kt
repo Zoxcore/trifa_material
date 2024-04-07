@@ -19,6 +19,7 @@
 package org.briarproject.briar.desktop.contact
 
 import GROUP_PEER_COLUMN_PEERNAME_LEN_THRESHOLD
+import NotoEmoji
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -181,6 +182,7 @@ private fun GrouppeerItemViewInfo(grouppeerItem: GroupPeerItem) = Column(
             "IP: " + ip_addr_str) {
         Text(
             text = show_peer_name,
+            fontFamily = NotoEmoji,
             style = name_style,
             maxLines = 2,
             overflow = Ellipsis,
