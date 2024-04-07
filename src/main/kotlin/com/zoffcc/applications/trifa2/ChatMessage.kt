@@ -148,7 +148,7 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                         if(!isMyMessage) {
                             Row(verticalAlignment = Alignment.Bottom) {
                                 Text(
-                                    fontFamily = NotoEmoji,
+                                    fontFamily = DefaultFont,
                                     text = message.user.name,
                                     style = MaterialTheme.typography.body1.copy(
                                         fontWeight = FontWeight.SemiBold,
@@ -584,6 +584,7 @@ fun message_text_block(message: UIMessage, ui_scale: Float, setLinkVars: (Boolea
 {
     var show_link_click1 = false
     var link_str1 = ""
+    var text_is_only_emoji = false
     SelectionContainer(modifier = Modifier.padding(all = 0.dp))
     {
         var msg_fontsize = MSG_TEXT_FONT_SIZE_MIXED
@@ -593,6 +594,7 @@ fun message_text_block(message: UIMessage, ui_scale: Float, setLinkVars: (Boolea
             if (emojiInformation.isOnlyEmojis)
             {
                 msg_fontsize = MSG_TEXT_FONT_SIZE_EMOJI_ONLY
+                text_is_only_emoji = true
             }
         } catch (_: Exception)
         {
@@ -601,6 +603,7 @@ fun message_text_block(message: UIMessage, ui_scale: Float, setLinkVars: (Boolea
         var message_text_string = message.text
         if (message.trifaMsgType == TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value)
         {
+            text_is_only_emoji = false
             if (message.direction == TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value)
             {
                 if (is_filetransfer_finished_or_canceled(message, true))
@@ -618,7 +621,7 @@ fun message_text_block(message: UIMessage, ui_scale: Float, setLinkVars: (Boolea
             modifier = Modifier.randomDebugBorder(),
             style = MaterialTheme.typography.body1.copy(
                 fontSize = ((msg_fontsize * ui_scale).toDouble()).sp,
-                fontFamily = NotoEmoji,
+                fontFamily = if (text_is_only_emoji) NotoEmojiFont else DefaultFont,
                 lineHeight = TextUnit.Unspecified,
                 letterSpacing = 0.sp
             )

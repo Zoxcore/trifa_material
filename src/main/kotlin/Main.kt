@@ -91,7 +91,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -187,8 +186,6 @@ import java.util.*
 import java.util.concurrent.Executors
 import java.util.prefs.Preferences
 import javax.swing.JPanel
-import javax.swing.UIManager
-
 import com.vanniktech.emoji.EmojiManager
 import com.vanniktech.emoji.ios.IosEmojiProvider
 import com.vanniktech.emoji.search.SearchEmojiManager
@@ -281,7 +278,8 @@ const val GENERIC_TOR_USERAGENT = "Mozilla/5.0 (Windows NT 6.1; rv:60.0) Gecko/2
 var scaffoldState: ScaffoldState = ScaffoldState(drawerState = DrawerState(initialValue = DrawerValue.Closed), snackbarHostState = SnackbarHostState())
 @OptIn(DelicateCoroutinesApi::class)
 var ScaffoldCoroutineScope: CoroutineScope = GlobalScope
-var NotoEmoji: FontFamily? = null
+var NotoEmojiFont: FontFamily? = null
+var DefaultFont: FontFamily? = null
 
 @OptIn(DelicateCoroutinesApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -1890,10 +1888,13 @@ object AboutIcon : Painter() {
 @Composable
 private fun MainAppStart()
 {
-    NotoEmoji = FontFamily(
+    NotoEmojiFont = FontFamily(
+        Font(resource = "fonts/NotoColorEmoji.ttf", FontWeight.Normal),
+    )
+
+    DefaultFont = FontFamily(
         Font(resource = "fonts/Ubuntu-R.ttf", FontWeight.Normal, FontStyle.Normal),
         Font(resource = "fonts/Ubuntu-B.ttf", FontWeight.Bold, FontStyle.Normal),
-        Font(resource = "fonts/NotoColorEmoji.ttf", FontWeight.Normal),
     )
 
     var showIntroScreen by remember { mutableStateOf(true) }

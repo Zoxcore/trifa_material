@@ -18,10 +18,10 @@
 
 package org.briarproject.briar.desktop.contact
 
+import DefaultFont
 import GROUP_PEER_COLUMN_PEERNAME_LEN_THRESHOLD
-import NotoEmoji
+import NotoEmojiFont
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -35,20 +35,13 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Alignment.Companion.Start
 import androidx.compose.ui.Alignment.Companion.Top
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zoffcc.applications.trifa.Log
-import com.zoffcc.applications.trifa.TAG
 import org.briarproject.briar.desktop.ui.Tooltip
-import org.jetbrains.compose.resources.ExperimentalResourceApi
-import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun GrouppeerItemView(
@@ -182,7 +175,7 @@ private fun GrouppeerItemViewInfo(grouppeerItem: GroupPeerItem) = Column(
             "IP: " + ip_addr_str) {
         Text(
             text = show_peer_name,
-            fontFamily = NotoEmoji,
+            fontFamily = DefaultFont,
             style = name_style,
             maxLines = 2,
             overflow = Ellipsis,
