@@ -41,7 +41,8 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
             item { Spacer(Modifier.size(SPACE_BEFORE_FIRST_MESSAGE)) }
             items(grpmsgs.groupmessages, key = { it.msgDatabaseId }) {
                 GroupChatMessage(isMyMessage = it.user == myUser, it, ui_scale,
-                    modifier = Modifier.animateItemPlacement())
+                    // modifier = Modifier.animateItemPlacement()
+                )
             }
             item {
                 Box(Modifier.height(SPACE_AFTER_LAST_MESSAGE))

@@ -41,7 +41,8 @@ internal fun Messages(ui_scale: Float, selectedContactPubkey: String?) {
             items(msgs.messages, key = { it.msgDatabaseId }) {
                 // Log.i(com.zoffcc.applications.trifa.TAG, "LazyColumn -> it.msgDatabaseId = " + it.msgDatabaseId)
                 ChatMessage(isMyMessage = (it.user == myUser), it, ui_scale,
-                    modifier = Modifier.animateItemPlacement())
+                    // modifier = Modifier.animateItemPlacement()
+                )
             }
             item {
                 Box(Modifier.height(SPACE_AFTER_LAST_MESSAGE))
