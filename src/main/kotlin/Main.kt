@@ -91,7 +91,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
@@ -276,6 +281,7 @@ const val GENERIC_TOR_USERAGENT = "Mozilla/5.0 (Windows NT 6.1; rv:60.0) Gecko/2
 var scaffoldState: ScaffoldState = ScaffoldState(drawerState = DrawerState(initialValue = DrawerValue.Closed), snackbarHostState = SnackbarHostState())
 @OptIn(DelicateCoroutinesApi::class)
 var ScaffoldCoroutineScope: CoroutineScope = GlobalScope
+var NotoEmoji: FontFamily? = null
 
 @OptIn(DelicateCoroutinesApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -1884,6 +1890,12 @@ object AboutIcon : Painter() {
 @Composable
 private fun MainAppStart()
 {
+    NotoEmoji = FontFamily(
+        Font(resource = "fonts/Ubuntu-R.ttf", FontWeight.Normal, FontStyle.Normal),
+        Font(resource = "fonts/Ubuntu-B.ttf", FontWeight.Bold, FontStyle.Normal),
+        Font(resource = "fonts/NotoColorEmoji.ttf", FontWeight.Normal),
+    )
+
     var showIntroScreen by remember { mutableStateOf(true) }
     var firstRun by remember { mutableStateOf(true) }
     var inputTextToxSelfName by remember { mutableStateOf(RandomNameGenerator.getFullName(Random())) }

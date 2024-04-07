@@ -148,6 +148,7 @@ inline fun ChatMessage(isMyMessage: Boolean, message: UIMessage, ui_scale: Float
                         if(!isMyMessage) {
                             Row(verticalAlignment = Alignment.Bottom) {
                                 Text(
+                                    fontFamily = NotoEmoji,
                                     text = message.user.name,
                                     style = MaterialTheme.typography.body1.copy(
                                         fontWeight = FontWeight.SemiBold,
@@ -617,6 +618,7 @@ fun message_text_block(message: UIMessage, ui_scale: Float, setLinkVars: (Boolea
             modifier = Modifier.randomDebugBorder(),
             style = MaterialTheme.typography.body1.copy(
                 fontSize = ((msg_fontsize * ui_scale).toDouble()).sp,
+                fontFamily = NotoEmoji,
                 lineHeight = TextUnit.Unspecified,
                 letterSpacing = 0.sp
             )
