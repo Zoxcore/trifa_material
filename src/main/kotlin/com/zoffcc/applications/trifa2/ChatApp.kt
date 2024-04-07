@@ -20,7 +20,9 @@ import androidx.compose.material.ProvideTextStyle
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.TopAppBar
+import androidx.compose.material.Typography
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Call
@@ -461,10 +463,25 @@ fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, s
 @Composable
 fun Theme(content: @Composable () -> Unit)
 {
+    var Typography: Typography? = null
+    try
+    {
+        Typography = Typography(
+            defaultFontFamily = DefaultFont!!
+        )
+    }
+    catch(_: Exception)
+    {
+        Typography = MaterialTheme.typography
+    }
+
+    // colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White),
+    // TextFieldDefaults.textFieldColors(backgroundColor = Color(ChatColorsConfig.LIGHT__TEXTFIELD_BGCOLOR))
     MaterialTheme(
+        typography = Typography!!,
         colors = lightColors(
-            surface = Color(ChatColorsConfig.SURFACE),
-            background = Color(ChatColorsConfig.TOP_GRADIENT.last()),
+            surface = Color(ChatColorsConfig.LIGHT__FGCOLOR),
+            background = Color(ChatColorsConfig.LIGHT__BGCOLOR),
         ),
     ) {
         ProvideTextStyle(LocalTextStyle.current.copy(letterSpacing = 0.sp)) {

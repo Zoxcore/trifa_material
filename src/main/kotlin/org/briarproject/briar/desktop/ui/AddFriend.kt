@@ -42,7 +42,7 @@ fun AddFriend() = Box {
         TextField(singleLine = true,
             textStyle = TextStyle(fontSize = 14.sp),
             modifier = Modifier.padding(0.dp).width(400.dp),
-            colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White),
+            colors = TextFieldDefaults.textFieldColors(backgroundColor = Color(ChatColorsConfig.LIGHT__TEXTFIELD_BGCOLOR)),
             keyboardOptions = KeyboardOptions(
                 capitalization = KeyboardCapitalization.None,
                 autoCorrect = false,
