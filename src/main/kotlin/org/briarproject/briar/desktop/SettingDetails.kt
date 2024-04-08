@@ -100,6 +100,8 @@ fun SettingDetails()
             own_relay_settings()
             Spacer(modifier = Modifier.height(60.dp))
         }
+        general_settings()
+        Spacer(modifier = Modifier.height(60.dp))
         tox_settings()
         Spacer(modifier = Modifier.height(60.dp))
         if (global_store.ormaRunning)
@@ -323,6 +325,33 @@ private fun database_settings()
         // ---- windows dshow audio in source name ----
 
     }
+}
+
+@Composable
+private fun general_settings()
+{
+    // ---- use custom font that has color emoji AND normal text ----
+    var use_custom_font_with_color_emoji by remember { mutableStateOf(false) }
+    try
+    {
+        if (global_prefs.getBoolean("main.use_custom_font_with_color_emoji", false))
+        {
+            use_custom_font_with_color_emoji = true
+        }
+    } catch (_: Exception)
+    {
+    }
+    DetailItem(label = i18n("use custom font with color emojis for text.\n!! this is experimental and also needs an app restart !!"),
+        description = (if (use_custom_font_with_color_emoji) i18n("enabled") else i18n("disabled"))) {
+        Switch(
+            checked = use_custom_font_with_color_emoji,
+            onCheckedChange = {
+                global_prefs.putBoolean("main.use_custom_font_with_color_emoji", it)
+                use_custom_font_with_color_emoji = it
+            },
+        )
+    }
+    // ---- use custom font that has color emoji AND normal text ----
 }
 
 @Composable

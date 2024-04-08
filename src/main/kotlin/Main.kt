@@ -92,7 +92,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontLoadingStrategy
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -1890,6 +1889,18 @@ object AboutIcon : Painter() {
 @Composable
 private fun MainAppStart()
 {
+    var use_custom_font_with_color_emoji = false
+    try
+    {
+        val tmp = global_prefs.getBoolean("main.use_custom_font_with_color_emoji", false)
+        if (tmp == true)
+        {
+            use_custom_font_with_color_emoji = true
+        }
+    } catch (_: Exception)
+    {
+    }
+
     try
     {
         // HINT: for some reason the fonts do not load on macOS
@@ -1909,13 +1920,27 @@ private fun MainAppStart()
         // HINT: for some reason the fonts do not load on macOS
         if ((OperatingSystem.getCurrent() != OperatingSystem.MACOS) && (OperatingSystem.getCurrent() != OperatingSystem.MACARM))
         {
-            DefaultFont = FontFamily(
-                // Font(resource = "fonts/Ubuntu-R.ttf", FontWeight.Normal, FontStyle.Normal),
-                // Font(resource = "fonts/Ubuntu-B.ttf", FontWeight.Bold, FontStyle.Normal),
-                Font(resource = "fonts/NotoSans-Regular.ttf", FontWeight.Normal, FontStyle.Normal),
-                Font(resource = "fonts/NotoSans-SemiBold.ttf", FontWeight.SemiBold, FontStyle.Normal),
-                Font(resource = "fonts/NotoSans-SemiBold.ttf", FontWeight.Bold, FontStyle.Normal),
-            )
+            if (use_custom_font_with_color_emoji)
+            {
+                // HINT: use a patched font that contains color emojis aswell as normal text
+                // downloaded from: https://github.com/thedemons/merge_color_emoji_font/raw/main/seguiemj.ttf
+                // see for more details: https://github.com/thedemons/merge_color_emoji_font
+                DefaultFont = FontFamily(
+                    Font(resource = "fonts/seguiemj.ttf", FontWeight.Normal, FontStyle.Normal),
+                    Font(resource = "fonts/seguiemj.ttf", FontWeight.SemiBold, FontStyle.Normal),
+                    Font(resource = "fonts/seguiemj_bold.ttf", FontWeight.Bold, FontStyle.Normal),
+                )
+            }
+            else
+            {
+                DefaultFont = FontFamily(
+                    // Font(resource = "fonts/Ubuntu-R.ttf", FontWeight.Normal, FontStyle.Normal),
+                    // Font(resource = "fonts/Ubuntu-B.ttf", FontWeight.Bold, FontStyle.Normal),
+                    Font(resource = "fonts/NotoSans-Regular.ttf", FontWeight.Normal, FontStyle.Normal),
+                    Font(resource = "fonts/NotoSans-SemiBold.ttf", FontWeight.SemiBold, FontStyle.Normal),
+                    Font(resource = "fonts/NotoSans-SemiBold.ttf", FontWeight.Bold, FontStyle.Normal),
+                )
+            }
         }
     }
     catch(_: Exception)
