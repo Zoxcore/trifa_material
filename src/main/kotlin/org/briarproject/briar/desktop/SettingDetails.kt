@@ -331,12 +331,12 @@ private fun database_settings()
 private fun general_settings()
 {
     // ---- use custom font that has color emoji AND normal text ----
-    var use_custom_font_with_color_emoji by remember { mutableStateOf(true) }
+    var use_custom_font_with_color_emoji by remember { mutableStateOf(false) }
     try
     {
-        if (!global_prefs.getBoolean("main.use_custom_font_with_color_emoji", true))
+        if (global_prefs.getBoolean("main.use_custom_font_with_color_emoji", false))
         {
-            use_custom_font_with_color_emoji = false
+            use_custom_font_with_color_emoji = true
         }
     } catch (_: Exception)
     {
