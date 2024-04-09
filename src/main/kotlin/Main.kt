@@ -1889,13 +1889,13 @@ object AboutIcon : Painter() {
 @Composable
 private fun MainAppStart()
 {
-    var use_custom_font_with_color_emoji = true
+    var use_custom_font_with_color_emoji = false
     try
     {
-        val tmp = global_prefs.getBoolean("main.use_custom_font_with_color_emoji", true)
-        if (tmp == false)
+        val tmp = global_prefs.getBoolean("main.use_custom_font_with_color_emoji", false)
+        if (tmp == true)
         {
-            use_custom_font_with_color_emoji = false
+            use_custom_font_with_color_emoji = true
         }
     } catch (_: Exception)
     {
