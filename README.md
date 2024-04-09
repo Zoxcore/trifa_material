@@ -124,6 +124,23 @@ https://github.com/Zoxcore/trifa_material/releases/download/nightly/bom_compilec
 Full list of run time dependencies:<br>
 https://github.com/Zoxcore/trifa_material/releases/download/nightly/bom_runtimeclasspath.txt
 
+## Custom fonts
+```NotoColorEmoji.ttf```<br>
+downloaded from this repo https://github.com/googlefonts/noto-emoji<br>
+https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf
+
+
+```NotoSans-Regular.ttf```<br>
+```NotoSans-SemiBold.ttf```<br>
+both downloaded from this repo https://github.com/openmaptiles/fonts/tree/master/noto-sans<br>
+
+```NotoSans-Regular-COLRv1.ttf__004_3547_plus_49_glyphs_selected.ttf```<br>
+```NotoSans-SemiBold-COLRv1.ttf__005_3548_glyphs_selected.ttf```<br>
+
+these are made by merging ```NotoColorEmoji-SVG.otf```
+(from this repo https://github.com/adobe-fonts/noto-emoji-svg/blob/main/fonts/NotoColorEmoji-SVG.otf)
+into their NotoSans google fonts above
+
 
 <br>
 Any use of this project's code by GitHub Copilot, past or present, is done
