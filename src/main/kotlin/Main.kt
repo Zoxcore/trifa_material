@@ -1889,13 +1889,13 @@ object AboutIcon : Painter() {
 @Composable
 private fun MainAppStart()
 {
-    var use_custom_font_with_color_emoji = false
+    var use_custom_font_with_color_emoji = true
     try
     {
-        val tmp = global_prefs.getBoolean("main.use_custom_font_with_color_emoji", false)
-        if (tmp == true)
+        val tmp = global_prefs.getBoolean("main.use_custom_font_with_color_emoji", true)
+        if (tmp == false)
         {
-            use_custom_font_with_color_emoji = true
+            use_custom_font_with_color_emoji = false
         }
     } catch (_: Exception)
     {
@@ -1923,12 +1923,10 @@ private fun MainAppStart()
             if (use_custom_font_with_color_emoji)
             {
                 // HINT: use a patched font that contains color emojis aswell as normal text
-                // downloaded from: https://github.com/thedemons/merge_color_emoji_font/raw/main/seguiemj.ttf
-                // see for more details: https://github.com/thedemons/merge_color_emoji_font
                 DefaultFont = FontFamily(
-                    Font(resource = "fonts/seguiemj.ttf", FontWeight.Normal, FontStyle.Normal),
-                    Font(resource = "fonts/seguiemj.ttf", FontWeight.SemiBold, FontStyle.Normal),
-                    Font(resource = "fonts/seguiemj_bold.ttf", FontWeight.Bold, FontStyle.Normal),
+                    Font(resource = "fonts/NotoSans-Regular-COLRv1.ttf__004_3547_plus_49_glyphs_selected.ttf", FontWeight.Normal, FontStyle.Normal),
+                    Font(resource = "fonts/NotoSans-SemiBold-COLRv1.ttf__005_3548_glyphs_selected.ttf", FontWeight.SemiBold, FontStyle.Normal),
+                    Font(resource = "fonts/NotoSans-SemiBold-COLRv1.ttf__005_3548_glyphs_selected.ttf", FontWeight.Bold, FontStyle.Normal),
                 )
             }
             else
