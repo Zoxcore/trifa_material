@@ -111,22 +111,32 @@ import androidx.compose.ui.window.rememberWindowState
 import ca.gosyer.appdirs.AppDirs
 import com.google.gson.Gson
 import com.vanniktech.emoji.Emoji
+import com.vanniktech.emoji.EmojiManager
+import com.vanniktech.emoji.ios.IosEmojiProvider
+import com.vanniktech.emoji.search.SearchEmojiManager
 import com.zoffcc.applications.ffmpegav.AVActivity
+import com.zoffcc.applications.ffmpegav.AVActivity.JAVA_AUDIO_IN_DEVICE_NAME
 import com.zoffcc.applications.sorm.BootstrapNodeEntryDB
 import com.zoffcc.applications.trifa.AVState
 import com.zoffcc.applications.trifa.AudioBar
 import com.zoffcc.applications.trifa.AudioBar.audio_in_bar
 import com.zoffcc.applications.trifa.AudioBar.audio_out_bar
 import com.zoffcc.applications.trifa.CustomSemaphore
+import com.zoffcc.applications.trifa.EmojiStrAndName
+import com.zoffcc.applications.trifa.FriendSettingDetails
 import com.zoffcc.applications.trifa.GroupSettingDetails
 import com.zoffcc.applications.trifa.HelperGeneric.PubkeyShort
+import com.zoffcc.applications.trifa.HelperGeneric.ngc_video_frame_last_incoming_ts
+import com.zoffcc.applications.trifa.HelperGroup
 import com.zoffcc.applications.trifa.HelperNotification.init_system_tray
 import com.zoffcc.applications.trifa.HelperNotification.set_resouces_dir
 import com.zoffcc.applications.trifa.JPictureBox
 import com.zoffcc.applications.trifa.JPictureBoxOut
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity
+import com.zoffcc.applications.trifa.MainActivity.Companion.DEBUG_COMPOSE_UI_UPDATES
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__audio_input_filter
+import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__do_not_sync_av
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__v4l2_capture_force_mjpeg
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__video_bitrate_mode
 import com.zoffcc.applications.trifa.MainActivity.Companion.accept_incoming_av_call
@@ -135,7 +145,10 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.main_init
 import com.zoffcc.applications.trifa.MainActivity.Companion.set_toxav_video_sending_quality
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_name
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_peer_get_name
+import com.zoffcc.applications.trifa.MainActivity.Companion.toxav_option_set
 import com.zoffcc.applications.trifa.NodeListJS
+import com.zoffcc.applications.trifa.OperatingSystem
 import com.zoffcc.applications.trifa.PrefsSettings
 import com.zoffcc.applications.trifa.RandomNameGenerator
 import com.zoffcc.applications.trifa.SingleComponentAspectRatioKeeperLayout
@@ -170,12 +183,15 @@ import org.briarproject.briar.desktop.ui.AddFriend
 import org.briarproject.briar.desktop.ui.AddGroup
 import org.briarproject.briar.desktop.ui.ExplainerChat
 import org.briarproject.briar.desktop.ui.ExplainerGroup
+import org.briarproject.briar.desktop.ui.ExplainerInfoIsRelay
 import org.briarproject.briar.desktop.ui.ExplainerToxNotRunning
 import org.briarproject.briar.desktop.ui.HorizontalDivider
+import org.briarproject.briar.desktop.ui.Tooltip
 import org.briarproject.briar.desktop.ui.UiMode
 import org.briarproject.briar.desktop.ui.UiPlaceholder
 import org.briarproject.briar.desktop.ui.VerticalDivider
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
+import java.awt.GraphicsEnvironment
 import java.awt.Toolkit
 import java.io.File
 import java.net.URI
@@ -186,21 +202,6 @@ import java.util.*
 import java.util.concurrent.Executors
 import java.util.prefs.Preferences
 import javax.swing.JPanel
-import com.vanniktech.emoji.EmojiManager
-import com.vanniktech.emoji.ios.IosEmojiProvider
-import com.vanniktech.emoji.search.SearchEmojiManager
-import com.zoffcc.applications.ffmpegav.AVActivity.JAVA_AUDIO_IN_DEVICE_NAME
-import com.zoffcc.applications.trifa.EmojiStrAndName
-import com.zoffcc.applications.trifa.FriendSettingDetails
-import com.zoffcc.applications.trifa.HelperGeneric.ngc_video_frame_last_incoming_ts
-import com.zoffcc.applications.trifa.HelperGroup
-import com.zoffcc.applications.trifa.MainActivity.Companion.DEBUG_COMPOSE_UI_UPDATES
-import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__do_not_sync_av
-import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_peer_get_name
-import com.zoffcc.applications.trifa.MainActivity.Companion.toxav_option_set
-import com.zoffcc.applications.trifa.OperatingSystem
-import org.briarproject.briar.desktop.ui.ExplainerInfoIsRelay
-import org.briarproject.briar.desktop.ui.Tooltip
 
 private const val TAG = "trifa.Main.kt"
 var tox_running_state_wrapper = "start"
@@ -891,7 +892,7 @@ fun App()
                                             }
                                             audio_in_sources_get = tmp2.toTypedArray()
                                         }
-                                        //if (avstatestore.state.audio_in_device_get() == "dshow")
+                                        // if (avstatestore.state.audio_in_device_get() == "dshow")
                                         //{
                                         //    audio_in_sources_get += listOf("audio=" + MainActivity.DB_PREF__windows_audio_in_source + "")
                                         //}
@@ -1928,10 +1929,18 @@ private fun MainAppStart()
                     Font(resource = "fonts/Noto-COLRv1-COLRv1_normal_chars_removed.ttf", FontWeight.Normal, FontStyle.Normal),
                     Font(resource = "fonts/Noto-COLRv1-COLRv1_normal_chars_removed.ttf", FontWeight.SemiBold, FontStyle.Normal),
                     Font(resource = "fonts/Noto-COLRv1-COLRv1_normal_chars_removed.ttf", FontWeight.Bold, FontStyle.Normal),
-                    //Font(resource = "fonts/NotoSans-Regular-COLRv1.ttf", FontWeight.Normal, FontStyle.Normal),
-                    //Font(resource = "fonts/NotoSans-SemiBold-COLRv1.ttf", FontWeight.SemiBold, FontStyle.Normal),
-                    //Font(resource = "fonts/NotoSans-SemiBold-COLRv1.ttf", FontWeight.Bold, FontStyle.Normal),
+                    // Font(resource = "fonts/NotoSans-Regular.ttf", FontWeight.Normal, FontStyle.Normal),
+                    // Font(resource = "fonts/NotoSans-SemiBold.ttf", FontWeight.SemiBold, FontStyle.Normal),
+                    // Font(resource = "fonts/NotoSans-SemiBold.ttf", FontWeight.Bold, FontStyle.Normal),
                 )
+                /*
+                val default_font_file_with_path = RESOURCESDIR.toString() + "/" + "NotoSans-Regular.ttf"
+                Log.i(TAG, "font=" + default_font_file_with_path)
+                val f:  java.awt.Font =  java.awt.Font.createFont(java.awt.Font.TRUETYPE_FONT,
+                    File(default_font_file_with_path))
+                val ge = GraphicsEnvironment.getLocalGraphicsEnvironment()
+                ge.registerFont(f)
+                */
             }
             else
             {
@@ -1945,8 +1954,9 @@ private fun MainAppStart()
             }
         }
     }
-    catch(_: Exception)
+    catch(e: Exception)
     {
+        e.printStackTrace()
     }
 
     var showIntroScreen by remember { mutableStateOf(true) }
