@@ -134,12 +134,11 @@ https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf
 ```NotoSans-SemiBold.ttf```<br>
 both downloaded from this repo https://github.com/openmaptiles/fonts/tree/master/noto-sans<br>
 
-```NotoSans-Regular-COLRv1.ttf__004_3547_plus_49_glyphs_selected.ttf```<br>
-```NotoSans-SemiBold-COLRv1.ttf__005_3548_glyphs_selected.ttf```<br>
+```Noto-COLRv1_normal_chars_removed.ttf```<br>
 
-these are made by merging ```NotoColorEmoji-SVG.otf```
-(from this repo https://github.com/adobe-fonts/noto-emoji-svg/blob/main/fonts/NotoColorEmoji-SVG.otf)
-into their NotoSans google fonts above
+this is made by removing all normal characters like SPACE and NUMBERS from ```Noto-COLRv1.ttf```
+(from this repo https://github.com/googlefonts/noto-emoji/tree/main/fonts)
+
 
 
 <br>
