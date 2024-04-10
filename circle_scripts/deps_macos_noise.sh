@@ -42,7 +42,7 @@ type sudo
 # ------- deps verisions ---------
 NASM_VERSION="nasm-2.14.02"
 YASM_VERSION="1.3.0"
-FFMPEG_VERSION="n6.1.1"
+FFMPEG_VERSION="n7.0"
 OPUS_VERSION="v1.4"
 SODIUM_VERSION="1.0.19"
 VPX_VERSION="v1.14.0"
