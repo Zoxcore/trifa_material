@@ -1922,11 +1922,15 @@ private fun MainAppStart()
         {
             if (use_custom_font_with_color_emoji)
             {
-                // HINT: use a patched font that contains color emojis aswell as normal text
+                // HINT: use a patched font that noto color emoji with regular chars like numbers and spaces removed
+                // this will show emojis in texts but use the default font as fallback for anything that is not an emoji
                 DefaultFont = FontFamily(
-                    Font(resource = "fonts/NotoSans-Regular-COLRv1.ttf__004_3547_plus_49_glyphs_selected.ttf", FontWeight.Normal, FontStyle.Normal),
-                    Font(resource = "fonts/NotoSans-SemiBold-COLRv1.ttf__005_3548_glyphs_selected.ttf", FontWeight.SemiBold, FontStyle.Normal),
-                    Font(resource = "fonts/NotoSans-SemiBold-COLRv1.ttf__005_3548_glyphs_selected.ttf", FontWeight.Bold, FontStyle.Normal),
+                    Font(resource = "fonts/Noto-COLRv1-COLRv1_normal_chars_removed.ttf", FontWeight.Normal, FontStyle.Normal),
+                    Font(resource = "fonts/Noto-COLRv1-COLRv1_normal_chars_removed.ttf", FontWeight.SemiBold, FontStyle.Normal),
+                    Font(resource = "fonts/Noto-COLRv1-COLRv1_normal_chars_removed.ttf", FontWeight.Bold, FontStyle.Normal),
+                    //Font(resource = "fonts/NotoSans-Regular-COLRv1.ttf", FontWeight.Normal, FontStyle.Normal),
+                    //Font(resource = "fonts/NotoSans-SemiBold-COLRv1.ttf", FontWeight.SemiBold, FontStyle.Normal),
+                    //Font(resource = "fonts/NotoSans-SemiBold-COLRv1.ttf", FontWeight.Bold, FontStyle.Normal),
                 )
             }
             else
