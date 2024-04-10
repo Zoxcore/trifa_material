@@ -46,7 +46,7 @@ FFMPEG_VERSION="n6.1.1"
 OPUS_VERSION="v1.4"
 SODIUM_VERSION="1.0.19"
 VPX_VERSION="v1.14.0"
-_X264_VERSION_="31e19f92f00c7003fa115047ce50978bc98c3a0d"
+_X264_VERSION_="7ed753b10a61d0be95f683289dfb925b800b0676"
 # ------- deps verisions ---------
 
 # ---------- ffmpeg ---------
