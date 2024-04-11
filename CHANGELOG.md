@@ -1,5 +1,15 @@
 # Changelog
 
+## [v1.0.30](https://github.com/Zoxcore/trifa_material/tree/v1.0.30) (2024-04-11)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.29...v1.0.30)
+
+**Merged pull requests:**
+
+- update dependencies [\#205](https://github.com/Zoxcore/trifa_material/pull/205) ([zoff99](https://github.com/zoff99))
+- use custom fonts only on Linux [\#204](https://github.com/Zoxcore/trifa_material/pull/204) ([zoff99](https://github.com/zoff99))
+- better emoji support when mixed with text [\#203](https://github.com/Zoxcore/trifa_material/pull/203) ([zoff99](https://github.com/zoff99))
+
 ## [v1.0.29](https://github.com/Zoxcore/trifa_material/tree/v1.0.29) (2024-04-07)
 
 [Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.28...v1.0.29)
