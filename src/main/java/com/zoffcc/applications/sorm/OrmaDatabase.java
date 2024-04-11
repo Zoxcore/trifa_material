@@ -66,6 +66,25 @@ public class OrmaDatabase
         }
     }
 
+    static final int BINDVAR_TYPE_Int = 0;
+    static final int BINDVAR_TYPE_Long = 1;
+    static final int BINDVAR_TYPE_String = 2;
+    static final int BINDVAR_TYPE_Boolean = 3;
+    static final int BINDVAR_OFFSET_WHERE = 400;
+    static final int BINDVAR_OFFSET_SET = 600;
+
+    public static class OrmaBindvar
+    {
+        int type;
+        Object value;
+
+        OrmaBindvar(final int type, final Object value)
+        {
+            this.type = type;
+            this.value = value;
+        }
+    }
+
     /*
      * repair or finally replace a string that is not correct UTF-8
      */

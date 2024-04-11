@@ -197,7 +197,10 @@ public class Message
     String sql_where = "where 1=1 "; // where
     String sql_orderby = ""; // order by
     String sql_limit = ""; // limit
-    Object[] sql_bind_vars = new Object[]{};
+    List<OrmaBindvar> bind_where_vars = new ArrayList<>();
+    int bind_where_count = 0;
+    List<OrmaBindvar> bind_set_vars = new ArrayList<>();
+    int bind_set_count = 0;
 
     public List<Message> toList()
     {
@@ -205,15 +208,47 @@ public class Message
 
         try
         {
-            Statement statement = sqldb.createStatement();
-
             final String sql = this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit;
             if (ORMA_TRACE)
             {
-                Log.i(TAG, "sql=" + sql);
+                Log.i(TAG, "sql=" + sql + " bindvar count=" + bind_where_count);
+                if (bind_where_count > 0)
+                {
+                    for(int jj=0;jj<bind_where_count;jj++) {
+                        Log.i(TAG, "bindvar ?" + (jj + BINDVAR_OFFSET_WHERE) +
+                                " = " + bind_where_vars.get(jj).value);
+                    }
+                }
             }
             final long t1 = System.currentTimeMillis();
-            ResultSet rs = statement.executeQuery(sql);
+            PreparedStatement statement = sqldb.prepareStatement(sql);
+            statement.clearParameters();
+            if (bind_where_count > 0)
+            {
+                try {
+                    for (int jj = 0; jj < bind_where_count; jj++) {
+                        int type = bind_where_vars.get(jj).type;
+                        if (type == BINDVAR_TYPE_Int) {
+                            statement.setInt((jj + BINDVAR_OFFSET_WHERE),
+                                    (int) bind_where_vars.get(jj).value);
+                        } else if (type == BINDVAR_TYPE_Long) {
+                            statement.setLong((jj + BINDVAR_OFFSET_WHERE),
+                                    (long) bind_where_vars.get(jj).value);
+                        } else if (type == BINDVAR_TYPE_String) {
+                            statement.setString((jj + BINDVAR_OFFSET_WHERE),
+                                    (String) bind_where_vars.get(jj).value);
+                        } else if (type == BINDVAR_TYPE_Boolean) {
+                            statement.setBoolean((jj + BINDVAR_OFFSET_WHERE),
+                                    (boolean) bind_where_vars.get(jj).value);
+                        }
+                    }
+                }
+                catch(Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            ResultSet rs = statement.executeQuery();
             final long t2 = System.currentTimeMillis();
             if (ORMA_LONG_RUNNING_TRACE)
             {
@@ -461,13 +496,46 @@ public class Message
     {
         try
         {
-            Statement statement = sqldb.createStatement();
             final String sql = this.sql_start + " " + this.sql_set + " " + this.sql_where;
             if (ORMA_TRACE)
             {
-                Log.i(TAG, "sql=" + sql);
+                Log.i(TAG, "sql=" + sql + " bindvar count=" + bind_set_count);
+                if (bind_set_count > 0)
+                {
+                    for(int jj=0;jj<bind_set_count;jj++) {
+                        Log.i(TAG, "bindvar ?" + (jj + BINDVAR_OFFSET_SET) +
+                                " = " + bind_set_vars.get(jj).value);
+                    }
+                }
             }
-            statement.executeUpdate(sql);
+            PreparedStatement statement = sqldb.prepareStatement(sql);
+            statement.clearParameters();
+            if (bind_set_count > 0)
+            {
+                try {
+                    for (int jj = 0; jj < bind_set_count; jj++) {
+                        int type = bind_set_vars.get(jj).type;
+                        if (type == BINDVAR_TYPE_Int) {
+                            statement.setInt((jj + BINDVAR_OFFSET_SET),
+                                    (int) bind_set_vars.get(jj).value);
+                        } else if (type == BINDVAR_TYPE_Long) {
+                            statement.setLong((jj + BINDVAR_OFFSET_SET),
+                                    (long) bind_set_vars.get(jj).value);
+                        } else if (type == BINDVAR_TYPE_String) {
+                            statement.setString((jj + BINDVAR_OFFSET_SET),
+                                    (String) bind_set_vars.get(jj).value);
+                        } else if (type == BINDVAR_TYPE_Boolean) {
+                            statement.setBoolean((jj + BINDVAR_OFFSET_SET),
+                                    (boolean) bind_set_vars.get(jj).value);
+                        }
+                    }
+                }
+                catch(Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            statement.executeUpdate();
 
             try
             {
@@ -490,17 +558,49 @@ public class Message
 
         try
         {
-            Statement statement = sqldb.createStatement();
             this.sql_start = "SELECT count(*) as count FROM " + this.getClass().getSimpleName();
 
             final String sql = this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit;
             if (ORMA_TRACE)
             {
-                Log.i(TAG, "sql=" + sql);
+                Log.i(TAG, "sql=" + sql + " bindvar count=" + bind_set_count);
+                if (bind_set_count > 0)
+                {
+                    for(int jj=0;jj<bind_set_count;jj++) {
+                        Log.i(TAG, "bindvar ?" + (jj + BINDVAR_OFFSET_SET) +
+                                " = " + bind_set_vars.get(jj).value);
+                    }
+                }
             }
 
-            ResultSet rs = statement.executeQuery(sql);
-
+            PreparedStatement statement = sqldb.prepareStatement(sql);
+            statement.clearParameters();
+            if (bind_where_count > 0)
+            {
+                try {
+                    for (int jj = 0; jj < bind_where_count; jj++) {
+                        int type = bind_where_vars.get(jj).type;
+                        if (type == BINDVAR_TYPE_Int) {
+                            statement.setInt((jj + BINDVAR_OFFSET_WHERE),
+                                    (int) bind_where_vars.get(jj).value);
+                        } else if (type == BINDVAR_TYPE_Long) {
+                            statement.setLong((jj + BINDVAR_OFFSET_WHERE),
+                                    (long) bind_where_vars.get(jj).value);
+                        } else if (type == BINDVAR_TYPE_String) {
+                            statement.setString((jj + BINDVAR_OFFSET_WHERE),
+                                    (String) bind_where_vars.get(jj).value);
+                        } else if (type == BINDVAR_TYPE_Boolean) {
+                            statement.setBoolean((jj + BINDVAR_OFFSET_WHERE),
+                                    (boolean) bind_where_vars.get(jj).value);
+                        }
+                    }
+                }
+                catch(Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            ResultSet rs = statement.executeQuery();
             if (rs.next())
             {
                 ret = rs.getInt("count");
@@ -540,7 +640,9 @@ public class Message
 
     public Message tox_friendpubkeyEq(String tox_friendpubkey)
     {
-        this.sql_where = this.sql_where + " and tox_friendpubkey='" + s(tox_friendpubkey) + "' ";
+        this.sql_where = this.sql_where + " and tox_friendpubkey=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_friendpubkey));
+        bind_where_count++;
         return this;
     }
 
@@ -626,7 +728,9 @@ public class Message
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " text='" + s(text) + "' ";
+        this.sql_set = this.sql_set + " text=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, text));
+        bind_set_count++;
         return this;
     }
 
@@ -668,7 +772,9 @@ public class Message
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " filename_fullpath='" + s(filename_fullpath) + "' ";
+        this.sql_set = this.sql_set + " filename_fullpath=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, filename_fullpath));
+        bind_set_count++;
         return this;
     }
 
@@ -682,7 +788,9 @@ public class Message
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " raw_msgv2_bytes='" + s(raw_msgv2_bytes) + "' ";
+        this.sql_set = this.sql_set + " raw_msgv2_bytes=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, raw_msgv2_bytes));
+        bind_set_count++;
         return this;
     }
 
@@ -696,7 +804,9 @@ public class Message
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " msg_id_hash='" + s(msg_id_hash) + "' ";
+        this.sql_set = this.sql_set + " msg_id_hash=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, msg_id_hash));
+        bind_set_count++;
         return this;
     }
 
@@ -770,7 +880,9 @@ public class Message
 
     public Message msg_id_hashEq(String msg_id_hash)
     {
-        this.sql_where = this.sql_where + " and  msg_id_hash='" + s(msg_id_hash) + "' ";
+        this.sql_where = this.sql_where + " and msg_id_hash=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, msg_id_hash));
+        bind_where_count++;
         return this;
     }
 
@@ -939,7 +1051,9 @@ public class Message
 
     public Message msg_idv3_hashEq(String msg_idv3_hash)
     {
-        this.sql_where = this.sql_where + " and  msg_idv3_hash='" + s(msg_idv3_hash) + "' ";
+        this.sql_where = this.sql_where + " and msg_idv3_hash=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, msg_idv3_hash));
+        bind_where_count++;
         return this;
     }
 
@@ -953,7 +1067,9 @@ public class Message
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " msg_idv3_hash='" + s(msg_idv3_hash) + "' ";
+        this.sql_set = this.sql_set + " msg_idv3_hash=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, msg_idv3_hash));
+        bind_set_count++;
         return this;
     }
 
