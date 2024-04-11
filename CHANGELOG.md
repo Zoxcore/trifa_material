@@ -1,5 +1,13 @@
 # Changelog
 
+## [v1.0.31](https://github.com/Zoxcore/trifa_material/tree/v1.0.31) (2024-04-11)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.30...v1.0.31)
+
+**Merged pull requests:**
+
+- sorma: use bindvars for more network and sync strings [\#206](https://github.com/Zoxcore/trifa_material/pull/206) ([zoff99](https://github.com/zoff99))
+
 ## [v1.0.30](https://github.com/Zoxcore/trifa_material/tree/v1.0.30) (2024-04-11)
 
 [Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.29...v1.0.30)
