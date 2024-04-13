@@ -1,7 +1,6 @@
 package com.zoffcc.applications.sorm;
 
 import com.zoffcc.applications.trifa.Log;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -1164,7 +1163,6 @@ public class OrmaDatabase
         return ret;
     }
 
-    @NotNull
     public BootstrapNodeEntryDB deleteFromBootstrapNodeEntryDB() {
         BootstrapNodeEntryDB ret = new BootstrapNodeEntryDB();
         ret.sql_start = "DELETE FROM BootstrapNodeEntryDB";
