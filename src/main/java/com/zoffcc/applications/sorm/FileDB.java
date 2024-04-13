@@ -21,6 +21,7 @@ package com.zoffcc.applications.sorm;
 
 import com.zoffcc.applications.trifa.Log;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -84,6 +85,10 @@ public class FileDB
     String sql_where = "where 1=1 "; // where
     String sql_orderby = ""; // order by
     String sql_limit = ""; // limit
+    List<OrmaBindvar> bind_where_vars = new ArrayList<>();
+    int bind_where_count = 0;
+    List<OrmaBindvar> bind_set_vars = new ArrayList<>();
+    int bind_set_count = 0;
 
     public List<FileDB> toList()
     {
@@ -91,14 +96,21 @@ public class FileDB
 
         try
         {
-            Statement statement = sqldb.createStatement();
-
             final String sql = this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit;
-            if (ORMA_TRACE)
+            log_bindvars_where(sql, bind_where_count, bind_where_vars);
+            PreparedStatement statement = sqldb.prepareStatement(sql);
+            if (!set_bindvars_where(statement, bind_where_count, bind_where_vars))
             {
-                Log.i(TAG, "sql=" + sql);
+                try
+                {
+                    statement.close();
+                }
+                catch (Exception ignored)
+                {
+                }
+                return null;
             }
-            ResultSet rs = statement.executeQuery(sql);
+            ResultSet rs = statement.executeQuery();
             while (rs.next())
             {
                 FileDB out = new FileDB();
@@ -137,9 +149,11 @@ public class FileDB
 
         try
         {
+            String insert_pstmt_sql = null;
+            PreparedStatement insert_pstmt = null;
+
             // @formatter:off
-            Statement statement = sqldb.createStatement();
-            final String sql_str="insert into " + this.getClass().getSimpleName() +
+            insert_pstmt_sql="insert into " + this.getClass().getSimpleName() +
                     "(" +
                     "kind,"	+
                     "direction,"+
@@ -151,33 +165,38 @@ public class FileDB
                     ")" +
                     "values" +
                     "(" +
-                    "'"+s(this.kind)+"'," +
-                    "'"+s(this.direction)+"'," +
-                    "'"+s(this.tox_public_key_string)+"'," +
-                    "'"+s(this.path_name)+"'," +
-                    "'"+s(this.file_name)+"'," +
-                    "'"+s(this.filesize)+"'," +
-                    "'"+b(this.is_in_VFS)+"'" +
+                    "?1," +
+                    "?2," +
+                    "?3," +
+                    "?4," +
+                    "?5," +
+                    "?6," +
+                    "?7" +
                     ")";
+
+            insert_pstmt = sqldb.prepareStatement(insert_pstmt_sql);
+
+            insert_pstmt.clearParameters();
+
+            insert_pstmt.setInt(1, this.kind);
+            insert_pstmt.setInt(2, this.direction);
+            insert_pstmt.setString(3, this.tox_public_key_string);
+            insert_pstmt.setString(4, this.path_name);
+            insert_pstmt.setString(5, this.file_name);
+            insert_pstmt.setLong(6, this.filesize);
+            insert_pstmt.setBoolean(7, this.is_in_VFS);
 
             if (ORMA_TRACE)
             {
-                Log.i(TAG, "sql=" + sql_str);
+                Log.i(TAG, "sql=" + insert_pstmt);
             }
 
             orma_semaphore_lastrowid_on_insert.acquire();
-            statement.execute(sql_str);
-            ret = get_last_rowid(statement);
+            insert_pstmt.executeUpdate();
+            insert_pstmt.close();
+            ret = get_last_rowid_pstmt();
             orma_semaphore_lastrowid_on_insert.release();
             // @formatter:on
-
-            try
-            {
-                statement.close();
-            }
-            catch (Exception ignored)
-            {
-            }
         }
         catch (Exception e)
         {
@@ -198,14 +217,21 @@ public class FileDB
     {
         try
         {
-            Statement statement = sqldb.createStatement();
             final String sql = this.sql_start + " " + this.sql_set + " " + this.sql_where;
-            if (ORMA_TRACE)
+            log_bindvars_where_and_set(sql, bind_where_count, bind_where_vars, bind_set_count, bind_set_vars);
+            PreparedStatement statement = sqldb.prepareStatement(sql);
+            if (!set_bindvars_where_and_set(statement, bind_where_count, bind_where_vars, bind_set_count, bind_set_vars))
             {
-                Log.i(TAG, "sql=" + sql);
+                try
+                {
+                    statement.close();
+                }
+                catch (Exception ignored)
+                {
+                }
+                return;
             }
-            statement.executeUpdate(sql);
-
+            statement.executeUpdate();
             try
             {
                 statement.close();
@@ -227,17 +253,23 @@ public class FileDB
 
         try
         {
-            Statement statement = sqldb.createStatement();
             this.sql_start = "SELECT count(*) as count FROM " + this.getClass().getSimpleName();
 
             final String sql = this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit;
-            if (ORMA_TRACE)
+            log_bindvars_where(sql, bind_where_count, bind_where_vars);
+            PreparedStatement statement = sqldb.prepareStatement(sql);
+            if (!set_bindvars_where(statement, bind_where_count, bind_where_vars))
             {
-                Log.i(TAG, "sql=" + sql);
+                try
+                {
+                    statement.close();
+                }
+                catch (Exception ignored)
+                {
+                }
+                return 0;
             }
-
-            ResultSet rs = statement.executeQuery(sql);
-
+            ResultSet rs = statement.executeQuery();
             if (rs.next())
             {
                 ret = rs.getInt("count");
@@ -271,13 +303,17 @@ public class FileDB
 
     public FileDB tox_public_key_stringEq(String tox_public_key_string)
     {
-        this.sql_where = this.sql_where + " and tox_public_key_string='" + s(tox_public_key_string) + "' ";
+        this.sql_where = this.sql_where + " and tox_public_key_string=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_public_key_string));
+        bind_where_count++;
         return this;
     }
 
     public FileDB file_nameEq(String file_name)
     {
-        this.sql_where = this.sql_where + " and file_name='" + s(file_name) + "' ";
+        this.sql_where = this.sql_where + " and file_name=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, file_name));
+        bind_where_count++;
         return this;
     }
 
@@ -298,7 +334,9 @@ public class FileDB
 
     public FileDB path_nameEq(String path_name)
     {
-        this.sql_where = this.sql_where + " and path_name='" + s(path_name) + "' ";
+        this.sql_where = this.sql_where + " and path_name=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, path_name));
+        bind_where_count++;
         return this;
     }
 
