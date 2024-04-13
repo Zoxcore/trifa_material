@@ -162,43 +162,18 @@ public class GroupMessage
         try
         {
             final String sql = this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit;
-            if (ORMA_TRACE)
-            {
-                Log.i(TAG, "sql=" + sql + " bindvar count=" + bind_where_count);
-                if (bind_where_count > 0)
-                {
-                    for(int jj=0;jj<bind_where_count;jj++) {
-                        Log.i(TAG, "bindvar ?" + (jj + BINDVAR_OFFSET_WHERE) +
-                                " = " + bind_where_vars.get(jj).value);
-                    }
-                }
-            }
+            log_bindvars_where(sql, bind_where_count, bind_where_vars);
             PreparedStatement statement = sqldb.prepareStatement(sql);
-            statement.clearParameters();
-            if (bind_where_count > 0)
+            if (!set_bindvars_where(statement, bind_where_count, bind_where_vars))
             {
-                try {
-                    for (int jj = 0; jj < bind_where_count; jj++) {
-                        int type = bind_where_vars.get(jj).type;
-                        if (type == BINDVAR_TYPE_Int) {
-                            statement.setInt((jj + BINDVAR_OFFSET_WHERE),
-                                    (int) bind_where_vars.get(jj).value);
-                        } else if (type == BINDVAR_TYPE_Long) {
-                            statement.setLong((jj + BINDVAR_OFFSET_WHERE),
-                                    (long) bind_where_vars.get(jj).value);
-                        } else if (type == BINDVAR_TYPE_String) {
-                            statement.setString((jj + BINDVAR_OFFSET_WHERE),
-                                    (String) bind_where_vars.get(jj).value);
-                        } else if (type == BINDVAR_TYPE_Boolean) {
-                            statement.setBoolean((jj + BINDVAR_OFFSET_WHERE),
-                                    (boolean) bind_where_vars.get(jj).value);
-                        }
-                    }
-                }
-                catch(Exception e)
+                try
                 {
-                    e.printStackTrace();
+                    statement.close();
                 }
+                catch (Exception ignored)
+                {
+                }
+                return null;
             }
             ResultSet rs = statement.executeQuery();
             while (rs.next())
@@ -373,78 +348,20 @@ public class GroupMessage
         try
         {
             final String sql = this.sql_start + " " + this.sql_set + " " + this.sql_where;
-            if (ORMA_TRACE)
-            {
-                Log.i(TAG, "sql=" + sql + " bindvar count=" + (bind_set_count + bind_where_count));
-                if (bind_set_count > 0)
-                {
-                    for(int jj=0;jj<bind_set_count;jj++) {
-                        Log.i(TAG, "bindvar set ?" + (jj + BINDVAR_OFFSET_SET) +
-                                " = " + bind_set_vars.get(jj).value);
-                    }
-                }
-                if (bind_where_count > 0)
-                {
-                    for(int jj=0;jj<bind_where_count;jj++) {
-                        Log.i(TAG, "bindvar where ?" + (jj + BINDVAR_OFFSET_WHERE) +
-                                " = " + bind_where_vars.get(jj).value);
-                    }
-                }
-            }
+            log_bindvars_where_and_set(sql, bind_where_count, bind_where_vars, bind_set_count, bind_set_vars);
             PreparedStatement statement = sqldb.prepareStatement(sql);
-            statement.clearParameters();
-            if (bind_set_count > 0)
+            if (!set_bindvars_where_and_set(statement, bind_where_count, bind_where_vars, bind_set_count, bind_set_vars))
             {
-                try {
-                    for (int jj = 0; jj < bind_set_count; jj++) {
-                        int type = bind_set_vars.get(jj).type;
-                        if (type == BINDVAR_TYPE_Int) {
-                            statement.setInt((jj + BINDVAR_OFFSET_SET),
-                                    (int) bind_set_vars.get(jj).value);
-                        } else if (type == BINDVAR_TYPE_Long) {
-                            statement.setLong((jj + BINDVAR_OFFSET_SET),
-                                    (long) bind_set_vars.get(jj).value);
-                        } else if (type == BINDVAR_TYPE_String) {
-                            statement.setString((jj + BINDVAR_OFFSET_SET),
-                                    (String) bind_set_vars.get(jj).value);
-                        } else if (type == BINDVAR_TYPE_Boolean) {
-                            statement.setBoolean((jj + BINDVAR_OFFSET_SET),
-                                    (boolean) bind_set_vars.get(jj).value);
-                        }
-                    }
-                }
-                catch(Exception e)
+                try
                 {
-                    e.printStackTrace();
+                    statement.close();
                 }
-            }
-            if (bind_where_count > 0)
-            {
-                try {
-                    for (int jj = 0; jj < bind_where_count; jj++) {
-                        int type = bind_where_vars.get(jj).type;
-                        if (type == BINDVAR_TYPE_Int) {
-                            statement.setInt((jj + BINDVAR_OFFSET_WHERE),
-                                    (int) bind_where_vars.get(jj).value);
-                        } else if (type == BINDVAR_TYPE_Long) {
-                            statement.setLong((jj + BINDVAR_OFFSET_WHERE),
-                                    (long) bind_where_vars.get(jj).value);
-                        } else if (type == BINDVAR_TYPE_String) {
-                            statement.setString((jj + BINDVAR_OFFSET_WHERE),
-                                    (String) bind_where_vars.get(jj).value);
-                        } else if (type == BINDVAR_TYPE_Boolean) {
-                            statement.setBoolean((jj + BINDVAR_OFFSET_WHERE),
-                                    (boolean) bind_where_vars.get(jj).value);
-                        }
-                    }
-                }
-                catch(Exception e)
+                catch (Exception ignored)
                 {
-                    e.printStackTrace();
                 }
+                return;
             }
             statement.executeUpdate();
-
             try
             {
                 statement.close();
@@ -469,44 +386,18 @@ public class GroupMessage
             this.sql_start = "SELECT count(*) as count FROM " + this.getClass().getSimpleName();
 
             final String sql = this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit;
-            if (ORMA_TRACE)
-            {
-                Log.i(TAG, "sql=" + sql + " bindvar count=" + bind_set_count);
-                if (bind_set_count > 0)
-                {
-                    for(int jj=0;jj<bind_set_count;jj++) {
-                        Log.i(TAG, "bindvar ?" + (jj + BINDVAR_OFFSET_SET) +
-                                " = " + bind_set_vars.get(jj).value);
-                    }
-                }
-            }
-
+            log_bindvars_where(sql, bind_where_count, bind_where_vars);
             PreparedStatement statement = sqldb.prepareStatement(sql);
-            statement.clearParameters();
-            if (bind_where_count > 0)
+            if (!set_bindvars_where(statement, bind_where_count, bind_where_vars))
             {
-                try {
-                    for (int jj = 0; jj < bind_where_count; jj++) {
-                        int type = bind_where_vars.get(jj).type;
-                        if (type == BINDVAR_TYPE_Int) {
-                            statement.setInt((jj + BINDVAR_OFFSET_WHERE),
-                                    (int) bind_where_vars.get(jj).value);
-                        } else if (type == BINDVAR_TYPE_Long) {
-                            statement.setLong((jj + BINDVAR_OFFSET_WHERE),
-                                    (long) bind_where_vars.get(jj).value);
-                        } else if (type == BINDVAR_TYPE_String) {
-                            statement.setString((jj + BINDVAR_OFFSET_WHERE),
-                                    (String) bind_where_vars.get(jj).value);
-                        } else if (type == BINDVAR_TYPE_Boolean) {
-                            statement.setBoolean((jj + BINDVAR_OFFSET_WHERE),
-                                    (boolean) bind_where_vars.get(jj).value);
-                        }
-                    }
-                }
-                catch(Exception e)
+                try
                 {
-                    e.printStackTrace();
+                    statement.close();
                 }
+                catch (Exception ignored)
+                {
+                }
+                return 0;
             }
             ResultSet rs = statement.executeQuery();
             if (rs.next())

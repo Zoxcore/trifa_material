@@ -21,6 +21,7 @@ package com.zoffcc.applications.sorm;
 
 import com.zoffcc.applications.trifa.Log;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -103,6 +104,10 @@ public class GroupDB
     String sql_where = "where 1=1 "; // where
     String sql_orderby = ""; // order by
     String sql_limit = ""; // limit
+    List<OrmaBindvar> bind_where_vars = new ArrayList<>();
+    int bind_where_count = 0;
+    List<OrmaBindvar> bind_set_vars = new ArrayList<>();
+    int bind_set_count = 0;
 
     public List<GroupDB> toList()
     {
@@ -110,9 +115,21 @@ public class GroupDB
 
         try
         {
-            Statement statement = sqldb.createStatement();
-            ResultSet rs = statement.executeQuery(
-                    this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit);
+            final String sql = this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit;
+            log_bindvars_where(sql, bind_where_count, bind_where_vars);
+            PreparedStatement statement = sqldb.prepareStatement(sql);
+            if (!set_bindvars_where(statement, bind_where_count, bind_where_vars))
+            {
+                try
+                {
+                    statement.close();
+                }
+                catch (Exception ignored)
+                {
+                }
+                return null;
+            }
+            ResultSet rs = statement.executeQuery();
             while (rs.next())
             {
                 GroupDB out = new GroupDB();
@@ -153,9 +170,11 @@ public class GroupDB
 
         try
         {
+            String insert_pstmt_sql = null;
+            PreparedStatement insert_pstmt = null;
+
             // @formatter:off
-            Statement statement = sqldb.createStatement();
-            final String sql_str="insert into " + this.getClass().getSimpleName() +
+            insert_pstmt_sql="insert into " + this.getClass().getSimpleName() +
                     "(" +
                     "group_identifier,"	+
                     "who_invited__tox_public_key_string,"+
@@ -170,31 +189,39 @@ public class GroupDB
                     ")" +
                     "values" +
                     "(" +
-                    "'"+s(this.group_identifier)+"'," +
-                    "'"+s(this.who_invited__tox_public_key_string)+"'," +
-                    "'"+s(this.name)+"'," +
-                    "'"+s(this.topic)+"'," +
-                    "'"+s(this.peer_count)+"'," +
-                    "'"+s(this.own_peer_number)+"'," +
-                    "'"+s(this.privacy_state)+"'," +
-                    "'"+s(this.tox_group_number)+"'," +
-                    "'"+b(this.group_active)+"'," +
-                    "'"+b(this.notification_silent)+"'" +
+                    "?1," +
+                    "?2," +
+                    "?3," +
+                    "?4," +
+                    "?5," +
+                    "?6," +
+                    "?7," +
+                    "?8," +
+                    "?9," +
+                    "?10" +
                     ")";
 
+            insert_pstmt = sqldb.prepareStatement(insert_pstmt_sql);
+
+            insert_pstmt.clearParameters();
+
+            insert_pstmt.setString(1, this.group_identifier);
+            insert_pstmt.setString(2, this.who_invited__tox_public_key_string);
+            insert_pstmt.setString(3, this.name);
+            insert_pstmt.setString(4, this.topic);
+            insert_pstmt.setLong(5, this.peer_count);
+            insert_pstmt.setLong(6, this.own_peer_number);
+            insert_pstmt.setInt(7, this.privacy_state);
+            insert_pstmt.setLong(8, this.tox_group_number);
+            insert_pstmt.setBoolean(9, this.group_active);
+            insert_pstmt.setBoolean(10, this.notification_silent);
+
             orma_semaphore_lastrowid_on_insert.acquire();
-            statement.execute(sql_str);
-            ret = get_last_rowid(statement);
+            insert_pstmt.executeUpdate();
+            insert_pstmt.close();
+            ret = get_last_rowid_pstmt();
             orma_semaphore_lastrowid_on_insert.release();
             // @formatter:on
-
-            try
-            {
-                statement.close();
-            }
-            catch (Exception ignored)
-            {
-            }
         }
         catch (Exception e)
         {
@@ -215,14 +242,21 @@ public class GroupDB
     {
         try
         {
-            Statement statement = sqldb.createStatement();
             final String sql = this.sql_start + " " + this.sql_set + " " + this.sql_where;
-            if (ORMA_TRACE)
+            log_bindvars_where_and_set(sql, bind_where_count, bind_where_vars, bind_set_count, bind_set_vars);
+            PreparedStatement statement = sqldb.prepareStatement(sql);
+            if (!set_bindvars_where_and_set(statement, bind_where_count, bind_where_vars, bind_set_count, bind_set_vars))
             {
-                Log.i(TAG, "sql=" + sql);
+                try
+                {
+                    statement.close();
+                }
+                catch (Exception ignored)
+                {
+                }
+                return;
             }
-            statement.executeUpdate(sql);
-
+            statement.executeUpdate();
             try
             {
                 statement.close();
@@ -244,17 +278,23 @@ public class GroupDB
 
         try
         {
-            Statement statement = sqldb.createStatement();
             this.sql_start = "SELECT count(*) as count FROM " + this.getClass().getSimpleName();
 
             final String sql = this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit;
-            if (ORMA_TRACE)
+            log_bindvars_where(sql, bind_where_count, bind_where_vars);
+            PreparedStatement statement = sqldb.prepareStatement(sql);
+            if (!set_bindvars_where(statement, bind_where_count, bind_where_vars))
             {
-                Log.i(TAG, "sql=" + sql);
+                try
+                {
+                    statement.close();
+                }
+                catch (Exception ignored)
+                {
+                }
+                return 0;
             }
-
-            ResultSet rs = statement.executeQuery(sql);
-
+            ResultSet rs = statement.executeQuery();
             if (rs.next())
             {
                 ret = rs.getInt("count");
@@ -288,7 +328,9 @@ public class GroupDB
 
     public GroupDB group_identifierEq(String group_identifier)
     {
-        this.sql_where = this.sql_where + " and group_identifier='" + s(group_identifier) + "' ";
+        this.sql_where = this.sql_where + " and group_identifier=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, group_identifier));
+        bind_where_count++;
         return this;
     }
 
@@ -344,7 +386,9 @@ public class GroupDB
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " name='" + s(name) + "' ";
+        this.sql_set = this.sql_set + " name=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, name));
+        bind_set_count++;
         return this;
     }
 

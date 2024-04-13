@@ -717,6 +717,144 @@ public class OrmaDatabase
         }
     }
 
+    public static boolean set_bindvars_where(final PreparedStatement statement,
+                                             final int bind_where_count,
+                                             final List<OrmaBindvar> bind_where_vars)
+    {
+        try {
+            statement.clearParameters();
+            if (bind_where_count > 0) {
+                try {
+                    for (int jj = 0; jj < bind_where_count; jj++) {
+                        int type = bind_where_vars.get(jj).type;
+                        if (type == BINDVAR_TYPE_Int) {
+                            statement.setInt((jj + BINDVAR_OFFSET_WHERE), (int) bind_where_vars.get(jj).value);
+                        } else if (type == BINDVAR_TYPE_Long) {
+                            statement.setLong((jj + BINDVAR_OFFSET_WHERE), (long) bind_where_vars.get(jj).value);
+                        } else if (type == BINDVAR_TYPE_String) {
+                            statement.setString((jj + BINDVAR_OFFSET_WHERE), (String) bind_where_vars.get(jj).value);
+                        } else if (type == BINDVAR_TYPE_Boolean) {
+                            statement.setBoolean((jj + BINDVAR_OFFSET_WHERE), (boolean) bind_where_vars.get(jj).value);
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        catch(Exception e1)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean set_bindvars_where_and_set(final PreparedStatement statement,
+                                                     final int bind_where_count,
+                                                     final List<OrmaBindvar> bind_where_vars,
+                                                     final int bind_set_count,
+                                                     final List<OrmaBindvar> bind_set_vars)
+    {
+        try {
+            statement.clearParameters();
+            if (bind_set_count > 0)
+            {
+                try {
+                    for (int jj = 0; jj < bind_set_count; jj++) {
+                        int type = bind_set_vars.get(jj).type;
+                        if (type == BINDVAR_TYPE_Int) {
+                            statement.setInt((jj + BINDVAR_OFFSET_SET),
+                                    (int) bind_set_vars.get(jj).value);
+                        } else if (type == BINDVAR_TYPE_Long) {
+                            statement.setLong((jj + BINDVAR_OFFSET_SET),
+                                    (long) bind_set_vars.get(jj).value);
+                        } else if (type == BINDVAR_TYPE_String) {
+                            statement.setString((jj + BINDVAR_OFFSET_SET),
+                                    (String) bind_set_vars.get(jj).value);
+                        } else if (type == BINDVAR_TYPE_Boolean) {
+                            statement.setBoolean((jj + BINDVAR_OFFSET_SET),
+                                    (boolean) bind_set_vars.get(jj).value);
+                        }
+                    }
+                }
+                catch(Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            if (bind_where_count > 0)
+            {
+                try {
+                    for (int jj = 0; jj < bind_where_count; jj++) {
+                        int type = bind_where_vars.get(jj).type;
+                        if (type == BINDVAR_TYPE_Int) {
+                            statement.setInt((jj + BINDVAR_OFFSET_WHERE),
+                                    (int) bind_where_vars.get(jj).value);
+                        } else if (type == BINDVAR_TYPE_Long) {
+                            statement.setLong((jj + BINDVAR_OFFSET_WHERE),
+                                    (long) bind_where_vars.get(jj).value);
+                        } else if (type == BINDVAR_TYPE_String) {
+                            statement.setString((jj + BINDVAR_OFFSET_WHERE),
+                                    (String) bind_where_vars.get(jj).value);
+                        } else if (type == BINDVAR_TYPE_Boolean) {
+                            statement.setBoolean((jj + BINDVAR_OFFSET_WHERE),
+                                    (boolean) bind_where_vars.get(jj).value);
+                        }
+                    }
+                }
+                catch(Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+        catch(Exception e1)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    public static void log_bindvars_where(final String sql, final int bind_where_count, final List<OrmaBindvar> bind_where_vars)
+    {
+        if (ORMA_TRACE)
+        {
+            Log.i(TAG, "sql=" + sql + " bindvar count=" + bind_where_count);
+            if (bind_where_count > 0)
+            {
+                for(int jj=0;jj<bind_where_count;jj++) {
+                    Log.i(TAG, "bindvar ?" + (jj + BINDVAR_OFFSET_WHERE) +
+                            " = " + bind_where_vars.get(jj).value);
+                }
+            }
+        }
+    }
+
+    public static void log_bindvars_where_and_set(final String sql, final int bind_where_count,
+                                                  final List<OrmaBindvar> bind_where_vars,
+                                                  final int bind_set_count,
+                                                  final List<OrmaBindvar> bind_set_vars)
+    {
+        if (ORMA_TRACE)
+        {
+            Log.i(TAG, "sql=" + sql + " bindvar count=" + (bind_set_count + bind_where_count));
+            if (bind_set_count > 0)
+            {
+                for(int jj=0;jj<bind_set_count;jj++) {
+                    Log.i(TAG, "bindvar set ?" + (jj + BINDVAR_OFFSET_SET) +
+                            " = " + bind_set_vars.get(jj).value);
+                }
+            }
+            if (bind_where_count > 0)
+            {
+                for(int jj=0;jj<bind_where_count;jj++) {
+                    Log.i(TAG, "bindvar where ?" + (jj + BINDVAR_OFFSET_WHERE) +
+                            " = " + bind_where_vars.get(jj).value);
+                }
+            }
+        }
+    }
+
     /**
      * Starts building a query: {@code SELECT * FROM FriendList ...}.
      */

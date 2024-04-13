@@ -21,6 +21,7 @@ package com.zoffcc.applications.sorm;
 
 import com.zoffcc.applications.trifa.Log;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -115,22 +116,31 @@ public class Filetransfer
     String sql_where = "where 1=1 "; // where
     String sql_orderby = ""; // order by
     String sql_limit = ""; // limit
+    List<OrmaBindvar> bind_where_vars = new ArrayList<>();
+    int bind_where_count = 0;
+    List<OrmaBindvar> bind_set_vars = new ArrayList<>();
+    int bind_set_count = 0;
 
     public List<Filetransfer> toList()
     {
         List<Filetransfer> fl = new ArrayList<>();
-
         try
         {
-            Statement statement = sqldb.createStatement();
-
             final String sql = this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit;
-            if (ORMA_TRACE)
+            log_bindvars_where(sql, bind_where_count, bind_where_vars);
+            PreparedStatement statement = sqldb.prepareStatement(sql);
+            if (!set_bindvars_where(statement, bind_where_count, bind_where_vars))
             {
-                Log.i(TAG, "sql=" + sql);
+                try
+                {
+                    statement.close();
+                }
+                catch (Exception ignored)
+                {
+                }
+                return null;
             }
-
-            ResultSet rs = statement.executeQuery(sql);
+            ResultSet rs = statement.executeQuery();
             while (rs.next())
             {
                 Filetransfer out = new Filetransfer();
@@ -175,10 +185,11 @@ public class Filetransfer
 
         try
         {
-            // @formatter:off
-            Statement statement = sqldb.createStatement();
+            String insert_pstmt_sql = null;
+            PreparedStatement insert_pstmt = null;
 
-            final String sql_str="insert into " + this.getClass().getSimpleName() +
+            // @formatter:off
+            insert_pstmt_sql="insert into " + this.getClass().getSimpleName() +
                     "(" +
                     "tox_public_key_string,"	+
                     "direction,"+
@@ -197,40 +208,52 @@ public class Filetransfer
                     ")" +
                     "values" +
                     "(" +
-                    "'"+s(this.tox_public_key_string)+"'," +
-                    "'"+s(this.direction)+"'," +
-                    "'"+s(this.file_number)+"'," +
-                    "'"+s(this.kind)+"'," +
-                    "'"+s(this.state)+"'," +
-                    "'"+b(this.ft_accepted)+"'," +
-                    "'"+b(this.ft_outgoing_started)+"'," +
-                    "'"+s(this.path_name)+"'," +
-                    "'"+s(this.file_name)+"'," +
-                    "'"+b(this.fos_open)+"'," +
-                    "'"+s(this.filesize)+"'," +
-                    "'"+s(this.current_position)+"'," +
-                    "'"+s(this.message_id)+"'," +
-                    "'"+s(this.tox_file_id_hex)+"'" +
+                    "?1," +
+                    "?2," +
+                    "?3," +
+                    "?4," +
+                    "?5," +
+                    "?6," +
+                    "?7," +
+                    "?8," +
+                    "?9," +
+                    "?10," +
+                    "?11," +
+                    "?12," +
+                    "?13," +
+                    "?14" +
                     ")";
+
+            insert_pstmt = sqldb.prepareStatement(insert_pstmt_sql);
+
+            insert_pstmt.clearParameters();
+
+            insert_pstmt.setString(1, this.tox_public_key_string);
+            insert_pstmt.setInt(2, this.direction);
+            insert_pstmt.setLong(3, this.file_number);
+            insert_pstmt.setInt(4, this.kind);
+            insert_pstmt.setInt(5, this.state);
+            insert_pstmt.setBoolean(6, this.ft_accepted);
+            insert_pstmt.setBoolean(7, this.ft_outgoing_started);
+            insert_pstmt.setString(8, this.path_name);
+            insert_pstmt.setString(9, this.file_name);
+            insert_pstmt.setBoolean(10, this.fos_open);
+            insert_pstmt.setLong(11, this.filesize);
+            insert_pstmt.setLong(12, this.current_position);
+            insert_pstmt.setLong(13, this.message_id);
+            insert_pstmt.setString(14, this.tox_file_id_hex);
 
             if (ORMA_TRACE)
             {
-                Log.i(TAG, "sql=" + sql_str);
+                Log.i(TAG, "sql=" + insert_pstmt);
             }
 
             orma_semaphore_lastrowid_on_insert.acquire();
-            statement.execute(sql_str);
-            ret = get_last_rowid(statement);
+            insert_pstmt.executeUpdate();
+            insert_pstmt.close();
+            ret = get_last_rowid_pstmt();
             orma_semaphore_lastrowid_on_insert.release();
             // @formatter:on
-
-            try
-            {
-                statement.close();
-            }
-            catch (Exception ignored)
-            {
-            }
         }
         catch (Exception e)
         {
@@ -251,14 +274,21 @@ public class Filetransfer
     {
         try
         {
-            Statement statement = sqldb.createStatement();
             final String sql = this.sql_start + " " + this.sql_set + " " + this.sql_where;
-            if (ORMA_TRACE)
+            log_bindvars_where_and_set(sql, bind_where_count, bind_where_vars, bind_set_count, bind_set_vars);
+            PreparedStatement statement = sqldb.prepareStatement(sql);
+            if (!set_bindvars_where_and_set(statement, bind_where_count, bind_where_vars, bind_set_count, bind_set_vars))
             {
-                Log.i(TAG, "sql=" + sql);
+                try
+                {
+                    statement.close();
+                }
+                catch (Exception ignored)
+                {
+                }
+                return;
             }
-            statement.executeUpdate(sql);
-
+            statement.executeUpdate();
             try
             {
                 statement.close();
@@ -280,17 +310,23 @@ public class Filetransfer
 
         try
         {
-            Statement statement = sqldb.createStatement();
             this.sql_start = "SELECT count(*) as count FROM " + this.getClass().getSimpleName();
 
             final String sql = this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit;
-            if (ORMA_TRACE)
+            log_bindvars_where(sql, bind_where_count, bind_where_vars);
+            PreparedStatement statement = sqldb.prepareStatement(sql);
+            if (!set_bindvars_where(statement, bind_where_count, bind_where_vars))
             {
-                Log.i(TAG, "sql=" + sql);
+                try
+                {
+                    statement.close();
+                }
+                catch (Exception ignored)
+                {
+                }
+                return 0;
             }
-
-            ResultSet rs = statement.executeQuery(sql);
-
+            ResultSet rs = statement.executeQuery();
             if (rs.next())
             {
                 ret = rs.getInt("count");
@@ -330,7 +366,9 @@ public class Filetransfer
 
     public Filetransfer tox_public_key_stringEq(String tox_public_key_string)
     {
-        this.sql_where = this.sql_where + " and tox_public_key_string='" + s(tox_public_key_string) + "' ";
+        this.sql_where = this.sql_where + " and tox_public_key_string=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_public_key_string));
+        bind_where_count++;
         return this;
     }
 
@@ -370,7 +408,9 @@ public class Filetransfer
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " tox_public_key_string='" + s(tox_public_key_string) + "' ";
+        this.sql_set = this.sql_set + " tox_public_key_string=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_public_key_string));
+        bind_set_count++;
         return this;
     }
 
@@ -440,7 +480,9 @@ public class Filetransfer
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " path_name='" + s(path_name) + "' ";
+        this.sql_set = this.sql_set + " path_name=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, path_name));
+        bind_set_count++;
         return this;
     }
 
@@ -468,7 +510,9 @@ public class Filetransfer
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " file_name='" + s(file_name) + "' ";
+        this.sql_set = this.sql_set + " file_name=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, file_name));
+        bind_set_count++;
         return this;
     }
 
@@ -558,7 +602,9 @@ public class Filetransfer
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " tox_file_id_hex='" + s(tox_file_id_hex) + "' ";
+        this.sql_set = this.sql_set + " tox_file_id_hex=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_file_id_hex));
+        bind_set_count++;
         return this;
     }
 
