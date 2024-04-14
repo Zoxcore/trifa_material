@@ -926,22 +926,6 @@ public class FriendList
         return this;
     }
 
-    public FriendList tox_public_key_stringLt(String tox_public_key_string)
-    {
-        this.sql_where = this.sql_where + " and tox_public_key_string<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_public_key_string));
-        bind_where_count++;
-        return this;
-    }
-
-    public FriendList tox_public_key_stringGt(String tox_public_key_string)
-    {
-        this.sql_where = this.sql_where + " and tox_public_key_string>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_public_key_string));
-        bind_where_count++;
-        return this;
-    }
-
     public FriendList nameEq(String name)
     {
         this.sql_where = this.sql_where + " and name=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -953,22 +937,6 @@ public class FriendList
     public FriendList nameNotEq(String name)
     {
         this.sql_where = this.sql_where + " and name<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, name));
-        bind_where_count++;
-        return this;
-    }
-
-    public FriendList nameLt(String name)
-    {
-        this.sql_where = this.sql_where + " and name<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, name));
-        bind_where_count++;
-        return this;
-    }
-
-    public FriendList nameGt(String name)
-    {
-        this.sql_where = this.sql_where + " and name>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, name));
         bind_where_count++;
         return this;
@@ -990,22 +958,6 @@ public class FriendList
         return this;
     }
 
-    public FriendList alias_nameLt(String alias_name)
-    {
-        this.sql_where = this.sql_where + " and alias_name<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, alias_name));
-        bind_where_count++;
-        return this;
-    }
-
-    public FriendList alias_nameGt(String alias_name)
-    {
-        this.sql_where = this.sql_where + " and alias_name>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, alias_name));
-        bind_where_count++;
-        return this;
-    }
-
     public FriendList status_messageEq(String status_message)
     {
         this.sql_where = this.sql_where + " and status_message=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -1017,22 +969,6 @@ public class FriendList
     public FriendList status_messageNotEq(String status_message)
     {
         this.sql_where = this.sql_where + " and status_message<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, status_message));
-        bind_where_count++;
-        return this;
-    }
-
-    public FriendList status_messageLt(String status_message)
-    {
-        this.sql_where = this.sql_where + " and status_message<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, status_message));
-        bind_where_count++;
-        return this;
-    }
-
-    public FriendList status_messageGt(String status_message)
-    {
-        this.sql_where = this.sql_where + " and status_message>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, status_message));
         bind_where_count++;
         return this;
@@ -1070,6 +1006,16 @@ public class FriendList
         return this;
     }
 
+    public FriendList TOX_CONNECTIONBetween(int TOX_CONNECTION1, int TOX_CONNECTION2)
+    {
+        this.sql_where = this.sql_where + " and TOX_CONNECTION>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " and TOX_CONNECTION<?" + (BINDVAR_OFFSET_WHERE + 1 + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TOX_CONNECTION1));
+        bind_where_count++;
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TOX_CONNECTION2));
+        bind_where_count++;
+        return this;
+    }
+
     public FriendList TOX_CONNECTION_realEq(int TOX_CONNECTION_real)
     {
         this.sql_where = this.sql_where + " and TOX_CONNECTION_real=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -1098,6 +1044,16 @@ public class FriendList
     {
         this.sql_where = this.sql_where + " and TOX_CONNECTION_real>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TOX_CONNECTION_real));
+        bind_where_count++;
+        return this;
+    }
+
+    public FriendList TOX_CONNECTION_realBetween(int TOX_CONNECTION_real1, int TOX_CONNECTION_real2)
+    {
+        this.sql_where = this.sql_where + " and TOX_CONNECTION_real>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " and TOX_CONNECTION_real<?" + (BINDVAR_OFFSET_WHERE + 1 + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TOX_CONNECTION_real1));
+        bind_where_count++;
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TOX_CONNECTION_real2));
         bind_where_count++;
         return this;
     }
@@ -1134,6 +1090,16 @@ public class FriendList
         return this;
     }
 
+    public FriendList TOX_CONNECTION_on_offBetween(int TOX_CONNECTION_on_off1, int TOX_CONNECTION_on_off2)
+    {
+        this.sql_where = this.sql_where + " and TOX_CONNECTION_on_off>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " and TOX_CONNECTION_on_off<?" + (BINDVAR_OFFSET_WHERE + 1 + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TOX_CONNECTION_on_off1));
+        bind_where_count++;
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TOX_CONNECTION_on_off2));
+        bind_where_count++;
+        return this;
+    }
+
     public FriendList TOX_CONNECTION_on_off_realEq(int TOX_CONNECTION_on_off_real)
     {
         this.sql_where = this.sql_where + " and TOX_CONNECTION_on_off_real=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -1162,6 +1128,16 @@ public class FriendList
     {
         this.sql_where = this.sql_where + " and TOX_CONNECTION_on_off_real>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TOX_CONNECTION_on_off_real));
+        bind_where_count++;
+        return this;
+    }
+
+    public FriendList TOX_CONNECTION_on_off_realBetween(int TOX_CONNECTION_on_off_real1, int TOX_CONNECTION_on_off_real2)
+    {
+        this.sql_where = this.sql_where + " and TOX_CONNECTION_on_off_real>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " and TOX_CONNECTION_on_off_real<?" + (BINDVAR_OFFSET_WHERE + 1 + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TOX_CONNECTION_on_off_real1));
+        bind_where_count++;
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TOX_CONNECTION_on_off_real2));
         bind_where_count++;
         return this;
     }
@@ -1198,6 +1174,16 @@ public class FriendList
         return this;
     }
 
+    public FriendList TOX_USER_STATUSBetween(int TOX_USER_STATUS1, int TOX_USER_STATUS2)
+    {
+        this.sql_where = this.sql_where + " and TOX_USER_STATUS>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " and TOX_USER_STATUS<?" + (BINDVAR_OFFSET_WHERE + 1 + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TOX_USER_STATUS1));
+        bind_where_count++;
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TOX_USER_STATUS2));
+        bind_where_count++;
+        return this;
+    }
+
     public FriendList avatar_pathnameEq(String avatar_pathname)
     {
         this.sql_where = this.sql_where + " and avatar_pathname=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -1209,22 +1195,6 @@ public class FriendList
     public FriendList avatar_pathnameNotEq(String avatar_pathname)
     {
         this.sql_where = this.sql_where + " and avatar_pathname<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, avatar_pathname));
-        bind_where_count++;
-        return this;
-    }
-
-    public FriendList avatar_pathnameLt(String avatar_pathname)
-    {
-        this.sql_where = this.sql_where + " and avatar_pathname<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, avatar_pathname));
-        bind_where_count++;
-        return this;
-    }
-
-    public FriendList avatar_pathnameGt(String avatar_pathname)
-    {
-        this.sql_where = this.sql_where + " and avatar_pathname>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, avatar_pathname));
         bind_where_count++;
         return this;
@@ -1246,22 +1216,6 @@ public class FriendList
         return this;
     }
 
-    public FriendList avatar_filenameLt(String avatar_filename)
-    {
-        this.sql_where = this.sql_where + " and avatar_filename<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, avatar_filename));
-        bind_where_count++;
-        return this;
-    }
-
-    public FriendList avatar_filenameGt(String avatar_filename)
-    {
-        this.sql_where = this.sql_where + " and avatar_filename>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, avatar_filename));
-        bind_where_count++;
-        return this;
-    }
-
     public FriendList avatar_hexEq(String avatar_hex)
     {
         this.sql_where = this.sql_where + " and avatar_hex=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -1273,22 +1227,6 @@ public class FriendList
     public FriendList avatar_hexNotEq(String avatar_hex)
     {
         this.sql_where = this.sql_where + " and avatar_hex<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, avatar_hex));
-        bind_where_count++;
-        return this;
-    }
-
-    public FriendList avatar_hexLt(String avatar_hex)
-    {
-        this.sql_where = this.sql_where + " and avatar_hex<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, avatar_hex));
-        bind_where_count++;
-        return this;
-    }
-
-    public FriendList avatar_hexGt(String avatar_hex)
-    {
-        this.sql_where = this.sql_where + " and avatar_hex>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, avatar_hex));
         bind_where_count++;
         return this;
@@ -1310,22 +1248,6 @@ public class FriendList
         return this;
     }
 
-    public FriendList avatar_hash_hexLt(String avatar_hash_hex)
-    {
-        this.sql_where = this.sql_where + " and avatar_hash_hex<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, avatar_hash_hex));
-        bind_where_count++;
-        return this;
-    }
-
-    public FriendList avatar_hash_hexGt(String avatar_hash_hex)
-    {
-        this.sql_where = this.sql_where + " and avatar_hash_hex>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, avatar_hash_hex));
-        bind_where_count++;
-        return this;
-    }
-
     public FriendList avatar_updateEq(boolean avatar_update)
     {
         this.sql_where = this.sql_where + " and avatar_update=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -1337,22 +1259,6 @@ public class FriendList
     public FriendList avatar_updateNotEq(boolean avatar_update)
     {
         this.sql_where = this.sql_where + " and avatar_update<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, avatar_update));
-        bind_where_count++;
-        return this;
-    }
-
-    public FriendList avatar_updateLt(boolean avatar_update)
-    {
-        this.sql_where = this.sql_where + " and avatar_update<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, avatar_update));
-        bind_where_count++;
-        return this;
-    }
-
-    public FriendList avatar_updateGt(boolean avatar_update)
-    {
-        this.sql_where = this.sql_where + " and avatar_update>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, avatar_update));
         bind_where_count++;
         return this;
@@ -1390,6 +1296,16 @@ public class FriendList
         return this;
     }
 
+    public FriendList avatar_update_timestampBetween(long avatar_update_timestamp1, long avatar_update_timestamp2)
+    {
+        this.sql_where = this.sql_where + " and avatar_update_timestamp>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " and avatar_update_timestamp<?" + (BINDVAR_OFFSET_WHERE + 1 + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, avatar_update_timestamp1));
+        bind_where_count++;
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, avatar_update_timestamp2));
+        bind_where_count++;
+        return this;
+    }
+
     public FriendList notification_silentEq(boolean notification_silent)
     {
         this.sql_where = this.sql_where + " and notification_silent=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -1401,22 +1317,6 @@ public class FriendList
     public FriendList notification_silentNotEq(boolean notification_silent)
     {
         this.sql_where = this.sql_where + " and notification_silent<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, notification_silent));
-        bind_where_count++;
-        return this;
-    }
-
-    public FriendList notification_silentLt(boolean notification_silent)
-    {
-        this.sql_where = this.sql_where + " and notification_silent<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, notification_silent));
-        bind_where_count++;
-        return this;
-    }
-
-    public FriendList notification_silentGt(boolean notification_silent)
-    {
-        this.sql_where = this.sql_where + " and notification_silent>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, notification_silent));
         bind_where_count++;
         return this;
@@ -1454,6 +1354,16 @@ public class FriendList
         return this;
     }
 
+    public FriendList sortBetween(int sort1, int sort2)
+    {
+        this.sql_where = this.sql_where + " and sort>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " and sort<?" + (BINDVAR_OFFSET_WHERE + 1 + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, sort1));
+        bind_where_count++;
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, sort2));
+        bind_where_count++;
+        return this;
+    }
+
     public FriendList last_online_timestampEq(long last_online_timestamp)
     {
         this.sql_where = this.sql_where + " and last_online_timestamp=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -1482,6 +1392,16 @@ public class FriendList
     {
         this.sql_where = this.sql_where + " and last_online_timestamp>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, last_online_timestamp));
+        bind_where_count++;
+        return this;
+    }
+
+    public FriendList last_online_timestampBetween(long last_online_timestamp1, long last_online_timestamp2)
+    {
+        this.sql_where = this.sql_where + " and last_online_timestamp>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " and last_online_timestamp<?" + (BINDVAR_OFFSET_WHERE + 1 + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, last_online_timestamp1));
+        bind_where_count++;
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, last_online_timestamp2));
         bind_where_count++;
         return this;
     }
@@ -1518,6 +1438,16 @@ public class FriendList
         return this;
     }
 
+    public FriendList last_online_timestamp_realBetween(long last_online_timestamp_real1, long last_online_timestamp_real2)
+    {
+        this.sql_where = this.sql_where + " and last_online_timestamp_real>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " and last_online_timestamp_real<?" + (BINDVAR_OFFSET_WHERE + 1 + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, last_online_timestamp_real1));
+        bind_where_count++;
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, last_online_timestamp_real2));
+        bind_where_count++;
+        return this;
+    }
+
     public FriendList added_timestampEq(long added_timestamp)
     {
         this.sql_where = this.sql_where + " and added_timestamp=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -1550,6 +1480,16 @@ public class FriendList
         return this;
     }
 
+    public FriendList added_timestampBetween(long added_timestamp1, long added_timestamp2)
+    {
+        this.sql_where = this.sql_where + " and added_timestamp>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " and added_timestamp<?" + (BINDVAR_OFFSET_WHERE + 1 + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, added_timestamp1));
+        bind_where_count++;
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, added_timestamp2));
+        bind_where_count++;
+        return this;
+    }
+
     public FriendList is_relayEq(boolean is_relay)
     {
         this.sql_where = this.sql_where + " and is_relay=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -1566,22 +1506,6 @@ public class FriendList
         return this;
     }
 
-    public FriendList is_relayLt(boolean is_relay)
-    {
-        this.sql_where = this.sql_where + " and is_relay<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, is_relay));
-        bind_where_count++;
-        return this;
-    }
-
-    public FriendList is_relayGt(boolean is_relay)
-    {
-        this.sql_where = this.sql_where + " and is_relay>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, is_relay));
-        bind_where_count++;
-        return this;
-    }
-
     public FriendList push_urlEq(String push_url)
     {
         this.sql_where = this.sql_where + " and push_url=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -1593,22 +1517,6 @@ public class FriendList
     public FriendList push_urlNotEq(String push_url)
     {
         this.sql_where = this.sql_where + " and push_url<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, push_url));
-        bind_where_count++;
-        return this;
-    }
-
-    public FriendList push_urlLt(String push_url)
-    {
-        this.sql_where = this.sql_where + " and push_url<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, push_url));
-        bind_where_count++;
-        return this;
-    }
-
-    public FriendList push_urlGt(String push_url)
-    {
-        this.sql_where = this.sql_where + " and push_url>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, push_url));
         bind_where_count++;
         return this;
@@ -1646,6 +1554,16 @@ public class FriendList
         return this;
     }
 
+    public FriendList capabilitiesBetween(long capabilities1, long capabilities2)
+    {
+        this.sql_where = this.sql_where + " and capabilities>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " and capabilities<?" + (BINDVAR_OFFSET_WHERE + 1 + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, capabilities1));
+        bind_where_count++;
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, capabilities2));
+        bind_where_count++;
+        return this;
+    }
+
     public FriendList msgv3_capabilityEq(long msgv3_capability)
     {
         this.sql_where = this.sql_where + " and msgv3_capability=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -1674,6 +1592,16 @@ public class FriendList
     {
         this.sql_where = this.sql_where + " and msgv3_capability>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, msgv3_capability));
+        bind_where_count++;
+        return this;
+    }
+
+    public FriendList msgv3_capabilityBetween(long msgv3_capability1, long msgv3_capability2)
+    {
+        this.sql_where = this.sql_where + " and msgv3_capability>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " and msgv3_capability<?" + (BINDVAR_OFFSET_WHERE + 1 + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, msgv3_capability1));
+        bind_where_count++;
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, msgv3_capability2));
         bind_where_count++;
         return this;
     }
