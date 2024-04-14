@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vanniktech.emoji.emojiInformation
+import com.zoffcc.applications.trifa.HelperFiletransfer.byteCountToDisplaySize
 import com.zoffcc.applications.trifa.HelperFiletransfer.check_filename_is_image
 import com.zoffcc.applications.trifa.HelperGeneric
 import com.zoffcc.applications.trifa.HelperGeneric.cancel_ft_from_ui
@@ -342,13 +343,17 @@ fun outgoing_filetransfer(message: UIMessage, ui_scale: Float)
                 {
                 }
                 var file_size_in_bytes = "???"
+                var file_size_human = file_size_in_bytes
                 try
                 {
-                    file_size_in_bytes = File(message.filename_fullpath).length().toString()                }
+                    file_size_human = byteCountToDisplaySize(File(message.filename_fullpath).length())
+                    file_size_in_bytes = File(message.filename_fullpath).length().toString()
+                }
                 catch(_: Exception)
                 {
                 }
                 Tooltip(text = "Filename: " + file_name_without_path + "\n"
+                        + "Filesize: " + file_size_human + "\n"
                         + "Filesize: " + file_size_in_bytes + " Bytes",
                     textcolor = Color.Black) {
                     show_filetransfer_image(ui_scale = ui_scale, clickable = true,
@@ -424,13 +429,17 @@ fun incoming_filetransfer(message: UIMessage, ui_scale: Float)
                 {
                 }
                 var file_size_in_bytes = "???"
+                var file_size_human = file_size_in_bytes
                 try
                 {
-                    file_size_in_bytes = File(message.filename_fullpath).length().toString()                }
+                    file_size_human = byteCountToDisplaySize(File(message.filename_fullpath).length())
+                    file_size_in_bytes = File(message.filename_fullpath).length().toString()
+                }
                 catch(_: Exception)
                 {
                 }
                 Tooltip(text = "Filename: " + file_name_without_path + "\n"
+                        + "Filesize: " + file_size_human + "\n"
                         + "Filesize: " + file_size_in_bytes + " Bytes",
                     textcolor = Color.Black) {
                     show_filetransfer_image(ui_scale = ui_scale, clickable = true,

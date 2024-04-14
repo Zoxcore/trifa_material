@@ -6,6 +6,7 @@ import com.zoffcc.applications.sorm.Message;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.URLConnection;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -14,6 +15,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Base64;
+import java.util.Objects;
 import java.util.Random;
 
 import static com.zoffcc.applications.sorm.OrmaDatabase.sqldb;
@@ -820,4 +822,164 @@ public class HelperFiletransfer {
             Log.i(TAG, "MM2MM:EE1:" + e2.getMessage());
         }
     }
+
+    // --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
+    // HINT: copied from: https://commons.apache.org/proper/commons-io/apidocs/src-html/org/apache/commons/io/FileUtils.html
+    // --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
+
+    /**
+     * The number of bytes in a kilobyte.
+     */
+    public static final long ONE_KB = 1024;
+
+    /**
+     * The number of bytes in a kilobyte.
+     *
+     * @since 2.4
+     */
+    public static final BigInteger ONE_KB_BI = BigInteger.valueOf(ONE_KB);
+
+    /**
+     * The number of bytes in a megabyte.
+     */
+    public static final long ONE_MB = ONE_KB * ONE_KB;
+
+    /**
+     * The number of bytes in a megabyte.
+     *
+     * @since 2.4
+     */
+    public static final BigInteger ONE_MB_BI = ONE_KB_BI.multiply(ONE_KB_BI);
+
+    /**
+     * The number of bytes in a gigabyte.
+     */
+    public static final long ONE_GB = ONE_KB * ONE_MB;
+
+    /**
+     * The number of bytes in a gigabyte.
+     *
+     * @since 2.4
+     */
+    public static final BigInteger ONE_GB_BI = ONE_KB_BI.multiply(ONE_MB_BI);
+
+    /**
+     * The number of bytes in a terabyte.
+     */
+    public static final long ONE_TB = ONE_KB * ONE_GB;
+
+    /**
+     * The number of bytes in a terabyte.
+     *
+     * @since 2.4
+     */
+    public static final BigInteger ONE_TB_BI = ONE_KB_BI.multiply(ONE_GB_BI);
+
+    /**
+     * The number of bytes in a petabyte.
+     */
+    public static final long ONE_PB = ONE_KB * ONE_TB;
+
+    /**
+     * The number of bytes in a petabyte.
+     *
+     * @since 2.4
+     */
+    public static final BigInteger ONE_PB_BI = ONE_KB_BI.multiply(ONE_TB_BI);
+
+    /**
+     * The number of bytes in an exabyte.
+     */
+    public static final long ONE_EB = ONE_KB * ONE_PB;
+
+    /**
+     * The number of bytes in an exabyte.
+     *
+     * @since 2.4
+     */
+    public static final BigInteger ONE_EB_BI = ONE_KB_BI.multiply(ONE_PB_BI);
+
+    /**
+     * The number of bytes in a zettabyte.
+     */
+    public static final BigInteger ONE_ZB = BigInteger.valueOf(ONE_KB).multiply(BigInteger.valueOf(ONE_EB));
+
+    /**
+     * The number of bytes in a yottabyte.
+     */
+    public static final BigInteger ONE_YB = ONE_KB_BI.multiply(ONE_ZB);
+
+    /**
+     * An empty array of type {@link File}.
+     */
+    public static final File[] EMPTY_FILE_ARRAY = {};
+
+    /**
+     * Returns a human-readable version of the file size, where the input represents a specific number of bytes.
+     * <p>
+     * If the size is over 1GB, the size is returned as the number of whole GB, i.e. the size is rounded down to the
+     * nearest GB boundary.
+     * </p>
+     * <p>
+     * Similarly for the 1MB and 1KB boundaries.
+     * </p>
+     *
+     * @param size the number of bytes
+     * @return a human-readable display value (includes units - EB, PB, TB, GB, MB, KB or bytes)
+     * @throws NullPointerException if the given {@link BigInteger} is {@code null}.
+     * @see <a href="https://issues.apache.org/jira/browse/IO-226">IO-226 - should the rounding be changed?</a>
+     * @since 2.4
+     */
+    // See https://issues.apache.org/jira/browse/IO-226 - should the rounding be changed?
+    public static String byteCountToDisplaySize(final BigInteger size) {
+        Objects.requireNonNull(size, "size");
+        final String displaySize;
+
+        if (size.divide(ONE_EB_BI).compareTo(BigInteger.ZERO) > 0) {
+            displaySize = size.divide(ONE_EB_BI) + " EB";
+        } else if (size.divide(ONE_PB_BI).compareTo(BigInteger.ZERO) > 0) {
+            displaySize = size.divide(ONE_PB_BI) + " PB";
+        } else if (size.divide(ONE_TB_BI).compareTo(BigInteger.ZERO) > 0) {
+            displaySize = size.divide(ONE_TB_BI) + " TB";
+        } else if (size.divide(ONE_GB_BI).compareTo(BigInteger.ZERO) > 0) {
+            displaySize = size.divide(ONE_GB_BI) + " GB";
+        } else if (size.divide(ONE_MB_BI).compareTo(BigInteger.ZERO) > 0) {
+            displaySize = size.divide(ONE_MB_BI) + " MB";
+        } else if (size.divide(ONE_KB_BI).compareTo(BigInteger.ZERO) > 0) {
+            displaySize = size.divide(ONE_KB_BI) + " KB";
+        } else {
+            displaySize = size + " bytes";
+        }
+        return displaySize;
+    }
+
+    /**
+     * Returns a human-readable version of the file size, where the input represents a specific number of bytes.
+     * <p>
+     * If the size is over 1GB, the size is returned as the number of whole GB, i.e. the size is rounded down to the
+     * nearest GB boundary.
+     * </p>
+     * <p>
+     * Similarly for the 1MB and 1KB boundaries.
+     * </p>
+     *
+     * @param size the number of bytes
+     * @return a human-readable display value (includes units - EB, PB, TB, GB, MB, KB or bytes)
+     * @see <a href="https://issues.apache.org/jira/browse/IO-226">IO-226 - should the rounding be changed?</a>
+     */
+    // See https://issues.apache.org/jira/browse/IO-226 - should the rounding be changed?
+    public static String byteCountToDisplaySize(final long size) {
+        return byteCountToDisplaySize(BigInteger.valueOf(size));
+    }
+    // --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
+    // HINT: copied from: https://commons.apache.org/proper/commons-io/apidocs/src-html/org/apache/commons/io/FileUtils.html
+    // --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 }
