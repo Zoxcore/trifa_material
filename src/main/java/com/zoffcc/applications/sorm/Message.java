@@ -1029,10 +1029,34 @@ public class Message
     }
 
 
-    // ----------------- Eq funcs ----------------------- //
+    // ----------------- Eq/Gt/Lt funcs ----------------- //
     public Message idEq(long id)
     {
         this.sql_where = this.sql_where + " and id=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, id));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message idNotEq(long id)
+    {
+        this.sql_where = this.sql_where + " and id<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, id));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message idLt(long id)
+    {
+        this.sql_where = this.sql_where + " and id<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, id));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message idGt(long id)
+    {
+        this.sql_where = this.sql_where + " and id>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, id));
         bind_where_count++;
         return this;
@@ -1046,9 +1070,57 @@ public class Message
         return this;
     }
 
+    public Message message_idNotEq(long message_id)
+    {
+        this.sql_where = this.sql_where + " and message_id<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, message_id));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message message_idLt(long message_id)
+    {
+        this.sql_where = this.sql_where + " and message_id<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, message_id));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message message_idGt(long message_id)
+    {
+        this.sql_where = this.sql_where + " and message_id>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, message_id));
+        bind_where_count++;
+        return this;
+    }
+
     public Message tox_friendpubkeyEq(String tox_friendpubkey)
     {
         this.sql_where = this.sql_where + " and tox_friendpubkey=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_friendpubkey));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message tox_friendpubkeyNotEq(String tox_friendpubkey)
+    {
+        this.sql_where = this.sql_where + " and tox_friendpubkey<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_friendpubkey));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message tox_friendpubkeyLt(String tox_friendpubkey)
+    {
+        this.sql_where = this.sql_where + " and tox_friendpubkey<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_friendpubkey));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message tox_friendpubkeyGt(String tox_friendpubkey)
+    {
+        this.sql_where = this.sql_where + " and tox_friendpubkey>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_friendpubkey));
         bind_where_count++;
         return this;
@@ -1062,9 +1134,57 @@ public class Message
         return this;
     }
 
+    public Message directionNotEq(int direction)
+    {
+        this.sql_where = this.sql_where + " and direction<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, direction));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message directionLt(int direction)
+    {
+        this.sql_where = this.sql_where + " and direction<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, direction));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message directionGt(int direction)
+    {
+        this.sql_where = this.sql_where + " and direction>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, direction));
+        bind_where_count++;
+        return this;
+    }
+
     public Message TOX_MESSAGE_TYPEEq(int TOX_MESSAGE_TYPE)
     {
         this.sql_where = this.sql_where + " and TOX_MESSAGE_TYPE=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TOX_MESSAGE_TYPE));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message TOX_MESSAGE_TYPENotEq(int TOX_MESSAGE_TYPE)
+    {
+        this.sql_where = this.sql_where + " and TOX_MESSAGE_TYPE<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TOX_MESSAGE_TYPE));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message TOX_MESSAGE_TYPELt(int TOX_MESSAGE_TYPE)
+    {
+        this.sql_where = this.sql_where + " and TOX_MESSAGE_TYPE<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TOX_MESSAGE_TYPE));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message TOX_MESSAGE_TYPEGt(int TOX_MESSAGE_TYPE)
+    {
+        this.sql_where = this.sql_where + " and TOX_MESSAGE_TYPE>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TOX_MESSAGE_TYPE));
         bind_where_count++;
         return this;
@@ -1078,9 +1198,57 @@ public class Message
         return this;
     }
 
+    public Message TRIFA_MESSAGE_TYPENotEq(int TRIFA_MESSAGE_TYPE)
+    {
+        this.sql_where = this.sql_where + " and TRIFA_MESSAGE_TYPE<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TRIFA_MESSAGE_TYPE));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message TRIFA_MESSAGE_TYPELt(int TRIFA_MESSAGE_TYPE)
+    {
+        this.sql_where = this.sql_where + " and TRIFA_MESSAGE_TYPE<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TRIFA_MESSAGE_TYPE));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message TRIFA_MESSAGE_TYPEGt(int TRIFA_MESSAGE_TYPE)
+    {
+        this.sql_where = this.sql_where + " and TRIFA_MESSAGE_TYPE>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TRIFA_MESSAGE_TYPE));
+        bind_where_count++;
+        return this;
+    }
+
     public Message stateEq(int state)
     {
         this.sql_where = this.sql_where + " and state=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, state));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message stateNotEq(int state)
+    {
+        this.sql_where = this.sql_where + " and state<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, state));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message stateLt(int state)
+    {
+        this.sql_where = this.sql_where + " and state<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, state));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message stateGt(int state)
+    {
+        this.sql_where = this.sql_where + " and state>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, state));
         bind_where_count++;
         return this;
@@ -1094,9 +1262,57 @@ public class Message
         return this;
     }
 
+    public Message ft_acceptedNotEq(boolean ft_accepted)
+    {
+        this.sql_where = this.sql_where + " and ft_accepted<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, ft_accepted));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message ft_acceptedLt(boolean ft_accepted)
+    {
+        this.sql_where = this.sql_where + " and ft_accepted<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, ft_accepted));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message ft_acceptedGt(boolean ft_accepted)
+    {
+        this.sql_where = this.sql_where + " and ft_accepted>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, ft_accepted));
+        bind_where_count++;
+        return this;
+    }
+
     public Message ft_outgoing_startedEq(boolean ft_outgoing_started)
     {
         this.sql_where = this.sql_where + " and ft_outgoing_started=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, ft_outgoing_started));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message ft_outgoing_startedNotEq(boolean ft_outgoing_started)
+    {
+        this.sql_where = this.sql_where + " and ft_outgoing_started<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, ft_outgoing_started));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message ft_outgoing_startedLt(boolean ft_outgoing_started)
+    {
+        this.sql_where = this.sql_where + " and ft_outgoing_started<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, ft_outgoing_started));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message ft_outgoing_startedGt(boolean ft_outgoing_started)
+    {
+        this.sql_where = this.sql_where + " and ft_outgoing_started>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, ft_outgoing_started));
         bind_where_count++;
         return this;
@@ -1110,9 +1326,57 @@ public class Message
         return this;
     }
 
+    public Message filedb_idNotEq(long filedb_id)
+    {
+        this.sql_where = this.sql_where + " and filedb_id<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, filedb_id));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message filedb_idLt(long filedb_id)
+    {
+        this.sql_where = this.sql_where + " and filedb_id<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, filedb_id));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message filedb_idGt(long filedb_id)
+    {
+        this.sql_where = this.sql_where + " and filedb_id>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, filedb_id));
+        bind_where_count++;
+        return this;
+    }
+
     public Message filetransfer_idEq(long filetransfer_id)
     {
         this.sql_where = this.sql_where + " and filetransfer_id=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, filetransfer_id));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message filetransfer_idNotEq(long filetransfer_id)
+    {
+        this.sql_where = this.sql_where + " and filetransfer_id<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, filetransfer_id));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message filetransfer_idLt(long filetransfer_id)
+    {
+        this.sql_where = this.sql_where + " and filetransfer_id<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, filetransfer_id));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message filetransfer_idGt(long filetransfer_id)
+    {
+        this.sql_where = this.sql_where + " and filetransfer_id>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, filetransfer_id));
         bind_where_count++;
         return this;
@@ -1126,9 +1390,57 @@ public class Message
         return this;
     }
 
+    public Message sent_timestampNotEq(long sent_timestamp)
+    {
+        this.sql_where = this.sql_where + " and sent_timestamp<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, sent_timestamp));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message sent_timestampLt(long sent_timestamp)
+    {
+        this.sql_where = this.sql_where + " and sent_timestamp<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, sent_timestamp));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message sent_timestampGt(long sent_timestamp)
+    {
+        this.sql_where = this.sql_where + " and sent_timestamp>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, sent_timestamp));
+        bind_where_count++;
+        return this;
+    }
+
     public Message sent_timestamp_msEq(long sent_timestamp_ms)
     {
         this.sql_where = this.sql_where + " and sent_timestamp_ms=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, sent_timestamp_ms));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message sent_timestamp_msNotEq(long sent_timestamp_ms)
+    {
+        this.sql_where = this.sql_where + " and sent_timestamp_ms<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, sent_timestamp_ms));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message sent_timestamp_msLt(long sent_timestamp_ms)
+    {
+        this.sql_where = this.sql_where + " and sent_timestamp_ms<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, sent_timestamp_ms));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message sent_timestamp_msGt(long sent_timestamp_ms)
+    {
+        this.sql_where = this.sql_where + " and sent_timestamp_ms>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, sent_timestamp_ms));
         bind_where_count++;
         return this;
@@ -1142,9 +1454,57 @@ public class Message
         return this;
     }
 
+    public Message rcvd_timestampNotEq(long rcvd_timestamp)
+    {
+        this.sql_where = this.sql_where + " and rcvd_timestamp<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, rcvd_timestamp));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message rcvd_timestampLt(long rcvd_timestamp)
+    {
+        this.sql_where = this.sql_where + " and rcvd_timestamp<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, rcvd_timestamp));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message rcvd_timestampGt(long rcvd_timestamp)
+    {
+        this.sql_where = this.sql_where + " and rcvd_timestamp>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, rcvd_timestamp));
+        bind_where_count++;
+        return this;
+    }
+
     public Message rcvd_timestamp_msEq(long rcvd_timestamp_ms)
     {
         this.sql_where = this.sql_where + " and rcvd_timestamp_ms=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, rcvd_timestamp_ms));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message rcvd_timestamp_msNotEq(long rcvd_timestamp_ms)
+    {
+        this.sql_where = this.sql_where + " and rcvd_timestamp_ms<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, rcvd_timestamp_ms));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message rcvd_timestamp_msLt(long rcvd_timestamp_ms)
+    {
+        this.sql_where = this.sql_where + " and rcvd_timestamp_ms<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, rcvd_timestamp_ms));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message rcvd_timestamp_msGt(long rcvd_timestamp_ms)
+    {
+        this.sql_where = this.sql_where + " and rcvd_timestamp_ms>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, rcvd_timestamp_ms));
         bind_where_count++;
         return this;
@@ -1158,9 +1518,57 @@ public class Message
         return this;
     }
 
+    public Message readNotEq(boolean read)
+    {
+        this.sql_where = this.sql_where + " and read<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, read));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message readLt(boolean read)
+    {
+        this.sql_where = this.sql_where + " and read<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, read));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message readGt(boolean read)
+    {
+        this.sql_where = this.sql_where + " and read>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, read));
+        bind_where_count++;
+        return this;
+    }
+
     public Message send_retriesEq(int send_retries)
     {
         this.sql_where = this.sql_where + " and send_retries=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, send_retries));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message send_retriesNotEq(int send_retries)
+    {
+        this.sql_where = this.sql_where + " and send_retries<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, send_retries));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message send_retriesLt(int send_retries)
+    {
+        this.sql_where = this.sql_where + " and send_retries<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, send_retries));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message send_retriesGt(int send_retries)
+    {
+        this.sql_where = this.sql_where + " and send_retries>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, send_retries));
         bind_where_count++;
         return this;
@@ -1174,9 +1582,57 @@ public class Message
         return this;
     }
 
+    public Message is_newNotEq(boolean is_new)
+    {
+        this.sql_where = this.sql_where + " and is_new<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, is_new));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message is_newLt(boolean is_new)
+    {
+        this.sql_where = this.sql_where + " and is_new<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, is_new));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message is_newGt(boolean is_new)
+    {
+        this.sql_where = this.sql_where + " and is_new>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, is_new));
+        bind_where_count++;
+        return this;
+    }
+
     public Message textEq(String text)
     {
         this.sql_where = this.sql_where + " and text=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, text));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message textNotEq(String text)
+    {
+        this.sql_where = this.sql_where + " and text<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, text));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message textLt(String text)
+    {
+        this.sql_where = this.sql_where + " and text<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, text));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message textGt(String text)
+    {
+        this.sql_where = this.sql_where + " and text>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, text));
         bind_where_count++;
         return this;
@@ -1190,9 +1646,57 @@ public class Message
         return this;
     }
 
+    public Message filename_fullpathNotEq(String filename_fullpath)
+    {
+        this.sql_where = this.sql_where + " and filename_fullpath<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, filename_fullpath));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message filename_fullpathLt(String filename_fullpath)
+    {
+        this.sql_where = this.sql_where + " and filename_fullpath<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, filename_fullpath));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message filename_fullpathGt(String filename_fullpath)
+    {
+        this.sql_where = this.sql_where + " and filename_fullpath>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, filename_fullpath));
+        bind_where_count++;
+        return this;
+    }
+
     public Message msg_id_hashEq(String msg_id_hash)
     {
         this.sql_where = this.sql_where + " and msg_id_hash=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, msg_id_hash));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message msg_id_hashNotEq(String msg_id_hash)
+    {
+        this.sql_where = this.sql_where + " and msg_id_hash<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, msg_id_hash));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message msg_id_hashLt(String msg_id_hash)
+    {
+        this.sql_where = this.sql_where + " and msg_id_hash<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, msg_id_hash));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message msg_id_hashGt(String msg_id_hash)
+    {
+        this.sql_where = this.sql_where + " and msg_id_hash>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, msg_id_hash));
         bind_where_count++;
         return this;
@@ -1206,9 +1710,57 @@ public class Message
         return this;
     }
 
+    public Message raw_msgv2_bytesNotEq(String raw_msgv2_bytes)
+    {
+        this.sql_where = this.sql_where + " and raw_msgv2_bytes<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, raw_msgv2_bytes));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message raw_msgv2_bytesLt(String raw_msgv2_bytes)
+    {
+        this.sql_where = this.sql_where + " and raw_msgv2_bytes<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, raw_msgv2_bytes));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message raw_msgv2_bytesGt(String raw_msgv2_bytes)
+    {
+        this.sql_where = this.sql_where + " and raw_msgv2_bytes>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, raw_msgv2_bytes));
+        bind_where_count++;
+        return this;
+    }
+
     public Message msg_versionEq(int msg_version)
     {
         this.sql_where = this.sql_where + " and msg_version=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, msg_version));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message msg_versionNotEq(int msg_version)
+    {
+        this.sql_where = this.sql_where + " and msg_version<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, msg_version));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message msg_versionLt(int msg_version)
+    {
+        this.sql_where = this.sql_where + " and msg_version<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, msg_version));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message msg_versionGt(int msg_version)
+    {
+        this.sql_where = this.sql_where + " and msg_version>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, msg_version));
         bind_where_count++;
         return this;
@@ -1222,9 +1774,57 @@ public class Message
         return this;
     }
 
+    public Message resend_countNotEq(int resend_count)
+    {
+        this.sql_where = this.sql_where + " and resend_count<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, resend_count));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message resend_countLt(int resend_count)
+    {
+        this.sql_where = this.sql_where + " and resend_count<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, resend_count));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message resend_countGt(int resend_count)
+    {
+        this.sql_where = this.sql_where + " and resend_count>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, resend_count));
+        bind_where_count++;
+        return this;
+    }
+
     public Message ft_outgoing_queuedEq(boolean ft_outgoing_queued)
     {
         this.sql_where = this.sql_where + " and ft_outgoing_queued=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, ft_outgoing_queued));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message ft_outgoing_queuedNotEq(boolean ft_outgoing_queued)
+    {
+        this.sql_where = this.sql_where + " and ft_outgoing_queued<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, ft_outgoing_queued));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message ft_outgoing_queuedLt(boolean ft_outgoing_queued)
+    {
+        this.sql_where = this.sql_where + " and ft_outgoing_queued<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, ft_outgoing_queued));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message ft_outgoing_queuedGt(boolean ft_outgoing_queued)
+    {
+        this.sql_where = this.sql_where + " and ft_outgoing_queued>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, ft_outgoing_queued));
         bind_where_count++;
         return this;
@@ -1238,9 +1838,57 @@ public class Message
         return this;
     }
 
+    public Message msg_at_relayNotEq(boolean msg_at_relay)
+    {
+        this.sql_where = this.sql_where + " and msg_at_relay<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, msg_at_relay));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message msg_at_relayLt(boolean msg_at_relay)
+    {
+        this.sql_where = this.sql_where + " and msg_at_relay<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, msg_at_relay));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message msg_at_relayGt(boolean msg_at_relay)
+    {
+        this.sql_where = this.sql_where + " and msg_at_relay>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, msg_at_relay));
+        bind_where_count++;
+        return this;
+    }
+
     public Message msg_idv3_hashEq(String msg_idv3_hash)
     {
         this.sql_where = this.sql_where + " and msg_idv3_hash=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, msg_idv3_hash));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message msg_idv3_hashNotEq(String msg_idv3_hash)
+    {
+        this.sql_where = this.sql_where + " and msg_idv3_hash<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, msg_idv3_hash));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message msg_idv3_hashLt(String msg_idv3_hash)
+    {
+        this.sql_where = this.sql_where + " and msg_idv3_hash<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, msg_idv3_hash));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message msg_idv3_hashGt(String msg_idv3_hash)
+    {
+        this.sql_where = this.sql_where + " and msg_idv3_hash>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, msg_idv3_hash));
         bind_where_count++;
         return this;
@@ -1254,9 +1902,57 @@ public class Message
         return this;
     }
 
+    public Message sent_pushNotEq(int sent_push)
+    {
+        this.sql_where = this.sql_where + " and sent_push<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, sent_push));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message sent_pushLt(int sent_push)
+    {
+        this.sql_where = this.sql_where + " and sent_push<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, sent_push));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message sent_pushGt(int sent_push)
+    {
+        this.sql_where = this.sql_where + " and sent_push>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, sent_push));
+        bind_where_count++;
+        return this;
+    }
+
     public Message filetransfer_kindEq(int filetransfer_kind)
     {
         this.sql_where = this.sql_where + " and filetransfer_kind=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, filetransfer_kind));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message filetransfer_kindNotEq(int filetransfer_kind)
+    {
+        this.sql_where = this.sql_where + " and filetransfer_kind<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, filetransfer_kind));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message filetransfer_kindLt(int filetransfer_kind)
+    {
+        this.sql_where = this.sql_where + " and filetransfer_kind<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, filetransfer_kind));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message filetransfer_kindGt(int filetransfer_kind)
+    {
+        this.sql_where = this.sql_where + " and filetransfer_kind>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, filetransfer_kind));
         bind_where_count++;
         return this;
