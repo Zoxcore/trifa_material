@@ -115,6 +115,7 @@ public class GroupMessage
         out.group_identifier = in.group_identifier;
         out.tox_group_peer_pubkey = in.tox_group_peer_pubkey;
         out.private_message = in.private_message;
+        out.tox_group_peername = in.tox_group_peername;
         out.direction = in.direction;
         out.TOX_MESSAGE_TYPE = in.TOX_MESSAGE_TYPE;
         out.TRIFA_MESSAGE_TYPE = in.TRIFA_MESSAGE_TYPE;
@@ -123,7 +124,6 @@ public class GroupMessage
         out.read = in.read;
         out.is_new = in.is_new;
         out.text = in.text;
-        out.tox_group_peername = in.tox_group_peername;
         out.was_synced = in.was_synced;
         out.msg_id_hash = in.msg_id_hash;
         out.path_name = in.path_name;
@@ -145,6 +145,8 @@ public class GroupMessage
                 ", file_name=" + file_name + ", filename_fullpath=" + filename_fullpath + ", filesize=" + filesize;
     }
 
+
+
     String sql_start = "";
     String sql_set = "";
     String sql_where = "where 1=1 "; // where
@@ -158,11 +160,11 @@ public class GroupMessage
     public List<GroupMessage> toList()
     {
         List<GroupMessage> list = new ArrayList<>();
-
         try
         {
             final String sql = this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit;
             log_bindvars_where(sql, bind_where_count, bind_where_vars);
+            final long t1 = System.currentTimeMillis();
             PreparedStatement statement = sqldb.prepareStatement(sql);
             if (!set_bindvars_where(statement, bind_where_count, bind_where_vars))
             {
@@ -176,10 +178,18 @@ public class GroupMessage
                 return null;
             }
             ResultSet rs = statement.executeQuery();
+            final long t2 = System.currentTimeMillis();
+            if (ORMA_LONG_RUNNING_TRACE)
+            {
+                if ((t2 - t1) > ORMA_LONG_RUNNING_MS)
+                {
+                    Log.i(TAG, "long running (" + (t2 - t1)+ " ms) sql=" + sql);
+                }
+            }
+            final long t3 = System.currentTimeMillis();
             while (rs.next())
             {
                 GroupMessage out = new GroupMessage();
-
                 out.id = rs.getLong("id");
                 out.message_id_tox = rs.getString("message_id_tox");
                 out.group_identifier = rs.getString("group_identifier");
@@ -200,7 +210,16 @@ public class GroupMessage
                 out.file_name = rs.getString("file_name");
                 out.filename_fullpath = rs.getString("filename_fullpath");
                 out.filesize = rs.getLong("filesize");
+
                 list.add(out);
+            }
+            final long t4 = System.currentTimeMillis();
+            if (ORMA_LONG_RUNNING_TRACE)
+            {
+                if ((t4 - t3) > ORMA_LONG_RUNNING_MS)
+                {
+                    Log.i(TAG, "long running (" + (t4 - t3)+ " ms) fetch=" + sql);
+                }
             }
 
             try
@@ -219,6 +238,7 @@ public class GroupMessage
         return list;
     }
 
+
     public long insert()
     {
         long ret = -1;
@@ -229,53 +249,52 @@ public class GroupMessage
             PreparedStatement insert_pstmt = null;
 
             // @formatter:off
-            insert_pstmt_sql="insert into " + this.getClass().getSimpleName() +
-                    "(" +
-                    "message_id_tox,"+
-                    "group_identifier,"+
-                    "tox_group_peer_pubkey,"+
-                    "private_message,"+
-                    "tox_group_peername,"+
-                    "direction,"+
-                    "TOX_MESSAGE_TYPE,"	+
-                    "TRIFA_MESSAGE_TYPE,"	+
-                    "sent_timestamp,"+
-                    "rcvd_timestamp,"+
-                    "read,"+
-                    "is_new,"	+
-                    "text,"	+
-                    "was_synced,"+
-                    "msg_id_hash,"+
-                    "path_name,"	+
-                    "file_name,"	+
-                    "filename_fullpath,"	+
-                    "filesize"	+
-                    ")" +
+            insert_pstmt_sql ="insert into " + this.getClass().getSimpleName() +
+                    "("
+                    + "message_id_tox"
+                    + ",group_identifier"
+                    + ",tox_group_peer_pubkey"
+                    + ",private_message"
+                    + ",tox_group_peername"
+                    + ",direction"
+                    + ",TOX_MESSAGE_TYPE"
+                    + ",TRIFA_MESSAGE_TYPE"
+                    + ",sent_timestamp"
+                    + ",rcvd_timestamp"
+                    + ",read"
+                    + ",is_new"
+                    + ",text"
+                    + ",was_synced"
+                    + ",msg_id_hash"
+                    + ",path_name"
+                    + ",file_name"
+                    + ",filename_fullpath"
+                    + ",filesize"
+                    + ")" +
                     "values" +
-                    "(" +
-                    "?1," +
-                    "?2," +
-                    "?3," +
-                    "?4," +
-                    "?5," +
-                    "?6," +
-                    "?7," +
-                    "?8," +
-                    "?9," +
-                    "?10," +
-                    "?11," +
-                    "?12," +
-                    "?13," +
-                    "?14," +
-                    "?15," +
-                    "?16," +
-                    "?17," +
-                    "?18," +
-                    "?19" +
-                    ")";
+                    "("
+                    + "?1"
+                    + ",?2"
+                    + ",?3"
+                    + ",?4"
+                    + ",?5"
+                    + ",?6"
+                    + ",?7"
+                    + ",?8"
+                    + ",?9"
+                    + ",?10"
+                    + ",?11"
+                    + ",?12"
+                    + ",?13"
+                    + ",?14"
+                    + ",?15"
+                    + ",?16"
+                    + ",?17"
+                    + ",?18"
+                    + ",?19"
+                    + ")";
 
             insert_pstmt = sqldb.prepareStatement(insert_pstmt_sql);
-
             insert_pstmt.clearParameters();
 
             insert_pstmt.setString(1, this.message_id_tox);
@@ -297,6 +316,7 @@ public class GroupMessage
             insert_pstmt.setString(17, this.file_name);
             insert_pstmt.setString(18, this.filename_fullpath);
             insert_pstmt.setLong(19, this.filesize);
+            // @formatter:on
 
             if (ORMA_TRACE)
             {
@@ -310,9 +330,10 @@ public class GroupMessage
             {
                 if ((t2 - t1) > ORMA_LONG_RUNNING_MS)
                 {
-                    Log.i(TAG, "insertIntoGroupMessage acquire running long (" + (t2 - t1)+ " ms)");
+                    Log.i(TAG, "insertInto"+this.getClass().getSimpleName()+" acquire running long (" + (t2 - t1)+ " ms)");
                 }
             }
+
             final long t3 = System.currentTimeMillis();
             insert_pstmt.executeUpdate();
             final long t4 = System.currentTimeMillis();
@@ -320,13 +341,33 @@ public class GroupMessage
             {
                 if ((t4 - t3) > ORMA_LONG_RUNNING_MS)
                 {
-                    Log.i(TAG, "insertIntoGroupMessage sql running long (" + (t4 - t3)+ " ms)");
+                    Log.i(TAG, "insertInto"+this.getClass().getSimpleName()+" sql running long (" + (t4 - t3)+ " ms)");
                 }
             }
+
+            final long t5 = System.currentTimeMillis();
             insert_pstmt.close();
+            final long t6 = System.currentTimeMillis();
+            if (ORMA_LONG_RUNNING_TRACE)
+            {
+                if ((t6 - t5) > ORMA_LONG_RUNNING_MS)
+                {
+                    Log.i(TAG, "insertInto"+this.getClass().getSimpleName()+" statement close running long (" + (t6 - t5)+ " ms)");
+                }
+            }
+
+            final long t7 = System.currentTimeMillis();
             ret = get_last_rowid_pstmt();
+            final long t8 = System.currentTimeMillis();
+            if (ORMA_LONG_RUNNING_TRACE)
+            {
+                if ((t8 - t7) > ORMA_LONG_RUNNING_MS)
+                {
+                    Log.i(TAG, "insertInto"+this.getClass().getSimpleName()+" getLastRowId running long (" + (t8 - t7)+ " ms)");
+                }
+            }
+
             orma_semaphore_lastrowid_on_insert.release();
-            // @formatter:on
         }
         catch (Exception e)
         {
@@ -421,9 +462,9 @@ public class GroupMessage
         return ret;
     }
 
-    public GroupMessage limit(int i)
+    public GroupMessage limit(int rowcount)
     {
-        this.sql_limit = " limit " + i + " ";
+        this.sql_limit = " limit " + rowcount + " ";
         return this;
     }
 
@@ -437,9 +478,197 @@ public class GroupMessage
     // ----------------------------------- //
     // ----------------------------------- //
 
-    public GroupMessage group_identifierEq(String group_identifier)
+
+    // ----------------- Set funcs ---------------------- //
+    public GroupMessage id(long id)
     {
-        this.sql_where = this.sql_where + " and group_identifier='" + s(group_identifier) + "' ";
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " id=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, id));
+        bind_set_count++;
+        return this;
+    }
+
+    public GroupMessage message_id_tox(String message_id_tox)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " message_id_tox=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, message_id_tox));
+        bind_set_count++;
+        return this;
+    }
+
+    public GroupMessage group_identifier(String group_identifier)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " group_identifier=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, group_identifier));
+        bind_set_count++;
+        return this;
+    }
+
+    public GroupMessage tox_group_peer_pubkey(String tox_group_peer_pubkey)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " tox_group_peer_pubkey=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_group_peer_pubkey));
+        bind_set_count++;
+        return this;
+    }
+
+    public GroupMessage private_message(int private_message)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " private_message=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, private_message));
+        bind_set_count++;
+        return this;
+    }
+
+    public GroupMessage tox_group_peername(String tox_group_peername)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " tox_group_peername=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_group_peername));
+        bind_set_count++;
+        return this;
+    }
+
+    public GroupMessage direction(int direction)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " direction=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, direction));
+        bind_set_count++;
+        return this;
+    }
+
+    public GroupMessage TOX_MESSAGE_TYPE(int TOX_MESSAGE_TYPE)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " TOX_MESSAGE_TYPE=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TOX_MESSAGE_TYPE));
+        bind_set_count++;
+        return this;
+    }
+
+    public GroupMessage TRIFA_MESSAGE_TYPE(int TRIFA_MESSAGE_TYPE)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " TRIFA_MESSAGE_TYPE=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TRIFA_MESSAGE_TYPE));
+        bind_set_count++;
+        return this;
+    }
+
+    public GroupMessage sent_timestamp(long sent_timestamp)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " sent_timestamp=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, sent_timestamp));
+        bind_set_count++;
+        return this;
+    }
+
+    public GroupMessage rcvd_timestamp(long rcvd_timestamp)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " rcvd_timestamp=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, rcvd_timestamp));
+        bind_set_count++;
+        return this;
+    }
+
+    public GroupMessage read(boolean read)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " read=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, read));
+        bind_set_count++;
         return this;
     }
 
@@ -453,25 +682,316 @@ public class GroupMessage
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " is_new='" + b(is_new) + "' ";
+        this.sql_set = this.sql_set + " is_new=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, is_new));
+        bind_set_count++;
+        return this;
+    }
+
+    public GroupMessage text(String text)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " text=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, text));
+        bind_set_count++;
+        return this;
+    }
+
+    public GroupMessage was_synced(boolean was_synced)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " was_synced=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, was_synced));
+        bind_set_count++;
+        return this;
+    }
+
+    public GroupMessage msg_id_hash(String msg_id_hash)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " msg_id_hash=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, msg_id_hash));
+        bind_set_count++;
+        return this;
+    }
+
+    public GroupMessage path_name(String path_name)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " path_name=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, path_name));
+        bind_set_count++;
+        return this;
+    }
+
+    public GroupMessage file_name(String file_name)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " file_name=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, file_name));
+        bind_set_count++;
+        return this;
+    }
+
+    public GroupMessage filename_fullpath(String filename_fullpath)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " filename_fullpath=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, filename_fullpath));
+        bind_set_count++;
+        return this;
+    }
+
+    public GroupMessage filesize(long filesize)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " filesize=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, filesize));
+        bind_set_count++;
+        return this;
+    }
+
+
+    // ----------------- Eq funcs ----------------------- //
+    public GroupMessage idEq(long id)
+    {
+        this.sql_where = this.sql_where + " and id=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, id));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage message_id_toxEq(String message_id_tox)
+    {
+        this.sql_where = this.sql_where + " and message_id_tox=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, message_id_tox));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage group_identifierEq(String group_identifier)
+    {
+        this.sql_where = this.sql_where + " and group_identifier=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, group_identifier));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage tox_group_peer_pubkeyEq(String tox_group_peer_pubkey)
+    {
+        this.sql_where = this.sql_where + " and tox_group_peer_pubkey=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_group_peer_pubkey));
+        bind_where_count++;
         return this;
     }
 
     public GroupMessage tox_group_peer_pubkeyNotEq(String tox_group_peer_pubkey)
     {
-        this.sql_where = this.sql_where + " and tox_group_peer_pubkey<>'" + s(tox_group_peer_pubkey) + "' ";
+        this.sql_where = this.sql_where + " and tox_group_peer_pubkey<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_group_peer_pubkey));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage private_messageEq(int private_message)
+    {
+        this.sql_where = this.sql_where + " and private_message=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, private_message));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage tox_group_peernameEq(String tox_group_peername)
+    {
+        this.sql_where = this.sql_where + " and tox_group_peername=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_group_peername));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage directionEq(int direction)
+    {
+        this.sql_where = this.sql_where + " and direction=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, direction));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage TOX_MESSAGE_TYPEEq(int TOX_MESSAGE_TYPE)
+    {
+        this.sql_where = this.sql_where + " and TOX_MESSAGE_TYPE=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TOX_MESSAGE_TYPE));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage TRIFA_MESSAGE_TYPEEq(int TRIFA_MESSAGE_TYPE)
+    {
+        this.sql_where = this.sql_where + " and TRIFA_MESSAGE_TYPE=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TRIFA_MESSAGE_TYPE));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage sent_timestampEq(long sent_timestamp)
+    {
+        this.sql_where = this.sql_where + " and sent_timestamp=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, sent_timestamp));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage sent_timestampGt(long sent_timestamp)
+    {
+        this.sql_where = this.sql_where + " and sent_timestamp>?'" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, sent_timestamp));
+        bind_where_count++;
+        return this;
+    }
+
+
+    public GroupMessage rcvd_timestampEq(long rcvd_timestamp)
+    {
+        this.sql_where = this.sql_where + " and rcvd_timestamp=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, rcvd_timestamp));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage readEq(boolean read)
+    {
+        this.sql_where = this.sql_where + " and read=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, read));
+        bind_where_count++;
         return this;
     }
 
     public GroupMessage is_newEq(boolean is_new)
     {
-        this.sql_where = this.sql_where + " and is_new='" + b(is_new) + "' ";
+        this.sql_where = this.sql_where + " and is_new=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, is_new));
+        bind_where_count++;
         return this;
     }
 
-    public GroupMessage idEq(long id)
+    public GroupMessage textEq(String text)
     {
-        this.sql_where = this.sql_where + " and id='" + s(id) + "' ";
+        this.sql_where = this.sql_where + " and text=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, text));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage was_syncedEq(boolean was_synced)
+    {
+        this.sql_where = this.sql_where + " and was_synced=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, was_synced));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage msg_id_hashEq(String msg_id_hash)
+    {
+        this.sql_where = this.sql_where + " and msg_id_hash=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, msg_id_hash));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage path_nameEq(String path_name)
+    {
+        this.sql_where = this.sql_where + " and path_name=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, path_name));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage file_nameEq(String file_name)
+    {
+        this.sql_where = this.sql_where + " and file_name=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, file_name));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage filename_fullpathEq(String filename_fullpath)
+    {
+        this.sql_where = this.sql_where + " and filename_fullpath=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, filename_fullpath));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage filesizeEq(long filesize)
+    {
+        this.sql_where = this.sql_where + " and filesize=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, filesize));
+        bind_where_count++;
+        return this;
+    }
+
+
+    // ----------------- OrderBy funcs ------------------ //
+    public GroupMessage orderByIdAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " id ASC ";
         return this;
     }
 
@@ -489,35 +1009,227 @@ public class GroupMessage
         return this;
     }
 
-    public GroupMessage tox_group_peer_pubkeyEq(String tox_group_peer_pubkey)
+    public GroupMessage orderByMessage_id_toxAsc()
     {
-        this.sql_where = this.sql_where + " and tox_group_peer_pubkey='" + s(tox_group_peer_pubkey) + "' ";
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " message_id_tox ASC ";
         return this;
     }
 
-    public GroupMessage message_id_toxEq(String message_id_tox)
+    public GroupMessage orderByMessage_id_toxDesc()
     {
-        this.sql_where = this.sql_where + " and message_id_tox='" + s(message_id_tox) + "' ";
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " message_id_tox DESC ";
         return this;
     }
 
-    public GroupMessage sent_timestampGt(long sent_timestamp)
+    public GroupMessage orderByGroup_identifierAsc()
     {
-        this.sql_where = this.sql_where + " and sent_timestamp>'" + s(sent_timestamp) + "' ";
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " group_identifier ASC ";
         return this;
     }
 
-    public GroupMessage sent_timestampLt(long sent_timestamp)
+    public GroupMessage orderByGroup_identifierDesc()
     {
-        this.sql_where = this.sql_where + " and sent_timestamp<'" + s(sent_timestamp) + "' ";
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " group_identifier DESC ";
         return this;
     }
 
-    public GroupMessage textEq(String text)
+    public GroupMessage orderByTox_group_peer_pubkeyAsc()
     {
-        this.sql_where = this.sql_where + " and text=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, text));
-        bind_where_count++;
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " tox_group_peer_pubkey ASC ";
+        return this;
+    }
+
+    public GroupMessage orderByTox_group_peer_pubkeyDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " tox_group_peer_pubkey DESC ";
+        return this;
+    }
+
+    public GroupMessage orderByPrivate_messageAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " private_message ASC ";
+        return this;
+    }
+
+    public GroupMessage orderByPrivate_messageDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " private_message DESC ";
+        return this;
+    }
+
+    public GroupMessage orderByTox_group_peernameAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " tox_group_peername ASC ";
+        return this;
+    }
+
+    public GroupMessage orderByTox_group_peernameDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " tox_group_peername DESC ";
+        return this;
+    }
+
+    public GroupMessage orderByDirectionAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " direction ASC ";
+        return this;
+    }
+
+    public GroupMessage orderByDirectionDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " direction DESC ";
+        return this;
+    }
+
+    public GroupMessage orderByTOX_MESSAGE_TYPEAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " TOX_MESSAGE_TYPE ASC ";
+        return this;
+    }
+
+    public GroupMessage orderByTOX_MESSAGE_TYPEDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " TOX_MESSAGE_TYPE DESC ";
+        return this;
+    }
+
+    public GroupMessage orderByTRIFA_MESSAGE_TYPEAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " TRIFA_MESSAGE_TYPE ASC ";
+        return this;
+    }
+
+    public GroupMessage orderByTRIFA_MESSAGE_TYPEDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " TRIFA_MESSAGE_TYPE DESC ";
         return this;
     }
 
@@ -535,12 +1247,22 @@ public class GroupMessage
         return this;
     }
 
-    public GroupMessage private_messageEq(int private_message) {
-        this.sql_where = this.sql_where + " and private_message='" + s(private_message) + "' ";
+    public GroupMessage orderBySent_timestampDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " sent_timestamp DESC ";
         return this;
     }
 
-    public GroupMessage orderByRcvd_timestampAsc() {
+    public GroupMessage orderByRcvd_timestampAsc()
+    {
         if (this.sql_orderby.equals(""))
         {
             this.sql_orderby = " order by ";
@@ -553,46 +1275,273 @@ public class GroupMessage
         return this;
     }
 
-    public GroupMessage msg_id_hashEq(String msg_id_hash) {
-        this.sql_where = this.sql_where + " and msg_id_hash='" + s(msg_id_hash) + "' ";
-        return this;
-    }
-
-    public GroupMessage directionEq(int direction) {
-        this.sql_where = this.sql_where + " and direction='" + s(direction) + "' ";
-        return this;
-    }
-
-    public GroupMessage readEq(boolean read) {
-        this.sql_where = this.sql_where + " and read='" + b(read) + "' ";
-        return this;
-    }
-
-    public GroupMessage read(boolean read) {
-        if (this.sql_set.equals(""))
+    public GroupMessage orderByRcvd_timestampDesc()
+    {
+        if (this.sql_orderby.equals(""))
         {
-            this.sql_set = " set ";
+            this.sql_orderby = " order by ";
         }
         else
         {
-            this.sql_set = this.sql_set + " , ";
+            this.sql_orderby = this.sql_orderby + " , ";
         }
-        this.sql_set = this.sql_set + " read='" + b(read) + "' ";
+        this.sql_orderby = this.sql_orderby + " rcvd_timestamp DESC ";
         return this;
     }
 
-    public GroupMessage tox_group_peername(String tox_group_peername) {
-        if (this.sql_set.equals(""))
+    public GroupMessage orderByReadAsc()
+    {
+        if (this.sql_orderby.equals(""))
         {
-            this.sql_set = " set ";
+            this.sql_orderby = " order by ";
         }
         else
         {
-            this.sql_set = this.sql_set + " , ";
+            this.sql_orderby = this.sql_orderby + " , ";
         }
-        this.sql_set = this.sql_set + " tox_group_peername=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
-        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_group_peername));
-        bind_set_count++;
+        this.sql_orderby = this.sql_orderby + " read ASC ";
         return this;
     }
+
+    public GroupMessage orderByReadDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " read DESC ";
+        return this;
+    }
+
+    public GroupMessage orderByIs_newAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " is_new ASC ";
+        return this;
+    }
+
+    public GroupMessage orderByIs_newDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " is_new DESC ";
+        return this;
+    }
+
+    public GroupMessage orderByTextAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " text ASC ";
+        return this;
+    }
+
+    public GroupMessage orderByTextDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " text DESC ";
+        return this;
+    }
+
+    public GroupMessage orderByWas_syncedAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " was_synced ASC ";
+        return this;
+    }
+
+    public GroupMessage orderByWas_syncedDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " was_synced DESC ";
+        return this;
+    }
+
+    public GroupMessage orderByMsg_id_hashAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " msg_id_hash ASC ";
+        return this;
+    }
+
+    public GroupMessage orderByMsg_id_hashDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " msg_id_hash DESC ";
+        return this;
+    }
+
+    public GroupMessage orderByPath_nameAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " path_name ASC ";
+        return this;
+    }
+
+    public GroupMessage orderByPath_nameDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " path_name DESC ";
+        return this;
+    }
+
+    public GroupMessage orderByFile_nameAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " file_name ASC ";
+        return this;
+    }
+
+    public GroupMessage orderByFile_nameDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " file_name DESC ";
+        return this;
+    }
+
+    public GroupMessage orderByFilename_fullpathAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " filename_fullpath ASC ";
+        return this;
+    }
+
+    public GroupMessage orderByFilename_fullpathDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " filename_fullpath DESC ";
+        return this;
+    }
+
+    public GroupMessage orderByFilesizeAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " filesize ASC ";
+        return this;
+    }
+
+    public GroupMessage orderByFilesizeDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " filesize DESC ";
+        return this;
+    }
+
+
+
 }
+

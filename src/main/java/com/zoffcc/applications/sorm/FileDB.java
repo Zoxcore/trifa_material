@@ -63,6 +63,7 @@ public class FileDB
     static FileDB deep_copy(FileDB in)
     {
         FileDB out = new FileDB();
+        out.id = in.id;
         out.kind = in.kind;
         out.direction = in.direction;
         out.tox_public_key_string = in.tox_public_key_string;
@@ -70,6 +71,7 @@ public class FileDB
         out.file_name = in.file_name;
         out.filesize = in.filesize;
         out.is_in_VFS = in.is_in_VFS;
+
         return out;
     }
 
@@ -79,6 +81,8 @@ public class FileDB
         return "id=" + id + ", kind=" + kind + ", is_in_VFS=" + is_in_VFS + ", path_name=" + path_name + ", file_name" +
                 file_name + ", filesize=" + filesize + ", direction=" + direction;
     }
+
+
 
     String sql_start = "";
     String sql_set = "";
@@ -93,11 +97,11 @@ public class FileDB
     public List<FileDB> toList()
     {
         List<FileDB> list = new ArrayList<>();
-
         try
         {
             final String sql = this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit;
             log_bindvars_where(sql, bind_where_count, bind_where_vars);
+            final long t1 = System.currentTimeMillis();
             PreparedStatement statement = sqldb.prepareStatement(sql);
             if (!set_bindvars_where(statement, bind_where_count, bind_where_vars))
             {
@@ -111,10 +115,18 @@ public class FileDB
                 return null;
             }
             ResultSet rs = statement.executeQuery();
+            final long t2 = System.currentTimeMillis();
+            if (ORMA_LONG_RUNNING_TRACE)
+            {
+                if ((t2 - t1) > ORMA_LONG_RUNNING_MS)
+                {
+                    Log.i(TAG, "long running (" + (t2 - t1)+ " ms) sql=" + sql);
+                }
+            }
+            final long t3 = System.currentTimeMillis();
             while (rs.next())
             {
                 FileDB out = new FileDB();
-
                 out.id = rs.getLong("id");
                 out.kind = rs.getInt("kind");
                 out.direction = rs.getInt("direction");
@@ -125,6 +137,14 @@ public class FileDB
                 out.is_in_VFS = rs.getBoolean("is_in_VFS");
 
                 list.add(out);
+            }
+            final long t4 = System.currentTimeMillis();
+            if (ORMA_LONG_RUNNING_TRACE)
+            {
+                if ((t4 - t3) > ORMA_LONG_RUNNING_MS)
+                {
+                    Log.i(TAG, "long running (" + (t4 - t3)+ " ms) fetch=" + sql);
+                }
             }
 
             try
@@ -143,6 +163,7 @@ public class FileDB
         return list;
     }
 
+
     public long insert()
     {
         long ret = -1;
@@ -153,29 +174,28 @@ public class FileDB
             PreparedStatement insert_pstmt = null;
 
             // @formatter:off
-            insert_pstmt_sql="insert into " + this.getClass().getSimpleName() +
-                    "(" +
-                    "kind,"	+
-                    "direction,"+
-                    "tox_public_key_string,"+
-                    "path_name,"	+
-                    "file_name,"	+
-                    "filesize,"+
-                    "is_in_VFS"+
-                    ")" +
+            insert_pstmt_sql ="insert into " + this.getClass().getSimpleName() +
+                    "("
+                    + "kind"
+                    + ",direction"
+                    + ",tox_public_key_string"
+                    + ",path_name"
+                    + ",file_name"
+                    + ",filesize"
+                    + ",is_in_VFS"
+                    + ")" +
                     "values" +
-                    "(" +
-                    "?1," +
-                    "?2," +
-                    "?3," +
-                    "?4," +
-                    "?5," +
-                    "?6," +
-                    "?7" +
-                    ")";
+                    "("
+                    + "?1"
+                    + ",?2"
+                    + ",?3"
+                    + ",?4"
+                    + ",?5"
+                    + ",?6"
+                    + ",?7"
+                    + ")";
 
             insert_pstmt = sqldb.prepareStatement(insert_pstmt_sql);
-
             insert_pstmt.clearParameters();
 
             insert_pstmt.setInt(1, this.kind);
@@ -185,18 +205,58 @@ public class FileDB
             insert_pstmt.setString(5, this.file_name);
             insert_pstmt.setLong(6, this.filesize);
             insert_pstmt.setBoolean(7, this.is_in_VFS);
+            // @formatter:on
 
             if (ORMA_TRACE)
             {
                 Log.i(TAG, "sql=" + insert_pstmt);
             }
 
+            final long t1 = System.currentTimeMillis();
             orma_semaphore_lastrowid_on_insert.acquire();
+            final long t2 = System.currentTimeMillis();
+            if (ORMA_LONG_RUNNING_TRACE)
+            {
+                if ((t2 - t1) > ORMA_LONG_RUNNING_MS)
+                {
+                    Log.i(TAG, "insertInto"+this.getClass().getSimpleName()+" acquire running long (" + (t2 - t1)+ " ms)");
+                }
+            }
+
+            final long t3 = System.currentTimeMillis();
             insert_pstmt.executeUpdate();
+            final long t4 = System.currentTimeMillis();
+            if (ORMA_LONG_RUNNING_TRACE)
+            {
+                if ((t4 - t3) > ORMA_LONG_RUNNING_MS)
+                {
+                    Log.i(TAG, "insertInto"+this.getClass().getSimpleName()+" sql running long (" + (t4 - t3)+ " ms)");
+                }
+            }
+
+            final long t5 = System.currentTimeMillis();
             insert_pstmt.close();
+            final long t6 = System.currentTimeMillis();
+            if (ORMA_LONG_RUNNING_TRACE)
+            {
+                if ((t6 - t5) > ORMA_LONG_RUNNING_MS)
+                {
+                    Log.i(TAG, "insertInto"+this.getClass().getSimpleName()+" statement close running long (" + (t6 - t5)+ " ms)");
+                }
+            }
+
+            final long t7 = System.currentTimeMillis();
             ret = get_last_rowid_pstmt();
+            final long t8 = System.currentTimeMillis();
+            if (ORMA_LONG_RUNNING_TRACE)
+            {
+                if ((t8 - t7) > ORMA_LONG_RUNNING_MS)
+                {
+                    Log.i(TAG, "insertInto"+this.getClass().getSimpleName()+" getLastRowId running long (" + (t8 - t7)+ " ms)");
+                }
+            }
+
             orma_semaphore_lastrowid_on_insert.release();
-            // @formatter:on
         }
         catch (Exception e)
         {
@@ -291,15 +351,177 @@ public class FileDB
         return ret;
     }
 
-    public FileDB limit(int i)
+    public FileDB limit(int rowcount)
     {
-        this.sql_limit = " limit " + i + " ";
+        this.sql_limit = " limit " + rowcount + " ";
+        return this;
+    }
+
+    public FileDB limit(int rowcount, int offset)
+    {
+        this.sql_limit = " limit " + offset + " , " + rowcount;
         return this;
     }
 
     // ----------------------------------- //
     // ----------------------------------- //
     // ----------------------------------- //
+
+
+    // ----------------- Set funcs ---------------------- //
+    public FileDB id(long id)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " id=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, id));
+        bind_set_count++;
+        return this;
+    }
+
+    public FileDB kind(int kind)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " kind=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, kind));
+        bind_set_count++;
+        return this;
+    }
+
+    public FileDB direction(int direction)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " direction=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, direction));
+        bind_set_count++;
+        return this;
+    }
+
+    public FileDB tox_public_key_string(String tox_public_key_string)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " tox_public_key_string=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_public_key_string));
+        bind_set_count++;
+        return this;
+    }
+
+    public FileDB path_name(String path_name)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " path_name=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, path_name));
+        bind_set_count++;
+        return this;
+    }
+
+    public FileDB file_name(String file_name)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " file_name=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, file_name));
+        bind_set_count++;
+        return this;
+    }
+
+    public FileDB filesize(long filesize)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " filesize=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, filesize));
+        bind_set_count++;
+        return this;
+    }
+
+    public FileDB is_in_VFS(boolean is_in_VFS)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " is_in_VFS=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, is_in_VFS));
+        bind_set_count++;
+        return this;
+    }
+
+
+    // ----------------- Eq funcs ----------------------- //
+    public FileDB idEq(long id)
+    {
+        this.sql_where = this.sql_where + " and id=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, id));
+        bind_where_count++;
+        return this;
+    }
+
+    public FileDB kindEq(int kind)
+    {
+        this.sql_where = this.sql_where + " and kind=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, kind));
+        bind_where_count++;
+        return this;
+    }
+
+    public FileDB directionEq(int direction)
+    {
+        this.sql_where = this.sql_where + " and direction=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, direction));
+        bind_where_count++;
+        return this;
+    }
 
     public FileDB tox_public_key_stringEq(String tox_public_key_string)
     {
@@ -309,11 +531,51 @@ public class FileDB
         return this;
     }
 
+    public FileDB path_nameEq(String path_name)
+    {
+        this.sql_where = this.sql_where + " and path_name=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, path_name));
+        bind_where_count++;
+        return this;
+    }
+
     public FileDB file_nameEq(String file_name)
     {
         this.sql_where = this.sql_where + " and file_name=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, file_name));
         bind_where_count++;
+        return this;
+    }
+
+    public FileDB filesizeEq(long filesize)
+    {
+        this.sql_where = this.sql_where + " and filesize=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, filesize));
+        bind_where_count++;
+        return this;
+    }
+
+    public FileDB is_in_VFSEq(boolean is_in_VFS)
+    {
+        this.sql_where = this.sql_where + " and is_in_VFS=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, is_in_VFS));
+        bind_where_count++;
+        return this;
+    }
+
+
+    // ----------------- OrderBy funcs ------------------ //
+    public FileDB orderByIdAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " id ASC ";
         return this;
     }
 
@@ -329,32 +591,205 @@ public class FileDB
         }
         this.sql_orderby = this.sql_orderby + " id DESC ";
         return this;
-
     }
 
-    public FileDB path_nameEq(String path_name)
+    public FileDB orderByKindAsc()
     {
-        this.sql_where = this.sql_where + " and path_name=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, path_name));
-        bind_where_count++;
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " kind ASC ";
         return this;
     }
 
-    public FileDB directionEq(int direction)
+    public FileDB orderByKindDesc()
     {
-        this.sql_where = this.sql_where + " and direction='" + s(direction) + "' ";
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " kind DESC ";
         return this;
     }
 
-    public FileDB filesizeEq(long filesize)
+    public FileDB orderByDirectionAsc()
     {
-        this.sql_where = this.sql_where + " and filesize='" + s(filesize) + "' ";
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " direction ASC ";
         return this;
     }
 
-    public FileDB idEq(long id)
+    public FileDB orderByDirectionDesc()
     {
-        this.sql_where = this.sql_where + " and id='" + s(id) + "' ";
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " direction DESC ";
         return this;
     }
+
+    public FileDB orderByTox_public_key_stringAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " tox_public_key_string ASC ";
+        return this;
+    }
+
+    public FileDB orderByTox_public_key_stringDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " tox_public_key_string DESC ";
+        return this;
+    }
+
+    public FileDB orderByPath_nameAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " path_name ASC ";
+        return this;
+    }
+
+    public FileDB orderByPath_nameDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " path_name DESC ";
+        return this;
+    }
+
+    public FileDB orderByFile_nameAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " file_name ASC ";
+        return this;
+    }
+
+    public FileDB orderByFile_nameDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " file_name DESC ";
+        return this;
+    }
+
+    public FileDB orderByFilesizeAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " filesize ASC ";
+        return this;
+    }
+
+    public FileDB orderByFilesizeDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " filesize DESC ";
+        return this;
+    }
+
+    public FileDB orderByIs_in_VFSAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " is_in_VFS ASC ";
+        return this;
+    }
+
+    public FileDB orderByIs_in_VFSDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " is_in_VFS DESC ";
+        return this;
+    }
+
+
+
 }
+

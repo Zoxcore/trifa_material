@@ -136,6 +136,8 @@ public class Message
     @Nullable
     public int filetransfer_kind = TOX_FILE_KIND_DATA.value;
 
+    // ______@@SORMA_END@@______
+
     // ------- SWING UI elements ------- //
     JButton _swing_ok = null;
     JButton _swing_cancel = null;
@@ -165,8 +167,8 @@ public class Message
         out.text = in.text;
         out.filename_fullpath = in.filename_fullpath;
         out.msg_id_hash = in.msg_id_hash;
-        out.msg_version = in.msg_version;
         out.raw_msgv2_bytes = in.raw_msgv2_bytes;
+        out.msg_version = in.msg_version;
         out.resend_count = in.resend_count;
         out.ft_outgoing_queued = in.ft_outgoing_queued;
         out.msg_at_relay = in.msg_at_relay;
@@ -190,6 +192,8 @@ public class Message
                 ft_outgoing_queued + ", msg_at_relay=" + msg_at_relay + ", sent_push=" + sent_push +
                 ", filetransfer_kind=" + filetransfer_kind;
     }
+
+
 
     String sql_start = "";
     String sql_set = "";
@@ -234,7 +238,6 @@ public class Message
             while (rs.next())
             {
                 Message out = new Message();
-
                 out.id = rs.getLong("id");
                 out.message_id = rs.getLong("message_id");
                 out.tox_friendpubkey = rs.getString("tox_friendpubkey");
@@ -256,8 +259,8 @@ public class Message
                 out.text = rs.getString("text");
                 out.filename_fullpath = rs.getString("filename_fullpath");
                 out.msg_id_hash = rs.getString("msg_id_hash");
-                out.msg_version = rs.getInt("msg_version");
                 out.raw_msgv2_bytes = rs.getString("raw_msgv2_bytes");
+                out.msg_version = rs.getInt("msg_version");
                 out.resend_count = rs.getInt("resend_count");
                 out.ft_outgoing_queued = rs.getBoolean("ft_outgoing_queued");
                 out.msg_at_relay = rs.getBoolean("msg_at_relay");
@@ -292,6 +295,7 @@ public class Message
         return list;
     }
 
+
     public long insert()
     {
         long ret = -1;
@@ -303,69 +307,69 @@ public class Message
 
             // @formatter:off
             insert_pstmt_sql ="insert into " + this.getClass().getSimpleName() +
-                    "(" +
-                    "message_id," +
-                    "tox_friendpubkey," +
-                    "direction," +
-                    "TOX_MESSAGE_TYPE," +
-                    "TRIFA_MESSAGE_TYPE," +
-                    "state," +
-                    "ft_accepted," +
-                    "ft_outgoing_started," +
-                    "filedb_id," +
-                    "filetransfer_id," +
-                    "sent_timestamp," +
-                    "sent_timestamp_ms," +
-                    "rcvd_timestamp," +
-                    "rcvd_timestamp_ms," +
-                    "read," +
-                    "send_retries," +
-                    "is_new," +
-                    "text," +
-                    "filename_fullpath," +
-                    "msg_id_hash," +
-                    "msg_version," +
-                    "raw_msgv2_bytes," +
-                    "resend_count," +
-                    "ft_outgoing_queued," +
-                    "msg_at_relay," +
-                    "msg_idv3_hash," +
-                    "filetransfer_kind," +
-                    "sent_push" +
-                    ")" +
+                    "("
+                    + "message_id"
+                    + ",tox_friendpubkey"
+                    + ",direction"
+                    + ",TOX_MESSAGE_TYPE"
+                    + ",TRIFA_MESSAGE_TYPE"
+                    + ",state"
+                    + ",ft_accepted"
+                    + ",ft_outgoing_started"
+                    + ",filedb_id"
+                    + ",filetransfer_id"
+                    + ",sent_timestamp"
+                    + ",sent_timestamp_ms"
+                    + ",rcvd_timestamp"
+                    + ",rcvd_timestamp_ms"
+                    + ",read"
+                    + ",send_retries"
+                    + ",is_new"
+                    + ",text"
+                    + ",filename_fullpath"
+                    + ",msg_id_hash"
+                    + ",raw_msgv2_bytes"
+                    + ",msg_version"
+                    + ",resend_count"
+                    + ",ft_outgoing_queued"
+                    + ",msg_at_relay"
+                    + ",msg_idv3_hash"
+                    + ",sent_push"
+                    + ",filetransfer_kind"
+                    + ")" +
                     "values" +
-                    "(" +
-                    "?1," +
-                    "?2," +
-                    "?3," +
-                    "?4," +
-                    "?5," +
-                    "?6," +
-                    "?7," +
-                    "?8," +
-                    "?9," +
-                    "?10," +
-                    "?11," +
-                    "?12," +
-                    "?13," +
-                    "?14," +
-                    "?15," +
-                    "?16," +
-                    "?17," +
-                    "?18," +
-                    "?19," +
-                    "?20," +
-                    "?21," +
-                    "?22," +
-                    "?23," +
-                    "?24," +
-                    "?25," +
-                    "?26," +
-                    "?27," +
-                    "?28" +
-                    ")";
-            insert_pstmt = sqldb.prepareStatement(insert_pstmt_sql);
+                    "("
+                    + "?1"
+                    + ",?2"
+                    + ",?3"
+                    + ",?4"
+                    + ",?5"
+                    + ",?6"
+                    + ",?7"
+                    + ",?8"
+                    + ",?9"
+                    + ",?10"
+                    + ",?11"
+                    + ",?12"
+                    + ",?13"
+                    + ",?14"
+                    + ",?15"
+                    + ",?16"
+                    + ",?17"
+                    + ",?18"
+                    + ",?19"
+                    + ",?20"
+                    + ",?21"
+                    + ",?22"
+                    + ",?23"
+                    + ",?24"
+                    + ",?25"
+                    + ",?26"
+                    + ",?27"
+                    + ",?28"
+                    + ")";
 
+            insert_pstmt = sqldb.prepareStatement(insert_pstmt_sql);
             insert_pstmt.clearParameters();
 
             insert_pstmt.setLong(1, this.message_id);
@@ -388,14 +392,14 @@ public class Message
             insert_pstmt.setString(18, this.text);
             insert_pstmt.setString(19, this.filename_fullpath);
             insert_pstmt.setString(20, this.msg_id_hash);
-            insert_pstmt.setInt(21, this.msg_version);
-            insert_pstmt.setString(22, this.raw_msgv2_bytes);
+            insert_pstmt.setString(21, this.raw_msgv2_bytes);
+            insert_pstmt.setInt(22, this.msg_version);
             insert_pstmt.setInt(23, this.resend_count);
             insert_pstmt.setBoolean(24, this.ft_outgoing_queued);
             insert_pstmt.setBoolean(25, this.msg_at_relay);
             insert_pstmt.setString(26, this.msg_idv3_hash);
-            insert_pstmt.setInt(27, this.filetransfer_kind);
-            insert_pstmt.setInt(28, this.sent_push);
+            insert_pstmt.setInt(27, this.sent_push);
+            insert_pstmt.setInt(28, this.filetransfer_kind);
             // @formatter:on
 
             if (ORMA_TRACE)
@@ -410,7 +414,7 @@ public class Message
             {
                 if ((t2 - t1) > ORMA_LONG_RUNNING_MS)
                 {
-                    Log.i(TAG, "insertIntoMessage acquire running long (" + (t2 - t1)+ " ms)");
+                    Log.i(TAG, "insertInto"+this.getClass().getSimpleName()+" acquire running long (" + (t2 - t1)+ " ms)");
                 }
             }
 
@@ -421,7 +425,7 @@ public class Message
             {
                 if ((t4 - t3) > ORMA_LONG_RUNNING_MS)
                 {
-                    Log.i(TAG, "insertIntoMessage sql running long (" + (t4 - t3)+ " ms)");
+                    Log.i(TAG, "insertInto"+this.getClass().getSimpleName()+" sql running long (" + (t4 - t3)+ " ms)");
                 }
             }
 
@@ -432,7 +436,7 @@ public class Message
             {
                 if ((t6 - t5) > ORMA_LONG_RUNNING_MS)
                 {
-                    Log.i(TAG, "insertIntoMessage statement close running long (" + (t6 - t5)+ " ms)");
+                    Log.i(TAG, "insertInto"+this.getClass().getSimpleName()+" statement close running long (" + (t6 - t5)+ " ms)");
                 }
             }
 
@@ -443,7 +447,7 @@ public class Message
             {
                 if ((t8 - t7) > ORMA_LONG_RUNNING_MS)
                 {
-                    Log.i(TAG, "insertIntoMessage getLastRowId running long (" + (t8 - t7)+ " ms)");
+                    Log.i(TAG, "insertInto"+this.getClass().getSimpleName()+" getLastRowId running long (" + (t8 - t7)+ " ms)");
                 }
             }
 
@@ -558,69 +562,21 @@ public class Message
     // ----------------------------------- //
     // ----------------------------------- //
 
-    public Message tox_friendpubkeyEq(String tox_friendpubkey)
-    {
-        this.sql_where = this.sql_where + " and tox_friendpubkey=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_friendpubkey));
-        bind_where_count++;
-        return this;
-    }
 
-    public Message orderBySent_timestampAsc()
+    // ----------------- Set funcs ---------------------- //
+    public Message id(long id)
     {
-        if (this.sql_orderby.equals(""))
+        if (this.sql_set.equals(""))
         {
-            this.sql_orderby = " order by ";
+            this.sql_set = " set ";
         }
         else
         {
-            this.sql_orderby = this.sql_orderby + " , ";
+            this.sql_set = this.sql_set + " , ";
         }
-        this.sql_orderby = this.sql_orderby + " sent_timestamp ASC ";
-        return this;
-    }
-
-    public Message orderBySent_timestamp_msAsc()
-    {
-        if (this.sql_orderby.equals(""))
-        {
-            this.sql_orderby = " order by ";
-        }
-        else
-        {
-            this.sql_orderby = this.sql_orderby + " , ";
-        }
-        this.sql_orderby = this.sql_orderby + " sent_timestamp_ms ASC ";
-        return this;
-    }
-
-    public Message directionEq(int i)
-    {
-        this.sql_where = this.sql_where + " and direction='" + s(i) + "' ";
-        return this;
-    }
-
-    public Message TRIFA_MESSAGE_TYPEEq(int value)
-    {
-        this.sql_where = this.sql_where + " and TRIFA_MESSAGE_TYPE='" + s(value) + "' ";
-        return this;
-    }
-
-    public Message resend_countEq(int i)
-    {
-        this.sql_where = this.sql_where + " and resend_count='" + s(i) + "' ";
-        return this;
-    }
-
-    public Message readEq(boolean b)
-    {
-        this.sql_where = this.sql_where + " and read='" + b(b) + "' ";
-        return this;
-    }
-
-    public Message idEq(long id)
-    {
-        this.sql_where = this.sql_where + " and id='" + s(id) + "' ";
+        this.sql_set = this.sql_set + " id=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, id));
+        bind_set_count++;
         return this;
     }
 
@@ -634,7 +590,265 @@ public class Message
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " message_id='" + s(message_id) + "' ";
+        this.sql_set = this.sql_set + " message_id=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, message_id));
+        bind_set_count++;
+        return this;
+    }
+
+    public Message tox_friendpubkey(String tox_friendpubkey)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " tox_friendpubkey=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_friendpubkey));
+        bind_set_count++;
+        return this;
+    }
+
+    public Message direction(int direction)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " direction=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, direction));
+        bind_set_count++;
+        return this;
+    }
+
+    public Message TOX_MESSAGE_TYPE(int TOX_MESSAGE_TYPE)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " TOX_MESSAGE_TYPE=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TOX_MESSAGE_TYPE));
+        bind_set_count++;
+        return this;
+    }
+
+    public Message TRIFA_MESSAGE_TYPE(int TRIFA_MESSAGE_TYPE)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " TRIFA_MESSAGE_TYPE=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TRIFA_MESSAGE_TYPE));
+        bind_set_count++;
+        return this;
+    }
+
+    public Message state(int state)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " state=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, state));
+        bind_set_count++;
+        return this;
+    }
+
+    public Message ft_accepted(boolean ft_accepted)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " ft_accepted=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, ft_accepted));
+        bind_set_count++;
+        return this;
+    }
+
+    public Message ft_outgoing_started(boolean ft_outgoing_started)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " ft_outgoing_started=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, ft_outgoing_started));
+        bind_set_count++;
+        return this;
+    }
+
+    public Message filedb_id(long filedb_id)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " filedb_id=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, filedb_id));
+        bind_set_count++;
+        return this;
+    }
+
+    public Message filetransfer_id(long filetransfer_id)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " filetransfer_id=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, filetransfer_id));
+        bind_set_count++;
+        return this;
+    }
+
+    public Message sent_timestamp(long sent_timestamp)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " sent_timestamp=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, sent_timestamp));
+        bind_set_count++;
+        return this;
+    }
+
+    public Message sent_timestamp_ms(long sent_timestamp_ms)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " sent_timestamp_ms=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, sent_timestamp_ms));
+        bind_set_count++;
+        return this;
+    }
+
+    public Message rcvd_timestamp(long rcvd_timestamp)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " rcvd_timestamp=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, rcvd_timestamp));
+        bind_set_count++;
+        return this;
+    }
+
+    public Message rcvd_timestamp_ms(long rcvd_timestamp_ms)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " rcvd_timestamp_ms=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, rcvd_timestamp_ms));
+        bind_set_count++;
+        return this;
+    }
+
+    public Message read(boolean read)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " read=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, read));
+        bind_set_count++;
+        return this;
+    }
+
+    public Message send_retries(int send_retries)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " send_retries=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, send_retries));
+        bind_set_count++;
+        return this;
+    }
+
+    public Message is_new(boolean is_new)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " is_new=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, is_new));
+        bind_set_count++;
         return this;
     }
 
@@ -654,34 +868,6 @@ public class Message
         return this;
     }
 
-    public Message sent_timestamp(long sent_timestamp)
-    {
-        if (this.sql_set.equals(""))
-        {
-            this.sql_set = " set ";
-        }
-        else
-        {
-            this.sql_set = this.sql_set + " , ";
-        }
-        this.sql_set = this.sql_set + " sent_timestamp='" + s(sent_timestamp) + "' ";
-        return this;
-    }
-
-    public Message msg_version(int msg_version)
-    {
-        if (this.sql_set.equals(""))
-        {
-            this.sql_set = " set ";
-        }
-        else
-        {
-            this.sql_set = this.sql_set + " , ";
-        }
-        this.sql_set = this.sql_set + " msg_version='" + s(msg_version) + "' ";
-        return this;
-    }
-
     public Message filename_fullpath(String filename_fullpath)
     {
         if (this.sql_set.equals(""))
@@ -694,22 +880,6 @@ public class Message
         }
         this.sql_set = this.sql_set + " filename_fullpath=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
         bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, filename_fullpath));
-        bind_set_count++;
-        return this;
-    }
-
-    public Message raw_msgv2_bytes(String raw_msgv2_bytes)
-    {
-        if (this.sql_set.equals(""))
-        {
-            this.sql_set = " set ";
-        }
-        else
-        {
-            this.sql_set = this.sql_set + " , ";
-        }
-        this.sql_set = this.sql_set + " raw_msgv2_bytes=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
-        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, raw_msgv2_bytes));
         bind_set_count++;
         return this;
     }
@@ -730,6 +900,38 @@ public class Message
         return this;
     }
 
+    public Message raw_msgv2_bytes(String raw_msgv2_bytes)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " raw_msgv2_bytes=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, raw_msgv2_bytes));
+        bind_set_count++;
+        return this;
+    }
+
+    public Message msg_version(int msg_version)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " msg_version=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, msg_version));
+        bind_set_count++;
+        return this;
+    }
+
     public Message resend_count(int resend_count)
     {
         if (this.sql_set.equals(""))
@@ -740,166 +942,9 @@ public class Message
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " resend_count='" + s(resend_count) + "' ";
-        return this;
-    }
-
-    public Message msg_versionEq(int msg_version)
-    {
-        this.sql_where = this.sql_where + " and  msg_version='" + s(msg_version) + "' ";
-        return this;
-    }
-
-    public Message message_idEq(long message_id)
-    {
-        this.sql_where = this.sql_where + " and  message_id='" + s(message_id) + "' ";
-        return this;
-    }
-
-    public Message orderByIdDesc()
-    {
-        if (this.sql_orderby.equals(""))
-        {
-            this.sql_orderby = " order by ";
-        }
-        else
-        {
-            this.sql_orderby = this.sql_orderby + " , ";
-        }
-        this.sql_orderby = this.sql_orderby + " id DESC ";
-        return this;
-    }
-
-    public Message read(boolean read)
-    {
-        if (this.sql_set.equals(""))
-        {
-            this.sql_set = " set ";
-        }
-        else
-        {
-            this.sql_set = this.sql_set + " , ";
-        }
-        this.sql_set = this.sql_set + " read='" + b(read) + "' ";
-        return this;
-    }
-
-    public Message rcvd_timestamp(long rcvd_timestamp)
-    {
-        if (this.sql_set.equals(""))
-        {
-            this.sql_set = " set ";
-        }
-        else
-        {
-            this.sql_set = this.sql_set + " , ";
-        }
-        this.sql_set = this.sql_set + " rcvd_timestamp='" + s(rcvd_timestamp) + "' ";
-        return this;
-    }
-
-    public Message msg_id_hashEq(String msg_id_hash)
-    {
-        this.sql_where = this.sql_where + " and msg_id_hash=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, msg_id_hash));
-        bind_where_count++;
-        return this;
-    }
-
-    public Message ft_accepted(boolean ft_accepted)
-    {
-        if (this.sql_set.equals(""))
-        {
-            this.sql_set = " set ";
-        }
-        else
-        {
-            this.sql_set = this.sql_set + " , ";
-        }
-        this.sql_set = this.sql_set + " ft_accepted='" + b(ft_accepted) + "' ";
-        return this;
-    }
-
-    public Message state(int state)
-    {
-        Log.i(TAG, "DB:state="+state);
-        if (this.sql_set.equals(""))
-        {
-            this.sql_set = " set ";
-        }
-        else
-        {
-            this.sql_set = this.sql_set + " , ";
-        }
-        this.sql_set = this.sql_set + " state='" + s(state) + "' ";
-        return this;
-    }
-
-    public Message filetransfer_idEq(long filetransfer_id)
-    {
-        this.sql_where = this.sql_where + " and  filetransfer_id='" + s(filetransfer_id) + "' ";
-        return this;
-    }
-
-    public Message filedb_id(long filedb_id)
-    {
-        if (this.sql_set.equals(""))
-        {
-            this.sql_set = " set ";
-        }
-        else
-        {
-            this.sql_set = this.sql_set + " , ";
-        }
-        this.sql_set = this.sql_set + " filedb_id='" + s(filedb_id) + "' ";
-        return this;
-    }
-
-    public Message filetransfer_id(long filetransfer_id)
-    {
-        if (this.sql_set.equals(""))
-        {
-            this.sql_set = " set ";
-        }
-        else
-        {
-            this.sql_set = this.sql_set + " , ";
-        }
-        this.sql_set = this.sql_set + " filetransfer_id='" + s(filetransfer_id) + "' ";
-        return this;
-    }
-
-    public Message ft_outgoing_started(boolean ft_outgoing_started)
-    {
-        if (this.sql_set.equals(""))
-        {
-            this.sql_set = " set ";
-        }
-        else
-        {
-            this.sql_set = this.sql_set + " , ";
-        }
-        this.sql_set = this.sql_set + " ft_outgoing_started='" + b(ft_outgoing_started) + "' ";
-        return this;
-    }
-
-    public Message is_newEq(boolean is_new)
-    {
-        this.sql_where = this.sql_where + " and  is_new='" + b(is_new) + "' ";
-        return this;
-    }
-
-    public Message is_new(boolean is_new)
-    {
-        if (this.sql_set.equals(""))
-        {
-            this.sql_set = " set ";
-        }
-        else
-        {
-            this.sql_set = this.sql_set + " , ";
-        }
-        this.sql_set = this.sql_set + " is_new='" + b(is_new) + "' ";
+        this.sql_set = this.sql_set + " resend_count=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, resend_count));
+        bind_set_count++;
         return this;
     }
 
@@ -913,19 +958,9 @@ public class Message
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " ft_outgoing_queued='" + b(ft_outgoing_queued) + "' ";
-        return this;
-    }
-
-    public Message ft_outgoing_queuedEq(boolean ft_outgoing_queued)
-    {
-        this.sql_where = this.sql_where + " and  ft_outgoing_queued='" + b(ft_outgoing_queued) + "' ";
-        return this;
-    }
-
-    public Message stateNotEq(int state)
-    {
-        this.sql_where = this.sql_where + " and  state != '" + s(state) + "' ";
+        this.sql_set = this.sql_set + " ft_outgoing_queued=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, ft_outgoing_queued));
+        bind_set_count++;
         return this;
     }
 
@@ -939,41 +974,9 @@ public class Message
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " msg_at_relay='" + b(msg_at_relay) + "' ";
-        return this;
-    }
-
-    public Message orderBySent_timestampDesc()
-    {
-        if (this.sql_orderby.equals(""))
-        {
-            this.sql_orderby = " order by ";
-        }
-        else
-        {
-            this.sql_orderby = this.sql_orderby + " , ";
-        }
-        this.sql_orderby = this.sql_orderby + " sent_timestamp DESC ";
-        return this;
-    }
-
-    public Message msg_at_relayEq(boolean msg_at_relay)
-    {
-        this.sql_where = this.sql_where + " and  msg_at_relay='" + b(msg_at_relay) + "' ";
-        return this;
-    }
-
-    public Message filedb_idEq(long filedb_id)
-    {
-        this.sql_where = this.sql_where + " and  filedb_id='" + s(filedb_id) + "' ";
-        return this;
-    }
-
-    public Message msg_idv3_hashEq(String msg_idv3_hash)
-    {
-        this.sql_where = this.sql_where + " and msg_idv3_hash=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, msg_idv3_hash));
-        bind_where_count++;
+        this.sql_set = this.sql_set + " msg_at_relay=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, msg_at_relay));
+        bind_set_count++;
         return this;
     }
 
@@ -993,31 +996,6 @@ public class Message
         return this;
     }
 
-    public Message resend_countLt(int resend_count)
-    {
-        this.sql_where = this.sql_where + " and  resend_count<'" + s(resend_count) + "' ";
-        return this;
-    }
-
-    public Message sent_pushEq(int sent_push)
-    {
-        this.sql_where = this.sql_where + " and  sent_push='" + s(sent_push) + "' ";
-        return this;
-    }
-
-    public Message sent_timestampLt(long sent_timestamp)
-    {
-        this.sql_where = this.sql_where + " and  sent_timestamp<'" + s(sent_timestamp) + "' ";
-        return this;
-    }
-
-    public Message sent_timestampBetween(long sent_timestamp1, long sent_timestamp2)
-    {
-        this.sql_where = this.sql_where + " and  sent_timestamp>'" + s(sent_timestamp1) + "' and sent_timestamp<'" +
-                s(sent_timestamp2) + "' ";
-        return this;
-    }
-
     public Message sent_push(int sent_push)
     {
         if (this.sql_set.equals(""))
@@ -1028,7 +1006,9 @@ public class Message
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " sent_push='" + s(sent_push) + "' ";
+        this.sql_set = this.sql_set + " sent_push=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, sent_push));
+        bind_set_count++;
         return this;
     }
 
@@ -1042,7 +1022,1061 @@ public class Message
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " filetransfer_kind='" + s(filetransfer_kind) + "' ";
+        this.sql_set = this.sql_set + " filetransfer_kind=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, filetransfer_kind));
+        bind_set_count++;
         return this;
     }
+
+
+    // ----------------- Eq funcs ----------------------- //
+    public Message idEq(long id)
+    {
+        this.sql_where = this.sql_where + " and id=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, id));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message message_idEq(long message_id)
+    {
+        this.sql_where = this.sql_where + " and message_id=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, message_id));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message tox_friendpubkeyEq(String tox_friendpubkey)
+    {
+        this.sql_where = this.sql_where + " and tox_friendpubkey=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_friendpubkey));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message directionEq(int direction)
+    {
+        this.sql_where = this.sql_where + " and direction=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, direction));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message TOX_MESSAGE_TYPEEq(int TOX_MESSAGE_TYPE)
+    {
+        this.sql_where = this.sql_where + " and TOX_MESSAGE_TYPE=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TOX_MESSAGE_TYPE));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message TRIFA_MESSAGE_TYPEEq(int TRIFA_MESSAGE_TYPE)
+    {
+        this.sql_where = this.sql_where + " and TRIFA_MESSAGE_TYPE=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TRIFA_MESSAGE_TYPE));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message stateEq(int state)
+    {
+        this.sql_where = this.sql_where + " and state=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, state));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message ft_acceptedEq(boolean ft_accepted)
+    {
+        this.sql_where = this.sql_where + " and ft_accepted=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, ft_accepted));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message ft_outgoing_startedEq(boolean ft_outgoing_started)
+    {
+        this.sql_where = this.sql_where + " and ft_outgoing_started=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, ft_outgoing_started));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message filedb_idEq(long filedb_id)
+    {
+        this.sql_where = this.sql_where + " and filedb_id=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, filedb_id));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message filetransfer_idEq(long filetransfer_id)
+    {
+        this.sql_where = this.sql_where + " and filetransfer_id=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, filetransfer_id));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message sent_timestampEq(long sent_timestamp)
+    {
+        this.sql_where = this.sql_where + " and sent_timestamp=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, sent_timestamp));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message sent_timestamp_msEq(long sent_timestamp_ms)
+    {
+        this.sql_where = this.sql_where + " and sent_timestamp_ms=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, sent_timestamp_ms));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message rcvd_timestampEq(long rcvd_timestamp)
+    {
+        this.sql_where = this.sql_where + " and rcvd_timestamp=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, rcvd_timestamp));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message rcvd_timestamp_msEq(long rcvd_timestamp_ms)
+    {
+        this.sql_where = this.sql_where + " and rcvd_timestamp_ms=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, rcvd_timestamp_ms));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message readEq(boolean read)
+    {
+        this.sql_where = this.sql_where + " and read=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, read));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message send_retriesEq(int send_retries)
+    {
+        this.sql_where = this.sql_where + " and send_retries=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, send_retries));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message is_newEq(boolean is_new)
+    {
+        this.sql_where = this.sql_where + " and is_new=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, is_new));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message textEq(String text)
+    {
+        this.sql_where = this.sql_where + " and text=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, text));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message filename_fullpathEq(String filename_fullpath)
+    {
+        this.sql_where = this.sql_where + " and filename_fullpath=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, filename_fullpath));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message msg_id_hashEq(String msg_id_hash)
+    {
+        this.sql_where = this.sql_where + " and msg_id_hash=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, msg_id_hash));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message raw_msgv2_bytesEq(String raw_msgv2_bytes)
+    {
+        this.sql_where = this.sql_where + " and raw_msgv2_bytes=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, raw_msgv2_bytes));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message msg_versionEq(int msg_version)
+    {
+        this.sql_where = this.sql_where + " and msg_version=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, msg_version));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message resend_countEq(int resend_count)
+    {
+        this.sql_where = this.sql_where + " and resend_count=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, resend_count));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message ft_outgoing_queuedEq(boolean ft_outgoing_queued)
+    {
+        this.sql_where = this.sql_where + " and ft_outgoing_queued=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, ft_outgoing_queued));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message msg_at_relayEq(boolean msg_at_relay)
+    {
+        this.sql_where = this.sql_where + " and msg_at_relay=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, msg_at_relay));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message msg_idv3_hashEq(String msg_idv3_hash)
+    {
+        this.sql_where = this.sql_where + " and msg_idv3_hash=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, msg_idv3_hash));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message sent_pushEq(int sent_push)
+    {
+        this.sql_where = this.sql_where + " and sent_push=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, sent_push));
+        bind_where_count++;
+        return this;
+    }
+
+    public Message filetransfer_kindEq(int filetransfer_kind)
+    {
+        this.sql_where = this.sql_where + " and filetransfer_kind=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, filetransfer_kind));
+        bind_where_count++;
+        return this;
+    }
+
+
+    // ----------------- OrderBy funcs ------------------ //
+    public Message orderByIdAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " id ASC ";
+        return this;
+    }
+
+    public Message orderByIdDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " id DESC ";
+        return this;
+    }
+
+    public Message orderByMessage_idAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " message_id ASC ";
+        return this;
+    }
+
+    public Message orderByMessage_idDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " message_id DESC ";
+        return this;
+    }
+
+    public Message orderByTox_friendpubkeyAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " tox_friendpubkey ASC ";
+        return this;
+    }
+
+    public Message orderByTox_friendpubkeyDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " tox_friendpubkey DESC ";
+        return this;
+    }
+
+    public Message orderByDirectionAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " direction ASC ";
+        return this;
+    }
+
+    public Message orderByDirectionDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " direction DESC ";
+        return this;
+    }
+
+    public Message orderByTOX_MESSAGE_TYPEAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " TOX_MESSAGE_TYPE ASC ";
+        return this;
+    }
+
+    public Message orderByTOX_MESSAGE_TYPEDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " TOX_MESSAGE_TYPE DESC ";
+        return this;
+    }
+
+    public Message orderByTRIFA_MESSAGE_TYPEAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " TRIFA_MESSAGE_TYPE ASC ";
+        return this;
+    }
+
+    public Message orderByTRIFA_MESSAGE_TYPEDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " TRIFA_MESSAGE_TYPE DESC ";
+        return this;
+    }
+
+    public Message orderByStateAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " state ASC ";
+        return this;
+    }
+
+    public Message orderByStateDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " state DESC ";
+        return this;
+    }
+
+    public Message orderByFt_acceptedAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " ft_accepted ASC ";
+        return this;
+    }
+
+    public Message orderByFt_acceptedDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " ft_accepted DESC ";
+        return this;
+    }
+
+    public Message orderByFt_outgoing_startedAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " ft_outgoing_started ASC ";
+        return this;
+    }
+
+    public Message orderByFt_outgoing_startedDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " ft_outgoing_started DESC ";
+        return this;
+    }
+
+    public Message orderByFiledb_idAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " filedb_id ASC ";
+        return this;
+    }
+
+    public Message orderByFiledb_idDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " filedb_id DESC ";
+        return this;
+    }
+
+    public Message orderByFiletransfer_idAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " filetransfer_id ASC ";
+        return this;
+    }
+
+    public Message orderByFiletransfer_idDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " filetransfer_id DESC ";
+        return this;
+    }
+
+    public Message orderBySent_timestampAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " sent_timestamp ASC ";
+        return this;
+    }
+
+    public Message orderBySent_timestampDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " sent_timestamp DESC ";
+        return this;
+    }
+
+    public Message orderBySent_timestamp_msAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " sent_timestamp_ms ASC ";
+        return this;
+    }
+
+    public Message orderBySent_timestamp_msDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " sent_timestamp_ms DESC ";
+        return this;
+    }
+
+    public Message orderByRcvd_timestampAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " rcvd_timestamp ASC ";
+        return this;
+    }
+
+    public Message orderByRcvd_timestampDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " rcvd_timestamp DESC ";
+        return this;
+    }
+
+    public Message orderByRcvd_timestamp_msAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " rcvd_timestamp_ms ASC ";
+        return this;
+    }
+
+    public Message orderByRcvd_timestamp_msDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " rcvd_timestamp_ms DESC ";
+        return this;
+    }
+
+    public Message orderByReadAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " read ASC ";
+        return this;
+    }
+
+    public Message orderByReadDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " read DESC ";
+        return this;
+    }
+
+    public Message orderBySend_retriesAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " send_retries ASC ";
+        return this;
+    }
+
+    public Message orderBySend_retriesDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " send_retries DESC ";
+        return this;
+    }
+
+    public Message orderByIs_newAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " is_new ASC ";
+        return this;
+    }
+
+    public Message orderByIs_newDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " is_new DESC ";
+        return this;
+    }
+
+    public Message orderByTextAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " text ASC ";
+        return this;
+    }
+
+    public Message orderByTextDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " text DESC ";
+        return this;
+    }
+
+    public Message orderByFilename_fullpathAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " filename_fullpath ASC ";
+        return this;
+    }
+
+    public Message orderByFilename_fullpathDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " filename_fullpath DESC ";
+        return this;
+    }
+
+    public Message orderByMsg_id_hashAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " msg_id_hash ASC ";
+        return this;
+    }
+
+    public Message orderByMsg_id_hashDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " msg_id_hash DESC ";
+        return this;
+    }
+
+    public Message orderByRaw_msgv2_bytesAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " raw_msgv2_bytes ASC ";
+        return this;
+    }
+
+    public Message orderByRaw_msgv2_bytesDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " raw_msgv2_bytes DESC ";
+        return this;
+    }
+
+    public Message orderByMsg_versionAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " msg_version ASC ";
+        return this;
+    }
+
+    public Message orderByMsg_versionDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " msg_version DESC ";
+        return this;
+    }
+
+    public Message orderByResend_countAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " resend_count ASC ";
+        return this;
+    }
+
+    public Message orderByResend_countDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " resend_count DESC ";
+        return this;
+    }
+
+    public Message orderByFt_outgoing_queuedAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " ft_outgoing_queued ASC ";
+        return this;
+    }
+
+    public Message orderByFt_outgoing_queuedDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " ft_outgoing_queued DESC ";
+        return this;
+    }
+
+    public Message orderByMsg_at_relayAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " msg_at_relay ASC ";
+        return this;
+    }
+
+    public Message orderByMsg_at_relayDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " msg_at_relay DESC ";
+        return this;
+    }
+
+    public Message orderByMsg_idv3_hashAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " msg_idv3_hash ASC ";
+        return this;
+    }
+
+    public Message orderByMsg_idv3_hashDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " msg_idv3_hash DESC ";
+        return this;
+    }
+
+    public Message orderBySent_pushAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " sent_push ASC ";
+        return this;
+    }
+
+    public Message orderBySent_pushDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " sent_push DESC ";
+        return this;
+    }
+
+    public Message orderByFiletransfer_kindAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " filetransfer_kind ASC ";
+        return this;
+    }
+
+    public Message orderByFiletransfer_kindDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " filetransfer_kind DESC ";
+        return this;
+    }
+
+
+
 }
+
