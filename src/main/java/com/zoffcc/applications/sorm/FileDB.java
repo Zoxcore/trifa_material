@@ -531,6 +531,16 @@ public class FileDB
         return this;
     }
 
+    public FileDB idBetween(long id1, long id2)
+    {
+        this.sql_where = this.sql_where + " and id>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " and id<?" + (BINDVAR_OFFSET_WHERE + 1 + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, id1));
+        bind_where_count++;
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, id2));
+        bind_where_count++;
+        return this;
+    }
+
     public FileDB kindEq(int kind)
     {
         this.sql_where = this.sql_where + " and kind=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -559,6 +569,16 @@ public class FileDB
     {
         this.sql_where = this.sql_where + " and kind>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, kind));
+        bind_where_count++;
+        return this;
+    }
+
+    public FileDB kindBetween(int kind1, int kind2)
+    {
+        this.sql_where = this.sql_where + " and kind>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " and kind<?" + (BINDVAR_OFFSET_WHERE + 1 + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, kind1));
+        bind_where_count++;
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, kind2));
         bind_where_count++;
         return this;
     }
@@ -595,6 +615,16 @@ public class FileDB
         return this;
     }
 
+    public FileDB directionBetween(int direction1, int direction2)
+    {
+        this.sql_where = this.sql_where + " and direction>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " and direction<?" + (BINDVAR_OFFSET_WHERE + 1 + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, direction1));
+        bind_where_count++;
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, direction2));
+        bind_where_count++;
+        return this;
+    }
+
     public FileDB tox_public_key_stringEq(String tox_public_key_string)
     {
         this.sql_where = this.sql_where + " and tox_public_key_string=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -606,22 +636,6 @@ public class FileDB
     public FileDB tox_public_key_stringNotEq(String tox_public_key_string)
     {
         this.sql_where = this.sql_where + " and tox_public_key_string<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_public_key_string));
-        bind_where_count++;
-        return this;
-    }
-
-    public FileDB tox_public_key_stringLt(String tox_public_key_string)
-    {
-        this.sql_where = this.sql_where + " and tox_public_key_string<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_public_key_string));
-        bind_where_count++;
-        return this;
-    }
-
-    public FileDB tox_public_key_stringGt(String tox_public_key_string)
-    {
-        this.sql_where = this.sql_where + " and tox_public_key_string>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_public_key_string));
         bind_where_count++;
         return this;
@@ -643,22 +657,6 @@ public class FileDB
         return this;
     }
 
-    public FileDB path_nameLt(String path_name)
-    {
-        this.sql_where = this.sql_where + " and path_name<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, path_name));
-        bind_where_count++;
-        return this;
-    }
-
-    public FileDB path_nameGt(String path_name)
-    {
-        this.sql_where = this.sql_where + " and path_name>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, path_name));
-        bind_where_count++;
-        return this;
-    }
-
     public FileDB file_nameEq(String file_name)
     {
         this.sql_where = this.sql_where + " and file_name=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -670,22 +668,6 @@ public class FileDB
     public FileDB file_nameNotEq(String file_name)
     {
         this.sql_where = this.sql_where + " and file_name<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, file_name));
-        bind_where_count++;
-        return this;
-    }
-
-    public FileDB file_nameLt(String file_name)
-    {
-        this.sql_where = this.sql_where + " and file_name<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, file_name));
-        bind_where_count++;
-        return this;
-    }
-
-    public FileDB file_nameGt(String file_name)
-    {
-        this.sql_where = this.sql_where + " and file_name>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, file_name));
         bind_where_count++;
         return this;
@@ -723,6 +705,16 @@ public class FileDB
         return this;
     }
 
+    public FileDB filesizeBetween(long filesize1, long filesize2)
+    {
+        this.sql_where = this.sql_where + " and filesize>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " and filesize<?" + (BINDVAR_OFFSET_WHERE + 1 + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, filesize1));
+        bind_where_count++;
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, filesize2));
+        bind_where_count++;
+        return this;
+    }
+
     public FileDB is_in_VFSEq(boolean is_in_VFS)
     {
         this.sql_where = this.sql_where + " and is_in_VFS=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -734,22 +726,6 @@ public class FileDB
     public FileDB is_in_VFSNotEq(boolean is_in_VFS)
     {
         this.sql_where = this.sql_where + " and is_in_VFS<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, is_in_VFS));
-        bind_where_count++;
-        return this;
-    }
-
-    public FileDB is_in_VFSLt(boolean is_in_VFS)
-    {
-        this.sql_where = this.sql_where + " and is_in_VFS<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
-        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, is_in_VFS));
-        bind_where_count++;
-        return this;
-    }
-
-    public FileDB is_in_VFSGt(boolean is_in_VFS)
-    {
-        this.sql_where = this.sql_where + " and is_in_VFS>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, is_in_VFS));
         bind_where_count++;
         return this;
