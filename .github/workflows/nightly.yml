@@ -621,7 +621,14 @@ jobs:
                cat /tmp/a.sh
                chmod a+rx /tmp/a.sh
 
-        - name: patch-app
+        - name: patch-app1
+          run: |
+               pwd
+               ls -al
+               tools/patch_src_disable_ipv4_boots.sh
+               git diff||echo "NO ERR"
+
+        - name: patch-app2
           run: |
                pwd
                ls -al
