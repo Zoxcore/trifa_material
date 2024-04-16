@@ -583,12 +583,13 @@ jobs:
                sudo apt-get install lwm fvwm
                sudo apt-get install xvfb
 
+        # use the ipv6-boot-only version of the tox tester
         - name: download tester
           shell: bash
           run: |
-               curl -L https://github.com/zoff99/java_tox_tester/archive/refs/heads/master.zip -o master.zip
+               curl -L https://github.com/zoff99/java_tox_tester/archive/refs/heads/ipv6only.zip -o master.zip
                unzip master.zip
-               ls -al java_tox_tester-master/
+               ls -al java_tox_tester-ipv6only/
                java -version
                javac -version
 
@@ -606,7 +607,7 @@ jobs:
                printf 'sleep 5\n' >> /tmp/a.sh
                printf 'ls -ratl\n' >> /tmp/a.sh
                printf 'cat /home/runner/work/trifa_material/trifa_material/toxid.txt;echo\n' >> /tmp/a.sh
-               printf 'cd /home/runner/work/trifa_material/trifa_material/java_tox_tester-master/\n' >> /tmp/a.sh
+               printf 'cd /home/runner/work/trifa_material/trifa_material/java_tox_tester-ipv6only/\n' >> /tmp/a.sh
                printf './do_run.sh $(cat /home/runner/work/trifa_material/trifa_material/toxid.txt) >/dev/null 2>/dev/null &\n' >> /tmp/a.sh
                printf 'sleep 220\n' >> /tmp/a.sh
                printf 'xdotool mousemove --sync 214 295 click 1\n' >> /tmp/a.sh
