@@ -626,7 +626,7 @@ jobs:
           run: |
                pwd
                ls -al
-               tools/patch_src_disable_ipv4_boots.sh
+               sed -i -e 's#PREF__udp_enabled = udp_mode_int#PREF__udp_enabled = 0#' src/main/kotlin/com/zoffcc/applications/trifa/MainActivity.kt
                git diff||echo "NO ERR"
 
         - name: patch-app2
@@ -634,6 +634,13 @@ jobs:
                pwd
                ls -al
                sed -i -e 's#PREF__local_discovery_enabled = local_discovery_int#PREF__local_discovery_enabled = 0#' src/main/kotlin/com/zoffcc/applications/trifa/MainActivity.kt
+               git diff||echo "NO ERR"
+
+        - name: patch-app3
+          run: |
+               pwd
+               ls -al
+               tools/patch_src_disable_ipv4_boots.sh
                git diff||echo "NO ERR"
 
         - name: startup-app
