@@ -1,5 +1,23 @@
 # Changelog
 
+## [v1.0.33](https://github.com/Zoxcore/trifa_material/tree/v1.0.33) (2024-04-16)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.32...v1.0.33)
+
+**Merged pull requests:**
+
+- show filesize also in human readable format [\#210](https://github.com/Zoxcore/trifa_material/pull/210) ([zoff99](https://github.com/zoff99))
+- sorma: updates [\#209](https://github.com/Zoxcore/trifa_material/pull/209) ([zoff99](https://github.com/zoff99))
+- Bump gradle/wrapper-validation-action from 2 to 3 [\#208](https://github.com/Zoxcore/trifa_material/pull/208) ([dependabot[bot]](https://github.com/apps/dependabot))
+
+## [v1.0.32](https://github.com/Zoxcore/trifa_material/tree/v1.0.32) (2024-04-11)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.31...v1.0.32)
+
+**Merged pull requests:**
+
+- sorma: fix missing bind vars [\#207](https://github.com/Zoxcore/trifa_material/pull/207) ([zoff99](https://github.com/zoff99))
+
 ## [v1.0.31](https://github.com/Zoxcore/trifa_material/tree/v1.0.31) (2024-04-11)
 
 [Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.30...v1.0.31)
