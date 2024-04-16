@@ -602,9 +602,11 @@ jobs:
                printf 'xwininfo -id $(xdotool getactivewindow)\n' >> /tmp/a.sh
                printf 'xdotool mousemove --sync 80 74 click 1\n' >> /tmp/a.sh
                printf 'sleep 2\n' >> /tmp/a.sh
+               printf 'sleep 20\n' >> /tmp/a.sh
                printf 'xdotool mousemove --sync 140 74 click 1\n' >> /tmp/a.sh
                printf 'pwd\n' >> /tmp/a.sh
                printf 'sleep 5\n' >> /tmp/a.sh
+               printf 'sleep 60\n' >> /tmp/a.sh
                printf 'ls -ratl\n' >> /tmp/a.sh
                printf 'cat /home/runner/work/trifa_material/trifa_material/toxid.txt;echo\n' >> /tmp/a.sh
                printf 'cd /home/runner/work/trifa_material/trifa_material/java_tox_tester-ipv6only/\n' >> /tmp/a.sh
