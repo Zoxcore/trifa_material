@@ -341,7 +341,7 @@ private fun general_settings()
     } catch (_: Exception)
     {
     }
-    DetailItem(label = i18n("use custom font with color emojis for text.\n!! this is experimental and also needs an app restart !!"),
+    DetailItem(label = i18n("use custom font with color emojis for text. this needs an app restart !!"),
         description = (if (use_custom_font_with_color_emoji) i18n("enabled") else i18n("disabled"))) {
         Switch(
             checked = use_custom_font_with_color_emoji,
