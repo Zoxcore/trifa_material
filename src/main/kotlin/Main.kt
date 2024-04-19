@@ -2078,7 +2078,15 @@ private fun MainAppStart()
 
         if (isOpen)
         {
-            Window(onCloseRequest = { isAskingToClose = true }, title = "TRIfA - " + BuildConfig.APP_VERSION,
+            var win_title_addon = "Unknown Version"
+            try
+            {
+                win_title_addon = BuildConfig.APP_VERSION + " (" + BuildConfig.GIT_COMMIT_HASH.take(7) + ")"
+            }
+            catch(_: java.lang.Exception)
+            {}
+            Window(onCloseRequest = { isAskingToClose = true },
+                title = "TRIfA - " + win_title_addon,
                 icon = appIcon, state = state,
                 focusable = true,
                 onKeyEvent = {
