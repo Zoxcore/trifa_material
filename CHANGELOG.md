@@ -1,5 +1,18 @@
 # Changelog
 
+## [v1.0.34](https://github.com/Zoxcore/trifa_material/tree/v1.0.34) (2024-04-21)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.33...v1.0.34)
+
+**Merged pull requests:**
+
+- update to compose.version 1.6.10-beta01 [\#216](https://github.com/Zoxcore/trifa_material/pull/216) ([zoff99](https://github.com/zoff99))
+- small changes [\#215](https://github.com/Zoxcore/trifa_material/pull/215) ([zoff99](https://github.com/zoff99))
+- show ipv6 is working on the linux screenshot, and that TCP mode is working [\#214](https://github.com/Zoxcore/trifa_material/pull/214) ([zoff99](https://github.com/zoff99))
+- script to patch source to only bootstrap from ipv6 nodes [\#213](https://github.com/Zoxcore/trifa_material/pull/213) ([zoff99](https://github.com/zoff99))
+- Bump org.xerial:sqlite-jdbc from 3.45.2.0 to 3.45.3.0 [\#212](https://github.com/Zoxcore/trifa_material/pull/212) ([dependabot[bot]](https://github.com/apps/dependabot))
+- add ipv6 with small test, and change source to disable local LAN discovery. this should show that IPv6 works on the linux screenshot. [\#211](https://github.com/Zoxcore/trifa_material/pull/211) ([zoff99](https://github.com/zoff99))
+
 ## [v1.0.33](https://github.com/Zoxcore/trifa_material/tree/v1.0.33) (2024-04-16)
 
 [Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.32...v1.0.33)
