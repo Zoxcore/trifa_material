@@ -12,6 +12,7 @@ asan_runtime_lib=/usr/lib/x86_64-linux-gnu/libasan.so.6.0.0
 #####################################
 
 
+# runReleaseDistributable
 
 p=$(pwd)
 h=$(echo $HOME)
