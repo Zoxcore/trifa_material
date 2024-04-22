@@ -826,9 +826,25 @@ public class GroupMessage
         return this;
     }
 
+    public GroupMessage idLe(long id)
+    {
+        this.sql_where = this.sql_where + " and id<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, id));
+        bind_where_count++;
+        return this;
+    }
+
     public GroupMessage idGt(long id)
     {
         this.sql_where = this.sql_where + " and id>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, id));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage idGe(long id)
+    {
+        this.sql_where = this.sql_where + " and id>=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, id));
         bind_where_count++;
         return this;
@@ -860,6 +876,22 @@ public class GroupMessage
         return this;
     }
 
+    public GroupMessage message_id_toxLike(String message_id_tox)
+    {
+        this.sql_where = this.sql_where + " and message_id_tox LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, message_id_tox));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage message_id_toxNotLike(String message_id_tox)
+    {
+        this.sql_where = this.sql_where + " and message_id_tox NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, message_id_tox));
+        bind_where_count++;
+        return this;
+    }
+
     public GroupMessage group_identifierEq(String group_identifier)
     {
         this.sql_where = this.sql_where + " and group_identifier=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -876,6 +908,22 @@ public class GroupMessage
         return this;
     }
 
+    public GroupMessage group_identifierLike(String group_identifier)
+    {
+        this.sql_where = this.sql_where + " and group_identifier LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, group_identifier));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage group_identifierNotLike(String group_identifier)
+    {
+        this.sql_where = this.sql_where + " and group_identifier NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, group_identifier));
+        bind_where_count++;
+        return this;
+    }
+
     public GroupMessage tox_group_peer_pubkeyEq(String tox_group_peer_pubkey)
     {
         this.sql_where = this.sql_where + " and tox_group_peer_pubkey=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -887,6 +935,22 @@ public class GroupMessage
     public GroupMessage tox_group_peer_pubkeyNotEq(String tox_group_peer_pubkey)
     {
         this.sql_where = this.sql_where + " and tox_group_peer_pubkey<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_group_peer_pubkey));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage tox_group_peer_pubkeyLike(String tox_group_peer_pubkey)
+    {
+        this.sql_where = this.sql_where + " and tox_group_peer_pubkey LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_group_peer_pubkey));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage tox_group_peer_pubkeyNotLike(String tox_group_peer_pubkey)
+    {
+        this.sql_where = this.sql_where + " and tox_group_peer_pubkey NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_group_peer_pubkey));
         bind_where_count++;
         return this;
@@ -916,9 +980,25 @@ public class GroupMessage
         return this;
     }
 
+    public GroupMessage private_messageLe(int private_message)
+    {
+        this.sql_where = this.sql_where + " and private_message<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, private_message));
+        bind_where_count++;
+        return this;
+    }
+
     public GroupMessage private_messageGt(int private_message)
     {
         this.sql_where = this.sql_where + " and private_message>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, private_message));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage private_messageGe(int private_message)
+    {
+        this.sql_where = this.sql_where + " and private_message>=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, private_message));
         bind_where_count++;
         return this;
@@ -950,6 +1030,22 @@ public class GroupMessage
         return this;
     }
 
+    public GroupMessage tox_group_peernameLike(String tox_group_peername)
+    {
+        this.sql_where = this.sql_where + " and tox_group_peername LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_group_peername));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage tox_group_peernameNotLike(String tox_group_peername)
+    {
+        this.sql_where = this.sql_where + " and tox_group_peername NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_group_peername));
+        bind_where_count++;
+        return this;
+    }
+
     public GroupMessage directionEq(int direction)
     {
         this.sql_where = this.sql_where + " and direction=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -974,9 +1070,25 @@ public class GroupMessage
         return this;
     }
 
+    public GroupMessage directionLe(int direction)
+    {
+        this.sql_where = this.sql_where + " and direction<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, direction));
+        bind_where_count++;
+        return this;
+    }
+
     public GroupMessage directionGt(int direction)
     {
         this.sql_where = this.sql_where + " and direction>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, direction));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage directionGe(int direction)
+    {
+        this.sql_where = this.sql_where + " and direction>=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, direction));
         bind_where_count++;
         return this;
@@ -1016,9 +1128,25 @@ public class GroupMessage
         return this;
     }
 
+    public GroupMessage TOX_MESSAGE_TYPELe(int TOX_MESSAGE_TYPE)
+    {
+        this.sql_where = this.sql_where + " and TOX_MESSAGE_TYPE<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TOX_MESSAGE_TYPE));
+        bind_where_count++;
+        return this;
+    }
+
     public GroupMessage TOX_MESSAGE_TYPEGt(int TOX_MESSAGE_TYPE)
     {
         this.sql_where = this.sql_where + " and TOX_MESSAGE_TYPE>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TOX_MESSAGE_TYPE));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage TOX_MESSAGE_TYPEGe(int TOX_MESSAGE_TYPE)
+    {
+        this.sql_where = this.sql_where + " and TOX_MESSAGE_TYPE>=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TOX_MESSAGE_TYPE));
         bind_where_count++;
         return this;
@@ -1058,9 +1186,25 @@ public class GroupMessage
         return this;
     }
 
+    public GroupMessage TRIFA_MESSAGE_TYPELe(int TRIFA_MESSAGE_TYPE)
+    {
+        this.sql_where = this.sql_where + " and TRIFA_MESSAGE_TYPE<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TRIFA_MESSAGE_TYPE));
+        bind_where_count++;
+        return this;
+    }
+
     public GroupMessage TRIFA_MESSAGE_TYPEGt(int TRIFA_MESSAGE_TYPE)
     {
         this.sql_where = this.sql_where + " and TRIFA_MESSAGE_TYPE>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TRIFA_MESSAGE_TYPE));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage TRIFA_MESSAGE_TYPEGe(int TRIFA_MESSAGE_TYPE)
+    {
+        this.sql_where = this.sql_where + " and TRIFA_MESSAGE_TYPE>=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, TRIFA_MESSAGE_TYPE));
         bind_where_count++;
         return this;
@@ -1100,9 +1244,25 @@ public class GroupMessage
         return this;
     }
 
+    public GroupMessage sent_timestampLe(long sent_timestamp)
+    {
+        this.sql_where = this.sql_where + " and sent_timestamp<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, sent_timestamp));
+        bind_where_count++;
+        return this;
+    }
+
     public GroupMessage sent_timestampGt(long sent_timestamp)
     {
         this.sql_where = this.sql_where + " and sent_timestamp>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, sent_timestamp));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage sent_timestampGe(long sent_timestamp)
+    {
+        this.sql_where = this.sql_where + " and sent_timestamp>=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, sent_timestamp));
         bind_where_count++;
         return this;
@@ -1142,9 +1302,25 @@ public class GroupMessage
         return this;
     }
 
+    public GroupMessage rcvd_timestampLe(long rcvd_timestamp)
+    {
+        this.sql_where = this.sql_where + " and rcvd_timestamp<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, rcvd_timestamp));
+        bind_where_count++;
+        return this;
+    }
+
     public GroupMessage rcvd_timestampGt(long rcvd_timestamp)
     {
         this.sql_where = this.sql_where + " and rcvd_timestamp>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, rcvd_timestamp));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage rcvd_timestampGe(long rcvd_timestamp)
+    {
+        this.sql_where = this.sql_where + " and rcvd_timestamp>=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, rcvd_timestamp));
         bind_where_count++;
         return this;
@@ -1208,6 +1384,22 @@ public class GroupMessage
         return this;
     }
 
+    public GroupMessage textLike(String text)
+    {
+        this.sql_where = this.sql_where + " and text LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, text));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage textNotLike(String text)
+    {
+        this.sql_where = this.sql_where + " and text NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, text));
+        bind_where_count++;
+        return this;
+    }
+
     public GroupMessage was_syncedEq(boolean was_synced)
     {
         this.sql_where = this.sql_where + " and was_synced=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -1240,6 +1432,22 @@ public class GroupMessage
         return this;
     }
 
+    public GroupMessage msg_id_hashLike(String msg_id_hash)
+    {
+        this.sql_where = this.sql_where + " and msg_id_hash LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, msg_id_hash));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage msg_id_hashNotLike(String msg_id_hash)
+    {
+        this.sql_where = this.sql_where + " and msg_id_hash NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, msg_id_hash));
+        bind_where_count++;
+        return this;
+    }
+
     public GroupMessage path_nameEq(String path_name)
     {
         this.sql_where = this.sql_where + " and path_name=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -1251,6 +1459,22 @@ public class GroupMessage
     public GroupMessage path_nameNotEq(String path_name)
     {
         this.sql_where = this.sql_where + " and path_name<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, path_name));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage path_nameLike(String path_name)
+    {
+        this.sql_where = this.sql_where + " and path_name LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, path_name));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage path_nameNotLike(String path_name)
+    {
+        this.sql_where = this.sql_where + " and path_name NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, path_name));
         bind_where_count++;
         return this;
@@ -1272,6 +1496,22 @@ public class GroupMessage
         return this;
     }
 
+    public GroupMessage file_nameLike(String file_name)
+    {
+        this.sql_where = this.sql_where + " and file_name LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, file_name));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage file_nameNotLike(String file_name)
+    {
+        this.sql_where = this.sql_where + " and file_name NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, file_name));
+        bind_where_count++;
+        return this;
+    }
+
     public GroupMessage filename_fullpathEq(String filename_fullpath)
     {
         this.sql_where = this.sql_where + " and filename_fullpath=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -1283,6 +1523,22 @@ public class GroupMessage
     public GroupMessage filename_fullpathNotEq(String filename_fullpath)
     {
         this.sql_where = this.sql_where + " and filename_fullpath<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, filename_fullpath));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage filename_fullpathLike(String filename_fullpath)
+    {
+        this.sql_where = this.sql_where + " and filename_fullpath LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, filename_fullpath));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage filename_fullpathNotLike(String filename_fullpath)
+    {
+        this.sql_where = this.sql_where + " and filename_fullpath NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, filename_fullpath));
         bind_where_count++;
         return this;
@@ -1312,9 +1568,25 @@ public class GroupMessage
         return this;
     }
 
+    public GroupMessage filesizeLe(long filesize)
+    {
+        this.sql_where = this.sql_where + " and filesize<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, filesize));
+        bind_where_count++;
+        return this;
+    }
+
     public GroupMessage filesizeGt(long filesize)
     {
         this.sql_where = this.sql_where + " and filesize>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, filesize));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage filesizeGe(long filesize)
+    {
+        this.sql_where = this.sql_where + " and filesize>=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, filesize));
         bind_where_count++;
         return this;
