@@ -117,6 +117,8 @@ import com.vanniktech.emoji.search.SearchEmojiManager
 import com.zoffcc.applications.ffmpegav.AVActivity
 import com.zoffcc.applications.ffmpegav.AVActivity.JAVA_AUDIO_IN_DEVICE_NAME
 import com.zoffcc.applications.sorm.BootstrapNodeEntryDB
+import com.zoffcc.applications.sorm.GroupMessage
+import com.zoffcc.applications.sorm.Message
 import com.zoffcc.applications.trifa.AVState
 import com.zoffcc.applications.trifa.AudioBar
 import com.zoffcc.applications.trifa.AudioBar.audio_in_bar
@@ -125,6 +127,7 @@ import com.zoffcc.applications.trifa.CustomSemaphore
 import com.zoffcc.applications.trifa.EmojiStrAndName
 import com.zoffcc.applications.trifa.FriendSettingDetails
 import com.zoffcc.applications.trifa.GroupSettingDetails
+import com.zoffcc.applications.trifa.GroupStoreFilterFilter
 import com.zoffcc.applications.trifa.HelperGeneric.PubkeyShort
 import com.zoffcc.applications.trifa.HelperGeneric.ngc_video_frame_last_incoming_ts
 import com.zoffcc.applications.trifa.HelperGroup
@@ -191,7 +194,6 @@ import org.briarproject.briar.desktop.ui.UiMode
 import org.briarproject.briar.desktop.ui.UiPlaceholder
 import org.briarproject.briar.desktop.ui.VerticalDivider
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
-import java.awt.GraphicsEnvironment
 import java.awt.Toolkit
 import java.io.File
 import java.net.URI
@@ -1204,6 +1206,7 @@ fun App()
                                         ChatAppWithScaffold(focusRequester = focusRequester, contactList = contacts, ui_scale = ui_scale)
                                         LaunchedEffect(contacts.selectedContactPubkey) {
                                             focusRequester.requestFocus()
+                                            contactstore.messageresetFilter()
                                         }
                                     }
                                 }
@@ -1249,6 +1252,7 @@ fun App()
                                         GroupAppWithScaffold(focusRequester = groupfocusRequester, groupList = groups, ui_scale = ui_scale)
                                         LaunchedEffect(groups.selectedGroupId) {
                                             groupfocusRequester.requestFocus()
+                                            groupstore.groupmessageresetFilter()
                                         }
                                     }
                                 }
@@ -1327,8 +1331,28 @@ fun load_messages_for_friend(selectedContactPubkey: String?)
             } catch(_: Exception) {
             }
             val uimessages = ArrayList<UIMessage>()
-            val messages = orma!!.selectFromMessage().
-                tox_friendpubkeyEq(toxpk).orderBySent_timestampAsc().toList()
+            var messages: MutableList<Message>? = null
+            val filter_active = contactstore.state.messageFilterActive
+            val filter_value_raw = contactstore.state.messageFilterString
+            val filter_value = GroupStoreFilterFilter(filter_value_raw)
+            if ((filter_active) &&
+                (!filter_value_raw.isNullOrEmpty()) &&
+                (filter_value_raw.isNotBlank()) &&
+                (filter_value_raw.length > 0))
+            {
+                messages = orma!!.
+                selectFromMessage().
+                tox_friendpubkeyEq(toxpk).
+                textLike("%" + filter_value + "%").
+                orderBySent_timestampAsc().toList()
+            }
+            else
+            {
+                messages = orma!!.
+                selectFromMessage().
+                tox_friendpubkeyEq(toxpk).
+                orderBySent_timestampAsc().toList()
+            }
             messages.forEach() {
                 when (it.direction)
                 {
@@ -1383,7 +1407,7 @@ fun load_groupmessages(selectedGroupId: String?)
 {
     if (selectedGroupId != null)
     {
-        // Log.i(TAG, "load_groupmessages")
+        Log.i(TAG, "load_groupmessages")
         try
         {
             val groupid = selectedGroupId.lowercase()
@@ -1393,7 +1417,30 @@ fun load_groupmessages(selectedGroupId: String?)
             } catch(_: Exception) {
             }
             val uigroupmessages = ArrayList<UIGroupMessage>()
-            val messages = orma!!.selectFromGroupMessage().group_identifierEq(selectedGroupId).orderBySent_timestampAsc().toList()
+            var messages: MutableList<GroupMessage>? = null
+            val filter_active = groupstore.state.groupmessageFilterActive
+            val filter_value_raw = groupstore.state.groupmessageFilterString
+            val filter_value = GroupStoreFilterFilter(filter_value_raw)
+            if ((filter_active) &&
+                (!filter_value_raw.isNullOrEmpty()) &&
+                (filter_value_raw.isNotBlank()) &&
+                (filter_value_raw.length > 0))
+            {
+                messages = orma!!
+                    .selectFromGroupMessage()
+                    .group_identifierEq(selectedGroupId)
+                    .textLike("%" + filter_value + "%")
+                    .orderBySent_timestampAsc()
+                    .toList()
+            }
+            else
+            {
+                messages = orma!!
+                    .selectFromGroupMessage()
+                    .group_identifierEq(selectedGroupId)
+                    .orderBySent_timestampAsc()
+                    .toList()
+            }
             messages.forEach() { // 0 -> msg received, 1 -> msg sent
                 when (it.direction)
                 {

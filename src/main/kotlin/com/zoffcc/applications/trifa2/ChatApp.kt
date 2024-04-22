@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.LocalTextStyle
@@ -20,6 +21,7 @@ import androidx.compose.material.ProvideTextStyle
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.Typography
@@ -27,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Screenshot
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.lightColors
@@ -47,6 +50,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.onExternalDrag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.trifa.AVState
@@ -122,75 +127,105 @@ val avstatestorevplayfpsstate = CoroutineScope(SupervisorJob()).createAVStateSto
 fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolean = true, contactList: StateContacts, ui_scale: Float)
 {
     Theme {
-        Scaffold(topBar = {
-            TopAppBar(
-                title = {
-                    contactList.selectedContact?.let { Text(it.name) }
-                },
-                backgroundColor = MaterialTheme.colors.background,
-                modifier = Modifier.height(40.dp),
-                actions = {
-                    Tooltip(text = "Friend Settings and Info") {
-                        IconButton(onClick = { friendsettingsstore.visible(true) }) {
-                            Icon(Icons.Filled.Settings, null)
-                        }
-                    }
-                    Tooltip(text = "use the Video Call Button") {
-                        IconButton(onClick = {/* TODO: */ }) {
-                            Icon(Icons.Filled.Call, null)
-                        }
-                    }
-                    val current_callstate by avstatestorecallstate.stateFlow.collectAsState()
-                    Tooltip(text = "start an Audio or Video Call") {
-                        IconButton(onClick = {
-                            // video call button pressed
-                            val friendpubkey = contactList.selectedContactPubkey
-                            if (avstatestore.state.calling_state_get() == AVState.CALL_STATUS.CALL_STATUS_INCOMING)
-                            {
-                                println("toxav: we have an unanswered incoming call. ret 007")
-                                return@IconButton
-                            }
-                            val friendnum = tox_friend_by_public_key(friendpubkey)
-                            if (avstatestore.state.calling_state_get() == AVState.CALL_STATUS.CALL_STATUS_CALLING)
-                            {
-                                Log.i(com.zoffcc.applications.trifa.TAG, "ffmpeg_devices_stop:007")
-                                avstatestore.state.ffmpeg_devices_stop()
-                                toxav_call_control(friendnum, ToxVars.TOXAV_CALL_CONTROL.TOXAV_CALL_CONTROL_CANCEL.value)
-                                on_call_ended_actions()
-                                println("toxav: ret 001")
-                                return@IconButton
-                            }
-                            val call_res = toxav_call(friendnum, TRIFAGlobals.GLOBAL_AUDIO_BITRATE.toLong(), TRIFAGlobals.GLOBAL_VIDEO_BITRATE.toLong())
-                            println("toxav call_res: $call_res")
-                            if (call_res != 1)
-                            {
-                                on_call_ended_actions()
-                                println("toxav: ret 002")
-                                return@IconButton
-                            }
-                            avstatestore.state.calling_state_set(AVState.CALL_STATUS.CALL_STATUS_CALLING)
-                            avstatestore.state.call_with_friend_pubkey_set(friendpubkey)
-                            avstatestore.state.start_av_call()
-                            GlobalScope.launch {
-                                delay(1000)
-                                set_toxav_video_sending_quality(MainActivity.PREF__video_bitrate_mode)
-                                println("toxav: set 003")
-                            }
-                        }) {
-                            if (current_callstate.call_state == AVState.CALL_STATUS.CALL_STATUS_CALLING)
-                            {
-                                Icon(imageVector = Icons.Filled.Videocam, contentDescription = "",
-                                    tint = Color.Red)
-                            } else
-                            {
-                                Icon(imageVector = Icons.Filled.Videocam, contentDescription = null)
+        Column(modifier = Modifier.fillMaxWidth())
+        {
+            if (contactList.messageFilterActive)
+            {
+                var message_filter_str by remember { mutableStateOf(contactList.messageFilterString) }
+                TextField(enabled = true, singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    textStyle = TextStyle(fontSize = 16.sp),
+                    colors = TextFieldDefaults.textFieldColors(backgroundColor = Color(ChatColorsConfig.LIGHT__TEXTFIELD_BGCOLOR)),
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.None,
+                        autoCorrect = false,
+                    ),
+                    placeholder = {
+                        Text("type search text ...", fontSize = 16.sp)
+                    },
+                    value = message_filter_str,
+                    onValueChange = {
+                        message_filter_str = it
+                        contactstore.messagefilterString(message_filter_str)
+                    })
+            }
+            Scaffold(topBar = {
+                TopAppBar(
+                    title = {
+                        contactList.selectedContact?.let { Text(it.name) }
+                    },
+                    backgroundColor = MaterialTheme.colors.background,
+                    modifier = Modifier.height(40.dp),
+                    actions = {
+                        Tooltip(text = "Filter Messages") {
+                            IconButton(onClick = {
+                                contactstore.messagefilterString("")
+                                contactstore.messagefilterActive(!contactstore.state.messageFilterActive) }) {
+                                Icon(Icons.Filled.Search, null)
                             }
                         }
+                        Tooltip(text = "Friend Settings and Info") {
+                            IconButton(onClick = { friendsettingsstore.visible(true) }) {
+                                Icon(Icons.Filled.Settings, null)
+                            }
+                        }
+                        Tooltip(text = "use the Video Call Button") {
+                            IconButton(onClick = {/* TODO: */ }) {
+                                Icon(Icons.Filled.Call, null)
+                            }
+                        }
+                        val current_callstate by avstatestorecallstate.stateFlow.collectAsState()
+                        Tooltip(text = "start an Audio or Video Call") {
+                            IconButton(onClick = {
+                                // video call button pressed
+                                val friendpubkey = contactList.selectedContactPubkey
+                                if (avstatestore.state.calling_state_get() == AVState.CALL_STATUS.CALL_STATUS_INCOMING)
+                                {
+                                    println("toxav: we have an unanswered incoming call. ret 007")
+                                    return@IconButton
+                                }
+                                val friendnum = tox_friend_by_public_key(friendpubkey)
+                                if (avstatestore.state.calling_state_get() == AVState.CALL_STATUS.CALL_STATUS_CALLING)
+                                {
+                                    Log.i(com.zoffcc.applications.trifa.TAG, "ffmpeg_devices_stop:007")
+                                    avstatestore.state.ffmpeg_devices_stop()
+                                    toxav_call_control(friendnum, ToxVars.TOXAV_CALL_CONTROL.TOXAV_CALL_CONTROL_CANCEL.value)
+                                    on_call_ended_actions()
+                                    println("toxav: ret 001")
+                                    return@IconButton
+                                }
+                                val call_res = toxav_call(friendnum, TRIFAGlobals.GLOBAL_AUDIO_BITRATE.toLong(), TRIFAGlobals.GLOBAL_VIDEO_BITRATE.toLong())
+                                println("toxav call_res: $call_res")
+                                if (call_res != 1)
+                                {
+                                    on_call_ended_actions()
+                                    println("toxav: ret 002")
+                                    return@IconButton
+                                }
+                                avstatestore.state.calling_state_set(AVState.CALL_STATUS.CALL_STATUS_CALLING)
+                                avstatestore.state.call_with_friend_pubkey_set(friendpubkey)
+                                avstatestore.state.start_av_call()
+                                GlobalScope.launch {
+                                    delay(1000)
+                                    set_toxav_video_sending_quality(MainActivity.PREF__video_bitrate_mode)
+                                    println("toxav: set 003")
+                                }
+                            }) {
+                                if (current_callstate.call_state == AVState.CALL_STATUS.CALL_STATUS_CALLING)
+                                {
+                                    Icon(imageVector = Icons.Filled.Videocam, contentDescription = "",
+                                        tint = Color.Red)
+                                } else
+                                {
+                                    Icon(imageVector = Icons.Filled.Videocam, contentDescription = null)
+                                }
+                            }
+                        }
                     }
-                }
-            )
-        }) {
-            ChatApp(focusRequester = focusRequester, displayTextField = displayTextField, contactList.selectedContactPubkey, ui_scale)
+                )
+            }) {
+                ChatApp(focusRequester = focusRequester, displayTextField = displayTextField, contactList.selectedContactPubkey, ui_scale)
+            }
         }
     }
 }
@@ -200,23 +235,53 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
 fun GroupAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolean = true, groupList: StateGroups, ui_scale: Float)
 {
     Theme {
-        Scaffold(topBar = {
-            TopAppBar(
-                title = {
-                    groupList.selectedGroup?.let { Text(it.name) }
-                },
-                actions = {
-                    Tooltip(text = "Group Settings and Info") {
-                        IconButton(onClick = { groupsettingsstore.visible(true) }) {
-                            Icon(Icons.Filled.Settings, null)
+        Column(modifier = Modifier.fillMaxWidth())
+        {
+            if (groupList.groupmessageFilterActive)
+            {
+                var message_filter_str by remember { mutableStateOf(groupList.groupmessageFilterString) }
+                TextField(enabled = true, singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    textStyle = TextStyle(fontSize = 16.sp),
+                    colors = TextFieldDefaults.textFieldColors(backgroundColor = Color(ChatColorsConfig.LIGHT__TEXTFIELD_BGCOLOR)),
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.None,
+                        autoCorrect = false,
+                    ),
+                    placeholder = {
+                        Text("type search text ...", fontSize = 16.sp)
+                    },
+                    value = message_filter_str,
+                    onValueChange = {
+                        message_filter_str = it
+                        groupstore.groupmessagefilterString(message_filter_str)
+                    })
+            }
+            Scaffold(topBar = {
+                TopAppBar(
+                    title = {
+                        groupList.selectedGroup?.let { Text(it.name) }
+                    },
+                    actions = {
+                        Tooltip(text = "Filter Messages") {
+                            IconButton(onClick = {
+                                groupstore.groupmessagefilterString("")
+                                groupstore.groupmessagefilterActive(!groupstore.state.groupmessageFilterActive) }) {
+                                Icon(Icons.Filled.Search, null)
+                            }
                         }
-                    }
-                },
-                backgroundColor = MaterialTheme.colors.background,
-                modifier = Modifier.height(40.dp)
-            )
-        }) {
-            GroupApp(focusRequester = focusRequester, displayTextField = displayTextField, groupList.selectedGroupId, ui_scale)
+                        Tooltip(text = "Group Settings and Info") {
+                            IconButton(onClick = { groupsettingsstore.visible(true) }) {
+                                Icon(Icons.Filled.Settings, null)
+                            }
+                        }
+                    },
+                    backgroundColor = MaterialTheme.colors.background,
+                    modifier = Modifier.height(40.dp)
+                )
+            }) {
+                GroupApp(focusRequester = focusRequester, displayTextField = displayTextField, groupList.selectedGroupId, ui_scale)
+            }
         }
     }
 }
