@@ -6,7 +6,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.briarproject.briar.desktop.contact.ContactItem
 
-data class StateContacts(val contacts: List<ContactItem> = emptyList(), val visible: Boolean = false, val selectedContactPubkey: String? = null, val selectedContact: ContactItem? = null)
+data class StateContacts(val contacts: List<ContactItem> = emptyList(), val visible: Boolean = false,
+                         val selectedContactPubkey: String? = null, val selectedContact: ContactItem? = null,
+                         var messageFilterActive: Boolean = false, var messageFilterString: String = "")
 
 const val TAG = "trifa.ContactsStore"
 
@@ -17,6 +19,9 @@ interface ContactStore
     fun select(pubkey: String?)
     fun visible(value: Boolean)
     fun clear()
+    fun messagefilterActive(value: Boolean)
+    fun messagefilterString(value: String)
+    fun messageresetFilter()
     fun update(item: ContactItem)
     fun update_ipaddr(pubkey: String, ipaddr: String)
     val stateFlow: StateFlow<StateContacts>
@@ -215,6 +220,27 @@ fun CoroutineScope.createContactStore(): ContactStore
                 mutableStateFlow.value = state.copy(contacts = emptyList(), selectedContactPubkey = null, selectedContact = null)
                 global_semaphore_contactlist_ui.release()
             //}
+        }
+
+        override fun messagefilterActive(value: Boolean)
+        {
+            global_semaphore_contactlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
+            mutableStateFlow.value = state.copy(messageFilterActive = value )
+            global_semaphore_contactlist_ui.release()
+        }
+
+        override fun messageresetFilter()
+        {
+            global_semaphore_contactlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
+            mutableStateFlow.value = state.copy(messageFilterString = "", messageFilterActive = false)
+            global_semaphore_contactlist_ui.release()
+        }
+
+        override fun messagefilterString(value: String)
+        {
+            global_semaphore_contactlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
+            mutableStateFlow.value = state.copy(messageFilterString = value)
+            global_semaphore_contactlist_ui.release()
         }
     }
 }

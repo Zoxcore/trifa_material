@@ -4,11 +4,11 @@ import global_semaphore_grouplist_ui
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
-import org.briarproject.briar.desktop.contact.ContactItem
 import org.briarproject.briar.desktop.contact.GroupItem
 
-data class StateGroups(val groups: List<GroupItem> = emptyList(), val visible: Boolean = false, val selectedGroupId: String? = null, val selectedGroup: GroupItem? = null)
+data class StateGroups(val groups: List<GroupItem> = emptyList(), val visible: Boolean = false,
+                       val selectedGroupId: String? = null, val selectedGroup: GroupItem? = null,
+                       var groupmessageFilterActive: Boolean = false, var groupmessageFilterString: String = "")
 
 interface GroupStore
 {
@@ -17,9 +17,23 @@ interface GroupStore
     fun select(pubkey: String?)
     fun visible(value: Boolean)
     fun clear()
+    fun groupmessagefilterActive(value: Boolean)
+    fun groupmessagefilterString(value: String)
+    fun groupmessageresetFilter()
     fun update(item: GroupItem)
     val stateFlow: StateFlow<StateGroups>
     val state get() = stateFlow.value
+}
+
+fun GroupStoreFilterFilter(filterstring_raw: String): String
+{
+    try
+    {
+        return filterstring_raw.replace("\\", "\\\\").replace("%", "\\%")
+    } catch (_: Exception)
+    {
+        return filterstring_raw
+    }
 }
 
 fun CoroutineScope.createGroupStore(): GroupStore
@@ -179,6 +193,27 @@ fun CoroutineScope.createGroupStore(): GroupStore
                 mutableStateFlow.value = state.copy(groups = emptyList(), selectedGroupId = null, selectedGroup = null)
                 global_semaphore_grouplist_ui.release()
             //}
+        }
+
+        override fun groupmessagefilterActive(value: Boolean)
+        {
+            global_semaphore_grouplist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
+            mutableStateFlow.value = state.copy(groupmessageFilterActive = value )
+            global_semaphore_grouplist_ui.release()
+        }
+
+        override fun groupmessageresetFilter()
+        {
+            global_semaphore_grouplist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
+            mutableStateFlow.value = state.copy(groupmessageFilterString = "", groupmessageFilterActive = false)
+            global_semaphore_grouplist_ui.release()
+        }
+
+        override fun groupmessagefilterString(value: String)
+        {
+            global_semaphore_grouplist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
+            mutableStateFlow.value = state.copy(groupmessageFilterString = value)
+            global_semaphore_grouplist_ui.release()
         }
     }
 }
