@@ -694,9 +694,25 @@ public class Filetransfer
         return this;
     }
 
+    public Filetransfer idLe(long id)
+    {
+        this.sql_where = this.sql_where + " and id<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, id));
+        bind_where_count++;
+        return this;
+    }
+
     public Filetransfer idGt(long id)
     {
         this.sql_where = this.sql_where + " and id>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, id));
+        bind_where_count++;
+        return this;
+    }
+
+    public Filetransfer idGe(long id)
+    {
+        this.sql_where = this.sql_where + " and id>=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, id));
         bind_where_count++;
         return this;
@@ -728,6 +744,22 @@ public class Filetransfer
         return this;
     }
 
+    public Filetransfer tox_public_key_stringLike(String tox_public_key_string)
+    {
+        this.sql_where = this.sql_where + " and tox_public_key_string LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_public_key_string));
+        bind_where_count++;
+        return this;
+    }
+
+    public Filetransfer tox_public_key_stringNotLike(String tox_public_key_string)
+    {
+        this.sql_where = this.sql_where + " and tox_public_key_string NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_public_key_string));
+        bind_where_count++;
+        return this;
+    }
+
     public Filetransfer directionEq(int direction)
     {
         this.sql_where = this.sql_where + " and direction=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -752,9 +784,25 @@ public class Filetransfer
         return this;
     }
 
+    public Filetransfer directionLe(int direction)
+    {
+        this.sql_where = this.sql_where + " and direction<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, direction));
+        bind_where_count++;
+        return this;
+    }
+
     public Filetransfer directionGt(int direction)
     {
         this.sql_where = this.sql_where + " and direction>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, direction));
+        bind_where_count++;
+        return this;
+    }
+
+    public Filetransfer directionGe(int direction)
+    {
+        this.sql_where = this.sql_where + " and direction>=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, direction));
         bind_where_count++;
         return this;
@@ -794,9 +842,25 @@ public class Filetransfer
         return this;
     }
 
+    public Filetransfer file_numberLe(long file_number)
+    {
+        this.sql_where = this.sql_where + " and file_number<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, file_number));
+        bind_where_count++;
+        return this;
+    }
+
     public Filetransfer file_numberGt(long file_number)
     {
         this.sql_where = this.sql_where + " and file_number>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, file_number));
+        bind_where_count++;
+        return this;
+    }
+
+    public Filetransfer file_numberGe(long file_number)
+    {
+        this.sql_where = this.sql_where + " and file_number>=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, file_number));
         bind_where_count++;
         return this;
@@ -836,9 +900,25 @@ public class Filetransfer
         return this;
     }
 
+    public Filetransfer kindLe(int kind)
+    {
+        this.sql_where = this.sql_where + " and kind<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, kind));
+        bind_where_count++;
+        return this;
+    }
+
     public Filetransfer kindGt(int kind)
     {
         this.sql_where = this.sql_where + " and kind>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, kind));
+        bind_where_count++;
+        return this;
+    }
+
+    public Filetransfer kindGe(int kind)
+    {
+        this.sql_where = this.sql_where + " and kind>=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, kind));
         bind_where_count++;
         return this;
@@ -878,9 +958,25 @@ public class Filetransfer
         return this;
     }
 
+    public Filetransfer stateLe(int state)
+    {
+        this.sql_where = this.sql_where + " and state<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, state));
+        bind_where_count++;
+        return this;
+    }
+
     public Filetransfer stateGt(int state)
     {
         this.sql_where = this.sql_where + " and state>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, state));
+        bind_where_count++;
+        return this;
+    }
+
+    public Filetransfer stateGe(int state)
+    {
+        this.sql_where = this.sql_where + " and state>=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, state));
         bind_where_count++;
         return this;
@@ -944,6 +1040,22 @@ public class Filetransfer
         return this;
     }
 
+    public Filetransfer path_nameLike(String path_name)
+    {
+        this.sql_where = this.sql_where + " and path_name LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, path_name));
+        bind_where_count++;
+        return this;
+    }
+
+    public Filetransfer path_nameNotLike(String path_name)
+    {
+        this.sql_where = this.sql_where + " and path_name NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, path_name));
+        bind_where_count++;
+        return this;
+    }
+
     public Filetransfer file_nameEq(String file_name)
     {
         this.sql_where = this.sql_where + " and file_name=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -955,6 +1067,22 @@ public class Filetransfer
     public Filetransfer file_nameNotEq(String file_name)
     {
         this.sql_where = this.sql_where + " and file_name<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, file_name));
+        bind_where_count++;
+        return this;
+    }
+
+    public Filetransfer file_nameLike(String file_name)
+    {
+        this.sql_where = this.sql_where + " and file_name LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, file_name));
+        bind_where_count++;
+        return this;
+    }
+
+    public Filetransfer file_nameNotLike(String file_name)
+    {
+        this.sql_where = this.sql_where + " and file_name NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, file_name));
         bind_where_count++;
         return this;
@@ -1000,9 +1128,25 @@ public class Filetransfer
         return this;
     }
 
+    public Filetransfer filesizeLe(long filesize)
+    {
+        this.sql_where = this.sql_where + " and filesize<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, filesize));
+        bind_where_count++;
+        return this;
+    }
+
     public Filetransfer filesizeGt(long filesize)
     {
         this.sql_where = this.sql_where + " and filesize>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, filesize));
+        bind_where_count++;
+        return this;
+    }
+
+    public Filetransfer filesizeGe(long filesize)
+    {
+        this.sql_where = this.sql_where + " and filesize>=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, filesize));
         bind_where_count++;
         return this;
@@ -1042,9 +1186,25 @@ public class Filetransfer
         return this;
     }
 
+    public Filetransfer current_positionLe(long current_position)
+    {
+        this.sql_where = this.sql_where + " and current_position<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, current_position));
+        bind_where_count++;
+        return this;
+    }
+
     public Filetransfer current_positionGt(long current_position)
     {
         this.sql_where = this.sql_where + " and current_position>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, current_position));
+        bind_where_count++;
+        return this;
+    }
+
+    public Filetransfer current_positionGe(long current_position)
+    {
+        this.sql_where = this.sql_where + " and current_position>=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, current_position));
         bind_where_count++;
         return this;
@@ -1084,9 +1244,25 @@ public class Filetransfer
         return this;
     }
 
+    public Filetransfer message_idLe(long message_id)
+    {
+        this.sql_where = this.sql_where + " and message_id<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, message_id));
+        bind_where_count++;
+        return this;
+    }
+
     public Filetransfer message_idGt(long message_id)
     {
         this.sql_where = this.sql_where + " and message_id>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, message_id));
+        bind_where_count++;
+        return this;
+    }
+
+    public Filetransfer message_idGe(long message_id)
+    {
+        this.sql_where = this.sql_where + " and message_id>=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, message_id));
         bind_where_count++;
         return this;
@@ -1113,6 +1289,22 @@ public class Filetransfer
     public Filetransfer tox_file_id_hexNotEq(String tox_file_id_hex)
     {
         this.sql_where = this.sql_where + " and tox_file_id_hex<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_file_id_hex));
+        bind_where_count++;
+        return this;
+    }
+
+    public Filetransfer tox_file_id_hexLike(String tox_file_id_hex)
+    {
+        this.sql_where = this.sql_where + " and tox_file_id_hex LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_file_id_hex));
+        bind_where_count++;
+        return this;
+    }
+
+    public Filetransfer tox_file_id_hexNotLike(String tox_file_id_hex)
+    {
+        this.sql_where = this.sql_where + " and tox_file_id_hex NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_file_id_hex));
         bind_where_count++;
         return this;

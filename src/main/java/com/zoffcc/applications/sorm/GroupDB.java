@@ -573,6 +573,22 @@ public class GroupDB
         return this;
     }
 
+    public GroupDB group_identifierLike(String group_identifier)
+    {
+        this.sql_where = this.sql_where + " and group_identifier LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, group_identifier));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupDB group_identifierNotLike(String group_identifier)
+    {
+        this.sql_where = this.sql_where + " and group_identifier NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, group_identifier));
+        bind_where_count++;
+        return this;
+    }
+
     public GroupDB who_invited__tox_public_key_stringEq(String who_invited__tox_public_key_string)
     {
         this.sql_where = this.sql_where + " and who_invited__tox_public_key_string=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -584,6 +600,22 @@ public class GroupDB
     public GroupDB who_invited__tox_public_key_stringNotEq(String who_invited__tox_public_key_string)
     {
         this.sql_where = this.sql_where + " and who_invited__tox_public_key_string<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, who_invited__tox_public_key_string));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupDB who_invited__tox_public_key_stringLike(String who_invited__tox_public_key_string)
+    {
+        this.sql_where = this.sql_where + " and who_invited__tox_public_key_string LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, who_invited__tox_public_key_string));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupDB who_invited__tox_public_key_stringNotLike(String who_invited__tox_public_key_string)
+    {
+        this.sql_where = this.sql_where + " and who_invited__tox_public_key_string NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, who_invited__tox_public_key_string));
         bind_where_count++;
         return this;
@@ -605,6 +637,22 @@ public class GroupDB
         return this;
     }
 
+    public GroupDB nameLike(String name)
+    {
+        this.sql_where = this.sql_where + " and name LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, name));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupDB nameNotLike(String name)
+    {
+        this.sql_where = this.sql_where + " and name NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, name));
+        bind_where_count++;
+        return this;
+    }
+
     public GroupDB topicEq(String topic)
     {
         this.sql_where = this.sql_where + " and topic=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -616,6 +664,22 @@ public class GroupDB
     public GroupDB topicNotEq(String topic)
     {
         this.sql_where = this.sql_where + " and topic<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, topic));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupDB topicLike(String topic)
+    {
+        this.sql_where = this.sql_where + " and topic LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, topic));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupDB topicNotLike(String topic)
+    {
+        this.sql_where = this.sql_where + " and topic NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, topic));
         bind_where_count++;
         return this;
@@ -645,9 +709,25 @@ public class GroupDB
         return this;
     }
 
+    public GroupDB peer_countLe(long peer_count)
+    {
+        this.sql_where = this.sql_where + " and peer_count<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, peer_count));
+        bind_where_count++;
+        return this;
+    }
+
     public GroupDB peer_countGt(long peer_count)
     {
         this.sql_where = this.sql_where + " and peer_count>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, peer_count));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupDB peer_countGe(long peer_count)
+    {
+        this.sql_where = this.sql_where + " and peer_count>=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, peer_count));
         bind_where_count++;
         return this;
@@ -687,9 +767,25 @@ public class GroupDB
         return this;
     }
 
+    public GroupDB own_peer_numberLe(long own_peer_number)
+    {
+        this.sql_where = this.sql_where + " and own_peer_number<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, own_peer_number));
+        bind_where_count++;
+        return this;
+    }
+
     public GroupDB own_peer_numberGt(long own_peer_number)
     {
         this.sql_where = this.sql_where + " and own_peer_number>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, own_peer_number));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupDB own_peer_numberGe(long own_peer_number)
+    {
+        this.sql_where = this.sql_where + " and own_peer_number>=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, own_peer_number));
         bind_where_count++;
         return this;
@@ -729,9 +825,25 @@ public class GroupDB
         return this;
     }
 
+    public GroupDB privacy_stateLe(int privacy_state)
+    {
+        this.sql_where = this.sql_where + " and privacy_state<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, privacy_state));
+        bind_where_count++;
+        return this;
+    }
+
     public GroupDB privacy_stateGt(int privacy_state)
     {
         this.sql_where = this.sql_where + " and privacy_state>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, privacy_state));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupDB privacy_stateGe(int privacy_state)
+    {
+        this.sql_where = this.sql_where + " and privacy_state>=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, privacy_state));
         bind_where_count++;
         return this;
@@ -771,9 +883,25 @@ public class GroupDB
         return this;
     }
 
+    public GroupDB tox_group_numberLe(long tox_group_number)
+    {
+        this.sql_where = this.sql_where + " and tox_group_number<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, tox_group_number));
+        bind_where_count++;
+        return this;
+    }
+
     public GroupDB tox_group_numberGt(long tox_group_number)
     {
         this.sql_where = this.sql_where + " and tox_group_number>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, tox_group_number));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupDB tox_group_numberGe(long tox_group_number)
+    {
+        this.sql_where = this.sql_where + " and tox_group_number>=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, tox_group_number));
         bind_where_count++;
         return this;
