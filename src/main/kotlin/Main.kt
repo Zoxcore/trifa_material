@@ -1205,7 +1205,9 @@ fun App()
                                         }
                                         ChatAppWithScaffold(focusRequester = focusRequester, contactList = contacts, ui_scale = ui_scale)
                                         LaunchedEffect(contacts.selectedContactPubkey) {
+                                            // HINT: focus on the message input field
                                             focusRequester.requestFocus()
+                                            Log.i(TAG, "FFFFFF1111111111111: focus on the message input field")
                                             contactstore.messageresetFilter()
                                         }
                                     }
@@ -1251,7 +1253,9 @@ fun App()
                                         }
                                         GroupAppWithScaffold(focusRequester = groupfocusRequester, groupList = groups, ui_scale = ui_scale)
                                         LaunchedEffect(groups.selectedGroupId) {
+                                            // HINT: focus on the group message input field
                                             groupfocusRequester.requestFocus()
+                                            Log.i(TAG, "FFFFgg1111111111111: focus on the group message input field")
                                             groupstore.groupmessageresetFilter()
                                         }
                                     }

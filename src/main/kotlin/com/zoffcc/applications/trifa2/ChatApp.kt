@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,6 +47,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.ExternalDragValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.onExternalDrag
@@ -129,11 +131,12 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
     Theme {
         Column(modifier = Modifier.fillMaxWidth())
         {
+            val focusRequester2 = remember { FocusRequester() }
             if (contactList.messageFilterActive)
             {
                 var message_filter_str by remember { mutableStateOf(contactList.messageFilterString) }
                 TextField(enabled = true, singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().focusRequester(focusRequester2),
                     textStyle = TextStyle(fontSize = 16.sp),
                     colors = TextFieldDefaults.textFieldColors(backgroundColor = Color(ChatColorsConfig.LIGHT__TEXTFIELD_BGCOLOR)),
                     keyboardOptions = KeyboardOptions(
@@ -148,6 +151,19 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
                         message_filter_str = it
                         contactstore.messagefilterString(message_filter_str)
                     })
+                LaunchedEffect(contactList.messageFilterActive) {
+                    // HINT: focus on the search input field when search input field is opened
+                    focusRequester2.requestFocus()
+                    Log.i(TAG, "FFFFFF2222222222222: focus on the search input field when search input field is opened")
+                }
+            }
+            else
+            {
+                LaunchedEffect(contactList.messageFilterActive) {
+                    // HINT: focus on the message input field, when search input field is closed
+                    focusRequester.requestFocus()
+                    Log.i(TAG, "FFFFFF3333333333333: focus on the message input field, when search input field is closed")
+                }
             }
             Scaffold(topBar = {
                 TopAppBar(
@@ -237,11 +253,12 @@ fun GroupAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boole
     Theme {
         Column(modifier = Modifier.fillMaxWidth())
         {
+            val focusRequester2 = remember { FocusRequester() }
             if (groupList.groupmessageFilterActive)
             {
                 var message_filter_str by remember { mutableStateOf(groupList.groupmessageFilterString) }
                 TextField(enabled = true, singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().focusRequester(focusRequester2),
                     textStyle = TextStyle(fontSize = 16.sp),
                     colors = TextFieldDefaults.textFieldColors(backgroundColor = Color(ChatColorsConfig.LIGHT__TEXTFIELD_BGCOLOR)),
                     keyboardOptions = KeyboardOptions(
@@ -256,6 +273,19 @@ fun GroupAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boole
                         message_filter_str = it
                         groupstore.groupmessagefilterString(message_filter_str)
                     })
+                LaunchedEffect(groupList.groupmessageFilterActive) {
+                    // HINT: focus on the search input field when search input field is opened
+                    focusRequester2.requestFocus()
+                    Log.i(TAG, "FFFFgg2222222222222: focus on the search input field when search input field is opened")
+                }
+            }
+            else
+            {
+                LaunchedEffect(groupList.groupmessageFilterActive) {
+                    // HINT: focus on the message input field, when search input field is closed
+                    focusRequester.requestFocus()
+                    Log.i(TAG, "FFFFgg3333333333333: focus on the group message input field, when search input field is closed")
+                }
             }
             Scaffold(topBar = {
                 TopAppBar(
