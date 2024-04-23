@@ -434,7 +434,7 @@ jobs:
 
 
   macos-test:
-    runs-on: macos-11
+    runs-on: macos-latest
     if: ${{ true }}
     permissions:
       contents: write
