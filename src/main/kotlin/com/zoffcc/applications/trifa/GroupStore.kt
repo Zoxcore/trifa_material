@@ -25,11 +25,19 @@ interface GroupStore
     val state get() = stateFlow.value
 }
 
-fun GroupStoreFilterFilter(filterstring_raw: String): String
+fun SqliteEscapeLikeString(filterstring_raw: String): String
 {
     try
     {
-        return filterstring_raw.replace("\\", "\\\\").replace("%", "\\%")
+        // HINT:
+        // It is standard SQL that in LIKE expressions:
+        //
+        // % matches any sequence of characters, including an empty one. It is equivalent to .* in a regular expression.
+        // _ matches a single character. It is equivalent to . in a regular expression.
+        //
+        return filterstring_raw.replace("\\", "\\\\")
+            .replace("%", "\\%")
+            .replace("_", "\\_")
     } catch (_: Exception)
     {
         return filterstring_raw

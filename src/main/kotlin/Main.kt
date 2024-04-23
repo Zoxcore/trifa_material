@@ -127,7 +127,7 @@ import com.zoffcc.applications.trifa.CustomSemaphore
 import com.zoffcc.applications.trifa.EmojiStrAndName
 import com.zoffcc.applications.trifa.FriendSettingDetails
 import com.zoffcc.applications.trifa.GroupSettingDetails
-import com.zoffcc.applications.trifa.GroupStoreFilterFilter
+import com.zoffcc.applications.trifa.SqliteEscapeLikeString
 import com.zoffcc.applications.trifa.HelperGeneric.PubkeyShort
 import com.zoffcc.applications.trifa.HelperGeneric.ngc_video_frame_last_incoming_ts
 import com.zoffcc.applications.trifa.HelperGroup
@@ -1338,7 +1338,7 @@ fun load_messages_for_friend(selectedContactPubkey: String?)
             var messages: MutableList<Message>? = null
             val filter_active = contactstore.state.messageFilterActive
             val filter_value_raw = contactstore.state.messageFilterString
-            val filter_value = GroupStoreFilterFilter(filter_value_raw)
+            val filter_value = SqliteEscapeLikeString(filter_value_raw)
             if ((filter_active) &&
                 (!filter_value_raw.isNullOrEmpty()) &&
                 (filter_value_raw.isNotBlank()) &&
@@ -1424,7 +1424,7 @@ fun load_groupmessages(selectedGroupId: String?)
             var messages: MutableList<GroupMessage>? = null
             val filter_active = groupstore.state.groupmessageFilterActive
             val filter_value_raw = groupstore.state.groupmessageFilterString
-            val filter_value = GroupStoreFilterFilter(filter_value_raw)
+            val filter_value = SqliteEscapeLikeString(filter_value_raw)
             if ((filter_active) &&
                 (!filter_value_raw.isNullOrEmpty()) &&
                 (filter_value_raw.isNotBlank()) &&
