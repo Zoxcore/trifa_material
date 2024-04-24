@@ -111,9 +111,6 @@ The Java and JNI parts are built here: https://github.com/zoff99/ffmpeg_av_jni
 Java can do Notifications on Windows properly, but on macOS and Linux a native library is needed.<br>
 The Java and JNI parts are built here: https://github.com/zoff99/jni_notifications
 
-## arm64 macOS toxcore lib
-The lib for arm64 macOS is built on https://codemagic.io/
-
 ## BOM (Bill of materials)
 What dependencies are used by trifa material:<br>
 https://github.com/Zoxcore/trifa_material/releases/download/nightly/bom_implementation.txt
