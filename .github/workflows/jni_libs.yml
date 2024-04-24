@@ -73,6 +73,57 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "libjni-c-toxcore.jnilib"
 
+  build-macos_arm64-jni-artifact:
+    name: JNI Artifact macOS arm64 Build
+    runs-on: macos-14-arm64
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install deps
+        run:  brew install git automake yasm nasm
+
+      - name: build deps
+        run:  |
+          ls -al
+          id
+          pwd
+          ./circle_scripts/deps_macos.sh
+
+      - name: build jni lib
+        run:  |
+          ls -al
+          id
+          pwd
+          ./circle_scripts/java_jni_lib_macos.sh
+
+      - name: sha hash of jni lib
+        run:  |
+          shasum -a 256 /Users/runner/ToxAndroidRefImpl/jni-c-toxcore/libjni-c-toxcore.jnilib || echo "ignore"
+
+      - name: Rename artifact for nightly upload
+        if: github.ref == 'refs/heads/master'
+        run: |
+          pwd
+          cp -v /Users/runner/ToxAndroidRefImpl/jni-c-toxcore/libjni-c-toxcore.jnilib libjni-c-toxcore_arm64.jnilib
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: libjni-c-toxcore_arm64.jnilib
+          path: libjni-c-toxcore_arm64.jnilib
+      - name: Upload to nightly release
+        uses: ncipollo/release-action@v1
+        if: github.ref == 'refs/heads/master'
+        with:
+          allowUpdates: true
+          tag: nightly
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          prerelease: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "libjni-c-toxcore_arm64.jnilib"
 
   build-raspi-jni-artifact:
     name: JNI Artifact Raspi Build
