@@ -364,7 +364,7 @@ object HelperGeneric {
             while (new_len > TOX_MAX_NGC_FILESIZE)
             {
                 ImmutableImage.loader().fromFile(ff1).scaleToWidth(max_width).
-                    output(WebpWriter().withQ(quality),ff2.canonicalPath);
+                    output(WebpWriter().withQ(quality).withMultiThread(),ff2.canonicalPath)
                 new_len = ff2.length()
                 Log.i(TAG, "shrink_image_file:fsize_after=" +
                         new_len + " " + quality + " " + max_width + " " + ff2.absolutePath)
