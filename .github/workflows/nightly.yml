@@ -491,7 +491,7 @@ jobs:
            screencapture -T 60 -x -t png /Users/runner/screen07.png &
            screencapture -T 90 -x -t png /Users/runner/screen09.png &
            screencapture -T 110 -x -t png /Users/runner/screen10.png &
-           screencapture -T 200 -x -t png /Users/runner/screenshot-macos.png &
+           screencapture -T 208 -x -t png /Users/runner/screenshot-macos.png &
            screencapture -T 230 -x -t png /Users/runner/screen12.png &
            screencapture -T 300 -x -t png /Users/runner/screen13.png &
            pwd
@@ -502,7 +502,7 @@ jobs:
            cliclick -m verbose c:77,124
            sleep 2
            cliclick -m verbose c:139,124
-           sleep 2
+           sleep 10
            cat /Users/runner/work/trifa_material/trifa_material/toxid.txt;echo
            cd /Users/runner/work/trifa_material/trifa_material/java_tox_tester-master/
            ./do_compile.sh
