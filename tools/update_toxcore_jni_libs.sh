@@ -1,7 +1,9 @@
 #! /bin/sh
 base_url='https://github.com/zoff99/trifa_material/releases/download/nightly/'
 
+file_mac_arm64='libjni-c-toxcore_arm64.jnilib'
 file_mac='libjni-c-toxcore.jnilib'
+file_mac_noise_arm64='libjni-c-toxcore_arm64_noise.jnilib'
 file_mac_noise='libjni-c-toxcore_noise.jnilib'
 file_win='jni-c-toxcore.dll'
 file_win_noise='jni-c-toxcore_noise.dll'
@@ -17,6 +19,8 @@ export _HOME_
 basedir="$_HOME_""/../resources/common/"
 
 cd "$basedir"
+wget "$base_url""$file_mac_arm64" -O "$file_mac_arm64"
+# wget "$base_url""$file_mac_noise_arm64" -O "$file_mac_noise_arm64"
 wget "$base_url""$file_mac" -O "$file_mac"
 # wget "$base_url""$file_mac_noise" -O "$file_mac_noise"
 wget "$base_url""$file_win" -O "$file_win"
