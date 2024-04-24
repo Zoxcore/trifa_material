@@ -23,7 +23,7 @@ jobs:
 
   build-macos-jni-artifact:
     name: JNI Artifact macOS Build
-    runs-on: macos-11
+    runs-on: macos-12
     permissions:
       contents: write
     steps:
@@ -75,7 +75,7 @@ jobs:
 
   build-macos_arm64-jni-artifact:
     name: JNI Artifact macOS arm64 Build
-    runs-on: macos-14-arm64
+    runs-on: macos-14
     permissions:
       contents: write
     steps:
