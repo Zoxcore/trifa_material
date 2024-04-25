@@ -443,6 +443,9 @@ jobs:
     - name: install cliclick
       run:  brew install cliclick
 
+    - name: install imagemagick
+      run:  brew install imagemagick
+
     - name: install wget
       run:  brew install wget
 
@@ -491,7 +494,7 @@ jobs:
            screencapture -T 60 -x -t png /Users/runner/screen07.png &
            screencapture -T 90 -x -t png /Users/runner/screen09.png &
            screencapture -T 110 -x -t png /Users/runner/screen10.png &
-           screencapture -T 208 -x -t png /Users/runner/screenshot-macos.png &
+           screencapture -T 238 -x -t png /Users/runner/screenshot-macos.png &
            screencapture -T 230 -x -t png /Users/runner/screen12.png &
            screencapture -T 300 -x -t png /Users/runner/screen13.png &
            pwd
@@ -502,12 +505,12 @@ jobs:
            cliclick -m verbose c:77,124
            sleep 2
            cliclick -m verbose c:139,124
-           sleep 10
-           cat /Users/runner/work/trifa_material/trifa_material/toxid.txt;echo
+           sleep 30
            cd /Users/runner/work/trifa_material/trifa_material/java_tox_tester-master/
            ./do_compile.sh
+           cat /Users/runner/work/trifa_material/trifa_material/trifa.log
            ./do_run.sh $(cat /Users/runner/work/trifa_material/trifa_material/toxid.txt) >/dev/null 2>/dev/null &
-           sleep 58
+           sleep 68
            cliclick -m verbose c:195,347
            sleep 1
            cliclick -m verbose c:745,645
@@ -521,6 +524,19 @@ jobs:
            pwd
            ls -al /Users/runner/
            cp -v /Users/runner/screenshot-macos.png /Users/runner/work/trifa_material/trifa_material/screenshot-macos.png
+
+    - name: tweak screenshot
+      run: |
+           cd /Users/runner/work/trifa_material/trifa_material/
+           pwd
+           # cp -v screenshot-macos.png /Users/runner/screenshot-macos_orig.png
+           # convert screenshot-macos.png -crop 1176x885+0+0 +repage crop_br.png
+           # convert screenshot-macos.png -crop 1919x25+1663+0  crop_br2.png
+           # convert screenshot-macos.png -crop 1506x88+207+993  crop_br3.png
+           # convert crop_br3.png  -resize 65%  crop_br3small.png
+           # composite -compose Copy -gravity South crop_br3small.png crop_br.png -alpha set dst.png
+           # composite -compose Copy -gravity Northeast crop_br2.png dst.png -alpha set dst2.png
+           # cp -v dst2.png screenshot-macos.png
 
     - name: upload-screenshots
       uses: actions/upload-artifact@v4
@@ -541,6 +557,133 @@ jobs:
         replacesArtifacts: true
         token: ${{ secrets.GITHUB_TOKEN }}
         artifacts: "screenshot-macos.png"
+
+  macos-14-test:
+    runs-on: macos-14
+    if: ${{ true }}
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v4
+    - name: install cliclick
+      run:  brew install cliclick
+
+    - name: install imagemagick
+      run:  brew install imagemagick
+
+    - name: install wget
+      run:  brew install wget
+
+    - name: install sendkeys
+      run:  brew install socsieng/tap/sendkeys
+
+    - name: macos-version1
+      run: sw_vers -productVersion
+
+    - name: macos-version2
+      run: system_profiler SPSoftwareDataType
+
+    - name: csrutil-status
+      run: csrutil status || exit 0
+
+    - name: notifications_off_01
+      run: launchctl unload -w /System/Library/LaunchAgents/com.apple.notificationcenterui.plist || exit 0
+
+    - name: notifications_off_02
+      run: killall NotificationCenter || exit 0
+
+    - name: download tester
+      shell: bash
+      run: |
+           curl -L https://github.com/zoff99/java_tox_tester/archive/refs/heads/master.zip -o master.zip
+           unzip master.zip
+           ls -al java_tox_tester-master/
+           java -version
+           javac -version
+
+    - name: startup-app
+      run: |
+           pwd
+           ls -al /Users/runner/
+           _HOME_="/Users/runner/"
+           /usr/libexec/java_home -v 17
+           export JAVA_HOME=$(/usr/libexec/java_home -v17)
+           ./gradlew assemble
+           cliclick -m verbose m:12,34
+           screencapture -T 1 -x -t png /Users/runner/screen01.png &
+           screencapture -T 2 -x -t png /Users/runner/screen02.png &
+           screencapture -T 3 -x -t png /Users/runner/screen03.png &
+           screencapture -T 10 -x -t png /Users/runner/screen04.png &
+           screencapture -T 25 -x -t png /Users/runner/screen05.png &
+           screencapture -T 50 -x -t png /Users/runner/screen06.png &
+           screencapture -T 60 -x -t png /Users/runner/screen07.png &
+           screencapture -T 90 -x -t png /Users/runner/screen09.png &
+           screencapture -T 110 -x -t png /Users/runner/screen10.png &
+           screencapture -T 238 -x -t png /Users/runner/screenshot-macos-14.png &
+           screencapture -T 230 -x -t png /Users/runner/screen12.png &
+           screencapture -T 300 -x -t png /Users/runner/screen13.png &
+           pwd
+           ls -al
+           ./gradlew run > trifa.log 2>&1 &
+           pwd
+           sleep 20
+           cliclick -m verbose c:77,124
+           sleep 2
+           cliclick -m verbose c:139,124
+           sleep 20
+           cd /Users/runner/work/trifa_material/trifa_material/java_tox_tester-master/
+           ./do_compile.sh
+           cat /Users/runner/work/trifa_material/trifa_material/trifa.log
+           ./do_run.sh $(cat /Users/runner/work/trifa_material/trifa_material/toxid.txt) >/dev/null 2>/dev/null &
+           sleep 68
+           ls -al /Users/runner/work/trifa_material/trifa_material/
+           cat /Users/runner/work/trifa_material/trifa_material/trifa.log
+           cliclick -m verbose c:195,347
+           sleep 1
+           cliclick -m verbose c:745,645
+           sleep 1
+           cliclick -m verbose c:367,641
+           sleep 1
+           sendkeys apps
+           sendkeys -a "TRIfA" -c ":smile"
+           sleep 90
+           sleep 120
+           pwd
+           ls -al /Users/runner/
+           cp -v /Users/runner/screenshot-macos-14.png /Users/runner/work/trifa_material/trifa_material/screenshot-macos-14.png
+
+    - name: tweak screenshot
+      run: |
+           cd /Users/runner/work/trifa_material/trifa_material/
+           pwd
+           cp -v screenshot-macos-14.png /Users/runner/screenshot-macos-14_orig.png
+           convert screenshot-macos-14.png -crop 1176x885+0+0 +repage crop_br.png
+           convert screenshot-macos-14.png -crop 1919x25+1663+0  crop_br2.png
+           convert screenshot-macos-14.png -crop 1506x88+207+993  crop_br3.png
+           convert crop_br3.png  -resize 65%  crop_br3small.png
+           composite -compose Copy -gravity South crop_br3small.png crop_br.png -alpha set dst.png
+           composite -compose Copy -gravity Northeast crop_br2.png dst.png -alpha set dst2.png
+           cp -v dst2.png screenshot-macos-14.png
+
+    - name: upload-screenshots
+      uses: actions/upload-artifact@v4
+      with:
+        name: screenshot-macos-14
+        path: |
+          /Users/runner/screen*.png
+
+    - name: Upload to nightly release
+      uses: ncipollo/release-action@v1
+      if: github.ref == 'refs/heads/master'
+      with:
+        allowUpdates: true
+        tag: nightly
+        omitBodyDuringUpdate: true
+        omitNameDuringUpdate: true
+        prerelease: true
+        replacesArtifacts: true
+        token: ${{ secrets.GITHUB_TOKEN }}
+        artifacts: "screenshot-macos-14.png"
 
   linux-ub20-test:
     runs-on: ubuntu-20.04
