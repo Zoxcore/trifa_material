@@ -149,7 +149,7 @@ private fun button_settings()
                 }
             })
         {
-            Text("test Notification")
+            Text(i18n("ui.setting.test_notification"))
         }
     }
 
