@@ -63,7 +63,7 @@ fun AddGroup() = Box {
                     capitalization = KeyboardCapitalization.None,
                     autoCorrect = false,
                 ), value = join_group_id, placeholder = {
-                    Text("enter GroupID to join ...", fontSize = 13.sp)
+                    Text(i18n("ui.group.enter_groupid"), fontSize = 13.sp)
                 }, onValueChange = {
                     join_group_id = it
                     if (it.length == (ToxVars.TOX_GROUP_CHAT_ID_SIZE * 2))
@@ -96,7 +96,7 @@ fun AddGroup() = Box {
                         try
                         {
                             val new_privacy_state = MainActivity.tox_group_get_privacy_state(new_group_num)
-                            val group_name = "Group #" + new_group_num
+                            val group_name = i18n("ui.group.group") + new_group_num
                             val group_num_peers = MainActivity.tox_group_peer_count(new_group_num)
                             groupstore.add(item = GroupItem(numPeers = group_num_peers.toInt(),
                                 name = group_name!!, isConnected = 0,
@@ -105,14 +105,14 @@ fun AddGroup() = Box {
                         } catch (_: Exception)
                         {
                         }
-                        SnackBarToast("You joined new Group")
+                        SnackBarToast(i18n("ui.group.joined_new_group"))
                     } else
                     {
                         // some error on joining group
-                        SnackBarToast("Error joining the Group")
+                        SnackBarToast(i18n("ui.group.error_joining"))
                     }
                 }, colors = ButtonDefaults.buttonColors(), enabled = join_group_button_enabled) {
-                Text("join Group")
+                Text(i18n("ui.group.join_group"))
             }
         }
         Spacer(modifier = Modifier.height(30.dp))
@@ -150,14 +150,14 @@ fun AddGroup() = Box {
                         } catch (_: Exception)
                         {
                         }
-                        SnackBarToast("You joined the Public Information Group")
+                        SnackBarToast(i18n("ui.group.joined_the"))
                     } else
                     {
                         // some error on joining group
-                        SnackBarToast("Error joining the Public Information Group")
+                        SnackBarToast(i18n("ui.group.error_joining_public"))
                     }
                 }, colors = ButtonDefaults.buttonColors()) {
-                Text("join the Public Information Group")
+                Text(i18n("ui.group.join_public"))
             }
         }
         Spacer(modifier = Modifier.height(30.dp))
@@ -165,10 +165,10 @@ fun AddGroup() = Box {
             Spacer(modifier = Modifier.width(35.dp))
             Text(fontWeight = FontWeight.ExtraBold,
                 fontSize = 16.sp,
-                text ="Important Notice: ")
+                text =i18n("ui.group.important_notice"))
             Text(fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
-                text ="Joining a Tox Public group for the first time can take a long time, even up to 30 minutes")
+                text =i18n("ui.group.Joining_minutes"))
         }
         Spacer(modifier = Modifier.height(30.dp))
         Row {
@@ -185,7 +185,7 @@ fun AddGroup() = Box {
                     capitalization = KeyboardCapitalization.None,
                     autoCorrect = false,
                 ), value = new_public_group_name, placeholder = {
-                    Text("enter Group Name", fontSize = 13.sp)
+                    Text(i18n("ui.group.enter_group_name"), fontSize = 13.sp)
                 }, onValueChange = {
                     new_public_group_name = it
                 })
@@ -235,14 +235,14 @@ fun AddGroup() = Box {
                         {
                         }
                         new_public_group_name = ""
-                        SnackBarToast("You created new public Group")
+                        SnackBarToast(i18n("ui.group.created_new_public"))
                     } else
                     {
                         // some error on joining group
                         SnackBarToast("Error creating new public Group")
                     }
                 }, colors = ButtonDefaults.buttonColors(), enabled = new_public_group_name.isNotEmpty()) {
-                Text("Create new public Group")
+                Text(i18n("ui.group.created_public"))
             }
         }
         Spacer(modifier = Modifier.height(30.dp))
