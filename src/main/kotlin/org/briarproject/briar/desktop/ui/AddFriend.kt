@@ -63,7 +63,7 @@ fun AddFriend() = Box {
         Button(
             onClick = {
                 // HINT: invite Friend
-                val friendnum: Long = tox_friend_add(add_friend_toxid, "please add me")
+                val friendnum: Long = tox_friend_add(add_friend_toxid, i18n("ui.addfriend.add_me"))
                 if (friendnum > -1)
                 {
                     if (friendnum != UINT32_MAX_JAVA)
@@ -82,7 +82,7 @@ fun AddFriend() = Box {
                             catch(_: java.lang.Exception)
                             {
                             }
-                            contactstore.add(item = ContactItem(name = "new Friend #" + friendnum,
+                            contactstore.add(item = ContactItem(name = i18n("ui.addfriend.new_friend") + friendnum,
                                 isConnected = 0,
                                 pubkey = friend_pubkey!!,
                                 push_url = "",
@@ -90,7 +90,7 @@ fun AddFriend() = Box {
                         } catch (_: Exception)
                         {
                         }
-                        SnackBarToast("You have invited a new Friend")
+                        SnackBarToast(i18n("ui.addfriend.invited_Friend"))
                     } else
                     {
                         // some error on adding friend
