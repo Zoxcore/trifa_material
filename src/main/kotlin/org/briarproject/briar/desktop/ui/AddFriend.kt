@@ -47,7 +47,7 @@ fun AddFriend() = Box {
                 capitalization = KeyboardCapitalization.None,
                 autoCorrect = false,
             ), value = add_friend_toxid, placeholder = {
-                Text("enter Friend's ToxID ...", fontSize = 13.sp)
+                Text(i18n("ui.addfriend.add_friend_toxid"), fontSize = 13.sp)
             }, onValueChange = {
                 add_friend_toxid = it
                 if (it.length == (TOX_ADDRESS_SIZE * 2))
@@ -100,7 +100,7 @@ fun AddFriend() = Box {
                     // some error on adding friend
                 }
             }, colors = ButtonDefaults.buttonColors(), enabled = add_button_enabled) {
-            Text("invite Friend")
+            Text(i18n("ui.addfriend.invite_friend"))
         }
     }
 }
