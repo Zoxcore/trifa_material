@@ -757,7 +757,7 @@ jobs:
                printf 'ls -ratl\n' >> /tmp/a.sh
                printf 'cat /home/runner/work/trifa_material/trifa_material/toxid.txt;echo\n' >> /tmp/a.sh
                printf 'cd /home/runner/work/trifa_material/trifa_material/java_tox_tester-ipv6only/\n' >> /tmp/a.sh
-               printf './do_run.sh $(cat /home/runner/work/trifa_material/trifa_material/toxid.txt) >/dev/null 2>/dev/null &\n' >> /tmp/a.sh
+               printf './do_run.sh $(cat /home/runner/work/trifa_material/trifa_material/toxid.txt) >/home/runner/work/trifa_material/trifa_material/tester.log 2>&1 &\n' >> /tmp/a.sh
                printf 'sleep 220\n' >> /tmp/a.sh
                printf 'xdotool mousemove --sync 214 295 click 1\n' >> /tmp/a.sh
                printf 'sleep 4\n' >> /tmp/a.sh
@@ -798,6 +798,12 @@ jobs:
                ls -al
                ./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64/ assemble
                xvfb-run --server-args="-screen 0 1024x768x24" --auto-servernum /tmp/a.sh
+               echo "++++++++++++++++++"
+               echo "++++++++++++++++++"
+               cat /home/runner/work/trifa_material/trifa_material/trifa.log||echo "NO ERR"
+               echo "++++++++++++++++++"
+               echo "++++++++++++++++++"
+               cat /home/runner/work/trifa_material/trifa_material/tester.log||echo "NO ERR"
                cp -av /tmp/screenshot-linux.png screenshot-linux.png
 
         - name: upload-screenshots
