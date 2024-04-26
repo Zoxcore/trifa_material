@@ -45,6 +45,7 @@ import groupstore
 import org.briarproject.briar.desktop.contact.GroupItem
 import java.nio.ByteBuffer
 import java.util.*
+import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 
 @Composable
 @Preview
