@@ -84,6 +84,7 @@ import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import savepathstore
 import update_bootstrap_nodes_from_internet
 import java.io.File
+import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 
 @Composable
 fun SettingDetails()
