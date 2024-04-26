@@ -509,8 +509,10 @@ jobs:
            cd /Users/runner/work/trifa_material/trifa_material/java_tox_tester-master/
            ./do_compile.sh
            cat /Users/runner/work/trifa_material/trifa_material/trifa.log
-           ./do_run.sh $(cat /Users/runner/work/trifa_material/trifa_material/toxid.txt) >/dev/null 2>/dev/null &
+           ./do_run.sh $(cat /Users/runner/work/trifa_material/trifa_material/toxid.txt) >/Users/runner/work/trifa_material/trifa_material/tester.log 2>&1 &
            sleep 68
+           ls -al /Users/runner/work/trifa_material/trifa_material/
+           cat /Users/runner/work/trifa_material/trifa_material/trifa.log
            cliclick -m verbose c:195,347
            sleep 1
            cliclick -m verbose c:745,645
@@ -521,6 +523,7 @@ jobs:
            sendkeys -a "TRIfA" -c ":smile"
            sleep 90
            sleep 120
+           cat /Users/runner/work/trifa_material/trifa_material/tester.log
            pwd
            ls -al /Users/runner/
            cp -v /Users/runner/screenshot-macos.png /Users/runner/work/trifa_material/trifa_material/screenshot-macos.png
