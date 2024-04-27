@@ -33,6 +33,7 @@ import com.zoffcc.applications.trifa.ToxVars.TOX_ADDRESS_SIZE
 import contactstore
 import org.briarproject.briar.desktop.contact.ContactItem
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
+
 @Composable
 fun AddFriend() = Box {
     var add_friend_toxid by remember { mutableStateOf("") }
