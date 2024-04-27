@@ -169,7 +169,7 @@ fun AddGroup() = Box {
                 text =i18n("ui.group.important_notice"))
             Text(fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
-                text =i18n("ui.group.Joining_minutes"))
+                text =i18n("ui.group.joining_minutes"))
         }
         Spacer(modifier = Modifier.height(30.dp))
         Row {
