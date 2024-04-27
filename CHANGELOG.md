@@ -1,5 +1,30 @@
 # Changelog
 
+## [v1.0.35](https://github.com/Zoxcore/trifa_material/tree/v1.0.35) (2024-04-27)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.34...v1.0.35)
+
+**Merged pull requests:**
+
+- tweak NGC\_PEER\_LUMINANCE\_THRESHOLD\_FOR\_SHADOW for showing shadow under peer name in groups when the peername color is very bright [\#236](https://github.com/Zoxcore/trifa_material/pull/236) ([zoff99](https://github.com/zoff99))
+- update to compose.version 1.6.10-beta02 [\#235](https://github.com/Zoxcore/trifa_material/pull/235) ([zoff99](https://github.com/zoff99))
+- Bump com.sksamuel.scrimage:scrimage from 4.1.2 to 4.1.3 [\#234](https://github.com/Zoxcore/trifa_material/pull/234) ([zoff99](https://github.com/zoff99))
+- show more debug output for linux test build [\#233](https://github.com/Zoxcore/trifa_material/pull/233) ([zoff99](https://github.com/zoff99))
+- also fixup macos 12 screenshot. it seems sometimes github uses a different os image with higher resolution. [\#232](https://github.com/Zoxcore/trifa_material/pull/232) ([zoff99](https://github.com/zoff99))
+- fixes for macos CI runs [\#231](https://github.com/Zoxcore/trifa_material/pull/231) ([zoff99](https://github.com/zoff99))
+- macos 14 test and screenshot [\#230](https://github.com/Zoxcore/trifa_material/pull/230) ([zoff99](https://github.com/zoff99))
+- update JNI libs [\#229](https://github.com/Zoxcore/trifa_material/pull/229) ([zoff99](https://github.com/zoff99))
+- enable MultiThread for webp image encoding, it may not work yet: https://github.com/sksamuel/scrimage/issues/289 [\#228](https://github.com/Zoxcore/trifa_material/pull/228) ([zoff99](https://github.com/zoff99))
+- Bump com.sksamuel.scrimage:scrimage-core from 4.1.1 to 4.1.2 [\#226](https://github.com/Zoxcore/trifa_material/pull/226) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump com.sksamuel.scrimage:scrimage-webp from 4.1.1 to 4.1.2 [\#225](https://github.com/Zoxcore/trifa_material/pull/225) ([dependabot[bot]](https://github.com/apps/dependabot))
+- wait longer for the toxid file to be written [\#224](https://github.com/Zoxcore/trifa_material/pull/224) ([zoff99](https://github.com/zoff99))
+- macos arm64 github CI [\#223](https://github.com/Zoxcore/trifa_material/pull/223) ([zoff99](https://github.com/zoff99))
+- Revert "run CI tests on macos-latest" [\#222](https://github.com/Zoxcore/trifa_material/pull/222) ([zoff99](https://github.com/zoff99))
+- sqlite needs "\_" char for LIKE queries to be escaped [\#221](https://github.com/Zoxcore/trifa_material/pull/221) ([zoff99](https://github.com/zoff99))
+- search in groupmessages and messages [\#220](https://github.com/Zoxcore/trifa_material/pull/220) ([zoff99](https://github.com/zoff99))
+- sorma: add more helper functions [\#219](https://github.com/Zoxcore/trifa_material/pull/219) ([zoff99](https://github.com/zoff99))
+- updates [\#218](https://github.com/Zoxcore/trifa_material/pull/218) ([zoff99](https://github.com/zoff99))
+
 ## [v1.0.34](https://github.com/Zoxcore/trifa_material/tree/v1.0.34) (2024-04-21)
 
 [Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.33...v1.0.34)
