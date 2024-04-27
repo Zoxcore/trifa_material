@@ -83,7 +83,7 @@ fun AddFriend() = Box {
                             catch(_: java.lang.Exception)
                             {
                             }
-                            contactstore.add(item = ContactItem(name = i18n("ui.addfriend.new_friend") + friendnum,
+                            contactstore.add(item = ContactItem(name = i18n("ui.addfriend.new_friend") + " #" + friendnum,
                                 isConnected = 0,
                                 pubkey = friend_pubkey!!,
                                 push_url = "",

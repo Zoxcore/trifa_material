@@ -97,7 +97,7 @@ fun AddGroup() = Box {
                         try
                         {
                             val new_privacy_state = MainActivity.tox_group_get_privacy_state(new_group_num)
-                            val group_name = i18n("ui.group.group") + new_group_num
+                            val group_name = i18n("ui.group.group") + " #" + new_group_num
                             val group_num_peers = MainActivity.tox_group_peer_count(new_group_num)
                             groupstore.add(item = GroupItem(numPeers = group_num_peers.toInt(),
                                 name = group_name!!, isConnected = 0,
@@ -166,7 +166,7 @@ fun AddGroup() = Box {
             Spacer(modifier = Modifier.width(35.dp))
             Text(fontWeight = FontWeight.ExtraBold,
                 fontSize = 16.sp,
-                text =i18n("ui.group.important_notice"))
+                text =i18n("ui.group.important_notice") + " ")
             Text(fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
                 text =i18n("ui.group.joining_minutes"))
