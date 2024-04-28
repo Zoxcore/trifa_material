@@ -131,6 +131,8 @@ import com.zoffcc.applications.trifa.SqliteEscapeLikeString
 import com.zoffcc.applications.trifa.HelperGeneric.PubkeyShort
 import com.zoffcc.applications.trifa.HelperGeneric.ngc_video_frame_last_incoming_ts
 import com.zoffcc.applications.trifa.HelperGroup
+import com.zoffcc.applications.trifa.HelperGroup.group_get_last_know_peername
+import com.zoffcc.applications.trifa.HelperGroup.update_group_peername_in_all_missing_messages
 import com.zoffcc.applications.trifa.HelperNotification.init_system_tray
 import com.zoffcc.applications.trifa.HelperNotification.set_resouces_dir
 import com.zoffcc.applications.trifa.JPictureBox
@@ -1471,6 +1473,18 @@ fun load_groupmessages(selectedGroupId: String?)
                             }
                             catch (_: Exception)
                             {
+                            }
+                        }
+
+                        if (it.tox_group_peername.isNullOrEmpty())
+                        {
+                            // we still do not have a peername for this message, try to get it from previous messages in this group
+                            val last_know_peername = group_get_last_know_peername(it.group_identifier, it.tox_group_peer_pubkey)
+                            if (!last_know_peername.isNullOrEmpty())
+                            {
+                                it.tox_group_peername = last_know_peername
+                                // Log.i(TAG, "load_groupmessages:msg id of missing name:" + it.id)
+                                update_group_peername_in_all_missing_messages(it.group_identifier, it.tox_group_peer_pubkey, it.tox_group_peername)
                             }
                         }
 
