@@ -11,11 +11,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Random;
 
-import static com.zoffcc.applications.ffmpegav.AVActivity.bytesToHex;
 import static com.zoffcc.applications.trifa.HelperFiletransfer.get_incoming_filetransfer_local_filename;
 import static com.zoffcc.applications.trifa.HelperFiletransfer.save_group_incoming_file;
 import static com.zoffcc.applications.trifa.HelperGeneric.getHexArray;
-import static com.zoffcc.applications.trifa.HelperGeneric.long_date_time_format;
 import static com.zoffcc.applications.trifa.MainActivity.*;
 import static com.zoffcc.applications.trifa.MainActivity.tox_group_peer_get_name;
 import static com.zoffcc.applications.trifa.TRIFAGlobals.*;
@@ -1380,11 +1378,72 @@ public class HelperGroup {
         }
     }
 
+    public static void update_group_peername_in_all_missing_messages(final String group_identifier,
+                                                                     final String peer_pubkey, final String peer_name)
+    {
+        try
+        {
+            TrifaToxService.Companion.getOrma().updateGroupMessage()
+                    .group_identifierEq(group_identifier)
+                    .tox_group_peer_pubkeyEq(peer_pubkey)
+                    .tox_group_peernameEq("")
+                    .tox_group_peername(peer_name)
+                    .execute();
+        }
+        catch (Exception e)
+        {
+            // e.printStackTrace();
+        }
+
+        try
+        {
+            TrifaToxService.Companion.getOrma().updateGroupMessage()
+                    .group_identifierEq(group_identifier)
+                    .tox_group_peer_pubkeyEq(peer_pubkey)
+                    .tox_group_peernameIsNull()
+                    .tox_group_peername(peer_name)
+                    .execute();
+        }
+        catch (Exception e)
+        {
+            // e.printStackTrace();
+        }
+    }
+
+    public static String group_get_last_know_peername(final String group_identifier, final String peer_pubkey)
+    {
+        try
+        {
+            final String last_know_peername = TrifaToxService.Companion.getOrma()
+                    .selectFromGroupMessage()
+                    .group_identifierEq(group_identifier)
+                    .tox_group_peer_pubkeyEq(peer_pubkey)
+                    .tox_group_peernameNotEq("")
+                    .orderBySent_timestampAsc()
+                    .limit(1).toList()
+                    .get(0)
+                    .tox_group_peername;
+            Log.i(TAG, "last_know_peername=" + last_know_peername);
+            return last_know_peername;
+        }
+        catch (Exception e)
+        {
+            // e.printStackTrace();
+        }
+        return null;
+    }
+
     static void group_message_add_from_sync(final String group_identifier, final String syncer_pubkey,
                                             long peer_number2, String peer_pubkey, int a_TOX_MESSAGE_TYPE,
                                             String message, long length, long sent_timestamp_in_ms,
                                             String message_id, int sync_type, final String peer_name)
     {
+        // HINT: if peername is null or empty, lets try to get the last know peername from this groups messages
+        if ((peer_name == null) || (peer_name.length() < 1))
+        {
+             final String last_know_peername = group_get_last_know_peername(group_identifier, peer_pubkey);
+        }
+
         // Log.i(TAG,
         //       "group_message_add_from_sync:cf_num=" + group_identifier + " pnum=" + peer_number2 + " msg=" + message);
 
