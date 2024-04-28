@@ -1014,6 +1014,18 @@ public class GroupMessage
         return this;
     }
 
+    public GroupMessage tox_group_peernameIsNull()
+    {
+        this.sql_where = this.sql_where + " and tox_group_peername IS NULL ";
+        return this;
+    }
+
+    public GroupMessage tox_group_peernameIsNotNull()
+    {
+        this.sql_where = this.sql_where + " and tox_group_peername IS NOT NULL ";
+        return this;
+    }
+
     public GroupMessage tox_group_peernameEq(String tox_group_peername)
     {
         this.sql_where = this.sql_where + " and tox_group_peername=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
