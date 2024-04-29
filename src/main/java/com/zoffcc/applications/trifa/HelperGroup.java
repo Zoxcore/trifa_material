@@ -1419,7 +1419,7 @@ public class HelperGroup {
                     .group_identifierEq(group_identifier)
                     .tox_group_peer_pubkeyEq(peer_pubkey)
                     .tox_group_peernameNotEq("")
-                    .orderBySent_timestampAsc()
+                    .orderBySent_timestampDesc()
                     .limit(1).toList()
                     .get(0)
                     .tox_group_peername;
