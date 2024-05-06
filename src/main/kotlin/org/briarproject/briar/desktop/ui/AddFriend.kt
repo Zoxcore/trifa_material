@@ -32,6 +32,7 @@ import com.zoffcc.applications.trifa.TRIFAGlobals.UINT32_MAX_JAVA
 import com.zoffcc.applications.trifa.ToxVars.TOX_ADDRESS_SIZE
 import contactstore
 import org.briarproject.briar.desktop.contact.ContactItem
+import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 
 @Composable
 fun AddFriend() = Box {
@@ -47,7 +48,7 @@ fun AddFriend() = Box {
                 capitalization = KeyboardCapitalization.None,
                 autoCorrect = false,
             ), value = add_friend_toxid, placeholder = {
-                Text("enter Friend's ToxID ...", fontSize = 13.sp)
+                Text(i18n("ui.addfriend.add_friend_toxid"), fontSize = 13.sp)
             }, onValueChange = {
                 add_friend_toxid = it
                 if (it.length == (TOX_ADDRESS_SIZE * 2))
@@ -63,7 +64,7 @@ fun AddFriend() = Box {
         Button(
             onClick = {
                 // HINT: invite Friend
-                val friendnum: Long = tox_friend_add(add_friend_toxid, "please add me")
+                val friendnum: Long = tox_friend_add(add_friend_toxid, i18n("ui.addfriend.add_me"))
                 if (friendnum > -1)
                 {
                     if (friendnum != UINT32_MAX_JAVA)
@@ -82,7 +83,7 @@ fun AddFriend() = Box {
                             catch(_: java.lang.Exception)
                             {
                             }
-                            contactstore.add(item = ContactItem(name = "new Friend #" + friendnum,
+                            contactstore.add(item = ContactItem(name = i18n("ui.addfriend.new_friend") + " #" + friendnum,
                                 isConnected = 0,
                                 pubkey = friend_pubkey!!,
                                 push_url = "",
@@ -90,7 +91,7 @@ fun AddFriend() = Box {
                         } catch (_: Exception)
                         {
                         }
-                        SnackBarToast("You have invited a new Friend")
+                        SnackBarToast(i18n("ui.addfriend.invited_Friend"))
                     } else
                     {
                         // some error on adding friend
@@ -100,7 +101,7 @@ fun AddFriend() = Box {
                     // some error on adding friend
                 }
             }, colors = ButtonDefaults.buttonColors(), enabled = add_button_enabled) {
-            Text("invite Friend")
+            Text(i18n("ui.addfriend.invite_friend"))
         }
     }
 }
