@@ -380,7 +380,7 @@ fun App()
                                             }
                                             Log.i(TAG, "is started now")
                                             tox_running_state = tox_running_state_wrapper
-                                            start_button_text = "stop"
+                                            start_button_text = i18n("ui.start_button.stop")
                                         }.start()
                                         TrifaToxService.stop_me = false
                                         savepathstore.createPathDirectories()

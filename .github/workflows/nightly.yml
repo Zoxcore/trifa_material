@@ -730,6 +730,58 @@ jobs:
                sudo apt-get install lwm fvwm
                sudo apt-get install xvfb
 
+        - name: show installed font packages
+          run: |
+               dpkg -l|grep font
+
+        - name: install fonts
+          run: |
+               sudo apt-get install xfonts-utils xfonts-scalable xfonts-encodings xfonts-base xfonts-75dpi xfonts-100dpi
+               sudo apt-get install fonts-noto-color-emoji
+               sudo apt-get install fonts-dejavu fonts-dejavu-core fonts-freefont-ttf
+               sudo apt-get install xfonts-wqy \
+               xfonts-efont-unicode xfonts-efont-unicode-ib xfonts-intl-chinese xfonts-intl-chinese-big \
+               xfonts-intl-asian xfonts-intl-arabic xfonts-intl-european xfonts-unifont \
+                fonts-dejavu-core \
+                fonts-dejavu-extra \
+                fonts-droid-fallback \
+                fonts-guru \
+                fonts-guru-extra \
+                fonts-horai-umefont \
+                fonts-kacst \
+                fonts-kacst-one \
+                fonts-khmeros-core \
+                fonts-lao \
+                fonts-liberation \
+                fonts-lklug-sinhala \
+                fonts-lohit-guru \
+                fonts-nanum \
+                fonts-noto-cjk \
+                fonts-opensymbol \
+                fonts-roboto \
+                fonts-roboto-hinted \
+                fonts-sil-abyssinica \
+                fonts-sil-padauk \
+                fonts-stix \
+                fonts-symbola \
+                fonts-takao-pgothic \
+                fonts-thai-tlwg \
+                fonts-tibetan-machine \
+                fonts-tlwg-garuda \
+                fonts-tlwg-kinnari \
+                fonts-tlwg-laksaman \
+                fonts-tlwg-loma \
+                fonts-tlwg-mono \
+                fonts-tlwg-norasi \
+                fonts-tlwg-purisa \
+                fonts-tlwg-sawasdee \
+                fonts-tlwg-typewriter \
+                fonts-tlwg-typist \
+                fonts-tlwg-typo \
+                fonts-tlwg-umpush \
+                fonts-tlwg-waree \
+                fonts-unfonts-core
+
         # use the ipv6-boot-only version of the tox tester
         - name: download tester
           shell: bash
@@ -744,6 +796,7 @@ jobs:
           run: |
                printf '#!/bin/bash\n' > /tmp/a.sh
                printf 'xclock -digital -geometry 300x45+100+688 &\n' >> /tmp/a.sh
+               printf 'export LC_ALL=zh_CN.utf8\n' >> /tmp/a.sh
                printf '/home/runner/work/trifa_material/trifa_material/gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64/ run &\n' >> /tmp/a.sh
                printf 'sleep 20\n' >> /tmp/a.sh
                printf 'xwininfo -id $(xdotool getactivewindow)\n' >> /tmp/a.sh
@@ -792,10 +845,29 @@ jobs:
                tools/patch_src_disable_ipv4_boots.sh
                git diff||echo "NO ERR"
 
+        - name: generate locale
+          run: |
+               cat /etc/locale.gen
+               cat /etc/locale.gen|grep -i zn||echo "NO ERR"
+               echo "zh_CN.UTF-8 UTF-8" |sudo tee -a /etc/locale.gen
+               sudo locale-gen
+
+        - name: generate locale
+          run: |
+               sudo localectl set-locale LANG="zh_CN.UTF-8"
+               export LANG="zh_CN.UTF-8"
+               sudo update-locale
+               locale -a
+               locale
+               locale -c -k LC_NUMERIC
+               sudo update-locale LANG="zh_CN.UTF-8"
+               localectl status
+
         - name: startup-app
           run: |
                pwd
                ls -al
+               export LC_ALL=zh_CN.utf8
                ./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64/ assemble
                xvfb-run --server-args="-screen 0 1024x768x24" --auto-servernum /tmp/a.sh
                echo "++++++++++++++++++"
