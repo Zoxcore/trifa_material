@@ -134,7 +134,7 @@ private fun button_settings()
                     show_containing_dir_in_explorer(MainActivity.PREF__tox_savefile_dir + File.separator + ".")
                 })
             {
-                Text(i18n("ui.setting.open_data"）)
+                Text(i18n("ui.setting.open_data"))
             }
         }
     }
