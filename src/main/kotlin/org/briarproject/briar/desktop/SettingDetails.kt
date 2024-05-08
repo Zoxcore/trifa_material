@@ -134,7 +134,7 @@ private fun button_settings()
                     show_containing_dir_in_explorer(MainActivity.PREF__tox_savefile_dir + File.separator + ".")
                 })
             {
-                Text("Open data directory")
+                Text(i18n("ui.setting.open_data"）)
             }
         }
     }
@@ -162,11 +162,11 @@ private fun button_settings()
                     loading_nodes = true
                     update_bootstrap_nodes_from_internet()
                     loading_nodes = false
-                    SnackBarToast("Bootstrap nodes updated from internet")
+                    SnackBarToast(i18n("ui.setting.nodes_updated"))
                 }
             })
         {
-            Text("update bootstrap nodes from internet")
+            Text(i18n("ui.setting.update_bootstrap"))
         }
     }
 }
@@ -191,7 +191,7 @@ private fun database_settings()
         {
             e.printStackTrace()
         }
-        DetailItem(label = i18n("Open files directly instead of showing the containing directory.\nthis can be potentially dangerous!"),
+        DetailItem(label = i18n("ui.setting.open_files"),
             description = (if (open_files_directly) i18n("enabled") else i18n("disabled"))) {
             Switch(
                 checked = open_files_directly,
@@ -220,7 +220,7 @@ private fun database_settings()
             e.printStackTrace()
         }
 
-        DetailItem(label = i18n("enable notifications"),
+        DetailItem(label = i18n("ui.setting.enable_notifications"),
             description = (if (notifications_active) i18n("enabled") else i18n("disabled"))) {
             Switch(
                 checked = notifications_active,
@@ -249,7 +249,7 @@ private fun database_settings()
             e.printStackTrace()
         }
 
-        DetailItem(label = i18n("send push notifications"),
+        DetailItem(label = i18n("ui.setting.push_notifications"),
             description = (if (push_notifications_active) i18n("enabled") else i18n("disabled"))) {
             Switch(
                 checked = push_notifications_active,
@@ -278,7 +278,7 @@ private fun database_settings()
             e.printStackTrace()
         }
 
-        DetailItem(label = i18n("Use ToxProxies of Friends"),
+        DetailItem(label = i18n("ui.setting.ToxProxies"),
             description = (if (use_other_toxproxies_active) i18n("enabled") else i18n("disabled"))) {
             Switch(
                 checked = use_other_toxproxies_active,
@@ -369,7 +369,7 @@ private fun tox_settings()
     {
     }
 
-    DetailItem(label = i18n("UDP mode"),
+    DetailItem(label = i18n("ui.setting.udp_mode"),
         description = (if (tox_udp_mode) i18n("UDP mode enabled") else i18n("UDP mode disabled"))) {
         Switch(
             checked = tox_udp_mode,
@@ -391,7 +391,7 @@ private fun tox_settings()
     } catch (_: Exception)
     {
     }
-    DetailItem(label = i18n("LAN discovery"),
+    DetailItem(label = i18n("ui.setting.lan_discovery"),
         description =
         (if (tox_landiscovery_mode) i18n("Local LAN discovery enabled") else i18n("Local LAN discovery disabled"))) {
         Switch(
@@ -436,7 +436,7 @@ private fun tox_settings()
     } catch (_: Exception)
     {
     }
-    DetailItem(label = i18n("use Tor proxy [on localhost port: 9050]"),
+    DetailItem(label = i18n("ui.setting.tor_proxy"),
         description = (if (tox_tor_proxy) i18n("enabled") else i18n("disabled"))) {
         Switch(
             checked = tox_tor_proxy,
@@ -506,14 +506,14 @@ private fun set_own_name()
                 if (tox_self_set_name(tox_own_name) == 1)
                 {
                     HelperGeneric.update_savedata_file_wrapper()
-                    SnackBarToast("You have changed your own name")
+                    SnackBarToast(i18n("ui.setting.changed_name"))
                 } else
                 {
-                    SnackBarToast("Error while trying to set your own name")
+                    SnackBarToast(i18n("ui.setting.error_while_trying"))
                 }
             })
         {
-            Text("Update your Name")
+            Text(i18n("ui.setting.update_name"))
         }
     }
     // ---- change own name for one-on-one chats ----
@@ -551,7 +551,7 @@ private fun own_relay_settings()
                 }
             })
         {
-            Text("Add or Update your own Relay (ToxProxy)")
+            Text(i18n("ui.setting.add_toxproxy))
         }
     }
     // ---- change own name for one-on-one chats ----
