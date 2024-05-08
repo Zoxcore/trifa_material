@@ -278,7 +278,7 @@ private fun database_settings()
             e.printStackTrace()
         }
 
-        DetailItem(label = i18n("ui.setting.ToxProxies"),
+        DetailItem(label = i18n("ui.setting.toxproxies"),
             description = (if (use_other_toxproxies_active) i18n("enabled") else i18n("disabled"))) {
             Switch(
                 checked = use_other_toxproxies_active,
@@ -551,7 +551,7 @@ private fun own_relay_settings()
                 }
             })
         {
-            Text(i18n("ui.setting.add_toxproxy))
+            Text(i18n("ui.setting.add_toxproxy"))
         }
     }
     // ---- change own name for one-on-one chats ----
