@@ -55,9 +55,11 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.VideoLabel
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -97,6 +99,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -1152,7 +1155,7 @@ fun App()
                         }
                     }
                     UIScaleItem(
-                        label = i18n("ui.ui_scale"),
+                        label = i18n("ui.ui_textscale"),
                         description = "${i18n("ui.current_value")}: "
                                 + " " + ui_scale + ", " + i18n("ui.drag_slider_to_change")) {
                         Row(horizontalArrangement = Arrangement.spacedBy(2.dp),
@@ -1162,7 +1165,7 @@ fun App()
                             Slider(value = ui_scale, onValueChange = {
                                 ui_scale = it
                                 globalstore.updateUiScale(it)
-                                Log.i(TAG, "density: $ui_scale")
+                                Log.i(TAG, "updateUiScale:density: $ui_scale")
                             }, onValueChangeFinished = { }, valueRange = 0.6f..3f, steps = 6, // todo: without setting the width explicitly,
                                 //  the slider takes up the whole remaining space
                                 modifier = Modifier.width(150.dp))
@@ -1955,6 +1958,8 @@ object AboutIcon : Painter() {
 @Composable
 private fun MainAppStart()
 {
+    globalstore.setDefaultDensity(LocalDensity.current.density)
+
     var use_custom_font_with_color_emoji = true
     try
     {
@@ -2053,6 +2058,8 @@ private fun MainAppStart()
     // ************* DEBUG ONLY *************
     // ************* DEBUG ONLY *************
     // ************* DEBUG ONLY *************
+
+    globalstore.loadUiDensity()
     val appIcon = painterResource("icon-linux.png")
     if (showIntroScreen)
     {
@@ -2094,10 +2101,10 @@ private fun MainAppStart()
                         singleLine = true,
                         textStyle = TextStyle(fontSize = 18.sp),
                         colors = TextFieldDefaults.textFieldColors(backgroundColor = Color(ChatColorsConfig.LIGHT__TEXTFIELD_BGCOLOR)),
-                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.None,autoCorrect = false),
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.None, autoCorrect = false),
                         value = inputTextToxSelfName,
-                        placeholder = {   Text("") },
-                        onValueChange = {inputTextToxSelfName = it})
+                        placeholder = { Text("") },
+                        onValueChange = { inputTextToxSelfName = it })
 
                     if (isAskingToClose)
                     {
@@ -2147,20 +2154,23 @@ private fun MainAppStart()
             try
             {
                 win_title_addon = BuildConfig.APP_VERSION + " (" + BuildConfig.GIT_COMMIT_HASH.take(7) + ")"
+            } catch (_: java.lang.Exception)
+            {
             }
-            catch(_: java.lang.Exception)
-            {}
             Window(onCloseRequest = { isAskingToClose = true },
                 title = "TRIfA - " + win_title_addon,
                 icon = appIcon, state = state,
                 focusable = true,
                 onKeyEvent = {
-                    when (it.key) {
-                        Key.F11 -> {
+                    when (it.key)
+                    {
+                        Key.F11 ->
+                        {
                             state.placement = WindowPlacement.Fullscreen
                             true
                         }
-                        Key.Escape -> {
+                        Key.Escape ->
+                        {
                             state.placement = WindowPlacement.Floating
                             true
                         }
@@ -2214,8 +2224,16 @@ private fun MainAppStart()
                     snapshotFlow { state.size }.onEach(::onWindowResize).launchIn(this)
                     snapshotFlow { state.position }.filter { it.isSpecified }.onEach(::onWindowRelocate).launchIn(this)
                 }
-                App()
+                // var ui_density by remember { mutableStateOf(globalstore.getUiDensity()) }
+                // val manual_recompose = remember { mutableStateOf(globalstore.state.ui_density) }
+                CompositionLocalProvider(
+                    LocalDensity provides Density(globalstore.state.ui_density)
+                )
+                {
+                    App()
+                }
             }
+
         }
         // ----------- main app screen -----------
         // ----------- main app screen -----------
