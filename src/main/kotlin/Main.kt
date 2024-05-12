@@ -55,6 +55,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.VideoLabel
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -97,6 +98,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -1162,7 +1164,7 @@ fun App()
                             Slider(value = ui_scale, onValueChange = {
                                 ui_scale = it
                                 globalstore.updateUiScale(it)
-                                Log.i(TAG, "density: $ui_scale")
+                                Log.i(TAG, "updateUiScale:density: $ui_scale")
                             }, onValueChangeFinished = { }, valueRange = 0.6f..3f, steps = 6, // todo: without setting the width explicitly,
                                 //  the slider takes up the whole remaining space
                                 modifier = Modifier.width(150.dp))
@@ -1955,6 +1957,8 @@ object AboutIcon : Painter() {
 @Composable
 private fun MainAppStart()
 {
+    globalstore.setDefaultDensity(LocalDensity.current.density)
+
     var use_custom_font_with_color_emoji = true
     try
     {
@@ -2094,10 +2098,10 @@ private fun MainAppStart()
                         singleLine = true,
                         textStyle = TextStyle(fontSize = 18.sp),
                         colors = TextFieldDefaults.textFieldColors(backgroundColor = Color(ChatColorsConfig.LIGHT__TEXTFIELD_BGCOLOR)),
-                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.None,autoCorrect = false),
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.None, autoCorrect = false),
                         value = inputTextToxSelfName,
-                        placeholder = {   Text("") },
-                        onValueChange = {inputTextToxSelfName = it})
+                        placeholder = { Text("") },
+                        onValueChange = { inputTextToxSelfName = it })
 
                     if (isAskingToClose)
                     {
@@ -2150,72 +2154,82 @@ private fun MainAppStart()
             }
             catch(_: java.lang.Exception)
             {}
+            globalstore.loadUiDensity()
             Window(onCloseRequest = { isAskingToClose = true },
-                title = "TRIfA - " + win_title_addon,
-                icon = appIcon, state = state,
-                focusable = true,
-                onKeyEvent = {
-                    when (it.key) {
-                        Key.F11 -> {
-                            state.placement = WindowPlacement.Fullscreen
-                            true
-                        }
-                        Key.Escape -> {
-                            state.placement = WindowPlacement.Floating
-                            true
-                        }
-                        else -> false
-                    }
-                }
-            ) {
-                @OptIn(ExperimentalComposeUiApi::class)
-                window.exceptionHandler = WindowExceptionHandler { e -> println("Exception in Compose: $e") }
-                if (isAskingToClose)
-                {
-                    Dialog(
-                        onCloseRequest = { isAskingToClose = false },
-                        title = i18n("ui.close_trifa"),
-                    ) {
-                        Button(onClick = {
-                            if (tox_running_state_wrapper == "running")
+                    title = "TRIfA - " + win_title_addon,
+                    icon = appIcon, state = state,
+                    focusable = true,
+                    onKeyEvent = {
+                        when (it.key)
+                        {
+                            Key.F11 ->
                             {
-                                set_tox_running_state("stopping ...")
-                                TrifaToxService.stop_me = true
-                                runBlocking(Dispatchers.Default) {
-                                    Log.i(TAG, "waiting to shutdown ...")
-                                    while (tox_running_state_wrapper != "stopped")
-                                    {
-                                        delay(100)
-                                        Log.i(TAG, "waiting ...")
-                                    }
-                                    Log.i(TAG, "closing application")
-                                    closing_application = true
-                                    isOpen = false
-                                }
-                            } else
-                            {
-                                Log.i(TAG, "closing application")
-                                isOpen = false
-                                closing_application = true
+                                state.placement = WindowPlacement.Fullscreen
+                                true
                             }
-                        }) {
-                            Text(i18n("ui.yes"))
+                            Key.Escape ->
+                            {
+                                state.placement = WindowPlacement.Floating
+                                true
+                            }
+                            else -> false
                         }
                     }
-                }
-                val windowInfo = LocalWindowInfo.current
-                LaunchedEffect(windowInfo) {
-                    snapshotFlow { windowInfo.isWindowFocused }.collect { onWindowFocused ->
-                        onWindowFocused(onWindowFocused)
+                ) {
+                    @OptIn(ExperimentalComposeUiApi::class)
+                    window.exceptionHandler = WindowExceptionHandler { e -> println("Exception in Compose: $e") }
+                    if (isAskingToClose)
+                    {
+                        Dialog(
+                            onCloseRequest = { isAskingToClose = false },
+                            title = i18n("ui.close_trifa"),
+                        ) {
+                            Button(onClick = {
+                                if (tox_running_state_wrapper == "running")
+                                {
+                                    set_tox_running_state("stopping ...")
+                                    TrifaToxService.stop_me = true
+                                    runBlocking(Dispatchers.Default) {
+                                        Log.i(TAG, "waiting to shutdown ...")
+                                        while (tox_running_state_wrapper != "stopped")
+                                        {
+                                            delay(100)
+                                            Log.i(TAG, "waiting ...")
+                                        }
+                                        Log.i(TAG, "closing application")
+                                        closing_application = true
+                                        isOpen = false
+                                    }
+                                } else
+                                {
+                                    Log.i(TAG, "closing application")
+                                    isOpen = false
+                                    closing_application = true
+                                }
+                            }) {
+                                Text(i18n("ui.yes"))
+                            }
+                        }
+                    }
+                    val windowInfo = LocalWindowInfo.current
+                    LaunchedEffect(windowInfo) {
+                        snapshotFlow { windowInfo.isWindowFocused }.collect { onWindowFocused ->
+                            onWindowFocused(onWindowFocused)
+                        }
+                    }
+                    LaunchedEffect(state) {
+                        snapshotFlow { state.isMinimized }.onEach(::onWindowMinimised).launchIn(this)
+                        snapshotFlow { state.size }.onEach(::onWindowResize).launchIn(this)
+                        snapshotFlow { state.position }.filter { it.isSpecified }.onEach(::onWindowRelocate).launchIn(this)
+                    }
+                    CompositionLocalProvider(
+                        LocalDensity provides Density(globalstore.state.ui_density)
+                    )
+                    {
+                        App()
                     }
                 }
-                LaunchedEffect(state) {
-                    snapshotFlow { state.isMinimized }.onEach(::onWindowMinimised).launchIn(this)
-                    snapshotFlow { state.size }.onEach(::onWindowResize).launchIn(this)
-                    snapshotFlow { state.position }.filter { it.isSpecified }.onEach(::onWindowRelocate).launchIn(this)
-                }
-                App()
-            }
+
         }
         // ----------- main app screen -----------
         // ----------- main app screen -----------
