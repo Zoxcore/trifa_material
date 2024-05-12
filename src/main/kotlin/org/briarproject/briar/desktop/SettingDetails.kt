@@ -20,6 +20,7 @@ package org.briarproject.briar.desktop
 
 import SETTINGS_HEADER_SIZE
 import SnackBarToast
+import UIScaleItem
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,11 +39,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Slider
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -51,8 +56,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
@@ -67,6 +74,7 @@ import com.zoffcc.applications.trifa.HelperOSFile.show_containing_dir_in_explore
 import com.zoffcc.applications.trifa.HelperRelay.add_or_update_own_relay
 import com.zoffcc.applications.trifa.HelperRelay.get_own_relay_pubkey
 import com.zoffcc.applications.trifa.HelperRelay.remove_own_relay_in_db
+import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__notifications_active
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__open_files_directly
@@ -74,6 +82,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__send_push_n
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__use_other_toxproxies
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_name
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_set_name
+import com.zoffcc.applications.trifa.TAG
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import global_prefs
 import globalstore
@@ -352,6 +361,38 @@ private fun general_settings()
         )
     }
     // ---- use custom font that has color emoji AND normal text ----
+
+
+
+
+    // ---- set global density to scale the whole UI ----
+    var ui_density by remember { mutableStateOf(globalstore.getUiDensity()) }
+    DetailItem(label = i18n("ui.ui_density"),
+        description = i18n("ui.ui_density")) {
+        UIScaleItem(
+            label = "" + "%06.2f".format(ui_density),
+            description = i18n("ui.drag_slider_to_change")) {
+            Row(horizontalArrangement = Arrangement.spacedBy(2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()) {
+                Icon(Icons.Default.FormatSize, null, Modifier.scale(0.7f))
+                Slider(value = ui_density, onValueChange = {
+                    ui_density = it
+                }, onValueChangeFinished = {
+                    globalstore.updateUiDensity(ui_density)
+                    Log.i(TAG, "updateUiDensity:ui_density:1: $ui_density")
+                }, valueRange = 0.25f..10f, steps = 64)
+                Icon(Icons.Default.FormatSize, null)
+            }
+        }
+    }
+
+    //Row(Modifier.wrapContentHeight().fillMaxWidth().padding(start = 15.dp)) {
+    //}
+    // ---- set global density to scale the whole UI ----
+
+
+
 }
 
 @Composable

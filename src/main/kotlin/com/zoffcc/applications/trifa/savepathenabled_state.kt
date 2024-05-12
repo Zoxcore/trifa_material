@@ -1,5 +1,6 @@
 package com.zoffcc.applications.trifa
 
+import androidx.compose.ui.platform.LocalDensity
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__database_files_dir
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__tox_savefile_dir
 import com.zoffcc.applications.trifa.TRIFAGlobals.VFS_FILE_DIR
@@ -23,6 +24,8 @@ data class globalstore_state(
     val firstRun: Boolean = false,
     val startupSelfname: String = "",
     val ui_scale: Float = 1.0f,
+    val ui_density: Float = 1.0f,
+    val default_density: Float = 1.0f,
     val toxRunning: Boolean = false,
     val ormaRunning: Boolean = false
 )
@@ -35,12 +38,16 @@ interface GlobalStore {
     fun updateFirstRun(value: Boolean)
     fun updateStartupSelfname(value: String)
     fun updateUiScale(value: Float)
+    fun updateUiDensity(value: Float)
+    fun setDefaultDensity(value: Float)
     fun isMinimized(): Boolean
     fun isFocused(): Boolean
     fun isFirstRun(): Boolean
     fun getStartupSelfname(): String
     fun loadUiScale()
     fun getUiScale(): Float
+    fun loadUiDensity()
+    fun getUiDensity(): Float
     fun setToxRunning(value: Boolean)
     fun getToxRunning(): Boolean
     fun setOrmaRunning(value: Boolean)
@@ -98,6 +105,25 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
             mutableStateFlow.value = state.copy(ui_scale = value)
         }
 
+        override fun setDefaultDensity(value: Float)
+        {
+            mutableStateFlow.value = state.copy(default_density = value)
+        }
+
+        override fun updateUiDensity(value: Float)
+        {
+            GlobalScope.launch {
+                try
+                {
+                    global_prefs.putFloat("main.ui_density_factor", value)
+                }
+                catch(_: Exception)
+                {
+                }
+            }
+            mutableStateFlow.value = state.copy(ui_density = value)
+        }
+
         override fun isMinimized(): Boolean
         {
             return state.mainwindow_minimized
@@ -147,7 +173,7 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
                 if (tmp != null)
                 {
                     value = tmp.toFloat()
-                    Log.i(TAG, "density: $value")
+                    Log.i(TAG, "loadUiScale:density: $value")
                 }
             } catch (_: Exception)
             {
@@ -155,9 +181,40 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
             mutableStateFlow.value = state.copy(ui_scale = value)
         }
 
+        override fun loadUiDensity()
+        {
+            var value = 1.0f
+            try
+            {
+                value = state.default_density
+                Log.i(TAG, "current default density = " + value)
+            }
+            catch(_: Exception)
+            {
+            }
+            try
+            {
+                val tmp = global_prefs.get("main.ui_density_factor", null)
+                if (tmp != null)
+                {
+                    value = tmp.toFloat()
+                    Log.i(TAG, "loadUiDensity:density: $value")
+                }
+            } catch (_: Exception)
+            {
+            }
+            Log.i(TAG, "loading density = " + value)
+            mutableStateFlow.value = state.copy(ui_density = value)
+        }
+
         override fun getUiScale(): Float
         {
             return state.ui_scale
+        }
+
+        override fun getUiDensity(): Float
+        {
+            return state.ui_density
         }
 
         override fun increase_unread_message_count()
