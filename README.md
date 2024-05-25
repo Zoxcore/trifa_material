@@ -129,7 +129,7 @@ https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf
 
 ```NotoSans-Regular.ttf```<br>
 ```NotoSans-SemiBold.ttf```<br>
-both downloaded from this repo https://github.com/openmaptiles/fonts/tree/master/noto-sans<br>
+both downloaded from https://fonts.google.com/noto/specimen/Noto+Sans<br>
 
 ```Noto-COLRv1_normal_chars_removed.ttf```<br>
 
