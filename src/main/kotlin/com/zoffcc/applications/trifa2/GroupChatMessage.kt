@@ -38,6 +38,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.luminance
@@ -150,9 +151,16 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                                 // println("NNN:" + groupmessage.user.name + "CCC:" +groupmessage.user.color.luminance())
                                 Text(
                                     text = groupmessage.user.name,
+                                    modifier = if (groupmessage.user.color.luminance() > NGC_PEER_LUMINANCE_THRESHOLD_FOR_SHADOW)
+                                        Modifier.background(Color(NGC_PEER_SHADOW_COLOR), RoundedCornerShape(30)).padding(3.dp)
+                                    else
+                                        Modifier,
                                     fontFamily = DefaultFont,
                                     style = MaterialTheme.typography.body1.copy(
-                                        shadow = if (groupmessage.user.color.luminance() > NGC_PEER_LUMINANCE_THRESHOLD_FOR_SHADOW) Shadow(Color.Black, offset = Offset.Zero, blurRadius = 2.4f) else Shadow(),
+                                        //shadow = if (groupmessage.user.color.luminance() > NGC_PEER_LUMINANCE_THRESHOLD_FOR_SHADOW)
+                                        //    Shadow(Color.Black, offset = Offset.Zero, blurRadius = 2.1f)
+                                        //else
+                                        //    Shadow() ,
                                         fontWeight = FontWeight.SemiBold,
                                         lineHeight = TextUnit.Unspecified,
                                         letterSpacing = 0.sp,
