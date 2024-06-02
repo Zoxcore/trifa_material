@@ -1,5 +1,38 @@
 # Changelog
 
+## [v1.0.37](https://github.com/Zoxcore/trifa_material/tree/v1.0.37) (2024-06-02)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.36...v1.0.37)
+
+**Merged pull requests:**
+
+- make bright peer name colors a bit more readable by applying a dark background [\#255](https://github.com/Zoxcore/trifa_material/pull/255) ([zoff99](https://github.com/zoff99))
+- Bump org.xerial:sqlite-jdbc from 3.45.3.0 to 3.46.0.0 [\#254](https://github.com/Zoxcore/trifa_material/pull/254) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fonts [\#251](https://github.com/Zoxcore/trifa_material/pull/251) ([zoff99](https://github.com/zoff99))
+- update JNI toxcore libs [\#250](https://github.com/Zoxcore/trifa_material/pull/250) ([zoff99](https://github.com/zoff99))
+- update dependencies [\#249](https://github.com/Zoxcore/trifa_material/pull/249) ([zoff99](https://github.com/zoff99))
+- Bump com.google.code.gson:gson from 2.10.1 to 2.11.0 [\#248](https://github.com/Zoxcore/trifa_material/pull/248) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump com.vanniktech:emoji-ios from 0.18.0 to 0.20.0 [\#247](https://github.com/Zoxcore/trifa_material/pull/247) ([dependabot[bot]](https://github.com/apps/dependabot))
+
+## [v1.0.36](https://github.com/Zoxcore/trifa_material/tree/v1.0.36) (2024-05-17)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.35...v1.0.36)
+
+**Implemented enhancements:**
+
+- Add more translatable Texts [\#227](https://github.com/Zoxcore/trifa_material/pull/227) ([648480505](https://github.com/648480505))
+
+**Merged pull requests:**
+
+- update to compose.version 1.6.10-rc03 [\#246](https://github.com/Zoxcore/trifa_material/pull/246) ([zoff99](https://github.com/zoff99))
+- setting to scale the whole app [\#245](https://github.com/Zoxcore/trifa_material/pull/245) ([zoff99](https://github.com/zoff99))
+- Translations update from Hosted Weblate [\#243](https://github.com/Zoxcore/trifa_material/pull/243) ([weblate](https://github.com/weblate))
+- update dependencies [\#242](https://github.com/Zoxcore/trifa_material/pull/242) ([zoff99](https://github.com/zoff99))
+- Add more translatable Texts [\#241](https://github.com/Zoxcore/trifa_material/pull/241) ([648480505](https://github.com/648480505))
+- show linux screenshot with chinese locale [\#239](https://github.com/Zoxcore/trifa_material/pull/239) ([zoff99](https://github.com/zoff99))
+- take peername from newest row with peername, not oldest [\#238](https://github.com/Zoxcore/trifa_material/pull/238) ([zoff99](https://github.com/zoff99))
+- fix missing peername on sync messages [\#237](https://github.com/Zoxcore/trifa_material/pull/237) ([zoff99](https://github.com/zoff99))
+
 ## [v1.0.35](https://github.com/Zoxcore/trifa_material/tree/v1.0.35) (2024-04-27)
 
 [Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.34...v1.0.35)
