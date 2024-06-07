@@ -39,7 +39,7 @@ export CFLAGS_ADDON_MORE="--param=ssp-buffer-size=1 -fstack-protector-all"
 
 # ------- deps verisions ---------
 NASM_VERSION="nasm-2.15.05" # "nasm-2.16.01"
-FFMPEG_VERSION="n6.1.1"
+FFMPEG_VERSION="n7.0.1"
 OPUS_VERSION="v1.5.2"
 SODIUM_VERSION="1.0.20"
 VPX_VERSION="v1.14.1"
@@ -66,6 +66,9 @@ cd *mpeg*/
 
   export CXXFLAGS=${CXXFLAGS_ADDON}
   export CFLAGS=${CFLAGS_ADDON}
+
+  sed -i -e 's#die "Host compiler lacks C11 support"#echo "Host compiler lacks C11 support"#' configure
+
   ./configure --arch="$ARCH" \
               --enable-gpl \
               --prefix="$_INST_" \
