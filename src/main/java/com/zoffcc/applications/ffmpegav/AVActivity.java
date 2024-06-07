@@ -7,7 +7,7 @@ import java.util.Random;
 public class AVActivity {
 
     private static final String TAG = "ffmpegav.AVActivity";
-    static final String Version = "0.99.24";
+    static final String Version = "0.99.25";
     public static final String JAVA_AUDIO_IN_DEVICE_NAME = "Java Audio in (-fallback-)";
 
     private static boolean java_audio_in_device_used = false;
@@ -1105,7 +1105,7 @@ public class AVActivity {
         t8.start();
         try
         {
-            Thread.sleep(100000);
+            Thread.sleep(10000);
         }
         catch(Exception e)
         {
