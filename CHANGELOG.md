@@ -1,5 +1,13 @@
 # Changelog
 
+## [v1.0.38](https://github.com/Zoxcore/trifa_material/tree/v1.0.38) (2024-06-06)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.37...v1.0.38)
+
+**Merged pull requests:**
+
+- fix for CVE-2024-5197 and update other dependencies [\#256](https://github.com/Zoxcore/trifa_material/pull/256) ([zoff99](https://github.com/zoff99))
+
 ## [v1.0.37](https://github.com/Zoxcore/trifa_material/tree/v1.0.37) (2024-06-02)
 
 [Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.36...v1.0.37)
