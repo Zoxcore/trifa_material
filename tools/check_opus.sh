@@ -6,6 +6,6 @@ ver=$(git ls-remote --refs --sort='v:refname' --tags "$r1" \
 
 echo "$ver"
 
-cd ../circle_scripts/
+cd ./circle_scripts/
 grep -ril 'OPUS_VERSION='|xargs -L1 sed -i -e 's#OPUS_VERSION=".*"#OPUS_VERSION="'"$ver"'"#'
 
