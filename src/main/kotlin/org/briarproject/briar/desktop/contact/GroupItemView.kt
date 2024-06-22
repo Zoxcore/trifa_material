@@ -48,7 +48,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
 import com.zoffcc.applications.trifa.Log
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_offline_peer_count
 import com.zoffcc.applications.trifa.TAG
 import com.zoffcc.applications.trifa.ToxVars
 import com.zoffcc.applications.trifa.ToxVars.TOX_GROUP_PRIVACY_STATE
@@ -141,9 +143,12 @@ private fun GroupItemViewInfo(groupItem: GroupItem) = Column(
     if (groupItem.privacyState == ToxVars.TOX_GROUP_PRIVACY_STATE.TOX_GROUP_PRIVACY_STATE_PUBLIC.value) {
         p_state = "public"
     }
+    val group_num_ = tox_group_by_groupid__wrapper(groupItem.groupId)
+    val offline_num_peers = tox_group_offline_peer_count(group_num_)
     Tooltip(text = "Group Name: " + groupItem.name + "\n"
             + "Group ID: " + groupItem.groupId + "\n"
             + "Group Privacy State: " + p_state + "\n"
+            + "Offline Peers: " + offline_num_peers + "\n"
     ) {
         Text(
             text = groupItem.name,
