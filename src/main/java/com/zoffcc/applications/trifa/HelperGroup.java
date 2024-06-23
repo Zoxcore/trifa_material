@@ -7,19 +7,17 @@ import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Random;
+import java.util.*;
 
 import static com.zoffcc.applications.trifa.HelperFiletransfer.get_incoming_filetransfer_local_filename;
 import static com.zoffcc.applications.trifa.HelperFiletransfer.save_group_incoming_file;
 import static com.zoffcc.applications.trifa.HelperGeneric.getHexArray;
 import static com.zoffcc.applications.trifa.MainActivity.*;
-import static com.zoffcc.applications.trifa.MainActivity.tox_group_peer_get_name;
 import static com.zoffcc.applications.trifa.TRIFAGlobals.*;
 import static com.zoffcc.applications.trifa.TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_FILE;
 import static com.zoffcc.applications.trifa.TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT;
 import static com.zoffcc.applications.trifa.ToxVars.*;
+import static com.zoffcc.applications.trifa.ToxVars.GC_MAX_SAVED_PEERS;
 
 public class HelperGroup {
 
@@ -1574,5 +1572,68 @@ public class HelperGroup {
             count++;
         }
         return yuv;
+    }
+
+    static class group_list_peer
+    {
+        String peer_name;
+        long peer_num;
+        String peer_pubkey;
+        int peer_connection_status;
+        boolean self;
+    }
+
+    public static void dump_saved_offline_peers_to_log(final String group_identifier)
+    {
+        final long conference_num = tox_group_by_groupid__wrapper(group_identifier);
+
+        long offline_num_peers = tox_group_offline_peer_count(conference_num);
+
+        if (offline_num_peers > 0)
+        {
+            List<group_list_peer> group_peers_offline = new ArrayList<>();
+            long i = 0;
+            for (i = 0; i < GC_MAX_SAVED_PEERS; i++)
+            {
+                try
+                {
+                    String peer_pubkey_temp = tox_group_savedpeer_get_public_key(conference_num, i);
+                    String peer_name = "zzzzzoffline " + i;
+                    group_list_peer glp3 = new group_list_peer();
+                    glp3.peer_pubkey = peer_pubkey_temp;
+                    glp3.peer_num = i;
+                    glp3.peer_name = peer_name;
+                    glp3.peer_connection_status = ToxVars.TOX_CONNECTION.TOX_CONNECTION_NONE.value;
+                    group_peers_offline.add(glp3);
+                }
+                catch (Exception ignored)
+                {
+                }
+            }
+
+            try
+            {
+                Collections.sort(group_peers_offline, new Comparator<group_list_peer>()
+                {
+                    @Override
+                    public int compare(group_list_peer p1, group_list_peer p2)
+                    {
+                        String name1 = p1.peer_pubkey;
+                        String name2 = p2.peer_pubkey;
+                        return name1.compareToIgnoreCase(name2);
+                    }
+                });
+            }
+            catch (Exception ignored)
+            {
+            }
+
+            StringBuilder logstr = new StringBuilder();
+            for (group_list_peer peerloffline : group_peers_offline)
+            {
+                logstr.append(peerloffline.peer_pubkey).append(peerloffline.peer_num).append("\n");
+            }
+            Log.i(TAG, "\n\nNGC_GROUP_OFFLINE_PEERLIST:\n" + logstr + "\n\n");
+        }
     }
 }

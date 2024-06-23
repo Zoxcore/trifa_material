@@ -42,11 +42,13 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoffcc.applications.trifa.HelperGroup.dump_saved_offline_peers_to_log
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_self_get_peer_id
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_self_set_name
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_set_name
 import org.briarproject.briar.desktop.ui.VerticallyScrollableArea
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
+import java.io.File
 
 @Composable
 fun GroupSettingDetails(selectedGroupId: String?)
@@ -118,6 +120,17 @@ fun GroupSettingDetails(selectedGroupId: String?)
                 })
             {
                 Text("Update your Peer Name")
+            }
+        }
+        Spacer(modifier = Modifier.height(5.dp))
+        Row(Modifier.wrapContentHeight().fillMaxWidth().padding(start = 15.dp)) {
+            Button(modifier = Modifier.width(400.dp),
+                enabled = true,
+                onClick = {
+                    dump_saved_offline_peers_to_log(selectedGroupId)
+                })
+            {
+                Text("DEBUG: Dump saved offline peers to logfile")
             }
         }
     }
