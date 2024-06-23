@@ -53,7 +53,7 @@ fun GroupSettingDetails(selectedGroupId: String?)
 {
     SettingDetail(i18n("ui.group_settings_headline")) {
 
-        // ---- change own name for one-on-one chats ----
+        // ---- change own name for group chats ----
         var self_name_in_group = ""
         try
         {
