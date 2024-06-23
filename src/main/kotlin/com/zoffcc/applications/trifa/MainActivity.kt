@@ -891,6 +891,9 @@ class MainActivity
         external fun tox_group_peer_get_public_key(group_number: Long, peer_id: Long): String?
 
         @JvmStatic
+        external fun tox_group_savedpeer_get_public_key(group_number: Long, slot_num: Long): String?
+
+        @JvmStatic
         external fun tox_group_peer_by_public_key(group_number: Long, peer_public_key_string: String?): Long
 
         @JvmStatic
