@@ -1598,6 +1598,10 @@ public class HelperGroup {
                 try
                 {
                     String peer_pubkey_temp = tox_group_savedpeer_get_public_key(conference_num, i);
+                    if (peer_pubkey_temp.compareToIgnoreCase("-1") == 0)
+                    {
+                        continue;
+                    }
                     String peer_name = "zzzzzoffline " + i;
                     group_list_peer glp3 = new group_list_peer();
                     glp3.peer_pubkey = peer_pubkey_temp;
