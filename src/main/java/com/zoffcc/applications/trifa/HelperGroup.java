@@ -1631,7 +1631,7 @@ public class HelperGroup {
             StringBuilder logstr = new StringBuilder();
             for (group_list_peer peerloffline : group_peers_offline)
             {
-                logstr.append(peerloffline.peer_pubkey).append(peerloffline.peer_num).append("\n");
+                logstr.append(peerloffline.peer_pubkey).append(":").append(peerloffline.peer_num).append("\n");
             }
             Log.i(TAG, "\n\nNGC_GROUP_OFFLINE_PEERLIST:\n" + logstr + "\n\n");
         }
