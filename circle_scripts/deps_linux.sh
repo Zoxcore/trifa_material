@@ -37,7 +37,7 @@ CFLAGS_MORE='--param=ssp-buffer-size=1 -fstack-protector-all'
 # ------- deps verisions ---------
 NASM_VERSION="nasm-2.15.05" # "nasm-2.16.01"
 FFMPEG_VERSION="n7.0.1"
-OPUS_VERSION="v1.5.2"
+OPUS_VERSION="v1.4"
 SODIUM_VERSION="1.0.20"
 VPX_VERSION="v1.14.1"
 _X264_VERSION_="31e19f92f00c7003fa115047ce50978bc98c3a0d"
@@ -107,8 +107,8 @@ export LDFLAGS=" "
 # libavcodec.a(h264_qpel_10bit.o): relocation R_X86_64_PC32 against symbol `ff_pw_1023' can not be used when making a shared object; recompile with -fPIC
 #
 
-  export CXXFLAGS=${CXXFLAGS_ADDON}
-  export CFLAGS=${CFLAGS_ADDON}
+  export CXXFLAGS="${CXXFLAGS_ADDON}"
+  export CFLAGS="${CFLAGS_ADDON}"
 
   if [ "$1""x" == "raspix" ]; then
     echo "*** RASPI ***"

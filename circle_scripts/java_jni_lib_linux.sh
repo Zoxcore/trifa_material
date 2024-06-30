@@ -101,7 +101,7 @@ if [ "$2""x" == "asanx" ]; then
   echo "***** ASAN *****"
   echo "***** ASAN *****"
   echo "***** ASAN *****"
-  CFLAGS_ASAN="-fsanitize=address -fno-omit-frame-pointer -fsanitize-recover=address -static-libasan"
+  CFLAGS_ASAN="-lstdc++ -fno-rtti -fsanitize=address -fno-omit-frame-pointer -fsanitize-recover=address -static-libasan"
 else
   CFLAGS_ASAN=""
 fi
