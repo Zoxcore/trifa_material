@@ -8,7 +8,7 @@ plugins {
     // kotlin("multiplatform")
     id("org.jetbrains.compose")
     id("org.jetbrains.kotlin.plugin.compose")
-    id("com.github.gmazzo.buildconfig") version "5.3.5"
+    id("com.github.gmazzo.buildconfig") version "5.4.0"
     id("org.ajoberstar.grgit") version "5.2.2"
     id("io.gitlab.arturbosch.detekt") version("1.23.3")
     id("de.undercouch.download") version "5.6.0"
