@@ -1,0 +1,55 @@
+name: Auto update toxcore info
+
+on:
+  schedule:
+    # runs Tue at 12:00 am
+    - cron: '0 0 * * 2'
+  push:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: dummy
+        default: dummy
+
+
+jobs:
+  auto-update-dependencies:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Run auto dependency update
+      run: ./tools/check_toxcore.sh > output.txt
+
+    - name: check for changes
+      run:  git diff || echo "no changes"
+
+    - name: get version info string
+      id: version_info_str
+      run: |
+        (release_tag=$(cat output.txt|grep '__VERSIONUPDATE__'|cut -d':' -f2) ; echo "release_tag=$release_tag" >> $GITHUB_OUTPUT)|| echo "release_tag=" >> $GITHUB_OUTPUT
+
+    - name: cleanup
+      run: rm -f output.txt
+
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v6
+      with:
+        commit-message: update toxcore to ${{ steps.version_info_str.outputs.release_tag }}
+        branch: 'create-pull-request/ffmpeg'
+        delete-branch: true
+        title: update toxcore to ${{ steps.version_info_str.outputs.release_tag }}
+        body: |
+          - Dependency updates
+
+          please run "JNI Libs" workflow manually to build updated toxcore JNI libs,
+          then run "tools/update_toxcore_jni_libs.sh" on the command line to download the updated JNI libs
+          and commit them to the git repository.
+
+          [1]: https://github.com/zoff99/c-toxcore
+
+
