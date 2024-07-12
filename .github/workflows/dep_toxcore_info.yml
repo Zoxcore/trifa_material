@@ -46,10 +46,8 @@ jobs:
         body: |
           - Dependency updates
 
+          https://github.com/zoff99/c-toxcore
+
           please run "JNI Libs" workflow manually to build updated toxcore JNI libs,
           then run "tools/update_toxcore_jni_libs.sh" on the command line to download the updated JNI libs
           and commit them to the git repository.
-
-          [1]: https://github.com/zoff99/c-toxcore
-
-
