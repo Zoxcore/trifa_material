@@ -1717,7 +1717,7 @@ class MainActivity
         @Suppress("unused")
         fun android_tox_callback_friend_read_receipt_cb_method(friend_number: Long, message_id: Long)
         {
-            Log.i(TAG, "friend_read_receipt:friend_number=" + friend_number + " message_id=" + message_id)
+            // Log.i(TAG, "friend_read_receipt:friend_number=" + friend_number + " message_id=" + message_id)
             try
             {
                 val toxpk = tox_friend_get_public_key(friend_number)!!.uppercase()
@@ -1737,15 +1737,15 @@ class MainActivity
                 val m = orma!!.selectFromMessage().message_idEq(message_id).
                     tox_friendpubkeyEq(toxpk).directionEq(1).orderByIdDesc().toList()[0]
                 // there can be older messages with same message_id for this friend! so always take the latest one! -------
-                Log.i(TAG, "friend_read_receipt:m=" + m)
-                Log.i(TAG, "friend_read_receipt:m:message_id=" + m.message_id + " text=" + m.text + " friendpubkey=" + m.tox_friendpubkey + " read=" + m.read + " direction=" + m.direction)
+                // Log.i(TAG, "friend_read_receipt:m=" + m)
+                // Log.i(TAG, "friend_read_receipt:m:message_id=" + m.message_id + " text=" + m.text + " friendpubkey=" + m.tox_friendpubkey + " read=" + m.read + " direction=" + m.direction)
                 if (m != null)
                 {
                     m.rcvd_timestamp = System.currentTimeMillis()
                     m.read = true
-                    Log.i(TAG,
-                          "friend_read_receipt:friend:" + get_friend_name_from_num(friend_number) + " message:" + m.text +
-                          " m=" + m)
+                    // Log.i(TAG,
+                    //       "friend_read_receipt:friend:" + get_friend_name_from_num(friend_number) + " message:" + m.text +
+                    //       " m=" + m)
                     update_message_in_db_read_rcvd_timestamp_rawmsgbytes(m)
                     // update message in UI
                     modify_text_message(m)
@@ -1963,7 +1963,7 @@ class MainActivity
             catch(_: Exception)
             {
             }
-            Log.i(TAG, "TOX_FILE_KIND_MESSAGEV2:MSGv2HASH:2=" + msg_id_as_hex_string)
+            // Log.i(TAG, "TOX_FILE_KIND_MESSAGEV2:MSGv2HASH:2=" + msg_id_as_hex_string)
 
             val already_have_message = orma!!.selectFromMessage().tox_friendpubkeyEq(toxpk).
                 msg_id_hashEq(msg_id_as_hex_string).count()
@@ -2026,28 +2026,28 @@ class MainActivity
             raw_message_buf.put(raw_message, 0, raw_message_length.toInt())
             val msg_sec = tox_messagev2_get_ts_sec(raw_message_buf)
             val msg_ms = tox_messagev2_get_ts_ms(raw_message_buf)
-            Log.i(TAG, "friend_sync_message_v2_cb:sec=" + msg_sec + " ms=" + msg_ms);
+            // Log.i(TAG, "friend_sync_message_v2_cb:sec=" + msg_sec + " ms=" + msg_ms);
             val msg_id_buffer = ByteBuffer.allocateDirect(TOX_HASH_LENGTH)
             tox_messagev2_get_message_id(raw_message_buf, msg_id_buffer)
             val msg_id_buffer_compat = ByteBufferCompat(msg_id_buffer)
             val msg_id_as_hex_string = bytesToHex(msg_id_buffer_compat.array()!!,
                 msg_id_buffer_compat.arrayOffset(),
                 msg_id_buffer_compat.limit())
-            Log.i(TAG, "friend_sync_message_v2_cb:MSGv2HASH=" + msg_id_as_hex_string)
+            // Log.i(TAG, "friend_sync_message_v2_cb:MSGv2HASH=" + msg_id_as_hex_string)
             val real_sender_as_hex_string = tox_messagev2_get_sync_message_pubkey(raw_message_buf)
-            Log.i(TAG, "friend_sync_message_v2_cb:real sender pubkey=" + real_sender_as_hex_string + " " +
-                       get_friend_name_from_pubkey(real_sender_as_hex_string))
+            // Log.i(TAG, "friend_sync_message_v2_cb:real sender pubkey=" + real_sender_as_hex_string + " " +
+            //            get_friend_name_from_pubkey(real_sender_as_hex_string))
             val msgv2_type = tox_messagev2_get_sync_message_type(raw_message_buf)
-            Log.i(TAG, "friend_sync_message_v2_cb:msg type=" +
-                    ToxVars.TOX_FILE_KIND.value_str(msgv2_type.toInt()))
+            // Log.i(TAG, "friend_sync_message_v2_cb:msg type=" +
+            //         ToxVars.TOX_FILE_KIND.value_str(msgv2_type.toInt()))
             val msg_id_buffer_wrapped = ByteBuffer.allocateDirect(TOX_HASH_LENGTH)
             tox_messagev2_get_message_id(raw_message_buf_wrapped, msg_id_buffer_wrapped)
             val msg_id_buffer_wrapped_compat = ByteBufferCompat(msg_id_buffer_wrapped)
             val msg_id_as_hex_string_wrapped = bytesToHex(msg_id_buffer_wrapped_compat.array()!!,
                 msg_id_buffer_wrapped_compat.arrayOffset(),
                 msg_id_buffer_wrapped_compat.limit())
-            Log.i(TAG, "friend_sync_message_v2_cb:MSGv2HASH=" + msg_id_as_hex_string_wrapped + " len=" +
-                       msg_id_as_hex_string_wrapped.length)
+            // Log.i(TAG, "friend_sync_message_v2_cb:MSGv2HASH=" + msg_id_as_hex_string_wrapped + " len=" +
+            //            msg_id_as_hex_string_wrapped.length)
 
             if (msgv2_type.toInt() == ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_MESSAGEV2_SEND.value)
             {
@@ -2069,7 +2069,7 @@ class MainActivity
         {
             val msg_wrapped_sec = tox_messagev2_get_ts_sec(raw_message_buf_wrapped)
             val msg_wrapped_ms = tox_messagev2_get_ts_ms(raw_message_buf_wrapped)
-            Log.i(TAG, "friend_sync_message_v2_cb:sec=" + msg_wrapped_sec + " ms=" + msg_wrapped_ms);
+            // Log.i(TAG, "friend_sync_message_v2_cb:sec=" + msg_wrapped_sec + " ms=" + msg_wrapped_ms);
             val msg_text_buffer_wrapped = ByteBuffer.allocateDirect(raw_data_length.toInt())
             val text_length = tox_messagev2_get_message_text(raw_message_buf_wrapped,
                 raw_data_length, 0, 0,
@@ -2089,9 +2089,9 @@ class MainActivity
             val msg_text_as_hex_string_wrapped = bytesToHex(msg_text_buffer_wrapped_compat.array()!!,
                 msg_text_buffer_wrapped_compat.arrayOffset(),
                 msg_text_buffer_wrapped_compat.limit())
-            Log.i(TAG, "friend_sync_message_v2_cb:len=" + text_length + " wrapped msg text str=" +
-                        wrapped_msg_text_as_string)
-             Log.i(TAG, "friend_sync_message_v2_cb:wrapped msg text hex=" + msg_text_as_hex_string_wrapped)
+            // Log.i(TAG, "friend_sync_message_v2_cb:len=" + text_length + " wrapped msg text str=" +
+            //             wrapped_msg_text_as_string)
+            // Log.i(TAG, "friend_sync_message_v2_cb:wrapped msg text hex=" + msg_text_as_hex_string_wrapped)
 
             try
             {
@@ -2129,11 +2129,11 @@ class MainActivity
                             real_conference_id, real_sender_peer_pubkey, sync_msg_received_timestamp,
                             real_send_message_id, MESSAGE_GROUP_HISTORY_SYNC_DOUBLE_INTERVAL_SECS.toLong(), real_sender_text)
 
-                        Log.i(TAG, "m.message_id_tox=" + real_send_message_id)
+                        // Log.i(TAG, "m.message_id_tox=" + real_send_message_id)
 
                         if (gm != null)
                         {
-                            Log.i(TAG, "friend_sync_message_v2_cb:potentially double message:2")
+                            // Log.i(TAG, "friend_sync_message_v2_cb:potentially double message:2")
                             // ok it's a "potentially" double message
                             // just ignore it, but still send "receipt" to proxy so it won't send this message again
                             send_friend_msg_receipt_v2_wrapper(friend_number, 3, msg_id_buffer,
@@ -2161,7 +2161,7 @@ class MainActivity
                         if (peer_name.isNullOrEmpty())
                         {
                             // TODO: get peer name from ?? somewhere
-                            Log.i(TAG, "sync_messagev2_send: WARNING: we do not have a peer name")
+                            // Log.i(TAG, "sync_messagev2_send: WARNING: we do not have a peer name")
                         }
 
                         HelperGroup.group_message_add_from_sync(real_conference_id, syncer_pubkey,
@@ -2179,7 +2179,7 @@ class MainActivity
                     {
                         // sync message from unkown original sender (or conference, which is not implemented in this client)
                         // still send "receipt" to our relay, or else it will send us this message forever
-                        Log.i(TAG, "friend_sync_message_v2_cb:send receipt for unknown message");
+                        // Log.i(TAG, "friend_sync_message_v2_cb:send receipt for unknown message");
                         send_friend_msg_receipt_v2_wrapper(friend_number, 4, msg_id_buffer,
                             (System.currentTimeMillis() / 1000))
                     }
@@ -2219,12 +2219,12 @@ class MainActivity
 
             val ts_sec = tox_messagev2_get_ts_sec(raw_message_buf)
             val ts_ms = tox_messagev2_get_ts_ms(raw_message_buf)
-            Log.i(TAG, "receive_incoming_message:TOX_FILE_KIND_MESSAGEV2_SEND:raw_msg=" + bytes_to_hex(raw_message))
+            // Log.i(TAG, "receive_incoming_message:TOX_FILE_KIND_MESSAGEV2_SEND:raw_msg=" + bytes_to_hex(raw_message))
 
             val msg_id_as_hex_string = bytesToHex(msg_id_buffer_compat.array()!!,
                 msg_id_buffer_compat.arrayOffset(),
                 msg_id_buffer_compat.limit())
-            Log.i(TAG, "receive_incoming_message:TOX_FILE_KIND_MESSAGEV2_SEND:MSGv2HASH:2=$msg_id_as_hex_string")
+            // Log.i(TAG, "receive_incoming_message:TOX_FILE_KIND_MESSAGEV2_SEND:MSGv2HASH:2=$msg_id_as_hex_string")
 
             val already_have_message: Int = orma!!.selectFromMessage()
                 .tox_friendpubkeyEq(tox_friend_get_public_key(friend_number_real_sender))
@@ -2268,7 +2268,7 @@ class MainActivity
                 }
 
                 if (fname.isNullOrEmpty()) {
-                    Log.i(TAG, "receive_incoming_message:WARNING:we do not have a friend name")
+                    // Log.i(TAG, "receive_incoming_message:WARNING:we do not have a friend name")
                 }
 
                 val friend_user = User(fname!!, picture = "friend_avatar.png", toxpk = original_sender_pubkey)
@@ -2301,7 +2301,7 @@ class MainActivity
             msg_id_buffer.put(msg_id, 0, TOX_HASH_LENGTH)
             val msg_id_buffer_compat = ByteBufferCompat(msg_id_buffer)
             val message_id_hash_as_hex_string = bytesToHex(msg_id_buffer_compat.array()!!, msg_id_buffer_compat.arrayOffset(), msg_id_buffer_compat.limit())
-            Log.i(TAG, "receipt_message_v2_cb:MSGv2HASH:2=" + message_id_hash_as_hex_string)
+            // Log.i(TAG, "receipt_message_v2_cb:MSGv2HASH:2=" + message_id_hash_as_hex_string)
 
             try
             {
