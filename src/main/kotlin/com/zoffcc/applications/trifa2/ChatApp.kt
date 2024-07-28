@@ -154,7 +154,7 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
                 LaunchedEffect(contactList.messageFilterActive) {
                     // HINT: focus on the search input field when search input field is opened
                     focusRequester2.requestFocus()
-                    Log.i(TAG, "FFFFFF2222222222222: focus on the search input field when search input field is opened")
+                    // Log.i(TAG, "FFFFFF2222222222222: focus on the search input field when search input field is opened")
                 }
             }
             else
@@ -162,7 +162,7 @@ fun ChatAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boolea
                 LaunchedEffect(contactList.messageFilterActive) {
                     // HINT: focus on the message input field, when search input field is closed
                     focusRequester.requestFocus()
-                    Log.i(TAG, "FFFFFF3333333333333: focus on the message input field, when search input field is closed")
+                    // Log.i(TAG, "FFFFFF3333333333333: focus on the message input field, when search input field is closed")
                 }
             }
             Scaffold(topBar = {
@@ -276,7 +276,7 @@ fun GroupAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boole
                 LaunchedEffect(groupList.groupmessageFilterActive) {
                     // HINT: focus on the search input field when search input field is opened
                     focusRequester2.requestFocus()
-                    Log.i(TAG, "FFFFgg2222222222222: focus on the search input field when search input field is opened")
+                    // Log.i(TAG, "FFFFgg2222222222222: focus on the search input field when search input field is opened")
                 }
             }
             else
@@ -284,7 +284,7 @@ fun GroupAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boole
                 LaunchedEffect(groupList.groupmessageFilterActive) {
                     // HINT: focus on the message input field, when search input field is closed
                     focusRequester.requestFocus()
-                    Log.i(TAG, "FFFFgg3333333333333: focus on the group message input field, when search input field is closed")
+                    // Log.i(TAG, "FFFFgg3333333333333: focus on the group message input field, when search input field is closed")
                 }
             }
             Scaffold(topBar = {

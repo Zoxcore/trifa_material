@@ -1213,7 +1213,7 @@ fun App()
                                         LaunchedEffect(contacts.selectedContactPubkey) {
                                             // HINT: focus on the message input field
                                             focusRequester.requestFocus()
-                                            Log.i(TAG, "FFFFFF1111111111111: focus on the message input field")
+                                            // Log.i(TAG, "FFFFFF1111111111111: focus on the message input field")
                                             contactstore.messageresetFilter()
                                         }
                                     }
@@ -1261,7 +1261,7 @@ fun App()
                                         LaunchedEffect(groups.selectedGroupId) {
                                             // HINT: focus on the group message input field
                                             groupfocusRequester.requestFocus()
-                                            Log.i(TAG, "FFFFgg1111111111111: focus on the group message input field")
+                                            // Log.i(TAG, "FFFFgg1111111111111: focus on the group message input field")
                                             groupstore.groupmessageresetFilter()
                                         }
                                     }
@@ -1417,7 +1417,7 @@ fun load_groupmessages(selectedGroupId: String?)
 {
     if (selectedGroupId != null)
     {
-        Log.i(TAG, "load_groupmessages")
+        // Log.i(TAG, "load_groupmessages")
         try
         {
             val groupid = selectedGroupId.lowercase()

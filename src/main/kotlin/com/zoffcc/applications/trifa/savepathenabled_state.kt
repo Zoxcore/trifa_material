@@ -240,7 +240,7 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
                             .is_newEq(true).count()
                         if (unread_count > 0)
                         {
-                            Log.i(TAG, "try_clear_unread_message_count:unread_count=" + unread_count)
+                            // Log.i(TAG, "try_clear_unread_message_count:unread_count=" + unread_count)
                         }
                     }
                 } catch (e: Exception)
@@ -278,7 +278,7 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
                         .is_newEq(true).count()
                     if (unread_count != 0)
                     {
-                        Log.i(TAG, "try_clear_unread_group_message_count:unread_count=" + unread_count)
+                        // Log.i(TAG, "try_clear_unread_group_message_count:unread_count=" + unread_count)
                     }
                 }
             }
