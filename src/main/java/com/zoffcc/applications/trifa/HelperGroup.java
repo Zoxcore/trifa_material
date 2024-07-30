@@ -1421,7 +1421,7 @@ public class HelperGroup {
                     .limit(1).toList()
                     .get(0)
                     .tox_group_peername;
-            Log.i(TAG, "last_know_peername=" + last_know_peername);
+            // Log.i(TAG, "last_know_peername=" + last_know_peername);
             return last_know_peername;
         }
         catch (Exception e)
@@ -1445,7 +1445,7 @@ public class HelperGroup {
         // Log.i(TAG,
         //       "group_message_add_from_sync:cf_num=" + group_identifier + " pnum=" + peer_number2 + " msg=" + message);
 
-        Log.i(TAG, "group_message_add_from_sync:peername=" + peer_name);
+        // Log.i(TAG, "group_message_add_from_sync:peername=" + peer_name);
 
         long group_num_ = tox_group_by_groupid__wrapper(group_identifier);
         int res = -1;

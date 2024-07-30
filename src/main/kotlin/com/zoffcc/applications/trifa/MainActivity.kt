@@ -1559,9 +1559,7 @@ class MainActivity
                     if (length > "https://".length + 1)
                     {
                         val pushurl = String(Arrays.copyOfRange(data, 1, data.size), StandardCharsets.UTF_8)
-                        Log.i(TAG,
-                              "android_tox_callback_friend_lossless_packet_cb_method:CONTROL_PROXY_MESSAGE_TYPE_PUSH_URL_FOR_FRIEND:pushurl=" +
-                              pushurl)
+                        Log.i(TAG,"android_tox_callback_friend_lossless_packet_cb_method:CONTROL_PROXY_MESSAGE_TYPE_PUSH_URL_FOR_FRIEND:pushurl=**********") // + pushurl)
                         add_pushurl_for_friend(pushurl, fpubkey)
                     } else
                     {
@@ -2013,7 +2011,7 @@ class MainActivity
         @Suppress("unused")
         fun android_tox_callback_friend_sync_message_v2_cb_method(friend_number: Long, ts_sec: Long, ts_ms: Long, raw_message: ByteArray?, raw_message_length: Long, raw_data: ByteArray?, raw_data_length: Long)
         {
-            Log.i(TAG, "friend_sync_message_v2_cb::IN:fn=" + get_friend_name_from_num(friend_number))
+            // Log.i(TAG, "friend_sync_message_v2_cb::IN:fn=" + get_friend_name_from_num(friend_number))
 
             if (!is_own_relay(tox_friend_get_public_key(friend_number)))
             {
