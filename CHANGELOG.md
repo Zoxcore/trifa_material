@@ -1,5 +1,49 @@
 # Changelog
 
+## [Unreleased](https://github.com/Zoxcore/trifa_material/tree/HEAD)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.40...HEAD)
+
+**Merged pull requests:**
+
+- do not run on tags [\#280](https://github.com/Zoxcore/trifa_material/pull/280) ([zoff99](https://github.com/zoff99))
+
+## [v1.0.40](https://github.com/Zoxcore/trifa_material/tree/v1.0.40) (2024-08-01)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.39...v1.0.40)
+
+**Merged pull requests:**
+
+- revert to 1.6.x release of compose [\#279](https://github.com/Zoxcore/trifa_material/pull/279) ([zoff99](https://github.com/zoff99))
+- less verbose [\#278](https://github.com/Zoxcore/trifa_material/pull/278) ([zoff99](https://github.com/zoff99))
+- Bump org.xerial:sqlite-jdbc from 3.46.0.0 to 3.46.0.1 [\#277](https://github.com/Zoxcore/trifa_material/pull/277) ([dependabot[bot]](https://github.com/apps/dependabot))
+- less verbose [\#276](https://github.com/Zoxcore/trifa_material/pull/276) ([zoff99](https://github.com/zoff99))
+- dependencies [\#275](https://github.com/Zoxcore/trifa_material/pull/275) ([zoff99](https://github.com/zoff99))
+- update toxcore [\#274](https://github.com/Zoxcore/trifa_material/pull/274) ([zoff99](https://github.com/zoff99))
+- Bump com.github.gmazzo.buildconfig from 5.3.5 to 5.4.0 [\#273](https://github.com/Zoxcore/trifa_material/pull/273) ([dependabot[bot]](https://github.com/apps/dependabot))
+- use macos-12 [\#272](https://github.com/Zoxcore/trifa_material/pull/272) ([zoff99](https://github.com/zoff99))
+- update to compose.version 1.7.0-alpha01 [\#271](https://github.com/Zoxcore/trifa_material/pull/271) ([zoff99](https://github.com/zoff99))
+- user alpha beta and rc versions over dev versions [\#270](https://github.com/Zoxcore/trifa_material/pull/270) ([zoff99](https://github.com/zoff99))
+- add actual version info into title and commit message [\#269](https://github.com/Zoxcore/trifa_material/pull/269) ([zoff99](https://github.com/zoff99))
+- update JNI libs [\#268](https://github.com/Zoxcore/trifa_material/pull/268) ([zoff99](https://github.com/zoff99))
+- update JNI libs [\#267](https://github.com/Zoxcore/trifa_material/pull/267) ([zoff99](https://github.com/zoff99))
+- fix ASAN JNI libs [\#266](https://github.com/Zoxcore/trifa_material/pull/266) ([zoff99](https://github.com/zoff99))
+- updates [\#265](https://github.com/Zoxcore/trifa_material/pull/265) ([zoff99](https://github.com/zoff99))
+- Bump com.vanniktech:emoji-ios from 0.20.0 to 0.21.0 [\#264](https://github.com/Zoxcore/trifa_material/pull/264) ([dependabot[bot]](https://github.com/apps/dependabot))
+- some small updates [\#263](https://github.com/Zoxcore/trifa_material/pull/263) ([zoff99](https://github.com/zoff99))
+- tweak audio filters, show offline peercount in tooltip [\#262](https://github.com/Zoxcore/trifa_material/pull/262) ([zoff99](https://github.com/zoff99))
+- update to compose.version 1.6.20-dev1673, update to kotlin.version 2.0.20-Beta1 [\#260](https://github.com/Zoxcore/trifa_material/pull/260) ([zoff99](https://github.com/zoff99))
+- auto PRs for dependency updates [\#259](https://github.com/Zoxcore/trifa_material/pull/259) ([zoff99](https://github.com/zoff99))
+- go back to com.sksamuel.scrimage 4.1.3 [\#258](https://github.com/Zoxcore/trifa_material/pull/258) ([zoff99](https://github.com/zoff99))
+
+## [v1.0.39](https://github.com/Zoxcore/trifa_material/tree/v1.0.39) (2024-06-08)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.38...v1.0.39)
+
+**Merged pull requests:**
+
+- fix sending images in groups and update some dependencies [\#257](https://github.com/Zoxcore/trifa_material/pull/257) ([zoff99](https://github.com/zoff99))
+
 ## [v1.0.38](https://github.com/Zoxcore/trifa_material/tree/v1.0.38) (2024-06-06)
 
 [Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.37...v1.0.38)
