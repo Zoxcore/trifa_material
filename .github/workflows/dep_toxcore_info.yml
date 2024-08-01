@@ -37,6 +37,7 @@ jobs:
       run: rm -f output.txt
 
     - name: Create Pull Request
+      if: !contains(github.ref, 'refs/tags/v')
       uses: peter-evans/create-pull-request@v6
       with:
         commit-message: update toxcore to ${{ steps.version_info_str.outputs.release_tag }}
