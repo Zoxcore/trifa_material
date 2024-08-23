@@ -1055,8 +1055,8 @@ class TrifaToxService
                         val m_resend_v1 = ii.next()
                         m_counter++
 
-                        Log.i(TAG, "resend_v3_messages: " + m_counter + ": friend="
-                                + get_friend_name_from_pubkey(m_resend_v1.tox_friendpubkey) + " text=" + m_resend_v1.text)
+                        // Log.i(TAG, "resend_v3_messages: " + m_counter + ": friend="
+                        //        + get_friend_name_from_pubkey(m_resend_v1.tox_friendpubkey) + " text=" + m_resend_v1.text)
                     }
                     ii = m_v1.iterator()
                     while (ii.hasNext())
@@ -1076,8 +1076,8 @@ class TrifaToxService
                                     get_friend_name_from_pubkey(m_resend_v1.tox_friendpubkey))
                             continue
                         }
-                        Log.i(TAG, "resend_v3_messages:tox_friend_resend_msgv3_wrapper:msg_idv3_hash=" +  m_resend_v1.msg_idv3_hash + " text=" + m_resend_v1.text + " : m=" +
-                                m_resend_v1 + " : " + get_friend_name_from_pubkey(m_resend_v1.tox_friendpubkey));
+                        // Log.i(TAG, "resend_v3_messages:tox_friend_resend_msgv3_wrapper:msg_idv3_hash=" +  m_resend_v1.msg_idv3_hash + " text=" + m_resend_v1.text + " : m=" +
+                        //         m_resend_v1 + " : " + get_friend_name_from_pubkey(m_resend_v1.tox_friendpubkey));
                         tox_friend_resend_msgv3_wrapper(m_resend_v1)
                         cur_resend_count_per_iteration++
                         if (cur_resend_count_per_iteration >= max_resend_count_per_iteration)
@@ -1144,8 +1144,8 @@ class TrifaToxService
                         val m_resend_v0 = ii.next()
                         m_counter++
 
-                        Log.i(TAG, "resend_old_messages: " + m_counter + ": friend="
-                                + get_friend_name_from_pubkey(m_resend_v0.tox_friendpubkey) + " text=" + m_resend_v0.text)
+                        // Log.i(TAG, "resend_old_messages: " + m_counter + ": friend="
+                        //        + get_friend_name_from_pubkey(m_resend_v0.tox_friendpubkey) + " text=" + m_resend_v0.text)
                     }
                     ii = m_v0.iterator()
                     while (ii.hasNext())
@@ -1166,8 +1166,8 @@ class TrifaToxService
                                         get_friend_name_from_pubkey(m_resend_v0.tox_friendpubkey))
                             continue
                         }
-                        Log.i(TAG, "resend_old_messages:tox_friend_resend_msgv3_wrapper:" + m_resend_v0.text + " : m=" +
-                                    m_resend_v0 + " : " + get_friend_name_from_pubkey(m_resend_v0.tox_friendpubkey))
+                        // Log.i(TAG, "resend_old_messages:tox_friend_resend_msgv3_wrapper:" + m_resend_v0.text + " : m=" +
+                        //            m_resend_v0 + " : " + get_friend_name_from_pubkey(m_resend_v0.tox_friendpubkey))
                         tox_friend_resend_msgv3_wrapper(m_resend_v0)
                         cur_resend_count_per_iteration++
                         if (cur_resend_count_per_iteration >= max_resend_count_per_iteration)
@@ -1218,8 +1218,8 @@ class TrifaToxService
                         val m_resend_v2 = ii.next()
                         m_counter++
 
-                        Log.i(TAG, "resend_v2_messages: " + m_counter + ": friend="
-                                + get_friend_name_from_pubkey(m_resend_v2.tox_friendpubkey) + " text=" + m_resend_v2.text)
+                        // Log.i(TAG, "resend_v2_messages: " + m_counter + ": friend="
+                        //        + get_friend_name_from_pubkey(m_resend_v2.tox_friendpubkey) + " text=" + m_resend_v2.text)
                     }
                     ii = m_v1.iterator()
                     while (ii.hasNext())
