@@ -335,7 +335,7 @@ public class HelperFriend {
 
                 try {
                     HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-                    Log.i(TAG, "friend_call_push_url:url=" + pushurl_for_friend + " RES=" + response.statusCode());
+                    Log.i(TAG, "friend_call_push_url:url=" + "********" + " RES=" + response.statusCode());
 
                     if ((response.statusCode() < 300) && (response.statusCode() > 199)) {
                         if (update_message_flag) {
