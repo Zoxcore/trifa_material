@@ -287,17 +287,6 @@ public class HelperFriend {
                             public void run() {
                                 try {
                                     friend_do_actual_weburl_call(friend_pubkey, pushurl_for_friend, message_timestamp_circa, true);
-                                    // HINT: trigger push again after PUSH_URL_TRIGGER_AGAIN_SECONDS seconds to
-                                    //       make sure iphones actually get online and receive the message
-                                    boolean res = false;
-                                    for (int j = 0; j < PUSH_URL_TRIGGER_AGAIN_MAX_COUNT; j++) {
-                                        Thread.sleep(PUSH_URL_TRIGGER_AGAIN_SECONDS * 1000);
-                                        res = friend_do_actual_weburl_call(friend_pubkey, pushurl_for_friend, message_timestamp_circa, false);
-                                        if (res) {
-                                            Log.i(TAG, "friend_call_push_url:BREAK");
-                                            break;
-                                        }
-                                    }
                                 } catch (Exception e) {
                                     Log.i(TAG, "friend_call_push_url:EE2:" + e.getMessage());
                                 }
