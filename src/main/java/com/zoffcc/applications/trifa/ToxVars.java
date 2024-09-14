@@ -57,6 +57,8 @@ public class ToxVars
         boolean toxav_h264 = false;
         boolean msgv3 = false;
         boolean ftv2 = false;
+        boolean toxav_h265 = false;
+        boolean ftv2a = false;
         boolean next_implementation = false;
     }
 
@@ -66,6 +68,8 @@ public class ToxVars
     public static long TOX_CAPABILITY_TOXAV_H264 = 1 << 2;
     public static long TOX_CAPABILITY_MSGV3 = 1 << 3;
     public static long TOX_CAPABILITY_FTV2 = 1 << 4;
+    public static long TOX_CAPABILITY_TOXAV_H265 = 1 << 5;
+    public static long TOX_CAPABILITY_FTV2A = 1 << 6;
     public static long TOX_CAPABILITY_NEXT_IMPLEMENTATION = (1L << 63L);
 
     public static TOX_CAPABILITY_DECODE_RESULT TOX_CAPABILITY_DECODE(long capabilites_encoded)
@@ -97,6 +101,16 @@ public class ToxVars
             res.ftv2 = true;
         }
 
+        if ((capabilites_encoded & TOX_CAPABILITY_TOXAV_H265) != 0)
+        {
+            res.toxav_h265 = true;
+        }
+
+        if ((capabilites_encoded & TOX_CAPABILITY_FTV2A) != 0)
+        {
+            res.ftv2a = true;
+        }
+
         if ((capabilites_encoded & TOX_CAPABILITY_NEXT_IMPLEMENTATION) != 0)
         {
             res.next_implementation = true;
@@ -124,11 +138,6 @@ public class ToxVars
             res = res + " MSGV2 ";
         }
 
-        if (in.ftv2)
-        {
-            res = res + " FTV2 ";
-        }
-
         if (in.toxav_h264)
         {
             res = res + " TOXAV_H264 ";
@@ -137,6 +146,21 @@ public class ToxVars
         if (in.msgv3)
         {
             res = res + " MSGV3 ";
+        }
+
+        if (in.ftv2)
+        {
+            res = res + " FTV2 ";
+        }
+
+        if (in.toxav_h265)
+        {
+            res = res + " TOXAV_H265 ";
+        }
+
+        if (in.ftv2a)
+        {
+            res = res + " FTV2a ";
         }
 
         if (in.next_implementation)
