@@ -77,7 +77,7 @@ fun chatReducer(state: MessageState, action: MessageAction): MessageState = when
         catch (e: Exception)
         {
         }
-        Log.i(TAG, "MessageAction.UpdateMessage")
+        // Log.i(TAG, "MessageAction.UpdateMessage")
         state.copy(messages = state.messages)
     }
     is MessageAction.UpdateTextMessage ->
@@ -101,7 +101,7 @@ fun chatReducer(state: MessageState, action: MessageAction): MessageState = when
         catch (e: Exception)
         {
         }
-        Log.i(TAG, "MessageAction.UpdateTextMessage")
+        // Log.i(TAG, "MessageAction.UpdateTextMessage")
         state.copy(messages = state.messages)
     }
     else ->
