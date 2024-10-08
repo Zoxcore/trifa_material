@@ -730,6 +730,7 @@ jobs:
                sudo apt-get update
                sudo apt-get install openjdk-17-jdk-headless openjdk-17-jdk
                sudo apt-get install imagemagick
+               sudo apt-get install libv4l-0 libv4l-dev
                sudo apt-get install xdotool xclip
                sudo apt-get install x11-apps x11-utils
                sudo apt-get install lwm fvwm
