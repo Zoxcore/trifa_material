@@ -707,7 +707,7 @@ jobs:
             ip addr
 
         - name: Set up WARP
-          uses: fscarmen/warp-on-actions@v1.0
+          uses: fscarmen/warp-on-actions@v1.1
           with:
             mode: wireguard
 
