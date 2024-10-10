@@ -707,14 +707,9 @@ jobs:
             ip addr
 
         - name: Set up WARP
-          uses: fscarmen/warp-on-actions@v1.0
+          uses: fscarmen/warp-on-actions@v1.2
           with:
-            mode: wireguard
-
-#        - name: Setup WARP
-#          uses: fscarmen/warp-on-actions@v1.1
-#          with:
-#            stack: ipv6 # Optional. Support [ ipv4, ipv6, dual ]. Default is dual.
+             stack: ipv6 # Optional. Support [ ipv4, ipv6, dual ]. Default is dual.
 
         - name: ipv6
           run: |
