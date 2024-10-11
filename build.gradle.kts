@@ -15,7 +15,7 @@ plugins {
 }
 
 group = "com.zoffcc.applications.trifa_material"
-version = "1.0.42"
+version = "1.0.43"
 val appName = "trifa_material"
 
 repositories {
