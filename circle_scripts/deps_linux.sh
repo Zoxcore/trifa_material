@@ -41,7 +41,7 @@ OPUS_VERSION="v1.5.2"
 SODIUM_VERSION="1.0.20"
 VPX_VERSION="v1.14.1"
 _X264_VERSION_="31e19f92f00c7003fa115047ce50978bc98c3a0d"
-_X265_VERSION_="4ecee600df03bc5c7679d2caf702be9169f41aec"
+_X265_VERSION_="c3e7e4f38bbecd81d8f931d757f13df6bfadb987"
 # ------- deps verisions ---------
 
 
