@@ -187,12 +187,12 @@ compose.desktop {
 
 val macExtraPlistKeys: String
     get() = """
-<key>NSMicrophoneUsageDescription</key>
-<string>Need microphone access for making audio calls</string>
-<key>NSCameraUsageDescription</key>
-<string>Need camera access for making video calls</string>
-<key>NSPhotoLibraryUsageDescription</key>
-<string>Need photo library access for saving and uploading images</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Need microphone access for making audio calls</string>
+    <key>NSCameraUsageDescription</key>
+    <string>Need camera access for making video calls</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Need photo library access for saving and uploading images</string>
     """.trimIndent()
 
 val appImageTool = project.file("deps/appimagetool.AppImage")
