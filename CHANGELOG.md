@@ -1,11 +1,66 @@
 # Changelog
 
-## [Unreleased](https://github.com/Zoxcore/trifa_material/tree/HEAD)
+## [v1.0.44](https://github.com/Zoxcore/trifa_material/tree/v1.0.44) (2024-11-02)
 
-[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.40...HEAD)
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.43...v1.0.44)
 
 **Merged pull requests:**
 
+- update JNI libs \(update libvpx to v1.15.0\) [\#317](https://github.com/Zoxcore/trifa_material/pull/317) ([zoff99](https://github.com/zoff99))
+- fixes for macOS and A/V [\#316](https://github.com/Zoxcore/trifa_material/pull/316) ([zoff99](https://github.com/zoff99))
+- update to compose.version 1.8.0-dev1899 and remove old non existing import [\#315](https://github.com/Zoxcore/trifa_material/pull/315) ([zoff99](https://github.com/zoff99))
+- show percentage on filetransfers [\#314](https://github.com/Zoxcore/trifa_material/pull/314) ([zoff99](https://github.com/zoff99))
+- update JNI libs [\#313](https://github.com/Zoxcore/trifa_material/pull/313) ([zoff99](https://github.com/zoff99))
+- update to kotlin.version 2.0.21 [\#312](https://github.com/Zoxcore/trifa_material/pull/312) ([zoff99](https://github.com/zoff99))
+- drag and drop new API [\#311](https://github.com/Zoxcore/trifa_material/pull/311) ([zoff99](https://github.com/zoff99))
+- Update README.md [\#310](https://github.com/Zoxcore/trifa_material/pull/310) ([zoff99](https://github.com/zoff99))
+- Bump org.xerial:sqlite-jdbc from 3.46.1.3 to 3.47.0.0 [\#309](https://github.com/Zoxcore/trifa_material/pull/309) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update x265 to c3e7e4f38bbecd81d8f931d757f13df6bfadb987 [\#308](https://github.com/Zoxcore/trifa_material/pull/308) ([zoff99](https://github.com/zoff99))
+- Translations update from Hosted Weblate [\#307](https://github.com/Zoxcore/trifa_material/pull/307) ([weblate](https://github.com/weblate))
+
+## [v1.0.43](https://github.com/Zoxcore/trifa_material/tree/v1.0.43) (2024-10-11)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.42...v1.0.43)
+
+**Merged pull requests:**
+
+- update JNI libs \(reverted a change in toxcore to fix broken video\) [\#306](https://github.com/Zoxcore/trifa_material/pull/306) ([zoff99](https://github.com/zoff99))
+
+## [v1.0.42](https://github.com/Zoxcore/trifa_material/tree/v1.0.42) (2024-10-10)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.41...v1.0.42)
+
+**Merged pull requests:**
+
+- update to fscarmen/warp-on-actions@v1.2 [\#305](https://github.com/Zoxcore/trifa_material/pull/305) ([zoff99](https://github.com/zoff99))
+- fix fscarmen/warp-on-actions [\#303](https://github.com/Zoxcore/trifa_material/pull/303) ([zoff99](https://github.com/zoff99))
+- update ffmpeg to n7.1 [\#302](https://github.com/Zoxcore/trifa_material/pull/302) ([zoff99](https://github.com/zoff99))
+- Bump org.ajoberstar.grgit from 5.2.2 to 5.3.0 [\#301](https://github.com/Zoxcore/trifa_material/pull/301) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update JNI libs [\#300](https://github.com/Zoxcore/trifa_material/pull/300) ([zoff99](https://github.com/zoff99))
+- Bump org.xerial:sqlite-jdbc from 3.46.1.2 to 3.46.1.3 [\#299](https://github.com/Zoxcore/trifa_material/pull/299) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump org.xerial:sqlite-jdbc from 3.46.1.0 to 3.46.1.2 [\#298](https://github.com/Zoxcore/trifa_material/pull/298) ([dependabot[bot]](https://github.com/apps/dependabot))
+- less verbose [\#297](https://github.com/Zoxcore/trifa_material/pull/297) ([zoff99](https://github.com/zoff99))
+- Translations update from Hosted Weblate [\#296](https://github.com/Zoxcore/trifa_material/pull/296) ([weblate](https://github.com/weblate))
+- update dependencies [\#295](https://github.com/Zoxcore/trifa_material/pull/295) ([zoff99](https://github.com/zoff99))
+- Bump com.github.gmazzo.buildconfig from 5.4.0 to 5.5.0 [\#294](https://github.com/Zoxcore/trifa_material/pull/294) ([dependabot[bot]](https://github.com/apps/dependabot))
+
+## [v1.0.41](https://github.com/Zoxcore/trifa_material/tree/v1.0.41) (2024-09-14)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.40...v1.0.41)
+
+**Merged pull requests:**
+
+- show new capabilities for friends [\#293](https://github.com/Zoxcore/trifa_material/pull/293) ([zoff99](https://github.com/zoff99))
+- update toxcore JNI, remove iphone push support [\#292](https://github.com/Zoxcore/trifa_material/pull/292) ([zoff99](https://github.com/zoff99))
+- Translations update from Hosted Weblate [\#291](https://github.com/Zoxcore/trifa_material/pull/291) ([weblate](https://github.com/weblate))
+- Translations update from Hosted Weblate [\#290](https://github.com/Zoxcore/trifa_material/pull/290) ([weblate](https://github.com/weblate))
+- Bump peter-evans/create-pull-request from 6 to 7 [\#289](https://github.com/Zoxcore/trifa_material/pull/289) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update to kotlin 2.0.20 and some smaller cosmetic changes [\#287](https://github.com/Zoxcore/trifa_material/pull/287) ([zoff99](https://github.com/zoff99))
+- update to kotlin.version 2.0.20-RC2 [\#286](https://github.com/Zoxcore/trifa_material/pull/286) ([zoff99](https://github.com/zoff99))
+- Bump org.xerial:sqlite-jdbc from 3.46.0.1 to 3.46.1.0 [\#285](https://github.com/Zoxcore/trifa_material/pull/285) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update ffmpeg av JNI libs [\#284](https://github.com/Zoxcore/trifa_material/pull/284) ([zoff99](https://github.com/zoff99))
+- Bump com.sksamuel.scrimage:scrimage-webp from 4.1.3 to 4.2.0 [\#283](https://github.com/Zoxcore/trifa_material/pull/283) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update dependencies [\#281](https://github.com/Zoxcore/trifa_material/pull/281) ([zoff99](https://github.com/zoff99))
 - do not run on tags [\#280](https://github.com/Zoxcore/trifa_material/pull/280) ([zoff99](https://github.com/zoff99))
 
 ## [v1.0.40](https://github.com/Zoxcore/trifa_material/tree/v1.0.40) (2024-08-01)
