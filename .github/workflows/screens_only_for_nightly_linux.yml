@@ -1,0 +1,230 @@
+name: Screens Only Linux
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: dummy
+        default: dummy
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  linux-ub20-test:
+    runs-on: ubuntu-20.04
+    if: ${{ true }}
+    permissions:
+      contents: write
+    steps:
+        - uses: actions/checkout@v4
+        - name: os version
+          run:  uname -a
+
+        # This is necessary because GitHub Actions does not support IPv6 yet
+        # And if a user has `ipv6: true` set in their yaml config, it wouldn't work otherwise
+        # <https://github.com/actions/runner-images/issues/668#issuecomment-1872487355>
+        - name: show ip
+          run: |
+            ip addr
+
+        - name: Set up WARP
+          uses: fscarmen/warp-on-actions@v1.2
+          with:
+             stack: ipv6 # Optional. Support [ ipv4, ipv6, dual ]. Default is dual.
+
+        - name: ipv6
+          run: |
+            curl -m 9 --ipv6 --verbose https://google.com
+            curl -m 9 -6 https://ifconfig.co
+
+        - name: show ip
+          run: |
+            ip addr
+
+        - name: install deps
+          run: |
+               sudo apt-get update
+               sudo apt-get install openjdk-17-jdk-headless openjdk-17-jdk
+               sudo apt-get install imagemagick
+               sudo apt-get install libv4l-0 libv4l-dev
+               sudo apt-get install xdotool xclip
+               sudo apt-get install x11-apps x11-utils
+               sudo apt-get install lwm fvwm
+               sudo apt-get install xvfb
+
+        - name: show installed font packages
+          run: |
+               dpkg -l|grep font
+
+        - name: install fonts
+          run: |
+               sudo apt-get install xfonts-utils xfonts-scalable xfonts-encodings xfonts-base xfonts-75dpi xfonts-100dpi
+               sudo apt-get install fonts-noto-color-emoji
+               sudo apt-get install fonts-dejavu fonts-dejavu-core fonts-freefont-ttf
+               sudo apt-get install xfonts-wqy \
+               xfonts-efont-unicode xfonts-efont-unicode-ib xfonts-intl-chinese xfonts-intl-chinese-big \
+               xfonts-intl-asian xfonts-intl-arabic xfonts-intl-european xfonts-unifont \
+                fonts-dejavu-core \
+                fonts-dejavu-extra \
+                fonts-droid-fallback \
+                fonts-guru \
+                fonts-guru-extra \
+                fonts-horai-umefont \
+                fonts-kacst \
+                fonts-kacst-one \
+                fonts-khmeros-core \
+                fonts-lao \
+                fonts-liberation \
+                fonts-lklug-sinhala \
+                fonts-lohit-guru \
+                fonts-nanum \
+                fonts-noto-cjk \
+                fonts-opensymbol \
+                fonts-roboto \
+                fonts-roboto-hinted \
+                fonts-sil-abyssinica \
+                fonts-sil-padauk \
+                fonts-stix \
+                fonts-symbola \
+                fonts-takao-pgothic \
+                fonts-thai-tlwg \
+                fonts-tibetan-machine \
+                fonts-tlwg-garuda \
+                fonts-tlwg-kinnari \
+                fonts-tlwg-laksaman \
+                fonts-tlwg-loma \
+                fonts-tlwg-mono \
+                fonts-tlwg-norasi \
+                fonts-tlwg-purisa \
+                fonts-tlwg-sawasdee \
+                fonts-tlwg-typewriter \
+                fonts-tlwg-typist \
+                fonts-tlwg-typo \
+                fonts-tlwg-umpush \
+                fonts-tlwg-waree \
+                fonts-unfonts-core
+
+        # use the ipv6-boot-only version of the tox tester
+        - name: download tester
+          shell: bash
+          run: |
+               curl -L https://github.com/zoff99/java_tox_tester/archive/refs/heads/ipv6only.zip -o master.zip
+               unzip master.zip
+               ls -al java_tox_tester-ipv6only/
+               java -version
+               javac -version
+
+        - name: create runscript
+          run: |
+               printf '#!/bin/bash\n' > /tmp/a.sh
+               printf 'xclock -digital -geometry 300x45+100+688 &\n' >> /tmp/a.sh
+               printf 'export LC_ALL=zh_CN.utf8\n' >> /tmp/a.sh
+               printf '/home/runner/work/trifa_material/trifa_material/gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64/ run &\n' >> /tmp/a.sh
+               printf 'sleep 20\n' >> /tmp/a.sh
+               printf 'xwininfo -id $(xdotool getactivewindow)\n' >> /tmp/a.sh
+               printf 'xdotool mousemove --sync 80 74 click 1\n' >> /tmp/a.sh
+               printf 'sleep 2\n' >> /tmp/a.sh
+               printf 'sleep 20\n' >> /tmp/a.sh
+               printf 'xdotool mousemove --sync 140 74 click 1\n' >> /tmp/a.sh
+               printf 'pwd\n' >> /tmp/a.sh
+               printf 'sleep 5\n' >> /tmp/a.sh
+               printf 'sleep 60\n' >> /tmp/a.sh
+               printf 'ls -ratl\n' >> /tmp/a.sh
+               printf 'cat /home/runner/work/trifa_material/trifa_material/toxid.txt;echo\n' >> /tmp/a.sh
+               printf 'cd /home/runner/work/trifa_material/trifa_material/java_tox_tester-ipv6only/\n' >> /tmp/a.sh
+               printf './do_run.sh $(cat /home/runner/work/trifa_material/trifa_material/toxid.txt) >/home/runner/work/trifa_material/trifa_material/tester.log 2>&1 &\n' >> /tmp/a.sh
+               printf 'sleep 220\n' >> /tmp/a.sh
+               printf 'xdotool mousemove --sync 214 295 click 1\n' >> /tmp/a.sh
+               printf 'sleep 4\n' >> /tmp/a.sh
+               printf 'xdotool mousemove --sync 750 620 click 1\n' >> /tmp/a.sh
+               printf 'sleep 2\n' >> /tmp/a.sh
+               printf 'import -window root /tmp/screenshot-linux_before_wm.png\n' >> /tmp/a.sh
+               printf 'sleep 40\n' >> /tmp/a.sh
+               printf 'fvwm2 &' >> /tmp/a.sh
+               printf 'sleep 20\n' >> /tmp/a.sh
+               printf 'import -window root /tmp/screenshot-linux.png\n' >> /tmp/a.sh
+               cat /tmp/a.sh
+               chmod a+rx /tmp/a.sh
+
+        - name: patch-app1
+          run: |
+               pwd
+               ls -al
+               sed -i -e 's#PREF__udp_enabled = udp_mode_int#PREF__udp_enabled = 0#' src/main/kotlin/com/zoffcc/applications/trifa/MainActivity.kt
+               git diff||echo "NO ERR"
+
+        - name: patch-app2
+          run: |
+               pwd
+               ls -al
+               sed -i -e 's#PREF__local_discovery_enabled = local_discovery_int#PREF__local_discovery_enabled = 0#' src/main/kotlin/com/zoffcc/applications/trifa/MainActivity.kt
+               git diff||echo "NO ERR"
+
+        - name: patch-app3
+          run: |
+               pwd
+               ls -al
+               tools/patch_src_disable_ipv4_boots.sh
+               git diff||echo "NO ERR"
+
+        - name: generate locale
+          run: |
+               cat /etc/locale.gen
+               cat /etc/locale.gen|grep -i zn||echo "NO ERR"
+               echo "zh_CN.UTF-8 UTF-8" |sudo tee -a /etc/locale.gen
+               sudo locale-gen
+
+        - name: generate locale
+          run: |
+               sudo localectl set-locale LANG="zh_CN.UTF-8"
+               export LANG="zh_CN.UTF-8"
+               sudo update-locale
+               locale -a
+               locale
+               locale -c -k LC_NUMERIC
+               sudo update-locale LANG="zh_CN.UTF-8"
+               localectl status
+
+        - name: startup-app
+          run: |
+               pwd
+               ls -al
+               export LC_ALL=zh_CN.utf8
+               ./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64/ assemble
+               xvfb-run --server-args="-screen 0 1024x768x24" --auto-servernum /tmp/a.sh
+               echo "++++++++++++++++++"
+               echo "++++++++++++++++++"
+               cat /home/runner/work/trifa_material/trifa_material/trifa.log||echo "NO ERR"
+               echo "++++++++++++++++++"
+               echo "++++++++++++++++++"
+               cat /home/runner/work/trifa_material/trifa_material/tester.log||echo "NO ERR"
+               cp -av /tmp/screenshot-linux.png screenshot-linux.png
+
+        - name: upload-screenshots
+          uses: actions/upload-artifact@v4
+          with:
+            name: screenshot-linux
+            path: /tmp/screenshot-linux.png
+
+        - name: upload-screenshots
+          uses: actions/upload-artifact@v4
+          with:
+            name: screenshot-linux_before_wm
+            path: /tmp/screenshot-linux_before_wm.png
+
+        - name: Upload to nightly release
+          uses: ncipollo/release-action@v1
+          if: github.ref == 'refs/heads/master'
+          with:
+            allowUpdates: true
+            tag: nightly
+            omitBodyDuringUpdate: true
+            omitNameDuringUpdate: true
+            prerelease: true
+            replacesArtifacts: true
+            token: ${{ secrets.GITHUB_TOKEN }}
+            artifacts: "screenshot-linux.png"
+
+
