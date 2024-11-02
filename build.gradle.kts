@@ -149,6 +149,10 @@ compose.desktop {
                 println("iconFile=" + iconsRoot.resolve("icon-mac.icns"))
                 iconFile.set(iconsRoot.resolve("icon-mac.icns"))
                 bundleID = "com.zoffcc.applications.trifa_material"
+                runtimeEntitlementsFile.set(iconsRoot.resolve("runtime-entitlements.plist"))
+                infoPlist {
+                    extraKeysRawXml = macExtraPlistKeys
+                }
                 // dockName = ""
             }
             windows {
@@ -180,6 +184,16 @@ compose.desktop {
         }
     }
 }
+
+val macExtraPlistKeys: String
+    get() = """
+<key>NSMicrophoneUsageDescription</key>
+<string>Need microphone access for making audio calls</string>
+<key>NSCameraUsageDescription</key>
+<string>Need camera access for making video calls</string>
+<key>NSPhotoLibraryUsageDescription</key>
+<string>Need photo library access for saving and uploading images</string>
+    """.trimIndent()
 
 val appImageTool = project.file("deps/appimagetool.AppImage")
 val linuxAppDir = project.file("build/compose/binaries/main/app")
