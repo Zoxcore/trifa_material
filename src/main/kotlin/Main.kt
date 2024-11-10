@@ -265,6 +265,7 @@ const val BG_COLOR_RELAY_CONTACT_ITEM = 0x448ABEB9
 const val BG_COLOR_OWN_RELAY_CONTACT_ITEM = 0x44FFFFB9
 const val URL_TEXTVIEW_URL_COLOR = 0xFF223DDC
 const val NGC_PRIVATE_MSG_INDICATOR_COLOR = 0xFFFFA255
+val VIDEO_BOX_BG_COLOR = Color(0x00E7E7E7) // this is now fully transparent. but just in case the color vaule of the grey BG is saved here
 val MESSAGE_PUSH_CHECKMARK_COLOR = Color(0xFF2684A7)
 val DELIVERY_CHECKMARK_COLOR = Color(0xFF2684A7)
 val DELIVERY_CONFIRM_CHECKMARK_COLOR = Color(0xFF2684A7)
@@ -541,7 +542,7 @@ fun App()
                                         else
                                         {
                                             SwingPanel(
-                                                background = Color.Green,
+                                                background = VIDEO_BOX_BG_COLOR,
                                                 modifier = Modifier.fillMaxWidth(video_in_box_width_fraction)
                                                     .padding(5.dp)
                                                     .weight(80.0f)
@@ -758,7 +759,7 @@ fun App()
                                         else
                                         {
                                             SwingPanel(
-                                                background = Color.Green,
+                                                background = VIDEO_BOX_BG_COLOR,
                                                 modifier = Modifier.size(video_out_box_width, video_out_box_height)
                                                     .combinedClickable(onClick = {
                                                         if (video_out_box_small)
