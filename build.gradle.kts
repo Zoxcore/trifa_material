@@ -146,6 +146,11 @@ compose.desktop {
             val iconsRoot = project.file("resources")
             println("iconsRoot=$iconsRoot")
             macOS {
+                // --- scrimage needs this set ONLY for macos arm
+                // --- scrimage needs this set ONLY for macos arm
+                // jvmArgs += listOf("-Dcom.sksamuel.scrimage.webp.platform=mac-arm64")
+                // --- scrimage needs this set ONLY for macos arm
+                // --- scrimage needs this set ONLY for macos arm
                 println("iconFile=" + iconsRoot.resolve("icon-mac.icns"))
                 iconFile.set(iconsRoot.resolve("icon-mac.icns"))
                 bundleID = "com.zoffcc.applications.trifa_material"
