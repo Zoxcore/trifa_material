@@ -27,6 +27,9 @@ jobs:
     - name: install cliclick
       run:  brew install cliclick
 
+    - name: show architecture
+      run:  uname -m
+
     - name: install wget
       run:  brew install wget
 

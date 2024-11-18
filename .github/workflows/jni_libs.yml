@@ -29,6 +29,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: show architecture
+        run:  uname -m
+
       - name: install deps
         run:  brew install git automake yasm nasm
 
@@ -80,6 +83,9 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+
+      - name: show architecture
+        run:  uname -m
 
       - name: install deps
         run:  brew install git automake autoconf yasm nasm libtool
