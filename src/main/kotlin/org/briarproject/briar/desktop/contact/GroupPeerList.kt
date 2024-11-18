@@ -1,7 +1,10 @@
 package org.briarproject.briar.desktop.contact
 
+import GROUP_COLLAPSED_PEER_COLUMN_WIDTH
 import GROUP_PEER_COLUMN_WIDTH
 import GROUP_PEER_HEIGHT
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import com.zoffcc.applications.trifa.HelperGroup
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_self_get_public_key
 import com.zoffcc.applications.trifa.StateGroupPeers
-import grouppeerstore
 import org.briarproject.briar.desktop.ui.ListItemView
 import org.briarproject.briar.desktop.ui.VerticallyScrollableArea
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
@@ -27,8 +29,11 @@ import kotlin.math.min
 @Composable
 fun GroupPeerList(
     grouppeerList: StateGroupPeers,
+    peercollapsed: Boolean,
 ) = Column(
-    modifier = Modifier.fillMaxHeight().width(GROUP_PEER_COLUMN_WIDTH).background(Color.Transparent),
+    modifier = Modifier.fillMaxHeight().
+    width(if(peercollapsed) GROUP_COLLAPSED_PEER_COLUMN_WIDTH else GROUP_PEER_COLUMN_WIDTH).
+    background(Color.Transparent)
 ) {
     VerticallyScrollableArea(modifier = Modifier.randomDebugBorder().fillMaxSize()) { scrollState ->
         LazyColumn(
@@ -55,10 +60,11 @@ fun GroupPeerList(
                         .fillMaxWidth()
                         .background(GroupPeerListBgColor(item))
                         .padding(vertical = 8.dp)
-                        .padding(start = 3.dp, end = 3.dp)
+                        .padding(start = if(peercollapsed) 2.dp else 3.dp, end = if(peercollapsed) 0.dp else 3.dp)
                         GrouppeerItemView(
                             grouppeerItem = item,
-                            modifier = modifier
+                            modifier = modifier,
+                            peercollapsed = peercollapsed
                         )
                 }
             }

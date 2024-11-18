@@ -32,7 +32,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LockPerson
 import androidx.compose.material.icons.filled.Public
-import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -49,12 +48,9 @@ import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
-import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_offline_peer_count
-import com.zoffcc.applications.trifa.TAG
 import com.zoffcc.applications.trifa.ToxVars
 import com.zoffcc.applications.trifa.ToxVars.TOX_GROUP_PRIVACY_STATE
-import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import globalgrpstoreunreadmsgs
 import org.briarproject.briar.desktop.ui.NumberBadge
 import org.briarproject.briar.desktop.ui.Tooltip
@@ -63,7 +59,8 @@ import randomDebugBorder
 @Composable
 @Preview
 fun test__peercount_circle() = Row() {
-    PeerCountCircle(peerCount = 236)
+    val peercollapsed = false
+    PeerCountCircle(peercollapsed = peercollapsed, peerCount = 236)
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -71,8 +68,9 @@ fun test__peercount_circle() = Row() {
 fun GroupItemView(
     groupItem: GroupItem,
     modifier: Modifier = Modifier,
+    peercollapsed: Boolean,
 ) = Row(
-    horizontalArrangement = spacedBy(8.dp),
+    horizontalArrangement = spacedBy(if(peercollapsed) 0.dp else 8.dp),
     verticalAlignment = CenterVertically,
     modifier = modifier.height(IntrinsicSize.Min)
 ) {
@@ -89,14 +87,16 @@ fun GroupItemView(
             description = "Private Group"
         }
         Tooltip(text = description) {
-            Icon(imageVector = icon, modifier = Modifier.height(20.dp), contentDescription = description)
+            Icon(imageVector = icon, modifier = Modifier.height(if(peercollapsed) 8.dp else 20.dp),
+                contentDescription = description)
         }
-        Spacer(modifier = Modifier.randomDebugBorder().width(2.dp))
+        if(!peercollapsed) { Spacer(modifier = Modifier.randomDebugBorder().width(2.dp)) }
         Box() {
             Column(Modifier.align(BottomStart).randomDebugBorder()) {
                 Spacer(modifier = Modifier.randomDebugBorder().height(16.dp))
                 GroupItemViewInfo(
                     groupItem = groupItem,
+                    peercollapsed = peercollapsed
                 )
             }
             val current_groupstorerunreadmessagesstore by globalgrpstoreunreadmsgs.stateFlow.collectAsState()
@@ -107,35 +107,40 @@ fun GroupItemView(
             )
         }
     }
-    ConnectionIndicator(
-        modifier = Modifier.padding(end = 1.dp).requiredSize(16.dp),
-        isConnected = if (groupItem.isConnected == 0) 0 else 2
-    )
+    if(!peercollapsed)
+    {
+        ConnectionIndicator(
+            modifier = Modifier.padding(end = 1.dp).requiredSize(16.dp),
+            isConnected = if (groupItem.isConnected == 0) 0 else 2
+        )
+    }
     PeerCountCircle(
-        modifier = Modifier.padding(end = 1.dp).requiredSize(28.dp),
-        peerCount = groupItem.numPeers.toLong()
+        peercollapsed = peercollapsed,
+        peerCount = groupItem.numPeers.toLong(),
+        modifier = Modifier.padding(end = 1.dp).requiredSize(if(peercollapsed) 13.dp else 28.dp)
     )
 }
 
 @Composable
 fun PeerCountCircle(
-    modifier: Modifier = Modifier.size(25.dp),
+    peercollapsed: Boolean,
     peerCount: Long,
+    modifier: Modifier = Modifier.size(if (peercollapsed) 12.dp else 25.dp),
 ) = Box(
     modifier = modifier
-        .border(1.dp, Color.Black, CircleShape)
+        .border(if(peercollapsed) 0.dp else 1.dp, Color.Black, CircleShape)
         .background(Color.LightGray, CircleShape)
 )
 {
     Text(text = "" + peerCount,
         modifier = Modifier.align(Alignment.Center),
-        style = TextStyle(fontSize = 12.sp)
+        style = TextStyle(fontSize = if(peercollapsed) 8.sp else 12.sp)
     )
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun GroupItemViewInfo(groupItem: GroupItem) = Column(
+private fun GroupItemViewInfo(groupItem: GroupItem, peercollapsed: Boolean) = Column(
     horizontalAlignment = Start,
     modifier = Modifier.padding(start = 0.dp).randomDebugBorder()
 ) {
@@ -151,8 +156,8 @@ private fun GroupItemViewInfo(groupItem: GroupItem) = Column(
             + "Offline Peers: " + offline_num_peers + "\n"
     ) {
         Text(
-            text = groupItem.name,
-            style = if (groupItem.name.length > GROUPS_COLUMN_GROUPNAME_LEN_THRESHOLD)
+            text = if(peercollapsed) groupItem.name.take(2) else groupItem.name,
+            style = if ((groupItem.name.length > GROUPS_COLUMN_GROUPNAME_LEN_THRESHOLD) && (!peercollapsed))
                 MaterialTheme.typography.body1.copy(fontSize = 13.sp) else MaterialTheme.typography.body1,
             maxLines = 1,
             overflow = Ellipsis,
