@@ -1,0 +1,2 @@
+# Binary files (no line-ending conversions), diff using hexdump
+*.ttf binary diff=hex
