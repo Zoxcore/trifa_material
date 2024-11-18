@@ -211,7 +211,7 @@ jobs:
 
   build-macos-nightly-artifact:
     name: Nightly Artifact macOS Build
-    runs-on: macos-12
+    runs-on: macos-13
     needs: [update-nightly-tag]
     if: |
       always() &&
@@ -434,7 +434,7 @@ jobs:
 
 
   macos-test:
-    runs-on: macos-12
+    runs-on: macos-13
     if: ${{ true }}
     permissions:
       contents: write
