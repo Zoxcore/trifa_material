@@ -1,6 +1,7 @@
 package org.briarproject.briar.desktop.contact
 
 import GROUPITEM_HEIGHT
+import GROUPS_COLLAPSED_COLUMN_WIDTH
 import GROUPS_COLUMN_WIDTH
 import androidx.compose.foundation.ContextMenuArea
 import androidx.compose.foundation.ContextMenuItem
@@ -10,8 +11,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,8 +35,9 @@ import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 @Composable
 fun GroupList(
     groupList: StateGroups,
+    peercollapsed: Boolean,
 ) = Column(
-    modifier = Modifier.fillMaxHeight().width(GROUPS_COLUMN_WIDTH).background(Color.Transparent),
+    modifier = Modifier.fillMaxHeight().width(if(peercollapsed) GROUPS_COLLAPSED_COLUMN_WIDTH else GROUPS_COLUMN_WIDTH).background(Color.Transparent),
 ) {
     VerticallyScrollableArea(modifier = Modifier.fillMaxSize()) { scrollState ->
         LazyColumn(
@@ -69,7 +69,7 @@ fun GroupList(
                         .heightIn(min = GROUPITEM_HEIGHT)
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
-                        .padding(start = 3.dp, end = 3.dp)
+                        .padding(start = if(peercollapsed) 2.dp else 3.dp, end = if(peercollapsed) 0.dp else 3.dp)
                     ContextMenuArea(items = {
                         listOf(
                             ContextMenuItem("delete") {
@@ -83,7 +83,8 @@ fun GroupList(
                     }) {
                         GroupItemView(
                             groupItem = item,
-                            modifier = modifier
+                            modifier = modifier,
+                            peercollapsed = peercollapsed
                         )
                     }
                 }

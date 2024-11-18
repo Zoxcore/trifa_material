@@ -18,6 +18,15 @@
 
 package org.briarproject.briar.desktop.navigation
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -35,6 +44,8 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -44,6 +55,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.zoffcc.applications.trifa.Log
+import com.zoffcc.applications.trifa.TAG
 import globalstore
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -51,13 +64,14 @@ import kotlinx.coroutines.launch
 import org.briarproject.briar.desktop.navigation.SidebarButtonState.None
 import org.briarproject.briar.desktop.navigation.SidebarButtonState.UnreadMessages
 import org.briarproject.briar.desktop.navigation.SidebarButtonState.Warning
+import org.briarproject.briar.desktop.ui.Tooltip
 import org.briarproject.briar.desktop.ui.UiMode
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import randomDebugBorder
 
 val SIDEBAR_WIDTH = 56.dp
 
-@OptIn(DelicateCoroutinesApi::class)
+@OptIn(DelicateCoroutinesApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun BriarSidebar(
     uiMode: UiMode,
@@ -65,7 +79,7 @@ fun BriarSidebar(
 )
 {
     @Composable
-    fun BriarSidebarButton(
+    fun BriarSidebarButtonFunc(
         mode: UiMode,
         messageCount: Int = 0,
     ) = BriarSidebarButton(
@@ -83,6 +97,7 @@ fun BriarSidebar(
                   },
         icon = mode.icon,
         contentDescription = "",
+        tooltip = null,
         sideBarButtonState = if (messageCount == 0) None else UnreadMessages(messageCount),
     )
 
@@ -94,12 +109,32 @@ fun BriarSidebar(
     ) { // profile button
         Spacer(Modifier.height(4.dp))
         val current_globalstate by globalstore.stateFlow.collectAsState()
-        BriarSidebarButton(UiMode.CONTACTS, messageCount = current_globalstate.contacts_unread_message_count)
-        BriarSidebarButton(UiMode.GROUPS, messageCount = current_globalstate.contacts_unread_group_message_count)
-        BriarSidebarButton(UiMode.SETTINGS)
-        BriarSidebarButton(UiMode.ADDFRIEND)
-        BriarSidebarButton(UiMode.ADDGROUP)
-        BriarSidebarButton(UiMode.ABOUT)
+        BriarSidebarButtonFunc(UiMode.CONTACTS, messageCount = current_globalstate.contacts_unread_message_count)
+        BriarSidebarButtonFunc(UiMode.GROUPS, messageCount = current_globalstate.contacts_unread_group_message_count)
+        BriarSidebarButtonFunc(UiMode.SETTINGS)
+        BriarSidebarButtonFunc(UiMode.ADDFRIEND)
+        BriarSidebarButtonFunc(UiMode.ADDGROUP)
+        BriarSidebarButtonFunc(UiMode.ABOUT)
+        val global_store by globalstore.stateFlow.collectAsState()
+        if (global_store.toxRunning)
+        {
+            val targetState = globalstore.isPeerListCollapse()
+            // AnimatedContent(targetState = globalstore.isPeerListCollapse()) {isChecked ->
+            //Crossfade(targetState = globalstore.isPeerListCollapse()) { isChecked ->
+                BriarSidebarButton(
+                    selected = false,
+                    onClick = {
+                        globalstore.updatePeerListCollapse(!globalstore.isPeerListCollapse())
+                        Log.i(TAG, "PeerListCollapse=" + globalstore.isPeerListCollapse())
+                    },
+                    tooltip = if (targetState) "expand" else "collapse",
+                    icon = if (targetState) Icons.AutoMirrored.Filled.ArrowForward
+                    else Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "",
+                    sideBarButtonState = None
+                )
+            //}
+        }
     }
 }
 
@@ -110,12 +145,14 @@ sealed class SidebarButtonState
     data object Warning : SidebarButtonState()
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BriarSidebarButton(
     selected: Boolean,
     onClick: () -> Unit,
     icon: ImageVector,
     contentDescription: String,
+    tooltip: String?,
     sideBarButtonState: SidebarButtonState,
 ) = BadgedBox(
     badge = {
@@ -142,11 +179,26 @@ fun BriarSidebarButton(
     },
 ) {
     val tint = if (selected) MaterialTheme.colors.primary else MaterialTheme.colors.onSurface
-    IconButton(
-        icon = icon,
-        iconSize = 30.dp,
-        iconTint = tint,
-        contentDescription = contentDescription,
-        onClick = onClick,
-    )
+    if (tooltip.isNullOrEmpty())
+    {
+        IconButton(
+            icon = icon,
+            iconSize = 30.dp,
+            iconTint = tint,
+            contentDescription = contentDescription,
+            onClick = onClick,
+        )
+    }
+    else
+    {
+        Tooltip(text = tooltip, textcolor = Color.Black) {
+            IconButton(
+                icon = icon,
+                iconSize = 30.dp,
+                iconTint = tint,
+                contentDescription = contentDescription,
+                onClick = onClick,
+            )
+        }
+    }
 }

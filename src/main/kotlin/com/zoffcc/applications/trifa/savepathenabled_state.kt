@@ -22,6 +22,7 @@ data class globalstore_state(
     val contacts_unread_message_count: Int = 0,
     val contacts_unread_group_message_count: Int = 0,
     val firstRun: Boolean = false,
+    val peerListCollapse: Boolean = false,
     val startupSelfname: String = "",
     val ui_scale: Float = 1.0f,
     val ui_density: Float = 1.0f,
@@ -38,6 +39,7 @@ interface GlobalStore {
     fun updateFirstRun(value: Boolean)
     fun updateStartupSelfname(value: String)
     fun updateUiScale(value: Float)
+    fun updatePeerListCollapse(value: Boolean)
     fun updateUiDensity(value: Float)
     fun setDefaultDensity(value: Float)
     fun isMinimized(): Boolean
@@ -46,6 +48,7 @@ interface GlobalStore {
     fun getStartupSelfname(): String
     fun loadUiScale()
     fun getUiScale(): Float
+    fun isPeerListCollapse(): Boolean
     fun loadUiDensity()
     fun getUiDensity(): Float
     fun setToxRunning(value: Boolean)
@@ -84,6 +87,11 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
         override fun updateFirstRun(value: Boolean)
         {
             mutableStateFlow.value = state.copy(firstRun = value)
+        }
+
+        override fun updatePeerListCollapse(value: Boolean)
+        {
+            mutableStateFlow.value = state.copy(peerListCollapse = value)
         }
 
         override fun updateStartupSelfname(value: String)
@@ -137,6 +145,11 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
         override fun isFirstRun(): Boolean
         {
             return state.firstRun
+        }
+
+        override fun isPeerListCollapse(): Boolean
+        {
+            return state.peerListCollapse
         }
 
         override fun getStartupSelfname(): String

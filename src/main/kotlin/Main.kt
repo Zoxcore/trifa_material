@@ -1,5 +1,6 @@
 @file:OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -59,7 +60,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -226,8 +226,10 @@ val CONTACT_COLUMN_WIDTH = 230.dp
 const val CONTACT_COLUMN_CONTACTNAME_LEN_THRESHOLD = 13
 const val PUSHURL_SHOW_LEN_THRESHOLD = 60
 val GROUPS_COLUMN_WIDTH = 190.dp
+val GROUPS_COLLAPSED_COLUMN_WIDTH = 50.dp
 const val GROUPS_COLUMN_GROUPNAME_LEN_THRESHOLD = 13
 val GROUP_PEER_COLUMN_WIDTH = 165.dp
+val GROUP_COLLAPSED_PEER_COLUMN_WIDTH = 45.dp
 const val GROUP_PEER_COLUMN_PEERNAME_LEN_THRESHOLD = 12
 val MESSAGE_INPUT_LINE_HEIGHT = 58.dp
 val MAIN_TOP_TAB_HEIGHT = 160.dp
@@ -1229,8 +1231,11 @@ fun App()
                             val groupfocusRequester = remember { FocusRequester() }
                             val groups by groupstore.stateFlow.collectAsState()
                             val grouppeers by grouppeerstore.stateFlow.collectAsState()
+                            val globalstore__ by globalstore.stateFlow.collectAsState()
                             Row(modifier = Modifier.fillMaxWidth().randomDebugBorder()) {
-                                GroupList(groupList = groups)
+                                Box(modifier = Modifier.animateContentSize()) {
+                                    GroupList(groupList = groups, peercollapsed = globalstore__.peerListCollapse)
+                                }
                                 VerticalDivider()
                                 val groupsettings by groupsettingsstore.stateFlow.collectAsState()
                                 if ((groupsettings.visible) && (groups.selectedGroupId != null)) // show group settings
@@ -1245,7 +1250,9 @@ fun App()
                                         load_grouppeers(groups.selectedGroupId!!)
                                     }
                                     val GroupPeerListScope = rememberCoroutineScope()
-                                    GroupPeerList(grouppeerList = grouppeers)
+                                    Box(modifier = Modifier.animateContentSize()) {
+                                        GroupPeerList(grouppeerList = grouppeers, peercollapsed = globalstore__.peerListCollapse)
+                                    }
                                     VerticalDivider()
                                     if (groups.selectedGroupId == null)
                                     {

@@ -20,7 +20,6 @@ package org.briarproject.briar.desktop.contact
 
 import DefaultFont
 import GROUP_PEER_COLUMN_PEERNAME_LEN_THRESHOLD
-import NotoEmojiFont
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -47,8 +46,9 @@ import org.briarproject.briar.desktop.ui.Tooltip
 fun GrouppeerItemView(
     grouppeerItem: GroupPeerItem,
     modifier: Modifier = Modifier,
+    peercollapsed: Boolean,
 ) = Row(
-    horizontalArrangement = spacedBy(8.dp),
+    horizontalArrangement = spacedBy(if(peercollapsed) 0.dp else 8.dp),
     verticalAlignment = CenterVertically,
     modifier = modifier
         // allows content to be bottom-aligned
@@ -60,36 +60,41 @@ fun GrouppeerItemView(
         modifier = Modifier.weight(1f, fill = true),
     ) {
         Box(Modifier.align(Top).padding(vertical = 8.dp)) {
-            GroupPeerItemRoleCircle(Modifier.size(15.dp), grouppeerItem)
+            GroupPeerItemRoleCircle(peercollapsed, grouppeerItem, Modifier.size(if(peercollapsed) 8.dp else 15.dp))
             //NumberBadge(
             //    num = contactItem.unread,
             //    modifier = Modifier.align(TopEnd).offset(6.dp, (-6).dp)
             //)
         }
-        Spacer(Modifier.width(2.dp))
+        if (!peercollapsed) { Spacer(Modifier.width(2.dp)) }
         GrouppeerItemViewInfo(
             grouppeerItem = grouppeerItem,
+            peercollapsed = peercollapsed
         )
     }
-    ConnectionIndicator(
-        modifier = Modifier.padding(end = 5.dp).requiredSize(16.dp),
-        isConnected = grouppeerItem.connectionStatus
-    )
+    if (!peercollapsed)
+    {
+        ConnectionIndicator(
+            modifier = Modifier.padding(end = 5.dp).requiredSize(16.dp),
+            isConnected = grouppeerItem.connectionStatus
+        )
+    }
 }
 
 @Composable
 fun GroupPeerItemRoleCircle(
-    modifier: Modifier = Modifier.size(10.dp),
+    peercollapsed: Boolean,
     grouppeerItem: GroupPeerItem,
+    modifier: Modifier = Modifier.size(if (peercollapsed) 3.dp else 10.dp),
 ) = Box(
     modifier = modifier
-        .border(1.dp, Color.Black, CircleShape)
+        .border(if (peercollapsed) 0.dp else 1.dp, Color.Black, CircleShape)
         .background(GroupPeerRoleAsBgColor(grouppeerItem.peerRole), CircleShape)
 )
 {
     Text(text = "" + GroupPeerRoleAsStringShort(grouppeerItem.peerRole),
         modifier = Modifier.align(Alignment.Center),
-        style = TextStyle(fontSize = 10.sp)
+        style = TextStyle(fontSize = if (peercollapsed) 5.sp else 10.sp)
     )
 }
 
@@ -155,19 +160,28 @@ fun GroupPeerRoleAsBgColor(peerRole: Int) : Color
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun GrouppeerItemViewInfo(grouppeerItem: GroupPeerItem) = Column(
+private fun GrouppeerItemViewInfo(grouppeerItem: GroupPeerItem, peercollapsed: Boolean) = Column(
     horizontalAlignment = Start,
     modifier = Modifier.padding(start = 0.dp)
 ) {
     var show_peer_name = if (grouppeerItem.name.isEmpty()) grouppeerItem.pubkey.toUpperCase().take(6) else grouppeerItem.name
     val tooltip_name = if (grouppeerItem.name.isEmpty()) "" else grouppeerItem.name
-    var name_style = if (grouppeerItem.name.length > GROUP_PEER_COLUMN_PEERNAME_LEN_THRESHOLD)
-        MaterialTheme.typography.body1.copy(fontSize = 12.sp, lineHeight = TextUnit.Unspecified) else MaterialTheme.typography.body1.copy(lineHeight = TextUnit.Unspecified)
+    var name_style = if ((grouppeerItem.name.length > GROUP_PEER_COLUMN_PEERNAME_LEN_THRESHOLD) && (!peercollapsed))
+        MaterialTheme.typography.body1.copy(
+            fontSize = 12.sp,
+            lineHeight = TextUnit.Unspecified
+        ) else MaterialTheme.typography.body1.copy(lineHeight = TextUnit.Unspecified)
     val ip_addr_str =  grouppeerItem.ip_addr
     // Log.i(TAG, "GrouppeerItemViewInfo: ip_addr_str=" + ip_addr_str + " name=" + show_peer_name)
-    if (ip_addr_str.length > 0) {
-        show_peer_name = show_peer_name + "\n" + ip_addr_str
-        name_style = name_style.copy(fontSize = (name_style.fontSize.value - 4).sp)
+    if (peercollapsed) {
+        show_peer_name = show_peer_name.take(2)
+    } else
+    {
+        if (ip_addr_str.length > 0)
+        {
+            show_peer_name = show_peer_name + "\n" + ip_addr_str
+            name_style = name_style.copy(fontSize = (name_style.fontSize.value - 4).sp)
+        }
     }
     Tooltip(text = "Peer Name: " + tooltip_name + "\n"
             + "Peer Role: " + GroupPeerRoleAsStringLong(grouppeerItem.peerRole) + "\n"
@@ -177,7 +191,7 @@ private fun GrouppeerItemViewInfo(grouppeerItem: GroupPeerItem) = Column(
             text = show_peer_name,
             fontFamily = DefaultFont,
             style = name_style,
-            maxLines = 2,
+            maxLines = if (peercollapsed) 1 else 2,
             overflow = Ellipsis,
         )
     }
