@@ -222,6 +222,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: show architecture
+        run:  uname -m
+
       - name: Install Java
         uses: actions/setup-java@v4
         with:
@@ -443,6 +446,9 @@ jobs:
     - name: install cliclick
       run:  brew install cliclick
 
+    - name: show architecture
+      run:  uname -m
+
     - name: install imagemagick
       run:  brew install imagemagick
 
@@ -570,6 +576,9 @@ jobs:
     - uses: actions/checkout@v4
     - name: install cliclick
       run:  brew install cliclick
+
+    - name: show architecture
+      run:  uname -m
 
     - name: install imagemagick
       run:  brew install imagemagick
