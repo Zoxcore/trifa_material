@@ -2145,6 +2145,7 @@ private fun MainAppStart()
             y_ = global_prefs.get("main.window.position.y", "").toFloat().dp
             w_ = global_prefs.get("main.window.size.width", "").toFloat().dp
             h_ = global_prefs.get("main.window.size.height", "").toFloat().dp
+            println("init:onWindowReload " + x_ + " " + y_ + " " + w_ + " " + h_)
         } catch (_: Exception)
         {
             error = 1
@@ -2267,7 +2268,7 @@ private fun onWindowMinimised(minimised: Boolean)
 @Suppress("UNUSED_PARAMETER")
 private fun onWindowResize(size: DpSize)
 {
-    // println("onWindowResize $size")
+    println("size: onWindowResize $size " + size.width.value.toString() + " " + size.height.value.toString())
     global_prefs.put("main.window.size.width", size.width.value.toString())
     global_prefs.put("main.window.size.height", size.height.value.toString())
 }
@@ -2275,7 +2276,7 @@ private fun onWindowResize(size: DpSize)
 @Suppress("UNUSED_PARAMETER")
 private fun onWindowRelocate(position: WindowPosition)
 {
-    // println("onWindowRelocate $position")
+    println("pos : onWindowRelocate $position " + position.x.value.toString() + " " + position.y.value.toString())
     global_prefs.put("main.window.position.x", position.x.value.toString())
     global_prefs.put("main.window.position.y", position.y.value.toString())
 }
