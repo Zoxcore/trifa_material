@@ -2268,7 +2268,7 @@ private fun onWindowMinimised(minimised: Boolean)
 @Suppress("UNUSED_PARAMETER")
 private fun onWindowResize(size: DpSize)
 {
-    println("size: onWindowResize $size " + size.width.value.toString() + " " + size.height.value.toString())
+    // println("size: onWindowResize $size " + size.width.value.toString() + " " + size.height.value.toString())
     global_prefs.put("main.window.size.width", size.width.value.toString())
     global_prefs.put("main.window.size.height", size.height.value.toString())
 }
@@ -2276,7 +2276,7 @@ private fun onWindowResize(size: DpSize)
 @Suppress("UNUSED_PARAMETER")
 private fun onWindowRelocate(position: WindowPosition)
 {
-    println("pos : onWindowRelocate $position " + position.x.value.toString() + " " + position.y.value.toString())
+    // println("pos : onWindowRelocate $position " + position.x.value.toString() + " " + position.y.value.toString())
     global_prefs.put("main.window.position.x", position.x.value.toString())
     global_prefs.put("main.window.position.y", position.y.value.toString())
 }
