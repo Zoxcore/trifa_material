@@ -37,8 +37,7 @@ import static com.zoffcc.applications.trifa.MainActivity.*;
 import static com.zoffcc.applications.trifa.TRIFAGlobals.*;
 import static com.zoffcc.applications.trifa.TRIFAGlobals.CONTROL_PROXY_MESSAGE_TYPE.*;
 import static com.zoffcc.applications.trifa.TRIFAGlobals.NOTIFICATION_NTFY_PUSH_URL_PREFIX;
-import static com.zoffcc.applications.trifa.ToxVars.TOX_ADDRESS_SIZE;
-import static com.zoffcc.applications.trifa.ToxVars.TOX_PUBLIC_KEY_SIZE;
+import static com.zoffcc.applications.trifa.ToxVars.*;
 
 public class HelperRelay
 {
@@ -576,6 +575,10 @@ public class HelperRelay
                     int res = tox_group_invite_friend(group_num,
                             tox_friend_by_public_key(relay_public_key_string));
                     update_savedata_file_wrapper();
+                    byte[] data = hex_to_bytes("FF" + group_identifier);
+                    data[0] = (byte) CONTROL_PROXY_MESSAGE_TYPE_GROUP_ID_FOR_PROXY.value;
+                    tox_friend_send_lossless_packet(tox_friend_by_public_key(relay_public_key_string),
+                            data, TOX_GROUP_CHAT_ID_SIZE + 1);
                 }
                 conf_++;
             }
