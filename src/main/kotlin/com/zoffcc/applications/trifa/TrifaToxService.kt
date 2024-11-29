@@ -1348,7 +1348,7 @@ class TrifaToxService
             if (f_pubkey != null)
             {
                 fl = orma!!.selectFromFriendList().
-                    tox_public_key_stringEq(f_pubkey.toUpperCase()).toList()
+                    tox_public_key_stringEq(f_pubkey.uppercase()).toList()
             }
             if ((fl != null) && (fl.size > 0))
             {

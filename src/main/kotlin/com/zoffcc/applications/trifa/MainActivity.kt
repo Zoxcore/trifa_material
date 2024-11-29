@@ -1770,7 +1770,7 @@ class MainActivity
                     {
                         if (friend_public_key != null)
                         {
-                            HelperFriend.add_friend_to_system(friend_public_key.toUpperCase(),
+                            HelperFriend.add_friend_to_system(friend_public_key.uppercase(),
                                 false, null)
                         }
                     }
@@ -2112,7 +2112,7 @@ class MainActivity
                         if ((real_sender_text_.length > 8) && (real_sender_text_.startsWith(":", 8)))
                         {
                             real_sender_text = real_sender_text_.substring(9)
-                            real_send_message_id = real_sender_text_.substring(0, 8).toLowerCase()
+                            real_send_message_id = real_sender_text_.substring(0, 8).lowercase()
                         } else
                         {
                             real_sender_text = real_sender_text_
@@ -2704,7 +2704,7 @@ class MainActivity
                 if (friend_pk != null)
                 {
                     val f = Filetransfer()
-                    f.tox_public_key_string = friend_pk.toUpperCase()
+                    f.tox_public_key_string = friend_pk.uppercase()
                     f.direction = TRIFAGlobals.TRIFA_FT_DIRECTION.TRIFA_FT_DIRECTION_INCOMING.value
                     f.file_number = file_number
                     f.kind = a_TOX_FILE_KIND

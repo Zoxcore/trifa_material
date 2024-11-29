@@ -164,7 +164,7 @@ private fun GrouppeerItemViewInfo(grouppeerItem: GroupPeerItem, peercollapsed: B
     horizontalAlignment = Start,
     modifier = Modifier.padding(start = 0.dp)
 ) {
-    var show_peer_name = if (grouppeerItem.name.isEmpty()) grouppeerItem.pubkey.toUpperCase().take(6) else grouppeerItem.name
+    var show_peer_name = if (grouppeerItem.name.isEmpty()) grouppeerItem.pubkey.uppercase().take(6) else grouppeerItem.name
     val tooltip_name = if (grouppeerItem.name.isEmpty()) "" else grouppeerItem.name
     var name_style = if ((grouppeerItem.name.length > GROUP_PEER_COLUMN_PEERNAME_LEN_THRESHOLD) && (!peercollapsed))
         MaterialTheme.typography.body1.copy(

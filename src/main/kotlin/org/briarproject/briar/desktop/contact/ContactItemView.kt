@@ -97,10 +97,10 @@ private fun ContactItemViewInfo(contactItem: ContactItem) = Column(
     horizontalAlignment = Start,
     modifier = Modifier.padding(start = 6.dp)
 ) {
-    var show_name = if (contactItem.name.isEmpty()) contactItem.pubkey.toUpperCase().take(6) else contactItem.name
+    var show_name = if (contactItem.name.isEmpty()) contactItem.pubkey.uppercase().take(6) else contactItem.name
     var friend_name_for_relay: String? = null
-    if (is_any_relay(contactItem.pubkey.toUpperCase())) {
-        val friendpubkey_for_relay = get_friend_of_relay(contactItem.pubkey.toUpperCase())
+    if (is_any_relay(contactItem.pubkey.uppercase())) {
+        val friendpubkey_for_relay = get_friend_of_relay(contactItem.pubkey.uppercase())
         if (!friendpubkey_for_relay.isNullOrEmpty()) {
             friend_name_for_relay = get_friend_name_from_pubkey(friendpubkey_for_relay)
             if (!friend_name_for_relay.isNullOrEmpty())
@@ -112,7 +112,7 @@ private fun ContactItemViewInfo(contactItem: ContactItem) = Column(
     val tooltip_name = show_name
     var name_style = if (show_name.length > CONTACT_COLUMN_CONTACTNAME_LEN_THRESHOLD)
         MaterialTheme.typography.body1.copy(fontSize = 13.sp, lineHeight = TextUnit.Unspecified) else MaterialTheme.typography.body1.copy(lineHeight = TextUnit.Unspecified)
-    val friend_relay = get_relay_for_friend(contactItem.pubkey.toUpperCase())
+    val friend_relay = get_relay_for_friend(contactItem.pubkey.uppercase())
     var pushurl_str = if (contactItem.push_url.isNullOrEmpty()) "" else ("\n" + "Push URL: " + contactItem.push_url)
     pushurl_str = if (pushurl_str.length > PUSHURL_SHOW_LEN_THRESHOLD) (pushurl_str.take(PUSHURL_SHOW_LEN_THRESHOLD) + "...") else pushurl_str
     val relay_str = if (friend_relay.isNullOrEmpty()) "" else ("\n" + "Relay (ToxProxy): " + friend_relay)

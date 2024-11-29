@@ -231,7 +231,7 @@ fun getListWithGroupingAndSorting(peerlist: ArrayList<GroupPeerItem>, self_group
     return ArrayList(peerlist.sortedWith(
         compareBy<GroupPeerItem> { selfOrder[it.pubkey == self_group_pubkey] }.
         thenBy { rolesOrder[it.peerRole] }.
-        thenBy { it.name.toLowerCase() }
+        thenBy { it.name.lowercase() }
     )
     )
 }

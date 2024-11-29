@@ -502,7 +502,7 @@ object HelperGeneric {
             }
 
             val m = Message()
-            m.tox_friendpubkey = friendPubkey.toUpperCase()
+            m.tox_friendpubkey = friendPubkey.uppercase()
             m.direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value
             m.TOX_MESSAGE_TYPE = 0
             m.TRIFA_MESSAGE_TYPE = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value
@@ -519,7 +519,7 @@ object HelperGeneric {
             m.raw_msgv2_bytes = ""
 
             val result: MainActivity.Companion.send_message_result? =
-                tox_friend_send_message_wrapper(friendPubkey.toUpperCase(),
+                tox_friend_send_message_wrapper(friendPubkey.uppercase(),
                     0, msg,
                     m.sent_timestamp / 1000)
             if (result == null)
@@ -590,7 +590,7 @@ object HelperGeneric {
                 msg_idv3_hash = m.msg_idv3_hash,
                 msg_version = m.msg_version,
                 sentTimeMs = timestamp,
-                text = msg!!, toxpk = friendPubkey.toUpperCase(),
+                text = msg!!, toxpk = friendPubkey.uppercase(),
                 trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value,
                 msgDatabaseId = row_id,
                 filename_fullpath = null)))
