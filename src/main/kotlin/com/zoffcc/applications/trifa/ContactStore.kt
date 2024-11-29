@@ -5,6 +5,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.briarproject.briar.desktop.contact.ContactItem
+import java.util.*
+import kotlin.collections.ArrayList
 
 data class StateContacts(val contacts: List<ContactItem> = emptyList(), val visible: Boolean = false,
                          val selectedContactPubkey: String? = null, val selectedContact: ContactItem? = null,
@@ -265,7 +267,7 @@ fun getFriendListWithGroupingAndSorting(friendlist: ArrayList<ContactItem>)
             }
             friendsRolesOrder[tmp_sort_value]
         }.
-        thenBy { it.name.toLowerCase() }
+        thenBy { it.name.lowercase() }
     )
     )
 }
