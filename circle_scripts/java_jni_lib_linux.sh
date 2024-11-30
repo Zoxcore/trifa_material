@@ -121,6 +121,7 @@ jni-c-toxcore.c \
 $_INST_/lib/libtoxcore.a \
 $_INST_/lib/libtoxav.a \
 $_INST_/lib/libtoxencryptsave.a \
+-Wl,-Bsymbolic \
 $_INST_/lib/libavcodec.a \
 $_INST_/lib/libavdevice.a \
 $_INST_/lib/libavformat.a \
