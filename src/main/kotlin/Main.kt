@@ -1860,7 +1860,7 @@ fun update_bootstrap_nodes_from_internet()
                     if (bn2.ip != null && !bn2.ip.equals("none", ignoreCase = true) && bn2.port > 0 && bn2.key_hex != null)
                     {
                         orma?.insertIntoBootstrapNodeEntryDB(bn2)
-                        Log.i(TAG, "add UDP node:$bn2")
+                        Log.i(TAG, "add UDP node:" + bn2.toString().trimEnd())
                         num_udp++
                     }
                     val bn2_ip6 = BootstrapNodeEntryDB()
@@ -1872,7 +1872,7 @@ fun update_bootstrap_nodes_from_internet()
                     if (!bn2_ip6.ip.equals("-", ignoreCase = true) && bn2_ip6.port > 0 && bn2_ip6.key_hex != null)
                     {
                         orma?.insertIntoBootstrapNodeEntryDB(bn2_ip6)
-                        Log.i(TAG, "add UDP ipv6 node:$bn2_ip6")
+                        Log.i(TAG, "add UDP ipv6 node:" + bn2_ip6.toString().trimEnd())
                         num_udp++
                     }
                 } catch (e: java.lang.Exception)
@@ -1899,7 +1899,7 @@ fun update_bootstrap_nodes_from_internet()
                             bn2.num = num_tcp.toLong()
                             bn2.port = nl_entry.tcpPorts[p]?.toLong()!!
                             orma?.insertIntoBootstrapNodeEntryDB(bn2)
-                            Log.i(TAG, "add tcp node:$bn2")
+                            Log.i(TAG, "add tcp node:" + bn2.toString().trimEnd())
                             num_tcp++
                         }
                     }
@@ -1920,7 +1920,7 @@ fun update_bootstrap_nodes_from_internet()
                             bn2_ip6_.udp_node = false
                             bn2_ip6_.num = num_tcp.toLong()
                             orma?.insertIntoBootstrapNodeEntryDB(bn2_ip6_)
-                            Log.i(TAG, "add tcp ipv6 node:$bn2_ip6_")
+                            Log.i(TAG, "add tcp ipv6 node:" + bn2_ip6_.toString().trimEnd())
                             num_tcp++
                         }
                     }
