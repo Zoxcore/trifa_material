@@ -69,6 +69,7 @@ import androidx.compose.ui.unit.sp
 import com.zoffcc.applications.trifa.HelperFriend.get_g_opts
 import com.zoffcc.applications.trifa.HelperFriend.set_g_opts
 import com.zoffcc.applications.trifa.HelperGeneric
+import com.zoffcc.applications.trifa.HelperGeneric.long_to_hex
 import com.zoffcc.applications.trifa.HelperNotification
 import com.zoffcc.applications.trifa.HelperOSFile.show_containing_dir_in_explorer
 import com.zoffcc.applications.trifa.HelperRelay.add_or_update_own_relay
@@ -81,7 +82,9 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__open_files_
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__send_push_notifications
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__use_other_toxproxies
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_name
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_nospam
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_set_name
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_set_nospam
 import com.zoffcc.applications.trifa.TAG
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import global_prefs
@@ -93,6 +96,9 @@ import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import savepathstore
 import update_bootstrap_nodes_from_internet
 import java.io.File
+import kotlin.random.Random
+import kotlin.random.nextUInt
+import kotlin.random.nextULong
 
 @Composable
 fun SettingDetails()
@@ -102,6 +108,7 @@ fun SettingDetails()
         if (global_store.toxRunning)
         {
             set_own_name()
+            set_own_nospam()
             Spacer(modifier = Modifier.height(60.dp))
         }
         if ((global_store.toxRunning) && (global_store.ormaRunning))
@@ -558,6 +565,96 @@ private fun set_own_name()
         }
     }
     // ---- change own name for one-on-one chats ----
+}
+
+@Composable
+private fun set_own_nospam()
+{
+    // ---- change own nospam value ----
+    var tox_self_nospam = ""
+    try
+    {
+        tox_self_nospam = long_to_hex(tox_self_get_nospam())
+    } catch (e: java.lang.Exception)
+    {
+        e.printStackTrace()
+    }
+    val tox_nospam_hex_len = 8
+    val hex_Pattern = "[A-F0-9]*"
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var tox_own_nospam by remember { mutableStateOf(tox_self_nospam) }
+
+    Column(modifier = Modifier.height(90.dp)) {
+        Row(Modifier.wrapContentHeight().fillMaxWidth().padding(start = 15.dp)) {
+            TextField(enabled = true, singleLine = true,
+                textStyle = TextStyle(fontSize = 16.sp),
+                modifier = Modifier.padding(0.dp).weight(1.0f),
+                colors = TextFieldDefaults.textFieldColors(backgroundColor = Color(ChatColorsConfig.LIGHT__TEXTFIELD_BGCOLOR)),
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.None,
+                    autoCorrect = false,
+                ), value = tox_own_nospam,
+                isError = errorMessage != null,
+                placeholder = {
+                    Text("no spam must be " + tox_nospam_hex_len + " chars")
+                },
+                onValueChange = {
+                    tox_own_nospam = it.uppercase()
+                    errorMessage = if ((it.length == tox_nospam_hex_len) && (it.uppercase().matches(hex_Pattern.toRegex())))
+                    {
+                        null
+                    } else
+                    {
+                        "Please enter a valid 8 char hex string."
+                    }
+                })
+            Button(modifier = Modifier.width(300.dp).padding(start = 20.dp, end = 20.dp),
+                enabled = true,
+                onClick = {
+                    try
+                    {
+                        val new_value = tox_own_nospam.toLong(radix = 16)
+                        tox_self_set_nospam(new_value.toLong())
+                        HelperGeneric.update_savedata_file_wrapper()
+                        SnackBarToast(i18n("ui.setting.new_nospam_set"))
+                    }
+                    catch(_: Exception)
+                    {
+                    }
+                })
+            {
+                Text(i18n("ui.setting.update_tox_nospam"))
+            }
+            Button(modifier = Modifier.width(300.dp).padding(start = 0.dp, end = 20.dp),
+                enabled = true,
+                onClick = {
+                    try
+                    {
+                        val rnd_value = Random.nextUInt()
+                        tox_own_nospam = long_to_hex(rnd_value.toLong()).uppercase()
+                        tox_self_set_nospam(rnd_value.toLong())
+                        HelperGeneric.update_savedata_file_wrapper()
+                        SnackBarToast(i18n("ui.setting.new_nospam_set"))
+                    }
+                    catch(_: Exception)
+                    {
+                    }
+                })
+            {
+                Text(i18n("ui.setting.update_random_nospam"))
+            }
+        }
+        if (errorMessage != null)
+        {
+            Text(
+                text = errorMessage ?: "",
+                color = Color.Red,
+                style = MaterialTheme.typography.caption,
+                modifier = Modifier.padding(top = 3.dp, start = 20.dp).align(Alignment.Start)
+            )
+        }
+    }
+    // ---- change own nospam value ----
 }
 
 @Composable
