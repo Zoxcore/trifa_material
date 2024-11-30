@@ -4202,5 +4202,18 @@ class MainActivity
                 }
             }
         }
+
+        fun update_toxid_while_running()
+        {
+            val my_tox_id_temp = get_my_toxid()
+            Log.i(TAG, "MyToxID updated:$my_tox_id_temp")
+            myUser.toxpk = my_tox_id_temp
+            try
+            {
+                toxdatastore.updateToxID(my_tox_id_temp)
+            } catch (_: Exception)
+            {
+            }
+        }
     }
 }
