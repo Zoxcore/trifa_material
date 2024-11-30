@@ -78,6 +78,7 @@ import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.text.HexFormat
 
 object HelperGeneric {
     private const val TAG = "trifa.Hlp.Generic"
@@ -187,6 +188,29 @@ object HelperGeneric {
             hexChars[(j - start) * 2 + 1] = hexArray[v and 0x0F]
         }
         return String(hexChars)
+    }
+
+    @OptIn(ExperimentalStdlibApi::class)
+    fun long_to_hex(l: Long): String
+    {
+        try
+        {
+            val out: String = l.toHexString(format = HexFormat {
+                number {
+                    prefix = ""
+                    upperCase = true
+                    suffix = ""
+                    minLength = 8
+                    removeLeadingZeros = true
+                }
+            }
+            )
+            return out
+        }
+        catch(_: Exception)
+        {
+            return ""
+        }
     }
 
     fun two_hex_bytes_to_dec_int(b1: Byte, b2: Byte): Int {
