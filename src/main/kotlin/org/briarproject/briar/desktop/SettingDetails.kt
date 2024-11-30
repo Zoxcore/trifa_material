@@ -85,6 +85,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_name
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_nospam
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_set_name
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_set_nospam
+import com.zoffcc.applications.trifa.MainActivity.Companion.update_toxid_while_running
 import com.zoffcc.applications.trifa.TAG
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import global_prefs
@@ -613,10 +614,14 @@ private fun set_own_nospam()
                 onClick = {
                     try
                     {
-                        val new_value = tox_own_nospam.toLong(radix = 16)
-                        tox_self_set_nospam(new_value.toLong())
-                        HelperGeneric.update_savedata_file_wrapper()
-                        SnackBarToast(i18n("ui.setting.new_nospam_set"))
+                        if ((tox_own_nospam.length == tox_nospam_hex_len) && (tox_own_nospam.uppercase().matches(hex_Pattern.toRegex())))
+                        {
+                            val new_value = tox_own_nospam.toLong(radix = 16)
+                            tox_self_set_nospam(new_value)
+                            HelperGeneric.update_savedata_file_wrapper()
+                            update_toxid_while_running()
+                            SnackBarToast(i18n("ui.setting.new_nospam_set"))
+                        }
                     }
                     catch(_: Exception)
                     {
@@ -634,6 +639,7 @@ private fun set_own_nospam()
                         tox_own_nospam = long_to_hex(rnd_value.toLong()).uppercase()
                         tox_self_set_nospam(rnd_value.toLong())
                         HelperGeneric.update_savedata_file_wrapper()
+                        update_toxid_while_running()
                         SnackBarToast(i18n("ui.setting.new_nospam_set"))
                     }
                     catch(_: Exception)
