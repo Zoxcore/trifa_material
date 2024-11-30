@@ -72,7 +72,8 @@ cd x265_git/
     echo "*** RASPI ***"
     cmake . -DCMAKE_INSTALL_PREFIX="$_INST_" -DENABLE_PIC=ON -DENABLE_ASSEMBLY=OFF # -DCMAKE_VERBOSE_MAKEFILE=ON
   else
-    cmake . -DCMAKE_INSTALL_PREFIX="$_INST_" -DENABLE_PIC=ON -DENABLE_ASSEMBLY=OFF # -DCMAKE_VERBOSE_MAKEFILE=ON
+    # /usr/bin/ld: /home/runner/work/trifa_material/trifa_material/inst//lib/libx265.a(cpu-a.asm.o): relocation R_X86_64_PC32 against symbol `x265_intel_cpu_indicator_init' can not be used when making a shared object; recompile with -fPIC
+    cmake . -DCMAKE_INSTALL_PREFIX="$_INST_" -DENABLE_PIC=ON -DENABLE_ASSEMBLY=ON # -DCMAKE_VERBOSE_MAKEFILE=ON
   fi
   make || exit 1
   make install
@@ -162,7 +163,7 @@ export LDFLAGS=" "
   ./configure \
               --enable-gpl \
               --prefix="$_INST_" \
-              --disable-asm \
+              --enable-asm \
               --enable-pic \
               --disable-swscale \
               --disable-network \
@@ -425,6 +426,7 @@ cd x264/
                                          --enable-pic || exit 
   else
     ./configure \
+                                         --enable-asm \
                                          --prefix="$_INST_" \
                                          --disable-opencl \
                                          --enable-static \
@@ -487,11 +489,12 @@ else
     echo "***** ASAN *****"
     echo "***** ASAN *****"
     echo "***** ASAN *****"
-    # enable H265 encoder only on the ASAN build for linux (for now)
+    # enable H265 encoder
     h265_feature="yes"
     CFLAGS_ASAN="-fsanitize=address -fno-omit-frame-pointer -fsanitize-recover=address -static-libasan"
   else
-    h265_feature="no"
+    # enable H265 encoder also on the regular builds
+    h265_feature="yes"
     CFLAGS_ASAN=""
   fi
   ./configure \

@@ -204,6 +204,7 @@ jobs:
           openjdk-17-jdk-headless \
           coreutils autoconf libtool pkg-config \
           cmake \
+          nasm \
           yasm
 
       - name: build deps
