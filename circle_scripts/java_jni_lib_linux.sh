@@ -136,6 +136,7 @@ $_INST_/lib/libtoxencryptsave.a \
 $_INST_/lib/libsodium.a \
 -lpthread \
 -lm \
+-lstdc++ \
 -shared \
 -Wl,-soname,libjni-c-toxcore.so -o libjni-c-toxcore.so || exit 1
 
