@@ -96,6 +96,8 @@ dependencies {
     // implementation("io.github.theapache64:rebugger:1.0.0-rc02")
 }
 
+val main_class_name = "MainKt"
+
 compose.desktop {
     java {
         toolchain {
@@ -108,7 +110,8 @@ compose.desktop {
     }
 
     application {
-        mainClass = "MainKt"
+
+        mainClass = main_class_name
         // jvmArgs += listOf("-Xmx2G")
         // args += listOf("-customArgument")
         jvmArgs += listOf("-Dcom.apple.mrj.application.apple.menu.about.name=TRIfA")
