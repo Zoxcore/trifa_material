@@ -80,9 +80,9 @@ jobs:
            ls -al
            ./gradlew run > trifa.log 2>&1 &
            pwd
-           sleep 20
+           sleep 40
            cliclick -m verbose c:77,124
-           sleep 2
+           sleep 10
            cliclick -m verbose c:139,124
            sleep 20
            cd /Users/runner/work/trifa_material/trifa_material/java_tox_tester-master/
