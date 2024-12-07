@@ -14,3 +14,10 @@ java \
 -classpath ".:sqlite-jdbc-3.46.1.2.jar:sorma2.jar" \
 com/zoffcc/applications/sorm/Generator "gen"
 
+echo "#############"
+echo "#############"
+echo ""
+echo "have a look in ${basedir}/sorma2/gen/com/zoffcc/applications/sorm/ for the generated java source files"
+echo ""
+echo "#############"
+echo "#############"
