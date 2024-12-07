@@ -3691,7 +3691,18 @@ class MainActivity
                     catch(_: Exception)
                     {
                     }
-                    HelperNotification.displayNotification("new Group Message" + grptitle)
+
+                    var group_notification_silent = false
+                    try {
+                        if (orma!!.selectFromGroupDB().group_identifierEq(groupid.lowercase()).get(0).notification_silent) {
+                            group_notification_silent = true
+                        }
+                    } catch (_: Exception) {
+                    }
+                    if (group_notification_silent == false)
+                    {
+                        HelperNotification.displayNotification("new Group Message" + grptitle)
+                    }
                     globalstore.increase_unread_group_message_count()
                     globalgrpstoreunreadmsgs.increase_unread_per_group_message_count(groupid.lowercase())
                 }

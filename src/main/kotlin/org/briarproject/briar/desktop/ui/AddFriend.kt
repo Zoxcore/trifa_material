@@ -80,7 +80,7 @@ fun AddFriend() = Box {
                             {
                                 HelperFriend.add_friend_real(friend_pubkey)
                             }
-                            catch(_: java.lang.Exception)
+                            catch(_: Exception)
                             {
                             }
                             contactstore.add(item = ContactItem(name = i18n("ui.addfriend.new_friend") + " #" + friendnum,

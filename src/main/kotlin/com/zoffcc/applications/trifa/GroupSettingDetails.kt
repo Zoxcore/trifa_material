@@ -23,6 +23,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
+import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
@@ -46,6 +47,8 @@ import com.zoffcc.applications.trifa.HelperGroup.dump_saved_offline_peers_to_log
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_self_get_peer_id
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_self_set_name
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_set_name
+import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
+import org.briarproject.briar.desktop.DetailItem
 import org.briarproject.briar.desktop.ui.VerticallyScrollableArea
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import java.io.File
@@ -62,7 +65,7 @@ fun GroupSettingDetails(selectedGroupId: String?)
             val group_num = HelperGroup.tox_group_by_groupid__wrapper(selectedGroupId)
             val self_peernum = tox_group_self_get_peer_id(group_num)
             self_name_in_group = MainActivity.tox_group_peer_get_name(group_num, self_peernum)!!
-        } catch (e: java.lang.Exception)
+        } catch (e: Exception)
         {
             e.printStackTrace()
         }
@@ -74,6 +77,35 @@ fun GroupSettingDetails(selectedGroupId: String?)
                 label = "Group ID: " + selectedGroupId.lowercase(), description = "ID of this group")
             Spacer(modifier = Modifier.height(5.dp))
         }
+
+        // ---- notifications of this group ----
+        var group_notification_silent by remember { mutableStateOf(false) }
+        try
+        {
+            if (orma!!.selectFromGroupDB().group_identifierEq(selectedGroupId).get(0).notification_silent)
+            {
+                group_notification_silent = true
+            }
+        } catch (_: Exception)
+        {
+        }
+        DetailItem(label = i18n("ui.group_settings.notification_silent"),
+            description = (if (group_notification_silent) i18n("enabled") else i18n("disabled"))) {
+            Switch(
+                checked = group_notification_silent,
+                onCheckedChange = {
+                    group_notification_silent = it
+                    try
+                    {
+                        orma!!.updateGroupDB().group_identifierEq(selectedGroupId).notification_silent(group_notification_silent).execute()
+                    }
+                    catch(_: Exception)
+                    {
+                    }
+                },
+            )
+        }
+        // ---- notifications of this group ----
 
         var num_messages = "?"
         try
