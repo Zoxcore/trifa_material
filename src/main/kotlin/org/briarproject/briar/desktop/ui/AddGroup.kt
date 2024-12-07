@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoffcc.applications.sorm.GroupDB
 import com.zoffcc.applications.trifa.HelperGeneric
 import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
 import com.zoffcc.applications.trifa.HelperGroup.hex_to_bytes
@@ -41,6 +42,8 @@ import com.zoffcc.applications.trifa.TRIFAGlobals
 import com.zoffcc.applications.trifa.TRIFAGlobals.UINT32_MAX_JAVA
 import com.zoffcc.applications.trifa.ToxVars
 import com.zoffcc.applications.trifa.ToxVars.TOX_GROUP_CHAT_ID_SIZE
+import com.zoffcc.applications.trifa.TrifaToxService
+import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import groupstore
 import org.briarproject.briar.desktop.contact.GroupItem
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
@@ -99,6 +102,19 @@ fun AddGroup() = Box {
                             val new_privacy_state = MainActivity.tox_group_get_privacy_state(new_group_num)
                             val group_name = i18n("ui.group.new_group") + " #" + new_group_num
                             val group_num_peers = MainActivity.tox_group_peer_count(new_group_num)
+
+                            try
+                            {
+                                val group_new = GroupDB()
+                                group_new.group_identifier = join_group_id.lowercase()
+                                group_new.privacy_state = new_privacy_state
+                                group_new.name = group_name!!
+                                group_new.notification_silent = false
+                                orma!!.insertIntoGroupDB(group_new)
+                            } catch (_: Exception)
+                            {
+                            }
+
                             groupstore.add(item = GroupItem(numPeers = group_num_peers.toInt(),
                                 name = group_name!!, isConnected = 0,
                                 groupId = join_group_id.lowercase(),
@@ -144,6 +160,19 @@ fun AddGroup() = Box {
                             val new_privacy_state = MainActivity.tox_group_get_privacy_state(new_group_num)
                             val group_name = "TRIfA Info Group"
                             val group_num_peers = MainActivity.tox_group_peer_count(new_group_num)
+
+                            try
+                            {
+                                val group_new = GroupDB()
+                                group_new.group_identifier = TRIFAGlobals.TOX_TRIFA_PUBLIC_GROUPID.lowercase()
+                                group_new.privacy_state = new_privacy_state
+                                group_new.name = group_name!!
+                                group_new.notification_silent = false
+                                orma!!.insertIntoGroupDB(group_new)
+                            } catch (_: Exception)
+                            {
+                            }
+
                             groupstore.add(item = GroupItem(numPeers = group_num_peers.toInt(),
                                 name = group_name!!, isConnected = 0,
                                 groupId = TRIFAGlobals.TOX_TRIFA_PUBLIC_GROUPID.lowercase(),
