@@ -26,6 +26,7 @@ import com.sksamuel.scrimage.ImmutableImage
 import com.sksamuel.scrimage.webp.WebpWriter
 import com.vanniktech.emoji.search.SearchEmojiManager
 import com.zoffcc.applications.sorm.Filetransfer
+import com.zoffcc.applications.sorm.GroupDB
 import com.zoffcc.applications.sorm.Message
 import com.zoffcc.applications.trifa.HelperFiletransfer.get_filetransfer_filenum_from_id
 import com.zoffcc.applications.trifa.HelperFiletransfer.set_filetransfer_state_from_id
@@ -158,6 +159,13 @@ object HelperGeneric {
         {
             tox_group_leave(group_num_temp, "quit")
             update_savedata_file_wrapper()
+
+            try
+            {
+                orma!!.deleteFromGroupDB().group_identifierEq(group_id.lowercase())
+            } catch (_: Exception)
+            {
+            }
         }
         SnackBarToast("Group removed")
     }

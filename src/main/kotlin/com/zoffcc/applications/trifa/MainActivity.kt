@@ -7,6 +7,7 @@ import SnackBarToast
 import UIGroupMessage
 import UIMessage
 import User
+import androidx.compose.ui.graphics.vector.Group
 import avstatestore
 import avstatestorecallstate
 import avstatestorevcapfpsstate
@@ -17,6 +18,7 @@ import com.zoffcc.applications.jninotifications.NTFYActivity.jninotifications_lo
 import com.zoffcc.applications.sorm.FileDB
 import com.zoffcc.applications.sorm.Filetransfer
 import com.zoffcc.applications.sorm.FriendList
+import com.zoffcc.applications.sorm.GroupDB
 import com.zoffcc.applications.sorm.GroupMessage
 import com.zoffcc.applications.sorm.Message
 import com.zoffcc.applications.trifa.AudioBar.audio_in_bar
@@ -3169,6 +3171,17 @@ class MainActivity
                     val group_identifier: String = bytesToHex(Arrays.copyOfRange(invite_data, 0, GROUP_ID_LENGTH), 0, GROUP_ID_LENGTH).lowercase()
                     val new_privacy_state = tox_group_get_privacy_state(new_group_num)
                     val group_num_peers = tox_group_peer_count(new_group_num)
+                    try
+                    {
+                        val group_new = GroupDB()
+                        group_new.group_identifier = group_identifier
+                        group_new.privacy_state = new_privacy_state
+                        group_new.name = group_name!!
+                        group_new.notification_silent = false
+                        orma!!.insertIntoGroupDB(group_new)
+                    } catch (_: Exception)
+                    {
+                    }
                     groupstore.add(item = GroupItem(numPeers = group_num_peers.toInt(), name = group_name!!, isConnected = 0, groupId = group_identifier, privacyState = new_privacy_state))
                 } catch (_: Exception)
                 {

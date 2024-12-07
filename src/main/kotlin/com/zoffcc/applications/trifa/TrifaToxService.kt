@@ -8,6 +8,7 @@ import com.zoffcc.applications.sorm.BootstrapNodeEntryDB.get_tcprelay_nodelist_f
 import com.zoffcc.applications.sorm.BootstrapNodeEntryDB.get_udp_nodelist_from_db
 import com.zoffcc.applications.sorm.BootstrapNodeEntryDB.tcprelay_node_list
 import com.zoffcc.applications.sorm.FriendList
+import com.zoffcc.applications.sorm.GroupDB
 import com.zoffcc.applications.sorm.Message
 import com.zoffcc.applications.sorm.OrmaDatabase
 import com.zoffcc.applications.trifa.HelperFiletransfer.start_outgoing_ft
@@ -1457,6 +1458,19 @@ class TrifaToxService
                     group_name = ""
                 }
                 val new_privacy_state: Int = tox_group_get_privacy_state(group_numbers!![conf_])
+
+                try
+                {
+                    val group_new = GroupDB()
+                    group_new.group_identifier = group_identifier
+                    group_new.privacy_state = new_privacy_state
+                    group_new.name = group_name
+                    group_new.notification_silent = false
+                    orma!!.insertIntoGroupDB(group_new)
+                } catch (_: Exception)
+                {
+                }
+
                 try
                 {
                     groupstore.add(item = GroupItem(numPeers = group_num_peers.toInt(), name = group_name, isConnected = is_connected, groupId = group_identifier, privacyState = new_privacy_state))
