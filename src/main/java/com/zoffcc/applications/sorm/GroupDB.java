@@ -41,34 +41,34 @@ public class GroupDB
     // group id is always saved as lower case hex string!! -----------------
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    String who_invited__tox_public_key_string = "";
+    public String who_invited__tox_public_key_string = "";
 
     @Column(indexed = true, defaultExpr = "", helpers = Column.Helpers.ALL)
     @Nullable
-    String name = "";
+    public String name = "";
 
     @Column(indexed = true, defaultExpr = "", helpers = Column.Helpers.ALL)
     @Nullable
-    String topic = "";
+    public String topic = "";
 
     @Column(indexed = true, defaultExpr = "-1", helpers = Column.Helpers.ALL)
-    long peer_count = -1;
+    public long peer_count = -1;
 
     @Column(indexed = true, defaultExpr = "-1", helpers = Column.Helpers.ALL)
-    long own_peer_number = -1;
+    public long own_peer_number = -1;
 
     @Column(indexed = true, defaultExpr = "0", helpers = Column.Helpers.ALL)
-    int privacy_state = TOX_GROUP_PRIVACY_STATE.TOX_GROUP_PRIVACY_STATE_PUBLIC.value;
+    public int privacy_state = TOX_GROUP_PRIVACY_STATE.TOX_GROUP_PRIVACY_STATE_PUBLIC.value;
 
     @Column(indexed = true, defaultExpr = "-1", helpers = Column.Helpers.ALL)
-    long tox_group_number = -1; // this changes often!!
+    public long tox_group_number = -1; // this changes often!!
 
     @Column(indexed = true, defaultExpr = "false", helpers = Column.Helpers.ALL)
-    boolean group_active = false; // is this conference active now? are we invited?
+    public boolean group_active = false; // is this conference active now? are we invited?
 
     @Column(indexed = true, defaultExpr = "false", helpers = Column.Helpers.ALL)
     @Nullable
-    boolean notification_silent = false; // show notifications for this conference?
+    public boolean notification_silent = false; // show notifications for this conference?
 
     static GroupDB deep_copy(GroupDB in)
     {
