@@ -9,6 +9,7 @@ echo "$_HOME_"
 cd "$_HOME_" || exit
 
 if [ "$1""x" == "buildx" ]; then
+    # --no-cache
     docker build -f Dockerfile_ub20 -t trifa_materia_002_ub20 .
     exit 0
 fi
