@@ -37,7 +37,7 @@ if [ "$2""x" != "1x" ]; then
     -Dcompose.application.configure.swing.globals=true \
     -Dcompose.application.resources.dir="$p"/build/compose/tmp/prepareAppResources \
     -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant \
-    -cp "$p"/build/compose/jars/trifa_material-linux-x64-1.0.44.jar \
+    -cp "$p"/build/compose/jars/trifa_material-linux-x64-1.0.45.jar \
     MainKt
 else
   "$java_17_or_newer_dir"/bin/java -Dapple.awt.application.name=TRIfA \
@@ -45,6 +45,6 @@ else
     -Dcompose.application.configure.swing.globals=true \
     -Dcompose.application.resources.dir="$p"/build/compose/tmp/prepareAppResources \
     -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant \
-    -cp "$p"/build/compose/jars/trifa_material-linux-x64-1.0.44.jar \
+    -cp "$p"/build/compose/jars/trifa_material-linux-x64-1.0.45.jar \
     MainKt
 fi
