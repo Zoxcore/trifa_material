@@ -1,5 +1,37 @@
 # Changelog
 
+## [v1.0.45](https://github.com/Zoxcore/trifa_material/tree/v1.0.45) (2024-12-08)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.44...v1.0.45)
+
+**Merged pull requests:**
+
+- silence notifications per NGC group [\#342](https://github.com/Zoxcore/trifa_material/pull/342) ([zoff99](https://github.com/zoff99))
+- update dependencies [\#341](https://github.com/Zoxcore/trifa_material/pull/341) ([zoff99](https://github.com/zoff99))
+- set own nospam value, enable H265 encoder also on the regular builds, fix for com.sksamuel.scrimage, update toxcore [\#340](https://github.com/Zoxcore/trifa_material/pull/340) ([zoff99](https://github.com/zoff99))
+- Bump com.sksamuel.scrimage:scrimage-core from 4.1.3 to 4.3.0 [\#339](https://github.com/Zoxcore/trifa_material/pull/339) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump com.sksamuel.scrimage:scrimage-webp from 4.2.0 to 4.3.0 [\#338](https://github.com/Zoxcore/trifa_material/pull/338) ([dependabot[bot]](https://github.com/apps/dependabot))
+- remove trailing line breaks from some log messages [\#337](https://github.com/Zoxcore/trifa_material/pull/337) ([zoff99](https://github.com/zoff99))
+- update bootstrap nodes [\#336](https://github.com/Zoxcore/trifa_material/pull/336) ([zoff99](https://github.com/zoff99))
+- update to kotlin.version 2.1.0 [\#335](https://github.com/Zoxcore/trifa_material/pull/335) ([zoff99](https://github.com/zoff99))
+- send all groupIDs to toxproxy, and remove some debug log messages [\#334](https://github.com/Zoxcore/trifa_material/pull/334) ([zoff99](https://github.com/zoff99))
+- Bump org.xerial:sqlite-jdbc from 3.47.0.0 to 3.47.1.0 [\#333](https://github.com/Zoxcore/trifa_material/pull/333) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update x265 to 1d117bed4747758b51bd2c124d738527e30392cb [\#332](https://github.com/Zoxcore/trifa_material/pull/332) ([zoff99](https://github.com/zoff99))
+- more verbose on window size and position [\#331](https://github.com/Zoxcore/trifa_material/pull/331) ([zoff99](https://github.com/zoff99))
+- button to collapse grouplist and peerlist in groups [\#330](https://github.com/Zoxcore/trifa_material/pull/330) ([zoff99](https://github.com/zoff99))
+- CI macos update [\#329](https://github.com/Zoxcore/trifa_material/pull/329) ([zoff99](https://github.com/zoff99))
+- update some google noto fonts [\#328](https://github.com/Zoxcore/trifa_material/pull/328) ([zoff99](https://github.com/zoff99))
+- Bump com.github.gmazzo.buildconfig from 5.5.0 to 5.5.1 [\#327](https://github.com/Zoxcore/trifa_material/pull/327) ([dependabot[bot]](https://github.com/apps/dependabot))
+- make packages a little bit smaller [\#326](https://github.com/Zoxcore/trifa_material/pull/326) ([zoff99](https://github.com/zoff99))
+- add comment about webp encoding on macos arm [\#325](https://github.com/Zoxcore/trifa_material/pull/325) ([zoff99](https://github.com/zoff99))
+- update JNI libs [\#324](https://github.com/Zoxcore/trifa_material/pull/324) ([zoff99](https://github.com/zoff99))
+- set background of video boxes [\#323](https://github.com/Zoxcore/trifa_material/pull/323) ([zoff99](https://github.com/zoff99))
+- update to compose.version 1.8.0-dev1905 [\#322](https://github.com/Zoxcore/trifa_material/pull/322) ([zoff99](https://github.com/zoff99))
+- update toxcore to 88647413536b39ed248d449677596bd52cb2e2e5 [\#321](https://github.com/Zoxcore/trifa_material/pull/321) ([zoff99](https://github.com/zoff99))
+- CI for screens for each platform standalone [\#320](https://github.com/Zoxcore/trifa_material/pull/320) ([zoff99](https://github.com/zoff99))
+- CI for screens for each platform standalone [\#319](https://github.com/Zoxcore/trifa_material/pull/319) ([zoff99](https://github.com/zoff99))
+- manual workflow to only generate the automated screenshots from latest commit [\#318](https://github.com/Zoxcore/trifa_material/pull/318) ([zoff99](https://github.com/zoff99))
+
 ## [v1.0.44](https://github.com/Zoxcore/trifa_material/tree/v1.0.44) (2024-11-02)
 
 [Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.43...v1.0.44)
