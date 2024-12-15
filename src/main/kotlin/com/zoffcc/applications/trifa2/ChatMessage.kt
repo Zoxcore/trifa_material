@@ -569,12 +569,33 @@ fun message_timestamp_and_info(message: UIMessage, msg_version_int: Int)
     }
     val msg_v2_hash_str = if (message.msg_id_hash.isNullOrEmpty()) "" else message.msg_id_hash
     val msg_v3_hash_str = if (message.msg_idv3_hash.isNullOrEmpty()) "" else message.msg_idv3_hash
+    var file_info_lines = ""
+    if (message.trifaMsgType == TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value)
+    {
+        if (message.filename_fullpath.isNullOrEmpty())
+        {
+            file_info_lines = "File fullpath: " + "???" + "\n"
+        }
+        else
+        {
+            file_info_lines = "File fullpath: " + message.filename_fullpath + "\n"
+        }
+        try
+        {
+            file_info_lines = file_info_lines + "File size in bytes: " + File(message.filename_fullpath!!).length() + "\n"
+        }
+        catch(_: Exception)
+        {
+            file_info_lines = file_info_lines + "File size: " + "???" + "\n"
+        }
+    }
     Tooltip("Message sent at: " + timeToString(message.sentTimeMs) + "\n" +
             "Message rcvd at: " + timeToString(message.recvTimeMs) + "\n" +
             "Message size in bytes: " + (if (message_size_in_bytes == 0) "unknown" else message_size_in_bytes) + "\n" +
             "Message version: " + msg_version_int + "\n" +
             "Message V2 Hash: " + msg_v2_hash_str + "\n" +
             "Message V3 Hash: " + msg_v3_hash_str + "\n" +
+            file_info_lines +
             "The clocks on both sides are not synchronized for security reasons, " + "\n" +
             "therfore the timestamps may not be accurate") {
         Text(

@@ -451,12 +451,33 @@ fun message_timestamp_and_info(groupmessage: UIGroupMessage)
     } catch (_: Exception)
     {
     }
+    var file_info_lines = ""
+    if (groupmessage.trifaMsgType == TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value)
+    {
+        if (groupmessage.filename_fullpath.isNullOrEmpty())
+        {
+            file_info_lines = "File fullpath: " + "???" + "\n"
+        }
+        else
+        {
+            file_info_lines = "File fullpath: " + groupmessage.filename_fullpath + "\n"
+        }
+        try
+        {
+            file_info_lines = file_info_lines + "File size in bytes: " + File(groupmessage.filename_fullpath!!).length() + "\n"
+        }
+        catch(_: Exception)
+        {
+            file_info_lines = file_info_lines + "File size: " + "???" + "\n"
+        }
+    }
     val is_prv_msg = if (groupmessage.is_private_msg == 1) "yes" else "no"
     Tooltip("Message sent at: " + timeToString(groupmessage.timeMs) + "\n" +
             "Message ID: " + groupmessage.message_id_tox + "\n" +
             "is private Message: " + is_prv_msg + "\n" +
             "Sender Peer Pubkey: " + groupmessage.toxpk + "\n" +
             "Message size in bytes: " + (if (message_size_in_bytes == 0) "unknown" else message_size_in_bytes) + "\n" +
+            file_info_lines +
             "was synced: " + groupmessage.was_synced.toString()) {
         Text(
             modifier = Modifier.padding(all = 0.dp),
