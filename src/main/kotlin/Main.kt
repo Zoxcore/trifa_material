@@ -1,4 +1,5 @@
 @file:OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
+@file:Suppress("LocalVariableName", "FunctionName", "ConvertToStringTemplate", "SpellCheckingInspection")
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.desktop.ui.tooling.preview.Preview

@@ -1,3 +1,5 @@
+@file:Suppress("unused", "LocalVariableName", "PropertyName", "ClassName", "FunctionName", "SpellCheckingInspection")
+
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
