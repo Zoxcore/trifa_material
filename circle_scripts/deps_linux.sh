@@ -68,6 +68,15 @@ cd x265_git/
   export CXXFLAGS=${CXXFLAGS_ADDON}
   export CFLAGS=${CFLAGS_ADDON}
 
+  # fix ratecontrol while streaming --------------------
+  # echo "#####ratecontrolfix#####"
+  # sed -i -e \
+  # 's#m_param->rc.bitrate = m_param->rc.vbvMaxBitrate#m_param->rc.vbvMaxBitrate = m_param->rc.bitrate#g' \
+  # ./encoder/ratecontrol.cpp
+  # git diff ./encoder/ratecontrol.cpp
+  # echo "#####ratecontrolfix#####"
+  # fix ratecontrol while streaming --------------------
+
   if [ "$1""x" == "raspix" ]; then
     echo "*** RASPI ***"
     cmake . -DCMAKE_INSTALL_PREFIX="$_INST_" -DENABLE_PIC=ON -DENABLE_ASSEMBLY=OFF # -DCMAKE_VERBOSE_MAKEFILE=ON
