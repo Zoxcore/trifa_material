@@ -1,3 +1,4 @@
+@file:Suppress("UNUSED_PARAMETER", "LocalVariableName", "PropertyName", "ClassName", "FunctionName", "unused", "UNUSED_VARIABLE")
 package com.zoffcc.applications.trifa
 
 import ColorProvider
@@ -147,7 +148,7 @@ import java.util.*
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 
-@Suppress("UNUSED_PARAMETER")
+@Suppress("UNUSED_PARAMETER", "LocalVariableName", "PropertyName", "ClassName", "FunctionName", "SpellCheckingInspection")
 class MainActivity
 {
     companion object
