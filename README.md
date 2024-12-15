@@ -16,6 +16,8 @@ Automated screenshots:<br>
 <img src="https://img.shields.io/badge/license-GPLv3%2B-blue.svg" alt="GPLv3+" />
 </a>
 
+&nbsp;&nbsp;&nbsp;&nbsp;Looking for TRIfA Mobile version? [follow me](https://github.com/zoff99/ToxAndroidRefImpl)
+
 ## Development Snapshot Version
 the latest Development Snapshot can be downloaded from [here](https://github.com/Zoxcore/trifa_material/releases/tag/nightly)
 
