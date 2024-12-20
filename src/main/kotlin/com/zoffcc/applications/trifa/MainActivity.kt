@@ -3200,7 +3200,36 @@ class MainActivity
         @Suppress("unused")
         fun android_tox_callback_group_peer_join_cb_method(group_number: Long, peer_id: Long)
         {
-            val group_id = tox_group_by_groupnum__wrapper(group_number)
+            val group_id = tox_group_by_groupnum__wrapper(group_number).lowercase()
+
+            // check if the joining peer is a founder
+            try
+            {
+                val peer_role = tox_group_peer_get_role(group_number, peer_id)
+                val peer_pubkey = tox_group_peer_get_public_key(group_number, peer_id)
+                if ((peer_role == ToxVars.Tox_Group_Role.TOX_GROUP_ROLE_FOUNDER.value) && (!peer_pubkey.isNullOrEmpty()))
+                {
+                    val messages_to_update = orma!!.selectFromGroupMessage().group_identifierEq(group_id)
+                        .tox_group_peer_pubkeyEq(peer_pubkey.uppercase())
+                        .tox_group_peer_roleEq(-1).toList()
+                    val iter = messages_to_update.iterator()
+
+                    orma!!.updateGroupMessage().group_identifierEq(group_id)
+                        .tox_group_peer_pubkeyEq(peer_pubkey.uppercase())
+                        .tox_group_peer_roleEq(-1)
+                        .tox_group_peer_role(peer_role).execute()
+
+                    while(iter.hasNext())
+                    {
+                        val gm = iter.next()
+                        // Log.i(TAG, "GGGGGGG:found just came online:iter:" + gm.group_identifier.take(5) + " " + gm.tox_group_peer_pubkey.take(5) + " " + gm.tox_group_peer_role)
+                    }
+                }
+            }
+            catch(_: Exception)
+            {
+            }
+
             try
             {
                 val new_privacy_state = tox_group_get_privacy_state(group_number)
