@@ -580,6 +580,18 @@ fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, s
                                     val message_id: Long = tox_group_send_message(groupnum, ToxVars.TOX_MESSAGE_TYPE.TOX_MESSAGE_TYPE_NORMAL.value, text)
                                     if (message_id >= 0)
                                     {
+                                        var peer_role = -1
+                                        try
+                                        {
+                                            val self_peer_role = MainActivity.tox_group_self_get_role(groupnum)
+                                            if (self_peer_role >= 0)
+                                            {
+                                                peer_role = self_peer_role
+                                            }
+                                        } catch (_: Exception)
+                                        {
+                                        }
+
                                         val message_id_hex = HelperGroup.fourbytes_of_long_to_hex(message_id)
                                         val db_msgid = MainActivity.sent_groupmessage_to_db(groupid = selectedGroupId, message_timestamp =  timestamp, group_message = text, message_id = message_id, was_synced = false)
                                         groupmessagestore.send(GroupMessageAction.SendGroupMessage(
@@ -589,6 +601,7 @@ fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, s
                                                 sentTimeMs = timestamp,
                                                 rcvdTimeMs = timestamp,
                                                 syncdTimeMs = timestamp,
+                                                peer_role = peer_role,
                                                 msg_id_hash = "",
                                                 message_id_tox = message_id_hex, msgDatabaseId = db_msgid,
                                                 user = myUser, timeMs = timestamp, text = text,
