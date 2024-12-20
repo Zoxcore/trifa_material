@@ -72,6 +72,7 @@ cd *mpeg*/
   ./configure --arch="$ARCH" \
               --enable-gpl \
               --prefix="$_INST_" \
+              --enable-asm \
               --target-os="mingw32" \
               --cross-prefix="$ARCH-w64-mingw32-" \
               --pkg-config="pkg-config" \
@@ -284,6 +285,7 @@ cd x264/
   export CXXFLAGS=${CXXFLAGS_ADDON}
   export CFLAGS=${CFLAGS_ADDON}
   CROSS="$ARCH-w64-mingw32-" ./configure --host="$ARCH-w64-mingw32" \
+                                         --enable-asm \
                                          --prefix="$_INST_" \
                                          --disable-opencl \
                                          --enable-static \
