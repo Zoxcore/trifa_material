@@ -29,6 +29,7 @@ import java.util.List;
 
 import static com.zoffcc.applications.sorm.OrmaDatabase.*;
 import static com.zoffcc.applications.trifa.TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT;
+import static com.zoffcc.applications.trifa.ToxVars.Tox_Group_Role.TOX_GROUP_ROLE_USER;
 
 @Table
 public class GroupMessage
@@ -47,6 +48,9 @@ public class GroupMessage
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     public String tox_group_peer_pubkey; // uppercase
+
+    @Column(indexed = true, helpers = Column.Helpers.ALL)
+    public int tox_group_peer_role = TOX_GROUP_ROLE_USER.value;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     @Nullable
@@ -130,6 +134,7 @@ public class GroupMessage
         out.file_name = in.file_name;
         out.filename_fullpath = in.filename_fullpath;
         out.filesize = in.filesize;
+        out.tox_group_peer_role = in.tox_group_peer_role;
 
         return out;
     }
@@ -142,7 +147,8 @@ public class GroupMessage
                 direction + ", TRIFA_MESSAGE_TYPE=" + TRIFA_MESSAGE_TYPE + ", TOX_MESSAGE_TYPE=" + TOX_MESSAGE_TYPE +
                 ", sent_timestamp=" + sent_timestamp + ", rcvd_timestamp=" + rcvd_timestamp + ", read=" + read +
                 ", text=" + "xxxxxx" + ", is_new=" + is_new + ", was_synced=" + was_synced + ", path_name=" + path_name +
-                ", file_name=" + file_name + ", filename_fullpath=" + filename_fullpath + ", filesize=" + filesize;
+                ", file_name=" + file_name + ", filename_fullpath=" + filename_fullpath + ", filesize=" + filesize +
+                ", tox_group_peer_role=" + tox_group_peer_role;
     }
 
 
@@ -194,6 +200,7 @@ public class GroupMessage
                 out.message_id_tox = rs.getString("message_id_tox");
                 out.group_identifier = rs.getString("group_identifier");
                 out.tox_group_peer_pubkey = rs.getString("tox_group_peer_pubkey");
+                out.tox_group_peer_role = rs.getInt("tox_group_peer_role");
                 out.private_message = rs.getInt("private_message");
                 out.tox_group_peername = rs.getString("tox_group_peername");
                 out.direction = rs.getInt("direction");
@@ -254,6 +261,7 @@ public class GroupMessage
                     + "message_id_tox"
                     + ",group_identifier"
                     + ",tox_group_peer_pubkey"
+                    + ",tox_group_peer_role"
                     + ",private_message"
                     + ",tox_group_peername"
                     + ",direction"
@@ -292,6 +300,7 @@ public class GroupMessage
                     + ",?17"
                     + ",?18"
                     + ",?19"
+                    + ",?20"
                     + ")";
 
             insert_pstmt = sqldb.prepareStatement(insert_pstmt_sql);
@@ -300,22 +309,23 @@ public class GroupMessage
             insert_pstmt.setString(1, this.message_id_tox);
             insert_pstmt.setString(2, this.group_identifier);
             insert_pstmt.setString(3, this.tox_group_peer_pubkey);
-            insert_pstmt.setInt(4, this.private_message);
-            insert_pstmt.setString(5, this.tox_group_peername);
-            insert_pstmt.setInt(6, this.direction);
-            insert_pstmt.setInt(7, this.TOX_MESSAGE_TYPE);
-            insert_pstmt.setInt(8, this.TRIFA_MESSAGE_TYPE);
-            insert_pstmt.setLong(9, this.sent_timestamp);
-            insert_pstmt.setLong(10, this.rcvd_timestamp);
-            insert_pstmt.setBoolean(11, this.read);
-            insert_pstmt.setBoolean(12, this.is_new);
-            insert_pstmt.setString(13, this.text);
-            insert_pstmt.setBoolean(14, this.was_synced);
-            insert_pstmt.setString(15, this.msg_id_hash);
-            insert_pstmt.setString(16, this.path_name);
-            insert_pstmt.setString(17, this.file_name);
-            insert_pstmt.setString(18, this.filename_fullpath);
-            insert_pstmt.setLong(19, this.filesize);
+            insert_pstmt.setInt(4, this.tox_group_peer_role);
+            insert_pstmt.setInt(5, this.private_message);
+            insert_pstmt.setString(6, this.tox_group_peername);
+            insert_pstmt.setInt(7, this.direction);
+            insert_pstmt.setInt(8, this.TOX_MESSAGE_TYPE);
+            insert_pstmt.setInt(9, this.TRIFA_MESSAGE_TYPE);
+            insert_pstmt.setLong(10, this.sent_timestamp);
+            insert_pstmt.setLong(11, this.rcvd_timestamp);
+            insert_pstmt.setBoolean(12, this.read);
+            insert_pstmt.setBoolean(13, this.is_new);
+            insert_pstmt.setString(14, this.text);
+            insert_pstmt.setBoolean(15, this.was_synced);
+            insert_pstmt.setString(16, this.msg_id_hash);
+            insert_pstmt.setString(17, this.path_name);
+            insert_pstmt.setString(18, this.file_name);
+            insert_pstmt.setString(19, this.filename_fullpath);
+            insert_pstmt.setLong(20, this.filesize);
             // @formatter:on
 
             if (ORMA_TRACE)
@@ -540,6 +550,22 @@ public class GroupMessage
         }
         this.sql_set = this.sql_set + " tox_group_peer_pubkey=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
         bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_group_peer_pubkey));
+        bind_set_count++;
+        return this;
+    }
+
+    public GroupMessage tox_group_peer_role(int tox_group_peer_role)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " tox_group_peer_role=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, tox_group_peer_role));
         bind_set_count++;
         return this;
     }
@@ -1001,6 +1027,76 @@ public class GroupMessage
         this.sql_where = this.sql_where + " and tox_group_peer_pubkey NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, tox_group_peer_pubkey));
         bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage tox_group_peer_roleEq(int tox_group_peer_role)
+    {
+        this.sql_where = this.sql_where + " and tox_group_peer_role=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, tox_group_peer_role));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage tox_group_peer_roleNotEq(int tox_group_peer_role)
+    {
+        this.sql_where = this.sql_where + " and tox_group_peer_role<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, tox_group_peer_role));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage tox_group_peer_roleLt(int tox_group_peer_role)
+    {
+        this.sql_where = this.sql_where + " and tox_group_peer_role<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, tox_group_peer_role));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage tox_group_peer_roleLe(int tox_group_peer_role)
+    {
+        this.sql_where = this.sql_where + " and tox_group_peer_role<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, tox_group_peer_role));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage tox_group_peer_roleGt(int tox_group_peer_role)
+    {
+        this.sql_where = this.sql_where + " and tox_group_peer_role>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, tox_group_peer_role));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage tox_group_peer_roleGe(int tox_group_peer_role)
+    {
+        this.sql_where = this.sql_where + " and tox_group_peer_role>=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, tox_group_peer_role));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage tox_group_peer_roleBetween(int tox_group_peer_role1, int tox_group_peer_role2)
+    {
+        this.sql_where = this.sql_where + " and tox_group_peer_role>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " and tox_group_peer_role<?" + (BINDVAR_OFFSET_WHERE + 1 + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, tox_group_peer_role1));
+        bind_where_count++;
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, tox_group_peer_role2));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage tox_group_peer_roleIsNull()
+    {
+        this.sql_where = this.sql_where + " and tox_group_peer_role IS NULL ";
+        return this;
+    }
+
+    public GroupMessage tox_group_peer_roleIsNotNull()
+    {
+        this.sql_where = this.sql_where + " and tox_group_peer_role IS NOT NULL ";
         return this;
     }
 
@@ -1953,6 +2049,34 @@ public class GroupMessage
             this.sql_orderby = this.sql_orderby + " , ";
         }
         this.sql_orderby = this.sql_orderby + " tox_group_peer_pubkey DESC ";
+        return this;
+    }
+
+    public GroupMessage orderByTox_group_peer_roleAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " tox_group_peer_role ASC ";
+        return this;
+    }
+
+    public GroupMessage orderByTox_group_peer_roleDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " tox_group_peer_role DESC ";
         return this;
     }
 

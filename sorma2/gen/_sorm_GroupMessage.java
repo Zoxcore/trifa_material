@@ -49,6 +49,9 @@ public class GroupMessage
     public String tox_group_peer_pubkey; // uppercase
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
+    public int tox_group_peer_role = TOX_GROUP_ROLE_USER.value;
+
+    @Column(indexed = true, helpers = Column.Helpers.ALL)
     @Nullable
     public int private_message = 0; // 0 -> message to group, 1 -> msg privately to/from peer
 
