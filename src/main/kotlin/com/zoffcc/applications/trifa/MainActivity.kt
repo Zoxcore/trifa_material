@@ -3202,12 +3202,20 @@ class MainActivity
         {
             val group_id = tox_group_by_groupnum__wrapper(group_number).lowercase()
 
-            // check if the joining peer is a founder
+            // check if the joining peer is a founder or a moderator
             try
             {
                 val peer_role = tox_group_peer_get_role(group_number, peer_id)
                 val peer_pubkey = tox_group_peer_get_public_key(group_number, peer_id)
-                if ((peer_role == ToxVars.Tox_Group_Role.TOX_GROUP_ROLE_FOUNDER.value) && (!peer_pubkey.isNullOrEmpty()))
+                if (
+                    (
+                        (peer_role == ToxVars.Tox_Group_Role.TOX_GROUP_ROLE_FOUNDER.value)
+                        ||
+                        (peer_role == ToxVars.Tox_Group_Role.TOX_GROUP_ROLE_MODERATOR.value)
+                    )
+                    &&
+                    (!peer_pubkey.isNullOrEmpty())
+                    )
                 {
                     val messages_to_update = orma!!.selectFromGroupMessage().group_identifierEq(group_id)
                         .tox_group_peer_pubkeyEq(peer_pubkey.uppercase())
