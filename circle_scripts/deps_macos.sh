@@ -72,7 +72,7 @@ export LDFLAGS=" "
   ./configure  \
               --enable-gpl \
               --prefix="$_INST_" \
-              --disable-asm \
+              --enable-asm \
               --enable-pic \
               --disable-swscale \
               --disable-network \
@@ -313,6 +313,7 @@ cd x264/
 
   CFLAGS="-O2 -g -fPIC" ./configure \
                                          --prefix="$_INST_" \
+                                         --enable-asm \
                                          --disable-opencl \
                                          --enable-static \
                                          --disable-avs \
