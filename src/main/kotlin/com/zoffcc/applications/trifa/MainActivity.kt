@@ -3068,6 +3068,7 @@ class MainActivity
             val message_id_hex = fourbytes_of_long_to_hex(message_id)
             val message_timestamp_ms = System.currentTimeMillis()
             val peernum = tox_group_peer_by_public_key(group_number, tox_peerpk)
+            val peer_role = tox_group_peer_get_role(group_number, peernum)
             var fname = tox_group_peer_get_name(group_number, peernum)
             if (fname == null)
             {
@@ -3079,6 +3080,7 @@ class MainActivity
                 rcvd_message_timestamp_ms = message_timestamp_ms,
                 sent_message_timestamp_ms = message_timestamp_ms,
                 group_message = message_orig, message_id_hex = message_id_hex,
+                peer_role = peer_role,
                 was_synced = false, peername = fname)
             val peer_user = User(fname + " / " + PubkeyShort(tox_peerpk), picture = "friend_avatar.png", toxpk = tox_peerpk.uppercase(), color = ColorProvider.getColor(true, tox_peerpk.uppercase()))
             groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(
@@ -3088,6 +3090,7 @@ class MainActivity
                     sentTimeMs = message_timestamp_ms,
                     rcvdTimeMs = message_timestamp_ms,
                     syncdTimeMs = message_timestamp_ms,
+                    peer_role = peer_role,
                     msg_id_hash = "",
                     message_id_tox = message_id_hex, msgDatabaseId = msg_dbid,
                     user = peer_user, timeMs = message_timestamp_ms, text = message_orig!!,
@@ -3110,6 +3113,7 @@ class MainActivity
             val message_id_hex = "" // HINT: no message ID for ngc private messages
             val message_timestamp_ms = System.currentTimeMillis()
             val peernum = tox_group_peer_by_public_key(group_number, tox_peerpk)
+            var peer_role = tox_group_peer_get_role(group_number, peernum)
             var fname = tox_group_peer_get_name(group_number, peernum)
             if (fname == null)
             {
@@ -3121,7 +3125,7 @@ class MainActivity
                 rcvd_message_timestamp_ms = message_timestamp_ms,
                 sent_message_timestamp_ms = message_timestamp_ms,
                 group_message = message_orig, message_id_hex = message_id_hex,
-                was_synced = false, peername = fname)
+                was_synced = false, peer_role = peer_role,  peername = fname)
             val peer_user = User(fname + " / " + PubkeyShort(tox_peerpk), picture = "friend_avatar.png", toxpk = tox_peerpk.uppercase(), color = ColorProvider.getColor(true, tox_peerpk.uppercase()))
             groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(
                 UIGroupMessage(
@@ -3130,6 +3134,7 @@ class MainActivity
                     sentTimeMs = message_timestamp_ms,
                     rcvdTimeMs = message_timestamp_ms,
                     syncdTimeMs = message_timestamp_ms,
+                    peer_role = peer_role,
                     msg_id_hash = "",
                     message_id_tox = message_id_hex, msgDatabaseId = msg_dbid,
                     user = peer_user, timeMs = message_timestamp_ms, text = message_orig!!,
@@ -3643,7 +3648,7 @@ class MainActivity
             return row_id
         }
 
-        fun received_groupmessage_to_db(tox_peerpk: String, is_private_msg: Int, groupid: String, rcvd_message_timestamp_ms: Long, sent_message_timestamp_ms: Long, group_message: String?, message_id_hex: String, was_synced: Boolean, peername: String): Long
+        fun received_groupmessage_to_db(tox_peerpk: String, is_private_msg: Int, groupid: String, rcvd_message_timestamp_ms: Long, sent_message_timestamp_ms: Long, group_message: String?, message_id_hex: String, was_synced: Boolean, peername: String, peer_role: Int): Long
         {
             val groupnum = tox_group_by_groupid__wrapper(groupid)
             val peernum = tox_group_peer_by_public_key(groupnum, tox_peerpk)
@@ -3651,6 +3656,7 @@ class MainActivity
             m.tox_group_peer_pubkey = tox_peerpk
             m.direction = TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value // msg received
             m.TOX_MESSAGE_TYPE = 0
+            m.tox_group_peer_role = peer_role
             m.read = false
             m.is_new = true
             if ((groupstore.state.visible) && (groupstore.state.selectedGroupId == groupid))
@@ -3721,6 +3727,7 @@ class MainActivity
                 sent_message_timestamp_ms = m.sent_timestamp,
                 is_private_msg = m.private_message,
                 group_message = m.text, message_id_hex = m.message_id_tox, was_synced = m.was_synced,
+                peer_role = m.tox_group_peer_role,
                 peername = m.tox_group_peername)
             val peer_user = User(m.tox_group_peername + " / " + PubkeyShort(m.tox_group_peer_pubkey), picture = "friend_avatar.png", toxpk = m.tox_group_peer_pubkey.uppercase(), color = ColorProvider.getColor(true, m.tox_group_peer_pubkey.uppercase()))
 
@@ -3731,6 +3738,7 @@ class MainActivity
                     sentTimeMs = m.sent_timestamp,
                     rcvdTimeMs = m.rcvd_timestamp,
                     syncdTimeMs = m.rcvd_timestamp,
+                    peer_role = m.tox_group_peer_role,
                     msg_id_hash = m.msg_id_hash,
                     message_id_tox = m.message_id_tox, msgDatabaseId = msg_dbid,
                     user = peer_user, timeMs = m.sent_timestamp, text = m.text,
@@ -3758,6 +3766,21 @@ class MainActivity
                 toxpk = tox_peerpk.uppercase(),
                 color = ColorProvider.getColor(true, tox_peerpk.uppercase()))
 
+            var peer_role = -1
+            try
+            {
+                val group_number = tox_group_by_groupid__wrapper(group_id)
+                val peernum = tox_group_peer_by_public_key(group_number, tox_peerpk)
+                val peer_role_get = tox_group_peer_get_role(group_number, peernum)
+                if (peer_role_get >= 0)
+                {
+                    peer_role = peer_role_get
+                }
+            }
+            catch(_: Exception)
+            {
+            }
+
             groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(
                 UIGroupMessage(
                     is_private_msg = 0,
@@ -3766,6 +3789,7 @@ class MainActivity
                     rcvdTimeMs = msg_timestamp,
                     syncdTimeMs = msg_timestamp,
                     msg_id_hash = msg_id_hash,
+                    peer_role = peer_role,
                     message_id_tox = "", msgDatabaseId = file_meta_data.rowid,
                     user = peer_user, timeMs = msg_timestamp,
                     text = file_meta_data.message_text,
@@ -3880,6 +3904,20 @@ class MainActivity
             } catch (_: Exception)
             {
             }
+
+            m.tox_group_peer_role = -1
+            try
+            {
+                val self_peer_role = tox_group_self_get_role(group_num)
+                if (self_peer_role >= 0)
+                {
+                    m.tox_group_peer_role = self_peer_role
+                }
+            } catch (_: Exception)
+            {
+            }
+
+
             Log.i(TAG, "add_outgoing_file:090")
             // now send the file to the group as custom package ----------
             Log.i(TAG, "add_outgoing_file:091:send_group_image:start")
@@ -3897,6 +3935,7 @@ class MainActivity
                     rcvdTimeMs = m.rcvd_timestamp,
                     syncdTimeMs = m.sent_timestamp,
                     msg_id_hash = m.msg_id_hash,
+                    peer_role = m.tox_group_peer_role,
                     message_id_tox = m.message_id_tox, msgDatabaseId = row_id,
                     user = myUser, timeMs = m.sent_timestamp, text = m.text,
                     toxpk = m.tox_group_peer_pubkey, groupId = m.group_identifier,

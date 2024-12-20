@@ -1489,6 +1489,20 @@ public class HelperGroup {
         m.was_synced = true;
         m.private_message = 0;
 
+        m.tox_group_peer_role = -1;
+        try
+        {
+            int peer_role = tox_group_peer_get_role(group_num_, peer_number2);
+            if (peer_role >= 0)
+            {
+                m.tox_group_peer_role = peer_role;
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
         if (m.tox_group_peername == null)
         {
             try
