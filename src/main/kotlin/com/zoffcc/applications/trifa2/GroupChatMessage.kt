@@ -1,3 +1,4 @@
+import ChatColorsConfig.NGC_FOUNDER_MESSAGE_COLOR
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -53,17 +54,21 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vanniktech.emoji.emojiInformation
+import com.zoffcc.applications.sorm.GroupMessage
 import com.zoffcc.applications.trifa.HelperFiletransfer
 import com.zoffcc.applications.trifa.HelperFiletransfer.byteCountToDisplaySize
 import com.zoffcc.applications.trifa.HelperGeneric
 import com.zoffcc.applications.trifa.HelperOSFile.open_webpage
 import com.zoffcc.applications.trifa.HelperOSFile.show_containing_dir_in_explorer
 import com.zoffcc.applications.trifa.HelperOSFile.show_file_in_explorer_or_open
+import com.zoffcc.applications.trifa.MainActivity
 import com.zoffcc.applications.trifa.TRIFAGlobals
+import com.zoffcc.applications.trifa.ToxVars
 import com.zoffcc.applications.trifa2.timeToString
 import kotlinx.coroutines.DelicateCoroutinesApi
 import org.briarproject.briar.desktop.ui.Tooltip
 import java.io.File
+import java.util.*
 
 @Composable
 fun GroupTriangle(risingToTheRight: Boolean, background: Color, padding_bottom: Dp = 10.dp) {
@@ -83,7 +88,6 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
         modifier = modifier.fillMaxWidth(),
         contentAlignment = if (isMyMessage) Alignment.CenterEnd else Alignment.CenterStart
     ) {
-
         Row(verticalAlignment = Alignment.Bottom) {
             if (!isMyMessage) {
                 Column {
@@ -91,7 +95,14 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                 }
                 Spacer(Modifier.size(2.dp))
                 Column {
-                    GroupTriangle(true, ChatColorsConfig.OTHERS_MESSAGE, MESSAGE_BOX_BOTTOM_PADDING)
+                    if (groupmessage.peer_role == ToxVars.Tox_Group_Role.TOX_GROUP_ROLE_FOUNDER.value)
+                    {
+                        GroupTriangle(true, Color(NGC_FOUNDER_MESSAGE_COLOR), MESSAGE_BOX_BOTTOM_PADDING)
+                    }
+                    else
+                    {
+                        GroupTriangle(true, ChatColorsConfig.OTHERS_MESSAGE, MESSAGE_BOX_BOTTOM_PADDING)
+                    }
                 }
             }
             Column {
@@ -114,7 +125,7 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                 var start_end = 10.dp
                 var start_bottom = 5.dp
                 Box(
-                    Modifier.clip(
+                    Modifier.FounderBorder(groupmessage).clip(
                         RoundedCornerShape(
                             10.dp,
                             10.dp,
@@ -228,6 +239,18 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
         }
     }
 }
+
+fun Modifier.FounderBorder(groupmessage: UIGroupMessage): Modifier =
+    if (groupmessage.peer_role == ToxVars.Tox_Group_Role.TOX_GROUP_ROLE_FOUNDER.value)
+    {
+        Modifier.border(width = 4.dp,
+            color = Color(NGC_FOUNDER_MESSAGE_COLOR),
+            shape = RoundedCornerShape(10.dp, 10.dp, 10.dp, 0.dp))
+    }
+    else
+    {
+        Modifier
+    }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
