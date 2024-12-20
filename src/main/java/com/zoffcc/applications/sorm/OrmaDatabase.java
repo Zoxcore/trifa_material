@@ -319,6 +319,7 @@ public class OrmaDatabase
 
     public static int update_db(final int current_db_version)
     {
+        //noinspection StatementWithEmptyBody
         if (current_db_version < 1)
         {
             // dummy. sadly now it has to stay.
@@ -580,7 +581,21 @@ public class OrmaDatabase
             }
         }
 
-        final int new_db_version = 12;
+        if (current_db_version < 13)
+        {
+            try
+            {
+                final String update_004 = "alter table GroupMessage add tox_group_peer_role INTEGER NOT NULL DEFAULT '-1';" + "\n" +
+                        "CREATE INDEX index_tox_group_peer_role_on_GroupMessage ON GroupMessage (tox_group_peer_role);";
+                run_multi_sql(update_004);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+        final int new_db_version = 13;
         set_new_db_version(new_db_version);
         // return the updated DB VERSION
         return new_db_version;
