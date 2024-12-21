@@ -58,6 +58,18 @@ jobs:
            java -version
            javac -version
 
+    - name: download jshowarch
+      shell: bash
+      run: |
+           curl -L https://github.com/zoff99/jshowarch/archive/refs/heads/master.zip -o master.zip
+           unzip master.zip
+           pwd
+           ls -al jshowarch-master/
+           java -version
+           javac -version
+           cd jshowarch-master/
+           javac jshowarch.java
+
     - name: startup-app
       run: |
            pwd
@@ -104,6 +116,8 @@ jobs:
            sendkeys apps
            sendkeys -a "TRIfA" -c ":smile"
            sleep 90
+           cd /Users/runner/work/trifa_material/trifa_material/jshowarch-master
+           java jshowarch 885 76 115 65 24 &
            sleep 120
            cat /Users/runner/work/trifa_material/trifa_material/tester.log
            pwd
