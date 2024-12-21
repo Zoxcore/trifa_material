@@ -7,7 +7,7 @@ import java.util.Random;
 public class AVActivity {
 
     private static final String TAG = "ffmpegav.AVActivity";
-    static final String Version = "0.99.26";
+    static final String Version = "0.99.28";
     public static final String JAVA_AUDIO_IN_DEVICE_NAME = "Java Audio in (-fallback-)";
 
     private static boolean java_audio_in_device_used = false;
@@ -278,7 +278,7 @@ public class AVActivity {
         try {
             if (t_audio_rec != null)
             {
-                t_audio_rec.join(1000);
+                    t_audio_rec.join(1000);
             }
         } catch (Exception ignored) {
         } finally {
@@ -765,8 +765,8 @@ public class AVActivity {
             @Override
             public void onSuccess(long width, long height, long source_width, long source_height, long pts, int fps, int source_format) {
                 Log.i(TAG, "ffmpeg open video capture onSuccess:" + width + " " + height + " " +
-                        source_width + " " + source_height + " " + pts + " fps: " + fps +
-                        " source_format: " + ffmpegav_video_source_format_name.value_str(source_format));
+                source_width + " " + source_height + " " + pts + " fps: " + fps +
+                " source_format: " + ffmpegav_video_source_format_name.value_str(source_format));
             }
             @Override
             public void onError() {
@@ -774,7 +774,7 @@ public class AVActivity {
             @Override
             public void onBufferTooSmall(int y_buffer_size, int u_buffer_size, int v_buffer_size) {
                 Log.i(TAG, "Video buffer too small, needed sizes: " + y_buffer_size
-                        + " " + u_buffer_size + " "+ v_buffer_size);
+                    + " " + u_buffer_size + " "+ v_buffer_size);
                 ffmpegav_video_buffer_2_y = java.nio.ByteBuffer.allocateDirect(y_buffer_size);
                 ffmpegav_video_buffer_2_u = java.nio.ByteBuffer.allocateDirect(u_buffer_size);
                 ffmpegav_video_buffer_2_v = java.nio.ByteBuffer.allocateDirect(v_buffer_size);
@@ -854,11 +854,11 @@ public class AVActivity {
         // -----------------------
         // -----------------------
         final int res_vd2 = ffmpegav_open_video_in_device(vdevice,
-                vsource, 640, 480, 15, 0);
+            vsource, 640, 480, 15, 0);
         Log.i(TAG, "ffmpeg open video capture device: " + res_vd2);
 
         final int res_ad2 = ffmpegav_open_audio_in_device_wrapper(adevice,
-                asource);
+            asource);
         Log.i(TAG, "ffmpeg open audio capture device: " + res_ad2);
         ffmpegav_start_video_in_capture();
         ffmpegav_start_audio_in_capture_wrapper();
@@ -925,7 +925,7 @@ public class AVActivity {
                     {
                         Log.i(TAG, "T1: ffmpeg open video capture device:start");
                         final int res_vd2 = ffmpegav_open_video_in_device(vdevice_,
-                                vsource_, 640, 480, 15, 0);
+                            vsource_, 640, 480, 15, 0);
                         Log.i(TAG, "T1: ffmpeg open video capture device:done");
                         int low = 10;
                         int high = 80;
@@ -970,7 +970,7 @@ public class AVActivity {
                     {
                         Log.i(TAG, "T3: ffmpeg open video capture device:start");
                         final int res_vd2 = ffmpegav_open_video_in_device(vdevice_,
-                                vsource_, 640, 480, 15, 0);
+                            vsource_, 640, 480, 15, 0);
                         Log.i(TAG, "T3: ffmpeg open video capture device:done");
                         int low = 10;
                         int high = 80;
