@@ -6,11 +6,19 @@ on:
      - 'README.md'
      - 'CHANGELOG.md'
      - '.github/workflows/macos_pkg.yml'
+     - '.github/workflows/screens_only_for_nightly_linux.yml'
+     - '.github/workflows/screens_only_for_nightly_macos_arm.yml'
+     - '.github/workflows/screens_only_for_nightly_macos.yml'
+     - '.github/workflows/screens_only_for_nightly_win.yml'
   pull_request:
     paths-ignore:
      - 'README.md'
      - 'CHANGELOG.md'
      - '.github/workflows/macos_pkg.yml'
+     - '.github/workflows/screens_only_for_nightly_linux.yml'
+     - '.github/workflows/screens_only_for_nightly_macos_arm.yml'
+     - '.github/workflows/screens_only_for_nightly_macos.yml'
+     - '.github/workflows/screens_only_for_nightly_win.yml'
   workflow_dispatch:
     inputs:
       version:
