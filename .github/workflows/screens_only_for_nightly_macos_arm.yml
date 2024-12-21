@@ -102,6 +102,10 @@ jobs:
            cat /Users/runner/work/trifa_material/trifa_material/trifa.log
            ./do_run.sh $(cat /Users/runner/work/trifa_material/trifa_material/toxid.txt) >/Users/runner/work/trifa_material/trifa_material/tester.log 2>&1 &
            sleep 68
+           cd /Users/runner/work/trifa_material/trifa_material/jshowarch-master
+           rm *.class
+           javac jshowarch.java
+           java jshowarch 885 76 115 65 24 &
            ls -al /Users/runner/work/trifa_material/trifa_material/
            cat /Users/runner/work/trifa_material/trifa_material/trifa.log
            cliclick -m verbose c:195,347
@@ -113,10 +117,6 @@ jobs:
            sendkeys apps
            sendkeys -a "TRIfA" -c ":smile"
            sleep 90
-           cd /Users/runner/work/trifa_material/trifa_material/jshowarch-master
-           rm *.class
-           javac jshowarch.java
-           java jshowarch 885 76 115 65 24 &
            sleep 120
            cat /Users/runner/work/trifa_material/trifa_material/tester.log
            pwd
