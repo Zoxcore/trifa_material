@@ -28,7 +28,9 @@ data class globalstore_state(
     val ui_density: Float = 1.0f,
     val default_density: Float = 1.0f,
     val toxRunning: Boolean = false,
-    val ormaRunning: Boolean = false
+    val ormaRunning: Boolean = false,
+    val native_ffmpegav_lib_loaded: Boolean = false,
+    val native_notification_lib_loaded: Boolean = false
 )
 
 private val globalstore_state_lock = Any()
@@ -53,6 +55,10 @@ interface GlobalStore {
     fun getUiDensity(): Float
     fun setToxRunning(value: Boolean)
     fun getToxRunning(): Boolean
+    fun setNative_ffmpegav_lib_loaded(value: Boolean)
+    fun getNative_ffmpegav_lib_loaded(): Boolean
+    fun setNative_notification_lib_loaded(value: Boolean)
+    fun getNative_notification_lib_loaded(): Boolean
     fun setOrmaRunning(value: Boolean)
     fun getOrmaRunning(): Boolean
     fun increase_unread_message_count()
@@ -165,6 +171,26 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
         override fun setToxRunning(value: Boolean)
         {
             mutableStateFlow.value = state.copy(toxRunning = value)
+        }
+
+        override fun getNative_ffmpegav_lib_loaded(): Boolean
+        {
+            return state.native_ffmpegav_lib_loaded
+        }
+
+        override fun setNative_ffmpegav_lib_loaded(value: Boolean)
+        {
+            mutableStateFlow.value = state.copy(native_ffmpegav_lib_loaded = value)
+        }
+
+        override fun getNative_notification_lib_loaded(): Boolean
+        {
+            return state.native_notification_lib_loaded
+        }
+
+        override fun setNative_notification_lib_loaded(value: Boolean)
+        {
+            mutableStateFlow.value = state.copy(native_notification_lib_loaded = value)
         }
 
         override fun getOrmaRunning(): Boolean

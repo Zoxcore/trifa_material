@@ -47,15 +47,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.zoffcc.applications.trifa.Log
+import com.zoffcc.applications.trifa.OperatingSystem
 import com.zoffcc.applications.trifa.TAG
 import globalstore
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -67,6 +70,7 @@ import org.briarproject.briar.desktop.navigation.SidebarButtonState.Warning
 import org.briarproject.briar.desktop.ui.Tooltip
 import org.briarproject.briar.desktop.ui.UiMode
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
+import org.jetbrains.skiko.OS
 import randomDebugBorder
 
 val SIDEBAR_WIDTH = 56.dp
@@ -134,6 +138,36 @@ fun BriarSidebar(
                     sideBarButtonState = None
                 )
             //}
+        }
+        Tooltip(text = if (global_store.native_ffmpegav_lib_loaded) "ffmpeg AV JNI lib loaded"
+            else "ffmpeg AV JNI lib not loaded",
+            textcolor = Color.Black) {
+            IconButton(
+                modifier = Modifier.height(25.dp).padding(vertical = 0.dp),
+                icon = if (global_store.native_ffmpegav_lib_loaded) Icons.Filled.Info else Icons.Filled.Error,
+                iconSize = 20.dp,
+                enabled = false,
+                iconTint = if (global_store.native_ffmpegav_lib_loaded) Color.DarkGray.copy(alpha = 0.7f) else Color(0xff9c7924),
+                contentDescription = "",
+                onClick = {},
+            )
+        }
+        // HINT: on Windows we do have a JNI lib for notifications. java can handle it just fine.
+        if (OperatingSystem.getCurrent() != OperatingSystem.WINDOWS)
+        {
+            Tooltip(text = if (global_store.native_notification_lib_loaded) "Notification JNI lib loaded"
+            else "Notification JNI lib not loaded",
+                textcolor = Color.Black) {
+                IconButton(
+                    modifier = Modifier.height(25.dp).padding(vertical = 0.dp),
+                    icon = if (global_store.native_notification_lib_loaded) Icons.Filled.Info else Icons.Filled.Error,
+                    iconSize = 20.dp,
+                    enabled = false,
+                    iconTint = if (global_store.native_notification_lib_loaded) Color.DarkGray.copy(alpha = 0.7f) else Color(0xff9c7924),
+                    contentDescription = "",
+                    onClick = {},
+                )
+            }
         }
     }
 }
