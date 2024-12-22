@@ -457,6 +457,11 @@ class MainActivity
                 {
                 }
 
+                if (native_ffmpegav_lib_loaded_error == 0)
+                {
+                    globalstore.setNative_ffmpegav_lib_loaded(true)
+                }
+
                 if ((OperatingSystem.getCurrent() == OperatingSystem.LINUX)
                     || (OperatingSystem.getCurrent() == OperatingSystem.MACOS)
                     || (OperatingSystem.getCurrent() == OperatingSystem.MACARM))
@@ -464,6 +469,7 @@ class MainActivity
                     native_notification_lib_loaded_error = jninotifications_loadjni(libdir2)
                     if (native_notification_lib_loaded_error == 0)
                     {
+                        globalstore.setNative_notification_lib_loaded(true)
                         try
                         {
                             Log.i(TAG, "jninotifications version: " + NTFYActivity.jninotifications_version())
