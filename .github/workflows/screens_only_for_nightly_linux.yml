@@ -53,6 +53,7 @@ jobs:
                sudo apt-get install x11-apps x11-utils
                sudo apt-get install lwm fvwm
                sudo apt-get install xvfb
+               sudo apt-get install libpulse0
 
         - name: show installed font packages
           run: |
@@ -198,6 +199,7 @@ jobs:
                echo "++++++++++++++++++"
                cat /home/runner/work/trifa_material/trifa_material/trifa.log||echo "NO ERR"
                echo "++++++++++++++++++"
+               cat /home/runner/work/trifa_material/trifa_material/trifa.log | grep 'cannot open shared object file' || echo "NO ERR"
                echo "++++++++++++++++++"
                cat /home/runner/work/trifa_material/trifa_material/tester.log||echo "NO ERR"
                cp -av /tmp/screenshot-linux.png screenshot-linux.png
