@@ -254,14 +254,20 @@ class MainActivity
             {
                 e.printStackTrace()
             }
-            val locale = Locale.getDefault()
-            Log.i(TAG, locale.displayCountry)
-            Log.i(TAG, locale.displayLanguage)
-            Log.i(TAG, locale.displayName)
-            Log.i(TAG, locale.isO3Country)
-            Log.i(TAG, locale.isO3Language)
-            Log.i(TAG, locale.language)
-            Log.i(TAG, locale.country)
+            try
+            {
+                val locale = Locale.getDefault()
+                Log.i(TAG, locale.displayCountry)
+                Log.i(TAG, locale.displayLanguage)
+                Log.i(TAG, locale.displayName)
+                Log.i(TAG, locale.isO3Country)
+                Log.i(TAG, locale.isO3Language)
+                Log.i(TAG, locale.language)
+                Log.i(TAG, locale.country)
+            }
+            catch (_: Exception)
+            {
+            }
             try
             {
                 Thread.currentThread().name = "t_main"
