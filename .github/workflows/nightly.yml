@@ -563,7 +563,7 @@ jobs:
            cp -v screenshot-macos.png /Users/runner/screenshot-macos_orig.png
            convert screenshot-macos.png -crop 1176x885+0+0 +repage crop_br.png
            convert screenshot-macos.png -crop 1919x25+1663+0  crop_br2.png
-           convert screenshot-macos.png -crop 1506x88+207+993  crop_br3.png
+           convert screenshot-macos.png -crop 1560x88+180+993  crop_br3.png
            convert crop_br3.png  -resize 65%  crop_br3small.png
            composite -compose Copy -gravity South crop_br3small.png crop_br.png -alpha set dst.png
            composite -compose Copy -gravity Northeast crop_br2.png dst.png -alpha set dst2.png
@@ -710,7 +710,7 @@ jobs:
            cp -v screenshot-macos-14.png /Users/runner/screenshot-macos-14_orig.png
            convert screenshot-macos-14.png -crop 1176x885+0+0 +repage crop_br.png
            convert screenshot-macos-14.png -crop 1919x25+1663+0  crop_br2.png
-           convert screenshot-macos-14.png -crop 1506x88+207+993  crop_br3.png
+           convert screenshot-macos-14.png -crop 1560x88+180+993  crop_br3.png
            convert crop_br3.png  -resize 65%  crop_br3small.png
            composite -compose Copy -gravity South crop_br3small.png crop_br.png -alpha set dst.png
            composite -compose Copy -gravity Northeast crop_br2.png dst.png -alpha set dst2.png
