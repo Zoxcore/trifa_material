@@ -1273,6 +1273,8 @@ class MainActivity
             AudioBar.set_cur_value(0, audio_out_bar)
             avstatestorevplayfpsstate.updateIncomingResolution("")
             avstatestorevplayfpsstate.update(0)
+            avstatestorevplayfpsstate.updateNetworkRTT(0)
+            avstatestorevplayfpsstate.updatePlayDelay(0)
             avstatestorevplayfpsstate.updateDecoderVBitrate(0)
             avstatestorevcapfpsstate.updateSourceResolution("")
             avstatestorevcapfpsstate.updateSourceFormat("")
@@ -1425,11 +1427,13 @@ class MainActivity
             {
                 Log.i(TAG, "call_comm_cb: fnum: " + friend_number
                         + " NETWORK_ROUND_TRIP_MS = " + comm_number)
+                avstatestorevplayfpsstate.updateNetworkRTT(comm_number.toInt())
             }
             else if (a_TOXAV_CALL_COMM_INFO == ToxVars.TOXAV_CALL_COMM_INFO.TOXAV_CALL_COMM_PLAY_DELAY.value.toLong())
             {
                 Log.i(TAG, "call_comm_cb: fnum: " + friend_number
                         + " PLAY_DELAY = " + comm_number)
+                avstatestorevplayfpsstate.updatePlayDelay(comm_number.toInt())
             }
             else
             {

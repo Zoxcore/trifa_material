@@ -2,9 +2,8 @@
 
 package com.zoffcc.applications.trifa
 
-import CAPTURE_VIDEO_FPS
-import CAPTURE_VIDEO_HIGH_FPS
 import RESOURCESDIR
+import avstatestore
 import avstatestorecallstate
 import avstatestorevcapfpsstate
 import com.zoffcc.applications.ffmpegav.AVActivity
@@ -20,16 +19,15 @@ import global_prefs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.io.File
 import java.nio.ByteBuffer
 
-data class AVStateCallState(val call_state: AVState.CALL_STATUS = AVState.CALL_STATUS.CALL_STATUS_NONE)
+data class AVStateCallState(val call_state: AVState.CALL_STATUS = AVState.CALL_STATUS.CALL_STATUS_NONE, val video_in_popout: Boolean = false, val display_av_stats: Boolean = false)
 data class AVStateVideoCaptureFpsState(val videocapfps_state: Int = 0, val videocap_enc_bitrate: Int = 0, val sourceResolution: String = "", val sourceFormat: String = "")
-data class AVStateVideoPlayFpsState(val videoplayfps_state: Int = 0, val videocap_dec_bitrate: Int = 0, val incomingResolution: String = "")
+data class AVStateVideoPlayFpsState(val videoplayfps_state: Int = 0, val videocap_dec_bitrate: Int = 0, val incomingResolution: String = "", val network_rtt: Int = 0, val play_delay: Int = 0)
 
 data class AVState(val a: Int)
 {
@@ -71,6 +69,7 @@ data class AVState(val a: Int)
     private var audio_in_source = ""
     private var video_in_device = ""
     private var video_in_source = ""
+    private var video_capture_fps = -1
     private var video_in_resolution_width = 640
     private var video_in_resolution_height = 480
     private var video_in_source_resolution_width = 0
@@ -101,16 +100,16 @@ data class AVState(val a: Int)
             {
                 if ((video_in_source != null) && (video_in_source != ""))
                 {
-                    var capture_fps_used = CAPTURE_VIDEO_FPS
-                    if ((video_in_resolution_width == 1920) && (video_in_resolution_height == 1080))
-                    {
-                        capture_fps_used = CAPTURE_VIDEO_HIGH_FPS
-                    }
+                    //var capture_fps_used = CAPTURE_VIDEO_FPS
+                    //if ((video_in_resolution_width == 1920) && (video_in_resolution_height == 1080))
+                    //{
+                    //    capture_fps_used = CAPTURE_VIDEO_HIGH_FPS
+                    //}
                     println("ffmpeg video in device:2: " + video_in_resolution_width + " x " + video_in_resolution_height)
-                    println("capture_fps_used:2: " + capture_fps_used)
+                    println("capture_fps_used:2: " + avstatestore.state.video_capture_fps_get())
                     println("ffmpeg video in device: " + video_in_device + " " + video_in_source)
                     val res_vd = AVActivity.ffmpegav_open_video_in_device(video_in_device, video_in_source,
-                        video_in_resolution_width, video_in_resolution_height, capture_fps_used,
+                        video_in_resolution_width, video_in_resolution_height, avstatestore.state.video_capture_fps_get(),
                         PREF__v4l2_capture_force_mjpeg)
                     println("ffmpeg open video capture device: $res_vd")
                 }
@@ -192,6 +191,20 @@ data class AVState(val a: Int)
         }
     }
 
+    fun video_capture_fps_get(): Int
+    {
+        return (video_capture_fps)
+    }
+
+    fun video_capture_fps_set(value: Int)
+    {
+        if ((value == -1) || ((value > 0) && (value < 120)))
+        {
+            video_capture_fps = value
+            save_device_information()
+        }
+    }
+
     fun video_in_resolution_get(): String
     {
         return (video_in_resolution_width.toString() + "x" + video_in_resolution_height.toString())
@@ -256,6 +269,10 @@ data class AVState(val a: Int)
     fun calling_state_set(value: CALL_STATUS)
     {
         calling_state = value
+        if (value != CALL_STATUS.CALL_STATUS_CALLING)
+        {
+            avstatestorecallstate.video_in_popout_update(video_in_popout = false)
+        }
         avstatestorecallstate.update(status = value)
         Log.i(TAG, "calling_state_set:" + value)
     }
@@ -406,6 +423,17 @@ data class AVState(val a: Int)
         } catch (_: Exception)
         {
         }
+
+        try
+        {
+            val tmp = global_prefs.get("main.av.video_capture_fps", "-1")
+            if (tmp != null)
+            {
+                video_capture_fps = tmp.toInt()
+            }
+        } catch (_: Exception)
+        {
+        }
     }
 
     fun save_device_information()
@@ -431,6 +459,12 @@ data class AVState(val a: Int)
         try
         {
             global_prefs.put("main.av.video_in_source", video_in_source)
+        } catch (_: Exception)
+        {
+        }
+        try
+        {
+            global_prefs.put("main.av.video_capture_fps", video_capture_fps.toString())
         } catch (_: Exception)
         {
         }
@@ -473,16 +507,16 @@ data class AVState(val a: Int)
             {
                 if ((video_in_source != null) && (video_in_source != ""))
                 {
-                    var capture_fps_used = CAPTURE_VIDEO_FPS
-                    if ((video_in_resolution_width == 1920) && (video_in_resolution_height == 1080))
-                    {
-                        capture_fps_used = CAPTURE_VIDEO_HIGH_FPS
-                    }
+                    //var capture_fps_used = CAPTURE_VIDEO_FPS
+                    //if ((video_in_resolution_width == 1920) && (video_in_resolution_height == 1080))
+                    //{
+                    //    capture_fps_used = CAPTURE_VIDEO_HIGH_FPS
+                    //}
                     println("ffmpeg video in device:1: " + video_in_resolution_width + " x " + video_in_resolution_height)
-                    println("capture_fps_used:1: " + capture_fps_used)
+                    println("capture_fps_used:1: " + avstatestore.state.video_capture_fps_get())
                     println("ffmpeg video in device: " + video_in_device + " " + video_in_source)
                     val res_vd = AVActivity.ffmpegav_open_video_in_device(video_in_device, video_in_source,
-                        video_in_resolution_width_pin, video_in_resolution_height_pin, capture_fps_used,
+                        video_in_resolution_width_pin, video_in_resolution_height_pin, avstatestore.state.video_capture_fps_get(),
                         PREF__v4l2_capture_force_mjpeg)
                     println("ffmpeg open video capture device: $res_vd")
                 }
@@ -721,14 +755,27 @@ fun CoroutineScope.createAVStateStoreVideoCaptureFpsState(): AVStateStoreVideoCa
         override val stateFlow: StateFlow<AVStateVideoCaptureFpsState> = mutableStateFlow
         override fun update(fps: Int)
         {
-            //launch {
-            //    mutableStateFlow.value = state.copy(videocapfps_state = fps)
-            //}
+            launch {
+                if (avstatestorecallstate.state.display_av_stats)
+                {
+                    // !! IMPORTANT !! we only change this value when it deviates more than x
+                    // because for some reason the whole UI and all chat messages will repaint when the
+                    // element where this is displayed changes. i do not know why :-(
+                    if (Math.abs(state.videocapfps_state - fps) > 2)
+                    {
+                        mutableStateFlow.value = state.copy(videocapfps_state = fps)
+                    }
+                }
+            }
         }
+
         override fun updateEncoderVBitrate(bitrate: Int)
         {
             //launch {
-            //    mutableStateFlow.value = state.copy(videocap_enc_bitrate = bitrate)
+            if (avstatestorecallstate.state.display_av_stats)
+            {
+                mutableStateFlow.value = state.copy(videocap_enc_bitrate = bitrate)
+            }
             //}
         }
 
@@ -752,6 +799,8 @@ interface AVStateStoreVideoPlayFpsState
     val stateFlow: StateFlow<AVStateVideoPlayFpsState>
     val state get() = stateFlow.value
     fun update(fps: Int)
+    fun updateNetworkRTT(value: Int)
+    fun updatePlayDelay(value: Int)
     fun updateDecoderVBitrate(bitrate: Int)
     fun updateIncomingResolution(incomingResolution: String)
 }
@@ -765,14 +814,42 @@ fun CoroutineScope.createAVStateStoreVideoPlayFpsState(): AVStateStoreVideoPlayF
         override val stateFlow: StateFlow<AVStateVideoPlayFpsState> = mutableStateFlow
         override fun update(fps: Int)
         {
-            //launch {
-            // mutableStateFlow.value = state.copy(videoplayfps_state = fps)
-            //}
+            launch {
+                if (avstatestorecallstate.state.display_av_stats)
+                {
+                    // !! IMPORTANT !! we only change this value when it deviates more than x
+                    // incoming fps fluctuates more than capture fps. and therefore a higher delta value (x)
+                    // because for some reason the whole UI and all chat messages will repaint when the
+                    // element where this is displayed changes. i do not know why :-(
+                    if (Math.abs(state.videoplayfps_state - fps) > 4)
+                    {
+                        mutableStateFlow.value = state.copy(videoplayfps_state = fps)
+                    }
+                }
+            }
         }
+        override fun updateNetworkRTT(value: Int)
+        {
+            if (avstatestorecallstate.state.display_av_stats)
+            {
+                mutableStateFlow.value = state.copy(network_rtt = value)
+            }
+        }
+        override fun updatePlayDelay(value: Int)
+        {
+            if (avstatestorecallstate.state.display_av_stats)
+            {
+                mutableStateFlow.value = state.copy(play_delay = value)
+            }
+        }
+
         override fun updateDecoderVBitrate(bitrate: Int)
         {
             //launch {
-            //    mutableStateFlow.value = state.copy(videocap_dec_bitrate = bitrate)
+            if (avstatestorecallstate.state.display_av_stats)
+            {
+                mutableStateFlow.value = state.copy(videocap_dec_bitrate = bitrate)
+            }
             //}
         }
 
@@ -790,6 +867,8 @@ interface AVStateStoreCallState
     val stateFlow: StateFlow<AVStateCallState>
     val state get() = stateFlow.value
     fun update(status: AVState.CALL_STATUS)
+    fun video_in_popout_update(video_in_popout: Boolean)
+    fun display_av_stats(value: Boolean)
 }
 
 fun CoroutineScope.createAVStateStoreCallState(): AVStateStoreCallState
@@ -804,6 +883,27 @@ fun CoroutineScope.createAVStateStoreCallState(): AVStateStoreCallState
             //launch {
                 mutableStateFlow.value = state.copy(call_state = status)
             //}
+        }
+
+        override fun video_in_popout_update(value: Boolean)
+        {
+            if (value == true)
+            {
+                if (state.call_state == AVState.CALL_STATUS.CALL_STATUS_CALLING)
+                {
+                    mutableStateFlow.value = state.copy(video_in_popout = value)
+                    Log.i(TAG, "video_in_popout = " + value)
+                }
+            }
+            else
+            {
+                mutableStateFlow.value = state.copy(video_in_popout = value)
+                Log.i(TAG, "video_in_popout = " + value)
+            }
+        }
+        override fun display_av_stats(value: Boolean)
+        {
+            mutableStateFlow.value = state.copy(display_av_stats = value)
         }
     }
 }

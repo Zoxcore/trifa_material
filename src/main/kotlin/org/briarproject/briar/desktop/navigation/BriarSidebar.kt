@@ -129,36 +129,7 @@ fun BriarSidebar(
                 )
             //}
         }
-        Tooltip(text = if (global_store.native_ffmpegav_lib_loaded) "ffmpeg AV JNI lib loaded"
-            else "ffmpeg AV JNI lib not loaded",
-            textcolor = Color.Black) {
-            IconButton(
-                modifier = Modifier.height(25.dp).padding(vertical = 0.dp),
-                icon = if (global_store.native_ffmpegav_lib_loaded) Icons.Filled.Info else Icons.Filled.Error,
-                iconSize = 20.dp,
-                enabled = false,
-                iconTint = if (global_store.native_ffmpegav_lib_loaded) Color.DarkGray.copy(alpha = 0.7f) else Color(0xff9c7924),
-                contentDescription = "",
-                onClick = {},
-            )
-        }
-        // HINT: on Windows we do have a JNI lib for notifications. java can handle it just fine.
-        if (OperatingSystem.getCurrent() != OperatingSystem.WINDOWS)
-        {
-            Tooltip(text = if (global_store.native_notification_lib_loaded) "Notification JNI lib loaded"
-            else "Notification JNI lib not loaded",
-                textcolor = Color.Black) {
-                IconButton(
-                    modifier = Modifier.height(25.dp).padding(vertical = 0.dp),
-                    icon = if (global_store.native_notification_lib_loaded) Icons.Filled.Info else Icons.Filled.Error,
-                    iconSize = 20.dp,
-                    enabled = false,
-                    iconTint = if (global_store.native_notification_lib_loaded) Color.DarkGray.copy(alpha = 0.7f) else Color(0xff9c7924),
-                    contentDescription = "",
-                    onClick = {},
-                )
-            }
-        }
+
     }
 }
 
