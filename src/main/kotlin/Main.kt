@@ -1409,7 +1409,9 @@ fun App()
                 HorizontalDivider(modifier = Modifier.fillMaxWidth().padding(0.dp))
                 Row(
                     modifier = Modifier.randomDebugBorder().height(MAIN_STATUS_BAR_HEIGHT).fillMaxWidth(),
-                    verticalAlignment = Alignment.Bottom) {
+                    verticalAlignment = Alignment.Bottom)
+                {
+                    Spacer(modifier = Modifier.width(3.dp))
                     val globalstore2 by globalstore.stateFlow.collectAsState()
                     Tooltip(
                         modifier = Modifier.randomDebugBorder().width(18.dp),
