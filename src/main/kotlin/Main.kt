@@ -1161,7 +1161,13 @@ fun App()
                                     }
                                 }
                                 var capture_fps_expanded by remember { mutableStateOf(false) }
-                                Text("capture fps: " + avstatestore.state.video_capture_fps_get(), fontSize = 13.sp, modifier = Modifier.fillMaxWidth(),
+                                val fps_int = avstatestore.state.video_capture_fps_get()
+                                var fps_info_str = "" + fps_int
+                                if (fps_int == -1)
+                                {
+                                    fps_info_str = "Default"
+                                }
+                                Text("capture fps: " + fps_info_str, fontSize = 13.sp, modifier = Modifier.fillMaxWidth(),
                                     maxLines = 1)
                                 IconButton(onClick = {
                                     capture_fps_expanded = true
@@ -1184,7 +1190,14 @@ fun App()
                                             }
                                             capture_fps_expanded = false
                                         }) {
-                                            Text(text = "" + s)
+                                            if (s == -1)
+                                            {
+                                                Text(text = "Default")
+                                            }
+                                            else
+                                            {
+                                                Text(text = "" + s)
+                                            }
                                         }
                                     }
                                 }
