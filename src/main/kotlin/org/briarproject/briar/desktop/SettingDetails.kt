@@ -67,6 +67,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import avstatestorecallstate
 import com.zoffcc.applications.trifa.HelperFriend.get_g_opts
 import com.zoffcc.applications.trifa.HelperFriend.set_g_opts
 import com.zoffcc.applications.trifa.HelperGeneric
@@ -372,6 +373,29 @@ private fun general_settings()
     // ---- use custom font that has color emoji AND normal text ----
 
 
+    // ---- display status info for AV calls ----
+    var display_status_info_for_av_calls by remember { mutableStateOf(false) }
+    try
+    {
+        if (global_prefs.getBoolean("main.display_status_info_for_av_calls", false))
+        {
+            display_status_info_for_av_calls = true
+        }
+    } catch (_: Exception)
+    {
+    }
+    DetailItem(label = i18n("display status info for AV calls. WARNING: this will make the UI slow down"),
+        description = (if (display_status_info_for_av_calls) i18n("enabled") else i18n("disabled"))) {
+        Switch(
+            checked = display_status_info_for_av_calls,
+            onCheckedChange = {
+                global_prefs.putBoolean("main.display_status_info_for_av_calls", it)
+                display_status_info_for_av_calls = it
+                avstatestorecallstate.display_av_stats(display_status_info_for_av_calls)
+            },
+        )
+    }
+    // ---- display status info for AV calls ----
 
 
     // ---- set global density to scale the whole UI ----
@@ -576,7 +600,11 @@ private fun set_own_nospam()
     var tox_self_nospam = ""
     try
     {
-        tox_self_nospam = long_to_hex(tox_self_get_nospam())
+        val tmp_nospam_long = tox_self_get_nospam()
+        if (tmp_nospam_long != -1L)
+        {
+            tox_self_nospam = long_to_hex(tmp_nospam_long)
+        }
     } catch (e: java.lang.Exception)
     {
         e.printStackTrace()
