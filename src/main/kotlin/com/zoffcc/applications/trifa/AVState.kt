@@ -202,6 +202,7 @@ data class AVState(val a: Int)
         {
             video_capture_fps = value
             save_device_information()
+            restart_devices()
         }
     }
 
