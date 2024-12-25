@@ -1,4 +1,4 @@
-@file:Suppress("UNUSED_PARAMETER", "LocalVariableName", "PropertyName", "ClassName", "FunctionName", "unused", "UNUSED_VARIABLE")
+@file:Suppress("UNUSED_PARAMETER", "LocalVariableName", "PropertyName", "ClassName", "FunctionName", "unused", "UNUSED_VARIABLE", "SpellCheckingInspection", "UnnecessaryVariable", "ConvertToStringTemplate", "UNUSED_VALUE", "ReplaceCallWithBinaryOperator", "CascadeIf", "VARIABLE_WITH_REDUNDANT_INITIALIZER")
 package com.zoffcc.applications.trifa
 
 import ColorProvider
@@ -4176,7 +4176,7 @@ class MainActivity
             {
                 val ip_addr = group_peer_ip_addresses!!.toByteArray(StandardCharsets.UTF_8).filterNot { it == 0.toByte() }.toByteArray()
                 ip_addr_str = ip_addr.toString(StandardCharsets.UTF_8)
-            } catch (e: Exception)
+            } catch (_: Exception)
             {
             }
             return ip_addr_str

@@ -1,3 +1,5 @@
+@file:Suppress("FunctionName", "SpellCheckingInspection", "ConvertToStringTemplate", "LiftReturnOrAssignment", "MemberVisibilityCanBePrivate", "LocalVariableName", "UnnecessaryVariable", "ReplaceCallWithBinaryOperator", "PropertyName", "PrivatePropertyName", "ClassName", "JoinDeclarationAndAssignment")
+
 package com.zoffcc.applications.trifa
 
 import CAPTURE_VIDEO_FPS
