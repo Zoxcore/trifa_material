@@ -2345,6 +2345,14 @@ fun Modifier.randomDebugBorder(): Modifier =
         Modifier
     }
 
+fun Modifier.randomDebugBorder2(): Modifier =
+    Modifier.padding(3.dp).border(width = 4.dp,
+        color = Color(
+            Random().nextInt(0, 255),
+            Random().nextInt(0, 255),
+            Random().nextInt(0, 255)),
+        shape = RectangleShape)
+
 fun Modifier.dashedBorder(strokeWidth: Dp, color: Color, cornerRadiusDp: Dp) = composed(
     factory = {
         val density = LocalDensity.current

@@ -18,14 +18,6 @@
 
 package org.briarproject.briar.desktop.navigation
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
 import androidx.compose.foundation.layout.Column
@@ -54,7 +46,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.zoffcc.applications.trifa.Log
@@ -70,7 +61,6 @@ import org.briarproject.briar.desktop.navigation.SidebarButtonState.Warning
 import org.briarproject.briar.desktop.ui.Tooltip
 import org.briarproject.briar.desktop.ui.UiMode
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
-import org.jetbrains.skiko.OS
 import randomDebugBorder
 
 val SIDEBAR_WIDTH = 56.dp

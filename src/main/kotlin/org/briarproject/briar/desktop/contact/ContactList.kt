@@ -19,13 +19,11 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.zoffcc.applications.trifa.HelperGeneric.delete_friend_wrapper
-import com.zoffcc.applications.trifa.HelperRelay
 import com.zoffcc.applications.trifa.HelperRelay.delete_relay
 import com.zoffcc.applications.trifa.HelperRelay.is_any_relay
 import com.zoffcc.applications.trifa.HelperRelay.is_own_relay
 import com.zoffcc.applications.trifa.HelperRelay.remove_own_relay_in_db
 import com.zoffcc.applications.trifa.StateContacts
-import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import contactstore
 import friendsettingsstore
 import globalfrndstoreunreadmsgs

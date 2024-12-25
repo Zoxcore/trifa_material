@@ -1,4 +1,5 @@
 @file:OptIn(ExperimentalComposeUiApi::class)
+@file:Suppress("FunctionName", "SpellCheckingInspection", "LocalVariableName", "ConvertToStringTemplate")
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
