@@ -260,6 +260,8 @@ val VIDEO_OUT_BOX_WIDTH_SMALL = 130.dp
 val VIDEO_OUT_BOX_HEIGHT_SMALL = 100.dp
 val VIDEO_OUT_BOX_WIDTH_BIG = 500.dp
 val VIDEO_OUT_BOX_HEIGHT_BIG = 500.dp
+const val DOUBLE_BUFFER_VIDEOIN = true
+const val DOUBLE_BUFFER_VIDEOOUT = true
 val SAVEDATA_PATH_WIDTH = 200.dp
 val SAVEDATA_PATH_HEIGHT = 50.dp
 val MYTOXID_WIDTH = 200.dp
@@ -587,7 +589,7 @@ fun App()
                                                                 video_in_box_small != video_in_box_small
                                                             }),
                                                         factory = {
-                                                            JPanel(SingleComponentAspectRatioKeeperLayout(), true).apply {
+                                                            JPanel(SingleComponentAspectRatioKeeperLayout(), DOUBLE_BUFFER_VIDEOIN).apply {
                                                                 add(JPictureBox.videoinbox)
                                                             }
                                                         }
@@ -818,7 +820,7 @@ fun App()
                                                             Log.i(TAG, "update1: " + video_out_box_small)
                                                         }),
                                                     factory = {
-                                                        JPanel(SingleComponentAspectRatioKeeperLayout(), true).apply {
+                                                        JPanel(SingleComponentAspectRatioKeeperLayout(), DOUBLE_BUFFER_VIDEOOUT).apply {
                                                             add(JPictureBoxOut.videooutbox)
                                                         }
                                                     },
@@ -1153,7 +1155,15 @@ fun App()
                                 ) {
                                     items.forEachIndexed { index, s ->
                                         DropdownMenuItem(onClick = {
-                                            avstatestore.state.video_in_resolution_set(s)
+                                            if (avstatestore.state.calling_state_get() != AVState.CALL_STATUS.CALL_STATUS_CALLING)
+                                            {
+                                                // HINT: only allow to change resolution when no call is active
+                                                avstatestore.state.video_in_resolution_set(s)
+                                            }
+                                            else
+                                            {
+                                                SnackBarToast("Resolution change is only allowed when no call is active")
+                                            }
                                             resolution_expanded = false
                                         }) {
                                             Text(text = s)
@@ -2481,7 +2491,7 @@ private fun MainAppStart()
                                 .combinedClickable(onClick = {
                                 }),
                             factory = {
-                                JPanel(SingleComponentAspectRatioKeeperLayout(), true).apply {
+                                JPanel(SingleComponentAspectRatioKeeperLayout(), DOUBLE_BUFFER_VIDEOIN).apply {
                                     add(JPictureBox.videoinbox)
                                 }
                             }
