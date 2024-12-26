@@ -522,6 +522,13 @@ fi
   unset CXXFLAGS
   unset CFLAGS
 
+if [ "$2""x" == "asanx" ]; then
+    # check if we actually have ASAN symbols in the library files
+    nm $_INST_/lib/libtoxcore.a | grep -i asan || exit 1
+    nm $_INST_/lib/libtoxav.a | grep -i asan || exit 1
+    nm $_INST_/lib/libtoxencryptsave.a | grep -i asan || exit 1
+fi
+
 cd "$_HOME_"
 
 # ---------- c-toxcore ---------
