@@ -31,6 +31,7 @@ fi
 # -XX:+UseG1GC -XX:MinHeapFreeRatio=1 -XX:MaxHeapFreeRatio=1
 
 if [ "$2""x" != "1x" ]; then
+  export ASAN_OPTIONS="halt_on_error=false,detect_leaks=0"
   LD_PRELOAD="$asan_runtime_lib" \
     "$java_17_or_newer_dir"/bin/java -Dapple.awt.application.name=TRIfA \
     -Dcom.apple.mrj.application.apple.menu.about.name=TRIfA \
