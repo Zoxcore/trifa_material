@@ -145,5 +145,11 @@ sha256sum /home/runner/work/trifa_material/trifa_material/libjni-c-toxcore.so
 
 ls -al libjni-c-toxcore.so || exit 1
 pwd
+
+if [ "$2""x" == "asanx" ]; then
+    # check if we actually have ASAN symbols in the library file
+    nm libjni-c-toxcore.so | grep -i asan || exit 1
+fi
+
 file libjni-c-toxcore.so
 
