@@ -12,6 +12,7 @@ public class AVActivity {
 
     private static boolean java_audio_in_device_used = false;
     public static native String ffmpegav_version();
+    public static native String ffmpegav_GITHASH();
     public static native String ffmpegav_libavutil_version();
     public static native int ffmpegav_init(String resources_dir);
     public static native ffmpegav_descrid[] ffmpegav_get_in_sources(String devicename, int is_video);
@@ -278,7 +279,7 @@ public class AVActivity {
         try {
             if (t_audio_rec != null)
             {
-                    t_audio_rec.join(1000);
+                t_audio_rec.join(1000);
             }
         } catch (Exception ignored) {
         } finally {
@@ -647,6 +648,7 @@ public class AVActivity {
         }
         Log.i(TAG, "libavutil version: " + ffmpegav_libavutil_version());
         Log.i(TAG, "ffmpegav version: " + ffmpegav_version());
+        Log.i(TAG, "ffmpegav commit: " + ffmpegav_GITHASH());
         // final int res = ffmpegav_init("./"); // exmaple with path must include the seperator at the end!
         final int res = ffmpegav_init(null); // exmaple with "null" -> filter data will be loaded from current directory
         Log.i(TAG, "ffmpeg init: " + res);
@@ -765,8 +767,8 @@ public class AVActivity {
             @Override
             public void onSuccess(long width, long height, long source_width, long source_height, long pts, int fps, int source_format) {
                 Log.i(TAG, "ffmpeg open video capture onSuccess:" + width + " " + height + " " +
-                source_width + " " + source_height + " " + pts + " fps: " + fps +
-                " source_format: " + ffmpegav_video_source_format_name.value_str(source_format));
+                        source_width + " " + source_height + " " + pts + " fps: " + fps +
+                        " source_format: " + ffmpegav_video_source_format_name.value_str(source_format));
             }
             @Override
             public void onError() {
@@ -774,7 +776,7 @@ public class AVActivity {
             @Override
             public void onBufferTooSmall(int y_buffer_size, int u_buffer_size, int v_buffer_size) {
                 Log.i(TAG, "Video buffer too small, needed sizes: " + y_buffer_size
-                    + " " + u_buffer_size + " "+ v_buffer_size);
+                        + " " + u_buffer_size + " "+ v_buffer_size);
                 ffmpegav_video_buffer_2_y = java.nio.ByteBuffer.allocateDirect(y_buffer_size);
                 ffmpegav_video_buffer_2_u = java.nio.ByteBuffer.allocateDirect(u_buffer_size);
                 ffmpegav_video_buffer_2_v = java.nio.ByteBuffer.allocateDirect(v_buffer_size);
@@ -854,11 +856,11 @@ public class AVActivity {
         // -----------------------
         // -----------------------
         final int res_vd2 = ffmpegav_open_video_in_device(vdevice,
-            vsource, 640, 480, 15, 0);
+                vsource, 640, 480, 15, 0);
         Log.i(TAG, "ffmpeg open video capture device: " + res_vd2);
 
         final int res_ad2 = ffmpegav_open_audio_in_device_wrapper(adevice,
-            asource);
+                asource);
         Log.i(TAG, "ffmpeg open audio capture device: " + res_ad2);
         ffmpegav_start_video_in_capture();
         ffmpegav_start_audio_in_capture_wrapper();
@@ -925,7 +927,7 @@ public class AVActivity {
                     {
                         Log.i(TAG, "T1: ffmpeg open video capture device:start");
                         final int res_vd2 = ffmpegav_open_video_in_device(vdevice_,
-                            vsource_, 640, 480, 15, 0);
+                                vsource_, 640, 480, 15, 0);
                         Log.i(TAG, "T1: ffmpeg open video capture device:done");
                         int low = 10;
                         int high = 80;
@@ -970,7 +972,7 @@ public class AVActivity {
                     {
                         Log.i(TAG, "T3: ffmpeg open video capture device:start");
                         final int res_vd2 = ffmpegav_open_video_in_device(vdevice_,
-                            vsource_, 640, 480, 15, 0);
+                                vsource_, 640, 480, 15, 0);
                         Log.i(TAG, "T3: ffmpeg open video capture device:done");
                         int low = 10;
                         int high = 80;
