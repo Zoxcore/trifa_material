@@ -399,7 +399,6 @@ fun CoroutineScope.createSavepathStore(): SavepathStore {
                 channelPath.consumeAsFlow().collect { item ->
                     try
                     {
-                        val dir_file = File(item)
                         PREF__tox_savefile_dir = item
                         PREF__database_files_dir = item
                         VFS_TMP_FILE_DIR = PREF__tox_savefile_dir + File.separator + "/tempdir/files/"
