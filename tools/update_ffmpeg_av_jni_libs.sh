@@ -5,6 +5,7 @@ file_mac='libffmpeg_av_jni.jnilib'
 file_arm_mac='libffmpeg_av_jni_arm64.jnilib'
 file_win='ffmpeg_av_jni.dll'
 file_lix='libffmpeg_av_jni.so'
+file_asan_lix='libffmpeg_av_jni.so__ASAN'
 file_rpi='libffmpeg_av_jni_raspi.so'
 
 _HOME2_=$(dirname $0)
@@ -19,4 +20,5 @@ wget "$base_url""$file_mac" -O "$file_mac"
 wget "$base_url""$file_arm_mac" -O "$file_arm_mac"
 wget "$base_url""$file_win" -O "$file_win"
 wget "$base_url""$file_lix" -O "$file_lix"
+wget "$base_url""$file_asan_lix" -O "$file_asan_lix"
 wget "$base_url""$file_rpi" -O "$file_rpi"

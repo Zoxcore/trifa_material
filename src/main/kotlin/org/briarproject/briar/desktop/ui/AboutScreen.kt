@@ -213,12 +213,14 @@ private fun GeneralInfo() {
         add(Entry(i18n("about.libsodium_version"), libsodium_version))
         var ffmpegav_libavutil_version = "???"
         var ffmpegav_version = "???"
+        var ffmpegav_git_hash = "???"
         if (MainActivity.native_ffmpegav_lib_loaded_error == 0)
         {
             try
             {
                 ffmpegav_libavutil_version = AVActivity.ffmpegav_libavutil_version()
                 ffmpegav_version = AVActivity.ffmpegav_version()
+                ffmpegav_git_hash = AVActivity.ffmpegav_GITHASH()
             } catch (_: Exception)
             {
             }
@@ -227,9 +229,11 @@ private fun GeneralInfo() {
         {
             ffmpegav_libavutil_version = "JNI lib not loaded"
             ffmpegav_version = "JNI lib not loaded"
+            ffmpegav_git_hash = "JNI lib not loaded"
         }
         add(Entry(i18n("about.ffmpegav_libavutil_version"), ffmpegav_libavutil_version))
         add(Entry(i18n("about.ffmpegav_version"), ffmpegav_version))
+        add(Entry(i18n("about.ffmpegav_commit_hash"), ffmpegav_git_hash))
         var jninotifications_version = "???"
 
         if (MainActivity.native_notification_lib_loaded_error == 0)
