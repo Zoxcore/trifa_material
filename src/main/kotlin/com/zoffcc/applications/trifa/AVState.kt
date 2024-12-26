@@ -94,6 +94,12 @@ data class AVState(val a: Int)
         semaphore_avstate.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
         devices_state_copy = devices_state
         semaphore_avstate.release()
+
+        Log.i(TAG, "ffmpeg_devices_start:clear_video_out_frame")
+        VideoOutFrame.clear_video_out_frame()
+        Log.i(TAG, "ffmpeg_devices_start:clear_video_in_frame")
+        VideoInFrame.clear_video_in_frame()
+
         if (devices_state_copy == CALL_DEVICES_STATE.CALL_DEVICES_STATE_CLOSED)
         {
             if ((video_in_device != null) && (video_in_device != ""))
@@ -527,8 +533,8 @@ data class AVState(val a: Int)
             val buffer_size_in_bytes1 = (frame_width_px1 * frame_height_px1 * 3) / 2
             val video_buffer_1 = ByteBuffer.allocateDirect(buffer_size_in_bytes1)
             AVActivity.ffmpegav_set_JNI_video_buffer(video_buffer_1, frame_width_px1, frame_height_px1)
-            val frame_width_px2 = video_in_resolution_width_pin
-            val frame_height_px2 = video_in_resolution_height_pin
+            var frame_width_px2 = video_in_resolution_width_pin
+            var frame_height_px2 = video_in_resolution_height_pin
             val y_size = frame_width_px2 * frame_height_px2
             val u_size = (frame_width_px2 * frame_height_px2 / 4)
             val v_size = (frame_width_px2 * frame_height_px2 / 4)
@@ -655,6 +661,7 @@ data class AVState(val a: Int)
 
             AVActivity.ffmpegav_set_video_capture_callback(object : AVActivity.video_capture_callback
             {
+                // WARNING: you need to make this thread safe !!!!!
                 override fun onSuccess(width: Long, height: Long, source_width: Long, source_height: Long, pts: Long, fps: Int, source_format: Int)
                 {
                     // Log.i(TAG, "ffmpeg open video capture onSuccess: $width $height $pts FPS: $fps Source Format: "
@@ -676,20 +683,39 @@ data class AVState(val a: Int)
 
                     val frame_width_px: Int = width.toInt()
                     val frame_height_px: Int = height.toInt()
-                    val buffer_size_in_bytes3 = (frame_width_px * frame_height_px * 1.5f).toInt()
                     if ((video_buffer_2 == null) || (frame_width_px != frame_width_px2) || (frame_height_px != frame_height_px2))
                     {
+                        Log.i(TAG, "ffmpeg open video capture: sizes changed: " +
+                                video_buffer_2 + " " +
+                                frame_width_px + " " +
+                                frame_width_px2 + " " +
+                                frame_height_px + " " +
+                                frame_height_px2 + " "
+                        )
+                        val buffer_size_in_bytes3 = (frame_width_px * frame_height_px * 1.5f).toInt()
                         video_buffer_2 = ByteBuffer.allocateDirect(buffer_size_in_bytes3)
                         MainActivity.set_JNI_video_buffer2(video_buffer_2, frame_width_px, frame_height_px)
                         VideoOutFrame.setup_video_out_resolution(frame_width_px, frame_height_px, buffer_size_in_bytes3)
+                        frame_width_px2 = frame_width_px
+                        frame_height_px2 = frame_height_px
+                        Log.i(TAG, "ffmpeg open video capture: sizes changed: finished")
                     }
                     video_buffer_2!!.rewind()
                     AVActivity.ffmpegav_video_buffer_2_y.rewind()
                     AVActivity.ffmpegav_video_buffer_2_u.rewind()
                     AVActivity.ffmpegav_video_buffer_2_v.rewind()
-                    video_buffer_2!!.put(AVActivity.ffmpegav_video_buffer_2_y)
-                    video_buffer_2!!.put(AVActivity.ffmpegav_video_buffer_2_u)
-                    video_buffer_2!!.put(AVActivity.ffmpegav_video_buffer_2_v)
+                    try
+                    {
+                        video_buffer_2!!.put(AVActivity.ffmpegav_video_buffer_2_y)
+                        video_buffer_2!!.put(AVActivity.ffmpegav_video_buffer_2_u)
+                        video_buffer_2!!.put(AVActivity.ffmpegav_video_buffer_2_v)
+                    }
+                    catch(e: Exception)
+                    {
+                        // HINT: AVActivity.ffmpegav_video_buffer_2_[y/u/v] buffers are too large for video_buffer_2
+                        // if we want to change resolution during a call we need to change some stuff
+                        return
+                    }
                     // can we cache that? what if a friend gets deleted while in a call? and the friend number changes?
                     val friendnum = MainActivity.tox_friend_by_public_key(friendpubkey)
                     MainActivity.toxav_video_send_frame_age(friendnum = friendnum, frame_width_px = width.toInt(), frame_height_px = height.toInt(), age_ms = pts.toInt())
@@ -698,6 +724,7 @@ data class AVState(val a: Int)
                     VideoOutFrame.new_video_out_frame(video_buffer_2, frame_width_px, frame_height_px)
                 }
 
+                // WARNING: you need to make this thread safe !!!!!
                 override fun onBufferTooSmall(y_buffer_size: Int, u_buffer_size: Int, v_buffer_size: Int)
                 {
                     Log.i(TAG, "ffmpeg open video capture onBufferTooSmall: sizes needed: " + y_buffer_size + " " + u_buffer_size + " " + v_buffer_size)
@@ -705,8 +732,10 @@ data class AVState(val a: Int)
                     AVActivity.ffmpegav_video_buffer_2_u = ByteBuffer.allocateDirect(u_buffer_size)
                     AVActivity.ffmpegav_video_buffer_2_v = ByteBuffer.allocateDirect(v_buffer_size)
                     AVActivity.ffmpegav_set_JNI_video_buffer2(AVActivity.ffmpegav_video_buffer_2_y, AVActivity.ffmpegav_video_buffer_2_u, AVActivity.ffmpegav_video_buffer_2_v, frame_width_px2, frame_height_px2)
+                    Log.i(TAG, "ffmpeg open video capture onBufferTooSmall: finished")
                 }
 
+                // WARNING: you need to make this thread safe !!!!!
                 override fun onError()
                 {
                 }
