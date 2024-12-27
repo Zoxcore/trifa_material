@@ -25,7 +25,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: with full debug output
+        run: set -x ; tools/check_release_jni_libs.sh
+
       - name: check if checked in JNI libs are ok
         run: tools/check_release_jni_libs.sh
-
 
