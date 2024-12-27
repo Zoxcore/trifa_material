@@ -1,0 +1,31 @@
+name: check JNI libs
+
+on:
+  push:
+    paths-ignore:
+     - 'README.md'
+     - 'CHANGELOG.md'
+  pull_request:
+    paths-ignore:
+     - 'README.md'
+     - 'CHANGELOG.md'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: dummy
+        default: dummy
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  check-jni-libs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: check if checked in JNI libs are ok
+        run: tools/check_release_jni_libs.sh
+
+
