@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 base_url='https://github.com/zoff99/jni_notifications/releases/download/nightly/'
 
 file_mac='libjni_notifications.jnilib'
