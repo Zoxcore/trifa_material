@@ -17,6 +17,16 @@ else
 	echo "git repo clean."
 fi
 
+
+./tools/check_release_jni_libs.sh
+res_1=$?
+if [ $res_1 -ne 0 ]; then
+	echo "ERROR: JNI libs have some problem."
+	exit 1
+else
+	echo "JNI lib are ok."
+fi
+
 f1="build.gradle.kts"
 f2="asan_run.sh"
 
