@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 base_url='https://github.com/zoff99/ffmpeg_av_jni/releases/download/nightly/'
 
 file_mac='libffmpeg_av_jni.jnilib'

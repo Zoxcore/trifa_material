@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 url='https://github.com/zoff99/c-toxcore'
 
 _HOME2_=$(dirname $0)
