@@ -1148,7 +1148,7 @@ fun App()
                                     modifier = Modifier.size(AV_SELECTOR_ICON_SIZE)) {
                                     Icon(Icons.Filled.Refresh, null)
                                 }
-                                val items = listOf("480x270", "640x360", "640x480", "480x640", "960x540", "720x720", "1280x720", "720x1280", "1080x1080", "1920x1080", "1080x1920")
+                                val items = listOf("480x270", "640x360", "640x480", "480x640", "960x540", "720x720", "1024x768", "1280x720", "720x1280", "1080x1080", "1920x1080", "1080x1920")
                                 DropdownMenu(
                                     expanded = resolution_expanded,
                                     onDismissRequest = { resolution_expanded = false },
