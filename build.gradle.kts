@@ -156,7 +156,18 @@ compose.desktop {
                 // --- scrimage needs this set ONLY for macos arm
                 println("iconFile=" + iconsRoot.resolve("icon-mac.icns"))
                 iconFile.set(iconsRoot.resolve("icon-mac.icns"))
-                bundleID = "com.zoffcc.applications.trifa_material"
+                bundleID = "com.zoffcc.applications.trifamaterial"
+                // HINT: https://github.com/JetBrains/compose-multiplatform/blob/master/tutorials/Signing_and_notarization_on_macOS/README.md
+                signing {
+                    sign.set(false)
+                    identity.set("Rupert Key")
+                    keychain.set("keychain/macos_keychain")
+                }
+                //notarization {
+                //    val providers = project.providers
+                //    appleID.set(providers.environmentVariable("NOTARIZATION_APPLE_ID"))
+                //    password.set(providers.environmentVariable("NOTARIZATION_PASSWORD"))
+                //}
                 runtimeEntitlementsFile.set(iconsRoot.resolve("runtime-entitlements.plist"))
                 infoPlist {
                     extraKeysRawXml = macExtraPlistKeys
