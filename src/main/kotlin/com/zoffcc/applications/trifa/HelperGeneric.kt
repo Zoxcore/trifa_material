@@ -1,4 +1,4 @@
-@file:Suppress("FunctionName", "VerboseNullabilityAndEmptiness", "MemberVisibilityCanBePrivate", "LocalVariableName", "ConvertToStringTemplate", "SpellCheckingInspection", "UNUSED_VARIABLE", "ReplaceCallWithBinaryOperator", "USELESS_CAST", "ReplaceGetOrSet", "ReplaceSizeZeroCheckWithIsEmpty", "RedundantIf", "ReplaceWithOperatorAssignment", "ReplaceSizeCheckWithIsNotEmpty", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "UNUSED_VALUE")
+@file:Suppress("FunctionName", "VerboseNullabilityAndEmptiness", "MemberVisibilityCanBePrivate", "LocalVariableName", "ConvertToStringTemplate", "SpellCheckingInspection", "UNUSED_VARIABLE", "ReplaceCallWithBinaryOperator", "USELESS_CAST", "ReplaceGetOrSet", "ReplaceSizeZeroCheckWithIsEmpty", "RedundantIf", "ReplaceWithOperatorAssignment", "ReplaceSizeCheckWithIsNotEmpty", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "UNUSED_VALUE", "ReplacePutWithAssignment", "LiftReturnOrAssignment", "ReplaceRangeToWithRangeUntil")
 
 package com.zoffcc.applications.trifa
 
@@ -609,7 +609,7 @@ object HelperGeneric {
             try
             {
                 row_id = orma!!.insertIntoMessage(m)
-            } catch (e: Exception)
+            } catch (_: Exception)
             {
             }
             m.id = row_id
