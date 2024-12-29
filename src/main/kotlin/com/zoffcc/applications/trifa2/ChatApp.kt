@@ -427,9 +427,12 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                             Box(Modifier.weight(1f)) {
                                 SendMessage(focusRequester, selectedContactPubkey) { text -> //
                                     Log.i(TAG, "selectedContactPubkey=" + selectedContactPubkey)
-                                    if (!send_message_onclick(text, selectedContactPubkey))
+                                    if (selectedContactPubkey != null)
                                     {
-                                        SnackBarToast("Sending Message failed")
+                                        if (!send_message_onclick(text, selectedContactPubkey))
+                                        {
+                                            SnackBarToast("Sending Message failed")
+                                        }
                                     }
                                 }
                             }
@@ -575,45 +578,47 @@ fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, s
                         {
                             Box(Modifier.weight(1f)) {
                                 GroupSendMessage (focusRequester, selectedGroupId) { text ->
-                                    val timestamp = System.currentTimeMillis()
-                                    val groupnum: Long = tox_group_by_groupid__wrapper(selectedGroupId!!)
-                                    val my_group_peerpk = tox_group_self_get_public_key(groupnum)
-                                    val message_id: Long = tox_group_send_message(groupnum, ToxVars.TOX_MESSAGE_TYPE.TOX_MESSAGE_TYPE_NORMAL.value, text)
-                                    if (message_id >= 0)
+                                    Log.i(TAG, "selectedGroupId=" + selectedGroupId)
+                                    if (selectedGroupId != null)
                                     {
-                                        var peer_role = -1
-                                        try
+                                        val timestamp = System.currentTimeMillis()
+                                        val groupnum: Long = tox_group_by_groupid__wrapper(selectedGroupId!!)
+                                        val my_group_peerpk = tox_group_self_get_public_key(groupnum)
+                                        val message_id: Long = tox_group_send_message(groupnum, ToxVars.TOX_MESSAGE_TYPE.TOX_MESSAGE_TYPE_NORMAL.value, text)
+                                        if (message_id >= 0)
                                         {
-                                            val self_peer_role = MainActivity.tox_group_self_get_role(groupnum)
-                                            if (self_peer_role >= 0)
+                                            var peer_role = -1
+                                            try
                                             {
-                                                peer_role = self_peer_role
+                                                val self_peer_role = MainActivity.tox_group_self_get_role(groupnum)
+                                                if (self_peer_role >= 0)
+                                                {
+                                                    peer_role = self_peer_role
+                                                }
+                                            } catch (_: Exception)
+                                            {
                                             }
-                                        } catch (_: Exception)
+                                            val message_id_hex = HelperGroup.fourbytes_of_long_to_hex(message_id)
+                                            val db_msgid = MainActivity.sent_groupmessage_to_db(groupid = selectedGroupId, message_timestamp = timestamp, group_message = text, message_id = message_id, was_synced = false)
+                                            groupmessagestore.send(GroupMessageAction.SendGroupMessage(
+                                                UIGroupMessage(
+                                                    was_synced = false,
+                                                    is_private_msg = 0,
+                                                    sentTimeMs = timestamp,
+                                                    rcvdTimeMs = timestamp,
+                                                    syncdTimeMs = timestamp,
+                                                    peer_role = peer_role,
+                                                    msg_id_hash = "",
+                                                    message_id_tox = message_id_hex, msgDatabaseId = db_msgid,
+                                                    user = myUser, timeMs = timestamp, text = text,
+                                                    toxpk = my_group_peerpk,
+                                                    groupId = selectedGroupId!!.lowercase(),
+                                                    trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value,
+                                                    filename_fullpath = null)))
+                                        } else
                                         {
+                                            SnackBarToast("Sending Group Message failed")
                                         }
-
-                                        val message_id_hex = HelperGroup.fourbytes_of_long_to_hex(message_id)
-                                        val db_msgid = MainActivity.sent_groupmessage_to_db(groupid = selectedGroupId, message_timestamp =  timestamp, group_message = text, message_id = message_id, was_synced = false)
-                                        groupmessagestore.send(GroupMessageAction.SendGroupMessage(
-                                            UIGroupMessage(
-                                                was_synced = false,
-                                                is_private_msg = 0,
-                                                sentTimeMs = timestamp,
-                                                rcvdTimeMs = timestamp,
-                                                syncdTimeMs = timestamp,
-                                                peer_role = peer_role,
-                                                msg_id_hash = "",
-                                                message_id_tox = message_id_hex, msgDatabaseId = db_msgid,
-                                                user = myUser, timeMs = timestamp, text = text,
-                                                toxpk = my_group_peerpk,
-                                                groupId = selectedGroupId!!.lowercase(),
-                                                trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value,
-                                                filename_fullpath = null)))
-                                    }
-                                    else
-                                    {
-                                        SnackBarToast("Sending Group Message failed")
                                     }
                                 }
                             }
