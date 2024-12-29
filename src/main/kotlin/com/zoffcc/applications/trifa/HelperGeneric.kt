@@ -1,3 +1,5 @@
+@file:Suppress("FunctionName", "VerboseNullabilityAndEmptiness", "MemberVisibilityCanBePrivate", "LocalVariableName", "ConvertToStringTemplate", "SpellCheckingInspection", "UNUSED_VARIABLE", "ReplaceCallWithBinaryOperator", "USELESS_CAST", "ReplaceGetOrSet", "ReplaceSizeZeroCheckWithIsEmpty", "RedundantIf", "ReplaceWithOperatorAssignment", "ReplaceSizeCheckWithIsNotEmpty", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "UNUSED_VALUE")
+
 package com.zoffcc.applications.trifa
 
 import ImageloaderDispatcher
