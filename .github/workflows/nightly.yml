@@ -539,19 +539,20 @@ jobs:
            cat /Users/runner/work/trifa_material/trifa_material/trifa.log
            ./do_run.sh $(cat /Users/runner/work/trifa_material/trifa_material/toxid.txt) >/Users/runner/work/trifa_material/trifa_material/tester.log 2>&1 &
            sleep 68
-           cd /Users/runner/work/trifa_material/trifa_material/jshowarch-master
-           java jshowarch 885 76 115 65 24 &
            ls -al /Users/runner/work/trifa_material/trifa_material/
            cat /Users/runner/work/trifa_material/trifa_material/trifa.log
            cliclick -m verbose c:195,347
            sleep 1
-           cliclick -m verbose c:745,645
+           cliclick -m verbose c:745,627
            sleep 1
-           cliclick -m verbose c:367,641
+           cliclick -m verbose c:367,623
            sleep 1
            sendkeys apps
            sendkeys -a "TRIfA" -c ":smile"
+           cd /Users/runner/work/trifa_material/trifa_material/jshowarch-master
+           java jshowarch 885 76 115 65 24 &
            sleep 90
+           cliclick -m verbose c:367,623
            sleep 120
            cat /Users/runner/work/trifa_material/trifa_material/tester.log
            pwd
@@ -684,21 +685,22 @@ jobs:
            cat /Users/runner/work/trifa_material/trifa_material/trifa.log
            ./do_run.sh $(cat /Users/runner/work/trifa_material/trifa_material/toxid.txt) >/Users/runner/work/trifa_material/trifa_material/tester.log 2>&1 &
            sleep 68
-           cd /Users/runner/work/trifa_material/trifa_material/jshowarch-master
-           rm *.class
-           javac jshowarch.java
-           java jshowarch 885 76 115 65 24 &
            ls -al /Users/runner/work/trifa_material/trifa_material/
            cat /Users/runner/work/trifa_material/trifa_material/trifa.log
            cliclick -m verbose c:195,347
            sleep 1
-           cliclick -m verbose c:745,645
+           cliclick -m verbose c:745,627
            sleep 1
-           cliclick -m verbose c:367,641
+           cliclick -m verbose c:367,623
            sleep 1
            sendkeys apps
            sendkeys -a "TRIfA" -c ":smile"
+           cd /Users/runner/work/trifa_material/trifa_material/jshowarch-master
+           rm *.class
+           javac jshowarch.java
+           java jshowarch 885 76 115 65 24 &
            sleep 90
+           cliclick -m verbose c:367,623
            sleep 120
            cat /Users/runner/work/trifa_material/trifa_material/tester.log
            pwd
@@ -865,7 +867,7 @@ jobs:
                printf 'sleep 220\n' >> /tmp/a.sh
                printf 'xdotool mousemove --sync 214 295 click 1\n' >> /tmp/a.sh
                printf 'sleep 4\n' >> /tmp/a.sh
-               printf 'xdotool mousemove --sync 750 620 click 1\n' >> /tmp/a.sh
+               printf 'xdotool mousemove --sync 750 602 click 1\n' >> /tmp/a.sh
                printf 'sleep 2\n' >> /tmp/a.sh
                printf 'import -window root /tmp/screenshot-linux_before_wm.png\n' >> /tmp/a.sh
                printf 'sleep 40\n' >> /tmp/a.sh
@@ -1044,7 +1046,7 @@ jobs:
           $SendMouseClick::mouse_event(0x00000004, 0, 0, 0, 0);
           sleep -Seconds 02
           $x = 735
-          $y = 613
+          $y = 595
           [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point($x, $y)
           sleep -Seconds 02
           $SendMouseClick::mouse_event(0x00000002, 0, 0, 0, 0);
