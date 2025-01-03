@@ -139,7 +139,7 @@ jobs:
                printf 'sleep 220\n' >> /tmp/a.sh
                printf 'xdotool mousemove --sync 214 295 click 1\n' >> /tmp/a.sh
                printf 'sleep 4\n' >> /tmp/a.sh
-               printf 'xdotool mousemove --sync 750 620 click 1\n' >> /tmp/a.sh
+               printf 'xdotool mousemove --sync 750 602 click 1\n' >> /tmp/a.sh
                printf 'sleep 2\n' >> /tmp/a.sh
                printf 'import -window root /tmp/screenshot-linux_before_wm.png\n' >> /tmp/a.sh
                printf 'sleep 40\n' >> /tmp/a.sh
