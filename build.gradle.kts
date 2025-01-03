@@ -86,7 +86,7 @@ dependencies {
     implementation(compose.materialIconsExtended)
     //
     //
-    implementation("org.xerial:sqlite-jdbc:3.47.1.0")
+    implementation("org.xerial:sqlite-jdbc:3.47.2.0")
     implementation("ca.gosyer:kotlin-multiplatform-appdirs:1.2.0")
     implementation("com.sksamuel.scrimage:scrimage-core:4.3.0")
     implementation("com.sksamuel.scrimage:scrimage-webp:4.3.0")
