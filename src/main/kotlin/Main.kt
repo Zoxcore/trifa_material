@@ -1291,29 +1291,34 @@ fun App()
                                     if ((friendsettings.visible) && (contacts.selectedContactPubkey != null)) // show friend settings
                                     {
                                         FriendSettingDetails(contacts.selectedContactPubkey)
-                                    } else // -- show friend messages
+                                    }
+                                    else // -- show friend messages
                                     {
                                         if (contacts.selectedContactPubkey == null)
                                         {
                                             ExplainerChat()
                                         }
-                                        if ((contacts.selectedContact != null) && (contacts.selectedContact!!.is_relay))
+                                        else
                                         {
-                                            ExplainerInfoIsRelay(contacts.selectedContact)
-                                        } else
-                                        {
-                                            // Log.i(TAG, "CONTACTS -> draw")
-                                            load_messages_for_friend(contacts.selectedContactPubkey)
-                                            ContactListScope.launch {
-                                                globalstore.try_clear_unread_message_count()
-                                                globalfrndstoreunreadmsgs.try_clear_unread_per_friend_message_count(contacts.selectedContactPubkey)
+                                            if ((contacts.selectedContact != null) && (contacts.selectedContact!!.is_relay))
+                                            {
+                                                ExplainerInfoIsRelay(contacts.selectedContact)
                                             }
-                                            ChatAppWithScaffold(focusRequester = focusRequester, contactList = contacts, ui_scale = ui_scale)
-                                            LaunchedEffect(contacts.selectedContactPubkey) {
-                                                // HINT: focus on the message input field
-                                                focusRequester.requestFocus()
-                                                // Log.i(TAG, "FFFFFF1111111111111: focus on the message input field")
-                                                contactstore.messageresetFilter()
+                                            else
+                                            {
+                                                // Log.i(TAG, "CONTACTS -> draw")
+                                                load_messages_for_friend(contacts.selectedContactPubkey)
+                                                ContactListScope.launch {
+                                                    globalstore.try_clear_unread_message_count()
+                                                    globalfrndstoreunreadmsgs.try_clear_unread_per_friend_message_count(contacts.selectedContactPubkey)
+                                                }
+                                                ChatAppWithScaffold(focusRequester = focusRequester, contactList = contacts, ui_scale = ui_scale)
+                                                LaunchedEffect(contacts.selectedContactPubkey) {
+                                                    // HINT: focus on the message input field
+                                                    focusRequester.requestFocus()
+                                                    // Log.i(TAG, "FFFFFF1111111111111: focus on the message input field")
+                                                    contactstore.messageresetFilter()
+                                                }
                                             }
                                         }
                                     }
@@ -1334,26 +1339,28 @@ fun App()
                                     }
                                     VerticalDivider()
                                     val groupsettings by groupsettingsstore.stateFlow.collectAsState()
-                                    if ((groupsettings.visible) && (groups.selectedGroupId != null)) // show group settings
+                                    if (groups.selectedGroupId == null)
                                     {
-                                        GroupSettingDetails(groups.selectedGroupId)
-                                    } else // -- show group messages and peer
+                                        ExplainerGroup()
+                                    }
+                                    else
                                     {
-                                        clear_grouppeers()
-                                        if (groups.selectedGroupId != null)
+                                        if ((groupsettings.visible) && (groups.selectedGroupId != null)) // show group settings
                                         {
-                                            load_grouppeers(groups.selectedGroupId!!)
+                                            GroupSettingDetails(groups.selectedGroupId)
                                         }
-                                        val GroupPeerListScope = rememberCoroutineScope()
-                                        Box(modifier = Modifier.animateContentSize()) {
-                                            GroupPeerList(grouppeerList = grouppeers, peercollapsed = globalstore__.peerListCollapse)
-                                        }
-                                        VerticalDivider()
-                                        if (groups.selectedGroupId == null)
+                                        else // -- show group messages and peer
                                         {
-                                            ExplainerGroup()
-                                        } else
-                                        {
+                                            clear_grouppeers()
+                                            if (groups.selectedGroupId != null)
+                                            {
+                                                load_grouppeers(groups.selectedGroupId!!)
+                                            }
+                                            val GroupPeerListScope = rememberCoroutineScope()
+                                            Box(modifier = Modifier.animateContentSize()) {
+                                                GroupPeerList(grouppeerList = grouppeers, peercollapsed = globalstore__.peerListCollapse)
+                                            }
+                                            VerticalDivider()
                                             // Log.i(TAG, "GROUPS -> draw")
                                             load_groupmessages(groups.selectedGroupId)
                                             GroupPeerListScope.launch {
