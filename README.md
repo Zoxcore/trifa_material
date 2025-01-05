@@ -105,6 +105,10 @@ to unload the AEC again
 pactl unload-module module-echo-cancel
 ```
 
+## Add Acoustic Echo Cancellation (AEC) and/or Noise Reduction (NS) (Linux only!) with Easy Effects
+you can install https://github.com/wwmm/easyeffects with your packagemanager or as flatpak.
+It has nice plugins for AEC and NS, and some other nice things.
+
 ## Capture Video and Audio
 ffmpeg lib is used to capture Video and Audio.<br>
 The Java and JNI parts are built here: https://github.com/zoff99/ffmpeg_av_jni
