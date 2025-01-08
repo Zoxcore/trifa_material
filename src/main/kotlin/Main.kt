@@ -2357,11 +2357,11 @@ private fun MainAppStart()
             var win_title_addon = "Unknown Version"
             try
             {
-                win_title_addon = BuildConfig.APP_VERSION + " (Build: " + BuildConfig.GIT_COMMIT_HASH.take(7) +
+                win_title_addon = BuildConfig.APP_VERSION + " (Build: " + BuildConfig.GIT_COMMIT_HASH.take(4) +
                         "-" +
-                        MainActivity.getNativeLibTOXGITHASH() +
+                        (MainActivity.getNativeLibTOXGITHASH()?.take(3) ?: "???") +
                         "-" +
-                        MainActivity.getNativeLibGITHASH() +
+                        (MainActivity.getNativeLibGITHASH()?.take(3) ?: "???") +
                         ")"
             } catch (_: java.lang.Exception)
             {
