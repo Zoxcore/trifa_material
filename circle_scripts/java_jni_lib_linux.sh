@@ -50,6 +50,14 @@ echo "--------------"
 
 ## ---------------------------
 git clone https://github.com/zoff99/ToxAndroidRefImpl
+
+# -- git hash for jni code --
+cd ToxAndroidRefImpl/
+git_hash_for_jni=$(git rev-parse --verify --short=8 HEAD 2>/dev/null|tr -dc '[A-Fa-f0-9]' 2>/dev/null)
+echo "XX:""$git_hash_for_jni"":YY"
+cd ..
+# -- git hash for jni code --
+
 cp -v ToxAndroidRefImpl/jni-c-toxcore/*.c ./
 pwd
 ls -al
@@ -93,9 +101,6 @@ if [ "$1""x" == "raspix" ]; then
   echo "*** RASPI ***"
   GCC_="$CC"
 fi
-
-git_hash_for_jni=$(git rev-parse --verify --short=8 HEAD 2>/dev/null|tr -dc '[A-Fa-f0-9]' 2>/dev/null)
-echo "XX:""$git_hash_for_jni"":YY"
 
 if [ "$2""x" == "asanx" ]; then
   echo "***** ASAN *****"

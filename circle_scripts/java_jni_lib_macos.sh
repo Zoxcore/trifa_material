@@ -48,6 +48,14 @@ sudo mkdir -p /Users/runner/
 sudo chmod a+rwx /Users/runner/
 cd /Users/runner/
 git clone https://github.com/zoff99/ToxAndroidRefImpl
+
+# -- git hash for jni code --
+cd ToxAndroidRefImpl/
+git_hash_for_jni=$(git rev-parse --verify --short=8 HEAD 2>/dev/null|tr -dc '[A-Fa-f0-9]' 2>/dev/null)
+echo "XX:""$git_hash_for_jni"":YY"
+cd ..
+# -- git hash for jni code --
+
 cd /Users/runner/ToxAndroidRefImpl/jni-c-toxcore/
 pwd
 ls -al
@@ -91,9 +99,6 @@ cp -av "$_HOME3_"/jni_md.h "$_INST_/jinclude/"
 cp -av "$_HOME3_"/jni.h "$_INST_/jinclude/"
 
 export CFLAGS=" -fPIC -std=gnu99 -I$_INST_/include/ -I$_INST_/jinclude/ -L$_INST_/lib -fstack-protector-all "
-
-git_hash_for_jni=$(git rev-parse --verify --short=8 HEAD 2>/dev/null|tr -dc '[A-Fa-f0-9]' 2>/dev/null)
-echo "XX:""$git_hash_for_jni"":YY"
 
 gcc $CFLAGS \
 -Wall \
