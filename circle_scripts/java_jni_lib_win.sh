@@ -42,6 +42,14 @@ echo "--------------"
 
 ## ---------------------------
 git clone https://github.com/zoff99/ToxAndroidRefImpl
+
+# -- git hash for jni code --
+cd ToxAndroidRefImpl/
+git_hash_for_jni=$(git rev-parse --verify --short=8 HEAD 2>/dev/null|tr -dc '[A-Fa-f0-9]' 2>/dev/null)
+echo "XX:""$git_hash_for_jni"":YY"
+cd ..
+# -- git hash for jni code --
+
 cp -v ToxAndroidRefImpl/jni-c-toxcore/*.c ./
 pwd
 ls -al
@@ -64,9 +72,6 @@ echo "JAVADIR1:""$JAVADIR1"
 echo "JAVADIR2:""$JAVADIR2"
 
 export CFLAGS=" -fPIC -D_FORTIFY_SOURCE=2 -std=gnu99 -I$_INST_/include/ -L$_INST_/lib -fstack-protector-all "
-
-git_hash_for_jni=$(git rev-parse --verify --short=8 HEAD 2>/dev/null|tr -dc '[A-Fa-f0-9]' 2>/dev/null)
-echo "XX:""$git_hash_for_jni"":YY"
 
 x86_64-w64-mingw32-gcc-win32 $CFLAGS \
 -Wall -D_JNI_IMPLEMENTATION_ -Wl,-kill-at \
