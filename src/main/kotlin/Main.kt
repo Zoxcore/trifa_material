@@ -2357,11 +2357,17 @@ private fun MainAppStart()
             var win_title_addon = "Unknown Version"
             try
             {
+                var tox_jni_asan_append = ""
+                if (MainActivity.jnictoxcore_version().contains("-asan", true))
+                {
+                    tox_jni_asan_append = "-ASAN"
+                }
                 win_title_addon = BuildConfig.APP_VERSION + " (Build: " + BuildConfig.GIT_COMMIT_HASH.take(4) +
                         "-" +
                         (MainActivity.getNativeLibTOXGITHASH()?.take(3) ?: "???") +
                         "-" +
                         (MainActivity.getNativeLibGITHASH()?.take(3) ?: "???") +
+                        tox_jni_asan_append +
                         ")"
             } catch (_: java.lang.Exception)
             {
