@@ -1,3 +1,5 @@
+@file:Suppress("SpellCheckingInspection", "ConvertToStringTemplate", "PropertyName")
+
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import de.undercouch.gradle.tasks.download.Download
 import org.ajoberstar.grgit.Grgit
@@ -58,7 +60,7 @@ buildConfig {
         {
             buildConfigField("String", "GIT_BRANCH", "\"" + "????" + "\"")
         }
-        catch (e: Exception)
+        catch (_: Exception)
         {
         }
         buildConfigField("String", "GIT_COMMIT_HASH", "\"" + "????" + "\"")
@@ -142,7 +144,7 @@ compose.desktop {
             // TargetFormat.AppImage
 
             nativeDistributions {
-                modules("java.instrument", "java.net.http", "java.prefs", "java.sql", "jdk.unsupported")
+                modules("java.instrument", "java.net.http", "java.prefs", "java.sql", "jdk.unsupported", "jdk.security.auth")
                 // includeAllModules = true
             }
 
@@ -251,6 +253,7 @@ tasks {
         environment("ARCH", "x86_64")
         println("iconFile_src=" + linuxIconFile)
         println("iconFile_dst=" + "${linuxAppDir}/trifa_material.png")
+        @Suppress("RemoveSingleExpressionStringTemplate", "RemoveCurlyBracesFromTemplate")
         println("appName=" + "${appName}")
         commandLine("cp", "-v", linuxIconFile, "${linuxAppDir}/trifa_material.png")
     }
@@ -266,6 +269,7 @@ tasks {
         dependsOn(copyAppimageIconfile)
         dependsOn(setAppimageRunfile)
         environment("ARCH", "x86_64")
+        @Suppress("RemoveCurlyBracesFromTemplate")
         println("cmd: " + "${appImageTool} ${linuxAppDir} $appName-${project.version}-x86_64.AppImage")
         commandLine(appImageTool, linuxAppDir, "$appName-${project.version}-x86_64.AppImage")
     }
