@@ -111,6 +111,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -141,6 +142,9 @@ import com.zoffcc.applications.trifa.FriendSettingDetails
 import com.zoffcc.applications.trifa.GroupSettingDetails
 import com.zoffcc.applications.trifa.SqliteEscapeLikeString
 import com.zoffcc.applications.trifa.HelperGeneric.PubkeyShort
+import com.zoffcc.applications.trifa.HelperGeneric.get_java_os_name
+import com.zoffcc.applications.trifa.HelperGeneric.get_java_os_version
+import com.zoffcc.applications.trifa.HelperGeneric.get_trifa_build_str
 import com.zoffcc.applications.trifa.HelperGeneric.ngc_video_frame_last_incoming_ts
 import com.zoffcc.applications.trifa.HelperGroup
 import com.zoffcc.applications.trifa.HelperGroup.group_get_last_know_peername
@@ -1428,7 +1432,7 @@ fun App()
                     modifier = Modifier.randomDebugBorder().height(MAIN_STATUS_BAR_HEIGHT).fillMaxWidth(),
                     verticalAlignment = Alignment.Bottom)
                 {
-                    Spacer(modifier = Modifier.width(3.dp))
+                    Spacer(modifier = Modifier.width(5.dp))
                     val globalstore2 by globalstore.stateFlow.collectAsState()
                     Tooltip(
                         modifier = Modifier.randomDebugBorder().width(18.dp),
@@ -1490,6 +1494,18 @@ fun App()
                             maxLines = 1)
                     }
 
+                    var os_name_ver = ""
+                    try
+                    {
+                        os_name_ver = "" + get_java_os_name() + " " + get_java_os_version()
+                    }
+                    catch (_: Exception)
+                    {
+                    }
+                    Spacer(modifier = Modifier.width(15.dp))
+                    Text(os_name_ver,
+                        fontSize = 11.sp,
+                        maxLines = 1)
                 }
             }
 
@@ -2357,18 +2373,7 @@ private fun MainAppStart()
             var win_title_addon = "Unknown Version"
             try
             {
-                var tox_jni_asan_append = ""
-                if (MainActivity.jnictoxcore_version().contains("-asan", true))
-                {
-                    tox_jni_asan_append = "-ASAN"
-                }
-                win_title_addon = BuildConfig.APP_VERSION + " (Build: " + BuildConfig.GIT_COMMIT_HASH.take(4) +
-                        "-" +
-                        (MainActivity.getNativeLibTOXGITHASH()?.take(3) ?: "???") +
-                        "-" +
-                        (MainActivity.getNativeLibGITHASH()?.take(3) ?: "???") +
-                        tox_jni_asan_append +
-                        ")"
+                win_title_addon = BuildConfig.APP_VERSION + " (Build: " + get_trifa_build_str() + ")"
             } catch (_: java.lang.Exception)
             {
             }
