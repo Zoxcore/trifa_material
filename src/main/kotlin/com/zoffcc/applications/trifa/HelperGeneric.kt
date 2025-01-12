@@ -28,7 +28,6 @@ import com.sksamuel.scrimage.ImmutableImage
 import com.sksamuel.scrimage.webp.WebpWriter
 import com.vanniktech.emoji.search.SearchEmojiManager
 import com.zoffcc.applications.sorm.Filetransfer
-import com.zoffcc.applications.sorm.GroupDB
 import com.zoffcc.applications.sorm.Message
 import com.zoffcc.applications.trifa.HelperFiletransfer.get_filetransfer_filenum_from_id
 import com.zoffcc.applications.trifa.HelperFiletransfer.set_filetransfer_state_from_id
@@ -46,6 +45,8 @@ import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_messagei
 import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_resend_count
 import com.zoffcc.applications.trifa.MainActivity.Companion.ROTATE_INCOMING_NGC_VIDEO
 import com.zoffcc.applications.trifa.MainActivity.Companion.audio_queue_full_trigger
+import com.zoffcc.applications.trifa.MainActivity.Companion.getNativeLibGITHASH
+import com.zoffcc.applications.trifa.MainActivity.Companion.getNativeLibTOXGITHASH
 import com.zoffcc.applications.trifa.MainActivity.Companion.modify_message_with_ft
 import com.zoffcc.applications.trifa.MainActivity.Companion.ngc_audio_in_queue
 import com.zoffcc.applications.trifa.MainActivity.Companion.ngc_audio_in_queue_max_capacity
@@ -66,6 +67,7 @@ import com.zoffcc.applications.trifa.ToxVars.TOX_HASH_LENGTH
 import com.zoffcc.applications.trifa.ToxVars.TOX_MAX_NGC_FILESIZE
 import com.zoffcc.applications.trifa.ToxVars.TOX_MSGV3_MAX_MESSAGE_LENGTH
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
+import com.zoffcc.applications.trifa_material.trifa_material.BuildConfig
 import globalstore
 import groupstore
 import kotlinx.coroutines.withContext
@@ -81,7 +83,6 @@ import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.text.HexFormat
 
 object HelperGeneric {
     private const val TAG = "trifa.Hlp.Generic"
@@ -1078,6 +1079,81 @@ object HelperGeneric {
         }
         return output
     }
+
+    fun get_java_os_name(): String
+    {
+        try
+        {
+            return System.getProperty("os.name")
+        } catch (e: java.lang.Exception)
+        {
+            return "??????????".take(4)
+        }
+    }
+
+    fun get_java_os_version(): String
+    {
+        try
+        {
+            return System.getProperty("os.version")
+        } catch (e: java.lang.Exception)
+        {
+            return "??????????".take(4)
+        }
+    }
+
+    fun get_trifa_build_str(): String
+    {
+        var build_str = ""
+
+        try
+        {
+            build_str = build_str + BuildConfig.GIT_COMMIT_HASH.take(4)
+        } catch (e: java.lang.Exception)
+        {
+            build_str = build_str + "??????????".take(4)
+        }
+
+        try
+        {
+            build_str = build_str + "-" + getNativeLibTOXGITHASH()!!.take(3)
+        } catch (e: java.lang.Exception)
+        {
+            build_str = build_str + "??????????".take(3)
+        }
+
+        try
+        {
+            build_str = build_str + "-" + getNativeLibGITHASH()!!.take(3)
+        } catch (e: java.lang.Exception)
+        {
+            build_str = build_str + "??????????".take(3)
+        }
+
+        try
+        {
+            build_str = build_str + "-" + System.getProperty("os.arch")
+        } catch (e: java.lang.Exception)
+        {
+            build_str = build_str + "??????????".take(3)
+        }
+
+        try
+        {
+            var tox_jni_asan_append = ""
+            if (MainActivity.jnictoxcore_version().contains("-asan", true))
+            {
+                tox_jni_asan_append = "-ASAN"
+            }
+
+            build_str = build_str + tox_jni_asan_append
+        } catch (_: Exception)
+        {
+        }
+
+        return build_str
+    }
+
 }
 
 /*

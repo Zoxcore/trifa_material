@@ -1,3 +1,5 @@
+@file:Suppress("SpellCheckingInspection", "ConvertToStringTemplate", "RemoveSingleExpressionStringTemplate")
+
 package org.briarproject.briar.desktop.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -11,13 +13,15 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Tab
-import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -39,27 +43,37 @@ import androidx.compose.ui.semantics.text
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
-import com.google.gson.internal.JavaVersion
+import com.sun.jndi.toolkit.url.Uri
 import com.zoffcc.applications.ffmpegav.AVActivity
 import com.zoffcc.applications.jninotifications.NTFYActivity
+import com.zoffcc.applications.trifa.HelperGeneric.get_java_os_name
+import com.zoffcc.applications.trifa.HelperGeneric.get_java_os_version
+import com.zoffcc.applications.trifa.HelperGeneric.get_trifa_build_str
+import com.zoffcc.applications.trifa.HelperOSFile
+import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity
 import com.zoffcc.applications.trifa.MainActivity.Companion.getNativeLibGITHASH
 import com.zoffcc.applications.trifa.MainActivity.Companion.getNativeLibTOXGITHASH
 import com.zoffcc.applications.trifa.MainActivity.Companion.jnictoxcore_version
 import com.zoffcc.applications.trifa.MainActivity.Companion.libavutil_version
 import com.zoffcc.applications.trifa.MainActivity.Companion.libopus_version
-import com.zoffcc.applications.trifa.MainActivity.Companion.libvpx_version
 import com.zoffcc.applications.trifa.MainActivity.Companion.libsodium_version
+import com.zoffcc.applications.trifa.MainActivity.Companion.libvpx_version
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_number_groups
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_version_major
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_version_minor
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_version_patch
 import com.zoffcc.applications.trifa.MainActivity.Companion.x264_version
+import com.zoffcc.applications.trifa.TAG
+import com.zoffcc.applications.trifa.TRIFAGlobals
+import com.zoffcc.applications.trifa.TRIFAGlobals.TRIFA_GITHUB_NEW_ISSUE_URL
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import com.zoffcc.applications.trifa_material.trifa_material.BuildConfig
 import globalstore
+import kotlinx.coroutines.DelicateCoroutinesApi
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import org.sqlite.SQLiteJDBCLoader
+import java.net.URLEncoder
 
 @Composable
 fun AboutScreen(
@@ -75,7 +89,7 @@ fun AboutScreen(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, DelicateCoroutinesApi::class)
 @Composable
 fun AboutScreen(modifier: Modifier = Modifier.padding(16.dp)) {
     Column(modifier) {
@@ -92,8 +106,64 @@ fun AboutScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                 maxLines = 1,
             )
         }
+
+        var show_link_click by remember { mutableStateOf(false) }
+        var link_str by remember { mutableStateOf("") }
+        show_report_bug_dialog(show_link_click, link_str) { show_link_click_, link_str_ ->
+            show_link_click = show_link_click_
+            link_str = link_str_
+        }
+
+
+        Row(Modifier.wrapContentHeight().padding(start = 15.dp)) {
+            Button(modifier = Modifier.width(200.dp),
+                enabled = true,
+                onClick = {
+                    try
+                    {
+                        var url: String = TRIFA_GITHUB_NEW_ISSUE_URL
+                        url = "$url?labels=bug"
+                        url = "$url&title=Bug:%20"
+                        url = "$url&template=bug.yaml"
+                        url = try
+                        {
+                            url + "&trifa_material_version=" + URLEncoder.encode(BuildConfig.APP_VERSION, "UTF-8")
+                        } catch (e: java.lang.Exception)
+                        {
+                            "$url" + "&trifa_material_version=unknown"
+                        }
+
+                        url = try
+                        {
+                            url + "&os_detail=" + URLEncoder.encode(get_java_os_name() + " " + get_java_os_version(), "UTF-8")
+                        } catch (e: java.lang.Exception)
+                        {
+                            "$url" + "&os_detail=unknown"
+                        }
+
+                        url = try
+                        {
+                            url + "&build=" + URLEncoder.encode(get_trifa_build_str(), "UTF-8")
+                        } catch (e: java.lang.Exception)
+                        {
+                            "$url" + "&build=unknown"
+                        }
+                        // Log.i(TAG, "GITHUB_NEW_ISSUE_URL:" + url)
+                        link_str = url
+                        show_link_click = true
+                    }
+                    catch(e: Exception)
+                    {
+                    }
+                })
+            {
+                Text(i18n("ui.about.report_bug"))
+            }
+        }
+
         var state by remember { mutableStateOf(0) }
         val titles = listOf(i18n("ui.about.category_general"), i18n("ui.about.category_dependencies"))
+        /*
         TabRow(selectedTabIndex = state, backgroundColor = MaterialTheme.colors.background) {
             titles.forEachIndexed { index, title ->
                 Tab(
@@ -107,6 +177,8 @@ fun AboutScreen(modifier: Modifier = Modifier.padding(16.dp)) {
             0 -> GeneralInfo()
             1 -> Libraries()
         }
+        */
+        GeneralInfo()
     }
 }
 
@@ -343,6 +415,30 @@ private fun Libraries() {
         }
     }
 }
+
+@Composable
+fun show_report_bug_dialog(show_link_click: Boolean, link_str: String, setLinkVars: (Boolean, String) -> Unit)
+{
+    var show_link_click1 = show_link_click
+    var link_str1 = link_str
+    if (show_link_click1)
+    {
+        AlertDialog(onDismissRequest = { link_str1 = ""; show_link_click1 = false; setLinkVars(show_link_click1, link_str1) },
+            title = { Text("Open this URL ?") },
+            confirmButton = {
+                Button(onClick = { HelperOSFile.open_webpage(link_str1); link_str1 = ""; show_link_click1 = false; setLinkVars(show_link_click1, link_str1) }) {
+                    Text("Yes")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { link_str1 = ""; show_link_click1 = false;setLinkVars(show_link_click1, link_str1) }) {
+                    Text("No")
+                }
+            },
+            text = { Text("This could be potentially dangerous!" + "\n\n" + link_str1) })
+    }
+}
+
 
 // sizes of the four columns in the dependencies tab
 val colSizesLibraries = listOf(0.3f, 0.3f, 0.15f, 0.25f)
