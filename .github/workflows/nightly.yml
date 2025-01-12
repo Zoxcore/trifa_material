@@ -781,7 +781,7 @@ jobs:
                sudo apt-get install x11-apps x11-utils
                sudo apt-get install lwm fvwm
                sudo apt-get install xvfb
-               sudo apt-get install libpulse0
+               sudo apt-get install libpulse0 libnotify4
 
         - name: show installed font packages
           run: |
