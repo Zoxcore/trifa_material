@@ -1,0 +1,52 @@
+name: automated Issue report
+description: File a bug
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Some fields should be filled out automatically. If you're filing this report manually, please fill out the following fields to the best of your ability.
+  - type: input
+    id: trifa_material_version
+    attributes:
+      label: TRIfA Material Version
+      placeholder: 1.0.0
+  - type: input
+    id: build
+    attributes:
+      label: Build
+      placeholder: "12a4-7f9-b56"
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: How can we reproduce the bug?
+      value: |
+        1. Start TRIfA Material
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed Behavior
+      description: Please describe what you saw. If you have screenshots, attach them here.
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      placeholder: Tell us what you expected to see.
+    validations:
+      required: true
+  - type: input
+    id: os_detail
+    attributes:
+      label: Operating System
+      placeholder: Windows 11 / Ubuntu 20.04 / MacOS 14 arm ...
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Please copy and paste any relevant log output.
+      render: shell
