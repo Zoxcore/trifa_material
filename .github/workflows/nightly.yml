@@ -522,18 +522,18 @@ jobs:
            screencapture -T 60 -x -t png /Users/runner/screen07.png &
            screencapture -T 90 -x -t png /Users/runner/screen09.png &
            screencapture -T 110 -x -t png /Users/runner/screen10.png &
-           screencapture -T 238 -x -t png /Users/runner/screenshot-macos.png &
-           screencapture -T 230 -x -t png /Users/runner/screen12.png &
+           screencapture -T 248 -x -t png /Users/runner/screenshot-macos.png &
+           screencapture -T 240 -x -t png /Users/runner/screen12.png &
            screencapture -T 300 -x -t png /Users/runner/screen13.png &
            pwd
            ls -al
            ./gradlew run > trifa.log 2>&1 &
            pwd
-           sleep 20
+           sleep 45
            cliclick -m verbose c:77,124
-           sleep 2
+           sleep 15
            cliclick -m verbose c:139,124
-           sleep 30
+           sleep 20
            cd /Users/runner/work/trifa_material/trifa_material/java_tox_tester-master/
            ./do_compile.sh
            cat /Users/runner/work/trifa_material/trifa_material/trifa.log
@@ -668,16 +668,16 @@ jobs:
            screencapture -T 60 -x -t png /Users/runner/screen07.png &
            screencapture -T 90 -x -t png /Users/runner/screen09.png &
            screencapture -T 110 -x -t png /Users/runner/screen10.png &
-           screencapture -T 238 -x -t png /Users/runner/screenshot-macos-14.png &
-           screencapture -T 230 -x -t png /Users/runner/screen12.png &
+           screencapture -T 248 -x -t png /Users/runner/screenshot-macos-14.png &
+           screencapture -T 240 -x -t png /Users/runner/screen12.png &
            screencapture -T 300 -x -t png /Users/runner/screen13.png &
            pwd
            ls -al
            ./gradlew run > trifa.log 2>&1 &
            pwd
-           sleep 20
+           sleep 45
            cliclick -m verbose c:77,124
-           sleep 2
+           sleep 15
            cliclick -m verbose c:139,124
            sleep 20
            cd /Users/runner/work/trifa_material/trifa_material/java_tox_tester-master/
