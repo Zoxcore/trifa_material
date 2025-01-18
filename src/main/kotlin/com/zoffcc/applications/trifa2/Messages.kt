@@ -1,4 +1,4 @@
-@file:Suppress("LocalVariableName", "FunctionName", "SpellCheckingInspection")
+@file:Suppress("LocalVariableName", "FunctionName", "SpellCheckingInspection", "PackageDirectoryMismatch")
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -27,7 +27,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun Messages(ui_scale: Float, selectedContactPubkey: String?) {
     val listState = rememberLazyListState()
@@ -38,7 +37,9 @@ internal fun Messages(ui_scale: Float, selectedContactPubkey: String?) {
             verticalArrangement = Arrangement.spacedBy(0.dp),
             state = listState,
         ) {
-            item { Spacer(Modifier.size(SPACE_BEFORE_FIRST_MESSAGE)) }
+            item (key = "FIRST_ITEM") {
+                Spacer(Modifier.size(SPACE_BEFORE_FIRST_MESSAGE))
+            }
             // Log.i(com.zoffcc.applications.trifa.TAG, "LazyColumn --> draw")
             items(msgs.messages, key = { it.msgDatabaseId }) {
                 // Log.i(com.zoffcc.applications.trifa.TAG, "LazyColumn -> it.msgDatabaseId = " + it.msgDatabaseId)
@@ -46,7 +47,7 @@ internal fun Messages(ui_scale: Float, selectedContactPubkey: String?) {
                     // modifier = Modifier.animateItemPlacement()
                 )
             }
-            item {
+            item (key = "LAST_ITEM") {
                 Box(Modifier.height(SPACE_AFTER_LAST_MESSAGE))
             }
         }
@@ -72,7 +73,7 @@ internal fun Messages(ui_scale: Float, selectedContactPubkey: String?) {
                     ?: -1L
                 if ((lastVisibleSerial >= prevLastSerial || lastVisibleSerial == -1L) && msgs.messages.lastIndex > 0) {
                     // scroll to the end if we were at the end
-                    listState.scrollToItem(msgs.messages.lastIndex)
+                    listState.scrollToItem(msgs.messages.lastIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
                     // Log.i(com.zoffcc.applications.trifa.TAG, "messages -> scroll to the end")
                 }
                 // remember the last serial
