@@ -1,3 +1,5 @@
+@file:Suppress("FunctionName", "LocalVariableName", "SpellCheckingInspection")
+
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.VerticalScrollbar
@@ -83,7 +85,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
 @OptIn(ExperimentalResourceApi::class)
 @Composable
 fun PeerPic(user: User, ui_scale: Float) {
-    val imageSize = (calc_avatar_size(AVATAR_SIZE * ui_scale) as Float)
+    val imageSize = calc_avatar_size(AVATAR_SIZE * ui_scale)
     val painter = user.picture?.let {
         painterResource(it)
     } ?: object : Painter() {
