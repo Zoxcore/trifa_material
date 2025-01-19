@@ -1,3 +1,5 @@
+@file:Suppress("FunctionName", "SpellCheckingInspection", "LiftReturnOrAssignment")
+
 package org.briarproject.briar.desktop.contact
 
 import GROUP_COLLAPSED_PEER_COLUMN_WIDTH

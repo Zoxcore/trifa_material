@@ -1,4 +1,4 @@
-@file:Suppress("UNUSED_PARAMETER", "LocalVariableName", "PropertyName", "ClassName", "FunctionName", "unused", "UNUSED_VARIABLE", "SpellCheckingInspection", "UnnecessaryVariable", "ConvertToStringTemplate", "UNUSED_VALUE", "ReplaceCallWithBinaryOperator", "CascadeIf", "VARIABLE_WITH_REDUNDANT_INITIALIZER")
+@file:Suppress("UNUSED_PARAMETER", "LocalVariableName", "PropertyName", "ClassName", "FunctionName", "unused", "UNUSED_VARIABLE", "SpellCheckingInspection", "UnnecessaryVariable", "ConvertToStringTemplate", "UNUSED_VALUE", "ReplaceCallWithBinaryOperator", "CascadeIf", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "ControlFlowWithEmptyBody", "MemberVisibilityCanBePrivate", "ConstPropertyName", "ConstPropertyName", "ObjectPropertyName", "ReplaceJavaStaticMethodWithKotlinAnalog", "KotlinConstantConditions", "FoldInitializerAndIfToElvis", "SENSELESS_COMPARISON")
 package com.zoffcc.applications.trifa
 
 import ColorProvider
@@ -2282,7 +2282,7 @@ class MainActivity
                       if (fname2.isNullOrEmpty()) {
                           fname = fname2
                       }
-                   } catch (e: Exception) {}
+                   } catch (_: Exception) {}
                 }
 
                 if (fname.isNullOrEmpty()) {
