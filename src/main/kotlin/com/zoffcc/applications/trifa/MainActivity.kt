@@ -3390,11 +3390,44 @@ class MainActivity
             SnackBarToast("You joined a Group")
         }
 
+        @OptIn(DelicateCoroutinesApi::class)
         @JvmStatic
         @Suppress("unused")
         fun android_tox_callback_group_moderation_cb_method(group_number: Long, source_peer_id: Long, target_peer_id: Long, a_Tox_Group_Mod_Event: Int)
         {
             // ** this happens non stop, so don't save here ** // update_savedata_file_wrapper()
+            try
+            {
+                // Log.i(TAG, "android_tox_callback_group_moderation_cb_method:1: " + tox_group_get_name(group_number) + " s_peer:" + source_peer_id + " t_peer:" + target_peer_id + " " + ToxVars.Tox_Group_Mod_Event.value_str(a_Tox_Group_Mod_Event))
+                // val peername_src = tox_group_peer_get_name(group_number, source_peer_id)
+                // val peername_dst = tox_group_peer_get_name(group_number, target_peer_id)
+                // Log.i(TAG, "android_tox_callback_group_moderation_cb_method:1: peername_src=" + peername_src + " peername_dst=" + peername_dst)
+            }
+            catch(_: Exception)
+            {
+            }
+            if (target_peer_id != UINT32_MAX_JAVA)
+            {
+                GlobalScope.launch(Dispatchers.IO) {
+                    try
+                    {
+                        try
+                        {
+                            Log.i(TAG, "android_tox_callback_group_moderation_cb_method:2: " + tox_group_get_name(group_number) + " " + ToxVars.Tox_Group_Mod_Event.value_str(a_Tox_Group_Mod_Event))
+                        }
+                        catch(_: Exception)
+                        {
+                        }
+                        val group_id = tox_group_by_groupnum__wrapper(group_number)
+                        if (group_id != null)
+                        {
+                            HelperGeneric.force_update_group_peerlist_ui(group_id)
+                        }
+                    } catch (_: Exception)
+                    {
+                    }
+                }
+            }
         }
 
         @JvmStatic

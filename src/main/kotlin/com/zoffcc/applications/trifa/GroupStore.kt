@@ -1,3 +1,5 @@
+@file:Suppress("FunctionName", "LiftReturnOrAssignment", "SpellCheckingInspection")
+
 package com.zoffcc.applications.trifa
 
 import global_semaphore_grouplist_ui
