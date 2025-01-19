@@ -57,6 +57,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_capab
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_connection_status
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_leave
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_peer_get_public_key
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_self_get_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_messagev3_friend_send_message
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_set_nospam
 import com.zoffcc.applications.trifa.MainActivity.Companion.toxav_ngc_audio_decode
@@ -69,10 +70,13 @@ import com.zoffcc.applications.trifa.ToxVars.TOX_MSGV3_MAX_MESSAGE_LENGTH
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import com.zoffcc.applications.trifa_material.trifa_material.BuildConfig
 import globalstore
+import grouppeerstore
 import groupstore
 import kotlinx.coroutines.withContext
 import messagestore
 import myUser
+import org.briarproject.briar.desktop.contact.GroupItem
+import org.briarproject.briar.desktop.contact.GroupPeerItem
 import org.jetbrains.skia.Bitmap
 import org.xml.sax.InputSource
 import java.io.File
@@ -1054,6 +1058,7 @@ object HelperGeneric {
         }
     }
 
+    // !! unused now !!
     fun replace_emojis_in_text(input: String): String
     {
         var output = input
@@ -1154,6 +1159,70 @@ object HelperGeneric {
         return build_str
     }
 
+    fun get_self_group_role(group_num: Long): Int
+    {
+        var peer_role = ToxVars.Tox_Group_Role.TOX_GROUP_ROLE_OBSERVER.value
+        try
+        {
+            val self_peer_role = MainActivity.tox_group_self_get_role(group_num)
+            if (self_peer_role >= 0)
+            {
+                peer_role = self_peer_role
+            }
+        } catch (_: Exception)
+        {
+        }
+
+        return peer_role
+    }
+
+    fun get_self_group_role(group_id: String): Int
+    {
+        val group_num_temp: Long = tox_group_by_groupid__wrapper(group_id)
+        if (group_num_temp == -1L)
+        {
+            return ToxVars.Tox_Group_Role.TOX_GROUP_ROLE_OBSERVER.value
+        }
+
+        return get_self_group_role(group_num_temp)
+    }
+
+    fun is_self_group_role_admin(group_role: Int): Boolean
+    {
+        if (group_role == ToxVars.Tox_Group_Role.TOX_GROUP_ROLE_FOUNDER.value)
+        {
+            return true
+        }
+        else if (group_role == ToxVars.Tox_Group_Role.TOX_GROUP_ROLE_MODERATOR.value)
+        {
+            return true
+        }
+        return false
+    }
+
+    fun is_peer_self(group_id: String, peer_pubkey: String): Boolean
+    {
+        try
+        {
+            val self_group_pubkey = tox_group_self_get_public_key(tox_group_by_groupid__wrapper(group_id))
+            return (self_group_pubkey == peer_pubkey)
+        }
+        catch(_: Exception)
+        {
+        }
+        return false
+    }
+
+    fun force_update_group_peerlist_ui(group_id: String)
+    {
+        try
+        {
+            // HINT: this is not pretty but it does the job for now :-(
+            grouppeerstore.update(GroupPeerItem(ip_addr = "127.0.0.1", groupID = group_id, name = "x", connectionStatus = 0, pubkey = "x", peerRole = 0))
+        } catch (_: Exception)
+        {
+        }
+    }
 }
 
 /*

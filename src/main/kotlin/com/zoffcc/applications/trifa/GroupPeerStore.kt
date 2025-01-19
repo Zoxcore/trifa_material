@@ -1,3 +1,5 @@
+@file:Suppress("FunctionName", "SpellCheckingInspection", "LocalVariableName")
+
 package com.zoffcc.applications.trifa
 
 import androidx.compose.ui.text.toLowerCase
@@ -38,6 +40,7 @@ fun CoroutineScope.createGroupPeerStore(): GroupPeerStore
         override fun add(item: GroupPeerItem)
         {
             //launch {
+                @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
                 global_semaphore_grouppeerlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var found = false
                 state.grouppeers.forEach {
@@ -69,6 +72,7 @@ fun CoroutineScope.createGroupPeerStore(): GroupPeerStore
         override fun remove(item: GroupPeerItem)
         {
             //launch {
+                @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
                 global_semaphore_grouppeerlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var sel_pubkey = state.selectedGrouppeerPubkey
                 var sel_item = state.selectedGrouppeer
@@ -107,8 +111,9 @@ fun CoroutineScope.createGroupPeerStore(): GroupPeerStore
         override fun select(pubkey: String?)
         {
             //launch {
-                global_semaphore_grouppeerlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
-                var wanted_contact_item: GroupPeerItem? = null
+            @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+            global_semaphore_grouppeerlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
+            var wanted_contact_item: GroupPeerItem? = null
                 state.grouppeers.forEach {
                     if (pubkey == it.pubkey)
                     {
@@ -129,6 +134,7 @@ fun CoroutineScope.createGroupPeerStore(): GroupPeerStore
         override fun update(item: GroupPeerItem)
         {
             //launch {
+                @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
                 global_semaphore_grouppeerlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 var update_item: GroupPeerItem? = null
                 state.grouppeers.forEach {
@@ -172,6 +178,7 @@ fun CoroutineScope.createGroupPeerStore(): GroupPeerStore
         override fun update_ipaddr(groupID: String, pubkey: String, ipaddr: String)
         {
             //launch {
+            @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
             global_semaphore_grouppeerlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
             var update_item: GroupPeerItem? = null
             state.grouppeers.forEach {
@@ -185,7 +192,7 @@ fun CoroutineScope.createGroupPeerStore(): GroupPeerStore
                 var need_update = false
                 var new_peers: ArrayList<GroupPeerItem> = ArrayList()
                 new_peers.addAll(state.grouppeers)
-                var to_remove_item: GroupPeerItem? = null
+                // var to_remove_item: GroupPeerItem? = null
                 new_peers.forEach { item2 ->
                     if (item2.pubkey == update_item!!.pubkey)
                     {
@@ -213,6 +220,7 @@ fun CoroutineScope.createGroupPeerStore(): GroupPeerStore
         override fun clear()
         {
             //launch {
+                @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
                 global_semaphore_grouppeerlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 mutableStateFlow.value = state.copy(grouppeers = emptyList(),
                     selectedGrouppeerPubkey = null, selectedGrouppeer = null)
