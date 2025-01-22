@@ -48,11 +48,24 @@ the latest Development Snapshot can be downloaded from [here](https://github.com
      ./gradlew run
      ```
   -  NixOS:
-     ```
-     chmod a+x trifa-material-x86_64.appimage
-     nix-shell -p appimage-run
-     appimage-run trifa-material-x86_64.appimage
-     ```
+     1. Add this config section to the `/etc/nixos/configuation.nix` in order for video, audio and notifications to work (making sure libv4l and libnotify in the AppImage runtime):
+        ```nix
+        programs.appimage = {
+          enable = true;
+          package = pkgs.appimage-run.override {
+            extraPkgs =
+              pkgs: with pkgs; [
+                libv4l
+                libnotify
+              ];
+          };
+        };
+        ```
+     2. After adjusting configuration just run the app using appimage-run:
+        ```bash
+        chmod a+x trifa-material-x86_64.appimage
+        appimage-run trifa-material-x86_64.appimage
+        ```
 
 or download any of the release [packages](https://github.com/Zoxcore/trifa_material/releases/latest)
 
