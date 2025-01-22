@@ -182,7 +182,7 @@ class MainActivity
         var PREF__local_discovery_enabled = 1
         var PREF__ipv6_enabled = 1
         var PREF__force_udp_only = 0
-        @JvmStatic var PREF__DB_wal_mode = true
+        @JvmStatic var PREF__DB_wal_mode = false
         @JvmStatic var DB_PREF__open_files_directly = false
         @JvmStatic var DB_PREF__notifications_active = true
         @JvmStatic var DB_PREF__windows_audio_in_source = "Microphone"
