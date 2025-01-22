@@ -10,8 +10,6 @@ import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
-import static com.zoffcc.applications.trifa.MainActivity.PREF__database_files_dir;
-
 public class OrmaDatabase
 {
     private static final String TAG = "trifa.OrmaDatabase";
@@ -25,8 +23,15 @@ public class OrmaDatabase
     static int current_db_version = 0;
     static Semaphore orma_semaphore_lastrowid_on_insert = new Semaphore(1);
 
-    public OrmaDatabase()
+    private static String db_file_path = null;
+    private static String secrect_key = null;
+    private static boolean wal_mode = true;
+
+    public OrmaDatabase(final String db_file_path, final String secrect_key, boolean wal_mode)
     {
+        OrmaDatabase.db_file_path = db_file_path;
+        OrmaDatabase.secrect_key = secrect_key;
+        OrmaDatabase.wal_mode = wal_mode;
     }
 
     public static Connection getSqldb()
@@ -616,19 +621,27 @@ public class OrmaDatabase
         Log.i(TAG, "SHUTDOWN:finished");
     }
 
-    public static void init()
+    public void init()
     {
         Log.i(TAG, "INIT:start");
         // create a database connection
         try
         {
             // Class.forName("org.sqlite.JDBC");
-            sqldb = DriverManager.getConnection("jdbc:sqlite:" + PREF__database_files_dir + "/main.db");
+            sqldb = DriverManager.getConnection("jdbc:sqlite:" + OrmaDatabase.db_file_path);
         }
         catch (Exception e)
         {
             e.printStackTrace();
             Log.i(TAG, "INIT:R_Error:" + e.getMessage());
+        }
+
+        if (OrmaDatabase.wal_mode)
+        {
+            // set WAL mode
+            final String set_wal_mode = "PRAGMA journal_mode = WAL;";
+            run_multi_sql(set_wal_mode);
+            Log.i(TAG, "INIT:setting WAL mode");
         }
 
         Log.i(TAG, "loaded:sqlite:" + get_current_sqlite_version());
