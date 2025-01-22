@@ -606,7 +606,7 @@ public class OrmaDatabase
         return new_db_version;
     }
 
-    public static void shutdown()
+    public void shutdown()
     {
         Log.i(TAG, "SHUTDOWN:start");
         try

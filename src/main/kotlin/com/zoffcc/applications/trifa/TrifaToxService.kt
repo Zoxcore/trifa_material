@@ -1,3 +1,5 @@
+@file:Suppress("ConvertToStringTemplate", "LocalVariableName")
+
 package com.zoffcc.applications.trifa
 
 import avstatestore
@@ -398,8 +400,15 @@ class TrifaToxService
                 }
 
                 globalstore.setOrmaRunning(false)
+                // ----------------- DB shutdown -----------------
+                // first make a copy of the pointer
+                val orma_temp = orma
+                // now set the original to NULL
                 orma = null
-                OrmaDatabase.shutdown()
+                // shutdown DB
+                orma_temp!!.shutdown()
+                // ----------------- DB shutdown -----------------
+                Log.i(TAG, "DB:shutdown ok")
                 unlock_data_dir_input()
                 try
                 {
