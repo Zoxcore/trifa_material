@@ -25,7 +25,7 @@ public class OrmaDatabase
 
     private static String db_file_path = null;
     private static String secrect_key = null;
-    private static boolean wal_mode = true;
+    private static boolean wal_mode = false; // default mode is WAL off!
 
     public OrmaDatabase(final String db_file_path, final String secrect_key, boolean wal_mode)
     {
@@ -642,6 +642,15 @@ public class OrmaDatabase
             final String set_wal_mode = "PRAGMA journal_mode = WAL;";
             run_multi_sql(set_wal_mode);
             Log.i(TAG, "INIT:setting WAL mode");
+            // set journal and wal size limit to 1 MB
+            final String set_journal_size_limit = "PRAGMA journal_size_limit = " + 10 * 1024 * 1024 + ";";
+            run_multi_sql(set_journal_size_limit);
+            Log.i(TAG, "INIT:setting journal_size_limit");
+        } else {
+            // turn off WAL mode (since this setting will persist inside the database even after a restart)
+            final String set_wal_mode = "PRAGMA journal_mode = DELETE;";
+            run_multi_sql(set_wal_mode);
+            Log.i(TAG, "INIT:turning OFF WAL mode");
         }
 
         Log.i(TAG, "loaded:sqlite:" + get_current_sqlite_version());
