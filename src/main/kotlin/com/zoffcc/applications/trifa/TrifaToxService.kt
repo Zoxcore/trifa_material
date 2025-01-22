@@ -24,6 +24,8 @@ import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_messagei
 import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_no_read_recvedts
 import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_resend_count
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__send_push_notifications
+import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__DB_wal_mode
+import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__database_files_dir
 import com.zoffcc.applications.trifa.MainActivity.Companion.add_tcp_relay_single_wrapper
 import com.zoffcc.applications.trifa.MainActivity.Companion.audio_queue_play_trigger
 import com.zoffcc.applications.trifa.MainActivity.Companion.bootstrap_single_wrapper
@@ -101,9 +103,9 @@ class TrifaToxService
                 {
                 }
 
-                com.zoffcc.applications.sorm.OrmaDatabase.init()
+                orma = OrmaDatabase(PREF__database_files_dir + "/main.db", "", PREF__DB_wal_mode);
+                orma!!.init()
                 // ------ correct startup order ------
-                orma = com.zoffcc.applications.sorm.OrmaDatabase()
                 globalstore.setOrmaRunning(true)
                 load_db_prefs()
                 try {
@@ -397,7 +399,7 @@ class TrifaToxService
 
                 globalstore.setOrmaRunning(false)
                 orma = null
-                com.zoffcc.applications.sorm.OrmaDatabase.shutdown()
+                OrmaDatabase.shutdown()
                 unlock_data_dir_input()
                 try
                 {
