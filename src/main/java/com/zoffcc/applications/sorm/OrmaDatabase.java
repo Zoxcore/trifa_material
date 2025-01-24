@@ -28,10 +28,25 @@ public class OrmaDatabase
     private static final String CREATE_DB_FILE_ON_WINDOWS_SHA256SUM = "5QKQ8Ga1SXdvsiEbf6Ps99KdIJVTNldtI42C3UMI9DM=";
     public static Connection sqldb = null;
     static int current_db_version = 0;
+    //
     static Semaphore orma_semaphore_lastrowid_on_insert = new Semaphore(1);
+    //
     static ReentrantReadWriteLock orma_global_readwritelock = new ReentrantReadWriteLock(true);
+    //
     static final Lock orma_global_readLock = orma_global_readwritelock.readLock();
     public static final Lock orma_global_writeLock = orma_global_readwritelock.writeLock();
+    // --- read locks ---
+    static final Lock orma_global_sqlcount_lock = orma_global_readLock;
+    static final Lock orma_global_sqltolist_lock = orma_global_readLock;
+    // static final Lock orma_global_sqlgetlastrowid_lock = orma_global_readLock;
+    static final Lock orma_global_sqlexecute_lock = orma_global_readLock;
+    static final Lock orma_global_sqlinsert_lock = orma_global_readLock;
+    // --- read locks ---
+    //
+    // --- write locks ---
+    static final Lock orma_global_sqlfreehand_lock = orma_global_writeLock;
+    // --- write locks ---
+    //
 
     private static String db_file_path = null;
     private static String secrect_key = null;
@@ -137,7 +152,7 @@ public class OrmaDatabase
 
     public static long get_last_rowid_pstmt()
     {
-        orma_global_readLock.lock();
+        // orma_global_sqlgetlastrowid_lock.lock();
         try
         {
             long ret = -1;
@@ -150,36 +165,17 @@ public class OrmaDatabase
             rs.close();
             lastrowid_pstmt.close();
             // Log.i(TAG, "get_last_rowid_pstmt:ret=" + ret);
-            orma_global_readLock.unlock();
             return ret;
         }
         catch (Exception e)
         {
-            orma_global_readLock.unlock();
             e.printStackTrace();
             Log.i(TAG, "get_last_rowid_pstmt:EE1:" + e.getMessage());
             return -1;
         }
-    }
-
-    public static long get_last_rowid(Statement statement)
-    {
-        try
+        finally
         {
-            long ret = -1;
-            ResultSet rs = statement.executeQuery("select last_insert_rowid() as lastrowid");
-            if (rs.next())
-            {
-                ret = rs.getLong("lastrowid");
-            }
-            // Log.i(TAG, "get_last_rowid:ret=" + ret);
-            return ret;
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            Log.i(TAG, "get_last_rowid:EE1:" + e.getMessage());
-            return -1;
+            // orma_global_sqlgetlastrowid_lock.unlock();
         }
     }
 
@@ -252,6 +248,7 @@ public class OrmaDatabase
     {
         String ret = "unknown";
 
+        orma_global_sqlfreehand_lock.lock();
         try
         {
             final Statement statement = sqldb.createStatement();
@@ -276,6 +273,10 @@ public class OrmaDatabase
         {
             e.printStackTrace();
         }
+        finally
+        {
+            orma_global_sqlfreehand_lock.unlock();
+        }
 
         return ret;
     }
@@ -284,6 +285,7 @@ public class OrmaDatabase
     {
         int ret = 0;
 
+        orma_global_sqlfreehand_lock.lock();
         try
         {
             Statement statement = sqldb.createStatement();
@@ -320,12 +322,17 @@ public class OrmaDatabase
                 e2.printStackTrace();
             }
         }
+        finally
+        {
+            orma_global_sqlfreehand_lock.unlock();
+        }
 
         return ret;
     }
 
     public static void set_new_db_version(int new_version)
     {
+        orma_global_sqlfreehand_lock.lock();
         try
         {
             final String update_001 = "update orma_schema set db_version='" + new_version + "';";
@@ -334,6 +341,10 @@ public class OrmaDatabase
         catch (Exception e2)
         {
             e2.printStackTrace();
+        }
+        finally
+        {
+            orma_global_sqlfreehand_lock.unlock();
         }
     }
 
@@ -745,6 +756,7 @@ public class OrmaDatabase
      */
     public static void run_multi_sql(String sql_multi)
     {
+        orma_global_sqlfreehand_lock.lock();
         try
         {
             Statement statement = null;
@@ -788,12 +800,17 @@ public class OrmaDatabase
         {
             Log.i(TAG, "ERR:MS:004:" + e.getMessage());
         }
+        finally
+        {
+            orma_global_sqlfreehand_lock.unlock();
+        }
     }
 
     public static String run_query_for_single_result(String sql_multi)
     {
         String text_result = null;
 
+        orma_global_sqlfreehand_lock.lock();
         try
         {
             Statement statement = null;
@@ -840,6 +857,10 @@ public class OrmaDatabase
         catch (Exception e)
         {
             Log.i(TAG, "ERR:QSL:004:" + e.getMessage());
+        }
+        finally
+        {
+            orma_global_sqlfreehand_lock.unlock();
         }
 
         return text_result;
