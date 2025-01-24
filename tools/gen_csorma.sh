@@ -11,7 +11,7 @@ cd "$basedir"
 cd ./sorma2/
 
 java \
--classpath ".:sqlite-jdbc-3.46.1.2.jar:sorma2.jar" \
+-classpath ".:sorma2.jar" \
 com/zoffcc/applications/sorm/Generator "gen"
 
 echo "#############"
