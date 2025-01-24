@@ -208,7 +208,7 @@ public class Message
     public List<Message> toList()
     {
         List<Message> list = new ArrayList<>();
-        orma_global_readLock.lock();
+        orma_global_sqltolist_lock.lock();
         try
         {
             final String sql = this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit;
@@ -294,7 +294,7 @@ public class Message
         }
         finally
         {
-            orma_global_readLock.unlock();
+            orma_global_sqltolist_lock.unlock();
         }
 
         return list;
@@ -305,7 +305,7 @@ public class Message
     {
         long ret = -1;
 
-        orma_global_readLock.lock();
+        orma_global_sqlinsert_lock.lock();
         try
         {
             String insert_pstmt_sql = null;
@@ -466,7 +466,7 @@ public class Message
         }
         finally
         {
-            orma_global_readLock.unlock();
+            orma_global_sqlinsert_lock.unlock();
         }
 
         return ret;
@@ -480,7 +480,7 @@ public class Message
 
     public void execute()
     {
-        orma_global_readLock.lock();
+        orma_global_sqlexecute_lock.lock();
         try
         {
             final String sql = this.sql_start + " " + this.sql_set + " " + this.sql_where;
@@ -514,7 +514,7 @@ public class Message
         }
         finally
         {
-            orma_global_readLock.unlock();
+            orma_global_sqlexecute_lock.unlock();
         }
     }
 
@@ -522,7 +522,7 @@ public class Message
     {
         int ret = 0;
 
-        orma_global_readLock.lock();
+        orma_global_sqlcount_lock.lock();
         try
         {
             this.sql_start = "SELECT count(*) as count FROM \"" + this.getClass().getSimpleName() + "\"";
@@ -561,7 +561,7 @@ public class Message
         }
         finally
         {
-            orma_global_readLock.unlock();
+            orma_global_sqlcount_lock.unlock();
         }
 
         return ret;
