@@ -145,10 +145,12 @@ class TrifaToxService
                 catch(_: Exception)
                 {
                 }
+                Log.i(TAG, "XXXXX:checkpoint:001=" + OrmaDatabase.run_query_for_single_result("PRAGMA wal_checkpoint(TRUNCATE);"))
                 clear_friends()
                 load_friends()
                 clear_groups()
                 load_groups()
+                Log.i(TAG, "XXXXX:checkpoint:001=" + OrmaDatabase.run_query_for_single_result("PRAGMA wal_checkpoint(TRUNCATE);"))
                 // --------------- bootstrap ---------------
                 // --------------- bootstrap ---------------
                 // --------------- bootstrap ---------------
