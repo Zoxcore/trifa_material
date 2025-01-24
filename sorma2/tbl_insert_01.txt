@@ -3,11 +3,12 @@
     {
         long ret = -1;
 
+        orma_global_readLock.lock();
         try
         {
             String insert_pstmt_sql = null;
             PreparedStatement insert_pstmt = null;
 
             // @formatter:off
-            insert_pstmt_sql ="insert into " + this.getClass().getSimpleName() +
+            insert_pstmt_sql ="insert into \"" + this.getClass().getSimpleName() + "\"" +
                     "("
