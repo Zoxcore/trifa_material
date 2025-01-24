@@ -1,7 +1,7 @@
     public List<__@@@TABLE@@@__> toList()
     {
         List<__@@@TABLE@@@__> list = new ArrayList<>();
-        orma_global_readLock.lock();
+        orma_global_sqltolist_lock.lock();
         try
         {
             final String sql = this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit;

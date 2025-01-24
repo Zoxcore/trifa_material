@@ -58,7 +58,7 @@
         }
         finally
         {
-            orma_global_readLock.unlock();
+            orma_global_sqlinsert_lock.unlock();
         }
 
         return ret;

@@ -24,7 +24,7 @@
         }
         finally
         {
-            orma_global_readLock.unlock();
+            orma_global_sqltolist_lock.unlock();
         }
 
         return list;

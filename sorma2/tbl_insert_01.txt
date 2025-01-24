@@ -3,7 +3,7 @@
     {
         long ret = -1;
 
-        orma_global_readLock.lock();
+        orma_global_sqlinsert_lock.lock();
         try
         {
             String insert_pstmt_sql = null;
