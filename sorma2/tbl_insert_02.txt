@@ -56,6 +56,10 @@
             orma_semaphore_lastrowid_on_insert.release();
             throw new RuntimeException(e);
         }
+        finally
+        {
+            orma_global_readLock.unlock();
+        }
 
         return ret;
     }
