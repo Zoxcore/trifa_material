@@ -106,7 +106,7 @@ class TrifaToxService
                 }
 
                 orma = OrmaDatabase(PREF__database_files_dir + "/main.db", "", PREF__DB_wal_mode);
-                orma!!.init()
+                OrmaDatabase.init()
                 // ------ correct startup order ------
                 globalstore.setOrmaRunning(true)
                 load_db_prefs()
@@ -403,12 +403,8 @@ class TrifaToxService
 
                 globalstore.setOrmaRunning(false)
                 // ----------------- DB shutdown -----------------
-                // first make a copy of the pointer
-                val orma_temp = orma
-                // now set the original to NULL
                 orma = null
-                // shutdown DB
-                orma_temp!!.shutdown()
+                OrmaDatabase.shutdown()
                 // ----------------- DB shutdown -----------------
                 Log.i(TAG, "DB:shutdown ok")
                 unlock_data_dir_input()
