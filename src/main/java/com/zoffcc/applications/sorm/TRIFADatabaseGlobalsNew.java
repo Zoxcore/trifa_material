@@ -21,6 +21,7 @@ package com.zoffcc.applications.sorm;
 
 import com.zoffcc.applications.trifa.Log;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -59,29 +60,57 @@ public class TRIFADatabaseGlobalsNew
     String sql_where = "where 1=1 "; // where
     String sql_orderby = ""; // order by
     String sql_limit = ""; // limit
+    List<OrmaBindvar> bind_where_vars = new ArrayList<>();
+    int bind_where_count = 0;
+    List<OrmaBindvar> bind_set_vars = new ArrayList<>();
+    int bind_set_count = 0;
 
     public List<TRIFADatabaseGlobalsNew> toList()
     {
         List<TRIFADatabaseGlobalsNew> list = new ArrayList<>();
-
+        orma_global_readLock.lock();
         try
         {
-            Statement statement = sqldb.createStatement();
-
             final String sql = this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit;
-            if (ORMA_TRACE)
+            log_bindvars_where(sql, bind_where_count, bind_where_vars);
+            final long t1 = System.currentTimeMillis();
+            PreparedStatement statement = sqldb.prepareStatement(sql);
+            if (!set_bindvars_where(statement, bind_where_count, bind_where_vars))
             {
-                Log.i(TAG, "sql=" + sql);
+                try
+                {
+                    statement.close();
+                }
+                catch (Exception ignored)
+                {
+                }
+                return null;
             }
-            ResultSet rs = statement.executeQuery(sql);
+            ResultSet rs = statement.executeQuery();
+            final long t2 = System.currentTimeMillis();
+            if (ORMA_LONG_RUNNING_TRACE)
+            {
+                if ((t2 - t1) > ORMA_LONG_RUNNING_MS)
+                {
+                    Log.i(TAG, "long running (" + (t2 - t1)+ " ms) sql=" + sql);
+                }
+            }
+            final long t3 = System.currentTimeMillis();
             while (rs.next())
             {
                 TRIFADatabaseGlobalsNew out = new TRIFADatabaseGlobalsNew();
-
                 out.key = rs.getString("key");
                 out.value = rs.getString("value");
 
                 list.add(out);
+            }
+            final long t4 = System.currentTimeMillis();
+            if (ORMA_LONG_RUNNING_TRACE)
+            {
+                if ((t4 - t3) > ORMA_LONG_RUNNING_MS)
+                {
+                    Log.i(TAG, "long running (" + (t4 - t3)+ " ms) fetch=" + sql);
+                }
             }
 
             try
@@ -96,53 +125,103 @@ public class TRIFADatabaseGlobalsNew
         {
             e.printStackTrace();
         }
+        finally
+        {
+            orma_global_readLock.unlock();
+        }
 
         return list;
     }
+
 
     public long insert()
     {
         long ret = -1;
 
+        orma_global_readLock.lock();
         try
         {
-            // @formatter:off
-            Statement statement = sqldb.createStatement();
+            String insert_pstmt_sql = null;
+            PreparedStatement insert_pstmt = null;
 
-            final String sql_str="insert into " + this.getClass().getSimpleName() +
-                    "(" +
-                    "key," +
-                    "value" +
-                    ")" +
+            // @formatter:off
+            insert_pstmt_sql ="insert into \"" + this.getClass().getSimpleName() + "\"" +
+                    "("
+                    + "\"key\""
+                    + ",\"value\""
+                    + ")" +
                     "values" +
-                    "(" +
-                    "'"+s(this.key)+"'," +
-                    "'"+s(this.value)+"'" +
-                    ")";
+                    "("
+                    + "?1"
+                    + ",?2"
+                    + ")";
+
+            insert_pstmt = sqldb.prepareStatement(insert_pstmt_sql);
+            insert_pstmt.clearParameters();
+
+            insert_pstmt.setString(1, this.key);
+            insert_pstmt.setString(2, this.value);
+            // @formatter:on
 
             if (ORMA_TRACE)
             {
-                Log.i(TAG, "sql=" + sql_str);
+                Log.i(TAG, "sql=" + insert_pstmt);
             }
 
+            final long t1 = System.currentTimeMillis();
             orma_semaphore_lastrowid_on_insert.acquire();
-            statement.execute(sql_str);
-            ret = get_last_rowid(statement);
-            orma_semaphore_lastrowid_on_insert.release();
-            // @formatter:on
+            final long t2 = System.currentTimeMillis();
+            if (ORMA_LONG_RUNNING_TRACE)
+            {
+                if ((t2 - t1) > ORMA_LONG_RUNNING_MS)
+                {
+                    Log.i(TAG, "insertInto"+this.getClass().getSimpleName()+" acquire running long (" + (t2 - t1)+ " ms)");
+                }
+            }
 
-            try
+            final long t3 = System.currentTimeMillis();
+            insert_pstmt.executeUpdate();
+            final long t4 = System.currentTimeMillis();
+            if (ORMA_LONG_RUNNING_TRACE)
             {
-                statement.close();
+                if ((t4 - t3) > ORMA_LONG_RUNNING_MS)
+                {
+                    Log.i(TAG, "insertInto"+this.getClass().getSimpleName()+" sql running long (" + (t4 - t3)+ " ms)");
+                }
             }
-            catch (Exception ignored)
+
+            final long t5 = System.currentTimeMillis();
+            insert_pstmt.close();
+            final long t6 = System.currentTimeMillis();
+            if (ORMA_LONG_RUNNING_TRACE)
             {
+                if ((t6 - t5) > ORMA_LONG_RUNNING_MS)
+                {
+                    Log.i(TAG, "insertInto"+this.getClass().getSimpleName()+" statement close running long (" + (t6 - t5)+ " ms)");
+                }
             }
+
+            final long t7 = System.currentTimeMillis();
+            ret = get_last_rowid_pstmt();
+            final long t8 = System.currentTimeMillis();
+            if (ORMA_LONG_RUNNING_TRACE)
+            {
+                if ((t8 - t7) > ORMA_LONG_RUNNING_MS)
+                {
+                    Log.i(TAG, "insertInto"+this.getClass().getSimpleName()+" getLastRowId running long (" + (t8 - t7)+ " ms)");
+                }
+            }
+
+            orma_semaphore_lastrowid_on_insert.release();
         }
         catch (Exception e)
         {
             orma_semaphore_lastrowid_on_insert.release();
             throw new RuntimeException(e);
+        }
+        finally
+        {
+            orma_global_readLock.unlock();
         }
 
         return ret;
@@ -156,16 +235,25 @@ public class TRIFADatabaseGlobalsNew
 
     public void execute()
     {
+        orma_global_readLock.lock();
         try
         {
-            Statement statement = sqldb.createStatement();
             final String sql = this.sql_start + " " + this.sql_set + " " + this.sql_where;
-            if (ORMA_TRACE)
+            log_bindvars_where_and_set(sql, bind_where_count, bind_where_vars, bind_set_count, bind_set_vars);
+            PreparedStatement statement = sqldb.prepareStatement(sql);
+            if (!set_bindvars_where_and_set(statement, bind_where_count, bind_where_vars, bind_set_count, bind_set_vars))
             {
-                Log.i(TAG, "sql=" + sql);
+                try
+                {
+                    statement.close();
+                }
+                catch (Exception ignored)
+                {
+                }
+                orma_semaphore_lastrowid_on_insert.release();
+                return;
             }
-            statement.executeUpdate(sql);
-
+            statement.executeUpdate();
             try
             {
                 statement.close();
@@ -179,25 +267,36 @@ public class TRIFADatabaseGlobalsNew
             e2.printStackTrace();
             Log.i(TAG, "EE1:" + e2.getMessage());
         }
+        finally
+        {
+            orma_global_readLock.unlock();
+        }
     }
 
     public int count()
     {
         int ret = 0;
 
+        orma_global_readLock.lock();
         try
         {
-            Statement statement = sqldb.createStatement();
-            this.sql_start = "SELECT count(*) as count FROM " + this.getClass().getSimpleName();
+            this.sql_start = "SELECT count(*) as count FROM \"" + this.getClass().getSimpleName() + "\"";
 
             final String sql = this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit;
-            if (ORMA_TRACE)
+            log_bindvars_where(sql, bind_where_count, bind_where_vars);
+            PreparedStatement statement = sqldb.prepareStatement(sql);
+            if (!set_bindvars_where(statement, bind_where_count, bind_where_vars))
             {
-                Log.i(TAG, "sql=" + sql);
+                try
+                {
+                    statement.close();
+                }
+                catch (Exception ignored)
+                {
+                }
+                return 0;
             }
-
-            ResultSet rs = statement.executeQuery(sql);
-
+            ResultSet rs = statement.executeQuery();
             if (rs.next())
             {
                 ret = rs.getInt("count");
@@ -215,19 +314,45 @@ public class TRIFADatabaseGlobalsNew
         {
             e.printStackTrace();
         }
+        finally
+        {
+            orma_global_readLock.unlock();
+        }
 
         return ret;
     }
 
-    public TRIFADatabaseGlobalsNew limit(int i)
+    public TRIFADatabaseGlobalsNew limit(int rowcount)
     {
-        this.sql_limit = " limit " + i + " ";
+        this.sql_limit = " limit " + rowcount + " ";
         return this;
     }
 
-    public TRIFADatabaseGlobalsNew keyEq(String key)
+    public TRIFADatabaseGlobalsNew limit(int rowcount, int offset)
     {
-        this.sql_where = this.sql_where + " and  key='" + s(key) + "' ";
+        this.sql_limit = " limit " + offset + " , " + rowcount;
+        return this;
+    }
+
+    // ----------------------------------- //
+    // ----------------------------------- //
+    // ----------------------------------- //
+
+
+    // ----------------- Set funcs ---------------------- //
+    public TRIFADatabaseGlobalsNew key(String key)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " \"key\"=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, key));
+        bind_set_count++;
         return this;
     }
 
@@ -241,12 +366,161 @@ public class TRIFADatabaseGlobalsNew
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " value='" + s(value) + "' ";
+        this.sql_set = this.sql_set + " \"value\"=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, value));
+        bind_set_count++;
         return this;
     }
 
-    // ----------------------------------- //
-    // ----------------------------------- //
-    // ----------------------------------- //
+
+    // ----------------- Eq/Gt/Lt funcs ----------------- //
+    public TRIFADatabaseGlobalsNew keyEq(String key)
+    {
+        this.sql_where = this.sql_where + " and \"key\"=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, key));
+        bind_where_count++;
+        return this;
+    }
+
+    public TRIFADatabaseGlobalsNew keyNotEq(String key)
+    {
+        this.sql_where = this.sql_where + " and \"key\"<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, key));
+        bind_where_count++;
+        return this;
+    }
+
+    public TRIFADatabaseGlobalsNew keyIsNull()
+    {
+        this.sql_where = this.sql_where + " and \"key\" IS NULL ";
+        return this;
+    }
+
+    public TRIFADatabaseGlobalsNew keyIsNotNull()
+    {
+        this.sql_where = this.sql_where + " and \"key\" IS NOT NULL ";
+        return this;
+    }
+
+    public TRIFADatabaseGlobalsNew keyLike(String key)
+    {
+        this.sql_where = this.sql_where + " and \"key\" LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, key));
+        bind_where_count++;
+        return this;
+    }
+
+    public TRIFADatabaseGlobalsNew keyNotLike(String key)
+    {
+        this.sql_where = this.sql_where + " and \"key\" NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, key));
+        bind_where_count++;
+        return this;
+    }
+
+    public TRIFADatabaseGlobalsNew valueEq(String value)
+    {
+        this.sql_where = this.sql_where + " and \"value\"=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, value));
+        bind_where_count++;
+        return this;
+    }
+
+    public TRIFADatabaseGlobalsNew valueNotEq(String value)
+    {
+        this.sql_where = this.sql_where + " and \"value\"<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, value));
+        bind_where_count++;
+        return this;
+    }
+
+    public TRIFADatabaseGlobalsNew valueIsNull()
+    {
+        this.sql_where = this.sql_where + " and \"value\" IS NULL ";
+        return this;
+    }
+
+    public TRIFADatabaseGlobalsNew valueIsNotNull()
+    {
+        this.sql_where = this.sql_where + " and \"value\" IS NOT NULL ";
+        return this;
+    }
+
+    public TRIFADatabaseGlobalsNew valueLike(String value)
+    {
+        this.sql_where = this.sql_where + " and \"value\" LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, value));
+        bind_where_count++;
+        return this;
+    }
+
+    public TRIFADatabaseGlobalsNew valueNotLike(String value)
+    {
+        this.sql_where = this.sql_where + " and \"value\" NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, value));
+        bind_where_count++;
+        return this;
+    }
+
+
+    // ----------------- OrderBy funcs ------------------ //
+    public TRIFADatabaseGlobalsNew orderByKeyAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " \"key\" ASC ";
+        return this;
+    }
+
+    public TRIFADatabaseGlobalsNew orderByKeyDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " \"key\" DESC ";
+        return this;
+    }
+
+    public TRIFADatabaseGlobalsNew orderByValueAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " \"value\" ASC ";
+        return this;
+    }
+
+    public TRIFADatabaseGlobalsNew orderByValueDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " \"value\" DESC ";
+        return this;
+    }
+
+
 
 }
+

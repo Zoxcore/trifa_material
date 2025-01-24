@@ -1,6 +1,9 @@
-package com.zoffcc.applications.sorm;
+/* SPDX-License-Identifier: GPL-3.0-or-later
+ * [sorma2], Java part of sorma2
+ * Copyright (C) 2024 Zoff <zoff@zoff.cc>
+ */
 
-import com.zoffcc.applications.trifa.Log;
+package com.zoffcc.applications.sorm;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -9,6 +12,10 @@ import java.sql.*;
 import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import com.zoffcc.applications.sorm.Log;
 
 public class OrmaDatabase
 {
@@ -22,6 +29,9 @@ public class OrmaDatabase
     public static Connection sqldb = null;
     static int current_db_version = 0;
     static Semaphore orma_semaphore_lastrowid_on_insert = new Semaphore(1);
+    static ReentrantReadWriteLock orma_global_readwritelock = new ReentrantReadWriteLock(true);
+    static final Lock orma_global_readLock = orma_global_readwritelock.readLock();
+    public static final Lock orma_global_writeLock = orma_global_readwritelock.writeLock();
 
     private static String db_file_path = null;
     private static String secrect_key = null;
@@ -92,6 +102,7 @@ public class OrmaDatabase
     /*
      * repair or finally replace a string that is not correct UTF-8
      */
+    @Deprecated
     static String safe_string_sql(String in)
     {
         if (in == null)
@@ -126,6 +137,7 @@ public class OrmaDatabase
 
     public static long get_last_rowid_pstmt()
     {
+        orma_global_readLock.lock();
         try
         {
             long ret = -1;
@@ -138,10 +150,12 @@ public class OrmaDatabase
             rs.close();
             lastrowid_pstmt.close();
             // Log.i(TAG, "get_last_rowid_pstmt:ret=" + ret);
+            orma_global_readLock.unlock();
             return ret;
         }
         catch (Exception e)
         {
+            orma_global_readLock.unlock();
             e.printStackTrace();
             Log.i(TAG, "get_last_rowid_pstmt:EE1:" + e.getMessage());
             return -1;
@@ -173,6 +187,7 @@ public class OrmaDatabase
      * escape to prevent SQL injection, very basic and bad!
      * TODO: make me better (and later use prepared statements)
      */
+    @Deprecated
     public static String s(String str)
     {
         // TODO: bad!! use prepared statements
@@ -606,7 +621,7 @@ public class OrmaDatabase
         return new_db_version;
     }
 
-    public void shutdown()
+    public static void shutdown()
     {
         Log.i(TAG, "SHUTDOWN:start");
         try
@@ -621,7 +636,7 @@ public class OrmaDatabase
         Log.i(TAG, "SHUTDOWN:finished");
     }
 
-    public void init()
+    public static void init()
     {
         Log.i(TAG, "INIT:start");
         // create a database connection
@@ -968,325 +983,302 @@ public class OrmaDatabase
         }
     }
 
-    /**
-     * Starts building a query: {@code SELECT * FROM FriendList ...}.
-     */
-    public FriendList selectFromFriendList()
-    {
-        FriendList ret = new FriendList();
-        ret.sql_start = "SELECT * FROM FriendList";
-        return ret;
-    }
 
-    public long insertIntoFriendList(FriendList f)
-    {
-        return f.insert();
-    }
-
-    /**
-     * Starts building a query: {@code SELECT * FROM Message ...}.
-     */
-    public Message selectFromMessage()
-    {
-        Message ret = new Message();
-        ret.sql_start = "SELECT * FROM Message";
-        return ret;
-    }
-
-    public List<Message> selectFromMessageCustomSQL(String statement)
-    {
-        Message ret = new Message();
-        ret.sql_where = "";
-        ret.sql_start = "SELECT * FROM Message " + statement;
-        return ret.toList();
-    }
-
-    /**
-     * Starts building a query: {@code UPDATE Message ...}.
-     */
-    public Message updateMessage()
-    {
-        Message ret = new Message();
-        ret.sql_start = "UPDATE Message";
-        return ret;
-    }
-
-    /**
-     * Starts building a query: {@code SELECT * FROM ConferenceDB ...}.
-     */
     public ConferenceDB selectFromConferenceDB()
     {
         ConferenceDB ret = new ConferenceDB();
-        ret.sql_start = "SELECT * FROM ConferenceDB";
+        ret.sql_start = "SELECT * FROM \"ConferenceDB\"";
         return ret;
     }
 
-    /**
-     * Starts building a query: {@code UPDATE ConferenceDB ...}.
-     */
+    public long insertIntoConferenceDB(ConferenceDB obj)
+    {
+        return obj.insert();
+    }
+
     public ConferenceDB updateConferenceDB()
     {
         ConferenceDB ret = new ConferenceDB();
-        ret.sql_start = "UPDATE ConferenceDB";
-        return ret;
-    }
-
-    public long insertIntoConferenceDB(ConferenceDB conf_new)
-    {
-        return conf_new.insert();
-    }
-
-    /**
-     * Starts building a query: {@code UPDATE ConferenceMessage ...}.
-     */
-    public ConferenceMessage updateConferenceMessage()
-    {
-        ConferenceMessage ret = new ConferenceMessage();
-        ret.sql_start = "UPDATE ConferenceMessage";
-        return ret;
-    }
-
-    /**
-     * Starts building a query: {@code SELECT * FROM ConferenceMessage ...}.
-     */
-    public ConferenceMessage selectFromConferenceMessage()
-    {
-        ConferenceMessage ret = new ConferenceMessage();
-        ret.sql_start = "SELECT * FROM ConferenceMessage";
-        return ret;
-    }
-
-    public long insertIntoConferenceMessage(ConferenceMessage m)
-    {
-        return m.insert();
-    }
-
-    /**
-     * Starts building a query: {@code UPDATE FriendList ...}.
-     */
-    public FriendList updateFriendList()
-    {
-        FriendList ret = new FriendList();
-        ret.sql_start = "UPDATE FriendList";
-        return ret;
-    }
-
-    /**
-     * Starts building a query: {@code SELECT * FROM Filetransfer ...}.
-     */
-    public Filetransfer selectFromFiletransfer()
-    {
-        Filetransfer ret = new Filetransfer();
-        ret.sql_start = "SELECT * FROM Filetransfer";
-        return ret;
-    }
-
-    public long insertIntoFiletransfer(Filetransfer f)
-    {
-        return f.insert();
-    }
-
-    /**
-     * Starts building a query: {@code UPDATE Filetransfer ...}.
-     */
-    public Filetransfer updateFiletransfer()
-    {
-        Filetransfer ret = new Filetransfer();
-        ret.sql_start = "UPDATE Filetransfer";
-        return ret;
-    }
-
-    public long insertIntoFileDB(FileDB f)
-    {
-        return f.insert();
-    }
-
-    /**
-     * Starts building a query: {@code SELECT * FROM FileDB ...}.
-     */
-    public FileDB selectFromFileDB()
-    {
-        FileDB ret = new FileDB();
-        ret.sql_start = "SELECT * FROM FileDB";
-        return ret;
-    }
-
-    public Filetransfer deleteFromFiletransfer()
-    {
-        Filetransfer ret = new Filetransfer();
-        ret.sql_start = "DELETE FROM Filetransfer";
-        return ret;
-    }
-
-    public long insertIntoMessage(Message m)
-    {
-        return m.insert();
-    }
-
-    /**
-     * Starts building a query: {@code SELECT * FROM RelayListDB ...}.
-     */
-    public RelayListDB selectFromRelayListDB()
-    {
-        RelayListDB ret = new RelayListDB();
-        ret.sql_start = "SELECT * FROM RelayListDB";
-        return ret;
-    }
-
-    public long insertIntoRelayListDB(RelayListDB f)
-    {
-        return f.insert();
-    }
-
-    public long insertIntoTRIFADatabaseGlobalsNew(TRIFADatabaseGlobalsNew o)
-    {
-        return o.insert();
-    }
-
-    /**
-     * Starts building a query: {@code UPDATE TRIFADatabaseGlobalsNew ...}.
-     */
-    public TRIFADatabaseGlobalsNew updateTRIFADatabaseGlobalsNew()
-    {
-        TRIFADatabaseGlobalsNew ret = new TRIFADatabaseGlobalsNew();
-        ret.sql_start = "UPDATE TRIFADatabaseGlobalsNew";
-        return ret;
-    }
-
-    public TRIFADatabaseGlobalsNew deleteFromTRIFADatabaseGlobalsNew()
-    {
-        TRIFADatabaseGlobalsNew ret = new TRIFADatabaseGlobalsNew();
-        ret.sql_start = "DELETE FROM TRIFADatabaseGlobalsNew";
-        return ret;
-    }
-
-    /**
-     * Starts building a query: {@code SELECT * FROM TRIFADatabaseGlobalsNew ...}.
-     */
-    public TRIFADatabaseGlobalsNew selectFromTRIFADatabaseGlobalsNew()
-    {
-        TRIFADatabaseGlobalsNew ret = new TRIFADatabaseGlobalsNew();
-        ret.sql_start = "SELECT * FROM TRIFADatabaseGlobalsNew";
-        return ret;
-    }
-
-    public FileDB deleteFromFileDB()
-    {
-        FileDB ret = new FileDB();
-        ret.sql_start = "DELETE FROM FileDB";
-        return ret;
-    }
-
-    public Message deleteFromMessage()
-    {
-        Message ret = new Message();
-        ret.sql_start = "DELETE FROM Message";
-        return ret;
-    }
-
-    public FriendList deleteFromFriendList()
-    {
-        FriendList ret = new FriendList();
-        ret.sql_start = "DELETE FROM FriendList";
-        return ret;
-    }
-
-    public ConferenceMessage deleteFromConferenceMessage()
-    {
-        ConferenceMessage ret = new ConferenceMessage();
-        ret.sql_start = "DELETE FROM ConferenceMessage";
+        ret.sql_start = "UPDATE \"ConferenceDB\"";
         return ret;
     }
 
     public ConferenceDB deleteFromConferenceDB()
     {
         ConferenceDB ret = new ConferenceDB();
-        ret.sql_start = "DELETE FROM ConferenceDB";
+        ret.sql_start = "DELETE FROM \"ConferenceDB\"";
         return ret;
     }
 
-    /**
-     * Starts building a query: {@code SELECT * FROM GroupDB ...}.
-     */
-    public GroupDB selectFromGroupDB()
+
+    public BootstrapNodeEntryDB selectFromBootstrapNodeEntryDB()
     {
-        GroupDB ret = new GroupDB();
-        ret.sql_start = "SELECT * FROM GroupDB";
+        BootstrapNodeEntryDB ret = new BootstrapNodeEntryDB();
+        ret.sql_start = "SELECT * FROM \"BootstrapNodeEntryDB\"";
         return ret;
     }
 
-    /**
-     * Starts building a query: {@code UPDATE GroupDB ...}.
-     */
-    public GroupDB updateGroupDB()
+    public long insertIntoBootstrapNodeEntryDB(BootstrapNodeEntryDB obj)
     {
-        GroupDB ret = new GroupDB();
-        ret.sql_start = "UPDATE GroupDB";
+        return obj.insert();
+    }
+
+    public BootstrapNodeEntryDB updateBootstrapNodeEntryDB()
+    {
+        BootstrapNodeEntryDB ret = new BootstrapNodeEntryDB();
+        ret.sql_start = "UPDATE \"BootstrapNodeEntryDB\"";
         return ret;
     }
 
-    public long insertIntoGroupDB(GroupDB group_new)
+    public BootstrapNodeEntryDB deleteFromBootstrapNodeEntryDB()
     {
-        return group_new.insert();
-    }
-
-    public GroupDB deleteFromGroupDB()
-    {
-        GroupDB ret = new GroupDB();
-        ret.sql_start = "DELETE FROM GroupDB";
+        BootstrapNodeEntryDB ret = new BootstrapNodeEntryDB();
+        ret.sql_start = "DELETE FROM \"BootstrapNodeEntryDB\"";
         return ret;
     }
 
-    /**
-     * Starts building a query: {@code SELECT * FROM GroupMessage ...}.
-     */
+
+    public ConferenceMessage selectFromConferenceMessage()
+    {
+        ConferenceMessage ret = new ConferenceMessage();
+        ret.sql_start = "SELECT * FROM \"ConferenceMessage\"";
+        return ret;
+    }
+
+    public long insertIntoConferenceMessage(ConferenceMessage obj)
+    {
+        return obj.insert();
+    }
+
+    public ConferenceMessage updateConferenceMessage()
+    {
+        ConferenceMessage ret = new ConferenceMessage();
+        ret.sql_start = "UPDATE \"ConferenceMessage\"";
+        return ret;
+    }
+
+    public ConferenceMessage deleteFromConferenceMessage()
+    {
+        ConferenceMessage ret = new ConferenceMessage();
+        ret.sql_start = "DELETE FROM \"ConferenceMessage\"";
+        return ret;
+    }
+
+
+    public FileDB selectFromFileDB()
+    {
+        FileDB ret = new FileDB();
+        ret.sql_start = "SELECT * FROM \"FileDB\"";
+        return ret;
+    }
+
+    public long insertIntoFileDB(FileDB obj)
+    {
+        return obj.insert();
+    }
+
+    public FileDB updateFileDB()
+    {
+        FileDB ret = new FileDB();
+        ret.sql_start = "UPDATE \"FileDB\"";
+        return ret;
+    }
+
+    public FileDB deleteFromFileDB()
+    {
+        FileDB ret = new FileDB();
+        ret.sql_start = "DELETE FROM \"FileDB\"";
+        return ret;
+    }
+
+
+    public Filetransfer selectFromFiletransfer()
+    {
+        Filetransfer ret = new Filetransfer();
+        ret.sql_start = "SELECT * FROM \"Filetransfer\"";
+        return ret;
+    }
+
+    public long insertIntoFiletransfer(Filetransfer obj)
+    {
+        return obj.insert();
+    }
+
+    public Filetransfer updateFiletransfer()
+    {
+        Filetransfer ret = new Filetransfer();
+        ret.sql_start = "UPDATE \"Filetransfer\"";
+        return ret;
+    }
+
+    public Filetransfer deleteFromFiletransfer()
+    {
+        Filetransfer ret = new Filetransfer();
+        ret.sql_start = "DELETE FROM \"Filetransfer\"";
+        return ret;
+    }
+
+
+    public FriendList selectFromFriendList()
+    {
+        FriendList ret = new FriendList();
+        ret.sql_start = "SELECT * FROM \"FriendList\"";
+        return ret;
+    }
+
+    public long insertIntoFriendList(FriendList obj)
+    {
+        return obj.insert();
+    }
+
+    public FriendList updateFriendList()
+    {
+        FriendList ret = new FriendList();
+        ret.sql_start = "UPDATE \"FriendList\"";
+        return ret;
+    }
+
+    public FriendList deleteFromFriendList()
+    {
+        FriendList ret = new FriendList();
+        ret.sql_start = "DELETE FROM \"FriendList\"";
+        return ret;
+    }
+
+
     public GroupMessage selectFromGroupMessage()
     {
         GroupMessage ret = new GroupMessage();
-        ret.sql_start = "SELECT * FROM GroupMessage";
+        ret.sql_start = "SELECT * FROM \"GroupMessage\"";
         return ret;
     }
 
-    /**
-     * Starts building a query: {@code UPDATE GroupMessage ...}.
-     */
+    public long insertIntoGroupMessage(GroupMessage obj)
+    {
+        return obj.insert();
+    }
+
     public GroupMessage updateGroupMessage()
     {
         GroupMessage ret = new GroupMessage();
-        ret.sql_start = "UPDATE GroupMessage";
+        ret.sql_start = "UPDATE \"GroupMessage\"";
         return ret;
-    }
-
-    public long insertIntoGroupMessage(GroupMessage groupmessage_new)
-    {
-        return groupmessage_new.insert();
     }
 
     public GroupMessage deleteFromGroupMessage()
     {
         GroupMessage ret = new GroupMessage();
-        ret.sql_start = "DELETE FROM GroupMessage";
+        ret.sql_start = "DELETE FROM \"GroupMessage\"";
         return ret;
     }
 
-    public long insertIntoBootstrapNodeEntryDB(BootstrapNodeEntryDB b) { return b.insert(); }
 
-    public BootstrapNodeEntryDB selectFromBootstrapNodeEntryDB() {
-        BootstrapNodeEntryDB ret = new BootstrapNodeEntryDB();
-        ret.sql_start = "SELECT * FROM BootstrapNodeEntryDB";
+    public GroupDB selectFromGroupDB()
+    {
+        GroupDB ret = new GroupDB();
+        ret.sql_start = "SELECT * FROM \"GroupDB\"";
         return ret;
     }
 
-    public BootstrapNodeEntryDB deleteFromBootstrapNodeEntryDB() {
-        BootstrapNodeEntryDB ret = new BootstrapNodeEntryDB();
-        ret.sql_start = "DELETE FROM BootstrapNodeEntryDB";
+    public long insertIntoGroupDB(GroupDB obj)
+    {
+        return obj.insert();
+    }
+
+    public GroupDB updateGroupDB()
+    {
+        GroupDB ret = new GroupDB();
+        ret.sql_start = "UPDATE \"GroupDB\"";
         return ret;
     }
 
-    public RelayListDB deleteFromRelayListDB() {
+    public GroupDB deleteFromGroupDB()
+    {
+        GroupDB ret = new GroupDB();
+        ret.sql_start = "DELETE FROM \"GroupDB\"";
+        return ret;
+    }
+
+
+    public RelayListDB selectFromRelayListDB()
+    {
         RelayListDB ret = new RelayListDB();
-        ret.sql_start = "DELETE FROM RelayListDB";
+        ret.sql_start = "SELECT * FROM \"RelayListDB\"";
         return ret;
     }
+
+    public long insertIntoRelayListDB(RelayListDB obj)
+    {
+        return obj.insert();
+    }
+
+    public RelayListDB updateRelayListDB()
+    {
+        RelayListDB ret = new RelayListDB();
+        ret.sql_start = "UPDATE \"RelayListDB\"";
+        return ret;
+    }
+
+    public RelayListDB deleteFromRelayListDB()
+    {
+        RelayListDB ret = new RelayListDB();
+        ret.sql_start = "DELETE FROM \"RelayListDB\"";
+        return ret;
+    }
+
+
+    public TRIFADatabaseGlobalsNew selectFromTRIFADatabaseGlobalsNew()
+    {
+        TRIFADatabaseGlobalsNew ret = new TRIFADatabaseGlobalsNew();
+        ret.sql_start = "SELECT * FROM \"TRIFADatabaseGlobalsNew\"";
+        return ret;
+    }
+
+    public long insertIntoTRIFADatabaseGlobalsNew(TRIFADatabaseGlobalsNew obj)
+    {
+        return obj.insert();
+    }
+
+    public TRIFADatabaseGlobalsNew updateTRIFADatabaseGlobalsNew()
+    {
+        TRIFADatabaseGlobalsNew ret = new TRIFADatabaseGlobalsNew();
+        ret.sql_start = "UPDATE \"TRIFADatabaseGlobalsNew\"";
+        return ret;
+    }
+
+    public TRIFADatabaseGlobalsNew deleteFromTRIFADatabaseGlobalsNew()
+    {
+        TRIFADatabaseGlobalsNew ret = new TRIFADatabaseGlobalsNew();
+        ret.sql_start = "DELETE FROM \"TRIFADatabaseGlobalsNew\"";
+        return ret;
+    }
+
+
+    public Message selectFromMessage()
+    {
+        Message ret = new Message();
+        ret.sql_start = "SELECT * FROM \"Message\"";
+        return ret;
+    }
+
+    public long insertIntoMessage(Message obj)
+    {
+        return obj.insert();
+    }
+
+    public Message updateMessage()
+    {
+        Message ret = new Message();
+        ret.sql_start = "UPDATE \"Message\"";
+        return ret;
+    }
+
+    public Message deleteFromMessage()
+    {
+        Message ret = new Message();
+        ret.sql_start = "DELETE FROM \"Message\"";
+        return ret;
+    }
+
 }
 

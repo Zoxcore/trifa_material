@@ -90,11 +90,7 @@ public class GroupDB
     @Override
     public String toString()
     {
-        return "tox_group_number=" + tox_group_number + ", group_identifier=" + group_identifier +
-                ", who_invited__tox_public_key_string=" + who_invited__tox_public_key_string + ", name=" + name +
-                ", topic=" + topic + ", privacy_state=" + privacy_state + ", peer_count=" + peer_count +
-                ", own_peer_number=" + own_peer_number + ", notification_silent=" + notification_silent +
-                ", group_active=" + group_active;
+        return "group_identifier=" + group_identifier + ", who_invited__tox_public_key_string=" + who_invited__tox_public_key_string + ", name=" + name + ", topic=" + topic + ", peer_count=" + peer_count + ", own_peer_number=" + own_peer_number + ", privacy_state=" + privacy_state + ", tox_group_number=" + tox_group_number + ", group_active=" + group_active + ", notification_silent=" + notification_silent;
     }
 
 
@@ -112,6 +108,7 @@ public class GroupDB
     public List<GroupDB> toList()
     {
         List<GroupDB> list = new ArrayList<>();
+        orma_global_readLock.lock();
         try
         {
             final String sql = this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit;
@@ -176,6 +173,10 @@ public class GroupDB
         {
             e.printStackTrace();
         }
+        finally
+        {
+            orma_global_readLock.unlock();
+        }
 
         return list;
     }
@@ -185,24 +186,25 @@ public class GroupDB
     {
         long ret = -1;
 
+        orma_global_readLock.lock();
         try
         {
             String insert_pstmt_sql = null;
             PreparedStatement insert_pstmt = null;
 
             // @formatter:off
-            insert_pstmt_sql ="insert into " + this.getClass().getSimpleName() +
+            insert_pstmt_sql ="insert into \"" + this.getClass().getSimpleName() + "\"" +
                     "("
-                    + "group_identifier"
-                    + ",who_invited__tox_public_key_string"
-                    + ",name"
-                    + ",topic"
-                    + ",peer_count"
-                    + ",own_peer_number"
-                    + ",privacy_state"
-                    + ",tox_group_number"
-                    + ",group_active"
-                    + ",notification_silent"
+                    + "\"group_identifier\""
+                    + ",\"who_invited__tox_public_key_string\""
+                    + ",\"name\""
+                    + ",\"topic\""
+                    + ",\"peer_count\""
+                    + ",\"own_peer_number\""
+                    + ",\"privacy_state\""
+                    + ",\"tox_group_number\""
+                    + ",\"group_active\""
+                    + ",\"notification_silent\""
                     + ")" +
                     "values" +
                     "("
@@ -289,6 +291,10 @@ public class GroupDB
             orma_semaphore_lastrowid_on_insert.release();
             throw new RuntimeException(e);
         }
+        finally
+        {
+            orma_global_readLock.unlock();
+        }
 
         return ret;
     }
@@ -301,6 +307,7 @@ public class GroupDB
 
     public void execute()
     {
+        orma_global_readLock.lock();
         try
         {
             final String sql = this.sql_start + " " + this.sql_set + " " + this.sql_where;
@@ -315,6 +322,7 @@ public class GroupDB
                 catch (Exception ignored)
                 {
                 }
+                orma_semaphore_lastrowid_on_insert.release();
                 return;
             }
             statement.executeUpdate();
@@ -331,15 +339,20 @@ public class GroupDB
             e2.printStackTrace();
             Log.i(TAG, "EE1:" + e2.getMessage());
         }
+        finally
+        {
+            orma_global_readLock.unlock();
+        }
     }
 
     public int count()
     {
         int ret = 0;
 
+        orma_global_readLock.lock();
         try
         {
-            this.sql_start = "SELECT count(*) as count FROM " + this.getClass().getSimpleName();
+            this.sql_start = "SELECT count(*) as count FROM \"" + this.getClass().getSimpleName() + "\"";
 
             final String sql = this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit;
             log_bindvars_where(sql, bind_where_count, bind_where_vars);
@@ -373,6 +386,10 @@ public class GroupDB
         {
             e.printStackTrace();
         }
+        finally
+        {
+            orma_global_readLock.unlock();
+        }
 
         return ret;
     }
@@ -405,7 +422,7 @@ public class GroupDB
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " group_identifier=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        this.sql_set = this.sql_set + " \"group_identifier\"=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
         bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, group_identifier));
         bind_set_count++;
         return this;
@@ -421,7 +438,7 @@ public class GroupDB
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " who_invited__tox_public_key_string=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        this.sql_set = this.sql_set + " \"who_invited__tox_public_key_string\"=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
         bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, who_invited__tox_public_key_string));
         bind_set_count++;
         return this;
@@ -437,7 +454,7 @@ public class GroupDB
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " name=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        this.sql_set = this.sql_set + " \"name\"=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
         bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, name));
         bind_set_count++;
         return this;
@@ -453,7 +470,7 @@ public class GroupDB
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " topic=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        this.sql_set = this.sql_set + " \"topic\"=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
         bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, topic));
         bind_set_count++;
         return this;
@@ -469,7 +486,7 @@ public class GroupDB
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " peer_count=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        this.sql_set = this.sql_set + " \"peer_count\"=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
         bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, peer_count));
         bind_set_count++;
         return this;
@@ -485,7 +502,7 @@ public class GroupDB
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " own_peer_number=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        this.sql_set = this.sql_set + " \"own_peer_number\"=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
         bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, own_peer_number));
         bind_set_count++;
         return this;
@@ -501,7 +518,7 @@ public class GroupDB
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " privacy_state=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        this.sql_set = this.sql_set + " \"privacy_state\"=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
         bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, privacy_state));
         bind_set_count++;
         return this;
@@ -517,7 +534,7 @@ public class GroupDB
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " tox_group_number=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        this.sql_set = this.sql_set + " \"tox_group_number\"=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
         bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, tox_group_number));
         bind_set_count++;
         return this;
@@ -533,7 +550,7 @@ public class GroupDB
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " group_active=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        this.sql_set = this.sql_set + " \"group_active\"=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
         bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, group_active));
         bind_set_count++;
         return this;
@@ -549,7 +566,7 @@ public class GroupDB
         {
             this.sql_set = this.sql_set + " , ";
         }
-        this.sql_set = this.sql_set + " notification_silent=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        this.sql_set = this.sql_set + " \"notification_silent\"=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
         bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, notification_silent));
         bind_set_count++;
         return this;
@@ -559,7 +576,7 @@ public class GroupDB
     // ----------------- Eq/Gt/Lt funcs ----------------- //
     public GroupDB group_identifierEq(String group_identifier)
     {
-        this.sql_where = this.sql_where + " and group_identifier=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"group_identifier\"=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, group_identifier));
         bind_where_count++;
         return this;
@@ -567,15 +584,27 @@ public class GroupDB
 
     public GroupDB group_identifierNotEq(String group_identifier)
     {
-        this.sql_where = this.sql_where + " and group_identifier<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"group_identifier\"<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, group_identifier));
         bind_where_count++;
         return this;
     }
 
+    public GroupDB group_identifierIsNull()
+    {
+        this.sql_where = this.sql_where + " and \"group_identifier\" IS NULL ";
+        return this;
+    }
+
+    public GroupDB group_identifierIsNotNull()
+    {
+        this.sql_where = this.sql_where + " and \"group_identifier\" IS NOT NULL ";
+        return this;
+    }
+
     public GroupDB group_identifierLike(String group_identifier)
     {
-        this.sql_where = this.sql_where + " and group_identifier LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        this.sql_where = this.sql_where + " and \"group_identifier\" LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, group_identifier));
         bind_where_count++;
         return this;
@@ -583,7 +612,7 @@ public class GroupDB
 
     public GroupDB group_identifierNotLike(String group_identifier)
     {
-        this.sql_where = this.sql_where + " and group_identifier NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        this.sql_where = this.sql_where + " and \"group_identifier\" NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, group_identifier));
         bind_where_count++;
         return this;
@@ -591,7 +620,7 @@ public class GroupDB
 
     public GroupDB who_invited__tox_public_key_stringEq(String who_invited__tox_public_key_string)
     {
-        this.sql_where = this.sql_where + " and who_invited__tox_public_key_string=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"who_invited__tox_public_key_string\"=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, who_invited__tox_public_key_string));
         bind_where_count++;
         return this;
@@ -599,15 +628,27 @@ public class GroupDB
 
     public GroupDB who_invited__tox_public_key_stringNotEq(String who_invited__tox_public_key_string)
     {
-        this.sql_where = this.sql_where + " and who_invited__tox_public_key_string<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"who_invited__tox_public_key_string\"<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, who_invited__tox_public_key_string));
         bind_where_count++;
         return this;
     }
 
+    public GroupDB who_invited__tox_public_key_stringIsNull()
+    {
+        this.sql_where = this.sql_where + " and \"who_invited__tox_public_key_string\" IS NULL ";
+        return this;
+    }
+
+    public GroupDB who_invited__tox_public_key_stringIsNotNull()
+    {
+        this.sql_where = this.sql_where + " and \"who_invited__tox_public_key_string\" IS NOT NULL ";
+        return this;
+    }
+
     public GroupDB who_invited__tox_public_key_stringLike(String who_invited__tox_public_key_string)
     {
-        this.sql_where = this.sql_where + " and who_invited__tox_public_key_string LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        this.sql_where = this.sql_where + " and \"who_invited__tox_public_key_string\" LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, who_invited__tox_public_key_string));
         bind_where_count++;
         return this;
@@ -615,7 +656,7 @@ public class GroupDB
 
     public GroupDB who_invited__tox_public_key_stringNotLike(String who_invited__tox_public_key_string)
     {
-        this.sql_where = this.sql_where + " and who_invited__tox_public_key_string NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        this.sql_where = this.sql_where + " and \"who_invited__tox_public_key_string\" NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, who_invited__tox_public_key_string));
         bind_where_count++;
         return this;
@@ -623,7 +664,7 @@ public class GroupDB
 
     public GroupDB nameEq(String name)
     {
-        this.sql_where = this.sql_where + " and name=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"name\"=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, name));
         bind_where_count++;
         return this;
@@ -631,15 +672,27 @@ public class GroupDB
 
     public GroupDB nameNotEq(String name)
     {
-        this.sql_where = this.sql_where + " and name<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"name\"<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, name));
         bind_where_count++;
         return this;
     }
 
+    public GroupDB nameIsNull()
+    {
+        this.sql_where = this.sql_where + " and \"name\" IS NULL ";
+        return this;
+    }
+
+    public GroupDB nameIsNotNull()
+    {
+        this.sql_where = this.sql_where + " and \"name\" IS NOT NULL ";
+        return this;
+    }
+
     public GroupDB nameLike(String name)
     {
-        this.sql_where = this.sql_where + " and name LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        this.sql_where = this.sql_where + " and \"name\" LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, name));
         bind_where_count++;
         return this;
@@ -647,7 +700,7 @@ public class GroupDB
 
     public GroupDB nameNotLike(String name)
     {
-        this.sql_where = this.sql_where + " and name NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        this.sql_where = this.sql_where + " and \"name\" NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, name));
         bind_where_count++;
         return this;
@@ -655,7 +708,7 @@ public class GroupDB
 
     public GroupDB topicEq(String topic)
     {
-        this.sql_where = this.sql_where + " and topic=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"topic\"=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, topic));
         bind_where_count++;
         return this;
@@ -663,15 +716,27 @@ public class GroupDB
 
     public GroupDB topicNotEq(String topic)
     {
-        this.sql_where = this.sql_where + " and topic<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"topic\"<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, topic));
         bind_where_count++;
         return this;
     }
 
+    public GroupDB topicIsNull()
+    {
+        this.sql_where = this.sql_where + " and \"topic\" IS NULL ";
+        return this;
+    }
+
+    public GroupDB topicIsNotNull()
+    {
+        this.sql_where = this.sql_where + " and \"topic\" IS NOT NULL ";
+        return this;
+    }
+
     public GroupDB topicLike(String topic)
     {
-        this.sql_where = this.sql_where + " and topic LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        this.sql_where = this.sql_where + " and \"topic\" LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, topic));
         bind_where_count++;
         return this;
@@ -679,7 +744,7 @@ public class GroupDB
 
     public GroupDB topicNotLike(String topic)
     {
-        this.sql_where = this.sql_where + " and topic NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        this.sql_where = this.sql_where + " and \"topic\" NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, topic));
         bind_where_count++;
         return this;
@@ -687,7 +752,7 @@ public class GroupDB
 
     public GroupDB peer_countEq(long peer_count)
     {
-        this.sql_where = this.sql_where + " and peer_count=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"peer_count\"=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, peer_count));
         bind_where_count++;
         return this;
@@ -695,7 +760,7 @@ public class GroupDB
 
     public GroupDB peer_countNotEq(long peer_count)
     {
-        this.sql_where = this.sql_where + " and peer_count<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"peer_count\"<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, peer_count));
         bind_where_count++;
         return this;
@@ -703,7 +768,7 @@ public class GroupDB
 
     public GroupDB peer_countLt(long peer_count)
     {
-        this.sql_where = this.sql_where + " and peer_count<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"peer_count\"<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, peer_count));
         bind_where_count++;
         return this;
@@ -711,7 +776,7 @@ public class GroupDB
 
     public GroupDB peer_countLe(long peer_count)
     {
-        this.sql_where = this.sql_where + " and peer_count<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"peer_count\"<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, peer_count));
         bind_where_count++;
         return this;
@@ -719,7 +784,7 @@ public class GroupDB
 
     public GroupDB peer_countGt(long peer_count)
     {
-        this.sql_where = this.sql_where + " and peer_count>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"peer_count\">?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, peer_count));
         bind_where_count++;
         return this;
@@ -727,7 +792,7 @@ public class GroupDB
 
     public GroupDB peer_countGe(long peer_count)
     {
-        this.sql_where = this.sql_where + " and peer_count>=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"peer_count\">=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, peer_count));
         bind_where_count++;
         return this;
@@ -735,7 +800,7 @@ public class GroupDB
 
     public GroupDB peer_countBetween(long peer_count1, long peer_count2)
     {
-        this.sql_where = this.sql_where + " and peer_count>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " and peer_count<?" + (BINDVAR_OFFSET_WHERE + 1 + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"peer_count\">?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " and peer_count<?" + (BINDVAR_OFFSET_WHERE + 1 + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, peer_count1));
         bind_where_count++;
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, peer_count2));
@@ -743,9 +808,21 @@ public class GroupDB
         return this;
     }
 
+    public GroupDB peer_countIsNull()
+    {
+        this.sql_where = this.sql_where + " and \"peer_count\" IS NULL ";
+        return this;
+    }
+
+    public GroupDB peer_countIsNotNull()
+    {
+        this.sql_where = this.sql_where + " and \"peer_count\" IS NOT NULL ";
+        return this;
+    }
+
     public GroupDB own_peer_numberEq(long own_peer_number)
     {
-        this.sql_where = this.sql_where + " and own_peer_number=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"own_peer_number\"=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, own_peer_number));
         bind_where_count++;
         return this;
@@ -753,7 +830,7 @@ public class GroupDB
 
     public GroupDB own_peer_numberNotEq(long own_peer_number)
     {
-        this.sql_where = this.sql_where + " and own_peer_number<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"own_peer_number\"<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, own_peer_number));
         bind_where_count++;
         return this;
@@ -761,7 +838,7 @@ public class GroupDB
 
     public GroupDB own_peer_numberLt(long own_peer_number)
     {
-        this.sql_where = this.sql_where + " and own_peer_number<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"own_peer_number\"<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, own_peer_number));
         bind_where_count++;
         return this;
@@ -769,7 +846,7 @@ public class GroupDB
 
     public GroupDB own_peer_numberLe(long own_peer_number)
     {
-        this.sql_where = this.sql_where + " and own_peer_number<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"own_peer_number\"<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, own_peer_number));
         bind_where_count++;
         return this;
@@ -777,7 +854,7 @@ public class GroupDB
 
     public GroupDB own_peer_numberGt(long own_peer_number)
     {
-        this.sql_where = this.sql_where + " and own_peer_number>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"own_peer_number\">?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, own_peer_number));
         bind_where_count++;
         return this;
@@ -785,7 +862,7 @@ public class GroupDB
 
     public GroupDB own_peer_numberGe(long own_peer_number)
     {
-        this.sql_where = this.sql_where + " and own_peer_number>=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"own_peer_number\">=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, own_peer_number));
         bind_where_count++;
         return this;
@@ -793,7 +870,7 @@ public class GroupDB
 
     public GroupDB own_peer_numberBetween(long own_peer_number1, long own_peer_number2)
     {
-        this.sql_where = this.sql_where + " and own_peer_number>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " and own_peer_number<?" + (BINDVAR_OFFSET_WHERE + 1 + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"own_peer_number\">?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " and own_peer_number<?" + (BINDVAR_OFFSET_WHERE + 1 + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, own_peer_number1));
         bind_where_count++;
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, own_peer_number2));
@@ -801,9 +878,21 @@ public class GroupDB
         return this;
     }
 
+    public GroupDB own_peer_numberIsNull()
+    {
+        this.sql_where = this.sql_where + " and \"own_peer_number\" IS NULL ";
+        return this;
+    }
+
+    public GroupDB own_peer_numberIsNotNull()
+    {
+        this.sql_where = this.sql_where + " and \"own_peer_number\" IS NOT NULL ";
+        return this;
+    }
+
     public GroupDB privacy_stateEq(int privacy_state)
     {
-        this.sql_where = this.sql_where + " and privacy_state=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"privacy_state\"=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, privacy_state));
         bind_where_count++;
         return this;
@@ -811,7 +900,7 @@ public class GroupDB
 
     public GroupDB privacy_stateNotEq(int privacy_state)
     {
-        this.sql_where = this.sql_where + " and privacy_state<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"privacy_state\"<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, privacy_state));
         bind_where_count++;
         return this;
@@ -819,7 +908,7 @@ public class GroupDB
 
     public GroupDB privacy_stateLt(int privacy_state)
     {
-        this.sql_where = this.sql_where + " and privacy_state<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"privacy_state\"<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, privacy_state));
         bind_where_count++;
         return this;
@@ -827,7 +916,7 @@ public class GroupDB
 
     public GroupDB privacy_stateLe(int privacy_state)
     {
-        this.sql_where = this.sql_where + " and privacy_state<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"privacy_state\"<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, privacy_state));
         bind_where_count++;
         return this;
@@ -835,7 +924,7 @@ public class GroupDB
 
     public GroupDB privacy_stateGt(int privacy_state)
     {
-        this.sql_where = this.sql_where + " and privacy_state>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"privacy_state\">?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, privacy_state));
         bind_where_count++;
         return this;
@@ -843,7 +932,7 @@ public class GroupDB
 
     public GroupDB privacy_stateGe(int privacy_state)
     {
-        this.sql_where = this.sql_where + " and privacy_state>=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"privacy_state\">=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, privacy_state));
         bind_where_count++;
         return this;
@@ -851,7 +940,7 @@ public class GroupDB
 
     public GroupDB privacy_stateBetween(int privacy_state1, int privacy_state2)
     {
-        this.sql_where = this.sql_where + " and privacy_state>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " and privacy_state<?" + (BINDVAR_OFFSET_WHERE + 1 + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"privacy_state\">?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " and privacy_state<?" + (BINDVAR_OFFSET_WHERE + 1 + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, privacy_state1));
         bind_where_count++;
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Int, privacy_state2));
@@ -859,9 +948,21 @@ public class GroupDB
         return this;
     }
 
+    public GroupDB privacy_stateIsNull()
+    {
+        this.sql_where = this.sql_where + " and \"privacy_state\" IS NULL ";
+        return this;
+    }
+
+    public GroupDB privacy_stateIsNotNull()
+    {
+        this.sql_where = this.sql_where + " and \"privacy_state\" IS NOT NULL ";
+        return this;
+    }
+
     public GroupDB tox_group_numberEq(long tox_group_number)
     {
-        this.sql_where = this.sql_where + " and tox_group_number=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"tox_group_number\"=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, tox_group_number));
         bind_where_count++;
         return this;
@@ -869,7 +970,7 @@ public class GroupDB
 
     public GroupDB tox_group_numberNotEq(long tox_group_number)
     {
-        this.sql_where = this.sql_where + " and tox_group_number<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"tox_group_number\"<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, tox_group_number));
         bind_where_count++;
         return this;
@@ -877,7 +978,7 @@ public class GroupDB
 
     public GroupDB tox_group_numberLt(long tox_group_number)
     {
-        this.sql_where = this.sql_where + " and tox_group_number<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"tox_group_number\"<?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, tox_group_number));
         bind_where_count++;
         return this;
@@ -885,7 +986,7 @@ public class GroupDB
 
     public GroupDB tox_group_numberLe(long tox_group_number)
     {
-        this.sql_where = this.sql_where + " and tox_group_number<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"tox_group_number\"<=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, tox_group_number));
         bind_where_count++;
         return this;
@@ -893,7 +994,7 @@ public class GroupDB
 
     public GroupDB tox_group_numberGt(long tox_group_number)
     {
-        this.sql_where = this.sql_where + " and tox_group_number>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"tox_group_number\">?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, tox_group_number));
         bind_where_count++;
         return this;
@@ -901,7 +1002,7 @@ public class GroupDB
 
     public GroupDB tox_group_numberGe(long tox_group_number)
     {
-        this.sql_where = this.sql_where + " and tox_group_number>=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"tox_group_number\">=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, tox_group_number));
         bind_where_count++;
         return this;
@@ -909,7 +1010,7 @@ public class GroupDB
 
     public GroupDB tox_group_numberBetween(long tox_group_number1, long tox_group_number2)
     {
-        this.sql_where = this.sql_where + " and tox_group_number>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " and tox_group_number<?" + (BINDVAR_OFFSET_WHERE + 1 + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"tox_group_number\">?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " and tox_group_number<?" + (BINDVAR_OFFSET_WHERE + 1 + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, tox_group_number1));
         bind_where_count++;
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Long, tox_group_number2));
@@ -917,9 +1018,21 @@ public class GroupDB
         return this;
     }
 
+    public GroupDB tox_group_numberIsNull()
+    {
+        this.sql_where = this.sql_where + " and \"tox_group_number\" IS NULL ";
+        return this;
+    }
+
+    public GroupDB tox_group_numberIsNotNull()
+    {
+        this.sql_where = this.sql_where + " and \"tox_group_number\" IS NOT NULL ";
+        return this;
+    }
+
     public GroupDB group_activeEq(boolean group_active)
     {
-        this.sql_where = this.sql_where + " and group_active=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"group_active\"=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, group_active));
         bind_where_count++;
         return this;
@@ -927,15 +1040,27 @@ public class GroupDB
 
     public GroupDB group_activeNotEq(boolean group_active)
     {
-        this.sql_where = this.sql_where + " and group_active<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"group_active\"<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, group_active));
         bind_where_count++;
         return this;
     }
 
+    public GroupDB group_activeIsNull()
+    {
+        this.sql_where = this.sql_where + " and \"group_active\" IS NULL ";
+        return this;
+    }
+
+    public GroupDB group_activeIsNotNull()
+    {
+        this.sql_where = this.sql_where + " and \"group_active\" IS NOT NULL ";
+        return this;
+    }
+
     public GroupDB notification_silentEq(boolean notification_silent)
     {
-        this.sql_where = this.sql_where + " and notification_silent=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"notification_silent\"=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, notification_silent));
         bind_where_count++;
         return this;
@@ -943,9 +1068,21 @@ public class GroupDB
 
     public GroupDB notification_silentNotEq(boolean notification_silent)
     {
-        this.sql_where = this.sql_where + " and notification_silent<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        this.sql_where = this.sql_where + " and \"notification_silent\"<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
         bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_Boolean, notification_silent));
         bind_where_count++;
+        return this;
+    }
+
+    public GroupDB notification_silentIsNull()
+    {
+        this.sql_where = this.sql_where + " and \"notification_silent\" IS NULL ";
+        return this;
+    }
+
+    public GroupDB notification_silentIsNotNull()
+    {
+        this.sql_where = this.sql_where + " and \"notification_silent\" IS NOT NULL ";
         return this;
     }
 
@@ -961,7 +1098,7 @@ public class GroupDB
         {
             this.sql_orderby = this.sql_orderby + " , ";
         }
-        this.sql_orderby = this.sql_orderby + " group_identifier ASC ";
+        this.sql_orderby = this.sql_orderby + " \"group_identifier\" ASC ";
         return this;
     }
 
@@ -975,7 +1112,7 @@ public class GroupDB
         {
             this.sql_orderby = this.sql_orderby + " , ";
         }
-        this.sql_orderby = this.sql_orderby + " group_identifier DESC ";
+        this.sql_orderby = this.sql_orderby + " \"group_identifier\" DESC ";
         return this;
     }
 
@@ -989,7 +1126,7 @@ public class GroupDB
         {
             this.sql_orderby = this.sql_orderby + " , ";
         }
-        this.sql_orderby = this.sql_orderby + " who_invited__tox_public_key_string ASC ";
+        this.sql_orderby = this.sql_orderby + " \"who_invited__tox_public_key_string\" ASC ";
         return this;
     }
 
@@ -1003,7 +1140,7 @@ public class GroupDB
         {
             this.sql_orderby = this.sql_orderby + " , ";
         }
-        this.sql_orderby = this.sql_orderby + " who_invited__tox_public_key_string DESC ";
+        this.sql_orderby = this.sql_orderby + " \"who_invited__tox_public_key_string\" DESC ";
         return this;
     }
 
@@ -1017,7 +1154,7 @@ public class GroupDB
         {
             this.sql_orderby = this.sql_orderby + " , ";
         }
-        this.sql_orderby = this.sql_orderby + " name ASC ";
+        this.sql_orderby = this.sql_orderby + " \"name\" ASC ";
         return this;
     }
 
@@ -1031,7 +1168,7 @@ public class GroupDB
         {
             this.sql_orderby = this.sql_orderby + " , ";
         }
-        this.sql_orderby = this.sql_orderby + " name DESC ";
+        this.sql_orderby = this.sql_orderby + " \"name\" DESC ";
         return this;
     }
 
@@ -1045,7 +1182,7 @@ public class GroupDB
         {
             this.sql_orderby = this.sql_orderby + " , ";
         }
-        this.sql_orderby = this.sql_orderby + " topic ASC ";
+        this.sql_orderby = this.sql_orderby + " \"topic\" ASC ";
         return this;
     }
 
@@ -1059,7 +1196,7 @@ public class GroupDB
         {
             this.sql_orderby = this.sql_orderby + " , ";
         }
-        this.sql_orderby = this.sql_orderby + " topic DESC ";
+        this.sql_orderby = this.sql_orderby + " \"topic\" DESC ";
         return this;
     }
 
@@ -1073,7 +1210,7 @@ public class GroupDB
         {
             this.sql_orderby = this.sql_orderby + " , ";
         }
-        this.sql_orderby = this.sql_orderby + " peer_count ASC ";
+        this.sql_orderby = this.sql_orderby + " \"peer_count\" ASC ";
         return this;
     }
 
@@ -1087,7 +1224,7 @@ public class GroupDB
         {
             this.sql_orderby = this.sql_orderby + " , ";
         }
-        this.sql_orderby = this.sql_orderby + " peer_count DESC ";
+        this.sql_orderby = this.sql_orderby + " \"peer_count\" DESC ";
         return this;
     }
 
@@ -1101,7 +1238,7 @@ public class GroupDB
         {
             this.sql_orderby = this.sql_orderby + " , ";
         }
-        this.sql_orderby = this.sql_orderby + " own_peer_number ASC ";
+        this.sql_orderby = this.sql_orderby + " \"own_peer_number\" ASC ";
         return this;
     }
 
@@ -1115,7 +1252,7 @@ public class GroupDB
         {
             this.sql_orderby = this.sql_orderby + " , ";
         }
-        this.sql_orderby = this.sql_orderby + " own_peer_number DESC ";
+        this.sql_orderby = this.sql_orderby + " \"own_peer_number\" DESC ";
         return this;
     }
 
@@ -1129,7 +1266,7 @@ public class GroupDB
         {
             this.sql_orderby = this.sql_orderby + " , ";
         }
-        this.sql_orderby = this.sql_orderby + " privacy_state ASC ";
+        this.sql_orderby = this.sql_orderby + " \"privacy_state\" ASC ";
         return this;
     }
 
@@ -1143,7 +1280,7 @@ public class GroupDB
         {
             this.sql_orderby = this.sql_orderby + " , ";
         }
-        this.sql_orderby = this.sql_orderby + " privacy_state DESC ";
+        this.sql_orderby = this.sql_orderby + " \"privacy_state\" DESC ";
         return this;
     }
 
@@ -1157,7 +1294,7 @@ public class GroupDB
         {
             this.sql_orderby = this.sql_orderby + " , ";
         }
-        this.sql_orderby = this.sql_orderby + " tox_group_number ASC ";
+        this.sql_orderby = this.sql_orderby + " \"tox_group_number\" ASC ";
         return this;
     }
 
@@ -1171,7 +1308,7 @@ public class GroupDB
         {
             this.sql_orderby = this.sql_orderby + " , ";
         }
-        this.sql_orderby = this.sql_orderby + " tox_group_number DESC ";
+        this.sql_orderby = this.sql_orderby + " \"tox_group_number\" DESC ";
         return this;
     }
 
@@ -1185,7 +1322,7 @@ public class GroupDB
         {
             this.sql_orderby = this.sql_orderby + " , ";
         }
-        this.sql_orderby = this.sql_orderby + " group_active ASC ";
+        this.sql_orderby = this.sql_orderby + " \"group_active\" ASC ";
         return this;
     }
 
@@ -1199,7 +1336,7 @@ public class GroupDB
         {
             this.sql_orderby = this.sql_orderby + " , ";
         }
-        this.sql_orderby = this.sql_orderby + " group_active DESC ";
+        this.sql_orderby = this.sql_orderby + " \"group_active\" DESC ";
         return this;
     }
 
@@ -1213,7 +1350,7 @@ public class GroupDB
         {
             this.sql_orderby = this.sql_orderby + " , ";
         }
-        this.sql_orderby = this.sql_orderby + " notification_silent ASC ";
+        this.sql_orderby = this.sql_orderby + " \"notification_silent\" ASC ";
         return this;
     }
 
@@ -1227,7 +1364,7 @@ public class GroupDB
         {
             this.sql_orderby = this.sql_orderby + " , ";
         }
-        this.sql_orderby = this.sql_orderby + " notification_silent DESC ";
+        this.sql_orderby = this.sql_orderby + " \"notification_silent\" DESC ";
         return this;
     }
 
