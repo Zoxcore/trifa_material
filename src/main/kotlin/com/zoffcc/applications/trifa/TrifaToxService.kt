@@ -145,12 +145,10 @@ class TrifaToxService
                 catch(_: Exception)
                 {
                 }
-                Log.i(TAG, "XXXXX:checkpoint:001=" + OrmaDatabase.run_query_for_single_result("PRAGMA wal_checkpoint(TRUNCATE);"))
                 clear_friends()
                 load_friends()
                 clear_groups()
                 load_groups()
-                Log.i(TAG, "XXXXX:checkpoint:001=" + OrmaDatabase.run_query_for_single_result("PRAGMA wal_checkpoint(TRUNCATE);"))
                 // --------------- bootstrap ---------------
                 // --------------- bootstrap ---------------
                 // --------------- bootstrap ---------------
@@ -417,6 +415,20 @@ class TrifaToxService
             }
         }
         (ToxServiceThread as Thread).start()
+    }
+
+    fun wal_checkpoint()
+    {
+        OrmaDatabase.orma_global_writeLock.lock()
+        try
+        {
+            Thread.sleep(10)
+            Log.i(TAG, "XXXXX:checkpoint:001=" + OrmaDatabase.run_query_for_single_result("PRAGMA wal_checkpoint(TRUNCATE);"))
+        }
+        finally
+        {
+            OrmaDatabase.orma_global_writeLock.unlock()
+        }
     }
 
     fun tox_audio_play_thread_start()
@@ -1351,7 +1363,6 @@ class TrifaToxService
     {
         tox_self_get_friend_list()?.forEach {
             // Log.i(TAG, "friend:" + it)
-
             var f: FriendList? = null
             val f_pubkey = tox_friend_get_public_key(it)
             var fl: MutableList<FriendList>? = null
