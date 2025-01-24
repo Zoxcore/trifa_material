@@ -656,7 +656,7 @@ public class OrmaDatabase
             Log.i(TAG, "INIT:setting journal_size_limit");
 
             // set wal_autocheckpoint
-            final String set_wal_autocheckpoint = "PRAGMA wal_autocheckpoint = 100;";
+            final String set_wal_autocheckpoint = "PRAGMA wal_autocheckpoint = 1000;";
             run_multi_sql(set_wal_autocheckpoint);
             Log.i(TAG, "INIT:setting wal_autocheckpoint");
 
