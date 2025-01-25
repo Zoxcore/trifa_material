@@ -9,6 +9,13 @@
                     Log.i(TAG, "long running (" + (t4 - t3)+ " ms) fetch=" + sql);
                 }
             }
+            try
+            {
+                rs.close();
+            }
+            catch (Exception ignored)
+            {
+            }
 
             try
             {

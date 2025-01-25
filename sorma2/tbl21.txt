@@ -72,6 +72,13 @@
             {
                 ret = rs.getInt("count");
             }
+            try
+            {
+                rs.close();
+            }
+            catch (Exception ignored)
+            {
+            }
 
             try
             {
