@@ -114,6 +114,13 @@ public class TRIFADatabaseGlobalsNew
                     Log.i(TAG, "long running (" + (t4 - t3)+ " ms) fetch=" + sql);
                 }
             }
+            try
+            {
+                rs.close();
+            }
+            catch (Exception ignored)
+            {
+            }
 
             try
             {
@@ -302,6 +309,13 @@ public class TRIFADatabaseGlobalsNew
             if (rs.next())
             {
                 ret = rs.getInt("count");
+            }
+            try
+            {
+                rs.close();
+            }
+            catch (Exception ignored)
+            {
             }
 
             try
