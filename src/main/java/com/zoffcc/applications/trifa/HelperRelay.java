@@ -67,24 +67,8 @@ public class HelperRelay
         try
         {
             String ret = null;
-            Statement statement = OrmaDatabase.getSqldb().createStatement();
-
-            ResultSet rs = statement.executeQuery(
-                    "select tox_public_key_string from RelayListDB where own_relay='0' and tox_public_key_string_of_owner='" +
-                            s(friend_pubkey) + "'");
-            if (rs.next())
-            {
-                ret = rs.getString("tox_public_key_string");
-            }
-
-            try
-            {
-                statement.close();
-            }
-            catch (Exception ignored)
-            {
-            }
-
+            ret = TrifaToxService.Companion.getOrma().selectFromRelayListDB().
+                    own_relayEq(false).tox_public_key_string_of_ownerEq(friend_pubkey).get(0).tox_public_key_string;
             return ret;
         }
         catch (Exception e)
@@ -157,35 +141,15 @@ public class HelperRelay
     {
         try
         {
-            Statement statement = OrmaDatabase.getSqldb().createStatement();
-            ResultSet rs = statement.executeQuery(
-                    "select count(*) as count from FriendList where tox_public_key_string='" +
-                            s(friend_pubkey.toUpperCase()) +
-                            "' and is_relay='1'");
-            if (rs.next())
+            int count = TrifaToxService.Companion.getOrma().selectFromFriendList().
+                    tox_public_key_stringEq(friend_pubkey.toUpperCase()).
+                    is_relay(true).count();
+            if (count > 0)
             {
-                int count = rs.getInt("count");
-                if (count > 0)
-                {
-                    try
-                    {
-                        statement.close();
-                    }
-                    catch (Exception ignored)
-                    {
-                    }
-                    return true;
-                }
+                return true;
             }
             else
             {
-                try
-                {
-                    statement.close();
-                }
-                catch (Exception ignored)
-                {
-                }
                 return false;
             }
         }
@@ -193,8 +157,6 @@ public class HelperRelay
         {
             return false;
         }
-
-        return false;
     }
 
     public static boolean have_own_relay()

@@ -390,26 +390,13 @@ public class HelperFiletransfer {
             long ft_id = -1;
             try
             {
-                Statement statement = sqldb.createStatement();
-                ResultSet rs = statement.executeQuery("SELECT id FROM Filetransfer where rowid='" + row_id + "'");
-                if (rs.next())
-                {
-                    ft_id = rs.getLong("id");
-                }
-
-                try
-                {
-                    statement.close();
-                }
-                catch (Exception ignored)
-                {
-                }
+                ft_id = TrifaToxService.Companion.getOrma().selectFromFiletransfer().
+                        idEq(row_id).toList().get(0).id;
             }
             catch (Exception e)
             {
                 e.printStackTrace();
             }
-
             return ft_id;
         }
         catch (Exception e)
