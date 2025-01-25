@@ -419,15 +419,12 @@ class TrifaToxService
 
     fun wal_checkpoint()
     {
-        OrmaDatabase.orma_global_writeLock.lock()
         try
         {
-            Thread.sleep(10)
-            Log.i(TAG, "XXXXX:checkpoint:001=" + OrmaDatabase.run_query_for_single_result("PRAGMA wal_checkpoint(TRUNCATE);"))
+            // Log.i(TAG, "XXXXX:checkpoint:001=" + OrmaDatabase.run_query_for_single_result("PRAGMA busy_timeout = 10; PRAGMA wal_checkpoint(TRUNCATE);"))
         }
-        finally
+        catch(_: Exception)
         {
-            OrmaDatabase.orma_global_writeLock.unlock()
         }
     }
 
