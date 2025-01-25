@@ -21,6 +21,9 @@ version = "1.0.49"
 val appName = "trifa_material"
 
 repositories {
+    flatDir {
+        dirs("customlibs")
+    }
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     google()
@@ -88,6 +91,7 @@ dependencies {
     implementation(compose.materialIconsExtended)
     //
     //
+    //**//implementation(":sqlite-jdbc:3.48.0.1-SNAPSHOT")
     implementation("org.xerial:sqlite-jdbc:3.48.0.0")
     implementation("ca.gosyer:kotlin-multiplatform-appdirs:1.2.0")
     implementation("com.sksamuel.scrimage:scrimage-core:4.3.0")
