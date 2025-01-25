@@ -23,7 +23,6 @@ import com.zoffcc.applications.trifa.Log;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -160,6 +159,13 @@ public class GroupDB
                     Log.i(TAG, "long running (" + (t4 - t3)+ " ms) fetch=" + sql);
                 }
             }
+            try
+            {
+                rs.close();
+            }
+            catch (Exception ignored)
+            {
+            }
 
             try
             {
@@ -187,10 +193,10 @@ public class GroupDB
         long ret = -1;
 
         orma_global_sqlinsert_lock.lock();
+        PreparedStatement insert_pstmt = null;
         try
         {
             String insert_pstmt_sql = null;
-            PreparedStatement insert_pstmt = null;
 
             // @formatter:off
             insert_pstmt_sql ="insert into \"" + this.getClass().getSimpleName() + "\"" +
@@ -288,6 +294,13 @@ public class GroupDB
         }
         catch (Exception e)
         {
+            try
+            {
+                insert_pstmt.close();
+            }
+            catch(Exception ignored)
+            {
+            }
             orma_semaphore_lastrowid_on_insert.release();
             throw new RuntimeException(e);
         }
@@ -372,6 +385,13 @@ public class GroupDB
             if (rs.next())
             {
                 ret = rs.getInt("count");
+            }
+            try
+            {
+                rs.close();
+            }
+            catch (Exception ignored)
+            {
             }
 
             try

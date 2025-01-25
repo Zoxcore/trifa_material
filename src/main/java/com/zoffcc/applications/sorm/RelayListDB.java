@@ -147,6 +147,13 @@ public class RelayListDB
                     Log.i(TAG, "long running (" + (t4 - t3)+ " ms) fetch=" + sql);
                 }
             }
+            try
+            {
+                rs.close();
+            }
+            catch (Exception ignored)
+            {
+            }
 
             try
             {
@@ -347,6 +354,13 @@ public class RelayListDB
             if (rs.next())
             {
                 ret = rs.getInt("count");
+            }
+            try
+            {
+                rs.close();
+            }
+            catch (Exception ignored)
+            {
             }
 
             try

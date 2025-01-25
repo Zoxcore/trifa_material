@@ -44,7 +44,7 @@ public class OrmaDatabase
     // --- read locks ---
     //
     // --- write locks ---
-    static final Lock orma_global_sqlfreehand_lock = orma_global_writeLock;
+    static final Lock orma_global_sqlfreehand_lock = orma_global_readLock;
     // --- write locks ---
     //
 
@@ -257,6 +257,14 @@ public class OrmaDatabase
             {
                 ret = rs.getString(1);
             }
+            try
+            {
+                rs.close();
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
 
             try
             {
@@ -294,6 +302,14 @@ public class OrmaDatabase
             if (rs.next())
             {
                 ret = rs.getInt("db_version");
+            }
+            try
+            {
+                rs.close();
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
             }
 
             try
@@ -761,23 +777,26 @@ public class OrmaDatabase
         {
             Statement statement = null;
 
-            try
-            {
-                statement = sqldb.createStatement();
-                statement.setQueryTimeout(10);  // set timeout to x sec.
-            }
-            catch (SQLException e)
-            {
-                System.err.println(e.getMessage());
-                Log.i(TAG, "ERR:MS:001:" + e.getMessage());
-            }
-
             String[] queries = sql_multi.split(";");
             for (String query : queries)
             {
                 try
                 {
-                    // Log.i(TAG, "SQL:" + query);
+                    statement = sqldb.createStatement();
+                    statement.setQueryTimeout(10);  // set timeout to x sec.
+                }
+                catch (SQLException e)
+                {
+                    System.err.println(e.getMessage());
+                    Log.i(TAG, "ERR:MS:001:" + e.getMessage());
+                }
+
+                try
+                {
+                    if (ORMA_TRACE)
+                    {
+                        Log.i(TAG, "sql=" + query);
+                    }
                     statement.executeUpdate(query);
                 }
                 catch (SQLException e)
@@ -785,15 +804,15 @@ public class OrmaDatabase
                     System.err.println(e.getMessage());
                     Log.i(TAG, "ERR:MS:002:" + e.getMessage());
                 }
-            }
 
-            try
-            {
-                statement.close();
-            }
-            catch (Exception e)
-            {
-                Log.i(TAG, "ERR:MS:003:" + e.getMessage());
+                try
+                {
+                    statement.close();
+                }
+                catch (Exception e)
+                {
+                    Log.i(TAG, "ERR:MS:003:" + e.getMessage());
+                }
             }
         }
         catch (Exception e)
@@ -815,43 +834,47 @@ public class OrmaDatabase
         {
             Statement statement = null;
 
-            try
+            String[] queries = sql_multi.split(";");
+            for (String query : queries)
             {
-                statement = sqldb.createStatement();
-                statement.setQueryTimeout(10);  // set timeout to x sec.
-            }
-            catch (SQLException e)
-            {
-                System.err.println(e.getMessage());
-                Log.i(TAG, "ERR:QSL:001:" + e.getMessage());
-            }
-
-            try
-            {
-                String[] queries = sql_multi.split(";");
-                for (String query : queries)
+                try
                 {
-                    // Log.i(TAG, "SQL:" + query);
+                    statement = sqldb.createStatement();
+                    statement.setQueryTimeout(10);  // set timeout to x sec.
+                }
+                catch (SQLException e)
+                {
+                    System.err.println(e.getMessage());
+                    Log.i(TAG, "ERR:QSL:001:" + e.getMessage());
+                }
+
+                try
+                {
+                    if (ORMA_TRACE)
+                    {
+                        Log.i(TAG, "sql=" + query);
+                    }
                     ResultSet rs = statement.executeQuery(query);
                     if (rs.next())
                     {
                         text_result = rs.getObject(1).toString();
                     }
+                    rs.close();
                 }
-            }
-            catch (SQLException e)
-            {
-                System.err.println(e.getMessage());
-                Log.i(TAG, "ERR:QSL:002:" + e.getMessage());
-            }
+                catch (SQLException e)
+                {
+                    System.err.println(e.getMessage());
+                    Log.i(TAG, "ERR:QSL:002:" + e.getMessage());
+                }
 
-            try
-            {
-                statement.close();
-            }
-            catch (Exception e)
-            {
-                Log.i(TAG, "ERR:QSL:003:" + e.getMessage());
+                try
+                {
+                    statement.close();
+                }
+                catch (Exception e)
+                {
+                    Log.i(TAG, "ERR:QSL:003:" + e.getMessage());
+                }
             }
         }
         catch (Exception e)
