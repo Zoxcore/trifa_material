@@ -129,12 +129,13 @@ public class ConferenceMessage
     {
         List<ConferenceMessage> list = new ArrayList<>();
         orma_global_sqltolist_lock.lock();
+        PreparedStatement statement = null;
         try
         {
             final String sql = this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit;
             log_bindvars_where(sql, bind_where_count, bind_where_vars);
             final long t1 = System.currentTimeMillis();
-            PreparedStatement statement = sqldb.prepareStatement(sql);
+            statement = sqldb.prepareStatement(sql);
             if (!set_bindvars_where(statement, bind_where_count, bind_where_vars))
             {
                 try
@@ -202,10 +203,18 @@ public class ConferenceMessage
         }
         catch (Exception e)
         {
+            Log.i(TAG, "ERR:toList:001:" + e.getMessage());
             e.printStackTrace();
         }
         finally
         {
+            try
+            {
+                statement.close();
+            }
+            catch (Exception ignored)
+            {
+            }
             orma_global_sqltolist_lock.unlock();
         }
 
@@ -218,10 +227,10 @@ public class ConferenceMessage
         long ret = -1;
 
         orma_global_sqlinsert_lock.lock();
+        PreparedStatement insert_pstmt = null;
         try
         {
             String insert_pstmt_sql = null;
-            PreparedStatement insert_pstmt = null;
 
             // @formatter:off
             insert_pstmt_sql ="insert into \"" + this.getClass().getSimpleName() + "\"" +
@@ -329,10 +338,18 @@ public class ConferenceMessage
         catch (Exception e)
         {
             orma_semaphore_lastrowid_on_insert.release();
+            Log.i(TAG, "ERR:insert:001:" + e.getMessage());
             throw new RuntimeException(e);
         }
         finally
         {
+            try
+            {
+                insert_pstmt.close();
+            }
+            catch (Exception ignored)
+            {
+            }
             orma_global_sqlinsert_lock.unlock();
         }
 
@@ -348,11 +365,12 @@ public class ConferenceMessage
     public void execute()
     {
         orma_global_sqlexecute_lock.lock();
+        PreparedStatement statement = null;
         try
         {
             final String sql = this.sql_start + " " + this.sql_set + " " + this.sql_where;
             log_bindvars_where_and_set(sql, bind_where_count, bind_where_vars, bind_set_count, bind_set_vars);
-            PreparedStatement statement = sqldb.prepareStatement(sql);
+            statement = sqldb.prepareStatement(sql);
             if (!set_bindvars_where_and_set(statement, bind_where_count, bind_where_vars, bind_set_count, bind_set_vars))
             {
                 try
@@ -376,11 +394,18 @@ public class ConferenceMessage
         }
         catch (Exception e2)
         {
+            Log.i(TAG, "ERR:execute:001:" + e2.getMessage());
             e2.printStackTrace();
-            Log.i(TAG, "EE1:" + e2.getMessage());
         }
         finally
         {
+            try
+            {
+                statement.close();
+            }
+            catch (Exception ignored)
+            {
+            }
             orma_global_sqlexecute_lock.unlock();
         }
     }
@@ -390,13 +415,14 @@ public class ConferenceMessage
         int ret = 0;
 
         orma_global_sqlcount_lock.lock();
+        PreparedStatement statement = null;
         try
         {
             this.sql_start = "SELECT count(*) as count FROM \"" + this.getClass().getSimpleName() + "\"";
 
             final String sql = this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit;
             log_bindvars_where(sql, bind_where_count, bind_where_vars);
-            PreparedStatement statement = sqldb.prepareStatement(sql);
+            statement = sqldb.prepareStatement(sql);
             if (!set_bindvars_where(statement, bind_where_count, bind_where_vars))
             {
                 try
@@ -431,10 +457,18 @@ public class ConferenceMessage
         }
         catch (Exception e)
         {
+            Log.i(TAG, "ERR:count:001:" + e.getMessage());
             e.printStackTrace();
         }
         finally
         {
+            try
+            {
+                statement.close();
+            }
+            catch (Exception ignored)
+            {
+            }
             orma_global_sqlcount_lock.unlock();
         }
 
