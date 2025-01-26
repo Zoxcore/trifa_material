@@ -19,7 +19,7 @@ import com.zoffcc.applications.sorm.Log;
 
 public class OrmaDatabase
 {
-    private static final String TAG = "trifa.OrmaDatabase";
+    private static final String TAG = "sorm.OrmaDatabase";
     final static boolean ORMA_TRACE = false; // set "false" for release builds
     final static boolean ORMA_LONG_RUNNING_TRACE = true; // set "false" for release builds
     final static long ORMA_LONG_RUNNING_MS = 180;
@@ -44,7 +44,7 @@ public class OrmaDatabase
     // --- read locks ---
     //
     // --- write locks ---
-    static final Lock orma_global_sqlfreehand_lock = orma_global_readLock;
+    static final Lock orma_global_sqlfreehand_lock = orma_global_writeLock;
     // --- write locks ---
     //
 
@@ -157,20 +157,34 @@ public class OrmaDatabase
         {
             long ret = -1;
             PreparedStatement lastrowid_pstmt = sqldb.prepareStatement("select last_insert_rowid() as lastrowid");
-            ResultSet rs = lastrowid_pstmt.executeQuery();
-            if (rs.next())
+            try
             {
-                ret = rs.getLong("lastrowid");
+                ResultSet rs = lastrowid_pstmt.executeQuery();
+                if (rs.next())
+                {
+                    ret = rs.getLong("lastrowid");
+                }
+                rs.close();
+                lastrowid_pstmt.close();
+                // Log.i(TAG, "get_last_rowid_pstmt:ret=" + ret);
             }
-            rs.close();
-            lastrowid_pstmt.close();
-            // Log.i(TAG, "get_last_rowid_pstmt:ret=" + ret);
+            catch(Exception e3)
+            {
+                Log.i(TAG, "ERR:GLRI:001:" + e3.getMessage());
+                try
+                {
+                    lastrowid_pstmt.close();
+                }
+                catch(Exception e4)
+                {
+                }
+            }
             return ret;
         }
         catch (Exception e)
         {
             e.printStackTrace();
-            Log.i(TAG, "get_last_rowid_pstmt:EE1:" + e.getMessage());
+            Log.i(TAG, "ERR:GLRI:002:" + e.getMessage());
             return -1;
         }
         finally
@@ -249,9 +263,10 @@ public class OrmaDatabase
         String ret = "unknown";
 
         orma_global_sqlfreehand_lock.lock();
+        Statement statement = null;
         try
         {
-            final Statement statement = sqldb.createStatement();
+            statement = sqldb.createStatement();
             final ResultSet rs = statement.executeQuery("SELECT sqlite_version()");
             if (rs.next())
             {
@@ -263,9 +278,18 @@ public class OrmaDatabase
             }
             catch (Exception e)
             {
+                Log.i(TAG, "ERR:CSQLV:001:" + e.getMessage());
                 e.printStackTrace();
             }
-
+            return ret;
+        }
+        catch (Exception e)
+        {
+            Log.i(TAG, "ERR:CSQLV:002:" + e.getMessage());
+            e.printStackTrace();
+        }
+        finally
+        {
             try
             {
                 statement.close();
@@ -274,15 +298,6 @@ public class OrmaDatabase
             {
                 e.printStackTrace();
             }
-
-            return ret;
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-        finally
-        {
             orma_global_sqlfreehand_lock.unlock();
         }
 
@@ -294,9 +309,10 @@ public class OrmaDatabase
         int ret = 0;
 
         orma_global_sqlfreehand_lock.lock();
+        Statement statement = null;
         try
         {
-            Statement statement = sqldb.createStatement();
+            statement = sqldb.createStatement();
             ResultSet rs = statement.executeQuery(
                     "select db_version from orma_schema order by db_version desc limit 1");
             if (rs.next())
@@ -309,6 +325,7 @@ public class OrmaDatabase
             }
             catch (Exception e)
             {
+                Log.i(TAG, "ERR:CDBV:001:" + e.getMessage());
                 e.printStackTrace();
             }
 
@@ -316,14 +333,24 @@ public class OrmaDatabase
             {
                 statement.close();
             }
-            catch (Exception ignored)
+            catch (Exception e)
             {
+                Log.i(TAG, "ERR:CDBV:002:" + e.getMessage());
             }
 
             return ret;
         }
         catch (Exception e)
         {
+            try
+            {
+                statement.close();
+            }
+            catch (Exception e2)
+            {
+                e2.printStackTrace();
+            }
+
             ret = 0;
 
             try
@@ -335,11 +362,20 @@ public class OrmaDatabase
             }
             catch (Exception e2)
             {
+                Log.i(TAG, "ERR:CDBV:003:" + e2.getMessage());
                 e2.printStackTrace();
             }
         }
         finally
         {
+            try
+            {
+                statement.close();
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
             orma_global_sqlfreehand_lock.unlock();
         }
 
@@ -356,6 +392,7 @@ public class OrmaDatabase
         }
         catch (Exception e2)
         {
+            Log.i(TAG, "ERR:SNDBV:001:" + e2.getMessage());
             e2.printStackTrace();
         }
         finally
@@ -657,8 +694,8 @@ public class OrmaDatabase
         }
         catch (Exception e2)
         {
+            Log.i(TAG, "ERR:SHUTDOWN:001:" + e2.getMessage());
             e2.printStackTrace();
-            Log.i(TAG, "SHUTDOWN:Error:" + e2.getMessage());
         }
         Log.i(TAG, "SHUTDOWN:finished");
     }
@@ -674,8 +711,8 @@ public class OrmaDatabase
         }
         catch (Exception e)
         {
+            Log.i(TAG, "ERR:INIT:001:" + e.getMessage());
             e.printStackTrace();
-            Log.i(TAG, "INIT:R_Error:" + e.getMessage());
         }
 
         if (OrmaDatabase.wal_mode)
@@ -762,9 +799,9 @@ public class OrmaDatabase
         }
         catch (Exception e)
         {
+            Log.i(TAG, "ERR:CRDB:001:" + e.getMessage());
             e.printStackTrace();
         }
-
     }
 
     /*
@@ -785,9 +822,8 @@ public class OrmaDatabase
                     statement = sqldb.createStatement();
                     statement.setQueryTimeout(10);  // set timeout to x sec.
                 }
-                catch (SQLException e)
+                catch (Exception e)
                 {
-                    System.err.println(e.getMessage());
                     Log.i(TAG, "ERR:MS:001:" + e.getMessage());
                 }
 
@@ -799,9 +835,8 @@ public class OrmaDatabase
                     }
                     statement.executeUpdate(query);
                 }
-                catch (SQLException e)
+                catch (Exception e)
                 {
-                    System.err.println(e.getMessage());
                     Log.i(TAG, "ERR:MS:002:" + e.getMessage());
                 }
 
@@ -842,9 +877,8 @@ public class OrmaDatabase
                     statement = sqldb.createStatement();
                     statement.setQueryTimeout(10);  // set timeout to x sec.
                 }
-                catch (SQLException e)
+                catch (Exception e)
                 {
-                    System.err.println(e.getMessage());
                     Log.i(TAG, "ERR:QSL:001:" + e.getMessage());
                 }
 
@@ -861,9 +895,8 @@ public class OrmaDatabase
                     }
                     rs.close();
                 }
-                catch (SQLException e)
+                catch (Exception e)
                 {
-                    System.err.println(e.getMessage());
                     Log.i(TAG, "ERR:QSL:002:" + e.getMessage());
                 }
 
@@ -911,11 +944,13 @@ public class OrmaDatabase
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
+                    Log.i(TAG, "ERR:SBV:001:" + e.getMessage());
                 }
             }
         }
         catch(Exception e1)
         {
+            Log.i(TAG, "ERR:SBV:002:" + e1.getMessage());
             return false;
         }
         return true;
@@ -952,6 +987,7 @@ public class OrmaDatabase
                 catch(Exception e)
                 {
                     e.printStackTrace();
+                    Log.i(TAG, "ERR:SBVWS:001:" + e.getMessage());
                 }
             }
             if (bind_where_count > 0)
@@ -977,11 +1013,13 @@ public class OrmaDatabase
                 catch(Exception e)
                 {
                     e.printStackTrace();
+                    Log.i(TAG, "ERR:SBVWS:002:" + e.getMessage());
                 }
             }
         }
         catch(Exception e1)
         {
+            Log.i(TAG, "ERR:SBVWS:003:" + e1.getMessage());
             return false;
         }
         return true;
