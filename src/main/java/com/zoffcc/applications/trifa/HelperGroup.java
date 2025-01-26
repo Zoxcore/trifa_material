@@ -1013,7 +1013,7 @@ public class HelperGroup {
                         GroupMessage gm = TrifaToxService.Companion.getOrma().selectFromGroupMessage().
                                 group_identifierEq(group_identifier.toLowerCase()).
                                 tox_group_peer_pubkeyEq(original_sender_peerpubkey.toUpperCase()).
-                                msg_id_hashEq(message_id_hash).toList().get(0);
+                                msg_id_hashEq(message_id_hash).get(0);
 
                         if (gm != null)
                         {
@@ -1365,7 +1365,6 @@ public class HelperGroup {
                     sent_timestampGt(sent_timestamp - (time_delta_ms * 1000)).
                     textEq(message_text).
                     limit(1).
-                    toList().
                     get(0);
 
             return gm;
@@ -1418,7 +1417,7 @@ public class HelperGroup {
                     .tox_group_peer_pubkeyEq(peer_pubkey)
                     .tox_group_peernameNotEq("")
                     .orderBySent_timestampDesc()
-                    .limit(1).toList()
+                    .limit(1)
                     .get(0)
                     .tox_group_peername;
             // Log.i(TAG, "last_know_peername=" + last_know_peername);

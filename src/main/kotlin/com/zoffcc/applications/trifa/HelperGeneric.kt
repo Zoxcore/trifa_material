@@ -138,7 +138,7 @@ object HelperGeneric {
         {
             val msg: Message? = orma!!.selectFromMessage().idEq(uimessage.msgDatabaseId)
                 .tox_friendpubkeyEq(uimessage.toxpk)
-                .toList().get(0)
+                .get(0)
             if (msg != null)
             {
                 set_message_queueing_from_id(msg.id, false) // cancel FT
@@ -1007,7 +1007,7 @@ object HelperGeneric {
     {
         try
         {
-            val f = orma!!.selectFromFriendList().tox_public_key_stringEq(friend_pubkey).toList().get(0)
+            val f = orma!!.selectFromFriendList().tox_public_key_stringEq(friend_pubkey).get(0)
             if ((f.avatar_hex == null) || (f.avatar_hex.length < 1))
             {
                 return null
@@ -1024,7 +1024,7 @@ object HelperGeneric {
     {
         try
         {
-            val f = orma!!.selectFromFriendList().tox_public_key_stringEq(friend_pubkey).toList().get(0)
+            val f = orma!!.selectFromFriendList().tox_public_key_stringEq(friend_pubkey).get(0)
             if ((f.avatar_hex == null) || (f.avatar_hex.length < 1))
             {
                 return false

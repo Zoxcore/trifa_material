@@ -214,7 +214,7 @@ public class HelperFiletransfer {
             long del_ft_id = TrifaToxService.Companion.getOrma().selectFromFiletransfer().
                     tox_public_key_stringEq(tox_friend_get_public_key(friend_number)).
                     file_numberEq(file_number).
-                    orderByIdDesc().toList().
+                    orderByIdDesc().
                     get(0).id;
             // Log.i(TAG, "delete_ft:id=" + del_ft_id);
             delete_filetransfers_from_id(del_ft_id);
@@ -245,7 +245,7 @@ public class HelperFiletransfer {
             set_filetransfer_for_message_from_filetransfer_id(TrifaToxService.Companion.getOrma().selectFromFiletransfer().
                     tox_public_key_stringEq(tox_friend_get_public_key(friend_number)).
                     file_numberEq(file_number).
-                    orderByIdDesc().toList().
+                    orderByIdDesc().
                     get(0).id, ft_id);
         }
         catch (Exception e)
@@ -260,7 +260,7 @@ public class HelperFiletransfer {
         {
             if (TrifaToxService.Companion.getOrma().selectFromFiletransfer().idEq(filetransfer_id).count() == 1)
             {
-                return TrifaToxService.Companion.getOrma().selectFromFiletransfer().idEq(filetransfer_id).toList().get(0).file_name;
+                return TrifaToxService.Companion.getOrma().selectFromFiletransfer().idEq(filetransfer_id).get(0).file_name;
             }
             else
             {
@@ -280,7 +280,7 @@ public class HelperFiletransfer {
         {
             if (TrifaToxService.Companion.getOrma().selectFromFiletransfer().idEq(filetransfer_id).count() == 1)
             {
-                return TrifaToxService.Companion.getOrma().selectFromFiletransfer().idEq(filetransfer_id).toList().get(0).filesize;
+                return TrifaToxService.Companion.getOrma().selectFromFiletransfer().idEq(filetransfer_id).get(0).filesize;
             }
             else
             {
@@ -300,7 +300,7 @@ public class HelperFiletransfer {
         {
             if (TrifaToxService.Companion.getOrma().selectFromFiletransfer().idEq(filetransfer_id).count() == 1)
             {
-                return TrifaToxService.Companion.getOrma().selectFromFiletransfer().idEq(filetransfer_id).toList().get(0).state;
+                return TrifaToxService.Companion.getOrma().selectFromFiletransfer().idEq(filetransfer_id).get(0).state;
             }
             else
             {
@@ -356,7 +356,7 @@ public class HelperFiletransfer {
         {
             if (TrifaToxService.Companion.getOrma().selectFromFiletransfer().idEq(filetransfer_id).count() == 1)
             {
-                return TrifaToxService.Companion.getOrma().selectFromFiletransfer().idEq(filetransfer_id).toList().get(0).file_number;
+                return TrifaToxService.Companion.getOrma().selectFromFiletransfer().idEq(filetransfer_id).get(0).file_number;
             }
             else
             {
@@ -391,7 +391,7 @@ public class HelperFiletransfer {
             try
             {
                 ft_id = TrifaToxService.Companion.getOrma().selectFromFiletransfer().
-                        idEq(row_id).toList().get(0).id;
+                        idEq(row_id).get(0).id;
             }
             catch (Exception e)
             {
@@ -564,7 +564,7 @@ public class HelperFiletransfer {
                     file_numberEq(file_number).
                     tox_public_key_stringEq(tox_friend_get_public_key(friend_number)).
                     orderByIdDesc().
-                    toList().get(0);
+                    get(0);
 
             if (f.direction == TRIFA_FT_DIRECTION_INCOMING.value)
             {
@@ -584,7 +584,7 @@ public class HelperFiletransfer {
                     // update UI
                     try
                     {
-                        final Message m = TrifaToxService.Companion.getOrma().selectFromMessage().idEq(msg_id).tox_friendpubkeyEq(tox_friend_get_public_key(friend_number)).toList().get(0);
+                        final Message m = TrifaToxService.Companion.getOrma().selectFromMessage().idEq(msg_id).tox_friendpubkeyEq(tox_friend_get_public_key(friend_number)).get(0);
                         modify_message_with_ft(m, null);
                     }
                     catch(Exception e)

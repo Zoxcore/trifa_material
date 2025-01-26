@@ -59,7 +59,7 @@ public class HelperMessage {
                     directionEq(1).
                     readEq(false).
                     orderByIdDesc().
-                    toList().get(0);
+                    get(0);
         }
         catch (Exception e)
         {
@@ -149,11 +149,11 @@ public class HelperMessage {
         {
             long ft_id = TrifaToxService.Companion.getOrma().selectFromFiletransfer().
                     tox_public_key_stringEq(tox_friend_get_public_key(friend_number)).
-                    file_numberEq(file_number).orderByIdDesc().toList().get(0).id;
+                    file_numberEq(file_number).orderByIdDesc().get(0).id;
 
             update_message_in_db_filename_fullpath_from_id(TrifaToxService.Companion.getOrma().selectFromMessage().
                     filetransfer_idEq(ft_id).
-                    tox_friendpubkeyEq(tox_friend_get_public_key(friend_number)).toList().
+                    tox_friendpubkeyEq(tox_friend_get_public_key(friend_number)).
                     get(0).id, filename_fullpath);
         }
         catch (Exception e)
@@ -182,14 +182,14 @@ public class HelperMessage {
         {
             long ft_id = TrifaToxService.Companion.getOrma().selectFromFiletransfer().
                     tox_public_key_stringEq(tox_friend_get_public_key(friend_number)).
-                    file_numberEq(file_number).orderByIdDesc().toList().get(0).id;
+                    file_numberEq(file_number).orderByIdDesc().get(0).id;
             // Log.i(TAG,
             //       "set_message_state_from_friendnum_and_filenum:ft_id=" + ft_id + " friend_number=" + friend_number +
             //       " file_number=" + file_number);
             set_message_state_from_id(TrifaToxService.Companion.getOrma().selectFromMessage().
                     filetransfer_idEq(ft_id).
                     tox_friendpubkeyEq(tox_friend_get_public_key(friend_number)).
-                    toList().get(0).id, state);
+                    get(0).id, state);
         }
         catch (Exception e)
         {
@@ -219,7 +219,7 @@ public class HelperMessage {
             long ft_id = TrifaToxService.Companion.getOrma().selectFromFiletransfer().
                     tox_public_key_stringEq(tox_friend_get_public_key(friend_number)).
                     file_numberEq(file_number).
-                    orderByIdDesc().toList().
+                    orderByIdDesc().
                     get(0).id;
             // Log.i(TAG,
             //       "set_message_filedb_from_friendnum_and_filenum:ft_id=" + ft_id + " friend_number=" + friend_number +
@@ -227,7 +227,7 @@ public class HelperMessage {
             set_message_filedb_from_id(TrifaToxService.Companion.getOrma().selectFromMessage().
                     filetransfer_idEq(ft_id).
                     tox_friendpubkeyEq(tox_friend_get_public_key(friend_number)).
-                    orderByIdDesc().toList().
+                    orderByIdDesc().
                     get(0).id, filedb_id);
         }
         catch (Exception e)
@@ -244,7 +244,7 @@ public class HelperMessage {
             try
             {
                 Message m = TrifaToxService.Companion.getOrma().selectFromMessage().
-                        idEq(mid).orderByIdDesc().toList().get(0);
+                        idEq(mid).orderByIdDesc().get(0);
 
                 if (m.id != -1)
                 {
@@ -266,7 +266,7 @@ public class HelperMessage {
         {
             Message m = TrifaToxService.Companion.getOrma().selectFromMessage().
                     filetransfer_idEq(ft.id).
-                    orderByIdDesc().toList().get(0);
+                    orderByIdDesc().get(0);
 
             if (m.id != -1)
             {
@@ -295,7 +295,7 @@ public class HelperMessage {
         }
         try
         {
-            Message msg = TrifaToxService.Companion.getOrma().selectFromMessage().idEq(mid).toList().get(0);
+            Message msg = TrifaToxService.Companion.getOrma().selectFromMessage().idEq(mid).get(0);
             if (msg != null)
             {
                 final Filetransfer ft = new Filetransfer();
@@ -617,7 +617,7 @@ public class HelperMessage {
                     sent_timestamp + PUSH_URL_TRIGGER_GET_MESSAGE_FOR_delta_ms_after).
                     directionEq(1).
                     orderBySent_timestampAsc().
-                    limit(1).toList().get(0);
+                    limit(1).get(0);
 
             return m.read;
         }
@@ -639,7 +639,7 @@ public class HelperMessage {
                     sent_timestamp + PUSH_URL_TRIGGER_GET_MESSAGE_FOR_delta_ms_after).
                     directionEq(1).
                     orderBySent_timestampAsc().
-                    limit(1).toList().get(0);
+                    limit(1).get(0);
 
             // Log.i(TAG, "update_message_in_db_sent_push_set:ts=" + sent_timestamp + " m=" + m);
 

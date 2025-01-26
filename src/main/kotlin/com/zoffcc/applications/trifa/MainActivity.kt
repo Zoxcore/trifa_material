@@ -2346,7 +2346,7 @@ class MainActivity
                     tox_friendpubkeyEq(toxpk).
                     directionEq(1).
                     readEq(false).
-                    toList().get(0)
+                    get(0)
 
                 if (m != null)
                 {

@@ -84,7 +84,7 @@ public class HelperFriend {
                 {
                     String result_alias = TrifaToxService.Companion.getOrma().selectFromFriendList().
                             tox_public_key_stringEq(tox_friend_get_public_key(friendnum)).
-                            toList().get(0).alias_name;
+                            get(0).alias_name;
 
                     if (result_alias != null)
                     {
@@ -102,7 +102,7 @@ public class HelperFriend {
 
                 result = TrifaToxService.Companion.getOrma().selectFromFriendList().
                         tox_public_key_stringEq(tox_friend_get_public_key(friendnum)).
-                        toList().get(0).name;
+                        get(0).name;
             }
         }
         catch (Exception e)
@@ -124,7 +124,7 @@ public class HelperFriend {
         {
             friend_alias_name = TrifaToxService.Companion.getOrma().selectFromFriendList().
                     tox_public_key_stringEq(friend_pubkey).
-                    toList().get(0).alias_name;
+                    get(0).alias_name;
         }
         catch (Exception e)
         {
@@ -138,7 +138,7 @@ public class HelperFriend {
             {
                 friend_name = TrifaToxService.Companion.getOrma().selectFromFriendList().
                         tox_public_key_stringEq(friend_pubkey).
-                        toList().get(0).name;
+                        get(0).name;
             }
             catch (Exception e)
             {
@@ -489,7 +489,7 @@ public class HelperFriend {
 
     static void add_friend_avatar_chunk(String friend_pubkey, String avatar_chunk_hex, boolean first)
     {
-       FriendList f = TrifaToxService.Companion.getOrma().selectFromFriendList().tox_public_key_stringEq(friend_pubkey).toList().get(0);
+       FriendList f = TrifaToxService.Companion.getOrma().selectFromFriendList().tox_public_key_stringEq(friend_pubkey).get(0);
        if (first)
        {
            f.avatar_hex = avatar_chunk_hex;
