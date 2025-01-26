@@ -143,7 +143,7 @@ public class HelperRelay
         {
             int count = TrifaToxService.Companion.getOrma().selectFromFriendList().
                     tox_public_key_stringEq(friend_pubkey.toUpperCase()).
-                    is_relay(true).count();
+                    is_relayEq(true).count();
             if (count > 0)
             {
                 return true;
