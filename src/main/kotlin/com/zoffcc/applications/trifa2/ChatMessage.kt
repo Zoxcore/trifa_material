@@ -375,9 +375,24 @@ fun outgoing_filetransfer(message: UIMessage, ui_scale: Float)
         {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically)
             {
+                var progress_: Float = 0.0f
+                try
+                {
+                    progress_ = (message.currentfilepos.toFloat() / message.filesize.toFloat())
+                }
+                catch(_: Exception)
+                {
+                }
+                if (progress_ < 0)
+                {
+                    progress_ = 0.0f
+                }
+                if (progress_.isNaN()) {
+                    progress_ = 0.0f
+                }
                 LinearProgressIndicator(
                     progress = {
-                        (message.currentfilepos.toFloat() / message.filesize.toFloat())
+                        progress_
                     },
                     strokeCap = StrokeCap.Round,
                     drawStopIndicator = {},
@@ -411,9 +426,24 @@ fun incoming_filetransfer(message: UIMessage, ui_scale: Float)
     {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically)
         {
+            var progress_: Float = 0.0f
+            try
+            {
+                progress_ = (message.currentfilepos.toFloat() / message.filesize.toFloat())
+            }
+            catch(_: Exception)
+            {
+            }
+            if (progress_ < 0)
+            {
+                progress_ = 0.0f
+            }
+            if (progress_.isNaN()) {
+                progress_ = 0.0f
+            }
             LinearProgressIndicator(
                 progress = {
-                    (message.currentfilepos.toFloat() / message.filesize.toFloat())
+                    progress_
                 },
                 strokeCap = StrokeCap.Round,
                 drawStopIndicator = {},
