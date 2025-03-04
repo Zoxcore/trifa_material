@@ -126,7 +126,7 @@ jobs:
         artifacts: "package-screenshot-macos-dmg.png"
 
   linux-test-deb:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     if: ${{ true }}
     permissions:
       contents: write
