@@ -158,6 +158,7 @@ jobs:
           wget \
           rpm \
           sed \
+          libfuse2 \
           openjdk-17-jdk \
           openjdk-17-jdk-headless
 
