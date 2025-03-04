@@ -189,7 +189,7 @@ jobs:
 
   build-asan-linux-jni-artifact:
     name: JNI Artifact ASAN Linux Build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     permissions:
       contents: write
     steps:
@@ -253,7 +253,7 @@ jobs:
 
   build-linux-jni-artifact:
     name: JNI Artifact Linux Build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     permissions:
       contents: write
     steps:

@@ -45,7 +45,7 @@ jobs:
 
   build-linux-nightly-artifact:
     name: Nightly Artifact Linux Build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [update-nightly-tag]
     if: |
       always() &&
@@ -138,7 +138,7 @@ jobs:
 
   build-appimage-nightly-artifact:
     name: Nightly Artifact AppImage Build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [update-nightly-tag]
     if: |
       always() &&
@@ -374,7 +374,7 @@ jobs:
           artifacts: "trifa-material_nightly.msi,trifa-material_nightly.exe"
 
   build-windows-nightly-zip-artifact:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [build-windows-nightly-artifact]
     if: |
       always() &&
@@ -741,7 +741,7 @@ jobs:
         artifacts: "screenshot-macos-14.png"
 
   linux-ub20-test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     if: ${{ true }}
     permissions:
       contents: write
