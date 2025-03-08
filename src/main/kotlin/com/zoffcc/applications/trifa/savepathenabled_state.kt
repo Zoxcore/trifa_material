@@ -30,7 +30,8 @@ data class globalstore_state(
     val toxRunning: Boolean = false,
     val ormaRunning: Boolean = false,
     val native_ffmpegav_lib_loaded: Boolean = false,
-    val native_notification_lib_loaded: Boolean = false
+    val native_notification_lib_loaded: Boolean = false,
+    val app_startup: Boolean = true
 )
 
 private val globalstore_state_lock = Any()
@@ -57,6 +58,8 @@ interface GlobalStore {
     fun getToxRunning(): Boolean
     fun setNative_ffmpegav_lib_loaded(value: Boolean)
     fun getNative_ffmpegav_lib_loaded(): Boolean
+    fun setApp_startup(value: Boolean)
+    fun getApp_startup(): Boolean
     fun setNative_notification_lib_loaded(value: Boolean)
     fun getNative_notification_lib_loaded(): Boolean
     fun setOrmaRunning(value: Boolean)
@@ -186,6 +189,17 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
         override fun getNative_notification_lib_loaded(): Boolean
         {
             return state.native_notification_lib_loaded
+        }
+
+        override fun setApp_startup(value: Boolean)
+        {
+            mutableStateFlow.value = state.copy(app_startup = value)
+            Log.i(TAG, "setApp_startup: " + value)
+        }
+
+        override fun getApp_startup(): Boolean
+        {
+            return state.app_startup
         }
 
         override fun setNative_notification_lib_loaded(value: Boolean)

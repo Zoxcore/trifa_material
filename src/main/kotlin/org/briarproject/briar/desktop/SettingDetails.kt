@@ -398,6 +398,30 @@ private fun general_settings()
     // ---- display status info for AV calls ----
 
 
+    // ---- auto connect tox with default profile ----
+    var auto_connect_tox_with_default_profile by remember { mutableStateOf(false) }
+    try
+    {
+        if (global_prefs.getBoolean("main.auto_connect_tox_with_default_profile", false))
+        {
+            auto_connect_tox_with_default_profile = true
+        }
+    } catch (_: Exception)
+    {
+    }
+    DetailItem(label = i18n("ui.setting.auto_connect_tox_with_default_profile"),
+        description = (if (auto_connect_tox_with_default_profile) i18n("enabled") else i18n("disabled"))) {
+        Switch(
+            checked = auto_connect_tox_with_default_profile,
+            onCheckedChange = {
+                global_prefs.putBoolean("main.auto_connect_tox_with_default_profile", it)
+                auto_connect_tox_with_default_profile = it
+            },
+        )
+    }
+    // ---- auto connect tox with default profile ----
+
+
     // ---- set global density to scale the whole UI ----
     var ui_density by remember { mutableStateOf(globalstore.getUiDensity()) }
     DetailItem(label = i18n("ui.ui_density"),
