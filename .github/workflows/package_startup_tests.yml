@@ -152,7 +152,8 @@ jobs:
         - name: install package
           shell: bash
           run: |
-               sudo dpkg -i ./app.deb
+               sudo apt-get install ./app.deb
+               # sudo dpkg -i ./app.deb
                dpkg -L trifa-material
                ls -al /opt/trifa-material/bin/trifa_material
                file /opt/trifa-material/bin/trifa_material
