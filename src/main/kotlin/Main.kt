@@ -111,7 +111,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -360,6 +359,42 @@ fun App()
                         Row(modifier = Modifier.randomDebugBorder().fillMaxWidth().height(main_top_tab_height)) {
                             Column(modifier = Modifier.randomDebugBorder()) {
                                 Row(Modifier.wrapContentHeight(), Arrangement.spacedBy(5.dp)) {
+
+                                    if (globalstore.getApp_startup())
+                                    {
+                                        Log.i(TAG, "XXXXXXXXX:00:" + globalstore.getApp_startup())
+                                        globalstore.setApp_startup(false)
+                                        Log.i(TAG, "XXXXXXXXX:11:" + globalstore.getApp_startup())
+
+                                        if (tox_running_state == "stopped")
+                                        {
+                                            if (global_prefs.getBoolean("main.auto_connect_tox_with_default_profile", false))
+                                            {
+                                                TrifaToxService.stop_me = false
+                                                tox_running_state = "starting ..."
+                                                start_button_text = tox_running_state
+                                                tox_running_state_wrapper = tox_running_state
+                                                start_button_text_wrapper = start_button_text
+                                                Log.i(TAG, "----> tox_running_state = $tox_running_state_wrapper")
+                                                Thread {
+                                                    Log.i(TAG, "waiting to startup ...")
+                                                    while (tox_running_state_wrapper != "running")
+                                                    {
+                                                        Thread.sleep(100)
+                                                        Log.i(TAG, "waiting ...")
+                                                    }
+                                                    Log.i(TAG, "is started now")
+                                                    tox_running_state = tox_running_state_wrapper
+                                                    start_button_text = i18n("ui.start_button.stop")
+                                                }.start()
+                                                TrifaToxService.stop_me = false
+                                                savepathstore.createPathDirectories()
+                                                main_init()
+                                            }
+                                        }
+                                    }
+
+
                                     Button(modifier = Modifier.width(140.dp), onClick = { // start/stop tox button
                                         if (tox_running_state == "running")
                                         {
