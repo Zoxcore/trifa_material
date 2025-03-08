@@ -139,6 +139,8 @@ jobs:
                sudo apt-get install imagemagick
                sudo apt-get install xdotool xclip
                sudo apt-get install x11-apps x11-utils
+               sudo apt-get install libpulse0 libnotify4
+               sudo apt-get install libv4l-0 libv4l-dev
                sudo apt-get install lwm fvwm
                sudo apt-get install xvfb
 
