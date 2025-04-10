@@ -173,7 +173,7 @@ cd "$_SRC_"
 
 SODIUM_FILENAME="libsodium-$SODIUM_VERSION.tar.gz"
 rm -f libsodium-*.tar.gz
-wget $WGET_OPTIONS "https://download.libsodium.org/libsodium/releases/$SODIUM_FILENAME" -O "$SODIUM_FILENAME"
+wget $WGET_OPTIONS "https://github.com/jedisct1/libsodium/releases/download/""$SODIUM_VERSION""-RELEASE/""$SODIUM_FILENAME" -O "$SODIUM_FILENAME"
 tar -xf "$SODIUM_FILENAME"
 cd libsodium*/
 
