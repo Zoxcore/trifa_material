@@ -242,7 +242,7 @@ jobs:
       - name: list and install downloaded package
         shell: pwsh
         run: |
-             $file = "D:\a\trifa_material\trifa_material\app.msi" 
+             $file = "C:\a\trifa_material\trifa_material\app.msi" 
              $log = "install.log" 
              $procMain = Start-Process "msiexec" "/i `"$file`" /qn /l*! `"$log`"" -NoNewWindow -PassThru
              $procLog = Start-Process "powershell" "Get-Content -Path `"$log`" -Wait" -NoNewWindow -PassThru 
@@ -263,7 +263,7 @@ jobs:
           [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
           [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
           Start-Sleep -Seconds 30
-          Start-Process -FilePath 'C:\Program Files\trifa_material\trifa_material.exe' -WorkingDirectory "D:\a\trifa_material\trifa_material"
+          Start-Process -FilePath 'C:\Program Files\trifa_material\trifa_material.exe' -WorkingDirectory "C:\a\trifa_material\trifa_material"
           Start-Sleep -Seconds 20
           Start-Sleep -Seconds 8
           $signature=@'
@@ -316,16 +316,16 @@ jobs:
           $bitmap  = New-Object System.Drawing.Bitmap $Width, $Height
           $graphic = [System.Drawing.Graphics]::FromImage($bitmap)
           $graphic.CopyFromScreen($Left, $Top, 0, 0, $bitmap.Size)
-          $bitmap.Save("D:\a\trifa_material\trifa_material\package-screenshot-windows-msi.png")
+          $bitmap.Save("C:\a\trifa_material\trifa_material\package-screenshot-windows-msi.png")
           Write-Output "Screenshot saved to:"
-          Write-Output D:\a\trifa_material\trifa_material\package-screenshot-windows-msi.png
+          Write-Output C:\a\trifa_material\trifa_material\package-screenshot-windows-msi.png
 
       - name: upload-screenshots
         uses: actions/upload-artifact@v4
         with:
           name: screenshot-windows
           path: |
-            D:\a\trifa_material\trifa_material\package-screenshot-windows-msi.png
+            C:\a\trifa_material\trifa_material\package-screenshot-windows-msi.png
 
       - name: Upload to nightly release
         uses: ncipollo/release-action@v1
