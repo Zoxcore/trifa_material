@@ -11,7 +11,7 @@ plugins {
     id("org.jetbrains.compose")
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.github.gmazzo.buildconfig") version "5.6.6"
-    id("org.ajoberstar.grgit") version "5.3.0"
+    id("org.ajoberstar.grgit") version "5.3.2"
     id("io.gitlab.arturbosch.detekt") version("1.23.3")
     id("de.undercouch.download") version "5.6.0"
 }
