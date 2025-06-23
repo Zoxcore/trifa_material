@@ -998,7 +998,7 @@ jobs:
           [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
           [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
           Start-Sleep -Seconds 30
-          Start-Process -FilePath 'C:\Windows\System32\cmd.exe' -WorkingDirectory "C:\a\trifa_material\trifa_material" -ArgumentList '/c', 'C:\a\trifa_material\trifa_material\gradlew.bat', "run" -windowstyle Maximized
+          Start-Process -FilePath 'C:\Windows\System32\cmd.exe' -WorkingDirectory "D:\a\trifa_material\trifa_material" -ArgumentList '/c', 'D:\a\trifa_material\trifa_material\gradlew.bat', "run" -windowstyle Maximized
           Start-Sleep -Seconds 20
           Start-Sleep -Seconds 8
           $signature=@'
@@ -1067,16 +1067,16 @@ jobs:
           $bitmap  = New-Object System.Drawing.Bitmap $Width, $Height
           $graphic = [System.Drawing.Graphics]::FromImage($bitmap)
           $graphic.CopyFromScreen($Left, $Top, 0, 0, $bitmap.Size)
-          $bitmap.Save("C:\a\trifa_material\trifa_material\screenshot-windows.png")
+          $bitmap.Save("D:\a\trifa_material\trifa_material\screenshot-windows.png")
           Write-Output "Screenshot saved to:"
-          Write-Output C:\a\trifa_material\trifa_material\screenshot-windows.png
+          Write-Output D:\a\trifa_material\trifa_material\screenshot-windows.png
 
       - name: upload-screenshots
         uses: actions/upload-artifact@v4
         with:
           name: screenshot-windows
           path: |
-            C:\a\trifa_material\trifa_material\screenshot-windows.png
+            D:\a\trifa_material\trifa_material\screenshot-windows.png
 
       - name: Upload to nightly release
         uses: ncipollo/release-action@v1
