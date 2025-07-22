@@ -234,7 +234,7 @@ tasks.withType<org.gradle.jvm.tasks.Jar> {
 
 tasks {
     val downloadAppImageBuilder by registering(Download::class) {
-        src("https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage")
+        src("https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage")
         dest(appImageTool)
         overwrite(false)
         doFirst {
