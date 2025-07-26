@@ -553,6 +553,8 @@ jobs:
            cd /Users/runner/work/trifa_material/trifa_material/jshowarch-master
            java jshowarch 885 76 115 65 24 &
            sleep 90
+           cliclick -m verbose c:820,334
+           sleep 1
            cliclick -m verbose c:367,623
            sleep 120
            cat /Users/runner/work/trifa_material/trifa_material/tester.log
@@ -872,6 +874,8 @@ jobs:
                printf 'sleep 2\n' >> /tmp/a.sh
                printf 'import -window root /tmp/screenshot-linux_before_wm.png\n' >> /tmp/a.sh
                printf 'sleep 40\n' >> /tmp/a.sh
+               printf 'xdotool mousemove --sync 823 305 click 1\n' >> /tmp/a.sh
+               printf 'sleep 2\n' >> /tmp/a.sh
                printf 'fvwm2 &' >> /tmp/a.sh
                printf 'sleep 20\n' >> /tmp/a.sh
                printf 'import -window root /tmp/screenshot-linux.png\n' >> /tmp/a.sh
@@ -972,7 +976,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin' # See 'Supported distributions' for available options
-          java-version: '17'
+          java-version: '21'
 
       - name: java-version
         run: java -version
@@ -987,19 +991,22 @@ jobs:
              java -version
              javac -version
 
-      - name: compile-app
+      - name: app_compile
         shell: bash
         run: |
           ./gradlew.bat assemble
 
-      - name: startup-app
+      - name: app_startup
+        shell: bash
+        run: |
+          ./gradlew.bat run > runlog.txt 2>&1 &
+
+      - name: app_click_for_start
         shell: pwsh
         run: |
           [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
           [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
-          Start-Sleep -Seconds 30
-          Start-Process -FilePath 'C:\Windows\System32\cmd.exe' -WorkingDirectory "D:\a\trifa_material\trifa_material" -ArgumentList '/c', 'D:\a\trifa_material\trifa_material\gradlew.bat', "run" -windowstyle Maximized
-          Start-Sleep -Seconds 20
+          Start-Sleep -Seconds 260
           Start-Sleep -Seconds 8
           $signature=@'
           [DllImport("user32.dll",CharSet=CharSet.Auto,CallingConvention=CallingConvention.StdCall)]
@@ -1020,7 +1027,23 @@ jobs:
           $SendMouseClick::mouse_event(0x00000004, 0, 0, 0, 0);
           Start-Sleep -Seconds 2
 
-      - name: start tester
+      - name: app_check_log
+        shell: bash
+        run: |
+          cat runlog.txt
+          echo "xxxxxxxxxxxxxxxxxxxx"
+          echo "xxxxxxxxxxxxxxxxxxxx"
+          echo "xxxxxxxxxxxxxxxxxxxx"
+          pwd
+          ls -al
+          sleep 20
+          pwd
+          ls -al
+          sleep 20
+          pwd
+          ls -al
+
+      - name: tester_startup
         shell: bash
         run: |
           cat toxid.txt;echo
@@ -1029,7 +1052,7 @@ jobs:
           ./do_run.sh $(cat ../toxid.txt) &
           sleep 180
 
-      - name: startup-app
+      - name: app_click_for_tests
         shell: pwsh
         run: |
           [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
@@ -1050,6 +1073,12 @@ jobs:
           $y = 595
           [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point($x, $y)
           sleep -Seconds 02
+          $SendMouseClick::mouse_event(0x00000002, 0, 0, 0, 0);
+          $SendMouseClick::mouse_event(0x00000004, 0, 0, 0, 0);
+          sleep -Seconds 02
+          $x = 810
+          $y = 313
+          [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point($x, $y)
           $SendMouseClick::mouse_event(0x00000002, 0, 0, 0, 0);
           $SendMouseClick::mouse_event(0x00000004, 0, 0, 0, 0);
           sleep -Seconds 02
