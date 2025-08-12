@@ -23,7 +23,7 @@ jobs:
   check-jni-libs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: with full debug output
         run: bash -x tools/check_release_jni_libs.sh
