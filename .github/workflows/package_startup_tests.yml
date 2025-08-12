@@ -23,7 +23,7 @@ jobs:
     permissions:
       contents: write
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: install cliclick
       run:  brew install cliclick
 
@@ -131,7 +131,7 @@ jobs:
     permissions:
       contents: write
     steps:
-        - uses: actions/checkout@v4
+        - uses: actions/checkout@v5
         - name: install deps
           run: |
                sudo apt-get update
@@ -218,7 +218,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Display the path
         run: echo %PATH%
         shell: cmd
