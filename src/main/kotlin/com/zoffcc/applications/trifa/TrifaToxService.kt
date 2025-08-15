@@ -281,7 +281,9 @@ class TrifaToxService
                                     while (ii.hasNext())
                                     {
                                         val m_resend_ft = ii.next()
-                                        friend_call_push_url(m_resend_ft.tox_friendpubkey, m_resend_ft.sent_timestamp)
+                                        if (m_resend_ft.sent_push < 1) {
+                                            friend_call_push_url(m_resend_ft.tox_friendpubkey, m_resend_ft.sent_timestamp)
+                                        }
                                         if (tox_friend_get_connection_status(
                                                 tox_friend_by_public_key(m_resend_ft.tox_friendpubkey))
                                             != ToxVars.TOX_CONNECTION.TOX_CONNECTION_NONE.value)
