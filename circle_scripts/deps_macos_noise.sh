@@ -90,7 +90,7 @@ export LDFLAGS=" "
               --disable-iconv \
               --disable-network \
               --disable-muxers \
-              --disable-postproc \
+                \
               --disable-swresample \
               --disable-swscale-alpha \
               --disable-dwt \
