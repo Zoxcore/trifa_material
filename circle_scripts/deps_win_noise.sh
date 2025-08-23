@@ -237,7 +237,7 @@ fi
 
 
 # --- NASM ---
-if [ 1 == 1 ]; then
+if [ 1 == 0 ]; then
 
 cd "$_SRC_"
 

@@ -143,7 +143,7 @@ jobs:
              sudo DEBIAN_FRONTEND=noninteractive \
              apt-get install -y --no-install-recommends \
              ca-certificates \
-             yasm \
+             yasm nasm \
              openjdk-17-jdk \
              openjdk-17-jdk-headless \
              coreutils autoconf libtool pkg-config \
