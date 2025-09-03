@@ -96,7 +96,7 @@ dependencies {
     implementation("org.xerial:sqlite-jdbc:3.50.3.0")
     implementation("ca.gosyer:kotlin-multiplatform-appdirs:1.2.0")
     implementation("com.sksamuel.scrimage:scrimage-core:4.3.2")
-    implementation("com.sksamuel.scrimage:scrimage-webp:4.3.3")
+    implementation("com.sksamuel.scrimage:scrimage-webp:4.3.4")
     implementation("com.google.code.gson:gson:2.13.1")
     implementation("io.github.alexzhirkevich:qrose:1.0.1")
     implementation("com.vanniktech:emoji-ios:0.21.0")
