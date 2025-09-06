@@ -8,7 +8,6 @@ import SnackBarToast
 import UIGroupMessage
 import UIMessage
 import User
-import androidx.compose.ui.graphics.vector.Group
 import avstatestore
 import avstatestorecallstate
 import avstatestorevcapfpsstate
@@ -34,7 +33,6 @@ import com.zoffcc.applications.trifa.HelperFriend.add_friend_avatar_chunk
 import com.zoffcc.applications.trifa.HelperFriend.add_pushurl_for_friend
 import com.zoffcc.applications.trifa.HelperFriend.del_friend_avatar
 import com.zoffcc.applications.trifa.HelperFriend.get_friend_name_from_num
-import com.zoffcc.applications.trifa.HelperFriend.get_friend_name_from_pubkey
 import com.zoffcc.applications.trifa.HelperFriend.main_get_friend
 import com.zoffcc.applications.trifa.HelperFriend.remove_pushurl_for_friend
 import com.zoffcc.applications.trifa.HelperFriend.send_friend_msg_receipt_v2_wrapper
@@ -116,6 +114,7 @@ import com.zoffcc.applications.trifa.TrifaToxService.Companion.resend_old_messag
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.resend_v3_messages
 import com.zoffcc.applications.trifa.VideoInFrame.new_video_in_frame
 import com.zoffcc.applications.trifa.VideoInFrame.setup_video_in_resolution
+import com.zoffcc.applications.trifa2.timestampMs
 import com.zoffcc.applications.trifa_material.trifa_material.BuildConfig
 import contactstore
 import global_prefs
@@ -137,7 +136,6 @@ import org.briarproject.briar.desktop.contact.ContactItem
 import org.briarproject.briar.desktop.contact.GroupItem
 import org.briarproject.briar.desktop.contact.GroupPeerItem
 import set_tox_online_state
-import com.zoffcc.applications.trifa2.timestampMs
 import toxdatastore
 import java.io.File
 import java.io.PrintWriter
