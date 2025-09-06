@@ -139,7 +139,6 @@ import com.zoffcc.applications.trifa.CustomSemaphore
 import com.zoffcc.applications.trifa.EmojiStrAndName
 import com.zoffcc.applications.trifa.FriendSettingDetails
 import com.zoffcc.applications.trifa.GroupSettingDetails
-import com.zoffcc.applications.trifa.SqliteEscapeLikeString
 import com.zoffcc.applications.trifa.HelperGeneric.PubkeyShort
 import com.zoffcc.applications.trifa.HelperGeneric.get_java_os_name
 import com.zoffcc.applications.trifa.HelperGeneric.get_java_os_version
@@ -172,6 +171,7 @@ import com.zoffcc.applications.trifa.OperatingSystem
 import com.zoffcc.applications.trifa.PrefsSettings
 import com.zoffcc.applications.trifa.RandomNameGenerator
 import com.zoffcc.applications.trifa.SingleComponentAspectRatioKeeperLayout
+import com.zoffcc.applications.trifa.SqliteEscapeLikeString
 import com.zoffcc.applications.trifa.TRIFAGlobals
 import com.zoffcc.applications.trifa.ToxVars
 import com.zoffcc.applications.trifa.TrifaToxService
