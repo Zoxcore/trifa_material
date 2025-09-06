@@ -9,6 +9,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.ByteBuffer;
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
 
 import static com.zoffcc.applications.trifa.HelperMessage.get_message_in_db_sent_push_is_read;
@@ -22,6 +23,9 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 public class HelperFriend {
 
     private static final String TAG = "trifa.Hlp.Friend";
+
+    static HashMap<String, Long> ping_push_blocker_cache = new HashMap<>();
+    final static long TWO_HOURS_IN_MILLIS = (2 * 3600 * 1000); // 2 hours in millis
 
     static void send_friend_msg_receipt_v2_wrapper(final long friend_number, final int msg_type, final ByteBuffer msg_id_buffer, long t_sec_receipt) {
         // (msg_type == 1) msgV2 direct message
@@ -313,6 +317,21 @@ public class HelperFriend {
                 }
             }
 
+            long check_for_http_too_many_request_timeout = 0L;
+            try
+            {
+                ping_push_blocker_cache.getOrDefault(pushurl_for_friend, 0L);
+            }
+            catch(Exception ignored)
+            {
+            }
+
+            if (check_for_http_too_many_request_timeout + TWO_HOURS_IN_MILLIS > System.currentTimeMillis())
+            {
+                Log.i(TAG, "friend_call_push_url:HTTP 429: too many requests -> timeout");
+                return false;
+            }
+
             try {
                 HttpClient client = null;
 
@@ -326,7 +345,17 @@ public class HelperFriend {
                     HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
                     Log.i(TAG, "friend_call_push_url:url=" + "********" + " RES=" + response.statusCode());
 
-                    if ((response.statusCode() < 300) && (response.statusCode() > 199)) {
+                    if (response.statusCode() == 429) {
+                        // HINT: set timestamp of last 429 HTTP code (Error Too Many Requests)
+                        ping_push_blocker_cache.put(pushurl_for_friend, System.currentTimeMillis());
+                        if (ping_push_blocker_cache.size() >= 20000)
+                        {
+                            // HINT: too many entries. just clear the hasmap.
+                            // but probably nobody will have 20k friends in this app in sum?
+                            ping_push_blocker_cache.clear();
+                        }
+                    }
+                    else if ((response.statusCode() < 300) && (response.statusCode() > 199)) {
                         if (update_message_flag) {
                             update_message_in_db_sent_push_set(friend_pubkey, message_timestamp_circa);
                         }
@@ -336,10 +365,8 @@ public class HelperFriend {
             } catch (Exception e) {
                 Log.i(TAG, "friend_call_push_url:001:EE:" + e.getMessage());
             }
-
         } catch (Exception ignored) {
         }
-
         return false;
     }
 
