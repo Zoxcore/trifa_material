@@ -154,6 +154,7 @@ import com.zoffcc.applications.trifa.JPictureBoxOut
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity
 import com.zoffcc.applications.trifa.MainActivity.Companion.DEBUG_COMPOSE_UI_UPDATES
+import com.zoffcc.applications.trifa.MainActivity.Companion.DEBUG_SET_FAKE_WEBCAM
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__audio_input_filter
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__do_not_sync_av
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__v4l2_capture_force_mjpeg
@@ -445,6 +446,23 @@ fun App()
                                             TrifaToxService.stop_me = false
                                             savepathstore.createPathDirectories()
                                             main_init()
+
+                                            // ************* DEBUG ONLY *************
+                                            // ************* DEBUG ONLY *************
+                                            // ************* DEBUG ONLY *************
+                                            if (DEBUG_SET_FAKE_WEBCAM)
+                                            {
+                                                // HINT: set video in source to "v4l2" / "/dev/video10"
+                                                Log.i(TAG, "****** DEBUG_SET_FAKE_WEBCAM ******")
+                                                Log.i(TAG, "****** DEBUG_SET_FAKE_WEBCAM ******")
+                                                Log.i(TAG, "****** DEBUG_SET_FAKE_WEBCAM ******")
+                                                Log.i(TAG, "****** DEBUG_SET_FAKE_WEBCAM ******")
+                                                avstatestore.state.video_in_device_set("video4linux2,v4l2")
+                                                avstatestore.state.video_in_source_set("/dev/video10")
+                                            }
+                                            // ************* DEBUG ONLY *************
+                                            // ************* DEBUG ONLY *************
+                                            // ************* DEBUG ONLY *************
                                         }
                                     }) {
                                         Text(start_button_text)

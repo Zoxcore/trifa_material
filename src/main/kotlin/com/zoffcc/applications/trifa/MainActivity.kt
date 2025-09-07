@@ -158,6 +158,7 @@ class MainActivity
         const val CTOXCORE_NATIVE_LOGGING = false // set "false" for release builds
         const val AUDIO_PCM_DEBUG_FILES = false // set "false" for release builds
         const val DEBUG_COMPOSE_UI_UPDATES = false // set "false" for release builds
+        const val DEBUG_SET_FAKE_WEBCAM = false // set "false" for release builds
 
         // --------- global config ---------
         // --------- global config ---------
