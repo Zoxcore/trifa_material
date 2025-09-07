@@ -786,6 +786,26 @@ jobs:
                sudo apt-get install xvfb
                sudo apt-get install libpulse0 libnotify4
 
+        - name: install deps for fake webcam
+          run: |
+               sudo apt-get install v4l2loopback-utils ffmpeg
+               sudo apt-get install linux-modules-extra-$(uname -r)
+
+        - name: start fake webcam
+          run: |
+               pwd
+               git clone https://github.com/whokilleddb/Fake-Stream
+               cd Fake-Stream/
+               ls -al
+               pwd
+               sudo modprobe v4l2loopback card_label="My Fake Webcam" video_nr=10 devices=1 exclusive_caps=1
+               sleep 2
+               ls -al /dev/video*
+               sudo ffmpeg -stream_loop -1 -re -i ./test.mp4 -vcodec rawvideo -threads 0 -f v4l2 /dev/video10 &
+               sleep 10
+               sudo chmod a+rw /dev/video*
+               ls -al /dev/video*
+
         - name: show installed font packages
           run: |
                dpkg -l|grep font
@@ -881,6 +901,13 @@ jobs:
                printf 'import -window root /tmp/screenshot-linux.png\n' >> /tmp/a.sh
                cat /tmp/a.sh
                chmod a+rx /tmp/a.sh
+
+        - name: patch-app-fake-webcam
+          run: |
+               pwd
+               ls -al
+               sed -i -e 's#DEBUG_SET_FAKE_WEBCAM = false#DEBUG_SET_FAKE_WEBCAM = true#' src/main/kotlin/com/zoffcc/applications/trifa/MainActivity.kt
+               git diff||echo "NO ERR"
 
         - name: patch-app1
           run: |
