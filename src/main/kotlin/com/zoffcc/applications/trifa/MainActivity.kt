@@ -167,8 +167,8 @@ class MainActivity
         @JvmStatic var native_ffmpegav_lib_loaded_error = -1
         var tox_service_fg: TrifaToxService? = null
         var tox_savefile_directory = "."
-        var ORBOT_PROXY_HOST = "127.0.0.1"
-        var ORBOT_PROXY_PORT: Long = 9050
+        @JvmStatic var ORBOT_PROXY_HOST = "127.0.0.1"
+        @JvmStatic var ORBOT_PROXY_PORT: Long = 9050
         var PREF__udp_enabled = 1
         var PREF__audio_play_volume_percent = 100
         var PREF__audio_input_filter = 0
