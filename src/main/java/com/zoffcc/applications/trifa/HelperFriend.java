@@ -2,7 +2,11 @@ package com.zoffcc.applications.trifa;
 
 import com.zoffcc.applications.sorm.FriendList;
 import com.zoffcc.applications.sorm.TRIFADatabaseGlobalsNew;
+import okhttp3.*;
 
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.ProxySelector;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -11,6 +15,7 @@ import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static com.zoffcc.applications.trifa.HelperMessage.get_message_in_db_sent_push_is_read;
 import static com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_sent_push_set;
@@ -333,29 +338,55 @@ public class HelperFriend {
             }
 
             try {
-                HttpClient client = null;
+                OkHttpClient client = null;
 
-                client = HttpClient.newBuilder().connectTimeout(Duration.of(8, SECONDS)).build();
+                if (Companion.getPREF__orbot_enabled_to_int() == 1)
+                {
+                    InetSocketAddress proxyAddr = new InetSocketAddress(getORBOT_PROXY_HOST(), (int) getORBOT_PROXY_PORT());
+                    Proxy proxy = new Proxy(Proxy.Type.SOCKS, proxyAddr);
+                    client = new OkHttpClient.Builder().
+                            proxy(proxy).
+                            readTimeout(5, TimeUnit.SECONDS).
+                            callTimeout(6, TimeUnit.SECONDS).
+                            connectTimeout(8, TimeUnit.SECONDS).
+                            writeTimeout(5, TimeUnit.SECONDS).
+                            build();
+                }
+                else {
+                    client = new OkHttpClient.Builder().
+                            readTimeout(5, TimeUnit.SECONDS).
+                            callTimeout(6, TimeUnit.SECONDS).
+                            connectTimeout(8, TimeUnit.SECONDS).
+                            writeTimeout(5, TimeUnit.SECONDS).
+                            build();
+                    //                                   cacheControl(new CacheControl.Builder().noCache().build()).
+                }
 
-                //                                   cacheControl(new CacheControl.Builder().noCache().build()).
+                RequestBody formBody = new FormBody.Builder().
+                        add("ping", "1").
+                        build();
 
-                HttpRequest request = HttpRequest.newBuilder().uri(URI.create(pushurl_for_friend)).header("User-Agent", GENERIC_TOR_USERAGENT).timeout(Duration.of(5, SECONDS)).POST(HttpRequest.BodyPublishers.ofString("ping=1")).build();
+                Request request = new Request.
+                        Builder().
+                        cacheControl(new CacheControl.Builder().noCache().build()).
+                        url(pushurl_for_friend).
+                        header("User-Agent", GENERIC_TOR_USERAGENT).
+                        post(formBody).
+                        build();
 
                 try {
-                    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-                    Log.i(TAG, "friend_call_push_url:url=" + "********" + " RES=" + response.statusCode());
+                    Response response = client.newCall(request).execute();
+                    Log.i(TAG, "friend_call_push_url:url=" + "********" + " RES=" + response.code());
 
-                    if (response.statusCode() == 429) {
+                    if (response.code() == 429) {
                         // HINT: set timestamp of last 429 HTTP code (Error Too Many Requests)
                         ping_push_blocker_cache.put(pushurl_for_friend, System.currentTimeMillis());
-                        if (ping_push_blocker_cache.size() >= 20000)
-                        {
+                        if (ping_push_blocker_cache.size() >= 20000) {
                             // HINT: too many entries. just clear the hasmap.
                             // but probably nobody will have 20k friends in this app in sum?
                             ping_push_blocker_cache.clear();
                         }
-                    }
-                    else if ((response.statusCode() < 300) && (response.statusCode() > 199)) {
+                    } else if ((response.code() < 300) && (response.code() > 199)) {
                         if (update_message_flag) {
                             update_message_in_db_sent_push_set(friend_pubkey, message_timestamp_circa);
                         }
