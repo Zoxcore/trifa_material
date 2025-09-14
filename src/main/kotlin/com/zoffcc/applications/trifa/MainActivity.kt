@@ -2792,7 +2792,7 @@ class MainActivity
                 {
                     m.filetransfer_kind = ToxVars.TOX_FILE_KIND.TOX_FILE_KIND_DATA.value
                 }
-                m.is_new = false
+                m.is_new = true
                 var new_msg_id: Long = -1
                 try
                 {
@@ -2820,6 +2820,8 @@ class MainActivity
                             e2.printStackTrace()
                         }
                         HelperNotification.displayNotification("new incoming File" + fname)
+                        globalstore.increase_unread_message_count()
+                        globalfrndstoreunreadmsgs.increase_unread_per_friend_message_count(friend_pk!!)
                     }
                 } catch (_: Exception)
                 {
