@@ -179,7 +179,13 @@ private fun button_settings()
             onClick = {
                 GlobalScope.launch {
                     loading_nodes = true
-                    update_bootstrap_nodes_from_internet()
+                    try
+                    {
+                        update_bootstrap_nodes_from_internet()
+                    }
+                    catch(_: Exception)
+                    {
+                    }
                     loading_nodes = false
                     SnackBarToast(i18n("ui.setting.nodes_updated"))
                 }
