@@ -155,8 +155,11 @@ import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity
 import com.zoffcc.applications.trifa.MainActivity.Companion.DEBUG_COMPOSE_UI_UPDATES
 import com.zoffcc.applications.trifa.MainActivity.Companion.DEBUG_SET_FAKE_WEBCAM
+import com.zoffcc.applications.trifa.MainActivity.Companion.ORBOT_PROXY_HOST
+import com.zoffcc.applications.trifa.MainActivity.Companion.ORBOT_PROXY_PORT
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__audio_input_filter
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__do_not_sync_av
+import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__orbot_enabled_to_int
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__v4l2_capture_force_mjpeg
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__video_bitrate_mode
 import com.zoffcc.applications.trifa.MainActivity.Companion.accept_incoming_av_call
@@ -173,6 +176,7 @@ import com.zoffcc.applications.trifa.PrefsSettings
 import com.zoffcc.applications.trifa.RandomNameGenerator
 import com.zoffcc.applications.trifa.SingleComponentAspectRatioKeeperLayout
 import com.zoffcc.applications.trifa.SqliteEscapeLikeString
+import com.zoffcc.applications.trifa.TAG
 import com.zoffcc.applications.trifa.TRIFAGlobals
 import com.zoffcc.applications.trifa.ToxVars
 import com.zoffcc.applications.trifa.TrifaToxService
@@ -194,6 +198,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import org.briarproject.briar.desktop.SettingDetails
 import org.briarproject.briar.desktop.contact.ContactList
 import org.briarproject.briar.desktop.contact.GroupList
@@ -214,12 +220,12 @@ import org.briarproject.briar.desktop.ui.VerticalDivider
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import java.awt.Toolkit
 import java.io.File
-import java.net.URI
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
+import java.lang.reflect.Field
+import java.net.InetSocketAddress
+import java.net.Proxy
 import java.util.*
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import java.util.prefs.Preferences
 import javax.swing.JPanel
 
@@ -805,7 +811,7 @@ fun App()
                                                         .combinedClickable(
                                                             onClick = {
                                                                 val friendnum = tox_friend_by_public_key(avstatestore.state.call_with_friend_pubkey_get())
-                                                                Log.i(com.zoffcc.applications.trifa.TAG, "ffmpeg_devices_stop:002")
+                                                                Log.i(TAG, "ffmpeg_devices_stop:002")
                                                                 avstatestore.state.ffmpeg_devices_stop()
                                                                 MainActivity.toxav_call_control(friendnum, ToxVars.TOXAV_CALL_CONTROL.TOXAV_CALL_CONTROL_CANCEL.value)
                                                                 MainActivity.on_call_ended_actions()
@@ -2064,14 +2070,35 @@ fun main() = application(exitProcessOnExit = true) {
 fun update_bootstrap_nodes_from_internet()
 {
     val NODES_URL = "https://nodes.tox.chat/json"
-    val client = HttpClient.newHttpClient()
-    val request = HttpRequest.newBuilder()
-        .uri(URI(NODES_URL))
-        .GET()
+    var client: OkHttpClient
+
+    if (PREF__orbot_enabled_to_int == 1)
+    {
+        val proxyAddr = InetSocketAddress(ORBOT_PROXY_HOST, ORBOT_PROXY_PORT.toInt())
+        val proxy = Proxy(Proxy.Type.SOCKS, proxyAddr)
+        client = OkHttpClient().newBuilder()
+            .proxy(proxy)
+            .readTimeout(5, TimeUnit.SECONDS)
+            .callTimeout(6, TimeUnit.SECONDS)
+            .connectTimeout(8, TimeUnit.SECONDS)
+            .writeTimeout(5, TimeUnit.SECONDS)
+            .build()
+    } else
+    {
+        client = OkHttpClient().newBuilder()
+            .readTimeout(5, TimeUnit.SECONDS)
+            .callTimeout(6, TimeUnit.SECONDS)
+            .connectTimeout(8, TimeUnit.SECONDS)
+            .writeTimeout(5, TimeUnit.SECONDS)
+            .build()
+    }
+    val request = Request.Builder()
+        .url(NODES_URL)
+        .get()
         .header("User-Agent", GENERIC_TOR_USERAGENT)
         .build()
-    val response = client.send(request, HttpResponse.BodyHandlers.ofString())
-    val fromJson: NodeListJS = Gson().fromJson(response.body(), NodeListJS::class.java)
+    val response = client.newCall(request).execute()
+    val fromJson: NodeListJS = Gson().fromJson(response.body?.string(), NodeListJS::class.java)
     Log.i(TAG, "getLastRefresh=" + fromJson.lastRefresh)
     Log.i(TAG, "getLastScan=" + fromJson.lastScan)
     Log.i(TAG, "getNodes=" + fromJson.nodes.size)
