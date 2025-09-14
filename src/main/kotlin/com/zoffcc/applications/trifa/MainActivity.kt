@@ -2808,6 +2808,25 @@ class MainActivity
 
                 try
                 {
+                    if ((!globalstore.isFocused()) || (globalstore.isMinimized()) || (!contactstore.state.visible) || (contactstore.state.selectedContactPubkey != friend_pk))
+                    {
+                        var fname: String? = ""
+                        try
+                        {
+                            fname = " from " + tox_friend_get_name(tox_friend_by_public_key(friend_pk))
+                        }
+                        catch (e2: Exception)
+                        {
+                            e2.printStackTrace()
+                        }
+                        HelperNotification.displayNotification("new incoming File" + fname)
+                    }
+                } catch (_: Exception)
+                {
+                }
+
+                try
+                {
                     val t: Thread = object : Thread()
                     {
                         override fun run()
