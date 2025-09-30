@@ -989,7 +989,8 @@ class TrifaToxService
                 val cutoff_sent_time = System.currentTimeMillis() - (10 * 1000)
 
                 // first check:
-                val m_push_count = orma!!.selectFromMessage().directionEq(1).
+                val m_push_count = orma!!.selectFromMessage().
+                directionEq(TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value).
                 msg_versionEq(0).
                 TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value).
                 sent_pushEq(0).
@@ -1004,7 +1005,7 @@ class TrifaToxService
                     return
                 }
 
-                val m_push: List<Message>? = orma!!.selectFromMessage().directionEq(1).
+                val m_push: List<Message>? = orma!!.selectFromMessage().directionEq(TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value).
                 msg_versionEq(0).
                 TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value).
                 sent_pushEq(0).
@@ -1047,7 +1048,7 @@ class TrifaToxService
                 // HINT: check if there is anything to resend first --------
                 var check_count = 0
                 try {
-                    check_count = orma!!.selectFromMessage().directionEq(1)
+                    check_count = orma!!.selectFromMessage().directionEq(TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value)
                         .msg_versionEq(0)
                         .TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value)
                         .resend_countLt(MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION).readEq(false)
@@ -1061,10 +1062,10 @@ class TrifaToxService
                 var m_v1: List<Message>? = null
                 m_v1 = if (friend_pubkey != null)
                 {
-                    orma!!.selectFromMessage().directionEq(1).msg_versionEq(0).tox_friendpubkeyEq(friend_pubkey).TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value).resend_countLt(MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION).readEq(false).orderBySent_timestampAsc().toList()
+                    orma!!.selectFromMessage().directionEq(TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value).msg_versionEq(0).tox_friendpubkeyEq(friend_pubkey).TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value).resend_countLt(MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION).readEq(false).orderBySent_timestampAsc().toList()
                 } else
                 {
-                    orma!!.selectFromMessage().directionEq(1).msg_versionEq(0).TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value).resend_countLt(MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION).readEq(false).orderBySent_timestampAsc().toList()
+                    orma!!.selectFromMessage().directionEq(TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value).msg_versionEq(0).TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value).resend_countLt(MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION).readEq(false).orderBySent_timestampAsc().toList()
                 }
                 Log.i(TAG, "resend_v3_messages: -- SQL --")
                 if (m_v1 != null && m_v1.size > 0)
@@ -1132,7 +1133,7 @@ class TrifaToxService
                 // HINT: check if there is anything to resend first --------
                 var check_count = 0
                 try {
-                    check_count = orma!!.selectFromMessage().directionEq(1)
+                    check_count = orma!!.selectFromMessage().directionEq(TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value)
                         .TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value)
                         .msg_versionEq(0).readEq(false)
                         .resend_countLt(MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION)
@@ -1149,11 +1150,11 @@ class TrifaToxService
                     // HINT: this is the generic resend for all friends, that happens in regular intervals
                     //       only resend if the original sent timestamp is at least 25 seconds in the past
                     //       to try to avoid resending when the read receipt is very late.
-                    orma!!.selectFromMessage().directionEq(1).TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value).msg_versionEq(0).tox_friendpubkeyEq(friend_pubkey).readEq(false).resend_countLt(MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION).orderBySent_timestampAsc().sent_timestampLt(cutoff_sent_time).toList()
+                    orma!!.selectFromMessage().directionEq(TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value).TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value).msg_versionEq(0).tox_friendpubkeyEq(friend_pubkey).readEq(false).resend_countLt(MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION).orderBySent_timestampAsc().sent_timestampLt(cutoff_sent_time).toList()
                 } else
                 {
                     // HINT: this is the specific resend for 1 friend only, when that friend comes online
-                    orma!!.selectFromMessage().directionEq(1).TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value).msg_versionEq(0).readEq(false).resend_countLt(MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION).orderBySent_timestampAsc().toList()
+                    orma!!.selectFromMessage().directionEq(TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value).TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value).msg_versionEq(0).readEq(false).resend_countLt(MAX_TEXTMSG_RESEND_COUNT_OLDMSG_VERSION).orderBySent_timestampAsc().toList()
                 }
                 Log.i(TAG, "resend_old_messages: -- SQL --")
                 if (m_v0 != null && m_v0.size > 0)
@@ -1216,7 +1217,7 @@ class TrifaToxService
                 var check_count = 0
                 try {
                     check_count = orma!!.selectFromMessage().
-                    directionEq(1).TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value)
+                    directionEq(TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value).TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value)
                         .msg_versionEq(1).readEq(false).
                         msg_at_relayEq(at_relay).count()
                 }
@@ -1226,7 +1227,7 @@ class TrifaToxService
 
                 Log.i(TAG, "resend_v2_messages: -- SQL --")
                 val m_v1 = orma!!.selectFromMessage().
-                directionEq(1).TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value)
+                directionEq(TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value).TRIFA_MESSAGE_TYPEEq(TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value)
                     .msg_versionEq(1).readEq(false).
                     msg_at_relayEq(at_relay).orderBySent_timestampAsc().toList()
                 Log.i(TAG, "resend_v2_messages: -- SQL --")
