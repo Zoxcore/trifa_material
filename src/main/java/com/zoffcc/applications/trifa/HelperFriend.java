@@ -391,6 +391,7 @@ public class HelperFriend {
                             update_message_in_db_sent_push_set(friend_pubkey, message_timestamp_circa);
                         }
                     }
+                    response.body().close();
                 } catch (Exception ignored) {
                 }
             } catch (Exception e) {
