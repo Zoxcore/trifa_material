@@ -1753,7 +1753,7 @@ class MainActivity
                 }
                 // there can be older messages with same message_id for this friend! so always take the latest one! -------
                 val m = orma!!.selectFromMessage().message_idEq(message_id).
-                    tox_friendpubkeyEq(toxpk).directionEq(1).orderByIdDesc().toList()[0]
+                    tox_friendpubkeyEq(toxpk).directionEq(TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value).orderByIdDesc().toList()[0]
                 // there can be older messages with same message_id for this friend! so always take the latest one! -------
                 // Log.i(TAG, "friend_read_receipt:m=" + m)
                 // Log.i(TAG, "friend_read_receipt:m:message_id=" + m.message_id + " text=" + m.text + " friendpubkey=" + m.tox_friendpubkey + " read=" + m.read + " direction=" + m.direction)
@@ -1830,7 +1830,7 @@ class MainActivity
             {
                 msgV3hash_hex_string = bytesToHex(msgV3hash_bin, 0, msgV3hash_bin.size)
                 val got_messages = orma!!.selectFromMessage().tox_friendpubkeyEq(toxpk).
-                    directionEq(0).msg_idv3_hashEq(msgV3hash_hex_string).count()
+                    directionEq(TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value).msg_idv3_hashEq(msgV3hash_hex_string).count()
                 // Log.i(TAG, "friend_message:friend:" + friend_number + " msgV3hash_hex_string:" + msgV3hash_hex_string +
                 //            " got_messages=" + got_messages);
                 // Log.i(TAG, "friend_message:friend:" + friend_number + " msgV3hash_hex_string:" + msgV3hash_hex_string +
@@ -1857,7 +1857,7 @@ class MainActivity
                 if (msgV3hash_bin != null)
                 {
                     val got_messages_mirrored = orma!!.selectFromMessage().
-                            tox_friendpubkeyEq(toxpk).directionEq(1).
+                            tox_friendpubkeyEq(toxpk).directionEq(TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value).
                             msg_idv3_hashEq(msgV3hash_hex_string).count()
                     // Log.i(TAG, "update_friend_msgv3_capability:got_messages_mirrored=" + got_messages_mirrored + " hash1=" +
                     //           msgV3hash_bin + " " + msgV3hash_hex_string);
@@ -2331,7 +2331,7 @@ class MainActivity
                 }
                 val m_try = orma!!.selectFromMessage().
                     msg_id_hashEq(message_id_hash_as_hex_string).
-                    tox_friendpubkeyEq(toxpk).directionEq(1).
+                    tox_friendpubkeyEq(toxpk).directionEq(TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value).
                     readEq(false).toList()
                 if ((m_try == null) || (m_try.size < 1))
                 {
@@ -2343,7 +2343,7 @@ class MainActivity
                 val m = orma!!.selectFromMessage().
                     msg_id_hashEq(message_id_hash_as_hex_string).
                     tox_friendpubkeyEq(toxpk).
-                    directionEq(1).
+                    directionEq(TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value).
                     readEq(false).
                     get(0)
 

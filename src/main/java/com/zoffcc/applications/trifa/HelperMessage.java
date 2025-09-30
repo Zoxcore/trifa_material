@@ -56,7 +56,7 @@ public class HelperMessage {
             m = TrifaToxService.Companion.getOrma().selectFromMessage().
                     msg_idv3_hashEq(msgV3hash_hex_string).
                     tox_friendpubkeyEq(tox_friend_get_public_key(friend_number)).
-                    directionEq(1).
+                    directionEq(TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value).
                     readEq(false).
                     orderByIdDesc().
                     get(0);
@@ -615,7 +615,7 @@ public class HelperMessage {
                     tox_friendpubkeyEq(friend_pubkey).
                     sent_timestampBetween(sent_timestamp - PUSH_URL_TRIGGER_GET_MESSAGE_FOR_delta_ms_prev,
                     sent_timestamp + PUSH_URL_TRIGGER_GET_MESSAGE_FOR_delta_ms_after).
-                    directionEq(1).
+                    directionEq(TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value).
                     orderBySent_timestampAsc().
                     limit(1).get(0);
 
@@ -637,7 +637,8 @@ public class HelperMessage {
                     tox_friendpubkeyEq(friend_pubkey).
                     sent_timestampBetween(sent_timestamp - PUSH_URL_TRIGGER_GET_MESSAGE_FOR_delta_ms_prev,
                     sent_timestamp + PUSH_URL_TRIGGER_GET_MESSAGE_FOR_delta_ms_after).
-                    directionEq(1).
+                    directionEq(TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value).
+                    sent_pushEq(0).
                     orderBySent_timestampAsc().
                     limit(1).get(0);
 
@@ -720,7 +721,7 @@ public class HelperMessage {
             final List<Message> mlist = TrifaToxService.Companion.getOrma().selectFromMessage().
                     msg_id_hashEq(message_id_hash_as_hex_string).
                     tox_friendpubkeyEq(real_sender_as_hex_string).
-                    directionEq(1).
+                    directionEq(TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value).
                     readEq(false).
                     toList();
 
