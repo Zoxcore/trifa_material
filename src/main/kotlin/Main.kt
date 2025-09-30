@@ -2229,6 +2229,14 @@ fun update_bootstrap_nodes_from_internet()
         Log.i(TAG, "onConnected:EE6:" + e.message)
         e.printStackTrace()
     }
+
+    try
+    {
+        response.body.close()
+    }
+    catch(_: Exception)
+    {
+    }
 }
 
 object AboutIcon : Painter() {
