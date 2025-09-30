@@ -382,7 +382,7 @@ public class HelperFriend {
                         // HINT: set timestamp of last 429 HTTP code (Error Too Many Requests)
                         ping_push_blocker_cache.put(pushurl_for_friend, System.currentTimeMillis());
                         if (ping_push_blocker_cache.size() >= 20000) {
-                            // HINT: too many entries. just clear the hasmap.
+                            // HINT: too many entries. just clear the hashmap.
                             // but probably nobody will have 20k friends in this app in sum?
                             ping_push_blocker_cache.clear();
                         }
