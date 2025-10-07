@@ -213,14 +213,16 @@ compose.desktop {
 }
 
 val macExtraPlistKeys: String
-    get() = """
-    <key>NSMicrophoneUsageDescription</key>
+// HINT: do NOT remove the formatting or the indents ----------
+    get() = """    <key>NSMicrophoneUsageDescription</key>
     <string>Need microphone access for making audio calls</string>
     <key>NSCameraUsageDescription</key>
     <string>Need camera access for making video calls</string>
-    <key>NSPhotoLibraryUsageDescription</key>
+    <key>NSPhotoLibraryAddUsageDescription</key>
     <string>Need photo library access for saving and uploading images</string>
-    """.trimIndent()
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Need photo library access for saving and uploading images</string>"""
+// HINT: do NOT remove the formatting or the indents ----------
 
 val appImageTool = project.file("deps/appimagetool.AppImage")
 val linuxAppDir = project.file("build/compose/binaries/main/app")
