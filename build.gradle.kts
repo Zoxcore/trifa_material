@@ -94,7 +94,7 @@ dependencies {
     //
     //**//implementation(":sqlite-jdbc:3.48.0.1-SNAPSHOT")
     implementation("org.xerial:sqlite-jdbc:3.50.3.0")
-    implementation("com.squareup.okhttp3:okhttp:5.1.0")
+    implementation("com.squareup.okhttp3:okhttp:5.2.0")
     implementation("ca.gosyer:kotlin-multiplatform-appdirs:1.2.0")
     implementation("com.sksamuel.scrimage:scrimage-core:4.3.5")
     implementation("com.sksamuel.scrimage:scrimage-webp:4.3.5")
