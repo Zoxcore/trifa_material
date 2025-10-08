@@ -3,9 +3,10 @@
 <img src="https://github.com/Zoxcore/trifa_material/releases/download/nightly/screenshot-macos.png" width="90%">
 
 Automated screenshots:<br>
-<img src="https://github.com/Zoxcore/trifa_material/releases/download/nightly/screenshot-macos-14.png" height="200"></a>
-<img src="https://github.com/Zoxcore/trifa_material/releases/download/nightly/screenshot-windows.png" height="200"></a>
-<img src="https://github.com/Zoxcore/trifa_material/releases/download/nightly/screenshot-linux.png" height="200"></a>
+<img src="https://github.com/Zoxcore/trifa_material/releases/download/nightly/screenshot-macos-14.png" height="180"></a>
+<img src="https://github.com/Zoxcore/trifa_material/releases/download/nightly/screenshot-macos-15.png" height="180"></a>
+<img src="https://github.com/Zoxcore/trifa_material/releases/download/nightly/screenshot-windows.png" height="180"></a>
+<img src="https://github.com/Zoxcore/trifa_material/releases/download/nightly/screenshot-linux.png" height="180"></a>
 
 ## Build Status
 
