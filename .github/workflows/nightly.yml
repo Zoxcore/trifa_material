@@ -551,7 +551,7 @@ jobs:
            sendkeys apps
            sendkeys -a "TRIfA" -c ":smile"
            cd /Users/runner/work/trifa_material/trifa_material/jshowarch-master
-           java jshowarch 885 76 115 65 24 &
+           java jshowarch 885 76 165 160 15 1 &
            sleep 90
            cliclick -m verbose c:820,334
            sleep 1
@@ -701,7 +701,7 @@ jobs:
            cd /Users/runner/work/trifa_material/trifa_material/jshowarch-master
            rm *.class
            javac jshowarch.java
-           java jshowarch 885 76 115 65 24 &
+           java jshowarch 885 76 165 160 15 1 &
            sleep 90
            cliclick -m verbose c:367,623
            sleep 120
@@ -850,7 +850,7 @@ jobs:
            cd /Users/runner/work/trifa_material/trifa_material/jshowarch-master
            rm *.class
            javac jshowarch.java
-           java jshowarch 885 76 115 65 24 &
+           java jshowarch 885 76 165 160 15 1 &
            sleep 90
            cliclick -m verbose c:367,623
            sleep 120
