@@ -8,6 +8,8 @@ file_lix='libffmpeg_av_jni.so'
 file_asan_lix='libffmpeg_av_jni.so__ASAN'
 file_rpi='libffmpeg_av_jni_raspi.so'
 
+java_source_url_01='https://raw.githubusercontent.com/zoff99/ffmpeg_av_jni/refs/heads/master/com/zoffcc/applications/ffmpegav/AVActivity.java'
+
 _HOME2_=$(dirname $0)
 export _HOME2_
 _HOME_=$(cd $_HOME2_;pwd)
@@ -22,3 +24,7 @@ wget "$base_url""$file_win" -O "$file_win"
 wget "$base_url""$file_lix" -O "$file_lix"
 wget "$base_url""$file_asan_lix" -O "$file_asan_lix"
 wget "$base_url""$file_rpi" -O "$file_rpi"
+
+cd "$_HOME_"/../
+wget "$java_source_url_01" -O ./src/main/java/com/zoffcc/applications/ffmpegav/AVActivity.java
+
