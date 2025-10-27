@@ -126,7 +126,7 @@ jobs:
           Write-Output D:\a\trifa_material\trifa_material\screenshot-windows.png
 
       - name: upload-screenshots
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: screenshot-windows
           path: |
