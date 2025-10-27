@@ -52,7 +52,7 @@ jobs:
         run: |
           cp -v /Users/runner/work/trifa_material/trifa_material/build/compose/binaries/main/dmg/trifa_material-*.dmg trifa-material_nightly.dmg
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: trifa-material_nightly.dmg
           path: trifa-material_nightly.dmg
