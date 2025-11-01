@@ -595,7 +595,7 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         artifacts: "screenshot-macos.png"
 
-  macos-14-test:
+  macos-14arm-test:
     runs-on: macos-14
     if: ${{ true }}
     permissions:
@@ -708,20 +708,20 @@ jobs:
            cat /Users/runner/work/trifa_material/trifa_material/tester.log
            pwd
            ls -al /Users/runner/
-           cp -v /Users/runner/screenshot-macos-14.png /Users/runner/work/trifa_material/trifa_material/screenshot-macos-14.png
+           cp -v /Users/runner/screenshot-macos-14.png /Users/runner/work/trifa_material/trifa_material/screenshot-macos-14arm.png
 
     - name: tweak screenshot
       run: |
            cd /Users/runner/work/trifa_material/trifa_material/
            pwd
-           cp -v screenshot-macos-14.png /Users/runner/screenshot-macos-14_orig.png
-           convert screenshot-macos-14.png -crop 1176x885+0+0 +repage crop_br.png
-           convert screenshot-macos-14.png -crop 1919x25+1663+0  crop_br2.png
-           convert screenshot-macos-14.png -crop 1560x88+180+993  crop_br3.png
+           cp -v screenshot-macos-14arm.png /Users/runner/screenshot-macos-14arm_orig.png
+           convert screenshot-macos-14arm.png -crop 1176x885+0+0 +repage crop_br.png
+           convert screenshot-macos-14arm.png -crop 1919x25+1663+0  crop_br2.png
+           convert screenshot-macos-14arm.png -crop 1560x88+180+993  crop_br3.png
            convert crop_br3.png  -resize 65%  crop_br3small.png
            composite -compose Copy -gravity South crop_br3small.png crop_br.png -alpha set dst.png
            composite -compose Copy -gravity Northeast crop_br2.png dst.png -alpha set dst2.png
-           cp -v dst2.png screenshot-macos-14.png
+           cp -v dst2.png screenshot-macos-14arm.png
 
     - name: upload-screenshots
       uses: actions/upload-artifact@v5
@@ -741,10 +741,10 @@ jobs:
         prerelease: true
         replacesArtifacts: true
         token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: "screenshot-macos-14.png"
+        artifacts: "screenshot-macos-14arm.png"
 
 
-  macos-15-test:
+  macos-15arm-test:
     runs-on: macos-15
     if: ${{ true }}
     permissions:
@@ -820,7 +820,7 @@ jobs:
            screencapture -T 60 -x -t png /Users/runner/screen07.png &
            screencapture -T 90 -x -t png /Users/runner/screen09.png &
            screencapture -T 110 -x -t png /Users/runner/screen10.png &
-           screencapture -T 248 -x -t png /Users/runner/screenshot-macos-15.png &
+           screencapture -T 248 -x -t png /Users/runner/screenshot-macos-15arm.png &
            screencapture -T 240 -x -t png /Users/runner/screen12.png &
            screencapture -T 300 -x -t png /Users/runner/screen13.png &
            pwd
@@ -857,20 +857,20 @@ jobs:
            cat /Users/runner/work/trifa_material/trifa_material/tester.log
            pwd
            ls -al /Users/runner/
-           cp -v /Users/runner/screenshot-macos-15.png /Users/runner/work/trifa_material/trifa_material/screenshot-macos-15.png
+           cp -v /Users/runner/screenshot-macos-15arm.png /Users/runner/work/trifa_material/trifa_material/screenshot-macos-15arm.png
 
     - name: tweak screenshot
       run: |
            cd /Users/runner/work/trifa_material/trifa_material/
            pwd
-           cp -v screenshot-macos-15.png /Users/runner/screenshot-macos-15_orig.png
-           convert screenshot-macos-15.png -crop 1176x885+0+0 +repage crop_br.png
-           convert screenshot-macos-15.png -crop 1919x25+1663+0  crop_br2.png
-           convert screenshot-macos-15.png -crop 1560x88+180+993  crop_br3.png
+           cp -v screenshot-macos-15arm.png /Users/runner/screenshot-macos-15arm_orig.png
+           convert screenshot-macos-15arm.png -crop 1176x885+0+0 +repage crop_br.png
+           convert screenshot-macos-15arm.png -crop 1919x25+1663+0  crop_br2.png
+           convert screenshot-macos-15arm.png -crop 1560x88+180+993  crop_br3.png
            convert crop_br3.png  -resize 65%  crop_br3small.png
            composite -compose Copy -gravity South crop_br3small.png crop_br.png -alpha set dst.png
            composite -compose Copy -gravity Northeast crop_br2.png dst.png -alpha set dst2.png
-           cp -v dst2.png screenshot-macos-15.png
+           cp -v dst2.png screenshot-macos-15arm.png
 
     - name: upload-screenshots
       uses: actions/upload-artifact@v5
@@ -890,7 +890,7 @@ jobs:
         prerelease: true
         replacesArtifacts: true
         token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: "screenshot-macos-15.png"
+        artifacts: "screenshot-macos-15arm.png"
 
 
 

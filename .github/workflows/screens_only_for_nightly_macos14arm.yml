@@ -1,4 +1,4 @@
-name: Screens Only MacOS-arm
+name: Screens Only MacOS 14-arm
 
 on:
   workflow_dispatch:
@@ -12,7 +12,7 @@ defaults:
     shell: bash
 
 jobs:
-  macos-14-test:
+  macos-14arm-test:
     runs-on: macos-14
     if: ${{ true }}
     permissions:
