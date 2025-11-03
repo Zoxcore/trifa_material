@@ -10,12 +10,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
 public class Generator {
     private static final String TAG = "Generator";
-    static final String Version = "0.99.1";
+    static final String Version = "0.99.2";
     static final String prefix = "_sorm_";
     static final String tbl_f_ext = ".java";
     static final String tbl_s_ext = ".sql";
@@ -88,7 +89,11 @@ public class Generator {
             final String workdir = args[0];
             begin_orma(workdir, orma_global_out);
 
-            for (final File fileEntry : new File(workdir).listFiles()) {
+            // HINT: sort order does not seem to be exactly identical everywhere. this is the aweful "fix" with sorting
+            File[] files = new File(workdir).listFiles();
+            Arrays.sort(files, (a, b) -> a.getName().compareTo(b.getName()));
+
+            for (final File fileEntry : files) {
                 if (!fileEntry.isDirectory()) {
                     if (fileEntry.getName().startsWith(prefix))
                     {
@@ -166,7 +171,7 @@ public class Generator {
     static void begin_table(final String workdir, final String tablename)
     {
         System.out.println("starting: " + workdir + File.separator + out_classdir + tablename + tbl_f_ext);
-        tbl_deepcopy = "    static "+tablename+" deep_copy("+tablename+" in)" + "\n";
+        tbl_deepcopy = "    public static "+tablename+" deep_copy("+tablename+" in)" + "\n";
         tbl_deepcopy += "    {" + "\n";
         tbl_deepcopy += "        "+tablename+" out = new "+tablename+"();" + "\n";
 
