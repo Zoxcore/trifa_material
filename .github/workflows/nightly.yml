@@ -853,6 +853,8 @@ jobs:
            java jshowarch 885 76 165 110 15 1 &
            sleep 90
            cliclick -m verbose c:367,623
+           sleep 5
+           cliclick -m verbose c:507,368
            sleep 120
            cat /Users/runner/work/trifa_material/trifa_material/tester.log
            pwd
