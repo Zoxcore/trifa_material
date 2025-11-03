@@ -856,9 +856,10 @@ jobs:
            sleep 5
            # audio video popup
            cliclick -m verbose c:507,368
+           sleep 1
            # hosted compute popup
            cliclick -m verbose c:599,351
-           sleep 120
+           sleep 119
            cat /Users/runner/work/trifa_material/trifa_material/tester.log
            pwd
            ls -al /Users/runner/
