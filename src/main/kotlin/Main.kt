@@ -1932,7 +1932,22 @@ fun set_tox_online_state(new_state: String)
     Log.i(TAG, "----> tox_online_state = $online_button_text_wrapper")
 }
 
-fun main() = application(exitProcessOnExit = true) {
+fun main(args: Array<String>) = application(exitProcessOnExit = true) {
+
+    try
+    {
+        println("args START ============")
+        println("args all:" + args.size)
+        args.iterator().forEach {
+            println("args:" + it)
+        }
+        println("args DONE  ============")
+    }
+    catch(e: Exception)
+    {
+        e.printStackTrace()
+    }
+
     try
     { // HINT: show proper name in MacOS Menubar
         // https://alvinalexander.com/java/java-application-name-mac-menu-bar-menubar-class-name/
