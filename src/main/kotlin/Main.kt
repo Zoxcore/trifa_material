@@ -122,6 +122,7 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import ca.gosyer.appdirs.AppDirs
 import com.google.gson.Gson
+import com.kdroid.composetray.utils.SingleInstanceManager
 import com.vanniktech.emoji.Emoji
 import com.vanniktech.emoji.EmojiManager
 import com.vanniktech.emoji.ios.IosEmojiProvider
@@ -1948,6 +1949,21 @@ fun main(args: Array<String>) = application(exitProcessOnExit = true) {
         e.printStackTrace()
     }
 
+    // -- check for single instance --
+    // thanks to: https://github.com/kdroidFilter/ComposeNativeTray/blob/master/src/commonMain/kotlin/com/kdroid/composetray/utils/SingleInstanceManager.kt
+    //
+    val isSingleInstance = SingleInstanceManager.isSingleInstance(
+        onRestoreRequest = {
+            // indicate that our main windows needs to be shown (if minimized now)
+            globalstore.updateMinimized(false)
+        }
+    )
+    if (!isSingleInstance) {
+        exitApplication()
+        return@application
+    }
+    // -- check for single instance --
+
     try
     { // HINT: show proper name in MacOS Menubar
         // https://alvinalexander.com/java/java-application-name-mac-menu-bar-menubar-class-name/
@@ -2567,6 +2583,13 @@ private fun MainAppStart()
                     LocalDensity provides Density(globalstore.state.ui_density)
                 )
                 {
+                    val globalstore__ by globalstore.stateFlow.collectAsState()
+                    if (!globalstore__.mainwindow_minimized)
+                    {
+                        // un-minimize main window when someone tried to open another instance of this app
+                        state.isMinimized = false
+                        globalstore.updateMinimized(false)
+                    }
                     App()
                 }
             }
