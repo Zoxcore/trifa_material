@@ -221,7 +221,6 @@ import org.briarproject.briar.desktop.ui.VerticalDivider
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import java.awt.Toolkit
 import java.io.File
-import java.lang.reflect.Field
 import java.net.InetSocketAddress
 import java.net.Proxy
 import java.util.*
@@ -317,6 +316,7 @@ var scaffoldState: ScaffoldState = ScaffoldState(drawerState = DrawerState(initi
 var ScaffoldCoroutineScope: CoroutineScope = GlobalScope
 var NotoEmojiFont: FontFamily? = null
 var DefaultFont: FontFamily? = null
+const val DISPLAY_SINGLE_INSTANCE_INFO = 1000L
 
 @OptIn(DelicateCoroutinesApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -1933,6 +1933,7 @@ fun set_tox_online_state(new_state: String)
     Log.i(TAG, "----> tox_online_state = $online_button_text_wrapper")
 }
 
+@OptIn(DelicateCoroutinesApi::class)
 fun main(args: Array<String>) = application(exitProcessOnExit = true) {
 
     try
@@ -1952,150 +1953,191 @@ fun main(args: Array<String>) = application(exitProcessOnExit = true) {
     // -- check for single instance --
     // thanks to: https://github.com/kdroidFilter/ComposeNativeTray/blob/master/src/commonMain/kotlin/com/kdroid/composetray/utils/SingleInstanceManager.kt
     //
-    val isSingleInstance = SingleInstanceManager.isSingleInstance(
+    var jump_single_instance by remember { mutableStateOf(false) }
+    var isSingleInstance = SingleInstanceManager.isSingleInstance(
         onRestoreRequest = {
             // indicate that our main windows needs to be shown (if minimized now)
             globalstore.updateMinimized(false)
         }
     )
+
+    var isOpenSingleInstance by remember { mutableStateOf(true) }
     if (!isSingleInstance) {
-        exitApplication()
-        return@application
-    }
-    // -- check for single instance --
-
-    try
-    { // HINT: show proper name in MacOS Menubar
-        // https://alvinalexander.com/java/java-application-name-mac-menu-bar-menubar-class-name/
-        System.setProperty("com.apple.mrj.application.apple.menu.about.name", "TRIfA - Material")
-        System.setProperty("apple.awt.application.name", "TRIfA - Material")
-        System.setProperty("apple.laf.useScreenMenuBar", "true")
-    } catch (e: java.lang.Exception)
-    {
-        e.printStackTrace()
-    }
-
-    try
-    { // set "StartupWMClass" for Java Swing applications
-        //
-        // https://stackoverflow.com/a/29218320
-        //
-        val xToolkit: Toolkit = Toolkit.getDefaultToolkit()
-        var awtAppClassNameField: java.lang.reflect.Field? = null
-        awtAppClassNameField = xToolkit.javaClass.getDeclaredField("awtAppClassName")
-        awtAppClassNameField.isAccessible = true
-        awtAppClassNameField[xToolkit] = "normal_trifa_material" // this needs to be exactly the same String as "StartupWMClass" in the "*.desktop" file
-    } catch (e: Exception)
-    { // e.printStackTrace()
-    }
-
-    try {
-        set_resouces_dir(RESOURCESDIR.canonicalPath)
-    } catch(_: Exception) {}
-
-    try
-    {
-        EmojiManager.install(IosEmojiProvider())
-        // ------
-        var emojis_cat_: List<Emoji>
-        var grouped_entries: Int
-        var remain: Int
-        // ------
-        // --- loop ---
-        for(j1 in 0..(IosEmojiProvider().categories.size - 1))
+        var isAskingToCloseSingleInstance by remember { mutableStateOf(false) }
+        if (isOpenSingleInstance)
         {
-            Log.i(TAG, "adding emoji category: " + j1 + " : " + IosEmojiProvider().categories[j1].categoryNames.values.elementAt(0))
-            val emojis_cat_gropued: ArrayList<ArrayList<EmojiStrAndName>> = ArrayList()
-            emojis_cat_ = IosEmojiProvider().categories[j1].emojis
-            grouped_entries = emojis_cat_.size / emojis_per_row
-            remain = emojis_cat_.size - (grouped_entries * emojis_per_row)
-            for (i in 0..(grouped_entries - 1))
-            {
-                val pos = i * emojis_per_row
-                val e: ArrayList<EmojiStrAndName> = ArrayList()
-                for (j in 0..(emojis_per_row - 1))
-                {
-                    // Log.i(TAG, "emoji name(s): " + emojis_cat_[pos + j].shortcodes)
-                    // Log.i(TAG, "emoji: " + emojis_cat_[pos + j].unicode)
-                    val em = EmojiStrAndName()
-                    em.char = emojis_cat_[pos + j].unicode
-                    em.name = ""
-                    try
-                    {
-                        em.name = emojis_cat_[pos + j].shortcodes[0]
-                    }
-                    catch(_: java.lang.Exception)
-                    {
-                    }
-                    e.add(em)
+            Window(onCloseRequest = { isAskingToCloseSingleInstance = true }, title = "Info") {
+                GlobalScope.launch {
+                    delay(DISPLAY_SINGLE_INSTANCE_INFO)
+                    isOpenSingleInstance = false
                 }
-                emojis_cat_gropued.add(e)
-            }
-            if (remain > 0)
-            {
-                val pos = grouped_entries * emojis_per_row
-                val e: ArrayList<EmojiStrAndName> = ArrayList()
-                for (j in 0..(remain - 1))
-                {
-                    val em = EmojiStrAndName()
-                    em.char = emojis_cat_[pos + j].unicode
-                    em.name = ""
-                    try
-                    {
-                        em.name = emojis_cat_[pos + j].shortcodes.get(0)
+                @OptIn(ExperimentalComposeUiApi::class)
+                Column {
+                    Spacer(modifier = Modifier.height(5.dp))
+                    Text(
+                        text = "TRIfA is already running",
+                        style = MaterialTheme.typography.body1.copy(
+                            fontSize = 22.sp,
+                        ),
+                    )
+                    Spacer(modifier = Modifier.height(5.dp))
+                    Button(onClick = {
+                        jump_single_instance = true
+                        isOpenSingleInstance = false
+                    }) {
+                        Text("Start TRIfA anyway (in case of Error)")
                     }
-                    catch(_: java.lang.Exception)
+                    if (isAskingToCloseSingleInstance)
                     {
-                    }
-                    e.add(em)
-                }
-                emojis_cat_gropued.add(e)
-            }
-            emojis_cat_all_gropued.add(emojis_cat_gropued)
-            val cat_name = IosEmojiProvider().categories[j1].categoryNames.values.elementAt(0)
-            emojis_cat_all_cat_names.add(cat_name)
-            var cat_emoji: String
-            try
-            {
-                var search_str = "slightly_smiling_face"
-                when (cat_name.lowercase())
-                {
-                    "faces" -> search_str = "slightly_smiling_face"
-                    "nature" -> search_str = "panda"
-                    "food" -> search_str = "cup"
-                    "activities" -> search_str = "soccer"
-                    "places" -> search_str = "car"
-                    "objects" -> search_str = "bulb"
-                    "symbols" -> search_str = "abc"
-                    "flags" -> search_str = "flag-at"
-                    else ->
-                    {
+                        isOpenSingleInstance = false
                     }
                 }
-                cat_emoji = SearchEmojiManager().search(query = search_str).first().emoji.unicode
-                emojis_cat_all_cat_emoji.add(cat_emoji)
             }
-            catch(e3: Exception)
-            {
-                cat_emoji = SearchEmojiManager().search(query = "smile").first().emoji.unicode
-                emojis_cat_all_cat_emoji.add(cat_emoji)
-            }
-            Log.i(TAG, "emoji cat: " + cat_name + " emoji: " + cat_emoji)
         }
-        // --- loop ---
+        else
+        {
+            if (!jump_single_instance)
+            {
+                exitApplication()
+                return@application
+            }
+        }
     }
-    catch (e: Exception)
+
+    if ((jump_single_instance) || (isSingleInstance))
     {
-        e.printStackTrace()
+        // -- check for single instance --
+        try
+        {
+            // HINT: show proper name in MacOS Menubar
+            // https://alvinalexander.com/java/java-application-name-mac-menu-bar-menubar-class-name/
+            System.setProperty("com.apple.mrj.application.apple.menu.about.name", "TRIfA - Material")
+            System.setProperty("apple.awt.application.name", "TRIfA - Material")
+            System.setProperty("apple.laf.useScreenMenuBar", "true")
+        } catch (e: java.lang.Exception)
+        {
+            e.printStackTrace()
+        }
+
+        try
+        { // set "StartupWMClass" for Java Swing applications
+            //
+            // https://stackoverflow.com/a/29218320
+            //
+            val xToolkit: Toolkit = Toolkit.getDefaultToolkit()
+            var awtAppClassNameField: java.lang.reflect.Field? = null
+            awtAppClassNameField = xToolkit.javaClass.getDeclaredField("awtAppClassName")
+            awtAppClassNameField.isAccessible = true
+            awtAppClassNameField[xToolkit] = "normal_trifa_material" // this needs to be exactly the same String as "StartupWMClass" in the "*.desktop" file
+        } catch (e: Exception)
+        { // e.printStackTrace()
+        }
+
+        try
+        {
+            set_resouces_dir(RESOURCESDIR.canonicalPath)
+        } catch (_: Exception)
+        {
+        }
+
+        try
+        {
+            EmojiManager.install(IosEmojiProvider())
+            // ------
+            var emojis_cat_: List<Emoji>
+            var grouped_entries: Int
+            var remain: Int
+            // ------
+            // --- loop ---
+            for (j1 in 0..(IosEmojiProvider().categories.size - 1))
+            {
+                Log.i(TAG, "adding emoji category: " + j1 + " : " + IosEmojiProvider().categories[j1].categoryNames.values.elementAt(0))
+                val emojis_cat_gropued: ArrayList<ArrayList<EmojiStrAndName>> = ArrayList()
+                emojis_cat_ = IosEmojiProvider().categories[j1].emojis
+                grouped_entries = emojis_cat_.size / emojis_per_row
+                remain = emojis_cat_.size - (grouped_entries * emojis_per_row)
+                for (i in 0..(grouped_entries - 1))
+                {
+                    val pos = i * emojis_per_row
+                    val e: ArrayList<EmojiStrAndName> = ArrayList()
+                    for (j in 0..(emojis_per_row - 1))
+                    {
+                        // Log.i(TAG, "emoji name(s): " + emojis_cat_[pos + j].shortcodes)
+                        // Log.i(TAG, "emoji: " + emojis_cat_[pos + j].unicode)
+                        val em = EmojiStrAndName()
+                        em.char = emojis_cat_[pos + j].unicode
+                        em.name = ""
+                        try
+                        {
+                            em.name = emojis_cat_[pos + j].shortcodes[0]
+                        } catch (_: java.lang.Exception)
+                        {
+                        }
+                        e.add(em)
+                    }
+                    emojis_cat_gropued.add(e)
+                }
+                if (remain > 0)
+                {
+                    val pos = grouped_entries * emojis_per_row
+                    val e: ArrayList<EmojiStrAndName> = ArrayList()
+                    for (j in 0..(remain - 1))
+                    {
+                        val em = EmojiStrAndName()
+                        em.char = emojis_cat_[pos + j].unicode
+                        em.name = ""
+                        try
+                        {
+                            em.name = emojis_cat_[pos + j].shortcodes.get(0)
+                        } catch (_: java.lang.Exception)
+                        {
+                        }
+                        e.add(em)
+                    }
+                    emojis_cat_gropued.add(e)
+                }
+                emojis_cat_all_gropued.add(emojis_cat_gropued)
+                val cat_name = IosEmojiProvider().categories[j1].categoryNames.values.elementAt(0)
+                emojis_cat_all_cat_names.add(cat_name)
+                var cat_emoji: String
+                try
+                {
+                    var search_str = "slightly_smiling_face"
+                    when (cat_name.lowercase())
+                    {
+                        "faces" -> search_str = "slightly_smiling_face"
+                        "nature" -> search_str = "panda"
+                        "food" -> search_str = "cup"
+                        "activities" -> search_str = "soccer"
+                        "places" -> search_str = "car"
+                        "objects" -> search_str = "bulb"
+                        "symbols" -> search_str = "abc"
+                        "flags" -> search_str = "flag-at"
+                        else ->
+                        {
+                        }
+                    }
+                    cat_emoji = SearchEmojiManager().search(query = search_str).first().emoji.unicode
+                    emojis_cat_all_cat_emoji.add(cat_emoji)
+                } catch (e3: Exception)
+                {
+                    cat_emoji = SearchEmojiManager().search(query = "smile").first().emoji.unicode
+                    emojis_cat_all_cat_emoji.add(cat_emoji)
+                }
+                Log.i(TAG, "emoji cat: " + cat_name + " emoji: " + cat_emoji)
+            }
+            // --- loop ---
+        } catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+        // ------- set UI look and feel to "system" for java AWT ----------
+        // UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
+        // ------- set UI look and feel to "system" for java AWT ----------
+        init_system_tray(RESOURCESDIR.canonicalPath + File.separator + "icon-linux.png")
+
+        MainAppStart()
     }
-
-    // ------- set UI look and feel to "system" for java AWT ----------
-    // UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
-    // ------- set UI look and feel to "system" for java AWT ----------
-
-    init_system_tray(RESOURCESDIR.canonicalPath + File.separator + "icon-linux.png")
-
-    MainAppStart()
 }
 
 fun update_bootstrap_nodes_from_internet()
