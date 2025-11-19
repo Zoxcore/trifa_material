@@ -27,6 +27,7 @@ repositories {
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     google()
+    maven("https://jitpack.io")
 }
 
 detekt {
@@ -92,8 +93,14 @@ dependencies {
     implementation(compose.materialIconsExtended)
     //
     //
-    //**//implementation(":sqlite-jdbc:3.48.0.1-SNAPSHOT")
+    //
+    // ------- SQLITE / SQLCIPHER implementation -------
     implementation("org.xerial:sqlite-jdbc:3.51.0.0")
+    //**//implementation("com.github.zoff99:pkgs_zoffcc_sqlite-jdbc-sqlcipher:1.0.19")
+    // ------- SQLITE / SQLCIPHER implementation -------
+    //
+    //
+    //
     implementation("com.squareup.okhttp3:okhttp:5.3.2")
     implementation("ca.gosyer:kotlin-multiplatform-appdirs:1.2.0")
     implementation("com.sksamuel.scrimage:scrimage-core:4.3.5")
