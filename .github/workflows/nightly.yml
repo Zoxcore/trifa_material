@@ -77,8 +77,9 @@ jobs:
 
       - name: build package
         run:  id;pwd;ls -al;./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64 packageReleaseDistributionForCurrentOS
+
       - name: build jar
-        run:  id;pwd;ls -al;./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64 packageReleaseUberJarForCurrentOS
+        run:  id;pwd;ls -al;./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64 clean packageReleaseUberJarForCurrentOS
 
       - name: check jar
         run:  id;pwd;ls -hal ./build/compose/jars/trifa_material-linux-x64-*.jar
