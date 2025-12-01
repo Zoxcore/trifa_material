@@ -95,7 +95,7 @@ dependencies {
     //
     //
     // ------- SQLITE / SQLCIPHER implementation -------
-    implementation("org.xerial:sqlite-jdbc:3.51.0.0")
+    implementation("org.xerial:sqlite-jdbc:3.51.1.0")
     //**//implementation("com.github.zoff99:pkgs_zoffcc_sqlite-jdbc-sqlcipher:1.0.19")
     // ------- SQLITE / SQLCIPHER implementation -------
     //
