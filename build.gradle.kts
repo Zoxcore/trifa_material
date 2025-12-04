@@ -47,7 +47,7 @@ buildConfig {
         {
             buildConfigField("String", "GIT_BRANCH", "\"" + grgit!!.branch.current().fullName + "\"")
         }
-        catch (e: Exception)
+        catch (_: Exception)
         {
             buildConfigField("String", "GIT_BRANCH", "\"" + "????" + "\"")
         }
@@ -59,7 +59,7 @@ buildConfig {
           replace("\\", "_").
           replace("\r", "_").take(40) + "\"")
     }
-    catch (e: Exception)
+    catch (_: Exception)
     {
         try
         {
@@ -80,16 +80,23 @@ dependencies {
     // (in a separate module for demo project and in testMain).
     // With compose.desktop.common you will also lose @Preview functionality
     implementation(compose.desktop.currentOs)
+    @Suppress("DEPRECATION")
     implementation(compose.desktop.common)
+    @Suppress("DEPRECATION")
     implementation(compose.ui)
+    @Suppress("DEPRECATION")
     implementation(compose.runtime)
+    @Suppress("DEPRECATION")
     implementation(compose.foundation)
+    @Suppress("DEPRECATION")
     implementation(compose.material)
+    @Suppress("DEPRECATION")
     implementation(compose.material3)
-    @Suppress("OPT_IN_IS_NOT_ENABLED")
+    @Suppress("OPT_IN_IS_NOT_ENABLED", "DEPRECATION")
     @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
     implementation(compose.components.resources)
     //
+    @Suppress("DEPRECATION")
     implementation(compose.materialIconsExtended)
     //
     //
@@ -278,7 +285,7 @@ tasks {
         commandLine("ln", "-sf", "trifa_material/bin/trifa_material", "AppRun")
     }
 
-    val executeAppImageBuilder by registering(Exec::class) {
+    @Suppress("unused") val executeAppImageBuilder by registering(Exec::class) {
         dependsOn(downloadAppImageBuilder)
         dependsOn(copyAppimageDesktopfile)
         dependsOn(copyAppimageIconfile)
