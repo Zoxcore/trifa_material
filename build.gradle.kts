@@ -1,9 +1,11 @@
-@file:Suppress("SpellCheckingInspection", "ConvertToStringTemplate", "PropertyName")
+@file:Suppress("SpellCheckingInspection", "ConvertToStringTemplate", "PropertyName", "LocalVariableName")
 
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import de.undercouch.gradle.tasks.download.Download
 import org.ajoberstar.grgit.Grgit
 import java.time.format.DateTimeFormatter
+import org.gradle.internal.os.OperatingSystem
+import org.jetbrains.compose.ExperimentalComposeLibrary
 
 plugins {
     kotlin("jvm")
@@ -19,6 +21,32 @@ plugins {
 group = "com.zoffcc.applications.trifa_material"
 version = "1.0.57"
 val appName = "trifa_material"
+
+val build_with_appimage = false
+
+var os: OperatingSystem? = null
+var os_arch: String? = null
+var os_java_home: String? = null
+var os_java_runtime_version: String? = null
+var os_java_vm_version: String? = null
+
+try
+{
+    os = OperatingSystem.current()
+    os_arch = System.getProperty("os.arch")
+    os_java_home = System.getProperty("java.home")
+    os_java_runtime_version = System.getProperty("java.runtime.version")
+    os_java_vm_version = System.getProperty("java.vm.version")
+
+    println("*** Building on ${os!!.familyName} / ${os!!.name} / ${os!!.version} / ${System.getProperty("os.arch")}.")
+    println("*** os_java_home: $os_java_home.")
+    println("*** os_java_runtime_version: $os_java_runtime_version.")
+    println("*** os_java_vm_version: $os_java_vm_version.")
+}
+catch(_: Exception)
+{
+    println("some Error detecting OS for Java")
+}
 
 repositories {
     flatDir {
@@ -93,17 +121,58 @@ dependencies {
     @Suppress("DEPRECATION")
     implementation(compose.material3)
     @Suppress("OPT_IN_IS_NOT_ENABLED", "DEPRECATION")
-    @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+    @OptIn(ExperimentalComposeLibrary::class)
     implementation(compose.components.resources)
     //
     @Suppress("DEPRECATION")
     implementation(compose.materialIconsExtended)
     //
     //
+    // # some hints to detect nixOS java runtime
+    //
+    // sun.boot.library.path=/nix/store/p9mylq323pjrabd7w0fhgh1yb8...
+    // java.home=/nix/store/p9mylq323pjrabd7w0fhgh1yb8...
+    // java.runtime.version=21.0.8+9-nixos
+    // java.vm.version=21.0.8+9-nixos
+    //
+    var running_on_nixos = false
+    try
+    {
+        if (os_java_runtime_version!!.contains("nixos"))
+        {
+            running_on_nixos = true
+        }
+        else if (os_java_vm_version!!.contains("nixos"))
+        {
+            running_on_nixos = true
+        }
+    }
+    catch(_: Exception)
+    {
+    }
+    // # some hints to detect nixOS java runtime
     //
     // ------- SQLITE / SQLCIPHER implementation -------
-    implementation("org.xerial:sqlite-jdbc:3.51.1.0")
-    //**//implementation("com.github.zoff99:pkgs_zoffcc_sqlite-jdbc-sqlcipher:1.0.19")
+    try
+    {
+        if ((os!!.isLinux) && (os_arch == "amd64") && (!running_on_nixos) && (!build_with_appimage))
+        {
+            // on "Linux amd64" use "sqlite-jdbc" with sqlcipher included (which is a dropin replacement for sqlite-jdbc)
+            println("Linux amd64 -> unsing pkgs_zoffcc_sqlite-jdbc-sqlcipher")
+            implementation("com.github.zoff99:pkgs_zoffcc_sqlite-jdbc-sqlcipher:1.0.19")
+        } else
+        {
+            // use regular "sqlite-jdbc"
+            println("other OS -> unsing org.xerial:sqlite-jdbc")
+            implementation("org.xerial:sqlite-jdbc:3.51.1.0")
+        }
+    }
+    catch(_: Exception)
+    {
+        // use regular "sqlite-jdbc"
+        println("error detecting OS -> unsing org.xerial:sqlite-jdbc")
+        implementation("org.xerial:sqlite-jdbc:3.51.1.0")
+    }
     // ------- SQLITE / SQLCIPHER implementation -------
     //
     //
@@ -156,12 +225,24 @@ compose.desktop {
             println("licenseFile=" + project.file("LICENSE"))
             appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
 
-            targetFormats(
-                TargetFormat.Msi, TargetFormat.Exe,
-                TargetFormat.Dmg,
-                TargetFormat.Deb, TargetFormat.Rpm
-            )
-            // TargetFormat.AppImage
+            if (build_with_appimage)
+            {
+                println("#### build with AppImage ####")
+                targetFormats(
+                    TargetFormat.Msi, TargetFormat.Exe,
+                    TargetFormat.Dmg,
+                    TargetFormat.Deb, TargetFormat.Rpm, TargetFormat.AppImage
+                )
+            }
+            else
+            {
+                println("==== build without AppImage ====")
+                targetFormats(
+                    TargetFormat.Msi, TargetFormat.Exe,
+                    TargetFormat.Dmg,
+                    TargetFormat.Deb, TargetFormat.Rpm
+                )
+            }
 
             nativeDistributions {
                 modules("java.instrument", "java.net.http", "java.prefs", "java.sql", "jdk.unsupported", "jdk.security.auth")

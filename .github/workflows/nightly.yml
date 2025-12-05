@@ -173,7 +173,8 @@ jobs:
 
       - name: activate appimage package creation
         run: |
-          sed -i -e 's#TargetFormat.Dmg#TargetFormat.AppImage#' build.gradle.kts
+          # sed -i -e 's#TargetFormat.Dmg#TargetFormat.AppImage#' build.gradle.kts
+          sed -i -e 's#build_with_appimage = false#build_with_appimage = true#' build.gradle.kts
 
       - name: build package
         run:  id;pwd;ls -al;./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64 packageAppImage
