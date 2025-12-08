@@ -23,7 +23,7 @@ jobs:
 
   build-macos-jni-artifact:
     name: JNI Artifact macOS Build
-    runs-on: macos-13
+    runs-on: macos-15-intel
     permissions:
       contents: write
     steps:
