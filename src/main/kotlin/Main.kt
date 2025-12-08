@@ -46,6 +46,8 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CloudDownload
+import androidx.compose.material.icons.filled.Downloading
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material.icons.filled.Fullscreen
@@ -56,6 +58,7 @@ import androidx.compose.material.icons.filled.NoiseAware
 import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.RawOff
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.SafetyCheck
 import androidx.compose.material.icons.filled.VideoLabel
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
@@ -175,6 +178,7 @@ import com.zoffcc.applications.trifa.NodeListJS
 import com.zoffcc.applications.trifa.OperatingSystem
 import com.zoffcc.applications.trifa.PrefsSettings
 import com.zoffcc.applications.trifa.RandomNameGenerator
+import com.zoffcc.applications.trifa.SQLITE_TYPE
 import com.zoffcc.applications.trifa.SingleComponentAspectRatioKeeperLayout
 import com.zoffcc.applications.trifa.SqliteEscapeLikeString
 import com.zoffcc.applications.trifa.TAG
@@ -1497,6 +1501,26 @@ fun App()
                     val globalstore2 by globalstore.stateFlow.collectAsState()
                     Tooltip(
                         modifier = Modifier.randomDebugBorder().width(18.dp),
+                        text = if (globalstore2.native_sqlite_type == SQLITE_TYPE.SQLCIPHER) "using sqlcipher encrypted database"
+                        else if (globalstore2.native_sqlite_type == SQLITE_TYPE.UNLOADED) "sqlite lib not yet loaded"
+                        else "regular sqlite database",
+                        textcolor = Color.Black) {
+                        IconButton(
+                            modifier = Modifier.padding(vertical = 0.dp),
+                            icon = if (globalstore2.native_sqlite_type == SQLITE_TYPE.SQLCIPHER) Icons.Filled.SafetyCheck
+                                else if (globalstore2.native_sqlite_type == SQLITE_TYPE.UNLOADED) Icons.Filled.Downloading
+                                else Icons.Filled.Info,
+                            iconSize = 16.dp,
+                            enabled = false,
+                            iconTint = if (globalstore2.native_sqlite_type == SQLITE_TYPE.SQLCIPHER) Color(0xff116B1B)
+                                else if (globalstore2.native_sqlite_type == SQLITE_TYPE.UNLOADED) Color.DarkGray.copy(alpha = 0.7f)
+                                else Color.DarkGray.copy(alpha = 0.7f),
+                            contentDescription = "",
+                            onClick = {},
+                        )
+                    }
+                    Tooltip(
+                        modifier = Modifier.randomDebugBorder().width(18.dp),
                         text = if (globalstore2.native_ffmpegav_lib_loaded) "ffmpeg AV JNI lib loaded"
                     else "ffmpeg AV JNI lib not loaded",
                         textcolor = Color.Black) {
@@ -1510,7 +1534,7 @@ fun App()
                             onClick = {},
                         )
                     }
-                    // HINT: on Windows we do have a JNI lib for notifications. java can handle it just fine.
+                    // HINT: on Windows we do NOT have a JNI lib for notifications. java can handle it just fine.
                     if (OperatingSystem.getCurrent() != OperatingSystem.WINDOWS)
                     {
                         Tooltip(
