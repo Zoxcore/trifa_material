@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("LocalVariableName")
+@file:Suppress("LocalVariableName", "ConvertToStringTemplate")
 
 package org.briarproject.briar.desktop
 
@@ -81,6 +81,7 @@ import com.zoffcc.applications.trifa.HelperFriend.get_g_opts
 import com.zoffcc.applications.trifa.HelperFriend.set_g_opts
 import com.zoffcc.applications.trifa.HelperGeneric
 import com.zoffcc.applications.trifa.HelperGeneric.long_to_hex
+import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
 import com.zoffcc.applications.trifa.HelperNotification
 import com.zoffcc.applications.trifa.HelperOSFile.show_containing_dir_in_explorer
 import com.zoffcc.applications.trifa.HelperRelay.add_or_update_own_relay
@@ -92,6 +93,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__notificatio
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__open_files_directly
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__send_push_notifications
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__use_other_toxproxies
+import com.zoffcc.applications.trifa.MainActivity.Companion.password_hash
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_name
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_nospam
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_set_name
@@ -141,8 +143,9 @@ fun SettingDetails()
         Spacer(modifier = Modifier.height(60.dp))
         if ((global_store.toxRunning) && (global_store.ormaRunning))
         {
-            change_tox_and_db_pass()
-            Spacer(modifier = Modifier.height(60.dp))
+            // TODO: !! this is not yet fully working !! do NOT enable !!
+            // change_tox_and_db_pass()
+            // Spacer(modifier = Modifier.height(60.dp))
         }
         //
         // --------------------------------------
@@ -783,6 +786,17 @@ fun ChangePasswordDialog(onDismiss: () -> Unit) {
             Button(onClick = {
                 // Handle password change logic here
                 // For example, validate and save the new password
+                if (currentPassword == password_hash)
+                {
+                    if (newPassword != password_hash)
+                    {
+                        // changing tox save password
+                        Log.i(TAG, "changing tox save password ...")
+                        password_hash = newPassword
+                        update_savedata_file_wrapper()
+                        Log.i(TAG, "tox save written with new password. password_hash=" + password_hash)
+                    }
+                }
                 onDismiss() // Close the dialog after action
             }) {
                 Text("Confirm")
