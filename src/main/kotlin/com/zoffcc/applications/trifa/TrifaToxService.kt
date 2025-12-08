@@ -109,6 +109,23 @@ class TrifaToxService
                 OrmaDatabase.init()
                 // ------ correct startup order ------
                 globalstore.setOrmaRunning(true)
+                var debug__cipher_version: String? = "unknown"
+                try
+                {
+                    debug__cipher_version = OrmaDatabase.run_query_for_single_result("PRAGMA cipher_version")
+                } catch (e: java.lang.Exception)
+                {
+                    e.printStackTrace()
+                }
+                Log.i(TAG, "debug__cipher_version:" + debug__cipher_version)
+                if (debug__cipher_version.isNullOrEmpty())
+                {
+                    globalstore.setNative_sqlite_type(SQLITE_TYPE.SQLITE)
+                }
+                else
+                {
+                    globalstore.setNative_sqlite_type(SQLITE_TYPE.SQLCIPHER)
+                }
                 load_db_prefs()
                 try {
                     globalstore.try_clear_unread_message_count()
@@ -403,6 +420,7 @@ class TrifaToxService
                 }
 
                 globalstore.setOrmaRunning(false)
+                globalstore.setNative_sqlite_type(SQLITE_TYPE.UNLOADED)
                 // ----------------- DB shutdown -----------------
                 orma = null
                 OrmaDatabase.shutdown()

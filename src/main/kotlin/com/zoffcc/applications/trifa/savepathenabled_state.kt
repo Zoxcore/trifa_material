@@ -1,6 +1,7 @@
+@file:Suppress("FunctionName", "PropertyName", "ClassName")
+
 package com.zoffcc.applications.trifa
 
-import androidx.compose.ui.platform.LocalDensity
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__database_files_dir
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__tox_savefile_dir
 import com.zoffcc.applications.trifa.TRIFAGlobals.VFS_FILE_DIR
@@ -15,6 +16,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 import java.io.File
+
+enum class SQLITE_TYPE(val type: Int) {
+    UNLOADED(0),
+    SQLITE(1),
+    SQLCIPHER(2),
+}
 
 data class globalstore_state(
     val mainwindow_minimized: Boolean = false,
@@ -31,6 +38,7 @@ data class globalstore_state(
     val ormaRunning: Boolean = false,
     val native_ffmpegav_lib_loaded: Boolean = false,
     val native_notification_lib_loaded: Boolean = false,
+    val native_sqlite_type: SQLITE_TYPE = SQLITE_TYPE.UNLOADED,
     val app_startup: Boolean = true
 )
 
@@ -62,6 +70,8 @@ interface GlobalStore {
     fun getApp_startup(): Boolean
     fun setNative_notification_lib_loaded(value: Boolean)
     fun getNative_notification_lib_loaded(): Boolean
+    fun setNative_sqlite_type(value: SQLITE_TYPE)
+    fun getNative_sqlite_type(): SQLITE_TYPE
     fun setOrmaRunning(value: Boolean)
     fun getOrmaRunning(): Boolean
     fun increase_unread_message_count()
@@ -191,6 +201,11 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
             return state.native_notification_lib_loaded
         }
 
+        override fun getNative_sqlite_type(): SQLITE_TYPE
+        {
+            return state.native_sqlite_type
+        }
+
         override fun setApp_startup(value: Boolean)
         {
             mutableStateFlow.value = state.copy(app_startup = value)
@@ -205,6 +220,11 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
         override fun setNative_notification_lib_loaded(value: Boolean)
         {
             mutableStateFlow.value = state.copy(native_notification_lib_loaded = value)
+        }
+
+        override fun setNative_sqlite_type(value: SQLITE_TYPE)
+        {
+            mutableStateFlow.value = state.copy(native_sqlite_type = value)
         }
 
         override fun getOrmaRunning(): Boolean

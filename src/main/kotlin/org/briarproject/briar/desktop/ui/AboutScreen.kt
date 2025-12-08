@@ -1,4 +1,4 @@
-@file:Suppress("SpellCheckingInspection", "ConvertToStringTemplate", "RemoveSingleExpressionStringTemplate")
+@file:Suppress("SpellCheckingInspection", "ConvertToStringTemplate", "RemoveSingleExpressionStringTemplate", "LocalVariableName")
 
 package org.briarproject.briar.desktop.ui
 
@@ -46,6 +46,8 @@ import androidx.compose.ui.unit.dp
 import com.sun.jndi.toolkit.url.Uri
 import com.zoffcc.applications.ffmpegav.AVActivity
 import com.zoffcc.applications.jninotifications.NTFYActivity
+import com.zoffcc.applications.sorm.OrmaDatabase
+import com.zoffcc.applications.sorm.OrmaDatabase.get_current_sqlite_version
 import com.zoffcc.applications.trifa.HelperGeneric.get_java_os_name
 import com.zoffcc.applications.trifa.HelperGeneric.get_java_os_version
 import com.zoffcc.applications.trifa.HelperGeneric.get_trifa_build_str
@@ -322,7 +324,21 @@ private fun GeneralInfo() {
             jninotifications_version = "JNI lib not loaded"
         }
         add(Entry(i18n("about.jninotifications_version"), jninotifications_version))
-        add(Entry(i18n("about.sqlitejdbc"), SQLiteJDBCLoader.getVersion()))
+        add(Entry(i18n("about.sqlitejdbc"), get_current_sqlite_version())) //SQLiteJDBCLoader.getVersion()))
+
+        var debug__cipher_version: String? = "unknown"
+        try
+        {
+            debug__cipher_version = OrmaDatabase.run_query_for_single_result("PRAGMA cipher_version")
+        } catch (e: java.lang.Exception)
+        {
+            e.printStackTrace()
+        }
+        if (!debug__cipher_version.isNullOrEmpty())
+        {
+            add(Entry(i18n("about.sqlcipher"), debug__cipher_version))
+        }
+
         // add(Entry(i18n("about.contact"), Strings.EMAIL, true))
     }
 
