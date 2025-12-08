@@ -1,4 +1,4 @@
-@file:Suppress("ConvertToStringTemplate", "LocalVariableName", "ReplaceSizeCheckWithIsNotEmpty")
+@file:Suppress("ConvertToStringTemplate", "LocalVariableName", "ReplaceSizeCheckWithIsNotEmpty", "FunctionName")
 
 package com.zoffcc.applications.trifa
 
@@ -31,6 +31,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__database_files
 import com.zoffcc.applications.trifa.MainActivity.Companion.add_tcp_relay_single_wrapper
 import com.zoffcc.applications.trifa.MainActivity.Companion.audio_queue_play_trigger
 import com.zoffcc.applications.trifa.MainActivity.Companion.bootstrap_single_wrapper
+import com.zoffcc.applications.trifa.MainActivity.Companion.db_password
 import com.zoffcc.applications.trifa.MainActivity.Companion.get_friend_ip_str
 import com.zoffcc.applications.trifa.MainActivity.Companion.get_group_peer_ip_str
 import com.zoffcc.applications.trifa.MainActivity.Companion.init_tox_callbacks
@@ -105,7 +106,7 @@ class TrifaToxService
                 {
                 }
 
-                orma = OrmaDatabase(PREF__database_files_dir + "/main.db", "", PREF__DB_wal_mode);
+                orma = OrmaDatabase(PREF__database_files_dir + "/main.db", db_password, PREF__DB_wal_mode);
                 OrmaDatabase.init()
                 // ------ correct startup order ------
                 globalstore.setOrmaRunning(true)

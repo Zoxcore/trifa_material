@@ -299,26 +299,29 @@ object HelperGeneric {
     }
 
     @JvmStatic fun update_savedata_file_wrapper() {
-        var callerMethodName = ""
-        try {
-            val stacktrace = Thread.currentThread().stackTrace
-            val e = stacktrace[2]
-            callerMethodName = " called from:" + e.methodName
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        try {
-            MainActivity.semaphore_tox_savedata!!.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
-            val password_hash_2 = MainActivity.password_hash
-            val start_timestamp = System.currentTimeMillis()
-            update_savedata_file(password_hash_2)
-            val end_timestamp = System.currentTimeMillis()
-            MainActivity.semaphore_tox_savedata!!.release()
-            // DEBUG// Log.i(TAG, "update_savedata_file()" + callerMethodName + " took:" + (end_timestamp - start_timestamp).toFloat() / 1000f + "s")
-        } catch (e: InterruptedException) {
-            MainActivity.semaphore_tox_savedata!!.release()
-            e.printStackTrace()
+        synchronized(this) {
+            var callerMethodName = ""
+            try {
+                val stacktrace = Thread.currentThread().stackTrace
+                val e = stacktrace[2]
+                callerMethodName = " called from:" + e.methodName
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            try
+            {
+                MainActivity.semaphore_tox_savedata!!.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
+                val password_hash_2 = MainActivity.password_hash
+                val start_timestamp = System.currentTimeMillis()
+                update_savedata_file(password_hash_2)
+                val end_timestamp = System.currentTimeMillis()
+                MainActivity.semaphore_tox_savedata!!.release()
+                // DEBUG// Log.i(TAG, "update_savedata_file()" + callerMethodName + " took:" + (end_timestamp - start_timestamp).toFloat() / 1000f + "s")
+            } catch (e: InterruptedException)
+            {
+                MainActivity.semaphore_tox_savedata!!.release()
+                e.printStackTrace()
+            }
         }
     }
 
