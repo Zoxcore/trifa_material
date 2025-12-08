@@ -38,7 +38,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -49,6 +51,8 @@ import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FormatSize
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -61,10 +65,15 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import avstatestorecallstate
@@ -130,6 +139,11 @@ fun SettingDetails()
         }
         button_settings()
         Spacer(modifier = Modifier.height(60.dp))
+        if ((global_store.toxRunning) && (global_store.ormaRunning))
+        {
+            change_tox_and_db_pass()
+            Spacer(modifier = Modifier.height(60.dp))
+        }
         //
         // --------------------------------------
         // HINT: change locale at runtime:
@@ -721,6 +735,67 @@ private fun set_own_nospam()
     }
     // ---- change own nospam value ----
 }
+
+@Composable
+private fun change_tox_and_db_pass()
+{
+    var showChangePasswordDialog by remember { mutableStateOf(false) }
+    Row(Modifier.wrapContentHeight().fillMaxWidth().padding(start = 15.dp)) {
+        Button(modifier = Modifier.width(400.dp),
+            enabled = true,
+            onClick = { showChangePasswordDialog = true }
+        )
+        {
+            Text(i18n("ui.setting.change_tox_and_db_pass"))
+        }
+    }
+
+    if (showChangePasswordDialog) {
+        ChangePasswordDialog(onDismiss = { showChangePasswordDialog = false })
+    }
+}
+
+@Composable
+fun ChangePasswordDialog(onDismiss: () -> Unit) {
+    var currentPassword by remember { mutableStateOf("") }
+    var newPassword by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Change Password") },
+        text = {
+            Column {
+                TextField(
+                    value = currentPassword,
+                    onValueChange = { currentPassword = it },
+                    label = { Text("Current Password") },
+                    visualTransformation = PasswordVisualTransformation()
+                )
+                TextField(
+                    value = newPassword,
+                    onValueChange = { newPassword = it },
+                    label = { Text("New Password") },
+                    visualTransformation = PasswordVisualTransformation()
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = {
+                // Handle password change logic here
+                // For example, validate and save the new password
+                onDismiss() // Close the dialog after action
+            }) {
+                Text("Confirm")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
 
 @Composable
 private fun own_relay_settings()
