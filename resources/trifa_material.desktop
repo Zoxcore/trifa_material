@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=TRIfA Material
 GenericName=Tox client
-StartupWMClass=normal_trifa_material
+StartupWMClass=TrifaMainKt
 Comment=TRIfA Material Tox Client
 Exec=trifa_material/bin/trifa_material
 Icon=trifa_material
