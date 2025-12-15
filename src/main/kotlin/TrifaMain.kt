@@ -46,7 +46,6 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Downloading
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.FormatSize
@@ -2052,7 +2051,7 @@ fun main(args: Array<String>) = application(exitProcessOnExit = true) {
             var awtAppClassNameField: java.lang.reflect.Field? = null
             awtAppClassNameField = xToolkit.javaClass.getDeclaredField("awtAppClassName")
             awtAppClassNameField.isAccessible = true
-            awtAppClassNameField[xToolkit] = "normal_trifa_material" // this needs to be exactly the same String as "StartupWMClass" in the "*.desktop" file
+            awtAppClassNameField[xToolkit] = "TrifaMainKt" // this needs to be exactly the same String as "StartupWMClass" in the "*.desktop" file
         } catch (e: Exception)
         { // e.printStackTrace()
         }

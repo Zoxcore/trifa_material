@@ -187,7 +187,7 @@ dependencies {
     // implementation("io.github.theapache64:rebugger:1.0.0-rc02")
 }
 
-val main_class_name = "MainKt"
+val main_class_name = "TrifaMainKt"
 
 compose.desktop {
     java {
