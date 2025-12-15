@@ -56,7 +56,7 @@ jobs:
           pwd
           cp -v /Users/runner/ToxAndroidRefImpl/jni-c-toxcore/libjni-c-toxcore_noise.jnilib libjni-c-toxcore_noise.jnilib
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: libjni-c-toxcore_noise.jnilib
           path: libjni-c-toxcore_noise.jnilib
@@ -111,7 +111,7 @@ jobs:
           sha256sum /home/runner/work/trifa_material/trifa_material/libjni-c-toxcore_noise.so || echo "ignore"
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: libjni-c-toxcore_noise.so
           path: libjni-c-toxcore_noise.so
@@ -171,7 +171,7 @@ jobs:
           sha256sum /home/runner/work/trifa_material/trifa_material/jni-c-toxcore_noise.dll || echo "ignore"
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: jni-c-toxcore_noise.dll
           path: jni-c-toxcore_noise.dll
