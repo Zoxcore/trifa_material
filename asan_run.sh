@@ -5,7 +5,7 @@
 # config:
 #
 java_17_or_newer_dir=/usr/lib/jvm/temurin-22-jdk-amd64/
-asan_runtime_lib=/usr/lib/x86_64-linux-gnu/libasan.so.6.0.0
+asan_runtime_lib=$(ls -1 /usr/lib/x86_64-linux-gnu/libasan.s*0.0)
 #
 #
 #
