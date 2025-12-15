@@ -106,7 +106,7 @@ jobs:
            cp -v /Users/runner/screenshot-macos-dmg.png /Users/runner/work/trifa_material/trifa_material/package-screenshot-macos-dmg.png
 
     - name: upload-screenshots
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: screenshot-macos
         path: |
@@ -193,7 +193,7 @@ jobs:
                cp -av /tmp/package-screenshot-linux-deb.png package-screenshot-linux-deb.png
 
         - name: upload-screenshots
-          uses: actions/upload-artifact@v5
+          uses: actions/upload-artifact@v6
           with:
             name: screenshot-linux
             path: /tmp/package-screenshot-linux-deb.png
@@ -321,7 +321,7 @@ jobs:
           Write-Output D:\a\trifa_material\trifa_material\package-screenshot-windows-msi.png
 
       - name: upload-screenshots
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: screenshot-windows
           path: |

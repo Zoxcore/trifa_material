@@ -59,7 +59,7 @@ jobs:
           pwd
           cp -v /Users/runner/ToxAndroidRefImpl/jni-c-toxcore/libjni-c-toxcore.jnilib libjni-c-toxcore.jnilib
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: libjni-c-toxcore.jnilib
           path: libjni-c-toxcore.jnilib
@@ -114,7 +114,7 @@ jobs:
           pwd
           cp -v /Users/runner/ToxAndroidRefImpl/jni-c-toxcore/libjni-c-toxcore.jnilib libjni-c-toxcore_arm64.jnilib
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: libjni-c-toxcore_arm64.jnilib
           path: libjni-c-toxcore_arm64.jnilib
@@ -168,7 +168,7 @@ jobs:
           sha256sum /home/runner/work/trifa_material/trifa_material/libjni-c-toxcore_raspi.so || echo "ignore"
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: libjni-c-toxcore_raspi.so
           path: libjni-c-toxcore_raspi.so
@@ -232,7 +232,7 @@ jobs:
           mv -v libjni-c-toxcore.so libjni-c-toxcore.so__ASAN
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: libjni-c-toxcore.so__ASAN
           path: libjni-c-toxcore.so__ASAN
@@ -291,7 +291,7 @@ jobs:
           sha256sum /home/runner/work/trifa_material/trifa_material/libjni-c-toxcore.so || echo "ignore"
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: libjni-c-toxcore.so
           path: libjni-c-toxcore.so
@@ -351,7 +351,7 @@ jobs:
           sha256sum /home/runner/work/trifa_material/trifa_material/jni-c-toxcore.dll || echo "ignore"
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: jni-c-toxcore.dll
           path: jni-c-toxcore.dll

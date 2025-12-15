@@ -233,13 +233,13 @@ jobs:
                cp -av /tmp/screenshot-linux.png screenshot-linux.png
 
         - name: upload-screenshots
-          uses: actions/upload-artifact@v5
+          uses: actions/upload-artifact@v6
           with:
             name: screenshot-linux
             path: /tmp/screenshot-linux.png
 
         - name: upload-screenshots
-          uses: actions/upload-artifact@v5
+          uses: actions/upload-artifact@v6
           with:
             name: screenshot-linux_before_wm
             path: /tmp/screenshot-linux_before_wm.png
