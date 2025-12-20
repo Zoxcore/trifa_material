@@ -86,6 +86,18 @@ jobs:
       - name: check deb
         run:  id;pwd;ls -hal ./build/compose/binaries/main*/deb/trifa-material_*-1_amd64.deb
 
+      - name: fix deb
+        run: |
+          id;pwd;ls -hal ./build/compose/binaries/main*/deb/trifa-material_*-1_amd64.deb
+          deb_pkg_name_with_path=$(ls -1 ./build/compose/binaries/main*/deb/trifa-material_*-1_amd64.deb | tail -1 2>/dev/null)
+          deb_pkg_name_base=$(basename "$deb_pkg_name_with_path")
+          cp -v "$deb_pkg_name_with_path" "$deb_pkg_name_base"
+          set -x
+          tools/fix_debian_pkg.sh "$deb_pkg_name_base"
+          find . -name '*.deb'
+          ls -hal ./final_pkg.deb
+          cp -av ./final_pkg.deb "$deb_pkg_name_with_path"
+
       - name: check rpm
         run:  id;pwd;ls -hal ./build/compose/binaries/main*/rpm/trifa_material-*.x86_64.rpm
 
