@@ -111,6 +111,9 @@ public class NTFYActivity {
             linux_lib_filename = jnilib_path + "/libjni_notifications_raspi.so";
         } else if (OperatingSystem.getCurrent() == OperatingSystem.WINDOWS)
         {
+            // TODO: windows has java notifications that work properly
+            // so no need to use JNI code
+            // also there is a typo here '...i.dll', the 'i' needs to be removed
             linux_lib_filename = jnilib_path + "/jni_notificationsi.dll";
         } else if (OperatingSystem.getCurrent() == OperatingSystem.MACOS)
         {
