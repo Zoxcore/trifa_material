@@ -7,7 +7,7 @@ workdir="./tmp_work/"
 postinst_cmd1='xdg-desktop-menu install /opt/trifa-material/lib/trifa-material-trifa_material.desktop'
 # postinst_cmd2='xdg-mime install --novendor /opt/trifa-material/lib/app/resources/trifa_material.xml'
 
-prerm_cmd1='xdg-desktop-menu uninstall /opt/undereat-material/lib/undereat-material-undereat_material.desktop'
+prerm_cmd1='xdg-desktop-menu uninstall /opt/toloshare-material/lib/toloshare-material-toloshare_material.desktop'
 # prerm_cmd2='xdg-mime uninstall /opt/trifa-material/lib/app/resources/trifa_material.xml'
 
 mkdir -p "$workdir"
