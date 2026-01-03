@@ -426,7 +426,7 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                         {
                             Box(Modifier.weight(1f)) {
                                 SendMessage(focusRequester, selectedContactPubkey) { text -> //
-                                    Log.i(TAG, "selectedContactPubkey=" + selectedContactPubkey)
+                                    // Log.i(TAG, "selectedContactPubkey=" + selectedContactPubkey)
                                     if (selectedContactPubkey != null)
                                     {
                                         if (!send_message_onclick(text, selectedContactPubkey))
@@ -448,7 +448,7 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                                     contentDescription = "send File",
                                     onClick = {
                                         pickFileUsingDialog(onCloseRequest = { dir, file ->
-                                            Log.i(TAG, "pickFileUsingDialog:result=" + dir + "::" + File.separator + "::" + file )
+                                            // Log.i(TAG, "pickFileUsingDialog:result=" + dir + "::" + File.separator + "::" + file )
                                             add_outgoing_file(dir, file, selectedContactPubkey)
                                         })
                                     }
@@ -578,7 +578,7 @@ fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, s
                         {
                             Box(Modifier.weight(1f)) {
                                 GroupSendMessage (focusRequester, selectedGroupId) { text ->
-                                    Log.i(TAG, "selectedGroupId=" + selectedGroupId)
+                                    // Log.i(TAG, "selectedGroupId=" + selectedGroupId)
                                     if (selectedGroupId != null)
                                     {
                                         val timestamp = System.currentTimeMillis()
@@ -634,7 +634,7 @@ fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, s
                                     contentDescription = "send File",
                                     onClick = {
                                         pickFileUsingDialog(onCloseRequest = { dir, file ->
-                                            Log.i(TAG, "pickFileUsingDialog:result=" + dir + "::" + File.separator + "::" + file )
+                                            // Log.i(TAG, "pickFileUsingDialog:result=" + dir + "::" + File.separator + "::" + file )
                                             add_ngc_outgoing_file(dir, file, selectedGroupId)
                                         })
                                     }
