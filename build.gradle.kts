@@ -159,7 +159,7 @@ dependencies {
         {
             // on "Linux amd64" use "sqlite-jdbc" with sqlcipher included (which is a dropin replacement for sqlite-jdbc)
             println("Linux amd64 -> unsing pkgs_zoffcc_sqlite-jdbc-sqlcipher")
-            implementation("com.github.zoff99:pkgs_zoffcc_sqlite-jdbc-sqlcipher:1.0.20")
+            implementation("com.github.zoff99:pkgs_zoffcc_sqlite-jdbc-sqlcipher:1.0.21")
         } else
         {
             // use regular "sqlite-jdbc"
