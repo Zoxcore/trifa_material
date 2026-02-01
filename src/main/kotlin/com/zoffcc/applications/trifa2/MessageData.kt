@@ -1,4 +1,4 @@
-@file:Suppress("PropertyName")
+@file:Suppress("PropertyName", "LocalVariableName")
 
 import androidx.compose.ui.graphics.Color
 import com.zoffcc.applications.trifa.ChatColors
