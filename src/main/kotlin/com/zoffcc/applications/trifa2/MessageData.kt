@@ -1,3 +1,5 @@
+@file:Suppress("PropertyName")
+
 import androidx.compose.ui.graphics.Color
 import com.zoffcc.applications.trifa.ChatColors
 import com.zoffcc.applications.trifa.ToxVars
