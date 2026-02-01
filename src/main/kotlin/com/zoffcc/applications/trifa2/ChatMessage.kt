@@ -70,6 +70,7 @@ import com.zoffcc.applications.trifa.HelperMessage.set_message_queueing_from_id
 import com.zoffcc.applications.trifa.HelperOSFile.open_webpage
 import com.zoffcc.applications.trifa.HelperOSFile.show_containing_dir_in_explorer
 import com.zoffcc.applications.trifa.HelperOSFile.show_file_in_explorer_or_open
+import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.TRIFAGlobals
 import com.zoffcc.applications.trifa.TRIFAGlobals.TRIFA_MSG_TYPE
 import com.zoffcc.applications.trifa.ToxVars
@@ -399,7 +400,7 @@ fun outgoing_filetransfer(message: UIMessage, ui_scale: Float)
                     modifier = Modifier.weight(10.0f).height(8.dp),
                 )
                 val currentTime = message.currentfileposTimeMs
-                val deltaBytes: Float = message.currentfilepos.toFloat()
+                val deltaBytes: Float = message.currentfilepos.toFloat() - message.startfilepos.toFloat()
                 val deltaTimeMs = currentTime - message.startfileposTimeMs
                 var transferSpeedKbps: Float = 0f
 
@@ -407,6 +408,12 @@ fun outgoing_filetransfer(message: UIMessage, ui_scale: Float)
                     val deltaTimeSeconds = deltaTimeMs / 1000f
                     transferSpeedKbps = (deltaBytes / 1024f) / deltaTimeSeconds
                 }
+                /*
+                Log.i("XXXXXXXXXXXX", " deltabyte="+deltaBytes+" "+currentTime +
+                        " curpos="+message.currentfilepos +
+                        " startpos="+message.startfilepos +
+                        " "+message.startfileposTimeMs+" deltatime="+deltaTimeMs +" "+transferSpeedKbps)
+                */
                 Text(modifier = Modifier.width(180.dp).padding(start = 15.dp),
                     fontSize = 14.sp,
                     text = "" + ((message.currentfilepos.toFloat() / message.filesize.toFloat()) * 100.0f).toLong() + "%" +

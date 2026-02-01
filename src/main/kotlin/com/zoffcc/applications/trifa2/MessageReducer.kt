@@ -1,3 +1,5 @@
+@file:Suppress("PropertyName", "LocalVariableName")
+
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
@@ -71,21 +73,31 @@ fun chatReducer(state: MessageState, action: MessageAction): MessageState = when
                 val prev_pos_ts = state.messages[item_position].currentfileposTimeMs
                 val cur_pos_ts = System.currentTimeMillis()
                 var start_ts = state.messages[item_position].startfileposTimeMs
+                var start_file_pos = state.messages[item_position].startfilepos
                 if (start_ts == 0L)
                 {
                     start_ts = System.currentTimeMillis()
                 }
-                state.messages[item_position] = item.copy(file_state = action.message_db.state, filesize = action.filetransfer_db.filesize, currentfilepos = action.filetransfer_db.current_position,
+                if ((start_file_pos == 0L) && (prev_pos == 0L) && (action.filetransfer_db.current_position > 0L))
+                {
+                    start_file_pos = action.filetransfer_db.current_position
+                }
+                state.messages[item_position] = item.copy(file_state = action.message_db.state,
+                    filesize = action.filetransfer_db.filesize,
+                    currentfilepos = action.filetransfer_db.current_position,
                     previousfilepos = prev_pos, currentfileposTimeMs = cur_pos_ts,
+                    startfilepos = start_file_pos,
                     startfileposTimeMs = start_ts,
                     previousfileposTimeMs = prev_pos_ts,
                     filename_fullpath = action.message_db.filename_fullpath)
             } else
             {
                 Log.i(TAG, "UpdateMessage:ft=null");
-                state.messages[item_position] = item.copy(file_state = action.message_db.state, filename_fullpath = null, currentfilepos = 0, previousfilepos = 0, previousfileposTimeMs = 0,
-                    startfileposTimeMs = 0,
-                    currentfileposTimeMs = 0,
+                state.messages[item_position] = item.copy(file_state = action.message_db.state, filename_fullpath = null,
+                    currentfilepos = 0, previousfilepos = 0, previousfileposTimeMs = 0,
+                    startfilepos = 0L,
+                    startfileposTimeMs = System.currentTimeMillis(),
+                    currentfileposTimeMs = System.currentTimeMillis(),
                     filesize = 0)
             }
         }
