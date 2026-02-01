@@ -21,6 +21,10 @@ data class UIMessage private constructor(
     val msgDatabaseId: Long,
     val filesize: Long = 0L,
     val currentfilepos: Long = 0L,
+    val previousfilepos: Long = 0L,
+    val startfileposTimeMs: Long = 0L,
+    val currentfileposTimeMs: Long = 0L,
+    val previousfileposTimeMs: Long = 0L,
     val filename_fullpath: String?,
     val file_state: Int = ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_PAUSE.value
 ) {
@@ -42,6 +46,10 @@ data class UIMessage private constructor(
         msgDatabaseId: Long,
         filesize: Long = 0L,
         currentfilepos: Long = 0L,
+        previousfilepos: Long = 0L,
+        startfileposTimeMs: Long = 0L,
+        currentfileposTimeMs: Long = 0L,
+        previousfileposTimeMs: Long = 0L,
         filename_fullpath: String?,
         file_state: Int = ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_PAUSE.value
     ) : this(
@@ -63,6 +71,10 @@ data class UIMessage private constructor(
         msg_version = msg_version,
         filesize = filesize,
         currentfilepos = currentfilepos,
+        previousfilepos = previousfilepos,
+        startfileposTimeMs = startfileposTimeMs,
+        currentfileposTimeMs = currentfileposTimeMs,
+        previousfileposTimeMs = previousfileposTimeMs,
         filename_fullpath = filename_fullpath,
         file_state = file_state
     )

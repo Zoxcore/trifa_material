@@ -398,8 +398,20 @@ fun outgoing_filetransfer(message: UIMessage, ui_scale: Float)
                     drawStopIndicator = {},
                     modifier = Modifier.weight(10.0f).height(8.dp),
                 )
-                Text(modifier = Modifier.width(70.dp).padding(start = 15.dp),
-                    text = "" + ((message.currentfilepos.toFloat() / message.filesize.toFloat()) * 100.0f).toLong() + "%")
+                val currentTime = message.currentfileposTimeMs
+                val deltaBytes: Float = message.currentfilepos.toFloat()
+                val deltaTimeMs = currentTime - message.startfileposTimeMs
+                var transferSpeedKbps: Float = 0f
+
+                if (deltaTimeMs > 0) {
+                    val deltaTimeSeconds = deltaTimeMs / 1000f
+                    transferSpeedKbps = (deltaBytes / 1024f) / deltaTimeSeconds
+                }
+                Text(modifier = Modifier.width(180.dp).padding(start = 15.dp),
+                    fontSize = 14.sp,
+                    text = "" + ((message.currentfilepos.toFloat() / message.filesize.toFloat()) * 100.0f).toLong() + "%" +
+                            " " + formatSpeed(transferSpeedKbps)
+                )
             }
             Column(modifier = Modifier.fillMaxWidth()) {
                 Spacer(Modifier.size(10.dp).align(Alignment.Start))
@@ -449,8 +461,21 @@ fun incoming_filetransfer(message: UIMessage, ui_scale: Float)
                 drawStopIndicator = {},
                 modifier = Modifier.weight(10.0f).height(8.dp),
             )
-            Text(modifier = Modifier.width(70.dp).padding(start = 15.dp),
-                text = "" + ((message.currentfilepos.toFloat() / message.filesize.toFloat()) * 100.0f).toLong() + "%")
+            val currentTime = message.currentfileposTimeMs
+            val deltaBytes: Float = message.currentfilepos.toFloat()
+            val deltaTimeMs = currentTime - message.startfileposTimeMs
+            var transferSpeedKbps: Float = 0f
+
+            if (deltaTimeMs > 0) {
+                val deltaTimeSeconds = deltaTimeMs / 1000f
+                transferSpeedKbps = (deltaBytes / 1024f) / deltaTimeSeconds
+            }
+
+            Text(modifier = Modifier.width(180.dp).padding(start = 15.dp),
+                fontSize = 14.sp,
+                text = "" + ((message.currentfilepos.toFloat() / message.filesize.toFloat()) * 100.0f).toLong() + "%" +
+                        " " + formatSpeed(transferSpeedKbps)
+            )
         }
 
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -877,5 +902,25 @@ class TriangleEdgeShape(val risingToTheRight: Boolean) : Shape {
         }
 
         return Outline.Generic(path = trianglePath)
+    }
+}
+
+fun formatSpeed(speedKbps: Float): String {
+    if (speedKbps < 0)
+    {
+        return "0"
+    }
+    else if (speedKbps < 1f)
+    {
+        // Display in bytes/sec
+        val bytesPerSec = speedKbps * 1024
+        return String.format("%.0f B/sec", bytesPerSec)
+    } else if (speedKbps > 1000f) {
+        // Display in MB/sec
+        val bytesPerSec = speedKbps / 1024
+        return String.format("%.1f MiB/sec", bytesPerSec)
+    } else {
+        // Display in KB/sec
+        return String.format("%.1f kiB/sec", speedKbps)
     }
 }
