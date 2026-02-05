@@ -179,8 +179,8 @@ dependencies {
     //
     implementation("com.squareup.okhttp3:okhttp:5.3.2")
     implementation("ca.gosyer:kotlin-multiplatform-appdirs:1.2.0")
-    implementation("com.sksamuel.scrimage:scrimage-core:4.3.5")
-    implementation("com.sksamuel.scrimage:scrimage-webp:4.3.5")
+    implementation("com.sksamuel.scrimage:scrimage-core:4.3.6")
+    implementation("com.sksamuel.scrimage:scrimage-webp:4.3.6")
     implementation("com.google.code.gson:gson:2.13.2")
     implementation("io.github.alexzhirkevich:qrose:1.1.1")
     implementation("com.vanniktech:emoji-ios:0.21.0")
