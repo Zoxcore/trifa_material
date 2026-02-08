@@ -794,7 +794,7 @@ fun ChangePasswordDialog(onDismiss: () -> Unit) {
                         Log.i(TAG, "changing tox save password ...")
                         password_hash = newPassword
                         update_savedata_file_wrapper()
-                        Log.i(TAG, "tox save written with new password. password_hash=" + password_hash)
+                        // Log.i(TAG, "tox save written with new password. password_hash=" + password_hash)
                     }
                 }
                 onDismiss() // Close the dialog after action

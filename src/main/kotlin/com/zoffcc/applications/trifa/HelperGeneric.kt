@@ -610,7 +610,7 @@ object HelperGeneric {
                 // save raw message bytes of this v2 msg into the database
                 // we need it if we want to resend it later
                 m.raw_msgv2_bytes = result.raw_message_buf_hex
-                Log.i(TAG, "send_message_onclick:2: raw_msgv2_bytes=" + m.raw_msgv2_bytes)
+                // Log.i(TAG, "send_message_onclick:2: raw_msgv2_bytes=" + m.raw_msgv2_bytes)
             }
             // TODO: typing indicator **// stop_self_typing_indicator_s()
             var row_id: Long = -1
