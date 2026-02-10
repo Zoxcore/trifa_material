@@ -164,14 +164,14 @@ dependencies {
         {
             // use regular "sqlite-jdbc"
             println("other OS -> unsing org.xerial:sqlite-jdbc")
-            implementation("org.xerial:sqlite-jdbc:3.51.1.0")
+            implementation("org.xerial:sqlite-jdbc:3.51.2.0")
         }
     }
     catch(_: Exception)
     {
         // use regular "sqlite-jdbc"
         println("error detecting OS -> unsing org.xerial:sqlite-jdbc")
-        implementation("org.xerial:sqlite-jdbc:3.51.1.0")
+        implementation("org.xerial:sqlite-jdbc:3.51.2.0")
     }
     // ------- SQLITE / SQLCIPHER implementation -------
     //
