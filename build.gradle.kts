@@ -19,7 +19,7 @@ plugins {
 }
 
 group = "com.zoffcc.applications.trifa_material"
-version = "1.0.59"
+version = "1.0.60"
 val appName = "trifa_material"
 
 val build_with_appimage = false
