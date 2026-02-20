@@ -197,7 +197,7 @@ project.task('calculateChecksums').doLast {
     def dependencies = calculateHashes project
     // HINT: add some magic at the start
     System.err.println "=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855:WITNESS:START:="
-    witnessFile.createNewFile()
+    witnessFile.write("") // empty the file
     witnessFile.append("dependencyVerification {" + "\n")
     witnessFile.append("    verify = [" + "\n")
     dependencies.each {dep ->
