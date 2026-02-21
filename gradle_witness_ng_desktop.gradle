@@ -164,10 +164,16 @@ static Map<String, ConfigurationInfo> findDependencies(Project project) {
     return dependencies
 }
 
+// HINT: default the witness check to "true"
+def runWitnessChecker_ = project.hasProperty('runWitnessChecker') ? project.property('runWitnessChecker').toBoolean() : true
 
 tasks.register("pinChecksums") {
     group = 'Verification'
     description = 'checks if binary downloads from maven have the correct checksums.'
+
+    if (!runWitnessChecker_) {
+        return
+    }
 
     doLast {
         def dependencies = calculateHashes project

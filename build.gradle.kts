@@ -160,11 +160,15 @@ dependencies {
             // on "Linux amd64" use "sqlite-jdbc" with sqlcipher included (which is a dropin replacement for sqlite-jdbc)
             System.err.println("Linux amd64 -> unsing pkgs_zoffcc_sqlite-jdbc-sqlcipher")
             implementation("com.github.zoff99:pkgs_zoffcc_sqlite-jdbc-sqlcipher:1.0.22")
+            // HINT: enable the witness checker
+            project.extensions.extraProperties["runWitnessChecker"] = true
         } else
         {
             // use regular "sqlite-jdbc"
             System.err.println("other OS -> unsing org.xerial:sqlite-jdbc")
             implementation("org.xerial:sqlite-jdbc:3.51.2.0")
+            // HINT: DISABLE the witness checker
+            project.extensions.extraProperties["runWitnessChecker"] = false
         }
     }
     catch(_: Exception)
@@ -172,6 +176,8 @@ dependencies {
         // use regular "sqlite-jdbc"
         System.err.println("error detecting OS -> unsing org.xerial:sqlite-jdbc")
         implementation("org.xerial:sqlite-jdbc:3.51.2.0")
+        // HINT: DISABLE the witness checker
+        project.extensions.extraProperties["runWitnessChecker"] = false
     }
     // ------- SQLITE / SQLCIPHER implementation -------
     //
