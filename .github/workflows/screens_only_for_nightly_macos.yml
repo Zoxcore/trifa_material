@@ -139,7 +139,7 @@ jobs:
            cp -v dst2.png screenshot-macos.png
 
     - name: upload-screenshots
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: screenshot-macos
         path: |
