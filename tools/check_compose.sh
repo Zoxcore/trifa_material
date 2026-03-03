@@ -7,6 +7,7 @@ ver=$(git ls-remote --refs --sort='v:refname' --tags "$r1" 2>/dev/null \
 ver_base=$(echo "$ver"|cut -d'-' -f1)
 echo "$ver_base"
 ver_other=$(git ls-remote --refs --sort='v:refname' --tags "$r1" 2>/dev/null | cut --delimiter='/' --fields=3 2>/dev/null| \
+ grep -v '+dev'|\
  grep -e "${ver_base}"'-alph' -e "${ver_base}"'-beta' -e "${ver_base}"'-rc'| tail -1 2>/dev/null|sed -e 's#^v##' 2>/dev/null)
 echo "$ver_other"
 
