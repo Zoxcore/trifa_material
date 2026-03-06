@@ -27,7 +27,7 @@ dependencyVerification {
         'com.adobe.xmp:xmpcore:6.1.11:xmpcore-6.1.11.jar:8f7033c579b99fa0d9d6ddcb9448875b5e4b577c350002278ce46997d678b737',
         'com.beust:jcommander:1.82:jcommander-1.82.jar:deeac157c8de6822878d85d0c7bc8467a19cc8484d37788f7804f039dde280b1',
         'com.drewnoakes:metadata-extractor:2.19.0:metadata-extractor-2.19.0.jar:e51bb454ed08ea2bfcc3ad147d088ad1aa73a999e0072563f8ae50021a2fcadb',
-        'com.github.gmazzo.buildconfig:plugin:6.0.7:plugin-6.0.7.jar:52852346174bb9ecb5720298b0dfb44dfb9555bd84f49d138979800bd2b22695',
+        'com.github.gmazzo.buildconfig:plugin:6.0.8:plugin-6.0.8.jar:b94591dd24d4315bbf3dca8b13e05472bccf94bf81133a7de2c64628076e9bfd',
         'com.github.zoff99:pkgs_zoffcc_sqlite-jdbc-sqlcipher:1.0.22:pkgs_zoffcc_sqlite-jdbc-sqlcipher-1.0.22.jar:743158b3953c830fc6bc46264db607130e0377dfab05aa37fe08a00aa618f8cd',
         'com.google.code.gson:gson:2.11.0:gson-2.11.0.jar:57928d6e5a6edeb2abd3770a8f95ba44dce45f3b23b7a9dc2b309c581552a78b',
         'com.google.code.gson:gson:2.13.2:gson-2.13.2.jar:dd0ce1b55a3ed2080cb70f9c655850cda86c206862310009dcb5e5c95265a5e0',
