@@ -217,6 +217,25 @@ fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?, 
                         }
                         false
                     }
+
+                    // Handle Shift + Enter to insert newline
+                    it.isShiftPressed && it.key == Key.Enter && it.type == KeyEventType.KeyDown -> {
+                        val currentText = inputTextV.text
+                        val selection = inputTextV.selection
+                        val start = selection.start
+                        val end = selection.end
+
+                        // Insert newline at cursor position
+                        val newText = currentText.substring(0, start) + "\n" + currentText.substring(end)
+                        val newCursorPosition = start + 1
+
+                        inputTextV = TextFieldValue(
+                            text = newText,
+                            selection = TextRange(newCursorPosition)
+                        )
+                        true
+                    }
+
                     (!it.isMetaPressed && !it.isAltPressed && !it.isCtrlPressed && !it.isShiftPressed && it.key == Key.Enter && it.type == KeyEventType.KeyDown) -> {
                         if (inputTextV.text.isNotEmpty())
                         {
