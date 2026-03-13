@@ -1,5 +1,366 @@
 # Changelog
 
+## [v1.0.62](https://github.com/Zoxcore/trifa_material/tree/v1.0.62) (2026-03-13)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.61...v1.0.62)
+
+**Merged pull requests:**
+
+- try to use new changelog generator version, and use the docker version [\#589](https://github.com/Zoxcore/trifa_material/pull/589) ([zoff99](https://github.com/zoff99))
+- update to compose.version 1.11.0-alpha04 and fix entering newline into the message textfield [\#588](https://github.com/Zoxcore/trifa_material/pull/588) ([zoff99](https://github.com/zoff99))
+- update witness checksums [\#587](https://github.com/Zoxcore/trifa_material/pull/587) ([zoff99](https://github.com/zoff99))
+- Bump com.github.gmazzo.buildconfig from 6.0.8 to 6.0.9 [\#586](https://github.com/Zoxcore/trifa_material/pull/586) ([dependabot[bot]](https://github.com/apps/dependabot))
+- add local build script [\#585](https://github.com/Zoxcore/trifa_material/pull/585) ([zoff99](https://github.com/zoff99))
+- update witness checksums [\#584](https://github.com/Zoxcore/trifa_material/pull/584) ([zoff99](https://github.com/zoff99))
+- Bump com.github.gmazzo.buildconfig from 6.0.7 to 6.0.8 [\#583](https://github.com/Zoxcore/trifa_material/pull/583) ([dependabot[bot]](https://github.com/apps/dependabot))
+- do not use pure dev versions, mostly gradle does not find them anymore [\#582](https://github.com/Zoxcore/trifa_material/pull/582) ([zoff99](https://github.com/zoff99))
+- downgrade run script to java 17 [\#581](https://github.com/Zoxcore/trifa_material/pull/581) ([zoff99](https://github.com/zoff99))
+- update witness checksums [\#580](https://github.com/Zoxcore/trifa_material/pull/580) ([zoff99](https://github.com/zoff99))
+- Bump com.sksamuel.scrimage:scrimage-webp from 4.3.6 to 4.3.8 [\#579](https://github.com/Zoxcore/trifa_material/pull/579) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump actions/upload-artifact from 6 to 7 [\#577](https://github.com/Zoxcore/trifa_material/pull/577) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump actions/download-artifact from 7 to 8 [\#576](https://github.com/Zoxcore/trifa_material/pull/576) ([dependabot[bot]](https://github.com/apps/dependabot))
+
+## [v1.0.61](https://github.com/Zoxcore/trifa_material/tree/v1.0.61) (2026-02-21)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.60...v1.0.61)
+
+**Merged pull requests:**
+
+- update to compose.version 1.11.0-alpha03+dev3692 [\#575](https://github.com/Zoxcore/trifa_material/pull/575) ([zoff99](https://github.com/zoff99))
+- add gradle witness check and update compose version [\#574](https://github.com/Zoxcore/trifa_material/pull/574) ([zoff99](https://github.com/zoff99))
+
+## [v1.0.60](https://github.com/Zoxcore/trifa_material/tree/v1.0.60) (2026-02-13)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.59...v1.0.60)
+
+**Merged pull requests:**
+
+- less verbose [\#573](https://github.com/Zoxcore/trifa_material/pull/573) ([zoff99](https://github.com/zoff99))
+- Bump org.xerial:sqlite-jdbc from 3.51.1.0 to 3.51.2.0 [\#572](https://github.com/Zoxcore/trifa_material/pull/572) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump io.github.alexzhirkevich:qrose from 1.1.1 to 1.1.2 [\#571](https://github.com/Zoxcore/trifa_material/pull/571) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump com.sksamuel.scrimage:scrimage-core from 4.3.5 to 4.3.6 [\#570](https://github.com/Zoxcore/trifa_material/pull/570) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Revert "update to compose.version 1.11.0-alpha03+dev3570" [\#568](https://github.com/Zoxcore/trifa_material/pull/568) ([zoff99](https://github.com/zoff99))
+- update dependencies [\#567](https://github.com/Zoxcore/trifa_material/pull/567) ([zoff99](https://github.com/zoff99))
+- Bump de.undercouch.download from 5.6.0 to 5.7.0 [\#566](https://github.com/Zoxcore/trifa_material/pull/566) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump io.github.alexzhirkevich:qrose from 1.1.0 to 1.1.1 [\#565](https://github.com/Zoxcore/trifa_material/pull/565) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump com.github.zoff99:pkgs\_zoffcc\_sqlite-jdbc-sqlcipher from 1.0.21 to 1.0.22 [\#564](https://github.com/Zoxcore/trifa_material/pull/564) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update dependencies, show overall transfer speed [\#563](https://github.com/Zoxcore/trifa_material/pull/563) ([zoff99](https://github.com/zoff99))
+- Bump io.github.alexzhirkevich:qrose from 1.0.1 to 1.1.0 [\#561](https://github.com/Zoxcore/trifa_material/pull/561) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump com.github.zoff99:pkgs\_zoffcc\_sqlite-jdbc-sqlcipher from 1.0.20 to 1.0.21 [\#560](https://github.com/Zoxcore/trifa_material/pull/560) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update dependencies [\#559](https://github.com/Zoxcore/trifa_material/pull/559) ([zoff99](https://github.com/zoff99))
+- remove some debug log messages [\#558](https://github.com/Zoxcore/trifa_material/pull/558) ([zoff99](https://github.com/zoff99))
+- update toxcore to f18e3dbe428b1505365f47146f891c49ee961837 [\#557](https://github.com/Zoxcore/trifa_material/pull/557) ([zoff99](https://github.com/zoff99))
+- update JNI libs [\#556](https://github.com/Zoxcore/trifa_material/pull/556) ([zoff99](https://github.com/zoff99))
+- Translations update from Hosted Weblate [\#555](https://github.com/Zoxcore/trifa_material/pull/555) ([weblate](https://github.com/weblate))
+- Bump com.github.gmazzo.buildconfig from 5.7.1 to 6.0.7 [\#554](https://github.com/Zoxcore/trifa_material/pull/554) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Translations update from Hosted Weblate [\#553](https://github.com/Zoxcore/trifa_material/pull/553) ([weblate](https://github.com/weblate))
+
+## [v1.0.59](https://github.com/Zoxcore/trifa_material/tree/v1.0.59) (2025-12-21)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.58...v1.0.59)
+
+**Merged pull requests:**
+
+- update to compose.version 1.11.0-alpha02+dev3425 [\#552](https://github.com/Zoxcore/trifa_material/pull/552) ([zoff99](https://github.com/zoff99))
+- fix JNI libs and deb package file [\#551](https://github.com/Zoxcore/trifa_material/pull/551) ([zoff99](https://github.com/zoff99))
+- update dependencies [\#550](https://github.com/Zoxcore/trifa_material/pull/550) ([zoff99](https://github.com/zoff99))
+- update opus to v1.6 [\#549](https://github.com/Zoxcore/trifa_material/pull/549) ([zoff99](https://github.com/zoff99))
+- change main class name to "TrifaMainKt" to make desktop icon in linux work better [\#548](https://github.com/Zoxcore/trifa_material/pull/548) ([zoff99](https://github.com/zoff99))
+- be more flexible about the asan lib [\#547](https://github.com/Zoxcore/trifa_material/pull/547) ([zoff99](https://github.com/zoff99))
+- Bump actions/download-artifact from 6 to 7 [\#545](https://github.com/Zoxcore/trifa_material/pull/545) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump actions/upload-artifact from 5 to 6 [\#544](https://github.com/Zoxcore/trifa_material/pull/544) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update toxcore to c3c719f450b67b81e9ed5aca9c1e903f1e2a5d2c [\#543](https://github.com/Zoxcore/trifa_material/pull/543) ([zoff99](https://github.com/zoff99))
+
+## [v1.0.58](https://github.com/Zoxcore/trifa_material/tree/v1.0.58) (2025-12-13)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.57...v1.0.58)
+
+**Merged pull requests:**
+
+- Bump com.github.zoff99:pkgs\_zoffcc\_sqlite-jdbc-sqlcipher from 1.0.19 to 1.0.20 [\#542](https://github.com/Zoxcore/trifa_material/pull/542) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update to compose.version 1.11.0-alpha01+dev3381 [\#541](https://github.com/Zoxcore/trifa_material/pull/541) ([zoff99](https://github.com/zoff99))
+- update JNI libs and prepare for password change feature [\#540](https://github.com/Zoxcore/trifa_material/pull/540) ([zoff99](https://github.com/zoff99))
+- use sqlcipher only on Linux/amd64, try to exclude AppImage and nixos [\#539](https://github.com/Zoxcore/trifa_material/pull/539) ([zoff99](https://github.com/zoff99))
+- macos-13 was dropped by github CI, so try to choose the best macos intel platform, and hope for the best [\#538](https://github.com/Zoxcore/trifa_material/pull/538) ([zoff99](https://github.com/zoff99))
+- update to compose.version 1.11.0-alpha01+dev3367 [\#537](https://github.com/Zoxcore/trifa_material/pull/537) ([zoff99](https://github.com/zoff99))
+- Bump peter-evans/create-pull-request from 7 to 8 [\#536](https://github.com/Zoxcore/trifa_material/pull/536) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update to compose.version 1.10.10-alpha01+dev3354 [\#535](https://github.com/Zoxcore/trifa_material/pull/535) ([zoff99](https://github.com/zoff99))
+- fix linter warnings [\#534](https://github.com/Zoxcore/trifa_material/pull/534) ([zoff99](https://github.com/zoff99))
+- update to compose.version 1.10.10-alpha01+dev3348 [\#533](https://github.com/Zoxcore/trifa_material/pull/533) ([zoff99](https://github.com/zoff99))
+- update to compose.version 1.10.10-alpha01+dev3342 [\#532](https://github.com/Zoxcore/trifa_material/pull/532) ([zoff99](https://github.com/zoff99))
+- Bump org.xerial:sqlite-jdbc from 3.51.0.0 to 3.51.1.0 [\#531](https://github.com/Zoxcore/trifa_material/pull/531) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update JNI libs [\#530](https://github.com/Zoxcore/trifa_material/pull/530) ([zoff99](https://github.com/zoff99))
+- update to compose.version 1.10.10-alpha01+dev3335 [\#529](https://github.com/Zoxcore/trifa_material/pull/529) ([zoff99](https://github.com/zoff99))
+
+## [v1.0.57](https://github.com/Zoxcore/trifa_material/tree/v1.0.57) (2025-11-28)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.56...v1.0.57)
+
+**Merged pull requests:**
+
+- update to compose.version 1.10.10-alpha01+dev3326 [\#528](https://github.com/Zoxcore/trifa_material/pull/528) ([zoff99](https://github.com/zoff99))
+- update JNI libs [\#527](https://github.com/Zoxcore/trifa_material/pull/527) ([zoff99](https://github.com/zoff99))
+- update dependencies [\#525](https://github.com/Zoxcore/trifa_material/pull/525) ([zoff99](https://github.com/zoff99))
+- update ffmpeg av JNI libs [\#524](https://github.com/Zoxcore/trifa_material/pull/524) ([zoff99](https://github.com/zoff99))
+- update to compose.version 1.10.0-beta02+dev3262 [\#523](https://github.com/Zoxcore/trifa_material/pull/523) ([zoff99](https://github.com/zoff99))
+- add jitpack.io maven repository and allow pkgs\_zoffcc\_sqlite-jdbc-sqlcipher as drop in replacement for org.xerial:sqlite-jdbc [\#522](https://github.com/Zoxcore/trifa_material/pull/522) ([zoff99](https://github.com/zoff99))
+- Bump com.github.gmazzo.buildconfig from 6.0.0 to 6.0.1 [\#521](https://github.com/Zoxcore/trifa_material/pull/521) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump actions/checkout from 5 to 6 [\#520](https://github.com/Zoxcore/trifa_material/pull/520) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump com.github.gmazzo.buildconfig from 5.7.1 to 6.0.0 [\#519](https://github.com/Zoxcore/trifa_material/pull/519) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update to compose.version 1.10.0-beta02+dev3258 [\#518](https://github.com/Zoxcore/trifa_material/pull/518) ([zoff99](https://github.com/zoff99))
+- Bump com.squareup.okhttp3:okhttp from 5.3.0 to 5.3.2 [\#517](https://github.com/Zoxcore/trifa_material/pull/517) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update to compose.version 1.10.0-beta02+dev3255 [\#516](https://github.com/Zoxcore/trifa_material/pull/516) ([zoff99](https://github.com/zoff99))
+- update to compose.version 1.10.0-beta02+dev3252 [\#515](https://github.com/Zoxcore/trifa_material/pull/515) ([zoff99](https://github.com/zoff99))
+- allow only a single instance of this app and show info that trifa is already running. also show a button to override. [\#514](https://github.com/Zoxcore/trifa_material/pull/514) ([zoff99](https://github.com/zoff99))
+- update to compose.version 1.10.0-beta02+dev3227 [\#513](https://github.com/Zoxcore/trifa_material/pull/513) ([zoff99](https://github.com/zoff99))
+- get and show commandline arguments [\#512](https://github.com/Zoxcore/trifa_material/pull/512) ([zoff99](https://github.com/zoff99))
+- update to compose.version 1.10.0-beta01+dev3216 [\#511](https://github.com/Zoxcore/trifa_material/pull/511) ([zoff99](https://github.com/zoff99))
+- update to compose.version 1.10.0-beta01+dev3204 [\#510](https://github.com/Zoxcore/trifa_material/pull/510) ([zoff99](https://github.com/zoff99))
+- Bump org.xerial:sqlite-jdbc from 3.50.3.0 to 3.51.0.0 [\#509](https://github.com/Zoxcore/trifa_material/pull/509) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump com.github.gmazzo.buildconfig from 5.7.0 to 5.7.1 [\#508](https://github.com/Zoxcore/trifa_material/pull/508) ([dependabot[bot]](https://github.com/apps/dependabot))
+- add script to update sorma2 and update sorma2 [\#507](https://github.com/Zoxcore/trifa_material/pull/507) ([zoff99](https://github.com/zoff99))
+- click away that silly popup [\#506](https://github.com/Zoxcore/trifa_material/pull/506) ([zoff99](https://github.com/zoff99))
+- add CI test on macos-15 intel [\#505](https://github.com/Zoxcore/trifa_material/pull/505) ([zoff99](https://github.com/zoff99))
+- update dependencies [\#504](https://github.com/Zoxcore/trifa_material/pull/504) ([zoff99](https://github.com/zoff99))
+- Bump com.squareup.okhttp3:okhttp from 5.2.1 to 5.3.0 [\#503](https://github.com/Zoxcore/trifa_material/pull/503) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump actions/upload-artifact from 4 to 5 [\#502](https://github.com/Zoxcore/trifa_material/pull/502) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump actions/download-artifact from 5 to 6 [\#501](https://github.com/Zoxcore/trifa_material/pull/501) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update dependencies [\#500](https://github.com/Zoxcore/trifa_material/pull/500) ([zoff99](https://github.com/zoff99))
+- update dependencies [\#499](https://github.com/Zoxcore/trifa_material/pull/499) ([zoff99](https://github.com/zoff99))
+- show full text with jshowarch [\#498](https://github.com/Zoxcore/trifa_material/pull/498) ([zoff99](https://github.com/zoff99))
+- show full text with jshowarch [\#497](https://github.com/Zoxcore/trifa_material/pull/497) ([zoff99](https://github.com/zoff99))
+- Bump com.squareup.okhttp3:okhttp from 5.2.0 to 5.2.1 [\#496](https://github.com/Zoxcore/trifa_material/pull/496) ([dependabot[bot]](https://github.com/apps/dependabot))
+- show also macos-15 screenshot [\#495](https://github.com/Zoxcore/trifa_material/pull/495) ([zoff99](https://github.com/zoff99))
+- Bump com.github.gmazzo.buildconfig from 5.6.8 to 5.7.0 [\#494](https://github.com/Zoxcore/trifa_material/pull/494) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update to compose.version 1.10.0-alpha02 [\#493](https://github.com/Zoxcore/trifa_material/pull/493) ([zoff99](https://github.com/zoff99))
+- test on macos-15 [\#492](https://github.com/Zoxcore/trifa_material/pull/492) ([zoff99](https://github.com/zoff99))
+- Bump com.squareup.okhttp3:okhttp from 5.1.0 to 5.2.0 [\#491](https://github.com/Zoxcore/trifa_material/pull/491) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump github/codeql-action from 3 to 4 [\#490](https://github.com/Zoxcore/trifa_material/pull/490) ([dependabot[bot]](https://github.com/apps/dependabot))
+- keep indents on macos Info.plist [\#489](https://github.com/Zoxcore/trifa_material/pull/489) ([zoff99](https://github.com/zoff99))
+
+## [v1.0.56](https://github.com/Zoxcore/trifa_material/tree/v1.0.56) (2025-10-02)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.55...v1.0.56)
+
+**Merged pull requests:**
+
+- fix calling push url too many times in some cases [\#488](https://github.com/Zoxcore/trifa_material/pull/488) ([zoff99](https://github.com/zoff99))
+- fix typo in comment [\#487](https://github.com/Zoxcore/trifa_material/pull/487) ([zoff99](https://github.com/zoff99))
+- update dependencies [\#486](https://github.com/Zoxcore/trifa_material/pull/486) ([zoff99](https://github.com/zoff99))
+- update dependencies [\#485](https://github.com/Zoxcore/trifa_material/pull/485) ([zoff99](https://github.com/zoff99))
+- Bump com.sksamuel.scrimage:scrimage-webp from 4.3.4 to 4.3.5 [\#484](https://github.com/Zoxcore/trifa_material/pull/484) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump com.squareup.okhttp3:okhttp from 4.12.0 to 5.1.0 [\#482](https://github.com/Zoxcore/trifa_material/pull/482) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Update to fscarmen/warp-on-actions@v1.4 [\#481](https://github.com/Zoxcore/trifa_material/pull/481) ([zoff99](https://github.com/zoff99))
+
+## [v1.0.55](https://github.com/Zoxcore/trifa_material/tree/v1.0.55) (2025-09-14)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.54...v1.0.55)
+
+**Fixed bugs:**
+
+- \[Bug\]: also use tor for updating the bootstrapnodes list from the internet [\#477](https://github.com/Zoxcore/trifa_material/issues/477)
+- \[Bug\]: no unread message badge on incoming filetranser [\#475](https://github.com/Zoxcore/trifa_material/issues/475)
+- \[Bug\]: also use tor for triggering push when tox is using tor [\#469](https://github.com/Zoxcore/trifa_material/issues/469)
+- \[Bug\]: no notification on incoming filetransfer [\#460](https://github.com/Zoxcore/trifa_material/issues/460)
+
+**Merged pull requests:**
+
+- update unread message badge on incoming filetranser [\#480](https://github.com/Zoxcore/trifa_material/pull/480) ([zoff99](https://github.com/zoff99))
+- also use tor for updating the bootstrapnode list from the internet [\#479](https://github.com/Zoxcore/trifa_material/pull/479) ([zoff99](https://github.com/zoff99))
+- remove deprecated config and check for exceptions [\#478](https://github.com/Zoxcore/trifa_material/pull/478) ([zoff99](https://github.com/zoff99))
+- use tor proxy also for triggering push notifications [\#476](https://github.com/Zoxcore/trifa_material/pull/476) ([zoff99](https://github.com/zoff99))
+- add notification on incoming filetransfer [\#474](https://github.com/Zoxcore/trifa_material/pull/474) ([zoff99](https://github.com/zoff99))
+- Bump com.google.code.gson:gson from 2.13.1 to 2.13.2 [\#473](https://github.com/Zoxcore/trifa_material/pull/473) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump com.github.gmazzo.buildconfig from 5.6.7 to 5.6.8 [\#471](https://github.com/Zoxcore/trifa_material/pull/471) ([dependabot[bot]](https://github.com/apps/dependabot))
+- enable fake webcam mode for CI run [\#470](https://github.com/Zoxcore/trifa_material/pull/470) ([zoff99](https://github.com/zoff99))
+
+## [v1.0.54](https://github.com/Zoxcore/trifa_material/tree/v1.0.54) (2025-09-07)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.53...v1.0.54)
+
+**Merged pull requests:**
+
+- Bump com.sksamuel.scrimage:scrimage-core from 4.3.3 to 4.3.4 \(fix\) [\#467](https://github.com/Zoxcore/trifa_material/pull/467) ([zoff99](https://github.com/zoff99))
+- Bump org.ajoberstar.grgit from 5.3.2 to 5.3.3 [\#466](https://github.com/Zoxcore/trifa_material/pull/466) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update to compose.version 1.10.0-alpha01 [\#464](https://github.com/Zoxcore/trifa_material/pull/464) ([zoff99](https://github.com/zoff99))
+- update x264 to b35605ace3ddf7c1a5d67a2eb553f034aef41d55 [\#463](https://github.com/Zoxcore/trifa_material/pull/463) ([zoff99](https://github.com/zoff99))
+- Bump com.sksamuel.scrimage:scrimage-core from 4.3.2 to 4.3.4 [\#462](https://github.com/Zoxcore/trifa_material/pull/462) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update to compose.version 1.10.0+dev2887 [\#461](https://github.com/Zoxcore/trifa_material/pull/461) ([zoff99](https://github.com/zoff99))
+- update to compose.version 1.10.0+dev2849 [\#459](https://github.com/Zoxcore/trifa_material/pull/459) ([zoff99](https://github.com/zoff99))
+- update dependencies [\#458](https://github.com/Zoxcore/trifa_material/pull/458) ([zoff99](https://github.com/zoff99))
+- update depedencies [\#457](https://github.com/Zoxcore/trifa_material/pull/457) ([zoff99](https://github.com/zoff99))
+- Bump actions/setup-java from 4 to 5 [\#456](https://github.com/Zoxcore/trifa_material/pull/456) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Translations update from Hosted Weblate [\#455](https://github.com/Zoxcore/trifa_material/pull/455) ([weblate](https://github.com/weblate))
+- update compose version [\#454](https://github.com/Zoxcore/trifa_material/pull/454) ([zoff99](https://github.com/zoff99))
+- trigger a single push when starting an outgoing filetransfer [\#453](https://github.com/Zoxcore/trifa_material/pull/453) ([zoff99](https://github.com/zoff99))
+- Bump actions/checkout from 4 to 5 [\#452](https://github.com/Zoxcore/trifa_material/pull/452) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump actions/download-artifact from 4 to 5 [\#451](https://github.com/Zoxcore/trifa_material/pull/451) ([dependabot[bot]](https://github.com/apps/dependabot))
+- start test video call on linux [\#450](https://github.com/Zoxcore/trifa_material/pull/450) ([zoff99](https://github.com/zoff99))
+- click on video call button [\#449](https://github.com/Zoxcore/trifa_material/pull/449) ([zoff99](https://github.com/zoff99))
+- update dependencies [\#448](https://github.com/Zoxcore/trifa_material/pull/448) ([zoff99](https://github.com/zoff99))
+- Obsolete version. DO NOT USE THIS VERSION ANYMORE. [\#447](https://github.com/Zoxcore/trifa_material/pull/447) ([zoff99](https://github.com/zoff99))
+- update to compose.version 1.9.0-beta01+dev2679 [\#446](https://github.com/Zoxcore/trifa_material/pull/446) ([zoff99](https://github.com/zoff99))
+- Bump org.xerial:sqlite-jdbc from 3.50.2.0 to 3.50.3.0 [\#445](https://github.com/Zoxcore/trifa_material/pull/445) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump com.sksamuel.scrimage:scrimage-webp from 4.3.1 to 4.3.3 [\#444](https://github.com/Zoxcore/trifa_material/pull/444) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update to compose.version 1.9.0-alpha03+dev2632 [\#442](https://github.com/Zoxcore/trifa_material/pull/442) ([zoff99](https://github.com/zoff99))
+- update to compose.version 1.9.0-alpha03+dev2604 [\#440](https://github.com/Zoxcore/trifa_material/pull/440) ([zoff99](https://github.com/zoff99))
+- Bump org.xerial:sqlite-jdbc from 3.50.1.0 to 3.50.2.0 [\#439](https://github.com/Zoxcore/trifa_material/pull/439) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update to kotlin.version 2.2.0 [\#438](https://github.com/Zoxcore/trifa_material/pull/438) ([zoff99](https://github.com/zoff99))
+- Bump com.sksamuel.scrimage:scrimage-core from 4.3.0 to 4.3.2 [\#436](https://github.com/Zoxcore/trifa_material/pull/436) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump com.github.gmazzo.buildconfig from 5.6.6 to 5.6.7 [\#435](https://github.com/Zoxcore/trifa_material/pull/435) ([dependabot[bot]](https://github.com/apps/dependabot))
+
+## [v1.0.53](https://github.com/Zoxcore/trifa_material/tree/v1.0.53) (2025-06-23)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.52...v1.0.53)
+
+**Merged pull requests:**
+
+- github CI reverted drive name again [\#434](https://github.com/Zoxcore/trifa_material/pull/434) ([zoff99](https://github.com/zoff99))
+- update to kotlin.version 2.2.0-RC3 [\#433](https://github.com/Zoxcore/trifa_material/pull/433) ([zoff99](https://github.com/zoff99))
+- Bump org.ajoberstar.grgit from 5.3.0 to 5.3.2 [\#431](https://github.com/Zoxcore/trifa_material/pull/431) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump com.github.gmazzo.buildconfig from 5.6.5 to 5.6.6 [\#430](https://github.com/Zoxcore/trifa_material/pull/430) ([dependabot[bot]](https://github.com/apps/dependabot))
+- D:\ seems to be C:\ now for some reason on CI [\#429](https://github.com/Zoxcore/trifa_material/pull/429) ([zoff99](https://github.com/zoff99))
+- fix CI run path on windows, and remove more special chars in commit message for buildconfig [\#428](https://github.com/Zoxcore/trifa_material/pull/428) ([zoff99](https://github.com/zoff99))
+- update dependencies [\#427](https://github.com/Zoxcore/trifa_material/pull/427) ([zoff99](https://github.com/zoff99))
+- Bump org.xerial:sqlite-jdbc from 3.49.1.0 to 3.50.1.0 [\#426](https://github.com/Zoxcore/trifa_material/pull/426) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update to compose.version 1.9.0+dev2515 [\#425](https://github.com/Zoxcore/trifa_material/pull/425) ([zoff99](https://github.com/zoff99))
+- update compose version [\#424](https://github.com/Zoxcore/trifa_material/pull/424) ([zoff99](https://github.com/zoff99))
+
+## [v1.0.52](https://github.com/Zoxcore/trifa_material/tree/v1.0.52) (2025-05-19)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.51...v1.0.52)
+
+**Merged pull requests:**
+
+- update to compose.version 1.9.0+dev2480 [\#423](https://github.com/Zoxcore/trifa_material/pull/423) ([zoff99](https://github.com/zoff99))
+- update toxcore to 728a9468c2bd4aa477f9936bf8fd3d079ec113a4 [\#422](https://github.com/Zoxcore/trifa_material/pull/422) ([zoff99](https://github.com/zoff99))
+- Bump com.github.gmazzo.buildconfig from 5.6.4 to 5.6.5 [\#421](https://github.com/Zoxcore/trifa_material/pull/421) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update dependencies [\#420](https://github.com/Zoxcore/trifa_material/pull/420) ([zoff99](https://github.com/zoff99))
+- Bump com.github.gmazzo.buildconfig from 5.6.3 to 5.6.4 [\#419](https://github.com/Zoxcore/trifa_material/pull/419) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump com.github.gmazzo.buildconfig from 5.6.2 to 5.6.3 [\#418](https://github.com/Zoxcore/trifa_material/pull/418) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Translations update from Hosted Weblate [\#417](https://github.com/Zoxcore/trifa_material/pull/417) ([weblate](https://github.com/weblate))
+- Bump com.google.code.gson:gson from 2.13.0 to 2.13.1 [\#416](https://github.com/Zoxcore/trifa_material/pull/416) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update to compose.version 1.8.10-alpha01+dev2349 [\#415](https://github.com/Zoxcore/trifa_material/pull/415) ([zoff99](https://github.com/zoff99))
+- Bump com.sksamuel.scrimage:scrimage-webp from 4.3.0 to 4.3.1 [\#413](https://github.com/Zoxcore/trifa_material/pull/413) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump com.google.code.gson:gson from 2.12.1 to 2.13.0 [\#412](https://github.com/Zoxcore/trifa_material/pull/412) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update dependencies [\#411](https://github.com/Zoxcore/trifa_material/pull/411) ([zoff99](https://github.com/zoff99))
+- change libsodium url to github since download.libsodium.org often has timeouts [\#410](https://github.com/Zoxcore/trifa_material/pull/410) ([zoff99](https://github.com/zoff99))
+- update JNI libs and dependencies [\#409](https://github.com/Zoxcore/trifa_material/pull/409) ([zoff99](https://github.com/zoff99))
+- Bump com.github.gmazzo.buildconfig from 5.6.1 to 5.6.2 [\#408](https://github.com/Zoxcore/trifa_material/pull/408) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump com.github.gmazzo.buildconfig from 5.6.0 to 5.6.1 [\#407](https://github.com/Zoxcore/trifa_material/pull/407) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump com.github.gmazzo.buildconfig from 5.5.4 to 5.6.0 [\#406](https://github.com/Zoxcore/trifa_material/pull/406) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update dependencies [\#405](https://github.com/Zoxcore/trifa_material/pull/405) ([zoff99](https://github.com/zoff99))
+- Translations update from Hosted Weblate [\#404](https://github.com/Zoxcore/trifa_material/pull/404) ([weblate](https://github.com/weblate))
+
+## [v1.0.51](https://github.com/Zoxcore/trifa_material/tree/v1.0.51) (2025-03-16)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.50...v1.0.51)
+
+**Implemented enhancements:**
+
+- Auto-connect when TRIfA is started. [\#392](https://github.com/Zoxcore/trifa_material/issues/392)
+
+**Merged pull requests:**
+
+- Translations update from Hosted Weblate [\#403](https://github.com/Zoxcore/trifa_material/pull/403) ([weblate](https://github.com/weblate))
+- Bump com.github.gmazzo.buildconfig from 5.5.2 to 5.5.4 [\#402](https://github.com/Zoxcore/trifa_material/pull/402) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Translations update from Hosted Weblate [\#401](https://github.com/Zoxcore/trifa_material/pull/401) ([weblate](https://github.com/weblate))
+- Bump com.github.gmazzo.buildconfig from 5.5.1 to 5.5.2 [\#400](https://github.com/Zoxcore/trifa_material/pull/400) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Translations update from Hosted Weblate [\#399](https://github.com/Zoxcore/trifa_material/pull/399) ([weblate](https://github.com/weblate))
+- add a setting to automatically connect to the tox network when the application is started. fixes: https://github.com/Zoxcore/trifa\_material/issues/392 [\#398](https://github.com/Zoxcore/trifa_material/pull/398) ([zoff99](https://github.com/zoff99))
+- dependency updates and fixes [\#397](https://github.com/Zoxcore/trifa_material/pull/397) ([zoff99](https://github.com/zoff99))
+- Translations update from Hosted Weblate [\#396](https://github.com/Zoxcore/trifa_material/pull/396) ([weblate](https://github.com/weblate))
+- avoid crash on LinearProgressIndicator with NaN [\#395](https://github.com/Zoxcore/trifa_material/pull/395) ([zoff99](https://github.com/zoff99))
+- Bump org.xerial:sqlite-jdbc from 3.49.0.0 to 3.49.1.0 [\#394](https://github.com/Zoxcore/trifa_material/pull/394) ([dependabot[bot]](https://github.com/apps/dependabot))
+- update to compose.version 1.8.0-alpha03 [\#393](https://github.com/Zoxcore/trifa_material/pull/393) ([zoff99](https://github.com/zoff99))
+- Translations update from Hosted Weblate [\#391](https://github.com/Zoxcore/trifa_material/pull/391) ([weblate](https://github.com/weblate))
+
+## [v1.0.50](https://github.com/Zoxcore/trifa_material/tree/v1.0.50) (2025-02-08)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.49...v1.0.50)
+
+**Fixed bugs:**
+
+- \[Bug\]: Couldn't initialize Audio and Video devices [\#382](https://github.com/Zoxcore/trifa_material/issues/382)
+
+**Merged pull requests:**
+
+- Bump org.xerial:sqlite-jdbc from 3.48.0.0 to 3.49.0.0 [\#390](https://github.com/Zoxcore/trifa_material/pull/390) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Translations update from Hosted Weblate [\#389](https://github.com/Zoxcore/trifa_material/pull/389) ([weblate](https://github.com/weblate))
+- Translations update from Hosted Weblate [\#388](https://github.com/Zoxcore/trifa_material/pull/388) ([weblate](https://github.com/weblate))
+- update to kotlin.version 2.1.20-Beta2 [\#387](https://github.com/Zoxcore/trifa_material/pull/387) ([zoff99](https://github.com/zoff99))
+- Bump com.google.code.gson:gson from 2.12.0 to 2.12.1 [\#386](https://github.com/Zoxcore/trifa_material/pull/386) ([dependabot[bot]](https://github.com/apps/dependabot))
+- refactor orma and use WAL mode [\#385](https://github.com/Zoxcore/trifa_material/pull/385) ([zoff99](https://github.com/zoff99))
+- Bump com.google.code.gson:gson from 2.11.0 to 2.12.0 [\#384](https://github.com/Zoxcore/trifa_material/pull/384) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Update README.md [\#383](https://github.com/Zoxcore/trifa_material/pull/383) ([mourogurt](https://github.com/mourogurt))
+- Translations update from Hosted Weblate [\#381](https://github.com/Zoxcore/trifa_material/pull/381) ([weblate](https://github.com/weblate))
+- add context menu to group peer items [\#380](https://github.com/Zoxcore/trifa_material/pull/380) ([zoff99](https://github.com/zoff99))
+- actually scroll to the bottom on longer text messages [\#379](https://github.com/Zoxcore/trifa_material/pull/379) ([zoff99](https://github.com/zoff99))
+- update dependencies [\#378](https://github.com/Zoxcore/trifa_material/pull/378) ([zoff99](https://github.com/zoff99))
+- add a bit more delay on macos tests to make it less flaky [\#377](https://github.com/Zoxcore/trifa_material/pull/377) ([zoff99](https://github.com/zoff99))
+- Bump org.xerial:sqlite-jdbc from 3.47.2.0 to 3.48.0.0 [\#376](https://github.com/Zoxcore/trifa_material/pull/376) ([dependabot[bot]](https://github.com/apps/dependabot))
+
+## [v1.0.49](https://github.com/Zoxcore/trifa_material/tree/v1.0.49) (2025-01-12)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.48...v1.0.49)
+
+**Merged pull requests:**
+
+- install missing libnotify4 lib [\#375](https://github.com/Zoxcore/trifa_material/pull/375) ([zoff99](https://github.com/zoff99))
+- add button to report github issue [\#374](https://github.com/Zoxcore/trifa_material/pull/374) ([zoff99](https://github.com/zoff99))
+
+## [v1.0.48](https://github.com/Zoxcore/trifa_material/tree/v1.0.48) (2025-01-10)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.47...v1.0.48)
+
+**Merged pull requests:**
+
+- show if the JNI lib is running with ASAN in the app title [\#373](https://github.com/Zoxcore/trifa_material/pull/373) ([zoff99](https://github.com/zoff99))
+- update JNI libs [\#372](https://github.com/Zoxcore/trifa_material/pull/372) ([zoff99](https://github.com/zoff99))
+- add module jdk.security.auth [\#371](https://github.com/Zoxcore/trifa_material/pull/371) ([zoff99](https://github.com/zoff99))
+- shorten hashes/buildnumber in app title [\#370](https://github.com/Zoxcore/trifa_material/pull/370) ([zoff99](https://github.com/zoff99))
+- reformat build number in app title [\#369](https://github.com/Zoxcore/trifa_material/pull/369) ([zoff99](https://github.com/zoff99))
+- update JNI libs and show more commit hashes in the application title [\#368](https://github.com/Zoxcore/trifa_material/pull/368) ([zoff99](https://github.com/zoff99))
+
+## [v1.0.47](https://github.com/Zoxcore/trifa_material/tree/v1.0.47) (2025-01-07)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.46...v1.0.47)
+
+**Merged pull requests:**
+
+- Update README.md [\#367](https://github.com/Zoxcore/trifa_material/pull/367) ([zoff99](https://github.com/zoff99))
+- if no friend or group is selected do not compose those parts of the UI [\#366](https://github.com/Zoxcore/trifa_material/pull/366) ([zoff99](https://github.com/zoff99))
+- fix mouse position for screenshots \(because of statusbar\) [\#365](https://github.com/Zoxcore/trifa_material/pull/365) ([zoff99](https://github.com/zoff99))
+- Bump org.xerial:sqlite-jdbc from 3.47.1.0 to 3.47.2.0 [\#364](https://github.com/Zoxcore/trifa_material/pull/364) ([dependabot[bot]](https://github.com/apps/dependabot))
+- check for null before trying to send messages [\#363](https://github.com/Zoxcore/trifa_material/pull/363) ([zoff99](https://github.com/zoff99))
+- add option to select 1024x768 resolution and update ffmpeg av JNI libs [\#362](https://github.com/Zoxcore/trifa_material/pull/362) ([zoff99](https://github.com/zoff99))
+- check JNI libs in release script [\#361](https://github.com/Zoxcore/trifa_material/pull/361) ([zoff99](https://github.com/zoff99))
+- check if checked in JNI libs are ok [\#360](https://github.com/Zoxcore/trifa_material/pull/360) ([zoff99](https://github.com/zoff99))
+
+## [v1.0.46](https://github.com/Zoxcore/trifa_material/tree/v1.0.46) (2024-12-27)
+
+[Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.45...v1.0.46)
+
+**Merged pull requests:**
+
+- update JNI libs and set ASAN\_OPTIONS [\#359](https://github.com/Zoxcore/trifa_material/pull/359) ([zoff99](https://github.com/zoff99))
+- update JNI libs and some small updates [\#358](https://github.com/Zoxcore/trifa_material/pull/358) ([zoff99](https://github.com/zoff99))
+- add 2 "1:1" resolutions to pick [\#357](https://github.com/Zoxcore/trifa_material/pull/357) ([zoff99](https://github.com/zoff99))
+- some UI fixes [\#356](https://github.com/Zoxcore/trifa_material/pull/356) ([zoff99](https://github.com/zoff99))
+- allow to change capture fps during a call [\#355](https://github.com/Zoxcore/trifa_material/pull/355) ([zoff99](https://github.com/zoff99))
+- add status bar, refactor video-in with a popup frame, ask for AV permission on macos, update ffmpeg av JNI and libs [\#354](https://github.com/Zoxcore/trifa_material/pull/354) ([zoff99](https://github.com/zoff99))
+- fix a crash when some locale items are not found for the current locale [\#353](https://github.com/Zoxcore/trifa_material/pull/353) ([zoff99](https://github.com/zoff99))
+- install needed libs on linux [\#352](https://github.com/Zoxcore/trifa_material/pull/352) ([zoff99](https://github.com/zoff99))
+- show status in UI if notification and/or ffmpeg\_av JNI libs are loaded [\#351](https://github.com/Zoxcore/trifa_material/pull/351) ([zoff99](https://github.com/zoff99))
+- AV device selection on macos with useful names and still with fallback device numbers [\#350](https://github.com/Zoxcore/trifa_material/pull/350) ([zoff99](https://github.com/zoff99))
+- start jshowarch widget sooner, so that the window focus stays on trifa in the screenshots [\#349](https://github.com/Zoxcore/trifa_material/pull/349) ([zoff99](https://github.com/zoff99))
+- update ffmpeg av JNI and libs [\#348](https://github.com/Zoxcore/trifa_material/pull/348) ([zoff99](https://github.com/zoff99))
+- add jshowarch widget to macos and macos-arm automated screenshots [\#347](https://github.com/Zoxcore/trifa_material/pull/347) ([zoff99](https://github.com/zoff99))
+- explicitly enable asm for some deps on macOS and windows, update ffmpeg av JNI libs [\#346](https://github.com/Zoxcore/trifa_material/pull/346) ([zoff99](https://github.com/zoff99))
+- mark ngc group messages from founder with a color border, mark ngc group messages from a moderator with a color border [\#345](https://github.com/Zoxcore/trifa_material/pull/345) ([zoff99](https://github.com/zoff99))
+- Translations update from Hosted Weblate [\#344](https://github.com/Zoxcore/trifa_material/pull/344) ([weblate](https://github.com/weblate))
+- show more info for filetransfer files, remove more useless warnings [\#343](https://github.com/Zoxcore/trifa_material/pull/343) ([zoff99](https://github.com/zoff99))
+
 ## [v1.0.45](https://github.com/Zoxcore/trifa_material/tree/v1.0.45) (2024-12-08)
 
 [Full Changelog](https://github.com/Zoxcore/trifa_material/compare/v1.0.44...v1.0.45)
