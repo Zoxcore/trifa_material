@@ -36,7 +36,7 @@ CFLAGS_MORE='--param=ssp-buffer-size=1 -fstack-protector-all'
 
 # ------- deps verisions ---------
 NASM_VERSION="nasm-2.15.05" # "nasm-2.16.01"
-FFMPEG_VERSION="n8.0.1"
+FFMPEG_VERSION="n8.1"
 OPUS_VERSION="v1.6.1"
 SODIUM_VERSION="1.0.20"
 VPX_VERSION="v1.16.0"
