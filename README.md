@@ -13,10 +13,7 @@ Automated screenshots:<br>
 **Github:** [![Android CI](https://github.com/Zoxcore/trifa_material/workflows/Nightly/badge.svg)](https://github.com/Zoxcore/trifa_material/actions?query=workflow%3A%22Nightly%22)
 [![Last release](https://img.shields.io/github/v/release/Zoxcore/trifa_material)](https://github.com/Zoxcore/trifa_material/releases/latest)
 [![Translations](https://hosted.weblate.org/widget/trifa-a-tox-client-for-android/trifa-material/svg-badge.svg)](https://hosted.weblate.org/projects/trifa-a-tox-client-for-android/trifa-material/)
-<a href="https://github.com/Zoxcore/trifa_material/blob/master/LICENSE">
-<img src="https://img.shields.io/badge/license-GPLv3%2B-blue.svg" alt="GPLv3+" />
-</a>
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/zoff99/trifa_material)
+<a href="https://github.com/Zoxcore/trifa_material/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-GPLv3%2B-blue.svg" alt="GPLv3+" /></a>&nbsp;[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/zoff99/trifa_material)
 
 &nbsp;&nbsp;&nbsp;&nbsp;Looking for TRIfA Mobile version? [follow me](https://github.com/zoff99/ToxAndroidRefImpl)
 
