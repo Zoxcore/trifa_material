@@ -16,6 +16,7 @@ Automated screenshots:<br>
 <a href="https://github.com/Zoxcore/trifa_material/blob/master/LICENSE">
 <img src="https://img.shields.io/badge/license-GPLv3%2B-blue.svg" alt="GPLv3+" />
 </a>
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/zoff99/trifa_material)
 
 &nbsp;&nbsp;&nbsp;&nbsp;Looking for TRIfA Mobile version? [follow me](https://github.com/zoff99/ToxAndroidRefImpl)
 
