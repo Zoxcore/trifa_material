@@ -200,6 +200,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
@@ -479,7 +480,7 @@ fun App()
                                     }
                                     var online_button_text by remember { mutableStateOf("offline") }
                                     LaunchedEffect(online_button_text_wrapper) {
-                                        while (true) {
+                                        while (isActive) {
                                             if (online_button_text != online_button_text_wrapper) {
                                                 online_button_text = online_button_text_wrapper
                                             }
