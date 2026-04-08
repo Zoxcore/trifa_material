@@ -27,7 +27,7 @@ dependencyVerification {
         'com.beust:jcommander:1.82:jcommander-1.82.jar:deeac157c8de6822878d85d0c7bc8467a19cc8484d37788f7804f039dde280b1',
         'com.drewnoakes:metadata-extractor:2.19.0:metadata-extractor-2.19.0.jar:e51bb454ed08ea2bfcc3ad147d088ad1aa73a999e0072563f8ae50021a2fcadb',
         'com.github.gmazzo.buildconfig:plugin:6.0.9:plugin-6.0.9.jar:5bc7e3dc1b460f441563c02b1c6c7c49c804ef1d72979db960d30dd3b1445bc6',
-        'com.github.zoff99:pkgs_zoffcc_sqlite-jdbc-sqlcipher:1.0.22:pkgs_zoffcc_sqlite-jdbc-sqlcipher-1.0.22.jar:743158b3953c830fc6bc46264db607130e0377dfab05aa37fe08a00aa618f8cd',
+        'com.github.zoff99:pkgs_zoffcc_sqlite-jdbc-sqlcipher:1.0.24:pkgs_zoffcc_sqlite-jdbc-sqlcipher-1.0.24.jar:56d6a7526a834a460dcc6322ca9b0a756d7f678e5a611eb7caf7b52c20d2243c',
         'com.google.code.gson:gson:2.11.0:gson-2.11.0.jar:57928d6e5a6edeb2abd3770a8f95ba44dce45f3b23b7a9dc2b309c581552a78b',
         'com.google.code.gson:gson:2.13.2:gson-2.13.2.jar:dd0ce1b55a3ed2080cb70f9c655850cda86c206862310009dcb5e5c95265a5e0',
         'com.google.errorprone:error_prone_annotations:2.27.0:error_prone_annotations-2.27.0.jar:24c923372c58e35d0b9f16a028929bb9aedc77521867c274f2bd0735df5ba1f5',
