@@ -103,22 +103,19 @@ static Map<DependencyKey, String> calculateHashes(Project project) {
             // DEBUG: println "IT222::: ${it.properties}"
             // DEBUG: println "IT222::: ${it.properties.get("asFiletree")}"
             try {
-                if (
-                        (it.toString() != "configuration ':app:releaseIntransitiveDependenciesMetadata'") &&
-                                (it.toString() != "configuration ':app:debugImplementationDependenciesMetadata'") &&
-                                (it.toString() != "configuration ':app:implementationDependenciesMetadata'") &&
-                                (it.toString() != "configuration ':app:releaseImplementationDependenciesMetadata'")
-                ) {
-                    it.fileCollection { dep ->
-                        // DEBUG: println "DEP::::::::${dep}"
-                        // Skip dependencies on other projects
-                        dep.version != 'unspecified'
-                    }.each {
-                        // Skip files within project directory
-                        if (!it.canonicalPath.startsWith(projectPath)) {
-                            def key = makeKey it.path
-                            if (!dependencies.containsKey(key))
-                                dependencies.put key, calculateSha256(it)
+                it.incoming.artifactView { view ->
+                    view.componentFilter { id ->
+                        // Filter out project dependencies (usually identified by ProjectComponentIdentifier)
+                        // and 'unspecified' versions if necessary.
+                        // In Gradle 9, we typically check the type of the identifier.
+                        !(id instanceof ProjectComponentIdentifier)
+                    }
+                }.files.each { file ->
+                    // Skip files within project directory
+                    if (!file.canonicalPath.startsWith(projectPath)) {
+                        def key = makeKey(file.path)
+                        if (!dependencies.containsKey(key)) {
+                            dependencies.put(key, calculateSha256(file))
                         }
                     }
                 }
