@@ -5,7 +5,6 @@ import de.undercouch.gradle.tasks.download.Download
 import org.ajoberstar.grgit.Grgit
 import java.time.format.DateTimeFormatter
 import org.gradle.internal.os.OperatingSystem
-import org.jetbrains.compose.ExperimentalComposeLibrary
 
 plugins {
     kotlin("jvm")
@@ -120,8 +119,6 @@ dependencies {
     implementation(compose.material)
     @Suppress("DEPRECATION")
     implementation(compose.material3)
-    @Suppress("OPT_IN_IS_NOT_ENABLED", "DEPRECATION")
-    @OptIn(ExperimentalComposeLibrary::class)
     implementation(compose.components.resources)
     //
     @Suppress("DEPRECATION")
@@ -356,14 +353,14 @@ tasks {
         dest(appImageTool)
         overwrite(false)
         doFirst {
-            exec {
+            providers.exec {
                 commandLine("mkdir", "-p", "deps/")
-            }
+            }.standardOutput.asText.get().trim()
         }
         doLast {
-            exec {
+            providers.exec {
                 commandLine("chmod", "+x", "deps/appimagetool.AppImage")
-            }
+            }.standardOutput.asText.get().trim()
         }
     }
 
