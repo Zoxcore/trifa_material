@@ -36,7 +36,7 @@ import static com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wr
 import static com.zoffcc.applications.trifa.MainActivity.*;
 import static com.zoffcc.applications.trifa.TRIFAGlobals.*;
 import static com.zoffcc.applications.trifa.TRIFAGlobals.CONTROL_PROXY_MESSAGE_TYPE.*;
-import static com.zoffcc.applications.trifa.TRIFAGlobals.NOTIFICATION_NTFY_PUSH_URL_PREFIX;
+import static com.zoffcc.applications.trifa.TRIFAGlobals.NOTIFICATION_SUNUP_PUSH_URL_PREFIX;
 import static com.zoffcc.applications.trifa.ToxVars.*;
 
 public class HelperRelay
@@ -128,6 +128,15 @@ public class HelperRelay
         if (push_url.length() > NOTIFICATION_NTFY_PUSH_URL_PREFIX.length())
         {
             if (push_url.startsWith(NOTIFICATION_NTFY_PUSH_URL_PREFIX))
+            {
+                return true;
+            }
+        }
+
+        // whitelist mozilla sunup server
+        if (push_url.length() > NOTIFICATION_SUNUP_PUSH_URL_PREFIX.length())
+        {
+            if (push_url.startsWith(NOTIFICATION_SUNUP_PUSH_URL_PREFIX))
             {
                 return true;
             }

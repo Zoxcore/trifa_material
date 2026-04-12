@@ -137,10 +137,13 @@ public class TRIFAGlobals
 
     static long global_last_activity_outgoung_ft_ts = -1;
 
+    final static int MAX_PUSH_URL_LENGTH = 3000;
+
     final static String NOTIFICATION_FCM_PUSH_URL_PREFIX = "https://tox.zoff.xyz/toxfcm/fcm.php?id=";
     final static String NOTIFICATION_FCM_PUSH_URL_PREFIX_OLD = "https://toxcon2020.zoff.cc/toxfcm/fcm.php?id=";
     final static String NOTIFICATION_UP_PUSH_URL_PREFIX = "https://gotify1.unifiedpush.org/UP?token=";
     final static String NOTIFICATION_NTFY_PUSH_URL_PREFIX = "https://ntfy.sh/";
+    final static String NOTIFICATION_SUNUP_PUSH_URL_PREFIX = "https://updates.push.services.mozilla.com/wpush/";
 
     public static final Color CHAT_MSG_BG_SELF_COLOR = new Color(0xff33b5e5, true);
     public static final Color CHAT_MSG_BG_OTHER_COLOR = new Color(0xffffbb33, true);
