@@ -371,6 +371,8 @@ public class HelperFriend {
                         cacheControl(new CacheControl.Builder().noCache().build()).
                         url(pushurl_for_friend).
                         header("User-Agent", GENERIC_TOR_USERAGENT).
+                        header("TTL", "" + GENERIC_UNIFIED_WEBPUSH_TTL_SECONDS).
+                        header("Content-Encoding", GENERIC_UNIFIED_WEBPUSH_CONTENT_ENCODING).
                         post(formBody).
                         build();
 
