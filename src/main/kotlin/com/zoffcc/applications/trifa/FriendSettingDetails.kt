@@ -68,15 +68,22 @@ fun FriendSettingDetails(selectedContactPubkey: String?)
                 caps = TOX_CAPABILITY_DECODE_TO_STRING(TOX_CAPABILITY_DECODE(f.capabilities))
             }
 
+            var pushurl_str = ""
+            if (f != null)
+            {
+                pushurl_str = if (f.push_url.isNullOrEmpty()) "" else ("\n" + "Push URL: " + f.push_url)
+            }
+
             val t = "Name: " + f_name + "\n" +
                     "Public Key: " + selectedContactPubkey + "\n" +
                     "Capabilities: " + caps + "\n" +
-                    "IP: " + get_friend_ip_str(selectedContactPubkey)
+                    "IP: " + get_friend_ip_str(selectedContactPubkey) +
+                    pushurl_str
             SelectionContainer(modifier = Modifier.padding(all = 0.dp)) {
                 Text(
                     text = t,
                     style = MaterialTheme.typography.subtitle1.copy(fontSize = 16.sp, lineHeight = TextUnit.Unspecified),
-                    modifier = Modifier.padding(0.dp).weight(1.0f)
+                    modifier = Modifier.padding(10.dp).weight(1.0f)
                 )
             }
         }
