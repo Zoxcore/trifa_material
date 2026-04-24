@@ -184,7 +184,7 @@ dependencies {
     implementation("ca.gosyer:kotlin-multiplatform-appdirs:1.2.0")
     implementation("com.sksamuel.scrimage:scrimage-core:4.4.2")
     implementation("com.sksamuel.scrimage:scrimage-webp:4.4.2")
-    implementation("com.google.code.gson:gson:2.13.2")
+    implementation("com.google.code.gson:gson:2.14.0")
     implementation("io.github.alexzhirkevich:qrose:1.1.2")
     implementation("com.vanniktech:emoji-ios:0.21.0")
     // implementation("io.github.theapache64:rebugger:1.0.0-rc02")
