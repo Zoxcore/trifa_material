@@ -44,7 +44,7 @@ if [ "$2""x" != "1x" ]; then
     -Duser.country=US \
     -Duser.language=en \
     -Duser.variant \
-    -cp "$p"/build/compose/jars/trifa_material-linux-x64-1.0.66.jar \
+    -cp "$p"/build/compose/jars/trifa_material-linux-x64-1.0.67.jar \
     TrifaMainKt
 else
   "$java_17_or_newer_dir"/bin/java \
@@ -58,6 +58,6 @@ else
     -Duser.country=US \
     -Duser.language=en \
     -Duser.variant \
-    -cp "$p"/build/compose/jars/trifa_material-linux-x64-1.0.66.jar \
+    -cp "$p"/build/compose/jars/trifa_material-linux-x64-1.0.67.jar \
     TrifaMainKt
 fi
