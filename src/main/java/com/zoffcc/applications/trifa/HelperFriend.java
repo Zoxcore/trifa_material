@@ -325,7 +325,7 @@ public class HelperFriend {
             long check_for_http_too_many_request_timeout = 0L;
             try
             {
-                ping_push_blocker_cache.getOrDefault(pushurl_for_friend, 0L);
+                check_for_http_too_many_request_timeout = ping_push_blocker_cache.getOrDefault(pushurl_for_friend, 0L);
             }
             catch(Exception ignored)
             {
