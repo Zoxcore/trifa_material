@@ -41,8 +41,8 @@ dependencyVerification {
         'com.google.errorprone:error_prone_annotations:2.27.0:error_prone_annotations-2.27.0.jar:24c923372c58e35d0b9f16a028929bb9aedc77521867c274f2bd0735df5ba1f5',
         'com.google.errorprone:error_prone_annotations:2.48.0:error_prone_annotations-2.48.0.jar:b49c5c958316ed67a09c699dda9aa749caf434d51d863dea599ef36a49b9c855',
         'com.googlecode.javaewah:JavaEWAH:1.2.3:JavaEWAH-1.2.3.jar:d65226949713c4c61a784f41c51167e7b0316f93764398ebba9e4336b3d954c2',
-        'com.sksamuel.scrimage:scrimage-core:4.5.1:scrimage-core-4.5.1.jar:dafc61253f4d90e36560619dad2db3220be473a68f551968b4142f1a50cec9fc',
-        'com.sksamuel.scrimage:scrimage-webp:4.5.1:scrimage-webp-4.5.1.jar:f8d7bd68a6bf85879cd71919e302fe7a8f45ffc3d62d3472652878aa9349d094',
+        'com.sksamuel.scrimage:scrimage-core:4.5.4:scrimage-core-4.5.4.jar:ec92cb1c14f6fbb6467e11d08b69d8139b95b0b21142f1c8ed9c7bc03e7791bb',
+        'com.sksamuel.scrimage:scrimage-webp:4.5.4:scrimage-webp-4.5.4.jar:5431252fe261638232803aff7113a7dccfe339c1143640c6f86d28d596392543',
         'com.squareup.okhttp3:okhttp-jvm:5.3.2:okhttp-jvm-5.3.2.jar:c771f48075b763f6c322055e21129a94b7de4c1faf3f8f58ace320b0c9517a30',
         'com.squareup.okio:okio-jvm:3.16.4:okio-jvm-3.16.4.jar:2196b993cd34dbbd919e7e01f57a4781b58bee80f86106163e287c20343a96a7',
         'com.squareup:javapoet:1.13.0:javapoet-1.13.0.jar:4c7517e848a71b36d069d12bb3bf46a70fd4cda3105d822b0ed2e19c00b69291',
@@ -216,7 +216,7 @@ dependencyVerification {
         'org.ow2.asm:asm-tree:9.9.1:asm-tree-9.9.1.jar:0f3555096b720b820bbacab0b515589bee0200bee099bda14c561738ae837ba1',
         'org.ow2.asm:asm:9.9.1:asm-9.9.1.jar:6f3828a215c920059a5efa2fb55c233d6c54ec5cadca99ce1b1bdd10077c7ddd',
         'org.slf4j:slf4j-api:1.7.36:slf4j-api-1.7.36.jar:d3ef575e3e4979678dc01bf1dcce51021493b4d11fb7f1be8ad982877c16a1c0',
-        'org.slf4j:slf4j-api:2.0.17:slf4j-api-2.0.17.jar:7b751d952061954d5abfed7181c1f645d336091b679891591d63329c622eb832',
+        'org.slf4j:slf4j-api:2.0.18:slf4j-api-2.0.18.jar:44508fd1576500688c790b190acdd16fec4f8c79a3e0b900afd70503cf055f55',
         'org.snakeyaml:snakeyaml-engine:2.6:snakeyaml-engine-2.6.jar:2652199af40c9aa2f1782400d2dfbbf4e5226208c4e05ddd4059c3d6d9cd1505',
     ]
 }
