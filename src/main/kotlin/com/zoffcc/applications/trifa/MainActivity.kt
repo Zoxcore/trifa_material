@@ -4315,7 +4315,7 @@ class MainActivity
                         {
                             toxav_option_set(friendnum,
                                 ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MIN_BITRATE.value.toLong(),
-                                LOWER_GLOBAL_VIDEO_BITRATE.toLong())
+                                MEDIUM_GLOBAL_VIDEO_BITRATE.toLong())
                             toxav_option_set(friendnum,
                                 ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MAX_BITRATE.value.toLong(),
                                 HIGHER_GLOBAL_VIDEO_BITRATE.toLong())
