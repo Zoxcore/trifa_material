@@ -17,3 +17,4 @@ main.db__backup
 .kotlin/
 normal_run.sh
 final_pkg.deb
+.direnv
