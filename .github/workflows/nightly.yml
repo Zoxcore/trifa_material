@@ -1138,13 +1138,13 @@ jobs:
                printf 'sleep 4\n' >> /tmp/a.sh
                printf 'xdotool mousemove --sync 750 602 click 1\n' >> /tmp/a.sh
                printf 'sleep 2\n' >> /tmp/a.sh
-               printf 'import -window root /tmp/screenshot-linux_before_wm.png\n' >> /tmp/a.sh
+               printf 'import -window root /tmp/screenshot-linux-tor_before_wm.png\n' >> /tmp/a.sh
                printf 'sleep 40\n' >> /tmp/a.sh
                printf 'fvwm2 &' >> /tmp/a.sh
                printf 'sleep 20\n' >> /tmp/a.sh
                printf 'xdotool mousemove --sync 823 305 click 1\n' >> /tmp/a.sh
                printf 'sleep 90\n' >> /tmp/a.sh
-               printf 'import -window root /tmp/screenshot-linux.png\n' >> /tmp/a.sh
+               printf 'import -window root /tmp/screenshot-linux-tor.png\n' >> /tmp/a.sh
                cat /tmp/a.sh
                chmod a+rx /tmp/a.sh
 
@@ -1188,19 +1188,19 @@ jobs:
                echo "++++++++++++++++++"
                echo "++++++++++++++++++"
                cat /home/runner/work/trifa_material/trifa_material/tester.log||echo "NO ERR"
-               cp -av /tmp/screenshot-linux.png screenshot-linux-tor.png
+               cp -av /tmp/screenshot-linux-tor.png screenshot-linux-tor.png
 
         - name: upload-screenshots
           uses: actions/upload-artifact@v7
           with:
-            name: screenshot-linux
-            path: /tmp/screenshot-linux.png
+            name: screenshot-linux-tor
+            path: /tmp/screenshot-linux-tor.png
 
         - name: upload-screenshots
           uses: actions/upload-artifact@v7
           with:
-            name: screenshot-linux_before_wm
-            path: /tmp/screenshot-linux_before_wm.png
+            name: screenshot-linux-tor_before_wm
+            path: /tmp/screenshot-linux-tor_before_wm.png
 
         - name: Upload to nightly release
           uses: ncipollo/release-action@v1
