@@ -4328,6 +4328,15 @@ class MainActivity
                                 ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MAX_BITRATE.value.toLong(),
                                 HIGHER_GLOBAL_VIDEO_BITRATE.toLong())
                         }
+                        else if (avstatestore.state.video_in_resolution_get().equals("1280x720"))
+                        {
+                            toxav_option_set(friendnum,
+                                ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MIN_BITRATE.value.toLong(),
+                                NORMAL_GLOBAL_VIDEO_BITRATE.toLong())
+                            toxav_option_set(friendnum,
+                                ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_VIDEO_MAX_BITRATE.value.toLong(),
+                                HIGHER_GLOBAL_VIDEO_BITRATE.toLong())
+                        }
                         else
                         {
                             toxav_option_set(friendnum,
