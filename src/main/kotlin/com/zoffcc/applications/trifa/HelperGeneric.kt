@@ -19,9 +19,6 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.loadImageBitmap
-import androidx.compose.ui.res.loadSvgPainter
-import androidx.compose.ui.res.loadXmlImageVector
 import androidx.compose.ui.unit.Density
 import avstatestore
 import com.sksamuel.scrimage.ImmutableImage
@@ -75,7 +72,6 @@ import groupstore
 import kotlinx.coroutines.withContext
 import messagestore
 import myUser
-import org.briarproject.briar.desktop.contact.GroupItem
 import org.briarproject.briar.desktop.contact.GroupPeerItem
 import org.jetbrains.skia.Bitmap
 import org.xml.sax.InputSource
@@ -1190,13 +1186,9 @@ object HelperGeneric {
         return get_self_group_role(group_num_temp)
     }
 
-    fun is_self_group_role_admin(group_role: Int): Boolean
+    fun is_self_group_role_founder(group_role: Int): Boolean
     {
         if (group_role == ToxVars.Tox_Group_Role.TOX_GROUP_ROLE_FOUNDER.value)
-        {
-            return true
-        }
-        else if (group_role == ToxVars.Tox_Group_Role.TOX_GROUP_ROLE_MODERATOR.value)
         {
             return true
         }
@@ -1206,10 +1198,6 @@ object HelperGeneric {
     fun is_self_group_role_moderator(group_role: Int): Boolean
     {
         if (group_role == ToxVars.Tox_Group_Role.TOX_GROUP_ROLE_MODERATOR.value)
-        {
-            return true
-        }
-        else if (group_role == ToxVars.Tox_Group_Role.TOX_GROUP_ROLE_MODERATOR.value)
         {
             return true
         }

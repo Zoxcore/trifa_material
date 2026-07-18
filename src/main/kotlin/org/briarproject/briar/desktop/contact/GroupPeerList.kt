@@ -28,26 +28,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
 import com.zoffcc.applications.trifa.HelperGeneric.force_update_group_peerlist_ui
 import com.zoffcc.applications.trifa.HelperGeneric.get_self_group_role
 import com.zoffcc.applications.trifa.HelperGeneric.is_peer_self
-import com.zoffcc.applications.trifa.HelperGeneric.is_self_group_role_admin
+import com.zoffcc.applications.trifa.HelperGeneric.is_self_group_role_founder
 import com.zoffcc.applications.trifa.HelperGeneric.is_self_group_role_moderator
 import com.zoffcc.applications.trifa.HelperGroup
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
-import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_mod_kick_peer
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_mod_set_role
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_peer_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_self_get_public_key
-import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_send_message
-import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_send_private_message
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_send_private_message_by_peerpubkey
 import com.zoffcc.applications.trifa.StateGroupPeers
-import com.zoffcc.applications.trifa.TAG
 import com.zoffcc.applications.trifa.TRIFAGlobals
 import com.zoffcc.applications.trifa.ToxVars
 import groupmessagestore
@@ -60,7 +55,6 @@ import org.briarproject.briar.desktop.ui.ListItemView
 import org.briarproject.briar.desktop.ui.VerticallyScrollableArea
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import randomDebugBorder
-import randomDebugBorder2
 import kotlin.math.max
 import kotlin.math.min
 
@@ -204,7 +198,7 @@ fun GroupPeerList(
                         .padding(vertical = 8.dp)
                         .padding(start = if(peercollapsed) 2.dp else 3.dp, end = if(peercollapsed) 0.dp else 3.dp)
                     ContextMenuArea(items = {
-                        val is_admin = is_self_group_role_admin(get_self_group_role(item.groupID))
+                        val is_admin = is_self_group_role_founder(get_self_group_role(item.groupID))
                         val is_mod = is_self_group_role_moderator(get_self_group_role(item.groupID))
                         val is_self = is_peer_self(item.groupID, item.pubkey)
                         var menu_items_list = mutableListOf<ContextMenuItem>()
