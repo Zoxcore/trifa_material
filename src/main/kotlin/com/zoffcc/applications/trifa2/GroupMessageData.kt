@@ -1,4 +1,3 @@
-import kotlin.random.Random
 
 data class UIGroupMessage private constructor(
     val user: User,
@@ -17,7 +16,8 @@ data class UIGroupMessage private constructor(
     val trifaMsgType: Int,
     val filename_fullpath: String?,
     val peer_role: Int,
-    val is_private_msg: Int
+    val is_private_msg: Int,
+    val sent_privately_to_tox_group_peer_pubkey: String? = null
 ) {
     constructor(
         user: User,
@@ -35,7 +35,8 @@ data class UIGroupMessage private constructor(
         trifaMsgType: Int,
         filename_fullpath: String?,
         peer_role: Int,
-        is_private_msg: Int
+        is_private_msg: Int,
+        sent_privately_to_tox_group_peer_pubkey: String? = null
     ) : this(
         user = user,
         timeMs = timeMs,
@@ -53,6 +54,7 @@ data class UIGroupMessage private constructor(
         trifaMsgType = trifaMsgType,
         filename_fullpath = filename_fullpath,
         peer_role = peer_role,
-        is_private_msg = is_private_msg
+        is_private_msg = is_private_msg,
+        sent_privately_to_tox_group_peer_pubkey = sent_privately_to_tox_group_peer_pubkey
     )
 }

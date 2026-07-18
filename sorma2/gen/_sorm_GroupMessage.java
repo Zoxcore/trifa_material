@@ -96,6 +96,10 @@ public class GroupMessage
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     @Nullable
+    public String sent_privately_to_tox_group_peer_pubkey = null;
+
+    @Column(indexed = true, helpers = Column.Helpers.ALL)
+    @Nullable
     public String path_name = null;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
