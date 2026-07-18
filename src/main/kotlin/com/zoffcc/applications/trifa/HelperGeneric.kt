@@ -19,6 +19,9 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.loadImageBitmap
+import androidx.compose.ui.res.loadSvgPainter
+import androidx.compose.ui.res.loadXmlImageVector
 import androidx.compose.ui.unit.Density
 import avstatestore
 import com.sksamuel.scrimage.ImmutableImage
