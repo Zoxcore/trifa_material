@@ -679,7 +679,21 @@ public class OrmaDatabase
             }
         }
 
-        final int new_db_version = 13;
+        if (current_db_version < 14)
+        {
+            try
+            {
+                final String update_004 = "alter table GroupMessage add sent_privately_to_tox_group_peer_pubkey TEXT DEFAULT NULL;" + "\n" +
+                        "CREATE INDEX index_sent_privately_to_tox_group_peer_pubkey_on_GroupMessage ON GroupMessage (sent_privately_to_tox_group_peer_pubkey);";
+                run_multi_sql(update_004);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+        final int new_db_version = 14;
         set_new_db_version(new_db_version);
         // return the updated DB VERSION
         return new_db_version;

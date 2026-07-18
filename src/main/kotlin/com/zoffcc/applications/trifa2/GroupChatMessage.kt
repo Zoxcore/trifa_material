@@ -1,3 +1,5 @@
+@file:Suppress("KotlinConstantConditions", "LocalVariableName", "LiftReturnOrAssignment")
+
 import ChatColorsConfig.NGC_FOUNDER_MESSAGE_COLOR
 import ChatColorsConfig.NGC_MODERATOR_MESSAGE_COLOR
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -58,6 +60,8 @@ import com.zoffcc.applications.trifa.HelperGeneric
 import com.zoffcc.applications.trifa.HelperOSFile.open_webpage
 import com.zoffcc.applications.trifa.HelperOSFile.show_containing_dir_in_explorer
 import com.zoffcc.applications.trifa.HelperOSFile.show_file_in_explorer_or_open
+import com.zoffcc.applications.trifa.Log
+import com.zoffcc.applications.trifa.TAG
 import com.zoffcc.applications.trifa.TRIFAGlobals
 import com.zoffcc.applications.trifa.ToxVars
 import com.zoffcc.applications.trifa2.timeToString
@@ -183,6 +187,26 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                                 )
                             }
                         }
+                        else
+                        {
+                            // HINT: own private messages also get marked with an "orange circle" icon
+                            if (groupmessage.is_private_msg == 1)
+                            {
+                                Column() {
+                                    Tooltip(text = "private Message") {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(12.dp)
+                                                .border(1.dp, Color.Black, CircleShape)
+                                                .background(Color(NGC_PRIVATE_MSG_INDICATOR_COLOR),
+                                                    CircleShape)
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(3.dp))
+                                }
+                                Spacer(modifier = Modifier.width(5.dp))
+                            }
+                        }
                         var show_link_click by remember { mutableStateOf(false) }
                         var link_str by remember { mutableStateOf("") }
                         if (!image_save_ui_space)
@@ -220,9 +244,9 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                         ) {
                             if (isMyMessage) {
                                 message_checkmarks(groupmessage, isMyMessage)
-                                message_timestamp_and_info(groupmessage)
+                                message_timestamp_and_info(groupmessage, isMyMessage)
                             } else {
-                                message_timestamp_and_info(groupmessage)
+                                message_timestamp_and_info(groupmessage, isMyMessage)
                                 message_checkmarks(groupmessage, isMyMessage)
                             }
                         }
@@ -473,7 +497,7 @@ fun group_message_text_block(groupmessage: UIGroupMessage, ui_scale: Float, setL
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun message_timestamp_and_info(groupmessage: UIGroupMessage)
+fun message_timestamp_and_info(groupmessage: UIGroupMessage, isMyMessage: Boolean)
 {
     var message_size_in_bytes = 0
     try
@@ -503,10 +527,21 @@ fun message_timestamp_and_info(groupmessage: UIGroupMessage)
         }
     }
     val is_prv_msg = if (groupmessage.is_private_msg == 1) "yes" else "no"
+    var private_peer_txt = ""
+    if (groupmessage.is_private_msg == 1)
+    {
+        if (isMyMessage)
+        {
+            private_peer_txt = "Sent to Peer Pubkey: " + groupmessage.sent_privately_to_tox_group_peer_pubkey + "\n"
+        } else
+        {
+            private_peer_txt = "Sender Peer Pubkey: " + groupmessage.toxpk + "\n"
+        }
+    }
     Tooltip("Message sent at: " + timeToString(groupmessage.timeMs) + "\n" +
             "Message ID: " + groupmessage.message_id_tox + "\n" +
             "is private Message: " + is_prv_msg + "\n" +
-            "Sender Peer Pubkey: " + groupmessage.toxpk + "\n" +
+            private_peer_txt +
             "Message size in bytes: " + (if (message_size_in_bytes == 0) "unknown" else message_size_in_bytes) + "\n" +
             file_info_lines +
             "was synced: " + groupmessage.was_synced.toString()) {

@@ -1,29 +1,14 @@
-/**
- * [TRIfA], Java part of Tox Reference Implementation for Android
- * Copyright (C) 2017 - 2022 Zoff <zoff@zoff.cc>
- * <p>
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- * <p>
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * <p>
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the
- * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA  02110-1301, USA.
+/* SPDX-License-Identifier: GPL-3.0-or-later
+ * [sorma2], Java part of sorma2
+ * Copyright (C) 2024 Zoff <zoff@zoff.cc>
  */
 
 package com.zoffcc.applications.sorm;
 
-import com.zoffcc.applications.trifa.Log;
+import com.zoffcc.applications.sorm.Log;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,93 +16,85 @@ import static com.zoffcc.applications.sorm.OrmaDatabase.*;
 import static com.zoffcc.applications.trifa.TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT;
 import static com.zoffcc.applications.trifa.ToxVars.Tox_Group_Role.TOX_GROUP_ROLE_USER;
 
+
 @Table
 public class GroupMessage
 {
     private static final String TAG = "DB.GroupMessage";
-
     @PrimaryKey(autoincrement = true, auto = true)
-    public long id; // uniqe message id!!
+    public long id;
 
-    @Column(indexed = true, helpers = Column.Helpers.ALL, defaultExpr = "")
-    @Nullable
+    @Column(indexed = true, helpers = Column.Helpers.ALL)
     public String message_id_tox = ""; // Tox Group Message_ID (4 bytes as hex string lowercase)
 
-    @Column(indexed = true, defaultExpr = "-1", helpers = Column.Helpers.ALL)
+    @Column(indexed = true, helpers = Column.Helpers.ALL)
     public String group_identifier = "-1"; // f_key -> GroupDB.group_identifier
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    public String tox_group_peer_pubkey; // uppercase
+    public String tox_group_peer_pubkey;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     public int tox_group_peer_role = TOX_GROUP_ROLE_USER.value;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    @Nullable
     public int private_message = 0; // 0 -> message to group, 1 -> msg privately to/from peer
 
-    @Column(indexed = true, defaultExpr = "", helpers = Column.Helpers.ALL)
-    @Nullable
+    @Column(indexed = true, helpers = Column.Helpers.ALL)
     public String tox_group_peername = ""; // saved for backup, when conference is offline!
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     public int direction = 0; // 0 -> msg received, 1 -> msg sent
 
-    @Column(indexed = true)
+    @Column(indexed = true, helpers = Column.Helpers.ALL)
     public int TOX_MESSAGE_TYPE = 0; // 0 -> normal, 1 -> action
 
-    @Column(indexed = true, defaultExpr = "0")
+    @Column(indexed = true, helpers = Column.Helpers.ALL)
     public int TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE_TEXT.value;
 
-    @Column(helpers = Column.Helpers.ALL)
-    @Nullable
+    @Column(indexed = true, helpers = Column.Helpers.ALL)
     public long sent_timestamp = 0L;
 
-    @Column(indexed = true)
-    @Nullable
+    @Column(indexed = true, helpers = Column.Helpers.ALL)
     public long rcvd_timestamp = 0L;
 
-    @Column(helpers = Column.Helpers.ALL)
+    @Column(indexed = true, helpers = Column.Helpers.ALL)
     public boolean read = false;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     public boolean is_new = true;
 
-    @Column(helpers = Column.Helpers.ALL)
-    @Nullable
+    @Column(indexed = true, helpers = Column.Helpers.ALL)
     public String text = null;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    @Nullable
     public boolean was_synced = false;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    @Nullable
     public String msg_id_hash = null; // 32byte hash (as hex string uppercase)
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    @Nullable
+    public String sent_privately_to_tox_group_peer_pubkey = null;
+
+    @Column(indexed = true, helpers = Column.Helpers.ALL)
     public String path_name = null;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    @Nullable
     public String file_name = null;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    @Nullable
     public String filename_fullpath = null;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    @Nullable
     public long filesize = 0L;
 
-    static GroupMessage deep_copy(GroupMessage in)
+    public static GroupMessage deep_copy(GroupMessage in)
     {
         GroupMessage out = new GroupMessage();
-        out.id = in.id; // TODO: is this a good idea???
+        out.id = in.id;
         out.message_id_tox = in.message_id_tox;
         out.group_identifier = in.group_identifier;
         out.tox_group_peer_pubkey = in.tox_group_peer_pubkey;
+        out.tox_group_peer_role = in.tox_group_peer_role;
         out.private_message = in.private_message;
         out.tox_group_peername = in.tox_group_peername;
         out.direction = in.direction;
@@ -130,11 +107,11 @@ public class GroupMessage
         out.text = in.text;
         out.was_synced = in.was_synced;
         out.msg_id_hash = in.msg_id_hash;
+        out.sent_privately_to_tox_group_peer_pubkey = in.sent_privately_to_tox_group_peer_pubkey;
         out.path_name = in.path_name;
         out.file_name = in.file_name;
         out.filename_fullpath = in.filename_fullpath;
         out.filesize = in.filesize;
-        out.tox_group_peer_role = in.tox_group_peer_role;
 
         return out;
     }
@@ -142,13 +119,7 @@ public class GroupMessage
     @Override
     public String toString()
     {
-        return "id=" + id + ", message_id_tox=" + message_id_tox + ", tox_group_peername=" + tox_group_peername +
-                ", tox_peerpubkey=" + "*tox_peerpubkey*" + ", private_message=" + private_message + ", direction=" +
-                direction + ", TRIFA_MESSAGE_TYPE=" + TRIFA_MESSAGE_TYPE + ", TOX_MESSAGE_TYPE=" + TOX_MESSAGE_TYPE +
-                ", sent_timestamp=" + sent_timestamp + ", rcvd_timestamp=" + rcvd_timestamp + ", read=" + read +
-                ", text=" + "xxxxxx" + ", is_new=" + is_new + ", was_synced=" + was_synced + ", path_name=" + path_name +
-                ", file_name=" + file_name + ", filename_fullpath=" + filename_fullpath + ", filesize=" + filesize +
-                ", tox_group_peer_role=" + tox_group_peer_role;
+        return "id=" + id + ", message_id_tox=" + message_id_tox + ", group_identifier=" + group_identifier + ", tox_group_peer_pubkey=" + tox_group_peer_pubkey + ", tox_group_peer_role=" + tox_group_peer_role + ", private_message=" + private_message + ", tox_group_peername=" + tox_group_peername + ", direction=" + direction + ", TOX_MESSAGE_TYPE=" + TOX_MESSAGE_TYPE + ", TRIFA_MESSAGE_TYPE=" + TRIFA_MESSAGE_TYPE + ", sent_timestamp=" + sent_timestamp + ", rcvd_timestamp=" + rcvd_timestamp + ", read=" + read + ", is_new=" + is_new + ", text=" + text + ", was_synced=" + was_synced + ", msg_id_hash=" + msg_id_hash + ", sent_privately_to_tox_group_peer_pubkey=" + sent_privately_to_tox_group_peer_pubkey + ", path_name=" + path_name + ", file_name=" + file_name + ", filename_fullpath=" + filename_fullpath + ", filesize=" + filesize;
     }
 
 
@@ -215,6 +186,7 @@ public class GroupMessage
                 out.text = rs.getString("text");
                 out.was_synced = rs.getBoolean("was_synced");
                 out.msg_id_hash = rs.getString("msg_id_hash");
+                out.sent_privately_to_tox_group_peer_pubkey = rs.getString("sent_privately_to_tox_group_peer_pubkey");
                 out.path_name = rs.getString("path_name");
                 out.file_name = rs.getString("file_name");
                 out.filename_fullpath = rs.getString("filename_fullpath");
@@ -296,6 +268,7 @@ public class GroupMessage
                     + ",\"text\""
                     + ",\"was_synced\""
                     + ",\"msg_id_hash\""
+                    + ",\"sent_privately_to_tox_group_peer_pubkey\""
                     + ",\"path_name\""
                     + ",\"file_name\""
                     + ",\"filename_fullpath\""
@@ -323,6 +296,7 @@ public class GroupMessage
                     + ",?18"
                     + ",?19"
                     + ",?20"
+                    + ",?21"
                     + ")";
 
             insert_pstmt = sqldb.prepareStatement(insert_pstmt_sql);
@@ -344,10 +318,11 @@ public class GroupMessage
             insert_pstmt.setString(14, this.text);
             insert_pstmt.setBoolean(15, this.was_synced);
             insert_pstmt.setString(16, this.msg_id_hash);
-            insert_pstmt.setString(17, this.path_name);
-            insert_pstmt.setString(18, this.file_name);
-            insert_pstmt.setString(19, this.filename_fullpath);
-            insert_pstmt.setLong(20, this.filesize);
+            insert_pstmt.setString(17, this.sent_privately_to_tox_group_peer_pubkey);
+            insert_pstmt.setString(18, this.path_name);
+            insert_pstmt.setString(19, this.file_name);
+            insert_pstmt.setString(20, this.filename_fullpath);
+            insert_pstmt.setLong(21, this.filesize);
             // @formatter:on
 
             if (ORMA_TRACE)
@@ -827,6 +802,22 @@ public class GroupMessage
         }
         this.sql_set = this.sql_set + " \"msg_id_hash\"=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
         bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, msg_id_hash));
+        bind_set_count++;
+        return this;
+    }
+
+    public GroupMessage sent_privately_to_tox_group_peer_pubkey(String sent_privately_to_tox_group_peer_pubkey)
+    {
+        if (this.sql_set.equals(""))
+        {
+            this.sql_set = " set ";
+        }
+        else
+        {
+            this.sql_set = this.sql_set + " , ";
+        }
+        this.sql_set = this.sql_set + " \"sent_privately_to_tox_group_peer_pubkey\"=?" + (BINDVAR_OFFSET_SET + bind_set_count) + " ";
+        bind_set_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, sent_privately_to_tox_group_peer_pubkey));
         bind_set_count++;
         return this;
     }
@@ -1805,6 +1796,50 @@ public class GroupMessage
         return this;
     }
 
+    public GroupMessage sent_privately_to_tox_group_peer_pubkeyEq(String sent_privately_to_tox_group_peer_pubkey)
+    {
+        this.sql_where = this.sql_where + " and \"sent_privately_to_tox_group_peer_pubkey\"=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, sent_privately_to_tox_group_peer_pubkey));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage sent_privately_to_tox_group_peer_pubkeyNotEq(String sent_privately_to_tox_group_peer_pubkey)
+    {
+        this.sql_where = this.sql_where + " and \"sent_privately_to_tox_group_peer_pubkey\"<>?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, sent_privately_to_tox_group_peer_pubkey));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage sent_privately_to_tox_group_peer_pubkeyIsNull()
+    {
+        this.sql_where = this.sql_where + " and \"sent_privately_to_tox_group_peer_pubkey\" IS NULL ";
+        return this;
+    }
+
+    public GroupMessage sent_privately_to_tox_group_peer_pubkeyIsNotNull()
+    {
+        this.sql_where = this.sql_where + " and \"sent_privately_to_tox_group_peer_pubkey\" IS NOT NULL ";
+        return this;
+    }
+
+    public GroupMessage sent_privately_to_tox_group_peer_pubkeyLike(String sent_privately_to_tox_group_peer_pubkey)
+    {
+        this.sql_where = this.sql_where + " and \"sent_privately_to_tox_group_peer_pubkey\" LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, sent_privately_to_tox_group_peer_pubkey));
+        bind_where_count++;
+        return this;
+    }
+
+    public GroupMessage sent_privately_to_tox_group_peer_pubkeyNotLike(String sent_privately_to_tox_group_peer_pubkey)
+    {
+        this.sql_where = this.sql_where + " and \"sent_privately_to_tox_group_peer_pubkey\" NOT LIKE ?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ESCAPE '\\' ";
+        bind_where_vars.add(new OrmaBindvar(BINDVAR_TYPE_String, sent_privately_to_tox_group_peer_pubkey));
+        bind_where_count++;
+        return this;
+    }
+
     public GroupMessage path_nameEq(String path_name)
     {
         this.sql_where = this.sql_where + " and \"path_name\"=?" + (BINDVAR_OFFSET_WHERE + bind_where_count) + " ";
@@ -2482,6 +2517,34 @@ public class GroupMessage
             this.sql_orderby = this.sql_orderby + " , ";
         }
         this.sql_orderby = this.sql_orderby + " \"msg_id_hash\" DESC ";
+        return this;
+    }
+
+    public GroupMessage orderBySent_privately_to_tox_group_peer_pubkeyAsc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " \"sent_privately_to_tox_group_peer_pubkey\" ASC ";
+        return this;
+    }
+
+    public GroupMessage orderBySent_privately_to_tox_group_peer_pubkeyDesc()
+    {
+        if (this.sql_orderby.equals(""))
+        {
+            this.sql_orderby = " order by ";
+        }
+        else
+        {
+            this.sql_orderby = this.sql_orderby + " , ";
+        }
+        this.sql_orderby = this.sql_orderby + " \"sent_privately_to_tox_group_peer_pubkey\" DESC ";
         return this;
     }
 

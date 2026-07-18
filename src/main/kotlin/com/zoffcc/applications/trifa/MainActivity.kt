@@ -4157,7 +4157,7 @@ class MainActivity
                 filename_fullpath = m.filename_fullpath)))
         }
 
-        fun sent_groupmessage_to_db(groupid: String, message_timestamp: Long, group_message: String?, message_id: Long, was_synced: Boolean): Long
+        fun sent_groupmessage_to_db(groupid: String, message_timestamp: Long, group_message: String?, message_id: Long, was_synced: Boolean, is_private_message: Int = 0, sent_privately_to_tox_group_peer_pubkey: String? = null): Long
         {
             val message_id_hex = fourbytes_of_long_to_hex(message_id)
             val groupnum = tox_group_by_groupid__wrapper(groupid)
@@ -4169,6 +4169,7 @@ class MainActivity
             m.TOX_MESSAGE_TYPE = 0
             m.read = true
             m.is_new = false
+            m.sent_privately_to_tox_group_peer_pubkey = sent_privately_to_tox_group_peer_pubkey
             if (peername == null)
             {
                 m.tox_group_peername = ""
@@ -4177,7 +4178,7 @@ class MainActivity
             {
                 m.tox_group_peername = peername
             }
-            m.private_message = 0
+            m.private_message = is_private_message
             m.group_identifier = groupid
             m.TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value
             m.sent_timestamp = System.currentTimeMillis()

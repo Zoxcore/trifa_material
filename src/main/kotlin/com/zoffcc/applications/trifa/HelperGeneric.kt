@@ -1203,6 +1203,19 @@ object HelperGeneric {
         return false
     }
 
+    fun is_self_group_role_moderator(group_role: Int): Boolean
+    {
+        if (group_role == ToxVars.Tox_Group_Role.TOX_GROUP_ROLE_MODERATOR.value)
+        {
+            return true
+        }
+        else if (group_role == ToxVars.Tox_Group_Role.TOX_GROUP_ROLE_MODERATOR.value)
+        {
+            return true
+        }
+        return false
+    }
+
     fun is_peer_self(group_id: String, peer_pubkey: String): Boolean
     {
         try
