@@ -154,7 +154,7 @@ fun GroupPeerList(
                                     peerSnapshot.pubkey,
                                     0, pmTextMessage)
 
-                                if (res == 0)
+                                if (res >= 0)
                                 {
                                     var peer_role = -1
                                     try
@@ -168,8 +168,9 @@ fun GroupPeerList(
                                     {
                                     }
 
+                                    val message_id_tox = res.toHexString()
                                     val db_msgid = MainActivity.sent_groupmessage_to_db(groupid = peerSnapshot.groupID, message_timestamp = timestamp,
-                                        group_message = pmTextMessage, message_id = 0, was_synced = false, 1,
+                                        group_message = pmTextMessage, message_id = res, was_synced = false, 1,
                                         sent_privately_to_tox_group_peer_pubkey = peerSnapshot.pubkey.uppercase())
                                     groupmessagestore.send(GroupMessageAction.SendGroupMessage(
                                         UIGroupMessage(
@@ -180,7 +181,7 @@ fun GroupPeerList(
                                             syncdTimeMs = timestamp,
                                             peer_role = peer_role,
                                             msg_id_hash = "",
-                                            message_id_tox = "", msgDatabaseId = db_msgid,
+                                            message_id_tox = message_id_tox, msgDatabaseId = db_msgid,
                                             user = myUser, timeMs = timestamp, text = pmTextMessage,
                                             toxpk = my_group_peerpk,
                                             groupId = peerSnapshot.groupID!!.lowercase(),
