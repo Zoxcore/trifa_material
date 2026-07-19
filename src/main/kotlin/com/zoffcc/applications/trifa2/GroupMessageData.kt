@@ -1,3 +1,4 @@
+@file:Suppress("PropertyName", "LocalVariableName")
 
 data class UIGroupMessage private constructor(
     val user: User,
