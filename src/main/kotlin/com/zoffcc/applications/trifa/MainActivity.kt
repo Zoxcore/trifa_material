@@ -3109,6 +3109,7 @@ class MainActivity
             val group_id = tox_group_by_groupnum__wrapper(group_number).lowercase()
             val tox_peerpk = tox_group_peer_get_public_key(group_number, peer_id)!!.uppercase()
             val message_id_hex = fourbytes_of_long_to_hex(message_id)
+            // Log.i(TAG, "msg_id=" + message_id_hex + " " + message_id)
             val message_timestamp_ms = System.currentTimeMillis()
             val peernum = tox_group_peer_by_public_key(group_number, tox_peerpk)
             val peer_role = tox_group_peer_get_role(group_number, peernum)

@@ -39,6 +39,7 @@ import com.zoffcc.applications.trifa.HelperGeneric.is_self_group_role_founder
 import com.zoffcc.applications.trifa.HelperGeneric.is_self_group_role_moderator
 import com.zoffcc.applications.trifa.HelperGroup
 import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
+import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_mod_kick_peer
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_mod_set_role
@@ -46,6 +47,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_peer_by_pu
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_self_get_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_send_private_message_by_peerpubkey
 import com.zoffcc.applications.trifa.StateGroupPeers
+import com.zoffcc.applications.trifa.TAG
 import com.zoffcc.applications.trifa.TRIFAGlobals
 import com.zoffcc.applications.trifa.ToxVars
 import groupmessagestore
@@ -154,6 +156,8 @@ fun GroupPeerList(
                                     peerSnapshot.pubkey,
                                     0, pmTextMessage)
 
+                                // Log.i(TAG, "msg_id=" + res)
+
                                 if (res >= 0)
                                 {
                                     var peer_role = -1
@@ -168,7 +172,7 @@ fun GroupPeerList(
                                     {
                                     }
 
-                                    val message_id_tox = res.toHexString()
+                                    val message_id_tox = HelperGroup.fourbytes_of_long_to_hex(res)
                                     val db_msgid = MainActivity.sent_groupmessage_to_db(groupid = peerSnapshot.groupID, message_timestamp = timestamp,
                                         group_message = pmTextMessage, message_id = res, was_synced = false, 1,
                                         sent_privately_to_tox_group_peer_pubkey = peerSnapshot.pubkey.uppercase())
