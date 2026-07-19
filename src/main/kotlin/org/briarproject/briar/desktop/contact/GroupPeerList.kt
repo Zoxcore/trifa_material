@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.zoffcc.applications.trifa.HelperGeneric
 import com.zoffcc.applications.trifa.HelperGeneric.force_update_group_peerlist_ui
 import com.zoffcc.applications.trifa.HelperGeneric.get_self_group_role
 import com.zoffcc.applications.trifa.HelperGeneric.is_peer_self
@@ -46,6 +47,7 @@ import com.zoffcc.applications.trifa.StateGroupPeers
 import com.zoffcc.applications.trifa.TRIFAGlobals
 import com.zoffcc.applications.trifa.ToxVars
 import groupmessagestore
+import groupstore
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -71,6 +73,46 @@ fun GroupPeerList(
     var showPmDialog by remember { mutableStateOf(false) }
     var pmTextMessage by remember { mutableStateOf("") }
     var activePmPeer by remember { mutableStateOf<GroupPeerItem?>(null) }
+
+    var showKickDialog by remember { mutableStateOf(false) }
+    var kickPeer by remember { mutableStateOf<GroupPeerItem?>(null) }
+
+    if (showKickDialog) {
+        val kickPeerSnapshot = kickPeer!!
+        AlertDialog(
+            onDismissRequest = { showKickDialog = false },
+            title = { Text("Kick Peer") },
+            text = { Text("Are you sure you want to kick this peer out of the group?") },
+            confirmButton = {
+                androidx.compose.material3.TextButton(
+                    onClick = {
+                        showKickDialog = false
+                        GlobalScope.launch(Dispatchers.IO) {
+                            try
+                            {
+                                val group_num = tox_group_by_groupid__wrapper(kickPeerSnapshot.groupID)
+                                val peernum = tox_group_peer_by_public_key(group_num, kickPeerSnapshot.pubkey)
+                                tox_group_mod_kick_peer(group_num, peernum)
+                                force_update_group_peerlist_ui(kickPeerSnapshot.groupID)
+                            } catch (_: Exception)
+                            {
+                            }
+                            kickPeer = null
+                        }
+                        // kick a peer
+                    }
+                ) {
+                    Text("Kick", color = Color.Red)
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { kickPeer = null; showKickDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
 
     if (showPmDialog && activePmPeer != null) {
         val peerSnapshot = activePmPeer!!
@@ -205,17 +247,8 @@ fun GroupPeerList(
                         if ((is_admin || is_mod) && (!is_self))
                         {
                             menu_items_list.add(ContextMenuItem("kick") {
-                                GlobalScope.launch(Dispatchers.IO) {
-                                    try
-                                    {
-                                        val group_num = tox_group_by_groupid__wrapper(item.groupID)
-                                        val peernum = tox_group_peer_by_public_key(group_num, item.pubkey)
-                                        tox_group_mod_kick_peer(group_num, peernum)
-                                        force_update_group_peerlist_ui(item.groupID)
-                                    } catch (_: Exception)
-                                    {
-                                    }
-                                }
+                                showKickDialog = true
+                                kickPeer = item
                             })
                         }
 

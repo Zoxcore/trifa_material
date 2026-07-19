@@ -55,6 +55,7 @@ fun ContactList(
     var itemToDelete by remember { mutableStateOf<ContactItem?>(null) }
 
     if (showDeleteDialog) {
+        val itemToDeleteSnapshot = itemToDelete!!
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
             title = { Text("Delete Contact") },
@@ -67,17 +68,17 @@ fun ContactList(
                             isConnected = 0,
                             is_relay = false,
                             push_url = "",
-                            pubkey = itemToDelete!!.pubkey))
+                            pubkey = itemToDeleteSnapshot!!.pubkey))
                         GlobalScope.launch(Dispatchers.IO) {
-                            if (is_any_relay(itemToDelete!!.pubkey))
+                            if (is_any_relay(itemToDeleteSnapshot!!.pubkey))
                             {
-                                if (is_own_relay(itemToDelete!!.pubkey)) {
+                                if (is_own_relay(itemToDeleteSnapshot!!.pubkey)) {
                                     remove_own_relay_in_db()
                                 } else {
-                                    delete_relay(itemToDelete!!.pubkey, true)
+                                    delete_relay(itemToDeleteSnapshot!!.pubkey, true)
                                 }
                             } else {
-                                delete_friend_wrapper(itemToDelete!!.pubkey, "Friend removed")
+                                delete_friend_wrapper(itemToDeleteSnapshot!!.pubkey, "Friend removed")
                             }
                             itemToDelete = null
                         }
