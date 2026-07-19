@@ -13,7 +13,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.OutlinedTextField
@@ -116,21 +118,26 @@ fun GroupPeerList(
 
     if (showPmDialog && activePmPeer != null) {
         val peerSnapshot = activePmPeer!!
-        AlertDialog(
+        AlertDialog(modifier = Modifier.fillMaxWidth(),
             onDismissRequest = {
                 showPmDialog = false // Close on clicking outside
                 activePmPeer = null
             },
             title = { Text(text = "Send Message to ${peerSnapshot.name} / ${peerSnapshot.pubkey.take(8)}") },
             text = {
-                // Multiline text input field
-                OutlinedTextField(
-                    value = pmTextMessage,
-                    onValueChange = { pmTextMessage = it },
-                    label = { Text("Your Message") },
-                    singleLine = false, // Enables multiline
-                    modifier = Modifier.fillMaxWidth().height(150.dp)
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp)
+                ) {
+                    OutlinedTextField(
+                        value = pmTextMessage,
+                        onValueChange = { pmTextMessage = it },
+                        label = { Text("Your Message") },
+                        singleLine = false,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
             },
             confirmButton = {
                 Button(
