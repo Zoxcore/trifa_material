@@ -778,7 +778,10 @@ fun App()
                                                             } else if (PREF__video_bitrate_mode == 1)
                                                             {
                                                                 PREF__video_bitrate_mode = 2
-                                                            } else // PREF__video_bitrate_mode == 2
+                                                            } else if (PREF__video_bitrate_mode == 2)
+                                                            {
+                                                                PREF__video_bitrate_mode = 3
+                                                            } else // PREF__video_bitrate_mode == 3
                                                             {
                                                                 PREF__video_bitrate_mode = 0
                                                             }
@@ -799,7 +802,8 @@ fun App()
                                                         tint =
                                                         if (video_bitrate_mode_value == 0) Color.DarkGray
                                                         else if (video_bitrate_mode_value == 1) Color.Green
-                                                        else Color.Red)
+                                                        else if (video_bitrate_mode_value == 2) Color.Red
+                                                        else Color(0xFFF900FF))
                                                 }
                                                 val current_callstate3 by avstatestorecallstate.stateFlow.collectAsState()
                                                 if (current_callstate3.call_state == AVState.CALL_STATUS.CALL_STATUS_CALLING)
