@@ -908,6 +908,9 @@ class MainActivity
         external fun tox_group_mod_set_role(group_number: Long, peer_id: Long, a_Tox_Group_Role: Int): Int
 
         @JvmStatic
+        external fun tox_group_founder_set_voice_state(group_number: Long, a_Tox_Group_Voice_State: Int): Int
+
+        @JvmStatic
         external fun tox_group_peer_get_public_key(group_number: Long, peer_id: Long): String?
 
         @JvmStatic
@@ -924,6 +927,9 @@ class MainActivity
 
         @JvmStatic
         external fun tox_group_get_topic(group_number: Long): String?
+
+        @JvmStatic
+        external fun tox_group_get_voice_state(group_number: Long): Int
 
         @JvmStatic
         external fun tox_group_peer_get_connection_status(group_number: Long, peer_id: Long): Int

@@ -1,3 +1,5 @@
+@file:Suppress("LocalVariableName")
+
 package com.zoffcc.applications.trifa
 
 import SETTINGS_HEADER_SIZE
@@ -21,12 +23,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Button
+import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ExposedDropdownMenuBox
+import androidx.compose.material.ExposedDropdownMenuDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,7 +50,12 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoffcc.applications.trifa.HelperGeneric.get_self_group_role
+import com.zoffcc.applications.trifa.HelperGeneric.is_self_group_role_founder
+import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
 import com.zoffcc.applications.trifa.HelperGroup.dump_saved_offline_peers_to_log
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_founder_set_voice_state
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_voice_state
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_self_get_peer_id
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_self_set_name
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_set_name
@@ -53,6 +65,7 @@ import org.briarproject.briar.desktop.ui.VerticallyScrollableArea
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import java.io.File
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun GroupSettingDetails(selectedGroupId: String?)
 {
@@ -106,6 +119,91 @@ fun GroupSettingDetails(selectedGroupId: String?)
             )
         }
         // ---- notifications of this group ----
+
+        var group_voice_state by remember { mutableStateOf(ToxVars.Tox_Group_Voice_State.TOX_GROUP_VOICE_STATE_ALL.value) }
+        try
+        {
+            val group_num = HelperGroup.tox_group_by_groupid__wrapper(selectedGroupId!!.lowercase())
+            val group_voice_state_tmp = tox_group_get_voice_state(group_num)
+            if ((group_voice_state_tmp >= ToxVars.Tox_Group_Voice_State.TOX_GROUP_VOICE_STATE_ALL.value)
+                && (group_voice_state_tmp <= ToxVars.Tox_Group_Voice_State.TOX_GROUP_VOICE_STATE_FOUNDER.value))
+            {
+                group_voice_state = group_voice_state_tmp
+            }
+        } catch (_: Exception)
+        {
+        }
+
+        var expanded by remember { mutableStateOf(false) }
+        val options = listOf("All", "Moderator", "Founder")
+        var selectedVoicestate by remember { mutableStateOf(options[group_voice_state]) }
+
+        DetailItem(
+            label = i18n("ui.group_settings.voice_state"),
+            description = selectedVoicestate
+        ) {
+            var is_admin = false
+            try
+            {
+                is_admin = is_self_group_role_founder(get_self_group_role(selectedGroupId!!.lowercase()))
+            }
+            catch (_: Exception)
+            {
+            }
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { if (is_admin) expanded = !expanded }
+            ) {
+                TextField(
+                    readOnly = true,
+                    value = selectedVoicestate,
+                    onValueChange = {},
+                    colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                )
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    options.forEach { selectionOption ->
+                        DropdownMenuItem(
+                            text = { Text(selectionOption) },
+                            onClick = {
+                                try
+                                {
+                                    val is_admin = is_self_group_role_founder(get_self_group_role(selectedGroupId!!.lowercase()))
+                                    if (is_admin)
+                                    {
+                                        selectedVoicestate = selectionOption
+                                        expanded = false
+                                        var new_value = ToxVars.Tox_Group_Voice_State.TOX_GROUP_VOICE_STATE_ALL.value
+                                        val group_num = HelperGroup.tox_group_by_groupid__wrapper(selectedGroupId!!.lowercase())
+                                        if (selectedVoicestate == "Founder")
+                                        {
+                                            new_value = ToxVars.Tox_Group_Voice_State.TOX_GROUP_VOICE_STATE_FOUNDER.value
+                                        } else if (selectedVoicestate == "Moderator")
+                                        {
+                                            new_value = ToxVars.Tox_Group_Voice_State.TOX_GROUP_VOICE_STATE_MODERATOR.value
+                                        }
+                                        tox_group_founder_set_voice_state(group_num, new_value)
+                                        update_savedata_file_wrapper()
+                                    }
+                                } catch (_: Exception)
+                                {
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+        }
+
+
+
+
+
+
+
+
 
         var num_messages = "?"
         try

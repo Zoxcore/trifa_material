@@ -1749,6 +1749,65 @@ public class ToxVars
         }
     }
 
+    public static enum Tox_Group_Voice_State
+    {
+        /**
+         * All group roles above Observer have permission to speak.
+         */
+        TOX_GROUP_VOICE_STATE_ALL(0),
+
+        /**
+         * Moderators and Founders have permission to speak.
+         */
+        TOX_GROUP_VOICE_STATE_MODERATOR(1),
+
+        /**
+         * Only the founder may speak.
+         */
+        TOX_GROUP_VOICE_STATE_FOUNDER(2);
+
+        public int value;
+
+        private Tox_Group_Voice_State(int value)
+        {
+            this.value = value;
+        }
+
+        public static String value_str(int value)
+        {
+            if (value == TOX_GROUP_VOICE_STATE_ALL.value)
+            {
+                return "TOX_GROUP_VOICE_STATE_ALL";
+            }
+            else if (value == TOX_GROUP_VOICE_STATE_MODERATOR.value)
+            {
+                return "TOX_GROUP_VOICE_STATE_MODERATOR";
+            }
+            else if (value == TOX_GROUP_VOICE_STATE_FOUNDER.value)
+            {
+                return "TOX_GROUP_VOICE_STATE_FOUNDER";
+            }
+            return "UNKNOWN";
+        }
+
+        public static String value_char(int value)
+        {
+            if (value == TOX_GROUP_VOICE_STATE_ALL.value)
+            {
+                return "A";
+            }
+            else if (value == TOX_GROUP_VOICE_STATE_MODERATOR.value)
+            {
+                return "M";
+            }
+            else if (value == TOX_GROUP_VOICE_STATE_FOUNDER.value)
+            {
+                return "F";
+            }
+            return "x";
+        }
+    }
+
     public static enum Tox_Group_Role
     {
         /**
