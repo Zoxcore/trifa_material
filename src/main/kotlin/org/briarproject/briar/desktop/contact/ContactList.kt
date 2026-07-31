@@ -1,3 +1,5 @@
+@file:Suppress("LocalVariableName")
+
 package org.briarproject.briar.desktop.contact
 
 import BG_COLOR_OWN_RELAY_CONTACT_ITEM
@@ -26,15 +28,20 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.zoffcc.applications.trifa.HelperGeneric.delete_friend_wrapper
+import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
+import com.zoffcc.applications.trifa.HelperGroup
 import com.zoffcc.applications.trifa.HelperRelay.delete_relay
 import com.zoffcc.applications.trifa.HelperRelay.is_any_relay
 import com.zoffcc.applications.trifa.HelperRelay.is_own_relay
 import com.zoffcc.applications.trifa.HelperRelay.remove_own_relay_in_db
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public_key
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_invite_friend
 import com.zoffcc.applications.trifa.StateContacts
 import contactstore
 import friendsettingsstore
 import globalfrndstoreunreadmsgs
 import globalstore
+import groupstore
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -53,6 +60,8 @@ fun ContactList(
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
     var itemToDelete by remember { mutableStateOf<ContactItem?>(null) }
+    var showInviteDialog by remember { mutableStateOf(false) }
+    var contactToInvite by remember { mutableStateOf<ContactItem?>(null) }
 
     if (showDeleteDialog) {
         val itemToDeleteSnapshot = itemToDelete!!
@@ -91,6 +100,51 @@ fun ContactList(
             },
             dismissButton = {
                 TextButton(onClick = { itemToDelete = null ; showDeleteDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    if (showInviteDialog && contactToInvite != null) {
+        val contactToInviteSnapshot = contactToInvite!!
+        val dialogScope = rememberCoroutineScope()
+        AlertDialog(
+            onDismissRequest = {
+                showInviteDialog = false
+                contactToInvite = null
+            },
+            title = { Text("Invite to Group") },
+            text = {
+                // Scrollable list container inside the dialog
+                Box(modifier = Modifier.sizeIn(maxHeight = 300.dp, maxWidth = 400.dp)) {
+                    LazyColumn {
+                        items(groupstore.state.groups) { group ->
+                            TextButton(
+                                onClick = {
+                                    dialogScope.launch {
+                                        val group_num = HelperGroup.tox_group_by_groupid__wrapper(group.groupId)
+                                        val friend_num = tox_friend_by_public_key(contactToInviteSnapshot.pubkey)
+                                        tox_group_invite_friend(group_num, friend_num)
+                                        update_savedata_file_wrapper()
+                                    }
+                                    showInviteDialog = false
+                                    contactToInvite = null
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(text = group.groupId.take(6) + " " + group.name, modifier = Modifier.fillMaxWidth())
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {}, // Kept empty since selecting an item completes the action
+            dismissButton = {
+                TextButton(onClick = {
+                    showInviteDialog = false
+                    contactToInvite = null
+                }) {
                     Text("Cancel")
                 }
             }
@@ -140,6 +194,10 @@ fun ContactList(
                         .padding(start = 16.dp, end = 4.dp)
                     ContextMenuArea(items = {
                         listOf(
+                            ContextMenuItem("invite to group") {
+                                contactToInvite = item
+                                showInviteDialog = true
+                            },
                             ContextMenuItem("delete") {
                                 itemToDelete = item
                                 showDeleteDialog = true
