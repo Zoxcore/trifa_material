@@ -1,4 +1,4 @@
-@file:Suppress("KotlinConstantConditions", "LocalVariableName", "LiftReturnOrAssignment")
+@file:Suppress("KotlinConstantConditions", "LocalVariableName", "LiftReturnOrAssignment", "FunctionName", "CascadeIf")
 
 import ChatColorsConfig.NGC_FOUNDER_MESSAGE_COLOR
 import ChatColorsConfig.NGC_MODERATOR_MESSAGE_COLOR
