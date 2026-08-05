@@ -599,7 +599,7 @@ fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, s
                                             {
                                             }
                                             val message_id_hex = HelperGroup.fourbytes_of_long_to_hex(message_id)
-                                            val db_msgid = MainActivity.sent_groupmessage_to_db(groupid = selectedGroupId, message_timestamp = timestamp, group_message = text, message_id = message_id, was_synced = false)
+                                            val db_msgid = MainActivity.sent_groupmessage_to_db(groupid = selectedGroupId, message_timestamp = timestamp, group_message = text, message_id = message_id, was_synced = false, peer_role = peer_role)
                                             groupmessagestore.send(GroupMessageAction.SendGroupMessage(
                                                 UIGroupMessage(
                                                     was_synced = false,

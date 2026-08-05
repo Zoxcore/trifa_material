@@ -174,7 +174,7 @@ fun GroupPeerList(
 
                                     val message_id_tox = HelperGroup.fourbytes_of_long_to_hex(res)
                                     val db_msgid = MainActivity.sent_groupmessage_to_db(groupid = peerSnapshot.groupID, message_timestamp = timestamp,
-                                        group_message = pmTextMessage, message_id = res, was_synced = false, 1,
+                                        group_message = pmTextMessage, message_id = res, peer_role = peer_role, was_synced = false, is_private_message = 1,
                                         sent_privately_to_tox_group_peer_pubkey = peerSnapshot.pubkey.uppercase())
                                     groupmessagestore.send(GroupMessageAction.SendGroupMessage(
                                         UIGroupMessage(

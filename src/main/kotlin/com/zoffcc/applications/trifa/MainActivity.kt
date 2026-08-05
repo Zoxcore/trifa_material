@@ -4165,7 +4165,7 @@ class MainActivity
                 filename_fullpath = m.filename_fullpath)))
         }
 
-        fun sent_groupmessage_to_db(groupid: String, message_timestamp: Long, group_message: String?, message_id: Long, was_synced: Boolean, is_private_message: Int = 0, sent_privately_to_tox_group_peer_pubkey: String? = null): Long
+        fun sent_groupmessage_to_db(groupid: String, message_timestamp: Long, group_message: String?, message_id: Long, was_synced: Boolean, peer_role: Int, is_private_message: Int = 0, sent_privately_to_tox_group_peer_pubkey: String? = null): Long
         {
             val message_id_hex = fourbytes_of_long_to_hex(message_id)
             val groupnum = tox_group_by_groupid__wrapper(groupid)
@@ -4194,6 +4194,7 @@ class MainActivity
             m.text = group_message
             m.was_synced = was_synced
             m.message_id_tox = message_id_hex
+            m.tox_group_peer_role = peer_role
             var row_id: Long = -1
             try
             {
