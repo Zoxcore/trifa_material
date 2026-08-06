@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.AlertDialog
@@ -49,11 +50,13 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -76,6 +79,8 @@ import com.zoffcc.applications.trifa.TRIFAGlobals.TRIFA_MSG_TYPE
 import com.zoffcc.applications.trifa.ToxVars
 import com.zoffcc.applications.trifa2.timeToString
 import org.briarproject.briar.desktop.ui.Tooltip
+import org.nibor.autolink.LinkExtractor
+import org.nibor.autolink.LinkType
 import java.io.File
 import kotlin.random.Random
 
@@ -782,8 +787,76 @@ fun AlertDialogTest()
         text = { Text("Hello text") })
 }
 
+
+
 @Composable
-fun UrlHighlightTextView(text: String, modifier: Modifier = Modifier, style: TextStyle, onClick: (String) -> Unit) {
+fun UrlHighlightTextView(
+    text: String,
+    modifier: Modifier = Modifier,
+    style: TextStyle,
+    onClick: (String) -> Unit
+) {
+    val colorScheme = MaterialTheme.colors
+    val textStyle = SpanStyle(color = colorScheme.onBackground)
+    val urlStyle = SpanStyle(color = Color(URL_TEXTVIEW_URL_COLOR))
+
+    // Configure the high-performance link extractor
+    val linkExtractor = remember {
+        LinkExtractor.builder()
+            .linkTypes(setOf(LinkType.URL, LinkType.WWW))
+            .build()
+    }
+
+    // Build the annotated string efficiently
+    val annotatedString = remember(text, textStyle, urlStyle) {
+        buildAnnotatedString {
+            val spans = linkExtractor.extractLinks(text)
+            var lastIndex = 0
+
+            for (span in spans) {
+                // 1. Append preceding plain text block
+                if (span.beginIndex > lastIndex) {
+                    withStyle(style = textStyle) {
+                        append(text.substring(lastIndex, span.beginIndex))
+                    }
+                }
+
+                // 2. Append link block with a built-in modern Clickable Annotation
+                val linkText = text.substring(span.beginIndex, span.endIndex)
+                val linkAnnotation = LinkAnnotation.Url(
+                    url = linkText,
+                    styles = androidx.compose.ui.text.TextLinkStyles(style = urlStyle),
+                    linkInteractionListener = {
+                        onClick(linkText)
+                    }
+                )
+
+                withLink(linkAnnotation) {
+                    append(linkText)
+                }
+
+                lastIndex = span.endIndex
+            }
+
+            // 3. Append remaining trailing text block
+            if (lastIndex < text.length) {
+                withStyle(style = textStyle) {
+                    append(text.substring(lastIndex, text.length))
+                }
+            }
+        }
+    }
+
+    // BasicText seamlessly handles modern native LinkAnnotations out-of-the-box
+    BasicText(
+        text = annotatedString,
+        modifier = modifier,
+        style = style
+    )
+}
+
+@Composable
+fun UrlHighlightTextView__UNUSED_PREVIOUS_IMPL(text: String, modifier: Modifier = Modifier, style: TextStyle, onClick: (String) -> Unit) {
 
     val colorScheme = MaterialTheme.colors
     val textStyle = SpanStyle(color = colorScheme.onBackground)
