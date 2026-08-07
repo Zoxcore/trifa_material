@@ -1,8 +1,12 @@
 @file:Suppress("FunctionName", "LocalVariableName", "SpellCheckingInspection", "PackageDirectoryMismatch")
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -28,6 +32,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.ExperimentalResourceApi
+
 
 @Composable
 internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
@@ -59,22 +64,65 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
         var prevLastSerial by remember { mutableStateOf(-1L) }
         var lastSerial = grpmsgs.groupmessages.lastOrNull()?.msgDatabaseId
         var prevselectedGroupId by remember { mutableStateOf(selectedGroupId) }
+
+        // Track whether this is the first data load for a selected group room
+        var isInitialLoad by remember { mutableStateOf(true) }
+
         if (prevselectedGroupId != selectedGroupId)
         {
             lastSerial = -1
             prevselectedGroupId = selectedGroupId
             prevLastSerial = -1L
+            isInitialLoad = true // Reset on room change
         }
+
         LaunchedEffect(lastSerial, selectedGroupId) {
             if (lastSerial != null) {
-                // If we're at the spot we last scrolled to
-                val lastVisibleSerial = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
-                    ?.let { grpmsgs.groupmessages.getOrNull(it)?.msgDatabaseId }
-                    ?: -1L
-                if ((lastVisibleSerial >= prevLastSerial || lastVisibleSerial == -1L) && grpmsgs.groupmessages.lastIndex > 0) {
-                    // scroll to the end if we were at the end
-                    listState.scrollToItem(grpmsgs.groupmessages.lastIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
-                    // Log.i(com.zoffcc.applications.trifa.TAG, "messages -> scroll to the end")
+                val targetLayoutIndex = grpmsgs.groupmessages.lastIndex + 1
+
+                if (isInitialLoad) {
+                    // On initial start, instantly snap to the bottom without animating
+                    // to prevent layout dimension bugs.
+                    if (grpmsgs.groupmessages.isNotEmpty()) {
+                        listState.scrollToItem(targetLayoutIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
+                    }
+                    isInitialLoad = false
+                } else {
+                    // If we're at the spot we last scrolled to
+                    val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
+
+                    val lastVisibleSerial = when (lastVisibleItem?.key) {
+                        "FIRST_ITEM", "LAST_ITEM" -> -1L
+                        null -> -1L
+                        else -> {
+                            val dataIndex = lastVisibleItem.index - 1
+                            grpmsgs.groupmessages.getOrNull(dataIndex)?.msgDatabaseId ?: -1L
+                        }
+                    }
+
+                    if ((lastVisibleSerial >= prevLastSerial || lastVisibleSerial == -1L) && grpmsgs.groupmessages.lastIndex > 0) {
+                        val layoutInfo = listState.layoutInfo
+                        val visibleItems = layoutInfo.visibleItemsInfo
+                        val lastVisible = visibleItems.lastOrNull()
+
+                        if (lastVisible != null) {
+                            val viewportEnd = layoutInfo.viewportEndOffset
+                            val itemEnd = lastVisible.offset + lastVisible.size
+
+                            val extraPaddingPx = 300f
+                            val scrollDistance = (itemEnd - viewportEnd).toFloat() + extraPaddingPx
+
+                            if (scrollDistance > 0f) {
+                                listState.animateScrollBy(
+                                    value = scrollDistance,
+                                    animationSpec = spring(
+                                        dampingRatio = Spring.DampingRatioNoBouncy,
+                                        stiffness = Spring.StiffnessVeryLow
+                                    )
+                                )
+                            }
+                        }
+                    }
                 }
                 // remember the last serial
                 prevLastSerial = lastSerial
@@ -82,6 +130,10 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
         }
     }
 }
+
+
+
+
 
 @OptIn(ExperimentalResourceApi::class)
 @Composable
