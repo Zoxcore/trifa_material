@@ -1699,7 +1699,7 @@ fun load_groupmessages(selectedGroupId: String?)
 {
     if (selectedGroupId != null)
     {
-        Log.i(TAG, "load_groupmessages")
+        // Log.i(TAG, "load_groupmessages")
         try
         {
             val groupid = selectedGroupId.lowercase()
