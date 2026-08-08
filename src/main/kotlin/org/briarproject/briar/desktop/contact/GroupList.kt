@@ -107,6 +107,7 @@ fun GroupList(
                         }
                         globalgrpstoreunreadmsgs.hard_clear_unread_per_group_message_count(item.groupId)
                         groupstore.select(item.groupId)
+                        groupstore.fullHistoryActive(false)
                                },
                     selected = (groupList.selectedGroupId == item.groupId)
                 ) {

@@ -10,7 +10,9 @@ import org.briarproject.briar.desktop.contact.GroupItem
 
 data class StateGroups(val groups: List<GroupItem> = emptyList(), val visible: Boolean = false,
                        val selectedGroupId: String? = null, val selectedGroup: GroupItem? = null,
-                       var groupmessageFilterActive: Boolean = false, var groupmessageFilterString: String = "")
+                       var groupmessageFilterActive: Boolean = false,
+                       var fullHistoryActive: Boolean = false,
+                       var groupmessageFilterString: String = "")
 
 interface GroupStore
 {
@@ -20,6 +22,7 @@ interface GroupStore
     fun visible(value: Boolean)
     fun clear()
     fun groupmessagefilterActive(value: Boolean)
+    fun fullHistoryActive(value: Boolean)
     fun groupmessagefilterString(value: String)
     fun groupmessageresetFilter()
     fun update(item: GroupItem)
@@ -209,6 +212,13 @@ fun CoroutineScope.createGroupStore(): GroupStore
         {
             global_semaphore_grouplist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
             mutableStateFlow.value = state.copy(groupmessageFilterActive = value )
+            global_semaphore_grouplist_ui.release()
+        }
+
+        override fun fullHistoryActive(value: Boolean)
+        {
+            global_semaphore_grouplist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
+            mutableStateFlow.value = state.copy(fullHistoryActive = value )
             global_semaphore_grouplist_ui.release()
         }
 

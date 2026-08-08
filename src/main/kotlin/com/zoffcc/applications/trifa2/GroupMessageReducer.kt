@@ -37,10 +37,14 @@ fun groupchatReducer(state: GroupMessageState, action: GroupMessageAction): Grou
                 state.groupmessages.clear()
             }
         }
-        // Global trimming logic: Keeps the code clean and handles any action size safely
-        val excess = state.groupmessages.size - maxGroupMessages
-        if (excess > 0) {
-            state.groupmessages.removeRange(0, excess)
+        if (!groupstore.state.fullHistoryActive)
+        {
+            // Global trimming logic: Keeps the code clean and handles any action size safely
+            val excess = state.groupmessages.size - maxGroupMessages
+            if (excess > 0)
+            {
+                state.groupmessages.removeRange(0, excess)
+            }
         }
     }
     return state

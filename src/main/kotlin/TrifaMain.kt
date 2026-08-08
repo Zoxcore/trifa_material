@@ -1428,7 +1428,7 @@ fun App()
                                             }
                                             VerticalDivider()
                                             // Log.i(TAG, "GROUPS -> draw")
-                                            load_groupmessages(groups.selectedGroupId)
+                                            load_groupmessages(groups.selectedGroupId, groups.fullHistoryActive)
                                             GroupPeerListScope.launch {
                                                 globalstore.try_clear_unread_group_message_count()
                                                 globalgrpstoreunreadmsgs.try_clear_unread_per_group_message_count(groups.selectedGroupId)
@@ -1610,7 +1610,7 @@ fun SnackBarToast(message: String, duration_ms: Long = SNACKBAR_TOAST_MS_DURATIO
     }
 }
 
-fun load_messages_for_friend(selectedContactPubkey: String?)
+fun load_messages_for_friend(selectedContactPubkey: String?, full_history: Boolean = false)
 {
     if (selectedContactPubkey != null)
     {
@@ -1645,7 +1645,9 @@ fun load_messages_for_friend(selectedContactPubkey: String?)
                 tox_friendpubkeyEq(toxpk).
                 orderBySent_timestampAsc().toList()
             }
-            messages.takeLast(MAX_ONE_ON_ONE_MESSAGES_TO_SHOW).forEach() {
+            messages
+                .let { if (full_history) it else it.takeLast(MAX_ONE_ON_ONE_MESSAGES_TO_SHOW) }
+                .forEach() {
                 when (it.direction)
                 {
                     TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value ->
@@ -1695,7 +1697,7 @@ fun load_messages_for_friend(selectedContactPubkey: String?)
     }
 }
 
-fun load_groupmessages(selectedGroupId: String?)
+fun load_groupmessages(selectedGroupId: String?, full_history: Boolean = false)
 {
     if (selectedGroupId != null)
     {
@@ -1733,7 +1735,9 @@ fun load_groupmessages(selectedGroupId: String?)
                     .orderBySent_timestampAsc()
                     .toList()
             }
-            messages.takeLast(MAX_GROUP_MESSAGES_TO_SHOW).forEach() { // 0 -> msg received, 1 -> msg sent
+            messages
+                .let { if (full_history) it else it.takeLast(MAX_ONE_ON_ONE_MESSAGES_TO_SHOW) }
+                .forEach() { // 0 -> msg received, 1 -> msg sent
                 when (it.direction)
                 {
                     TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value ->
