@@ -38,6 +38,21 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
     val listState = rememberLazyListState()
     val grpmsgs by groupmessagestore.stateFlow.collectAsState()
+
+    // 1. Continuous Scroll & Visibility Logger
+    LaunchedEffect(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset, grpmsgs.groupmessages) {
+        val visibleIds = listState.layoutInfo.visibleItemsInfo.mapNotNull { item ->
+            when (item.key) {
+                "FIRST_ITEM", "LAST_ITEM" -> null
+                else -> {
+                    val dataIndex = item.index - 1
+                    grpmsgs.groupmessages.getOrNull(dataIndex)?.msgDatabaseId
+                }
+            }
+        }
+        println("[SCROLL MONITOR] Index: ${listState.firstVisibleItemIndex} | Offset: ${listState.firstVisibleItemScrollOffset} | Total Items In Store: ${grpmsgs.groupmessages.size} | Visible Message IDs: $visibleIds")
+    }
+
     Box(Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(start = 4.dp, end = 10.dp),
@@ -48,9 +63,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
                 Spacer(Modifier.size(SPACE_BEFORE_FIRST_MESSAGE))
             }
             items(grpmsgs.groupmessages, key = { it.msgDatabaseId }) {
-                GroupChatMessage(isMyMessage = it.user == myUser, it, ui_scale,
-                    // modifier = Modifier.animateItemPlacement()
-                )
+                GroupChatMessage(isMyMessage = it.user == myUser, it, ui_scale)
             }
             item (key = "LAST_ITEM") {
                 Box(Modifier.height(SPACE_AFTER_LAST_MESSAGE))
@@ -58,39 +71,39 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
         }
         VerticalScrollbar(
             adapter = rememberScrollbarAdapter(listState),
-            modifier = Modifier.fillMaxHeight().align(CenterEnd).width(10.dp) // .background(Color.Red)
+            modifier = Modifier.fillMaxHeight().align(CenterEnd).width(10.dp)
         )
-        // This probably shouldn't cause a recomposition
-        var prevLastSerial by remember { mutableStateOf(-1L) }
-        var lastSerial = grpmsgs.groupmessages.lastOrNull()?.msgDatabaseId
-        var prevselectedGroupId by remember { mutableStateOf(selectedGroupId) }
 
-        // Track whether this is the first data load for a selected group room
+        var prevLastSerial by remember { mutableStateOf(-1L) }
+        val lastSerial = grpmsgs.groupmessages.lastOrNull()?.msgDatabaseId
+        var prevselectedGroupId by remember { mutableStateOf(selectedGroupId) }
         var isInitialLoad by remember { mutableStateOf(true) }
 
-        if (prevselectedGroupId != selectedGroupId)
-        {
-            lastSerial = -1
+        // 2. Room Switch Detector Logic Loop
+        if (prevselectedGroupId != selectedGroupId) {
+            println("[ROOM SWITCH DETECTED] Resetting Parameters -> Changing From: '$prevselectedGroupId' To: '$selectedGroupId' | Clearing prevLastSerial (Was: $prevLastSerial)")
             prevselectedGroupId = selectedGroupId
             prevLastSerial = -1L
-            isInitialLoad = true // Reset on room change
+            isInitialLoad = true
         }
 
+        // 3. Side-Effect Automation Pipeline Logger
         LaunchedEffect(lastSerial, selectedGroupId) {
+            println("[LAUNCHED EFFECT TRIGGERED] Keys -> lastSerial: $lastSerial, selectedGroupId: $selectedGroupId | Current Context State -> isInitialLoad: $isInitialLoad, prevLastSerial: $prevLastSerial")
+
             if (lastSerial != null) {
                 val targetLayoutIndex = grpmsgs.groupmessages.lastIndex + 1
 
                 if (isInitialLoad) {
-                    // On initial start, instantly snap to the bottom without animating
-                    // to prevent layout dimension bugs.
+                    println("[EVALUATION: INITIAL LOAD] Messages Empty?: ${grpmsgs.groupmessages.isEmpty()} | Target Layout Index: $targetLayoutIndex")
                     if (grpmsgs.groupmessages.isNotEmpty()) {
+                        println("[EXECUTION: SNAP TO BOTTOM] Call -> listState.scrollToItem(index=$targetLayoutIndex, offset=$LAST_MSG_SCROLL_TO_SCROLL_OFFSET)")
                         listState.scrollToItem(targetLayoutIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
                     }
                     isInitialLoad = false
+                    println("[STATE CHANGE] isInitialLoad flag updated to: false")
                 } else {
-                    // If we're at the spot we last scrolled to
                     val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
-
                     val lastVisibleSerial = when (lastVisibleItem?.key) {
                         "FIRST_ITEM", "LAST_ITEM" -> -1L
                         null -> -1L
@@ -100,6 +113,8 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
                         }
                     }
 
+                    println("[EVALUATION: APPEND LOGIC] lastVisibleItem Key: ${lastVisibleItem?.key ?: "NULL"}, Index: ${lastVisibleItem?.index ?: "NULL"} | lastVisibleSerial: $lastVisibleSerial | Comparison: (lastVisibleSerial [$lastVisibleSerial] >= prevLastSerial [$prevLastSerial] OR lastVisibleSerial == -1L)")
+
                     if ((lastVisibleSerial >= prevLastSerial || lastVisibleSerial == -1L) && grpmsgs.groupmessages.lastIndex > 0) {
                         val layoutInfo = listState.layoutInfo
                         val visibleItems = layoutInfo.visibleItemsInfo
@@ -108,11 +123,13 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
                         if (lastVisible != null) {
                             val viewportEnd = layoutInfo.viewportEndOffset
                             val itemEnd = lastVisible.offset + lastVisible.size
-
                             val extraPaddingPx = 300f
                             val scrollDistance = (itemEnd - viewportEnd).toFloat() + extraPaddingPx
 
+                            println("[CALCULATION] Viewport End: $viewportEnd, Item End: $itemEnd, Base Delta: ${itemEnd - viewportEnd}, Final Extra Scroll Distance: $scrollDistance px")
+
                             if (scrollDistance > 0f) {
+                                println("[EXECUTION: ANIMATE SCROLL] Call -> listState.animateScrollBy(value=$scrollDistance px)")
                                 listState.animateScrollBy(
                                     value = scrollDistance,
                                     animationSpec = spring(
@@ -120,12 +137,21 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
                                         stiffness = Spring.StiffnessVeryLow
                                     )
                                 )
+                            } else {
+                                println("[EXECUTION: SKIPPED] scrollDistance ($scrollDistance px) is not greater than 0f")
                             }
+                        } else {
+                            println("[EXECUTION: ABORTED] lastVisible layout item reference is unexpectedly null")
                         }
+                    } else {
+                        println("[EXECUTION: SKIPPED] Stick-to-bottom scroll conditions not met.")
                     }
                 }
-                // remember the last serial
+
+                println("[STATE CHANGE] Updating prevLastSerial From: $prevLastSerial To: $lastSerial")
                 prevLastSerial = lastSerial
+            } else {
+                println("[EXECUTION: ABORTED] lastSerial value is completely null (Empty message room stream)")
             }
         }
     }
