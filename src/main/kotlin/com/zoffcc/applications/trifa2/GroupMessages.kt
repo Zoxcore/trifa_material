@@ -55,16 +55,24 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
         result
     }}
 
-    // NEW: Capture bottom state snapshot right before composition updates data
+    // Capture bottom state snapshot right before composition updates data
     var wasAtBottomBeforeUpdate by remember { mutableStateOf(false) }
     SideEffect {
-        // NEW LOGGING FOR wasAtBottomBeforeUpdate MUTATION
         if (wasAtBottomBeforeUpdate != isAtBottomEnd.value) {
             println("[wasAtBottomBeforeUpdate FLIP] Mutating Context Status From: $wasAtBottomBeforeUpdate To: ${isAtBottomEnd.value}")
         } else {
             println("[wasAtBottomBeforeUpdate CAPTURE] Stable State Maintained: $wasAtBottomBeforeUpdate")
         }
         wasAtBottomBeforeUpdate = isAtBottomEnd.value
+    }
+
+    // NEW SAFETY VALVE: Detects asynchronous store recoveries and auto-forces scroll correction
+    LaunchedEffect(grpmsgs.groupmessages.size) {
+        if (wasAtBottomBeforeUpdate && grpmsgs.groupmessages.isNotEmpty()) {
+            val targetIndex = grpmsgs.groupmessages.lastIndex + 1
+            println("[ASYNC ENGINE INTERCEPTOR] Size changed to: ${grpmsgs.groupmessages.size} while wasAtBottomBeforeUpdate was true. Enforcing scroll execution safety to index: $targetIndex")
+            listState.scrollToItem(targetIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
+        }
     }
 
     // Logs only when the bottom status changes
