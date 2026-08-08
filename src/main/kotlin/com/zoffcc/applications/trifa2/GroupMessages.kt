@@ -15,6 +15,7 @@ import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -43,13 +44,28 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
     // Tracks if the very last item in the layout is fully visible
     val isAtBottomEnd = remember { derivedStateOf {
         val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
-        if (lastVisibleItem == null) false else {
+        val result = if (lastVisibleItem == null) false else {
             val viewportEnd = listState.layoutInfo.viewportEndOffset
             val itemEnd = lastVisibleItem.offset + lastVisibleItem.size
             // Checks if the last item (LAST_ITEM padding) is visible at or past the viewport edge
             lastVisibleItem.index == listState.layoutInfo.totalItemsCount - 1 && itemEnd <= viewportEnd
         }
+        // NEW LOGGING FOR isAtBottomEnd DERIVED STATE EVALUATION
+        println("[isAtBottomEnd RE-EVALUATION] Result: $result | Last Visible Item Index: ${lastVisibleItem?.index ?: "NULL"} | Total Layout Count: ${listState.layoutInfo.totalItemsCount}")
+        result
     }}
+
+    // NEW: Capture bottom state snapshot right before composition updates data
+    var wasAtBottomBeforeUpdate by remember { mutableStateOf(false) }
+    SideEffect {
+        // NEW LOGGING FOR wasAtBottomBeforeUpdate MUTATION
+        if (wasAtBottomBeforeUpdate != isAtBottomEnd.value) {
+            println("[wasAtBottomBeforeUpdate FLIP] Mutating Context Status From: $wasAtBottomBeforeUpdate To: ${isAtBottomEnd.value}")
+        } else {
+            println("[wasAtBottomBeforeUpdate CAPTURE] Stable State Maintained: $wasAtBottomBeforeUpdate")
+        }
+        wasAtBottomBeforeUpdate = isAtBottomEnd.value
+    }
 
     // Logs only when the bottom status changes
     LaunchedEffect(isAtBottomEnd.value) {
@@ -106,7 +122,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
 
         // 3. Side-Effect Automation Pipeline Logger
         LaunchedEffect(lastSerial, selectedGroupId) {
-            println("[LAUNCHED EFFECT TRIGGERED] Keys -> lastSerial: $lastSerial, selectedGroupId: $selectedGroupId | Current Context State -> isInitialLoad: $isInitialLoad, prevLastSerial: $prevLastSerial")
+            println("[LAUNCHED EFFECT TRIGGERED] Keys -> lastSerial: $lastSerial, selectedGroupId: $selectedGroupId | Current Context State -> isInitialLoad: $isInitialLoad, prevLastSerial: $prevLastSerial, wasAtBottomBeforeUpdate: $wasAtBottomBeforeUpdate")
 
             if (lastSerial != null) {
                 val targetLayoutIndex = grpmsgs.groupmessages.lastIndex + 1
@@ -132,7 +148,15 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
 
                     println("[EVALUATION: APPEND LOGIC] lastVisibleItem Key: ${lastVisibleItem?.key ?: "NULL"}, Index: ${lastVisibleItem?.index ?: "NULL"} | lastVisibleSerial: $lastVisibleSerial | Comparison: (lastVisibleSerial [$lastVisibleSerial] >= prevLastSerial [$prevLastSerial] OR lastVisibleSerial == -1L)")
 
-                    if ((lastVisibleSerial >= prevLastSerial || lastVisibleSerial == -1L) && grpmsgs.groupmessages.lastIndex > 0) {
+                    // Intercept sudden list adjustments if user was firmly tracking the bottom state before the update
+                    if (wasAtBottomBeforeUpdate) {
+                        println("[RECOVERY: SNAP TO BOTTOM] Fluctuations detected while user was reading bottom. Forcing scroll anchor recovery -> index: $targetLayoutIndex")
+                        listState.scrollToItem(targetLayoutIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
+                    } else if ((lastVisibleSerial >= prevLastSerial || lastVisibleSerial == -1L) &&
+                        grpmsgs.groupmessages.lastIndex > 0 &&
+                        lastVisibleItem != null &&
+                        lastVisibleItem.index >= listState.layoutInfo.totalItemsCount - 5) { // Proximity safety check
+
                         val layoutInfo = listState.layoutInfo
                         val visibleItems = layoutInfo.visibleItemsInfo
                         val lastVisible = visibleItems.lastOrNull()
@@ -161,7 +185,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
                             println("[EXECUTION: ABORTED] lastVisible layout item reference is unexpectedly null")
                         }
                     } else {
-                        println("[EXECUTION: SKIPPED] Stick-to-bottom scroll conditions not met.")
+                        println("[EXECUTION: SKIPPED] Stick-to-bottom scroll conditions not met. Proximity Index: ${lastVisibleItem?.index ?: -1} vs Total: ${listState.layoutInfo.totalItemsCount}")
                     }
                 }
 
@@ -173,8 +197,6 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
         }
     }
 }
-
-
 
 
 
