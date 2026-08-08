@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +39,22 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
     val listState = rememberLazyListState()
     val grpmsgs by groupmessagestore.stateFlow.collectAsState()
+
+    // Tracks if the very last item in the layout is fully visible
+    val isAtBottomEnd = remember { derivedStateOf {
+        val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
+        if (lastVisibleItem == null) false else {
+            val viewportEnd = listState.layoutInfo.viewportEndOffset
+            val itemEnd = lastVisibleItem.offset + lastVisibleItem.size
+            // Checks if the last item (LAST_ITEM padding) is visible at or past the viewport edge
+            lastVisibleItem.index == listState.layoutInfo.totalItemsCount - 1 && itemEnd <= viewportEnd
+        }
+    }}
+
+    // Logs only when the bottom status changes
+    LaunchedEffect(isAtBottomEnd.value) {
+        println("[BOTTOM MONITOR] Is At Bottom End: ${isAtBottomEnd.value}")
+    }
 
     // 1. Continuous Scroll & Visibility Logger
     LaunchedEffect(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset, grpmsgs.groupmessages) {
