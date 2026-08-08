@@ -66,14 +66,25 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
         wasAtBottomBeforeUpdate = isAtBottomEnd.value
     }
 
+    // Track the previous size to calculate sudden jumps
+    var prevMessageStoreSize by remember { mutableStateOf(grpmsgs.groupmessages.size) }
+
+
     // SAFETY VALVE: Detects asynchronous store recoveries and auto-forces scroll correction
     LaunchedEffect(grpmsgs.groupmessages.size) {
-        if (wasAtBottomBeforeUpdate && grpmsgs.groupmessages.isNotEmpty()) {
-            // FIX: Point exactly to the LAST_ITEM layout item index (size + 1) to match layout structure
+        val currentSize = grpmsgs.groupmessages.size
+        val sizeDelta = kotlin.math.abs(currentSize - prevMessageStoreSize)
+
+        // Only enforce hard snapping if the size jumped drastically (>= 100 items)
+        if (wasAtBottomBeforeUpdate && grpmsgs.groupmessages.isNotEmpty() && sizeDelta >= 100) {
             val targetIndex = grpmsgs.groupmessages.size + 1
-            println("[ASYNC ENGINE INTERCEPTOR] Size changed to: ${grpmsgs.groupmessages.size} while wasAtBottomBeforeUpdate was true. Enforcing scroll execution safety to index: $targetIndex")
+            println("[ASYNC ENGINE INTERCEPTOR] Sudden jump detected! Size changed from $prevMessageStoreSize to $currentSize (Delta: $sizeDelta). Enforcing hard scroll snap safety to index: $targetIndex")
             listState.scrollToItem(targetIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
+        } else if (wasAtBottomBeforeUpdate && grpmsgs.groupmessages.isNotEmpty()) {
+            println("[ASYNC ENGINE INTERCEPTOR] Normal update. Size changed from $prevMessageStoreSize to $currentSize (Delta: $sizeDelta). Bypassing snap to preserve animation.")
         }
+
+        prevMessageStoreSize = currentSize
     }
 
     // Logs only when the bottom status changes
@@ -127,6 +138,8 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
             prevselectedGroupId = selectedGroupId
             prevLastSerial = -1L
             isInitialLoad = true
+            // FIX: Re-initialize the layout size tracker during room change to prevent false delta math artifacts
+            prevMessageStoreSize = grpmsgs.groupmessages.size
         }
 
         // 3. Side-Effect Automation Pipeline Logger
@@ -158,9 +171,12 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
 
                     println("[EVALUATION: APPEND LOGIC] lastVisibleItem Key: ${lastVisibleItem?.key ?: "NULL"}, Index: ${lastVisibleItem?.index ?: "NULL"} | lastVisibleSerial: $lastVisibleSerial | Comparison: (lastVisibleSerial [$lastVisibleSerial] >= prevLastSerial [$prevLastSerial] OR lastVisibleSerial == -1L)")
 
+                    val currentSize = grpmsgs.groupmessages.size
+                    val sizeDelta = kotlin.math.abs(currentSize - prevMessageStoreSize)
+
                     // Intercept sudden list adjustments if user was firmly tracking the bottom state before the update
-                    if (wasAtBottomBeforeUpdate) {
-                        println("[RECOVERY: SNAP TO BOTTOM] Fluctuations detected while user was reading bottom. Forcing scroll anchor recovery -> index: $targetLayoutIndex")
+                    if (wasAtBottomBeforeUpdate && sizeDelta >= 100) {
+                        println("[RECOVERY: SNAP TO BOTTOM] Severe fluctuation threshold hit (Delta: $sizeDelta). Forcing scroll anchor recovery -> index: $targetLayoutIndex")
                         listState.scrollToItem(targetLayoutIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
                     } else if ((lastVisibleSerial >= prevLastSerial || lastVisibleSerial == -1L) &&
                         grpmsgs.groupmessages.lastIndex > 0 &&
