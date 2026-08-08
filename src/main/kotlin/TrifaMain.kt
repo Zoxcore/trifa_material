@@ -2647,7 +2647,7 @@ private fun MainAppStart()
                 LaunchedEffect(state) {
                     // 1. Log whenever the minimized state changes
                     snapshotFlow { state.isMinimized }.onEach { minimized ->
-                        println("[LOG MINIMIZE] isMinimized: $minimized | Current Placement: ${state.placement}")
+                        //DEBUG_WINDOW_SIZE_LOG//println("[LOG MINIMIZE] isMinimized: $minimized | Current Placement: ${state.placement}")
                         onWindowMinimised(minimized)
                     }.launchIn(this)
 
@@ -2658,7 +2658,7 @@ private fun MainAppStart()
                             WindowPlacement.Maximized -> "MAXIMIZED"
                             WindowPlacement.Floating -> "NORMAL WINDOW"
                         }
-                        println("[LOG SIZE] Mode: $modeStr | Size: ${size.width.value}x${size.height.value}")
+                        //DEBUG_WINDOW_SIZE_LOG//println("[LOG SIZE] Mode: $modeStr | Size: ${size.width.value}x${size.height.value}")
                         onWindowResize(size)
                     }.launchIn(this)
 
@@ -2669,7 +2669,7 @@ private fun MainAppStart()
                             WindowPlacement.Maximized -> "MAXIMIZED"
                             WindowPlacement.Floating -> "NORMAL WINDOW"
                         }
-                        println("[LOG POS] Mode: $modeStr | Position: X=${position.x.value}, Y=${position.y.value}")
+                        //DEBUG_WINDOW_SIZE_LOG//println("[LOG POS] Mode: $modeStr | Position: X=${position.x.value}, Y=${position.y.value}")
                         onWindowRelocate(position)
                     }.launchIn(this)
                 }
