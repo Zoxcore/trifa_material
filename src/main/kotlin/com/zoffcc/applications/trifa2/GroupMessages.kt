@@ -13,6 +13,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -22,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterEnd
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -114,6 +117,20 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
         ) {
             item (key = "FIRST_ITEM") {
                 Spacer(Modifier.size(SPACE_BEFORE_FIRST_MESSAGE))
+            }
+            if (!groupstore.state.fullHistoryActive) {
+                item(key = "load_more_button_key") {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Button(onClick = { groupstore.fullHistoryActive(true) }) {
+                            Text("Load Older Messages")
+                        }
+                    }
+                }
             }
             items(grpmsgs.groupmessages, key = { it.msgDatabaseId }) {
                 GroupChatMessage(isMyMessage = it.user == myUser, it, ui_scale)
