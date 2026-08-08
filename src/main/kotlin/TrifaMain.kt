@@ -1645,7 +1645,7 @@ fun load_messages_for_friend(selectedContactPubkey: String?)
                 tox_friendpubkeyEq(toxpk).
                 orderBySent_timestampAsc().toList()
             }
-            messages.forEach() {
+            messages.takeLast(MAX_ONE_ON_ONE_MESSAGES_TO_SHOW).forEach() {
                 when (it.direction)
                 {
                     TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value ->
@@ -1699,7 +1699,7 @@ fun load_groupmessages(selectedGroupId: String?)
 {
     if (selectedGroupId != null)
     {
-        // Log.i(TAG, "load_groupmessages")
+        Log.i(TAG, "load_groupmessages")
         try
         {
             val groupid = selectedGroupId.lowercase()
@@ -1733,7 +1733,7 @@ fun load_groupmessages(selectedGroupId: String?)
                     .orderBySent_timestampAsc()
                     .toList()
             }
-            messages.forEach() { // 0 -> msg received, 1 -> msg sent
+            messages.takeLast(MAX_GROUP_MESSAGES_TO_SHOW).forEach() { // 0 -> msg received, 1 -> msg sent
                 when (it.direction)
                 {
                     TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value ->
