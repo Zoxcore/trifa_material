@@ -1,9 +1,9 @@
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 
-sealed interface GroupMessageAction
-{
+sealed interface GroupMessageAction {
     data class SendMessagesBulk(val messages: List<UIGroupMessage>, val groupid: String) : GroupMessageAction
     data class SendGroupMessage(val groupmessage: UIGroupMessage) : GroupMessageAction
     data class ReceiveMessagesBulkWithClear(val messages: List<UIGroupMessage>, val groupid: String) : GroupMessageAction
@@ -11,34 +11,37 @@ sealed interface GroupMessageAction
     data class ClearGroup(val groupmessage: Int) : GroupMessageAction
 }
 
-data class GroupMessageState(val groupmessages: SnapshotStateList<UIGroupMessage> = mutableStateListOf())
+data class GroupMessageState(
+    val groupmessages: SnapshotStateList<UIGroupMessage> = mutableStateListOf()
+)
 
 const val maxGroupMessages = MAX_GROUP_MESSAGES_TO_SHOW
-fun groupchatReducer(state: GroupMessageState, action: GroupMessageAction): GroupMessageState = when (action)
-{
-    is GroupMessageAction.ReceiveMessagesBulkWithClear ->
-    {
-        state.copy(groupmessages = (action.messages).toMutableStateList())
+
+fun groupchatReducer(state: GroupMessageState, action: GroupMessageAction): GroupMessageState {
+    Snapshot.withMutableSnapshot {
+        when (action) {
+            is GroupMessageAction.ReceiveMessagesBulkWithClear -> {
+                state.groupmessages.clear()
+                state.groupmessages.addAll(action.messages)
+            }
+            is GroupMessageAction.SendMessagesBulk -> {
+                state.groupmessages.addAll(action.messages)
+            }
+            is GroupMessageAction.SendGroupMessage -> {
+                state.groupmessages.add(action.groupmessage)
+            }
+            is GroupMessageAction.ReceiveGroupMessage -> {
+                state.groupmessages.add(action.groupmessage)
+            }
+            is GroupMessageAction.ClearGroup -> {
+                state.groupmessages.clear()
+            }
+        }
+        // Global trimming logic: Keeps the code clean and handles any action size safely
+        val excess = state.groupmessages.size - maxGroupMessages
+        if (excess > 0) {
+            state.groupmessages.removeRange(0, excess)
+        }
     }
-    is GroupMessageAction.SendMessagesBulk ->
-    {
-        val m = state.groupmessages.toList()
-        state.copy(groupmessages = (m + action.messages).toMutableStateList())
-    }
-    is GroupMessageAction.SendGroupMessage ->
-    {
-        state.copy(groupmessages = (state.groupmessages + action.groupmessage).takeLast(maxGroupMessages).toMutableStateList())
-    }
-    is GroupMessageAction.ReceiveGroupMessage ->
-    {
-        state.copy(groupmessages = (state.groupmessages + action.groupmessage).takeLast(maxGroupMessages).toMutableStateList())
-    }
-    is GroupMessageAction.ClearGroup ->
-    {
-        state.copy(mutableStateListOf())
-    }
-    else ->
-    {
-        state.copy(mutableStateListOf())
-    }
+    return state
 }
