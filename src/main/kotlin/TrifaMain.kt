@@ -2643,11 +2643,40 @@ private fun MainAppStart()
                         onWindowFocused(onWindowFocused)
                     }
                 }
+
                 LaunchedEffect(state) {
-                    snapshotFlow { state.isMinimized }.onEach(::onWindowMinimised).launchIn(this)
-                    snapshotFlow { state.size }.onEach(::onWindowResize).launchIn(this)
-                    snapshotFlow { state.position }.filter { it.isSpecified }.onEach(::onWindowRelocate).launchIn(this)
+                    // 1. Log whenever the minimized state changes
+                    snapshotFlow { state.isMinimized }.onEach { minimized ->
+                        println("[LOG MINIMIZE] isMinimized: $minimized | Current Placement: ${state.placement}")
+                        onWindowMinimised(minimized)
+                    }.launchIn(this)
+
+                    // 2. Log every single size change across all modes
+                    snapshotFlow { state.size }.onEach { size ->
+                        val modeStr = when(state.placement) {
+                            WindowPlacement.Fullscreen -> "FULLSCREEN"
+                            WindowPlacement.Maximized -> "MAXIMIZED"
+                            WindowPlacement.Floating -> "NORMAL WINDOW"
+                        }
+                        println("[LOG SIZE] Mode: $modeStr | Size: ${size.width.value}x${size.height.value}")
+                        onWindowResize(size)
+                    }.launchIn(this)
+
+                    // 3. Log every single position change across all modes
+                    snapshotFlow { state.position }.filter { it.isSpecified }.onEach { position ->
+                        val modeStr = when(state.placement) {
+                            WindowPlacement.Fullscreen -> "FULLSCREEN"
+                            WindowPlacement.Maximized -> "MAXIMIZED"
+                            WindowPlacement.Floating -> "NORMAL WINDOW"
+                        }
+                        println("[LOG POS] Mode: $modeStr | Position: X=${position.x.value}, Y=${position.y.value}")
+                        onWindowRelocate(position)
+                    }.launchIn(this)
                 }
+
+
+
+
                 // var ui_density by remember { mutableStateOf(globalstore.getUiDensity()) }
                 // val manual_recompose = remember { mutableStateOf(globalstore.state.ui_density) }
                 CompositionLocalProvider(
