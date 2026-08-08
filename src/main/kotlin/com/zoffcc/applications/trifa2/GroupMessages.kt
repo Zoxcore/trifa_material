@@ -66,10 +66,11 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
         wasAtBottomBeforeUpdate = isAtBottomEnd.value
     }
 
-    // NEW SAFETY VALVE: Detects asynchronous store recoveries and auto-forces scroll correction
+    // SAFETY VALVE: Detects asynchronous store recoveries and auto-forces scroll correction
     LaunchedEffect(grpmsgs.groupmessages.size) {
         if (wasAtBottomBeforeUpdate && grpmsgs.groupmessages.isNotEmpty()) {
-            val targetIndex = grpmsgs.groupmessages.lastIndex + 1
+            // FIX: Point exactly to the LAST_ITEM layout item index (size + 1) to match layout structure
+            val targetIndex = grpmsgs.groupmessages.size + 1
             println("[ASYNC ENGINE INTERCEPTOR] Size changed to: ${grpmsgs.groupmessages.size} while wasAtBottomBeforeUpdate was true. Enforcing scroll execution safety to index: $targetIndex")
             listState.scrollToItem(targetIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
         }
@@ -133,7 +134,8 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
             println("[LAUNCHED EFFECT TRIGGERED] Keys -> lastSerial: $lastSerial, selectedGroupId: $selectedGroupId | Current Context State -> isInitialLoad: $isInitialLoad, prevLastSerial: $prevLastSerial, wasAtBottomBeforeUpdate: $wasAtBottomBeforeUpdate")
 
             if (lastSerial != null) {
-                val targetLayoutIndex = grpmsgs.groupmessages.lastIndex + 1
+                // FIX: Point exactly to the LAST_ITEM layout item index (size + 1) to match layout structure
+                val targetLayoutIndex = grpmsgs.groupmessages.size + 1
 
                 if (isInitialLoad) {
                     println("[EVALUATION: INITIAL LOAD] Messages Empty?: ${grpmsgs.groupmessages.isEmpty()} | Target Layout Index: $targetLayoutIndex")
