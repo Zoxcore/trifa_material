@@ -1,6 +1,7 @@
 @file:Suppress("PropertyName", "LocalVariableName")
 
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import com.zoffcc.applications.sorm.Filetransfer
@@ -21,120 +22,115 @@ sealed interface MessageAction
 data class MessageState(var messages: SnapshotStateList<UIMessage> = mutableStateListOf())
 
 const val maxMessages = MAX_ONE_ON_ONE_MESSAGES_TO_SHOW
-fun chatReducer(state: MessageState, action: MessageAction): MessageState = when (action)
-{
-    /*
-    is MessageAction.SendMessagesBulk ->
-    {
-        val m = state.messages.toList()
-        Log.i(com.zoffcc.applications.trifa.TAG, "MessageAction.SendMessagesBulk")
-        state.copy(messages = (m + action.messages).toMutableStateList())
-    }
-     */
-    is MessageAction.SendMessage ->
-    {
-        // val m = state.messages
-        // m.add(action.message)
-        // m.takeLast(maxMessages)
-        // Log.i(com.zoffcc.applications.trifa.TAG, "MessageAction.SendMessage")
-        state.copy(messages = (state.messages + action.message).takeLast(maxMessages).toMutableStateList())
-    }
-    is MessageAction.ReceiveMessagesBulkWithClear ->
-    {
-        // state.messages.clear()
-        // Log.i(com.zoffcc.applications.trifa.TAG, "MessageAction.ReceiveMessagesBulkWithClear")
-        state.copy(messages = (action.messages).toMutableStateList())
-    }
-    is MessageAction.ReceiveMessage ->
-    {
-        // val m = state.messages
-        // m.add(action.message)
-        // m.takeLast(maxMessages)
-        // Log.i(com.zoffcc.applications.trifa.TAG, "MessageAction.ReceiveMessage")
-        state.copy(messages = (state.messages + action.message).takeLast(maxMessages).toMutableStateList())
-    }
-    is MessageAction.Clear ->
-    {
-        // state.messages.clear()
-        // Log.i(com.zoffcc.applications.trifa.TAG, "MessageAction.Clear")
-        state.copy(mutableStateListOf())
-    }
-    is MessageAction.UpdateMessage ->
-    {
-        val TAG = "UpdateMessage"
-        try
+fun chatReducer(state: MessageState, action: MessageAction): MessageState {
+    Snapshot.withMutableSnapshot {
+        when (action)
         {
-            val item_position = state.messages.binarySearchBy(action.message_db.id) { it.id }
-            // Log.i(TAG, "item_position = " + item_position)
-            val item = state.messages[item_position]
-            if (action.filetransfer_db != null)
+            is MessageAction.SendMessage ->
             {
-                val prev_pos = state.messages[item_position].currentfilepos
-                val prev_pos_ts = state.messages[item_position].currentfileposTimeMs
-                val cur_pos_ts = System.currentTimeMillis()
-                var start_ts = state.messages[item_position].startfileposTimeMs
-                var start_file_pos = state.messages[item_position].startfilepos
-                if (start_ts == 0L)
-                {
-                    start_ts = System.currentTimeMillis()
-                }
-                if ((start_file_pos == 0L) && (prev_pos == 0L) && (action.filetransfer_db.current_position > 0L))
-                {
-                    start_file_pos = action.filetransfer_db.current_position
-                }
-                state.messages[item_position] = item.copy(file_state = action.message_db.state,
-                    filesize = action.filetransfer_db.filesize,
-                    currentfilepos = action.filetransfer_db.current_position,
-                    previousfilepos = prev_pos, currentfileposTimeMs = cur_pos_ts,
-                    startfilepos = start_file_pos,
-                    startfileposTimeMs = start_ts,
-                    previousfileposTimeMs = prev_pos_ts,
-                    filename_fullpath = action.message_db.filename_fullpath)
-            } else
+                state.messages.add(action.message)
+            }
+            is MessageAction.ReceiveMessagesBulkWithClear ->
             {
-                Log.i(TAG, "UpdateMessage:ft=null");
-                state.messages[item_position] = item.copy(file_state = action.message_db.state, filename_fullpath = null,
-                    currentfilepos = 0, previousfilepos = 0, previousfileposTimeMs = 0,
-                    startfilepos = 0L,
-                    startfileposTimeMs = System.currentTimeMillis(),
-                    currentfileposTimeMs = System.currentTimeMillis(),
-                    filesize = 0)
+                state.messages.clear()
+                state.messages.addAll(action.messages)
+            }
+            is MessageAction.ReceiveMessage ->
+            {
+                state.messages.add(action.message)
+            }
+            is MessageAction.Clear ->
+            {
+                state.messages.clear()
+            }
+
+            is MessageAction.UpdateMessage ->
+            {
+                val TAG = "UpdateMessage"
+                val item_position = state.messages.indexOfFirst { it.id == action.message_db.id }
+                if (item_position != -1)
+                {
+                    val item = state.messages[item_position]
+                    val updatedItem = if (action.filetransfer_db != null)
+                    {
+                        val prev_pos = item.currentfilepos
+                        val prev_pos_ts = item.currentfileposTimeMs
+                        val cur_pos_ts = System.currentTimeMillis()
+                        var start_ts = item.startfileposTimeMs
+                        var start_file_pos = item.startfilepos
+
+                        if (start_ts == 0L)
+                        {
+                            start_ts = cur_pos_ts
+                        }
+                        if ((start_file_pos == 0L) && (prev_pos == 0L) && (action.filetransfer_db.current_position > 0L))
+                        {
+                            start_file_pos = action.filetransfer_db.current_position
+                        }
+
+                        item.copy(
+                            file_state = action.message_db.state,
+                            filesize = action.filetransfer_db.filesize,
+                            currentfilepos = action.filetransfer_db.current_position,
+                            previousfilepos = prev_pos,
+                            currentfileposTimeMs = cur_pos_ts,
+                            startfilepos = start_file_pos,
+                            startfileposTimeMs = start_ts,
+                            previousfileposTimeMs = prev_pos_ts,
+                            filename_fullpath = action.message_db.filename_fullpath
+                        )
+                    } else
+                    {
+                        Log.i(TAG, "UpdateMessage:ft=null")
+                        val cur_pos_ts = System.currentTimeMillis()
+                        item.copy(
+                            file_state = action.message_db.state,
+                            filename_fullpath = null,
+                            currentfilepos = 0,
+                            previousfilepos = 0,
+                            previousfileposTimeMs = 0,
+                            startfilepos = 0L,
+                            startfileposTimeMs = cur_pos_ts,
+                            currentfileposTimeMs = cur_pos_ts,
+                            filesize = 0
+                        )
+                    }
+                    state.messages[item_position] = updatedItem
+                }
+            }
+            is MessageAction.UpdateTextMessage ->
+            {
+                val item_position = state.messages.indexOfFirst { it.id == action.message_db.id }
+                if (item_position != -1)
+                {
+                    val item = state.messages[item_position]
+                    state.messages[item_position] = item.copy(
+                        sentTimeMs = action.message_db.sent_timestamp,
+                        recvTimeMs = action.message_db.rcvd_timestamp,
+                        read = action.message_db.read,
+                        is_new = action.message_db.is_new,
+                        sent_push = action.message_db.sent_push,
+                        msg_version = action.message_db.msg_version,
+                        msg_id_hash = action.message_db.msg_id_hash,
+                        msg_idv3_hash = action.message_db.msg_idv3_hash
+                    )
+                }
+            }
+            else ->
+            {
+                Log.i(com.zoffcc.applications.trifa.TAG, "MessageAction.Default -> Clear (should never get here)")
+                state.messages.clear()
             }
         }
-        catch (e: Exception)
+        if (!contactstore.state.fullHistoryActive)
         {
+            // Global trimming logic: Keeps the code clean and handles any action size safely
+            val excess = state.messages.size - maxMessages
+            if (excess > 0)
+            {
+                state.messages.removeRange(0, excess)
+            }
         }
-        // Log.i(TAG, "MessageAction.UpdateMessage")
-        state.copy(messages = state.messages)
     }
-    is MessageAction.UpdateTextMessage ->
-    {
-        val TAG = "UpdateTextMessage"
-        try
-        {
-            val m = state.messages.toList()
-            val item_position = m.binarySearchBy(action.message_db.id) { it.id }
-            val item = m[item_position]
-            state.messages[item_position] = item.copy(sentTimeMs = action.message_db.sent_timestamp,
-                recvTimeMs = action.message_db.rcvd_timestamp,
-                read = action.message_db.read,
-                is_new = action.message_db.is_new,
-                sent_push = action.message_db.sent_push,
-                msg_version = action.message_db.msg_version,
-                msg_id_hash = action.message_db.msg_id_hash,
-                msg_idv3_hash = action.message_db.msg_idv3_hash
-            )
-        }
-        catch (e: Exception)
-        {
-        }
-        // Log.i(TAG, "MessageAction.UpdateTextMessage")
-        state.copy(messages = state.messages)
-    }
-    else ->
-    {
-        // state.messages.clear()
-        Log.i(com.zoffcc.applications.trifa.TAG, "MessageAction.Default -> Clear")
-        state.copy(messages = mutableStateListOf())
-    }
+    return state
 }
