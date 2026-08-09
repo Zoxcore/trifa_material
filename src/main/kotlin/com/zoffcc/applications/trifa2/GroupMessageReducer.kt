@@ -2,6 +2,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
+import com.zoffcc.applications.trifa.Log
 
 sealed interface GroupMessageAction {
     data class SendMessagesBulk(val messages: List<UIGroupMessage>, val groupid: String) : GroupMessageAction
@@ -34,6 +35,11 @@ fun groupchatReducer(state: GroupMessageState, action: GroupMessageAction): Grou
                 state.groupmessages.add(action.groupmessage)
             }
             is GroupMessageAction.ClearGroup -> {
+                state.groupmessages.clear()
+            }
+            else ->
+            {
+                Log.i(com.zoffcc.applications.trifa.TAG, "GroupMessageAction.Default -> Clear (should never get here)")
                 state.groupmessages.clear()
             }
         }

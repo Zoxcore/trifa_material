@@ -172,6 +172,7 @@ fun ContactList(
                                 ListItemViewScope.launch { globalstore.try_clear_unread_message_count() }
                                 globalfrndstoreunreadmsgs.hard_clear_unread_per_friend_message_count(item.pubkey)
                                 contactstore.select(item.pubkey)
+                                contactstore.fullHistoryActive(false)
                                },
                     selected = (contactList.selectedContactPubkey == item.pubkey)
                 ) {

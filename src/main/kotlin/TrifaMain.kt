@@ -1373,7 +1373,7 @@ fun App()
                                             else
                                             {
                                                 // Log.i(TAG, "CONTACTS -> draw")
-                                                load_messages_for_friend(contacts.selectedContactPubkey)
+                                                load_messages_for_friend(contacts.selectedContactPubkey, contacts.fullHistoryActive)
                                                 ContactListScope.launch {
                                                     globalstore.try_clear_unread_message_count()
                                                     globalfrndstoreunreadmsgs.try_clear_unread_per_friend_message_count(contacts.selectedContactPubkey)

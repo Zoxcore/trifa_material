@@ -10,7 +10,9 @@ import kotlin.collections.ArrayList
 
 data class StateContacts(val contacts: List<ContactItem> = emptyList(), val visible: Boolean = false,
                          val selectedContactPubkey: String? = null, val selectedContact: ContactItem? = null,
-                         var messageFilterActive: Boolean = false, var messageFilterString: String = "")
+                         var messageFilterActive: Boolean = false,
+                         var fullHistoryActive: Boolean = false,
+                         var messageFilterString: String = "")
 
 const val TAG = "trifa.ContactsStore"
 
@@ -22,6 +24,7 @@ interface ContactStore
     fun visible(value: Boolean)
     fun clear()
     fun messagefilterActive(value: Boolean)
+    fun fullHistoryActive(value: Boolean)
     fun messagefilterString(value: String)
     fun messageresetFilter()
     fun update(item: ContactItem)
@@ -228,6 +231,13 @@ fun CoroutineScope.createContactStore(): ContactStore
         {
             global_semaphore_contactlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
             mutableStateFlow.value = state.copy(messageFilterActive = value )
+            global_semaphore_contactlist_ui.release()
+        }
+
+        override fun fullHistoryActive(value: Boolean)
+        {
+            global_semaphore_contactlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
+            mutableStateFlow.value = state.copy(fullHistoryActive = value )
             global_semaphore_contactlist_ui.release()
         }
 
