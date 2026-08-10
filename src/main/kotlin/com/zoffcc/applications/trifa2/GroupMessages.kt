@@ -40,7 +40,7 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 
 @Composable
-internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
+internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?, onReplySelected: (UIGroupMessage) -> Unit) {
     val listState = rememberLazyListState()
     val grpmsgs by groupmessagestore.stateFlow.collectAsState()
 
@@ -133,7 +133,12 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?) {
                 }
             }
             items(grpmsgs.groupmessages, key = { it.msgDatabaseId }) {
-                GroupChatMessage(isMyMessage = it.user == myUser, it, ui_scale)
+                GroupChatMessage(
+                    isMyMessage = it.user == myUser,
+                    groupmessage = it,
+                    ui_scale = ui_scale,
+                    onReplySelected = onReplySelected
+                )
             }
             item (key = "LAST_ITEM") {
                 Box(Modifier.height(SPACE_AFTER_LAST_MESSAGE))

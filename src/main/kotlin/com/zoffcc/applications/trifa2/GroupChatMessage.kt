@@ -2,15 +2,25 @@
 
 import ChatColorsConfig.NGC_FOUNDER_MESSAGE_COLOR
 import ChatColorsConfig.NGC_MODERATOR_MESSAGE_COLOR
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.TooltipArea
+import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,11 +31,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.filled.Info
@@ -35,6 +48,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
@@ -42,13 +56,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -94,11 +112,20 @@ fun GroupTriangle(risingToTheRight: Boolean, peer_role: Int, padding_bottom: Dp 
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class, DelicateCoroutinesApi::class)
+@OptIn(ExperimentalFoundationApi::class, DelicateCoroutinesApi::class, ExperimentalComposeUiApi::class)
 @Composable
-inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, ui_scale: Float, modifier: Modifier = Modifier) {
+inline fun GroupChatMessage(isMyMessage: Boolean,
+                            groupmessage: UIGroupMessage,
+                            ui_scale: Float,
+                            modifier: Modifier = Modifier,
+                            crossinline onReplySelected: (UIGroupMessage) -> Unit) {
+
+    var isHovered by remember { mutableStateOf(false) }
+
     Box(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth()
+        .onPointerEvent(PointerEventType.Enter) { isHovered = true }
+        .onPointerEvent(PointerEventType.Exit) { isHovered = false },
         contentAlignment = if (isMyMessage) Alignment.CenterEnd else Alignment.CenterStart
     ) {
         Row(verticalAlignment = Alignment.Bottom) {
@@ -263,8 +290,75 @@ inline fun GroupChatMessage(isMyMessage: Boolean, groupmessage: UIGroupMessage, 
                 }
             }
         }
+
+        // 2. Overlay the Reply Action Button on Hover
+        AnimatedVisibility(
+            visible = isHovered,
+            enter = fadeIn() + scaleIn(initialScale = 0.8f),
+            exit = fadeOut() + scaleOut(targetScale = 0.8f),
+            modifier = Modifier
+                .align(if (isMyMessage) Alignment.CenterStart else Alignment.CenterEnd)
+                .padding(horizontal = 16.dp)
+        ) {
+            // Elegant tooltips integration for Desktop layout boundaries
+            TooltipArea(
+                tooltip = {
+                    Surface(
+                        elevation = 4.dp,
+                        shape = RoundedCornerShape(4.dp),
+                        color = Color(0xFF2C2C2C), // Modern high-contrast dark popup plate
+                        modifier = Modifier.padding(top = 4.dp)
+                    ) {
+                        Text(
+                            text = "Reply",
+                            color = Color.White,
+                            fontFamily = DefaultFont,
+                            style = MaterialTheme.typography.caption.copy(
+                                fontWeight = FontWeight.Medium,
+                                fontSize = (11 * ui_scale).sp
+                            ),
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+                },
+                tooltipPlacement = TooltipPlacement.CursorPoint(
+                    alignment = Alignment.BottomCenter,
+                    offset = DpOffset(0.dp, 8.dp)
+                ),
+                delayMillis = 400 // Safe operational delay before visual mounting
+            ) {
+                // Core Floating Action Component
+                Surface(
+                    elevation = 4.dp,
+                    shape = CircleShape,
+                    color = MaterialTheme.colors.surface,
+                    border = BorderStroke(0.5.dp, Color.Black.copy(alpha = 0.08f)),
+                    modifier = Modifier.size((36 * ui_scale).dp)
+                ) {
+                    IconButton(
+                        onClick = { onReplySelected(groupmessage) },
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Reply,
+                            contentDescription = "Reply",
+                            tint = MaterialTheme.colors.onSurface.copy(alpha = 0.7f),
+                            modifier = Modifier
+                                .size((18 * ui_scale).dp)
+                                .graphicsLayer(
+                                    // If it's my message (on the right), point LEFT (1f).
+                                    // If it's a peer message (on the left), mirror it to point RIGHT (-1f).
+                                    scaleX = if (isMyMessage) 1f else -1f
+                                )
+                        )
+
+                    }
+                }
+            }
+        }
     }
 }
+
 
 fun FounderBorder(groupmessage: UIGroupMessage): Modifier =
     if (groupmessage.peer_role == ToxVars.Tox_Group_Role.TOX_GROUP_ROLE_FOUNDER.value)

@@ -102,7 +102,6 @@ import kotlinx.coroutines.launch
 import org.briarproject.briar.desktop.ui.Tooltip
 import org.briarproject.briar.desktop.utils.FilePicker.pickFileUsingDialog
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-import java.io.File
 import java.net.URI
 import java.nio.file.LinkOption
 import kotlin.io.path.exists
@@ -546,6 +545,7 @@ fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, s
                         }
                     }
 
+                    var activeReplyTarget by remember { mutableStateOf<UIGroupMessage?>(null) }
 
                     Box(Modifier.weight(1f)
                         .background(color = if (isDragging) Color.LightGray else Color.Transparent)
@@ -570,14 +570,21 @@ fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, s
                         }
                         else
                         {
-                            GroupMessages(ui_scale = ui_scale, selectedGroupId)
+                            GroupMessages(ui_scale = ui_scale, selectedGroupId = selectedGroupId,
+                                onReplySelected = { chosenMessage ->
+                                activeReplyTarget = chosenMessage
+                            })
                         }
                     }
                     Row(modifier = Modifier.fillMaxWidth()) {
                         if (displayTextField)
                         {
                             Box(Modifier.weight(1f)) {
-                                GroupSendMessage (focusRequester, selectedGroupId) { text ->
+                                GroupSendMessage (focusRequester = focusRequester,
+                                    selectedGroupId = selectedGroupId,
+                                    replyingTo = activeReplyTarget,
+                                    onCancelReply = { activeReplyTarget = null }
+                                ) { text ->
                                     // Log.i(TAG, "selectedGroupId=" + selectedGroupId)
                                     if (selectedGroupId != null)
                                     {
