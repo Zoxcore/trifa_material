@@ -9,11 +9,13 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.PointerMatcher
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,6 +45,7 @@ import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,8 +63,10 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
@@ -291,9 +296,20 @@ inline fun GroupChatMessage(isMyMessage: Boolean,
             }
         }
 
+        // 1. Define a state variable to track if the button is forced hidden by a right-click
+        var isForceHidden by remember { mutableStateOf(false) }
+
+        // Reset the hidden state when the hover ends so it can reappear next time
+        LaunchedEffect(isHovered) {
+            if (!isHovered) {
+                isForceHidden = false
+            }
+        }
+
         // 2. Overlay the Reply Action Button on Hover
         AnimatedVisibility(
-            visible = isHovered,
+            // The button is only visible if hovered AND NOT forced hidden by a right-click
+            visible = isHovered && !isForceHidden,
             enter = fadeIn() + scaleIn(initialScale = 0.8f),
             exit = fadeOut() + scaleOut(targetScale = 0.8f),
             modifier = Modifier
@@ -333,7 +349,17 @@ inline fun GroupChatMessage(isMyMessage: Boolean,
                     shape = CircleShape,
                     color = MaterialTheme.colors.surface,
                     border = BorderStroke(0.5.dp, Color.Black.copy(alpha = 0.08f)),
-                    modifier = Modifier.size((36 * ui_scale).dp)
+                    modifier = Modifier
+                        .size((36 * ui_scale).dp)
+                        .pointerInput(Unit) {
+                            // Correct approach for Desktop right-click detection in detectTapGestures
+                            detectTapGestures(
+                                matcher = PointerMatcher.mouse(PointerButton.Secondary),
+                                onTap = {
+                                    isForceHidden = true
+                                }
+                            )
+                        }
                 ) {
                     IconButton(
                         onClick = { onReplySelected(groupmessage) },
@@ -351,7 +377,6 @@ inline fun GroupChatMessage(isMyMessage: Boolean,
                                     scaleX = if (isMyMessage) 1f else -1f
                                 )
                         )
-
                     }
                 }
             }
