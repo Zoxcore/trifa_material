@@ -283,6 +283,8 @@ fun GroupSendMessage(focusRequester: FocusRequester, selectedGroupId: String?,
                             {
                                 show_emoji_popup = true
                             }
+                            // CRITICAL: Prevent focus loss so the user can keep typing immediately
+                            focusRequester.requestFocus()
                         }
                     )
                 }
@@ -380,6 +382,8 @@ fun GroupSendMessage(focusRequester: FocusRequester, selectedGroupId: String?,
                                                                 text = newText,
                                                                 selection = androidx.compose.ui.text.TextRange(newCursorPosition)
                                                             )
+                                                            // 4. CRITICAL: Prevent focus loss so the user can keep typing immediately
+                                                            focusRequester.requestFocus()
                                                         }
                                                     ) {
                                                         Text(text = curtext, fontFamily = NotoEmojiFont, color = Color.Black, fontSize = 30.sp, maxLines = 1)
