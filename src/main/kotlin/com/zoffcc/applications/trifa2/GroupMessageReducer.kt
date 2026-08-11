@@ -10,6 +10,7 @@ sealed interface GroupMessageAction {
     data class ReceiveMessagesBulkWithClear(val messages: List<UIGroupMessage>, val groupid: String) : GroupMessageAction
     data class ReceiveGroupMessage(val groupmessage: UIGroupMessage) : GroupMessageAction
     data class ClearGroup(val groupmessage: Int) : GroupMessageAction
+    data class DeleteGroupMessage(val messageId: Long) : GroupMessageAction
 }
 
 data class GroupMessageState(
@@ -36,6 +37,9 @@ fun groupchatReducer(state: GroupMessageState, action: GroupMessageAction): Grou
             }
             is GroupMessageAction.ClearGroup -> {
                 state.groupmessages.clear()
+            }
+            is GroupMessageAction.DeleteGroupMessage -> {
+                state.groupmessages.removeIf { it.id == action.messageId }
             }
             else ->
             {

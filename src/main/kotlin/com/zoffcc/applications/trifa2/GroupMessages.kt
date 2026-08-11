@@ -40,7 +40,11 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 
 @Composable
-internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?, onReplySelected: (UIGroupMessage) -> Unit) {
+internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
+                           onReplySelected: (UIGroupMessage) -> Unit,
+                           onDeleteSelected: (UIGroupMessage) -> Unit,
+                           onEmojiSelected: (UIGroupMessage, String) -> Unit
+                           ) {
     val listState = rememberLazyListState()
     val grpmsgs by groupmessagestore.stateFlow.collectAsState()
 
@@ -78,8 +82,8 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?, onReplySel
         val currentSize = grpmsgs.groupmessages.size
         val sizeDelta = kotlin.math.abs(currentSize - prevMessageStoreSize)
 
-        // Only enforce hard snapping if the size jumped drastically (>= 100 items)
-        if (wasAtBottomBeforeUpdate && grpmsgs.groupmessages.isNotEmpty() && sizeDelta >= 100) {
+        // Only enforce hard snapping if the size jumped drastically (>= n items)
+        if (wasAtBottomBeforeUpdate && grpmsgs.groupmessages.isNotEmpty() && sizeDelta >= SNAP_TO_BOTTOM_NEW_ITEM_COUNT) {
             val targetIndex = grpmsgs.groupmessages.size + 1
             //SCROLL_DEBUG//println("[ASYNC ENGINE INTERCEPTOR] Sudden jump detected! Size changed from $prevMessageStoreSize to $currentSize (Delta: $sizeDelta). Enforcing hard scroll snap safety to index: $targetIndex")
             listState.scrollToItem(targetIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
@@ -137,7 +141,9 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?, onReplySel
                     isMyMessage = it.user == myUser,
                     groupmessage = it,
                     ui_scale = ui_scale,
-                    onReplySelected = onReplySelected
+                    onReplySelected = onReplySelected,
+                    onDeleteSelected = onDeleteSelected,
+                    onEmojiSelected = onEmojiSelected
                 )
             }
             item (key = "LAST_ITEM") {
@@ -197,7 +203,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?, onReplySel
                     val sizeDelta = kotlin.math.abs(currentSize - prevMessageStoreSize)
 
                     // Intercept sudden list adjustments if user was firmly tracking the bottom state before the update
-                    if (wasAtBottomBeforeUpdate && sizeDelta >= 100) {
+                    if (wasAtBottomBeforeUpdate && sizeDelta >= SNAP_TO_BOTTOM_NEW_ITEM_COUNT) {
                         //SCROLL_DEBUG//println("[RECOVERY: SNAP TO BOTTOM] Severe fluctuation threshold hit (Delta: $sizeDelta). Forcing scroll anchor recovery -> index: $targetLayoutIndex")
                         listState.scrollToItem(targetLayoutIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
                     } else if ((lastVisibleSerial >= prevLastSerial || lastVisibleSerial == -1L) &&
