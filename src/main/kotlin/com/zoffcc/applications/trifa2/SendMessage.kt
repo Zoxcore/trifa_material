@@ -335,6 +335,8 @@ fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?,
                             {
                                 show_emoji_popup = true
                             }
+                            // CRITICAL: Prevent focus loss so the user can keep typing immediately
+                            focusRequester.requestFocus()
                         }
                     )
                 }
@@ -432,6 +434,8 @@ fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?,
                                                                 text = newText,
                                                                 selection = androidx.compose.ui.text.TextRange(newCursorPosition)
                                                             )
+                                                            // 4. CRITICAL: Prevent focus loss so the user can keep typing immediately
+                                                            focusRequester.requestFocus()
                                                         }
                                                     ) {
                                                         Text(text = curtext, fontFamily = NotoEmojiFont, color = Color.Black, fontSize = 30.sp, maxLines = 1)
