@@ -392,6 +392,7 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                         }
                     }
 
+                    var activeReplyTarget by remember { mutableStateOf<UIMessage?>(null) }
 
                     Box(Modifier.weight(1f)
                         .background(color = if (isDragging) Color.LightGray else Color.Transparent)
@@ -417,14 +418,21 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                         }
                         else
                         {
-                            Messages(ui_scale, selectedContactPubkey)
+                            Messages(ui_scale = ui_scale, selectedContactPubkey =selectedContactPubkey,
+                                onReplySelected = { chosenMessage ->
+                                    activeReplyTarget = chosenMessage
+                                })
                         }
                     }
                     Row(modifier = Modifier.fillMaxWidth()) {
                         if (displayTextField)
                         {
                             Box(Modifier.weight(1f)) {
-                                SendMessage(focusRequester, selectedContactPubkey) { text -> //
+                                SendMessage(focusRequester = focusRequester,
+                                    selectedContactPubkey = selectedContactPubkey,
+                                    replyingTo = activeReplyTarget,
+                                    onCancelReply = { activeReplyTarget = null }
+                                ) { text -> //
                                     // Log.i(TAG, "selectedContactPubkey=" + selectedContactPubkey)
                                     if (selectedContactPubkey != null)
                                     {
