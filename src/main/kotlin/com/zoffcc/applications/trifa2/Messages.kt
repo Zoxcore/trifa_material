@@ -75,8 +75,8 @@ internal fun Messages(ui_scale: Float, selectedContactPubkey: String?, onReplySe
         val currentSize = msgs.messages.size
         val sizeDelta = kotlin.math.abs(currentSize - prevMessageStoreSize)
 
-        // Only enforce hard snapping if the size jumped drastically (>= 100 items)
-        if (wasAtBottomBeforeUpdate && msgs.messages.isNotEmpty() && sizeDelta >= 100) {
+        // Only enforce hard snapping if the size jumped drastically (>= n items)
+        if (wasAtBottomBeforeUpdate && msgs.messages.isNotEmpty() && sizeDelta >= SNAP_TO_BOTTOM_NEW_ITEM_COUNT) {
             val targetIndex = msgs.messages.size + 1
             //SCROLL_DEBUG//println("[ASYNC ENGINE INTERCEPTOR] Sudden jump detected! Size changed from $prevMessageStoreSize to $currentSize (Delta: $sizeDelta). Enforcing hard scroll snap safety to index: $targetIndex")
             listState.scrollToItem(targetIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
@@ -194,7 +194,7 @@ internal fun Messages(ui_scale: Float, selectedContactPubkey: String?, onReplySe
                     val currentSize = msgs.messages.size
                     val sizeDelta = kotlin.math.abs(currentSize - prevMessageStoreSize)
                     // Intercept sudden list adjustments if user was firmly tracking the bottom state before the update
-                    if (wasAtBottomBeforeUpdate && sizeDelta >= 100)
+                    if (wasAtBottomBeforeUpdate && sizeDelta >= SNAP_TO_BOTTOM_NEW_ITEM_COUNT)
                     {
                         //SCROLL_DEBUG//println("[RECOVERY: SNAP TO BOTTOM] Severe fluctuation threshold hit (Delta: $sizeDelta). Forcing scroll anchor recovery -> index: $targetLayoutIndex")
                         listState.scrollToItem(targetLayoutIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)

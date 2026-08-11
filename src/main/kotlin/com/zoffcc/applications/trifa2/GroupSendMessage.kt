@@ -72,6 +72,9 @@ private const val TAG = "trifa.SendGroupMessage"
 fun GroupSendMessage(focusRequester: FocusRequester, selectedGroupId: String?,
                      replyingTo: UIGroupMessage?,
                      onCancelReply: () -> Unit,
+                     emojiingTo: UIGroupMessage?,
+                     emojiText: String?,
+                     onCancelEmoji: () -> Unit,
                      sendGroupMessage: (String) -> Unit
                      ) {
     var inputTextV by remember {
@@ -107,6 +110,25 @@ fun GroupSendMessage(focusRequester: FocusRequester, selectedGroupId: String?,
                 selection = TextRange(newCursorPosition)
             )
             onCancelReply()
+            // 2. Force the UI focus back onto the text box instantly
+            focusRequester.requestFocus()
+        }
+    }
+
+    LaunchedEffect(emojiingTo) {
+        if ((emojiingTo != null) && (emojiText != null)) {
+            val replyTextToInsert = "--\n" + emojiingTo.text + "\n--\n" + emojiText
+            val currentSelection = inputTextV.selection
+            val currentText = inputTextV.text
+            val newText = StringBuilder(currentText)
+                .insert(currentSelection.start, replyTextToInsert)
+                .toString()
+            val newCursorPosition = currentSelection.start + replyTextToInsert.length
+            inputTextV = TextFieldValue(
+                text = newText,
+                selection = TextRange(newCursorPosition)
+            )
+            onCancelEmoji()
             // 2. Force the UI focus back onto the text box instantly
             focusRequester.requestFocus()
         }

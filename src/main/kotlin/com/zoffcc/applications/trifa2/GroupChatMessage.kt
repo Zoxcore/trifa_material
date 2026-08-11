@@ -43,6 +43,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.BrokenImage
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -123,7 +124,10 @@ inline fun GroupChatMessage(isMyMessage: Boolean,
                             groupmessage: UIGroupMessage,
                             ui_scale: Float,
                             modifier: Modifier = Modifier,
-                            crossinline onReplySelected: (UIGroupMessage) -> Unit) {
+                            crossinline onReplySelected: (UIGroupMessage) -> Unit,
+                            crossinline onDeleteSelected: (UIGroupMessage) -> Unit,
+                            crossinline onEmojiSelected: (UIGroupMessage, String) -> Unit
+                            ) {
 
     var isHovered by remember { mutableStateOf(false) }
 
@@ -296,7 +300,8 @@ inline fun GroupChatMessage(isMyMessage: Boolean,
             }
         }
 
-        // 1. Define a state variable to track if the button is forced hidden by a right-click
+
+        // 1. Define a state variable to track if the button row is forced hidden by a right-click
         var isForceHidden by remember { mutableStateOf(false) }
 
         // Reset the hidden state when the hover ends so it can reappear next time
@@ -306,9 +311,9 @@ inline fun GroupChatMessage(isMyMessage: Boolean,
             }
         }
 
-        // 2. Overlay the Reply Action Button on Hover
+        // 2. Overlay the Action Bar on Hover
         AnimatedVisibility(
-            // The button is only visible if hovered AND NOT forced hidden by a right-click
+            // Visible if hovered AND NOT forced hidden by a right-click
             visible = isHovered && !isForceHidden,
             enter = fadeIn() + scaleIn(initialScale = 0.8f),
             exit = fadeOut() + scaleOut(targetScale = 0.8f),
@@ -316,74 +321,127 @@ inline fun GroupChatMessage(isMyMessage: Boolean,
                 .align(if (isMyMessage) Alignment.CenterStart else Alignment.CenterEnd)
                 .padding(horizontal = 16.dp)
         ) {
-            // Elegant tooltips integration for Desktop layout boundaries
-            TooltipArea(
-                tooltip = {
-                    Surface(
-                        elevation = 4.dp,
-                        shape = RoundedCornerShape(4.dp),
-                        color = Color(0xFF2C2C2C), // Modern high-contrast dark popup plate
-                        modifier = Modifier.padding(top = 4.dp)
-                    ) {
-                        Text(
-                            text = "Reply",
-                            color = Color.White,
-                            fontFamily = DefaultFont,
-                            style = MaterialTheme.typography.caption.copy(
-                                fontWeight = FontWeight.Medium,
-                                fontSize = (11 * ui_scale).sp
-                            ),
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+            // Shared container logic for the entire action group
+            Surface(
+                elevation = 4.dp,
+                shape = RoundedCornerShape(16.dp), // Rounded bar shape instead of a circle
+                color = MaterialTheme.colors.surface,
+                border = BorderStroke(0.5.dp, Color.Black.copy(alpha = 0.08f)),
+                modifier = Modifier
+                    .pointerInput(Unit) {
+                        // Right-click anywhere on the bar container hides it
+                        detectTapGestures(
+                            matcher = PointerMatcher.mouse(PointerButton.Secondary),
+                            onTap = { isForceHidden = true }
                         )
                     }
-                },
-                tooltipPlacement = TooltipPlacement.CursorPoint(
-                    alignment = Alignment.BottomCenter,
-                    offset = DpOffset(0.dp, 8.dp)
-                ),
-                delayMillis = 400 // Safe operational delay before visual mounting
             ) {
-                // Core Floating Action Component
-                Surface(
-                    elevation = 4.dp,
-                    shape = CircleShape,
-                    color = MaterialTheme.colors.surface,
-                    border = BorderStroke(0.5.dp, Color.Black.copy(alpha = 0.08f)),
-                    modifier = Modifier
-                        .size((36 * ui_scale).dp)
-                        .pointerInput(Unit) {
-                            // Correct approach for Desktop right-click detection in detectTapGestures
-                            detectTapGestures(
-                                matcher = PointerMatcher.mouse(PointerButton.Secondary),
-                                onTap = {
-                                    isForceHidden = true
-                                }
+                // Arrange emoji list, reply, and delete horizontally
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                ) {
+
+                    // --- EMOJI REACTIONS SECTION ---
+                    val emojis = listOf("👍", "👎", "❤️")
+                    emojis.forEach { emoji ->
+                        IconButton(
+                            onClick = { onEmojiSelected(groupmessage, emoji) },
+                            modifier = Modifier.size((28 * ui_scale).dp) // Reduced footprint size
+                        ) {
+                            Text(
+                                text = emoji,
+                                fontSize = (14 * ui_scale).sp // Balanced scaled font size
                             )
                         }
-                ) {
-                    IconButton(
-                        onClick = { onReplySelected(groupmessage) },
-                        modifier = Modifier.fillMaxSize()
+                    }
+
+                    // Subtle vertical separator line between reactions and actions
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp)
+                            .width(1.dp)
+                            .height((16 * ui_scale).dp)
+                            .background(MaterialTheme.colors.onSurface.copy(alpha = 0.12f))
+                    )
+
+                    // --- REPLY ACTION BUTTON ---
+                    TooltipArea(
+                        tooltip = { ActionTooltip(text = "Reply", ui_scale = ui_scale) },
+                        tooltipPlacement = TooltipPlacement.CursorPoint(
+                            alignment = Alignment.BottomCenter,
+                            offset = DpOffset(0.dp, 8.dp)
+                        ),
+                        delayMillis = 400
                     ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.Reply,
-                            contentDescription = "Reply",
-                            tint = MaterialTheme.colors.onSurface.copy(alpha = 0.7f),
-                            modifier = Modifier
-                                .size((18 * ui_scale).dp)
-                                .graphicsLayer(
-                                    // If it's my message (on the right), point LEFT (1f).
-                                    // If it's a peer message (on the left), mirror it to point RIGHT (-1f).
-                                    scaleX = if (isMyMessage) 1f else -1f
-                                )
-                        )
+                        IconButton(
+                            onClick = { onReplySelected(groupmessage) },
+                            modifier = Modifier.size((28 * ui_scale).dp) // Reduced footprint size
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Reply,
+                                contentDescription = "Reply",
+                                tint = MaterialTheme.colors.onSurface.copy(alpha = 0.7f),
+                                modifier = Modifier
+                                    .size((14 * ui_scale).dp) // Reduced icon size
+                                    .graphicsLayer(
+                                        scaleX = if (isMyMessage) 1f else -1f
+                                    )
+                            )
+                        }
+                    }
+
+                    // --- DELETE ACTION BUTTON ---
+                    TooltipArea(
+                        tooltip = { ActionTooltip(text = "Delete", ui_scale = ui_scale) },
+                        tooltipPlacement = TooltipPlacement.CursorPoint(
+                            alignment = Alignment.BottomCenter,
+                            offset = DpOffset(0.dp, 8.dp)
+                        ),
+                        delayMillis = 400
+                    ) {
+                        IconButton(
+                            onClick = { onDeleteSelected(groupmessage) },
+                            modifier = Modifier.size((28 * ui_scale).dp) // Reduced footprint size
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete, // Ensure Icons.Default.Delete is imported
+                                contentDescription = "Delete",
+                                tint = MaterialTheme.colors.error.copy(alpha = 0.8f), // Red color highlight
+                                modifier = Modifier.size((14 * ui_scale).dp) // Reduced icon size
+                            )
+                        }
                     }
                 }
             }
         }
+
+
     }
 }
 
+
+// Extracted reusable Tooltip content helper to prevent code duplication
+@Composable
+fun ActionTooltip(text: String, ui_scale: Float) {
+    Surface(
+        elevation = 4.dp,
+        shape = RoundedCornerShape(4.dp),
+        color = Color(0xFF2C2C2C),
+        modifier = Modifier.padding(top = 4.dp)
+    ) {
+        Text(
+            text = text,
+            color = Color.White,
+            fontFamily = DefaultFont,
+            style = MaterialTheme.typography.caption.copy(
+                fontWeight = FontWeight.Medium,
+                fontSize = (11 * ui_scale).sp
+            ),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+        )
+    }
+}
 
 fun FounderBorder(groupmessage: UIGroupMessage): Modifier =
     if (groupmessage.peer_role == ToxVars.Tox_Group_Role.TOX_GROUP_ROLE_FOUNDER.value)

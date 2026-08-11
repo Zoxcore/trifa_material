@@ -79,6 +79,7 @@ import com.zoffcc.applications.trifa.StateContacts
 import com.zoffcc.applications.trifa.StateGroups
 import com.zoffcc.applications.trifa.TRIFAGlobals
 import com.zoffcc.applications.trifa.ToxVars
+import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import com.zoffcc.applications.trifa.createAVStateStore
 import com.zoffcc.applications.trifa.createAVStateStoreCallState
 import com.zoffcc.applications.trifa.createAVStateStoreVideoCaptureFpsState
@@ -95,10 +96,13 @@ import com.zoffcc.applications.trifa.createToxDataStore
 import com.zoffcc.applications.trifa.createUnreadMessages
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.briarproject.briar.desktop.ui.Tooltip
 import org.briarproject.briar.desktop.utils.FilePicker.pickFileUsingDialog
 import org.jetbrains.compose.resources.ExperimentalResourceApi
@@ -479,7 +483,7 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
     }
 }
 
-@OptIn(ExperimentalResourceApi::class, ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalResourceApi::class, ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class, DelicateCoroutinesApi::class)
 @Composable
 fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, selectedGroupId: String?, ui_scale: Float)
 {
@@ -554,6 +558,8 @@ fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, s
                     }
 
                     var activeReplyTarget by remember { mutableStateOf<UIGroupMessage?>(null) }
+                    var activeEmojiTarget by remember { mutableStateOf<UIGroupMessage?>(null) }
+                    var activeEmojiText by remember { mutableStateOf<String?>(null) }
 
                     Box(Modifier.weight(1f)
                         .background(color = if (isDragging) Color.LightGray else Color.Transparent)
@@ -578,10 +584,33 @@ fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, s
                         }
                         else
                         {
+                            val scope = rememberCoroutineScope()
                             GroupMessages(ui_scale = ui_scale, selectedGroupId = selectedGroupId,
                                 onReplySelected = { chosenMessage ->
-                                activeReplyTarget = chosenMessage
-                            })
+                                    activeReplyTarget = chosenMessage
+                                },
+                                onDeleteSelected = { chosenMessage ->
+                                    groupmessagestore.remove(chosenMessage.id)
+                                    GlobalScope.launch(context = Dispatchers.IO, block = {
+                                        try {
+                                            orma!!.deleteFromGroupMessage()
+                                                .group_identifierEq(selectedGroupId)
+                                                .idEq(chosenMessage.id)
+                                                .execute()
+                                            withContext(Dispatchers.Main) {
+                                                // HINT: If the database write fails, put the message back
+                                                groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(chosenMessage))
+                                            }
+                                        } catch (e: Exception) {
+                                            e.printStackTrace()
+                                        }
+                                    })
+                                },
+                                onEmojiSelected = { chosenMessage, emoji_text ->
+                                    activeEmojiTarget = chosenMessage
+                                    activeEmojiText = emoji_text
+                                },
+                            )
                         }
                     }
                     Row(modifier = Modifier.fillMaxWidth()) {
@@ -591,7 +620,10 @@ fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, s
                                 GroupSendMessage (focusRequester = focusRequester,
                                     selectedGroupId = selectedGroupId,
                                     replyingTo = activeReplyTarget,
-                                    onCancelReply = { activeReplyTarget = null }
+                                    onCancelReply = { activeReplyTarget = null },
+                                    emojiingTo = activeEmojiTarget,
+                                    emojiText = activeEmojiText,
+                                    onCancelEmoji = { activeEmojiTarget = null ; activeEmojiText = null }
                                 ) { text ->
                                     // Log.i(TAG, "selectedGroupId=" + selectedGroupId)
                                     if (selectedGroupId != null)

@@ -8,6 +8,7 @@ import kotlinx.coroutines.launch
 interface GroupMessageStore
 {
     fun send(action: GroupMessageAction)
+    fun remove(messageId: Long)
     val stateFlow: StateFlow<GroupMessageState>
     val state get() = stateFlow.value
 }
@@ -42,6 +43,15 @@ fun CoroutineScope.createGroupMessageStore(): GroupMessageStore
                 {
                     groupmessagechannel.send(action)
                 }
+                global_semaphore_groupmessagelist_ui.release()
+            }
+        }
+
+        override fun remove(messageId: Long)
+        {
+            launch {
+                global_semaphore_groupmessagelist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
+                groupmessagechannel.send(GroupMessageAction.DeleteGroupMessage(messageId))
                 global_semaphore_groupmessagelist_ui.release()
             }
         }
