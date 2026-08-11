@@ -81,7 +81,10 @@ private const val TAG = "trifa.SendMessage"
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?, sendMessage: (String) -> Unit) {
+fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?,
+                replyingTo: UIMessage?,
+                onCancelReply: () -> Unit,
+                sendMessage: (String) -> Unit) {
     var inputTextV by remember {
         val textFieldValue = TextFieldValue(text = "")
         mutableStateOf(textFieldValue)
@@ -100,6 +103,29 @@ fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?, 
     emoji_typing_box_offset_y_px = -(70.dp).DpAsPx.toInt()
     @Suppress("UNUSED_VARIABLE")
     val single_letter = 5.dp.DpAsPx.toInt()
+
+
+
+    LaunchedEffect(replyingTo) {
+        if (replyingTo != null) {
+            val replyTextToInsert = "--\n" + replyingTo.text + "\n--\n"
+            val currentSelection = inputTextV.selection
+            val currentText = inputTextV.text
+            val newText = StringBuilder(currentText)
+                .insert(currentSelection.start, replyTextToInsert)
+                .toString()
+            val newCursorPosition = currentSelection.start + replyTextToInsert.length
+            inputTextV = TextFieldValue(
+                text = newText,
+                selection = TextRange(newCursorPosition)
+            )
+            onCancelReply()
+            // 2. Force the UI focus back onto the text box instantly
+            focusRequester.requestFocus()
+        }
+    }
+
+
     if (show_typing_emoji_popup)
     {
         Popup(alignment = Alignment.BottomStart,

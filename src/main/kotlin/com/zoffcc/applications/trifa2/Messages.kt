@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 @Composable
-internal fun Messages(ui_scale: Float, selectedContactPubkey: String?) {
+internal fun Messages(ui_scale: Float, selectedContactPubkey: String?, onReplySelected: (UIMessage) -> Unit) {
     val listState = rememberLazyListState()
     val msgs by messagestore.stateFlow.collectAsState()
 
@@ -131,7 +131,11 @@ internal fun Messages(ui_scale: Float, selectedContactPubkey: String?) {
                 }
             }
             items(msgs.messages, key = { it.msgDatabaseId }) {
-                ChatMessage(isMyMessage = (it.user == myUser), it, ui_scale)
+                ChatMessage(
+                    isMyMessage = (it.user == myUser),
+                    message = it,
+                    ui_scale = ui_scale,
+                    onReplySelected = onReplySelected)
             }
             item(key = "LAST_ITEM") {
                 Box(Modifier.height(SPACE_AFTER_LAST_MESSAGE))
