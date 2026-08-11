@@ -168,7 +168,7 @@ object HelperGeneric {
 
             try
             {
-                orma!!.deleteFromGroupDB().group_identifierEq(group_id.lowercase())
+                orma!!.deleteFromGroupDB().group_identifierEq(group_id.lowercase()).execute()
             } catch (_: Exception)
             {
             }
