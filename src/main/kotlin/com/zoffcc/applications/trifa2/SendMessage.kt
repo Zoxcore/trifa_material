@@ -415,7 +415,25 @@ fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?,
                                                 val scope = rememberCoroutineScope()
                                                 Tooltip(text = if (emojistr.name.isEmpty()) "" else emojistr.name) {
                                                     IconButton(modifier = Modifier.width(40.dp).height(40.dp),
-                                                        onClick = { inputTextV = TextFieldValue(text = inputTextV.text + it[k].char) }) {
+                                                        onClick = {
+                                                            val currentText = inputTextV.text
+                                                            val selectionStart = inputTextV.selection.start
+
+                                                            // 1. Insert the emoji string exactly at the active cursor position
+                                                            val newText = StringBuilder(currentText)
+                                                                .insert(selectionStart, emojistr.char)
+                                                                .toString()
+
+                                                            // 2. Compute the new cursor index (moving it forward by the length of the emoji)
+                                                            val newCursorPosition = selectionStart + emojistr.char.length
+
+                                                            // 3. Update state with both text data and structural selection details
+                                                            inputTextV = TextFieldValue(
+                                                                text = newText,
+                                                                selection = androidx.compose.ui.text.TextRange(newCursorPosition)
+                                                            )
+                                                        }
+                                                    ) {
                                                         Text(text = curtext, fontFamily = NotoEmojiFont, color = Color.Black, fontSize = 30.sp, maxLines = 1)
                                                         scope.launch {
                                                             delay(62)
