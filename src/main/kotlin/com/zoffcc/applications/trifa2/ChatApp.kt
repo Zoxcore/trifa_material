@@ -597,7 +597,7 @@ fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, s
                                                 .group_identifierEq(selectedGroupId)
                                                 .idEq(chosenMessage.id)
                                                 .execute()
-                                            withContext(Dispatchers.Main) {
+                                            scope.launch {
                                                 // HINT: If the database write fails, put the message back
                                                 groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(chosenMessage))
                                             }
