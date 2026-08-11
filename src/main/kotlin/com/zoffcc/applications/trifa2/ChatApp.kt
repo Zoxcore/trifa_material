@@ -598,8 +598,8 @@ fun GroupApp(focusRequester: FocusRequester, displayTextField: Boolean = true, s
                                                 .idEq(chosenMessage.id)
                                                 .execute()
                                             scope.launch {
-                                                // HINT: If the database write fails, put the message back
-                                                groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(chosenMessage))
+                                                // ** disabled for now ** If the database write fails, put the message back
+                                                // groupmessagestore.send(GroupMessageAction.ReceiveGroupMessage(chosenMessage))
                                             }
                                         } catch (e: Exception) {
                                             e.printStackTrace()

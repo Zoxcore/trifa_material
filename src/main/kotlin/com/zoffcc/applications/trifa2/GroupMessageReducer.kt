@@ -21,39 +21,41 @@ const val maxGroupMessages = MAX_GROUP_MESSAGES_TO_SHOW
 
 fun groupchatReducer(state: GroupMessageState, action: GroupMessageAction): GroupMessageState {
     Snapshot.withMutableSnapshot {
+        val messages = state.groupmessages
+
         when (action) {
             is GroupMessageAction.ReceiveMessagesBulkWithClear -> {
-                state.groupmessages.clear()
-                state.groupmessages.addAll(action.messages)
+                messages.clear()
+                messages.addAll(action.messages)
             }
             is GroupMessageAction.SendMessagesBulk -> {
-                state.groupmessages.addAll(action.messages)
+                messages.addAll(action.messages)
             }
             is GroupMessageAction.SendGroupMessage -> {
-                state.groupmessages.add(action.groupmessage)
+                messages.add(action.groupmessage)
             }
             is GroupMessageAction.ReceiveGroupMessage -> {
-                state.groupmessages.add(action.groupmessage)
+                messages.add(action.groupmessage)
             }
             is GroupMessageAction.ClearGroup -> {
-                state.groupmessages.clear()
+                messages.clear()
             }
             is GroupMessageAction.DeleteGroupMessage -> {
-                state.groupmessages.removeIf { it.id == action.messageId }
+                messages.removeIf { it.id == action.messageId }
             }
             else ->
             {
                 Log.i(com.zoffcc.applications.trifa.TAG, "GroupMessageAction.Default -> Clear (should never get here)")
-                state.groupmessages.clear()
+                messages.clear()
             }
         }
         if (!groupstore.state.fullHistoryActive)
         {
             // Global trimming logic: Keeps the code clean and handles any action size safely
-            val excess = state.groupmessages.size - maxGroupMessages
+            val excess = messages.size - maxGroupMessages
             if (excess > 0)
             {
-                state.groupmessages.removeRange(0, excess)
+                messages.removeRange(0, excess)
             }
         }
     }

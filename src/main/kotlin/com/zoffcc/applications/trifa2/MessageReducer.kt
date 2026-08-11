@@ -24,33 +24,35 @@ data class MessageState(var messages: SnapshotStateList<UIMessage> = mutableStat
 const val maxMessages = MAX_ONE_ON_ONE_MESSAGES_TO_SHOW
 fun chatReducer(state: MessageState, action: MessageAction): MessageState {
     Snapshot.withMutableSnapshot {
+        val messages = state.messages
+
         when (action)
         {
             is MessageAction.SendMessage ->
             {
-                state.messages.add(action.message)
+                messages.add(action.message)
             }
             is MessageAction.ReceiveMessagesBulkWithClear ->
             {
-                state.messages.clear()
-                state.messages.addAll(action.messages)
+                messages.clear()
+                messages.addAll(action.messages)
             }
             is MessageAction.ReceiveMessage ->
             {
-                state.messages.add(action.message)
+                messages.add(action.message)
             }
             is MessageAction.Clear ->
             {
-                state.messages.clear()
+                messages.clear()
             }
 
             is MessageAction.UpdateMessage ->
             {
                 val TAG = "UpdateMessage"
-                val item_position = state.messages.indexOfFirst { it.id == action.message_db.id }
+                val item_position = messages.indexOfFirst { it.id == action.message_db.id }
                 if (item_position != -1)
                 {
-                    val item = state.messages[item_position]
+                    val item = messages[item_position]
                     val updatedItem = if (action.filetransfer_db != null)
                     {
                         val prev_pos = item.currentfilepos
@@ -95,16 +97,16 @@ fun chatReducer(state: MessageState, action: MessageAction): MessageState {
                             filesize = 0
                         )
                     }
-                    state.messages[item_position] = updatedItem
+                    messages[item_position] = updatedItem
                 }
             }
             is MessageAction.UpdateTextMessage ->
             {
-                val item_position = state.messages.indexOfFirst { it.id == action.message_db.id }
+                val item_position = messages.indexOfFirst { it.id == action.message_db.id }
                 if (item_position != -1)
                 {
-                    val item = state.messages[item_position]
-                    state.messages[item_position] = item.copy(
+                    val item = messages[item_position]
+                    messages[item_position] = item.copy(
                         sentTimeMs = action.message_db.sent_timestamp,
                         recvTimeMs = action.message_db.rcvd_timestamp,
                         read = action.message_db.read,
@@ -119,16 +121,16 @@ fun chatReducer(state: MessageState, action: MessageAction): MessageState {
             else ->
             {
                 Log.i(com.zoffcc.applications.trifa.TAG, "MessageAction.Default -> Clear (should never get here)")
-                state.messages.clear()
+                messages.clear()
             }
         }
         if (!contactstore.state.fullHistoryActive)
         {
             // Global trimming logic: Keeps the code clean and handles any action size safely
-            val excess = state.messages.size - maxMessages
+            val excess = messages.size - maxMessages
             if (excess > 0)
             {
-                state.messages.removeRange(0, excess)
+                messages.removeRange(0, excess)
             }
         }
     }
