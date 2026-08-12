@@ -36,8 +36,8 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.zoffcc.applications.trifa.MainActivity.Companion.DEBUG_MESSAGE_SCROLLING
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-
 
 @Composable
 internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
@@ -58,7 +58,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
             lastVisibleItem.index == listState.layoutInfo.totalItemsCount - 1 && itemEnd <= viewportEnd
         }
         // NEW LOGGING FOR isAtBottomEnd DERIVED STATE EVALUATION
-        //SCROLL_DEBUG//println("[isAtBottomEnd RE-EVALUATION] Result: $result | Last Visible Item Index: ${lastVisibleItem?.index ?: "NULL"} | Total Layout Count: ${listState.layoutInfo.totalItemsCount}")
+        if (DEBUG_MESSAGE_SCROLLING) println("[isAtBottomEnd RE-EVALUATION] Result: $result | Last Visible Item Index: ${lastVisibleItem?.index ?: "NULL"} | Total Layout Count: ${listState.layoutInfo.totalItemsCount}")
         result
     }}
 
@@ -66,9 +66,9 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
     var wasAtBottomBeforeUpdate by remember { mutableStateOf(false) }
     SideEffect {
         if (wasAtBottomBeforeUpdate != isAtBottomEnd.value) {
-            //SCROLL_DEBUG//println("[wasAtBottomBeforeUpdate FLIP] Mutating Context Status From: $wasAtBottomBeforeUpdate To: ${isAtBottomEnd.value}")
+            if (DEBUG_MESSAGE_SCROLLING) println("[wasAtBottomBeforeUpdate FLIP] Mutating Context Status From: $wasAtBottomBeforeUpdate To: ${isAtBottomEnd.value}")
         } else {
-            //SCROLL_DEBUG//println("[wasAtBottomBeforeUpdate CAPTURE] Stable State Maintained: $wasAtBottomBeforeUpdate")
+            if (DEBUG_MESSAGE_SCROLLING) println("[wasAtBottomBeforeUpdate CAPTURE] Stable State Maintained: $wasAtBottomBeforeUpdate")
         }
         wasAtBottomBeforeUpdate = isAtBottomEnd.value
     }
@@ -85,10 +85,10 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
         // Only enforce hard snapping if the size jumped drastically (>= n items)
         if (wasAtBottomBeforeUpdate && grpmsgs.groupmessages.isNotEmpty() && sizeDelta >= SNAP_TO_BOTTOM_NEW_ITEM_COUNT) {
             val targetIndex = grpmsgs.groupmessages.size + 1
-            //SCROLL_DEBUG//println("[ASYNC ENGINE INTERCEPTOR] Sudden jump detected! Size changed from $prevMessageStoreSize to $currentSize (Delta: $sizeDelta). Enforcing hard scroll snap safety to index: $targetIndex")
+            if (DEBUG_MESSAGE_SCROLLING) println("[ASYNC ENGINE INTERCEPTOR] Sudden jump detected! Size changed from $prevMessageStoreSize to $currentSize (Delta: $sizeDelta). Enforcing hard scroll snap safety to index: $targetIndex")
             listState.scrollToItem(targetIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
         } else if (wasAtBottomBeforeUpdate && grpmsgs.groupmessages.isNotEmpty()) {
-            //SCROLL_DEBUG//println("[ASYNC ENGINE INTERCEPTOR] Normal update. Size changed from $prevMessageStoreSize to $currentSize (Delta: $sizeDelta). Bypassing snap to preserve animation.")
+            if (DEBUG_MESSAGE_SCROLLING) println("[ASYNC ENGINE INTERCEPTOR] Normal update. Size changed from $prevMessageStoreSize to $currentSize (Delta: $sizeDelta). Bypassing snap to preserve animation.")
         }
 
         prevMessageStoreSize = currentSize
@@ -96,7 +96,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
 
     // Logs only when the bottom status changes
     LaunchedEffect(isAtBottomEnd.value) {
-        //SCROLL_DEBUG//println("[BOTTOM MONITOR] Is At Bottom End: ${isAtBottomEnd.value}")
+        if (DEBUG_MESSAGE_SCROLLING) println("[BOTTOM MONITOR] Is At Bottom End: ${isAtBottomEnd.value}")
     }
 
     // 1. Continuous Scroll & Visibility Logger
@@ -110,7 +110,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
                 }
             }
         }
-        //SCROLL_DEBUG//println("[SCROLL MONITOR] Index: ${listState.firstVisibleItemIndex} | Offset: ${listState.firstVisibleItemScrollOffset} | Total Items In Store: ${grpmsgs.groupmessages.size} | Visible Message IDs: $visibleIds")
+        if (DEBUG_MESSAGE_SCROLLING) println("[SCROLL MONITOR] Index: ${listState.firstVisibleItemIndex} | Offset: ${listState.firstVisibleItemScrollOffset} | Total Items In Store: ${grpmsgs.groupmessages.size} | Visible Message IDs: $visibleIds")
     }
 
     Box(Modifier.fillMaxSize()) {
@@ -162,7 +162,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
 
         // 2. Room Switch Detector Logic Loop
         if (prevselectedGroupId != selectedGroupId) {
-            //SCROLL_DEBUG//println("[ROOM SWITCH DETECTED] Resetting Parameters -> Changing From: '$prevselectedGroupId' To: '$selectedGroupId' | Clearing prevLastSerial (Was: $prevLastSerial)")
+            if (DEBUG_MESSAGE_SCROLLING) println("[ROOM SWITCH DETECTED] Resetting Parameters -> Changing From: '$prevselectedGroupId' To: '$selectedGroupId' | Clearing prevLastSerial (Was: $prevLastSerial)")
             prevselectedGroupId = selectedGroupId
             prevLastSerial = -1L
             isInitialLoad = true
@@ -172,20 +172,20 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
 
         // 3. Side-Effect Automation Pipeline Logger
         LaunchedEffect(lastSerial, selectedGroupId) {
-            //SCROLL_DEBUG//println("[LAUNCHED EFFECT TRIGGERED] Keys -> lastSerial: $lastSerial, selectedGroupId: $selectedGroupId | Current Context State -> isInitialLoad: $isInitialLoad, prevLastSerial: $prevLastSerial, wasAtBottomBeforeUpdate: $wasAtBottomBeforeUpdate")
+            if (DEBUG_MESSAGE_SCROLLING) println("[LAUNCHED EFFECT TRIGGERED] Keys -> lastSerial: $lastSerial, selectedGroupId: $selectedGroupId | Current Context State -> isInitialLoad: $isInitialLoad, prevLastSerial: $prevLastSerial, wasAtBottomBeforeUpdate: $wasAtBottomBeforeUpdate")
 
             if (lastSerial != null) {
                 // FIX: Point exactly to the LAST_ITEM layout item index (size + 1) to match layout structure
                 val targetLayoutIndex = grpmsgs.groupmessages.size + 1
 
                 if (isInitialLoad) {
-                    //SCROLL_DEBUG//println("[EVALUATION: INITIAL LOAD] Messages Empty?: ${grpmsgs.groupmessages.isEmpty()} | Target Layout Index: $targetLayoutIndex")
+                    if (DEBUG_MESSAGE_SCROLLING) println("[EVALUATION: INITIAL LOAD] Messages Empty?: ${grpmsgs.groupmessages.isEmpty()} | Target Layout Index: $targetLayoutIndex")
                     if (grpmsgs.groupmessages.isNotEmpty()) {
-                        //SCROLL_DEBUG//println("[EXECUTION: SNAP TO BOTTOM] Call -> listState.scrollToItem(index=$targetLayoutIndex, offset=$LAST_MSG_SCROLL_TO_SCROLL_OFFSET)")
+                        if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: SNAP TO BOTTOM] Call -> listState.scrollToItem(index=$targetLayoutIndex, offset=$LAST_MSG_SCROLL_TO_SCROLL_OFFSET)")
                         listState.scrollToItem(targetLayoutIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
                     }
                     isInitialLoad = false
-                    //SCROLL_DEBUG//println("[STATE CHANGE] isInitialLoad flag updated to: false")
+                    if (DEBUG_MESSAGE_SCROLLING) println("[STATE CHANGE] isInitialLoad flag updated to: false")
                 } else {
                     val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
                     val lastVisibleSerial = when (lastVisibleItem?.key) {
@@ -197,14 +197,14 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
                         }
                     }
 
-                    //SCROLL_DEBUG//println("[EVALUATION: APPEND LOGIC] lastVisibleItem Key: ${lastVisibleItem?.key ?: "NULL"}, Index: ${lastVisibleItem?.index ?: "NULL"} | lastVisibleSerial: $lastVisibleSerial | Comparison: (lastVisibleSerial [$lastVisibleSerial] >= prevLastSerial [$prevLastSerial] OR lastVisibleSerial == -1L)")
+                    if (DEBUG_MESSAGE_SCROLLING) println("[EVALUATION: APPEND LOGIC] lastVisibleItem Key: ${lastVisibleItem?.key ?: "NULL"}, Index: ${lastVisibleItem?.index ?: "NULL"} | lastVisibleSerial: $lastVisibleSerial | Comparison: (lastVisibleSerial [$lastVisibleSerial] >= prevLastSerial [$prevLastSerial] OR lastVisibleSerial == -1L)")
 
                     val currentSize = grpmsgs.groupmessages.size
                     val sizeDelta = kotlin.math.abs(currentSize - prevMessageStoreSize)
 
                     // Intercept sudden list adjustments if user was firmly tracking the bottom state before the update
                     if (wasAtBottomBeforeUpdate && sizeDelta >= SNAP_TO_BOTTOM_NEW_ITEM_COUNT) {
-                        //SCROLL_DEBUG//println("[RECOVERY: SNAP TO BOTTOM] Severe fluctuation threshold hit (Delta: $sizeDelta). Forcing scroll anchor recovery -> index: $targetLayoutIndex")
+                        if (DEBUG_MESSAGE_SCROLLING) println("[RECOVERY: SNAP TO BOTTOM] Severe fluctuation threshold hit (Delta: $sizeDelta). Forcing scroll anchor recovery -> index: $targetLayoutIndex")
                         listState.scrollToItem(targetLayoutIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
                     } else if ((lastVisibleSerial >= prevLastSerial || lastVisibleSerial == -1L) &&
                         grpmsgs.groupmessages.lastIndex > 0 &&
@@ -221,10 +221,10 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
                             val extraPaddingPx = 300f
                             val scrollDistance = (itemEnd - viewportEnd).toFloat() + extraPaddingPx
 
-                            //SCROLL_DEBUG//println("[CALCULATION] Viewport End: $viewportEnd, Item End: $itemEnd, Base Delta: ${itemEnd - viewportEnd}, Final Extra Scroll Distance: $scrollDistance px")
+                            if (DEBUG_MESSAGE_SCROLLING) println("[CALCULATION] Viewport End: $viewportEnd, Item End: $itemEnd, Base Delta: ${itemEnd - viewportEnd}, Final Extra Scroll Distance: $scrollDistance px")
 
                             if (scrollDistance > 0f) {
-                                //SCROLL_DEBUG//println("[EXECUTION: ANIMATE SCROLL] Call -> listState.animateScrollBy(value=$scrollDistance px)")
+                                if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: ANIMATE SCROLL] Call -> listState.animateScrollBy(value=$scrollDistance px)")
                                 listState.animateScrollBy(
                                     value = scrollDistance,
                                     animationSpec = spring(
@@ -233,20 +233,20 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
                                     )
                                 )
                             } else {
-                                //SCROLL_DEBUG//println("[EXECUTION: SKIPPED] scrollDistance ($scrollDistance px) is not greater than 0f")
+                                if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: SKIPPED] scrollDistance ($scrollDistance px) is not greater than 0f")
                             }
                         } else {
-                            //SCROLL_DEBUG//println("[EXECUTION: ABORTED] lastVisible layout item reference is unexpectedly null")
+                            if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: ABORTED] lastVisible layout item reference is unexpectedly null")
                         }
                     } else {
-                        //SCROLL_DEBUG//println("[EXECUTION: SKIPPED] Stick-to-bottom scroll conditions not met. Proximity Index: ${lastVisibleItem?.index ?: -1} vs Total: ${listState.layoutInfo.totalItemsCount}")
+                        if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: SKIPPED] Stick-to-bottom scroll conditions not met. Proximity Index: ${lastVisibleItem?.index ?: -1} vs Total: ${listState.layoutInfo.totalItemsCount}")
                     }
                 }
 
-                //SCROLL_DEBUG//println("[STATE CHANGE] Updating prevLastSerial From: $prevLastSerial To: $lastSerial")
+                if (DEBUG_MESSAGE_SCROLLING) println("[STATE CHANGE] Updating prevLastSerial From: $prevLastSerial To: $lastSerial")
                 prevLastSerial = lastSerial
             } else {
-                //SCROLL_DEBUG//println("[EXECUTION: ABORTED] lastSerial value is completely null (Empty message room stream)")
+                if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: ABORTED] lastSerial value is completely null (Empty message room stream)")
             }
         }
     }
