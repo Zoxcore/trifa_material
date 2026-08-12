@@ -322,7 +322,7 @@ fun GroupAppWithScaffold(focusRequester: FocusRequester, displayTextField: Boole
     }
 }
 
-@OptIn(ExperimentalResourceApi::class, ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalResourceApi::class, ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class, DelicateCoroutinesApi::class)
 @Composable
 fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, selectedContactPubkey: String?, ui_scale: Float)
 {
@@ -397,6 +397,8 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                     }
 
                     var activeReplyTarget by remember { mutableStateOf<UIMessage?>(null) }
+                    var activeEmojiTarget by remember { mutableStateOf<UIMessage?>(null) }
+                    var activeEmojiText by remember { mutableStateOf<String?>(null) }
 
                     Box(Modifier.weight(1f)
                         .background(color = if (isDragging) Color.LightGray else Color.Transparent)
@@ -422,10 +424,33 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                         }
                         else
                         {
-                            Messages(ui_scale = ui_scale, selectedContactPubkey =selectedContactPubkey,
+                            val scope = rememberCoroutineScope()
+                            Messages(ui_scale = ui_scale, selectedContactPubkey = selectedContactPubkey,
                                 onReplySelected = { chosenMessage ->
                                     activeReplyTarget = chosenMessage
-                                })
+                                },
+                                onDeleteSelected = { chosenMessage ->
+                                    messagestore.remove(chosenMessage.id)
+                                    GlobalScope.launch(context = Dispatchers.IO, block = {
+                                        try {
+                                            orma!!.deleteFromMessage()
+                                                .tox_friendpubkeyEq(selectedContactPubkey)
+                                                .idEq(chosenMessage.id)
+                                                .execute()
+                                            withContext(Dispatchers.Main) {
+                                                // HINT: If the database write fails, put the message back
+                                                // *** // messagestore.send(GroupMessageAction.ReceiveGroupMessage(chosenMessage))
+                                            }
+                                        } catch (e: Exception) {
+                                            e.printStackTrace()
+                                        }
+                                    })
+                                },
+                                onEmojiSelected = { chosenMessage, emoji_text ->
+                                    activeEmojiTarget = chosenMessage
+                                    activeEmojiText = emoji_text
+                                },
+                            )
                         }
                     }
                     Row(modifier = Modifier.fillMaxWidth()) {
@@ -435,7 +460,10 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                                 SendMessage(focusRequester = focusRequester,
                                     selectedContactPubkey = selectedContactPubkey,
                                     replyingTo = activeReplyTarget,
-                                    onCancelReply = { activeReplyTarget = null }
+                                    onCancelReply = { activeReplyTarget = null },
+                                    emojiingTo = activeEmojiTarget,
+                                    emojiText = activeEmojiText,
+                                    onCancelEmoji = { activeEmojiTarget = null ; activeEmojiText = null }
                                 ) { text -> //
                                     // Log.i(TAG, "selectedContactPubkey=" + selectedContactPubkey)
                                     if (selectedContactPubkey != null)

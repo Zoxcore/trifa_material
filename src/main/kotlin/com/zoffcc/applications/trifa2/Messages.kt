@@ -36,7 +36,10 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 @Composable
-internal fun Messages(ui_scale: Float, selectedContactPubkey: String?, onReplySelected: (UIMessage) -> Unit) {
+internal fun Messages(ui_scale: Float, selectedContactPubkey: String?,
+                      onReplySelected: (UIMessage) -> Unit,
+                      onDeleteSelected: (UIMessage) -> Unit,
+                      onEmojiSelected: (UIMessage, String) -> Unit ) {
     val listState = rememberLazyListState()
     val msgs by messagestore.stateFlow.collectAsState()
 
@@ -135,7 +138,10 @@ internal fun Messages(ui_scale: Float, selectedContactPubkey: String?, onReplySe
                     isMyMessage = (it.user == myUser),
                     message = it,
                     ui_scale = ui_scale,
-                    onReplySelected = onReplySelected)
+                    onReplySelected = onReplySelected,
+                    onDeleteSelected = onDeleteSelected,
+                    onEmojiSelected = onEmojiSelected
+                )
             }
             item(key = "LAST_ITEM") {
                 Box(Modifier.height(SPACE_AFTER_LAST_MESSAGE))

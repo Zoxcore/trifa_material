@@ -84,6 +84,9 @@ private const val TAG = "trifa.SendMessage"
 fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?,
                 replyingTo: UIMessage?,
                 onCancelReply: () -> Unit,
+                emojiingTo: UIMessage?,
+                emojiText: String?,
+                onCancelEmoji: () -> Unit,
                 sendMessage: (String) -> Unit) {
     var inputTextV by remember {
         val textFieldValue = TextFieldValue(text = "")
@@ -125,6 +128,24 @@ fun SendMessage(focusRequester: FocusRequester, selectedContactPubkey: String?,
         }
     }
 
+    LaunchedEffect(emojiingTo) {
+        if ((emojiingTo != null) && (emojiText != null)) {
+            val replyTextToInsert = "--\n" + emojiingTo.text + "\n--\n" + emojiText
+            val currentSelection = inputTextV.selection
+            val currentText = inputTextV.text
+            val newText = StringBuilder(currentText)
+                .insert(currentSelection.start, replyTextToInsert)
+                .toString()
+            val newCursorPosition = currentSelection.start + replyTextToInsert.length
+            inputTextV = TextFieldValue(
+                text = newText,
+                selection = TextRange(newCursorPosition)
+            )
+            onCancelEmoji()
+            // 2. Force the UI focus back onto the text box instantly
+            focusRequester.requestFocus()
+        }
+    }
 
     if (show_typing_emoji_popup)
     {
