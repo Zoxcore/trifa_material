@@ -437,7 +437,7 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                                                 .tox_friendpubkeyEq(selectedContactPubkey)
                                                 .idEq(chosenMessage.id)
                                                 .execute()
-                                            withContext(Dispatchers.Main) {
+                                            scope.launch {
                                                 // HINT: If the database write fails, put the message back
                                                 // *** // messagestore.send(GroupMessageAction.ReceiveGroupMessage(chosenMessage))
                                             }
