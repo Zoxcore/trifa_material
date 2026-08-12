@@ -120,7 +120,7 @@ fun chatReducer(state: MessageState, action: MessageAction): MessageState {
                 }
             }
             is MessageAction.DeleteMessage -> {
-                state.messages.removeIf { it.id == action.messageId }
+                messages.removeIf { it.id == action.messageId }
             }
             else ->
             {
