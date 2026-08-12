@@ -7,6 +7,7 @@ import kotlinx.coroutines.launch
 interface MessageStore
 {
     fun send(action: MessageAction)
+    fun remove(messageId: Long)
     val stateFlow: MutableStateFlow<MessageState>
     val state get() = stateFlow.value
 }
@@ -67,6 +68,15 @@ fun CoroutineScope.createMessageStore(): MessageStore
                 {
                     channel.send(action)
                 }
+                global_semaphore_messagelist_ui.release()
+            }
+        }
+
+        override fun remove(messageId: Long)
+        {
+            launch {
+                global_semaphore_messagelist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
+                channel.send(MessageAction.DeleteMessage(messageId))
                 global_semaphore_messagelist_ui.release()
             }
         }

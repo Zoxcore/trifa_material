@@ -16,6 +16,7 @@ sealed interface MessageAction
     data class ReceiveMessage(val message: UIMessage) : MessageAction
     data class UpdateMessage(val message_db: Message, val filetransfer_db: Filetransfer?) : MessageAction
     data class UpdateTextMessage(val message_db: Message) : MessageAction
+    data class DeleteMessage(val messageId: Long) : MessageAction
     data class Clear(val dummy: Int) : MessageAction
 }
 
@@ -117,6 +118,9 @@ fun chatReducer(state: MessageState, action: MessageAction): MessageState {
                         msg_idv3_hash = action.message_db.msg_idv3_hash
                     )
                 }
+            }
+            is MessageAction.DeleteMessage -> {
+                state.messages.removeIf { it.id == action.messageId }
             }
             else ->
             {
