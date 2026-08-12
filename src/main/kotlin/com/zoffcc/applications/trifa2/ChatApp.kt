@@ -438,8 +438,8 @@ fun ChatApp(focusRequester: FocusRequester, displayTextField: Boolean = true, se
                                                 .idEq(chosenMessage.id)
                                                 .execute()
                                             scope.launch {
-                                                // HINT: If the database write fails, put the message back
-                                                // *** // messagestore.send(GroupMessageAction.ReceiveGroupMessage(chosenMessage))
+                                                // ** disabled for now ** If the database write fails, put the message back
+                                                // messagestore.send()
                                             }
                                         } catch (e: Exception) {
                                             e.printStackTrace()
