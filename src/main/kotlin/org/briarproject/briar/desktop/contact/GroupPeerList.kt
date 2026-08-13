@@ -15,22 +15,34 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.zoffcc.applications.trifa.HelperGeneric
 import com.zoffcc.applications.trifa.HelperGeneric.force_update_group_peerlist_ui
 import com.zoffcc.applications.trifa.HelperGeneric.get_self_group_role
@@ -64,7 +76,7 @@ import randomDebugBorder
 import kotlin.math.max
 import kotlin.math.min
 
-@OptIn(DelicateCoroutinesApi::class)
+@OptIn(DelicateCoroutinesApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun GroupPeerList(
     grouppeerList: StateGroupPeers,
@@ -120,108 +132,166 @@ fun GroupPeerList(
 
     if (showPmDialog && activePmPeer != null) {
         val peerSnapshot = activePmPeer!!
-        AlertDialog(modifier = Modifier.fillMaxWidth(),
+        val dialogScope = rememberCoroutineScope()
+
+        AlertDialog(
             onDismissRequest = {
                 showPmDialog = false // Close on clicking outside
                 activePmPeer = null
             },
-            title = { Text(text = "Send Message to ${peerSnapshot.name} / ${peerSnapshot.pubkey.take(8)}") },
-            text = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(150.dp)
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+            modifier = Modifier
+                .padding(24.dp)
+                .wrapContentHeight()
+                .widthIn(max = 360.dp)
+        ) {
+            Surface(
+                shape = RoundedCornerShape(28.dp),
+                tonalElevation = 6.dp,
+                color = MaterialTheme.colorScheme.surface
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp)
                 ) {
+                    // Modern Two-Tier Header Layout
+                    Column(modifier = Modifier.padding(bottom = 16.dp)) {
+                        Text(
+                            text = "Send Message",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "To: ${peerSnapshot.name} (${peerSnapshot.pubkey.take(8).uppercase()})",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontFamily = FontFamily.Monospace,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    // Beautifully Styled Text Field Container
                     OutlinedTextField(
                         value = pmTextMessage,
                         onValueChange = { pmTextMessage = it },
                         label = { Text("Your Message") },
+                        shape = RoundedCornerShape(12.dp),
                         singleLine = false,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(130.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+                        )
                     )
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        if (pmTextMessage.isNotBlank()) {
-                            if (peerSnapshot.groupID != null)
-                            {
-                                val timestamp = System.currentTimeMillis()
-                                val groupnum: Long = tox_group_by_groupid__wrapper(peerSnapshot.groupID!!)
-                                val my_group_peerpk = tox_group_self_get_public_key(groupnum)
-                                val peer_id = tox_group_peer_by_public_key(groupnum, peerSnapshot.pubkey.uppercase())
 
-                                val res = tox_group_send_private_message_by_peerpubkey(groupnum,
-                                    peerSnapshot.pubkey,
-                                    0, pmTextMessage)
+                    Spacer(modifier = Modifier.height(24.dp))
 
-                                // Log.i(TAG, "msg_id=" + res)
+                    // Modern Action Buttons Layer
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        TextButton(
+                            onClick = {
+                                pmTextMessage = "" // Clear text
+                                showPmDialog = false // Close dialog
+                                activePmPeer = null
+                            }
+                        ) {
+                            Text(
+                                text = "Cancel",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
 
-                                if (res >= 0)
-                                {
-                                    var peer_role = -1
-                                    try
-                                    {
-                                        val self_peer_role = MainActivity.tox_group_self_get_role(groupnum)
-                                        if (self_peer_role >= 0)
-                                        {
-                                            peer_role = self_peer_role
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Button(
+                            enabled = pmTextMessage.isNotBlank(), // UX Improvement: Disables when input is empty
+                            shape = RoundedCornerShape(100.dp),
+                            onClick = {
+                                if (pmTextMessage.isNotBlank()) {
+                                    if (peerSnapshot.groupID != null) {
+                                        val timestamp = System.currentTimeMillis()
+                                        val groupnum: Long = HelperGroup.tox_group_by_groupid__wrapper(peerSnapshot.groupID!!)
+                                        val my_group_peerpk = tox_group_self_get_public_key(groupnum)
+                                        val peer_id = tox_group_peer_by_public_key(groupnum, peerSnapshot.pubkey.uppercase())
+
+                                        val res = tox_group_send_private_message_by_peerpubkey(
+                                            groupnum,
+                                            peerSnapshot.pubkey,
+                                            0, pmTextMessage
+                                        )
+
+                                        if (res >= 0) {
+                                            var peer_role = -1
+                                            try {
+                                                val self_peer_role = MainActivity.tox_group_self_get_role(groupnum)
+                                                if (self_peer_role >= 0) {
+                                                    peer_role = self_peer_role
+                                                }
+                                            } catch (_: Exception) {}
+
+                                            val message_id_tox = HelperGroup.fourbytes_of_long_to_hex(res)
+                                            val db_msgid = MainActivity.sent_groupmessage_to_db(
+                                                groupid = peerSnapshot.groupID,
+                                                message_timestamp = timestamp,
+                                                group_message = pmTextMessage,
+                                                message_id = res,
+                                                peer_role = peer_role,
+                                                was_synced = false,
+                                                is_private_message = 1,
+                                                sent_privately_to_tox_group_peer_pubkey = peerSnapshot.pubkey.uppercase()
+                                            )
+                                            groupmessagestore.send(
+                                                GroupMessageAction.SendGroupMessage(
+                                                    UIGroupMessage(
+                                                        was_synced = false,
+                                                        is_private_msg = 1,
+                                                        sentTimeMs = timestamp,
+                                                        rcvdTimeMs = timestamp,
+                                                        syncdTimeMs = timestamp,
+                                                        peer_role = peer_role,
+                                                        msg_id_hash = "",
+                                                        message_id_tox = message_id_tox,
+                                                        msgDatabaseId = db_msgid,
+                                                        user = myUser,
+                                                        timeMs = timestamp,
+                                                        text = pmTextMessage,
+                                                        toxpk = my_group_peerpk,
+                                                        groupId = peerSnapshot.groupID!!.lowercase(),
+                                                        trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value,
+                                                        filename_fullpath = null,
+                                                        sent_privately_to_tox_group_peer_pubkey = peerSnapshot.pubkey.uppercase()
+                                                    )
+                                                )
+                                            )
+                                        } else {
+                                            SnackBarToast("Sending Group Message failed")
                                         }
-                                    } catch (_: Exception)
-                                    {
                                     }
 
-                                    val message_id_tox = HelperGroup.fourbytes_of_long_to_hex(res)
-                                    val db_msgid = MainActivity.sent_groupmessage_to_db(groupid = peerSnapshot.groupID, message_timestamp = timestamp,
-                                        group_message = pmTextMessage, message_id = res, peer_role = peer_role, was_synced = false, is_private_message = 1,
-                                        sent_privately_to_tox_group_peer_pubkey = peerSnapshot.pubkey.uppercase())
-                                    groupmessagestore.send(GroupMessageAction.SendGroupMessage(
-                                        UIGroupMessage(
-                                            was_synced = false,
-                                            is_private_msg = 1,
-                                            sentTimeMs = timestamp,
-                                            rcvdTimeMs = timestamp,
-                                            syncdTimeMs = timestamp,
-                                            peer_role = peer_role,
-                                            msg_id_hash = "",
-                                            message_id_tox = message_id_tox, msgDatabaseId = db_msgid,
-                                            user = myUser, timeMs = timestamp, text = pmTextMessage,
-                                            toxpk = my_group_peerpk,
-                                            groupId = peerSnapshot.groupID!!.lowercase(),
-                                            trifaMsgType = TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT.value,
-                                            filename_fullpath = null,
-                                            sent_privately_to_tox_group_peer_pubkey = peerSnapshot.pubkey.uppercase())))
-                                } else
-                                {
-                                    SnackBarToast("Sending Group Message failed")
+                                    // Clear text and close dialog
+                                    pmTextMessage = ""
+                                    activePmPeer = null
+                                    showPmDialog = false
                                 }
                             }
-
-
-
-                            // Clear text and close dialog
-                            pmTextMessage = ""
-                            activePmPeer = null
-                            showPmDialog = false
+                        ) {
+                            Text(
+                                text = "Send",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold
+                            )
                         }
                     }
-                ) {
-                    Text("Send")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        pmTextMessage = "" // Clear text
-                        showPmDialog = false // Close dialog
-                        activePmPeer = null
-                    }
-                ) {
-                    Text("Cancel")
                 }
             }
-        )
+        }
     }
 
     VerticallyScrollableArea(modifier = Modifier.randomDebugBorder().fillMaxSize()) { scrollState ->
