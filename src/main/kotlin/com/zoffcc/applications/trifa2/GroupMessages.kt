@@ -35,6 +35,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.zoffcc.applications.trifa.MainActivity.Companion.DEBUG_MESSAGE_SCROLLING
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 @Composable
@@ -56,26 +57,64 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
     var prevGroupId by remember { mutableStateOf(selectedGroupId) }
     var isInitialLoad by remember { mutableStateOf(true) }
 
-    // SIMPLIFIED BOTTOM MONITOR
-    // We only evaluate stickToBottom when a user scroll STOPS.
-    // This naturally ignores layout jitter and message insertions!
+    val scrollDebugState = remember {
+        object {
+            var programmaticScrollActive = false
+            var lastLoggedIndex = listState.firstVisibleItemIndex
+            var lastLoggedOffset = listState.firstVisibleItemScrollOffset
+        }
+    }
+
+    // SCROLL MONITORING & BOTTOM DETECTION
     LaunchedEffect(Unit) {
-        snapshotFlow { listState.isScrollInProgress }.collect { isScrolling ->
-            val layoutInfo = listState.layoutInfo
-            val lastVisible = layoutInfo.visibleItemsInfo.lastOrNull()
-            val atBottom = lastVisible != null && lastVisible.index >= layoutInfo.totalItemsCount - 2
+        if (DEBUG_MESSAGE_SCROLLING) println("[INIT] Setting up scroll monitoring flows.")
 
-            if (DEBUG_MESSAGE_SCROLLING) {
-                println("[BOTTOM MONITOR] Scroll stopped. TotalItems: ${layoutInfo.totalItemsCount}, LastVisibleIndex: ${lastVisible?.index}, atBottom: $atBottom, CurrentStickToBottom: $stickToBottom")
-            }
+        // 1. Monitor exact scroll position changes (Detects User Scroll vs Programmatic vs Layout Shifts)
+        launch {
+            snapshotFlow { listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset }
+                .collect { (index, offset) ->
+                    if (index != scrollDebugState.lastLoggedIndex || offset != scrollDebugState.lastLoggedOffset) {
+                        val cause = if (scrollDebugState.programmaticScrollActive) "PROGRAMMATIC" else "USER/LAYOUT"
+                        if (DEBUG_MESSAGE_SCROLLING) {
+                            println("[SCROLL POSITION CHANGED] Index: $index (was ${scrollDebugState.lastLoggedIndex}), Offset: $offset (was ${scrollDebugState.lastLoggedOffset}). Cause: $cause. isScrollInProgress: ${listState.isScrollInProgress}")
+                        }
+                        scrollDebugState.lastLoggedIndex = index
+                        scrollDebugState.lastLoggedOffset = offset
+                    }
+                }
+        }
 
-            if (!isScrolling && !suppressScrollDetection) {
-                if (atBottom) {
-                    if (!stickToBottom && DEBUG_MESSAGE_SCROLLING) println("[BOTTOM MONITOR] Reached bottom, attaching.")
-                    stickToBottom = true
-                } else {
-                    if (stickToBottom && DEBUG_MESSAGE_SCROLLING) println("[BOTTOM MONITOR] User scrolled UP. Detaching from bottom.")
-                    stickToBottom = false
+        // 2. Monitor layout info changes (Total item count changes trigger layout recalculations)
+        launch {
+            snapshotFlow { listState.layoutInfo.totalItemsCount }
+                .collect { count ->
+                    if (DEBUG_MESSAGE_SCROLLING) println("[LAYOUT INFO] Total items count in LazyColumn changed to: $count")
+                }
+        }
+
+        // 3. SIMPLIFIED BOTTOM MONITOR
+        launch {
+            snapshotFlow { listState.isScrollInProgress }.collect { isScrolling ->
+                if (DEBUG_MESSAGE_SCROLLING) {
+                    val cause = if (scrollDebugState.programmaticScrollActive) "PROGRAMMATIC" else "USER"
+                    println("[BOTTOM MONITOR] Scroll state changed. isScrolling: $isScrolling. Cause: $cause")
+                }
+
+                val layoutInfo = listState.layoutInfo
+                val lastVisible = layoutInfo.visibleItemsInfo.lastOrNull()
+                val atBottom = lastVisible != null && lastVisible.index >= layoutInfo.totalItemsCount - 2
+
+                if (!isScrolling && !suppressScrollDetection) {
+                    if (DEBUG_MESSAGE_SCROLLING) {
+                        println("[BOTTOM MONITOR] Scroll stopped. TotalItems: ${layoutInfo.totalItemsCount}, LastVisibleIndex: ${lastVisible?.index}, atBottom: $atBottom, CurrentStickToBottom: $stickToBottom")
+                    }
+                    if (atBottom) {
+                        if (!stickToBottom && DEBUG_MESSAGE_SCROLLING) println("[BOTTOM MONITOR] Reached bottom, attaching.")
+                        stickToBottom = true
+                    } else {
+                        if (stickToBottom && DEBUG_MESSAGE_SCROLLING) println("[BOTTOM MONITOR] User scrolled UP. Detaching from bottom.")
+                        stickToBottom = false
+                    }
                 }
             }
         }
@@ -95,6 +134,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
             if (DEBUG_MESSAGE_SCROLLING) println("[ASYNC ENGINE INTERCEPTOR] Sudden jump detected! Enforcing hard scroll snap safety to index: $targetIndex")
 
             suppressScrollDetection = true
+            scrollDebugState.programmaticScrollActive = true
             try {
                 listState.scrollToItem(targetIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
                 if (DEBUG_MESSAGE_SCROLLING) println("[ASYNC ENGINE INTERCEPTOR] Snap successful to index: $targetIndex")
@@ -104,8 +144,10 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
                 if (retryIndex >= 0) {
                     try { listState.scrollToItem(retryIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET) } catch (_: Exception) {}
                 }
+            } finally {
+                suppressScrollDetection = false
+                scrollDebugState.programmaticScrollActive = false
             }
-            suppressScrollDetection = false
         }
         prevMsgSize = currentSize
     }
@@ -120,7 +162,10 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
             if (!groupstore.state.fullHistoryActive) {
                 item(key = "load_more_button_key") {
                     Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
-                        Button(onClick = { groupstore.fullHistoryActive(true) }) { Text("Load Older Messages") }
+                        Button(onClick = {
+                            if (DEBUG_MESSAGE_SCROLLING) println("[USER ACTION] Load Older Messages button clicked.")
+                            groupstore.fullHistoryActive(true)
+                        }) { Text("Load Older Messages") }
                     }
                 }
             }
@@ -139,7 +184,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
 
         // Room Switch Detector
         if (prevGroupId != selectedGroupId) {
-            if (DEBUG_MESSAGE_SCROLLING) println("[ROOM SWITCH DETECTED] Resetting Parameters. Old: $prevGroupId, New: $selectedGroupId")
+            if (DEBUG_MESSAGE_SCROLLING) println("[ROOM SWITCH DETECTED] Resetting Parameters. Old: $prevGroupId, New: $selectedGroupId. (This will trigger INITIAL SNAP in LaunchedEffect)")
             prevGroupId = selectedGroupId
             isInitialLoad = true
             stickToBottom = true
@@ -161,6 +206,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
                         if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: INITIAL SNAP] Snapping to bottom index: $targetLayoutIndex. Total items in DB: ${grpmsgs.groupmessages.size}")
 
                         suppressScrollDetection = true
+                        scrollDebugState.programmaticScrollActive = true
                         try {
                             listState.scrollToItem(targetLayoutIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
                         } catch (e: IndexOutOfBoundsException) {
@@ -171,6 +217,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
                             }
                         } finally {
                             suppressScrollDetection = false
+                            scrollDebugState.programmaticScrollActive = false
                         }
                     }
                     isInitialLoad = false
@@ -192,6 +239,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
                             if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: ANIMATE SCROLL] Animating by $scrollDistance px with StiffnessVeryLow")
 
                             suppressScrollDetection = true
+                            scrollDebugState.programmaticScrollActive = true
                             try {
                                 listState.animateScrollBy(
                                     value = scrollDistance,
@@ -201,6 +249,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
                                 if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: ANIMATE SCROLL] Exception during animation: ${e.message}")
                             } finally {
                                 suppressScrollDetection = false
+                                scrollDebugState.programmaticScrollActive = false
                             }
                         } else {
                             if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: ANIMATE SCROLL] Scroll distance is 0. No animation needed.")
