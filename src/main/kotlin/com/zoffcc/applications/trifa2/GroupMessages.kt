@@ -48,6 +48,10 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
     val listState = rememberLazyListState()
     val grpmsgs by groupmessagestore.stateFlow.collectAsState()
 
+    if (DEBUG_MESSAGE_SCROLLING) {
+        println("[STATE] GroupMessages recomposed. DB Messages: ${grpmsgs.groupmessages.size}, SelectedGroupId: $selectedGroupId")
+    }
+
     // --- ROBUST STICK-TO-BOTTOM STATE ---
     var stickToBottom by remember { mutableStateOf(true) }
     var prevScrollIndex by remember { mutableStateOf(0) }
@@ -55,6 +59,10 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
     var suppressScrollDetection by remember { mutableStateOf(false) } // NEW: Flag to ignore layout jitter during auto-scroll
 
     LaunchedEffect(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset) {
+        if (DEBUG_MESSAGE_SCROLLING) {
+            println("[BOTTOM MONITOR] Index: ${listState.firstVisibleItemIndex}, Offset: ${listState.firstVisibleItemScrollOffset}, TotalItems: ${listState.layoutInfo.totalItemsCount}, VisibleItems: ${listState.layoutInfo.visibleItemsInfo.size}, StickToBottom: $stickToBottom")
+        }
+
         // If we are currently auto-scrolling or snapping, ignore layout changes to prevent false detach
         if (suppressScrollDetection) {
             prevScrollIndex = listState.firstVisibleItemIndex
@@ -70,6 +78,9 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
         val isSpacerVisible = layoutInfo.visibleItemsInfo.any { it.index == lastItemIndex }
 
         if (isSpacerVisible) {
+            if (DEBUG_MESSAGE_SCROLLING && !stickToBottom) {
+                println("[BOTTOM MONITOR] Spacer visible, attaching to bottom.")
+            }
             stickToBottom = true
         } else {
             val indexDecreased = currentIndex < prevScrollIndex
@@ -77,6 +88,10 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
             // Layout jitter (text reflow, image loading) can easily cause 20-30px shifts.
             // A real user scroll will easily exceed 50px.
             val offsetDecreased = (currentIndex == prevScrollIndex) && (currentOffset < prevScrollOffset - 50f)
+
+            if (DEBUG_MESSAGE_SCROLLING) {
+                println("[BOTTOM MONITOR] indexDecreased: $indexDecreased, offsetDecreased: $offsetDecreased. PrevIdx: $prevScrollIndex, PrevOff: $prevScrollOffset")
+            }
 
             if (indexDecreased || offsetDecreased) {
                 stickToBottom = false
@@ -95,6 +110,10 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
         val currentSize = grpmsgs.groupmessages.size
         val sizeDelta = kotlin.math.abs(currentSize - prevMessageStoreSize)
 
+        if (DEBUG_MESSAGE_SCROLLING) {
+            println("[MSG STORE] Size changed: $currentSize (prev: $prevMessageStoreSize). Delta: $sizeDelta. Layout total items: ${listState.layoutInfo.totalItemsCount}")
+        }
+
         if (stickToBottom && grpmsgs.groupmessages.isNotEmpty() && sizeDelta >= SNAP_TO_BOTTOM_NEW_ITEM_COUNT) {
             // SAFE INDEX: Query the actual laid-out items count, not the data model size
             val targetIndex = (listState.layoutInfo.totalItemsCount - 1).coerceAtLeast(0)
@@ -104,8 +123,10 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
             suppressScrollDetection = true
             try {
                 listState.scrollToItem(targetIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
+                if (DEBUG_MESSAGE_SCROLLING) println("[ASYNC ENGINE INTERCEPTOR] Snap successful to index: $targetIndex")
             } catch (e: IndexOutOfBoundsException) {
                 // Race condition handled: list shrank while we were trying to scroll
+                if (DEBUG_MESSAGE_SCROLLING) println("[ASYNC ENGINE INTERCEPTOR] IndexOutOfBoundsException during snap! Retrying...")
                 val retryIndex = (listState.layoutInfo.totalItemsCount - 1).coerceAtLeast(0)
                 if (retryIndex >= 0) {
                     try { listState.scrollToItem(retryIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET) } catch (_: Exception) {}
@@ -163,28 +184,33 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
 
         // 2. Room Switch Detector Logic Loop
         if (prevselectedGroupId != selectedGroupId) {
-            if (DEBUG_MESSAGE_SCROLLING) println("[ROOM SWITCH DETECTED] Resetting Parameters")
+            if (DEBUG_MESSAGE_SCROLLING) println("[ROOM SWITCH DETECTED] Resetting Parameters. Old: $prevselectedGroupId, New: $selectedGroupId")
             prevselectedGroupId = selectedGroupId
             isInitialLoad = true
             stickToBottom = true // Reset stick to bottom on room change
             prevMessageStoreSize = grpmsgs.groupmessages.size
+            if (DEBUG_MESSAGE_SCROLLING) println("[ROOM SWITCH DETECTED] Reset state. stickToBottom: true, isInitialLoad: true, prevMessageStoreSize: $prevMessageStoreSize")
         }
 
         // 3. Side-Effect Automation Pipeline
         val lastSerial = grpmsgs.groupmessages.lastOrNull()?.msgDatabaseId
 
         LaunchedEffect(lastSerial, selectedGroupId) {
+            if (DEBUG_MESSAGE_SCROLLING) {
+                println("[LAST SERIAL EFFECT] Triggered. LastSerial: $lastSerial, SelectedGroupId: $selectedGroupId, isInitialLoad: $isInitialLoad, stickToBottom: $stickToBottom, DB size: ${grpmsgs.groupmessages.size}")
+            }
             if (lastSerial != null) {
                 if (isInitialLoad) {
                     if (grpmsgs.groupmessages.isNotEmpty()) {
                         val targetLayoutIndex = (listState.layoutInfo.totalItemsCount - 1).coerceAtLeast(0)
-                        if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: INITIAL SNAP] Snapping to bottom index: $targetLayoutIndex")
+                        if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: INITIAL SNAP] Snapping to bottom index: $targetLayoutIndex. Total items in DB: ${grpmsgs.groupmessages.size}")
 
                         suppressScrollDetection = true
                         try {
                             listState.scrollToItem(targetLayoutIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
                         } catch (e: IndexOutOfBoundsException) {
                             // Safety retry if the list shrank during the snap
+                            if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: INITIAL SNAP] IndexOutOfBoundsException. Retrying...")
                             val retryIndex = (listState.layoutInfo.totalItemsCount - 1).coerceAtLeast(0)
                             if (retryIndex >= 0) {
                                 try { listState.scrollToItem(retryIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET) } catch (_: Exception) {}
@@ -206,6 +232,10 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
                             val overflow = (itemEnd - viewportEnd).toFloat()
                             val scrollDistance = (overflow + 150f).coerceAtLeast(0f)
 
+                            if (DEBUG_MESSAGE_SCROLLING) {
+                                println("[EXECUTION: ANIMATE SCROLL CALC] ViewportEnd: $viewportEnd, LastVisibleOffset: ${lastVisible.offset}, LastVisibleSize: ${lastVisible.size}, ItemEnd: $itemEnd, Overflow: $overflow, ScrollDistance: $scrollDistance")
+                            }
+
                             if (scrollDistance > 0f) {
                                 if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: ANIMATE SCROLL] Animating by $scrollDistance px with StiffnessVeryLow")
 
@@ -219,18 +249,25 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
                                         )
                                     )
                                 } catch (e: Exception) {
+                                    if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: ANIMATE SCROLL] Exception during animation: ${e.message}")
                                     // Catch layout shift exceptions, but allow CancellationException to propagate
                                 } finally {
                                     // CRITICAL: Instantly resets the flag if the user touches the screen
                                     // and cancels the animation mid-flight!
                                     suppressScrollDetection = false
                                 }
+                            } else {
+                                if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: ANIMATE SCROLL] Scroll distance is 0. No animation needed.")
                             }
+                        } else {
+                            if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: ANIMATE SCROLL] No visible items found.")
                         }
                     } else {
                         if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: SKIPPED] User scrolled away from bottom.")
                     }
                 }
+            } else {
+                if (DEBUG_MESSAGE_SCROLLING) println("[LAST SERIAL EFFECT] lastSerial is null. Skipping execution.")
             }
         }
     }
