@@ -1,10 +1,7 @@
-@file:Suppress("FunctionName", "LocalVariableName", "SpellCheckingInspection", "PackageDirectoryMismatch")
+@file:Suppress("FunctionName", "LocalVariableName", "SpellCheckingInspection", "PackageDirectoryMismatch", "SimplifyBooleanWithConstants")
 
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.gestures.animateScrollBy
@@ -42,6 +39,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.ExperimentalResourceApi
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
@@ -104,7 +102,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
         } finally {
             if (!interrupted) {
                 snapshotFlow { listState.isScrollInProgress }.first { !it }
-                delay(50)
+                delay(50.milliseconds)
             }
 
             suppressScrollDetection = false
@@ -126,7 +124,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
             val expectedTotal = expectedLazyItemCount(minimumDbCount)
 
             // Wait a short time for LazyColumn to contain all known items.
-            withTimeoutOrNull(120) {
+            withTimeoutOrNull(120.milliseconds) {
                 snapshotFlow { listState.layoutInfo.totalItemsCount }
                     .first { it >= expectedTotal }
             }
@@ -137,7 +135,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
                 if (DEBUG_MESSAGE_SCROLLING) {
                     println("[SMOOTH BOTTOM] Layout not ready. total=${layoutInfo.totalItemsCount}, expected=$expectedTotal")
                 }
-                delay(24)
+                delay(24.milliseconds)
                 iteration++
                 continue
             }
@@ -149,7 +147,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
                 // If the final item/spacer is visible but has not been measured yet,
                 // wait one more iteration.
                 if (lastVisible.size <= 0) {
-                    delay(16)
+                    delay(16.milliseconds)
                     iteration++
                     continue
                 }
@@ -195,7 +193,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
             }
 
             iteration++
-            delay(16)
+            delay(16.milliseconds)
         }
 
         // -----------------------------------------------------------------
@@ -206,7 +204,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
         // -----------------------------------------------------------------
         val expectedTotal = expectedLazyItemCount(minimumDbCount)
 
-        withTimeoutOrNull(200) {
+        withTimeoutOrNull(200.milliseconds) {
             snapshotFlow { listState.layoutInfo.totalItemsCount }
                 .first { it >= expectedTotal }
         }
@@ -357,7 +355,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
                 try {
                     listState.scrollToItem(targetIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
                     if (DEBUG_MESSAGE_SCROLLING) println("[ASYNC ENGINE INTERCEPTOR] Snap successful to index: $targetIndex")
-                } catch (e: IndexOutOfBoundsException) {
+                } catch (_: IndexOutOfBoundsException) {
                     if (DEBUG_MESSAGE_SCROLLING) println("[ASYNC ENGINE INTERCEPTOR] IndexOutOfBoundsException during snap! Retrying...")
                     val retryIndex = (listState.layoutInfo.totalItemsCount - 1).coerceAtLeast(0)
                     if (retryIndex >= 0) {
@@ -480,7 +478,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
                         safeProgrammaticScroll {
                             try {
                                 listState.scrollToItem(targetLayoutIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
-                            } catch (e: IndexOutOfBoundsException) {
+                            } catch (_: IndexOutOfBoundsException) {
                                 if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: INITIAL SNAP] IndexOutOfBoundsException. Retrying...")
                                 val retryIndex = (listState.layoutInfo.totalItemsCount - 1).coerceAtLeast(0)
                                 if (retryIndex >= 0) {
@@ -510,7 +508,6 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
     }
 }
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun PeerPic(user: User, ui_scale: Float) {
     val imageSize = calc_avatar_size(AVATAR_SIZE * ui_scale)
