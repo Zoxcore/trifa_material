@@ -60,13 +60,24 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
 
     LaunchedEffect(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset) {
         if (DEBUG_MESSAGE_SCROLLING) {
-            println("[BOTTOM MONITOR] Index: ${listState.firstVisibleItemIndex}, Offset: ${listState.firstVisibleItemScrollOffset}, TotalItems: ${listState.layoutInfo.totalItemsCount}, VisibleItems: ${listState.layoutInfo.visibleItemsInfo.size}, StickToBottom: $stickToBottom")
+            println("[BOTTOM MONITOR] Index: ${listState.firstVisibleItemIndex}, Offset: ${listState.firstVisibleItemScrollOffset}, TotalItems: ${listState.layoutInfo.totalItemsCount}, VisibleItems: ${listState.layoutInfo.visibleItemsInfo.size}, StickToBottom: $stickToBottom, isScrollInProgress: ${listState.isScrollInProgress}")
         }
 
         // If we are currently auto-scrolling or snapping, ignore layout changes to prevent false detach
         if (suppressScrollDetection) {
             prevScrollIndex = listState.firstVisibleItemIndex
             prevScrollOffset = listState.firstVisibleItemScrollOffset
+            return@LaunchedEffect
+        }
+
+        // FIX: If the list is not actively scrolling, any change in index/offset is due to layout jitter
+        // (e.g., image loading, text reflow, item insertion/removal). We ignore it to prevent false detach.
+        if (!listState.isScrollInProgress) {
+            prevScrollIndex = listState.firstVisibleItemIndex
+            prevScrollOffset = listState.firstVisibleItemScrollOffset
+            if (DEBUG_MESSAGE_SCROLLING) {
+                println("[BOTTOM MONITOR] Layout jitter detected (not scrolling). Ignoring index/offset change.")
+            }
             return@LaunchedEffect
         }
 
