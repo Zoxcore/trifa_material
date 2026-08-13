@@ -52,12 +52,16 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
     var stickToBottom by remember { mutableStateOf(true) }
     var prevScrollIndex by remember { mutableStateOf(0) }
     var prevScrollOffset by remember { mutableStateOf(0) }
+    var suppressScrollDetection by remember { mutableStateOf(false) } // NEW: Flag to ignore layout jitter during auto-scroll
 
-    // Tracks if the user manually scrolled UP.
-    // If the spacer is visible, we are at the bottom.
-    // If the spacer is NOT visible, but the list is moving DOWN (auto-scrolling), we stay stuck to bottom.
-    // If the list moves UP (user scrolls), we detach.
     LaunchedEffect(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset) {
+        // If we are currently auto-scrolling or snapping, ignore layout changes to prevent false detach
+        if (suppressScrollDetection) {
+            prevScrollIndex = listState.firstVisibleItemIndex
+            prevScrollOffset = listState.firstVisibleItemScrollOffset
+            return@LaunchedEffect
+        }
+
         val currentIndex = listState.firstVisibleItemIndex
         val currentOffset = listState.firstVisibleItemScrollOffset
 
@@ -69,8 +73,10 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
             stickToBottom = true
         } else {
             val indexDecreased = currentIndex < prevScrollIndex
-            // 15px threshold to ignore minor layout jitter
-            val offsetDecreased = (currentIndex == prevScrollIndex) && (currentOffset < prevScrollOffset - 15f)
+            // Increased threshold from 15f to 50f.
+            // Layout jitter (text reflow, image loading) can easily cause 20-30px shifts.
+            // A real user scroll will easily exceed 50px.
+            val offsetDecreased = (currentIndex == prevScrollIndex) && (currentOffset < prevScrollOffset - 50f)
 
             if (indexDecreased || offsetDecreased) {
                 stickToBottom = false
@@ -90,9 +96,22 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
         val sizeDelta = kotlin.math.abs(currentSize - prevMessageStoreSize)
 
         if (stickToBottom && grpmsgs.groupmessages.isNotEmpty() && sizeDelta >= SNAP_TO_BOTTOM_NEW_ITEM_COUNT) {
-            val targetIndex = grpmsgs.groupmessages.size + 1
+            // SAFE INDEX: Query the actual laid-out items count, not the data model size
+            val targetIndex = (listState.layoutInfo.totalItemsCount - 1).coerceAtLeast(0)
+
             if (DEBUG_MESSAGE_SCROLLING) println("[ASYNC ENGINE INTERCEPTOR] Sudden jump detected! Enforcing hard scroll snap safety to index: $targetIndex")
-            listState.scrollToItem(targetIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
+
+            suppressScrollDetection = true
+            try {
+                listState.scrollToItem(targetIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
+            } catch (e: IndexOutOfBoundsException) {
+                // Race condition handled: list shrank while we were trying to scroll
+                val retryIndex = (listState.layoutInfo.totalItemsCount - 1).coerceAtLeast(0)
+                if (retryIndex >= 0) {
+                    try { listState.scrollToItem(retryIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET) } catch (_: Exception) {}
+                }
+            }
+            suppressScrollDetection = false
         }
         prevMessageStoreSize = currentSize
     }
@@ -156,16 +175,27 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
 
         LaunchedEffect(lastSerial, selectedGroupId) {
             if (lastSerial != null) {
-                val targetLayoutIndex = grpmsgs.groupmessages.size + 1
-
                 if (isInitialLoad) {
                     if (grpmsgs.groupmessages.isNotEmpty()) {
+                        val targetLayoutIndex = (listState.layoutInfo.totalItemsCount - 1).coerceAtLeast(0)
                         if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: INITIAL SNAP] Snapping to bottom index: $targetLayoutIndex")
-                        listState.scrollToItem(targetLayoutIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
+
+                        suppressScrollDetection = true
+                        try {
+                            listState.scrollToItem(targetLayoutIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
+                        } catch (e: IndexOutOfBoundsException) {
+                            // Safety retry if the list shrank during the snap
+                            val retryIndex = (listState.layoutInfo.totalItemsCount - 1).coerceAtLeast(0)
+                            if (retryIndex >= 0) {
+                                try { listState.scrollToItem(retryIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET) } catch (_: Exception) {}
+                            }
+                        } finally {
+                            // Wakes up monitor immediately if the user interrupts the initial snap
+                            suppressScrollDetection = false
+                        }
                     }
                     isInitialLoad = false
                 } else {
-                    // If we are sticking to the bottom, auto-scroll to keep the new message in view
                     if (stickToBottom) {
                         val layoutInfo = listState.layoutInfo
                         val viewportEnd = layoutInfo.viewportEndOffset
@@ -174,20 +204,27 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
                         if (lastVisible != null) {
                             val itemEnd = lastVisible.offset + lastVisible.size
                             val overflow = (itemEnd - viewportEnd).toFloat()
-
-                            // Calculate scroll distance.
-                            // Keep the 150f padding if you like the visual spacing, or change to 0f.
                             val scrollDistance = (overflow + 150f).coerceAtLeast(0f)
 
                             if (scrollDistance > 0f) {
                                 if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: ANIMATE SCROLL] Animating by $scrollDistance px with StiffnessVeryLow")
-                                listState.animateScrollBy(
-                                    value = scrollDistance,
-                                    animationSpec = spring(
-                                        dampingRatio = Spring.DampingRatioNoBouncy,
-                                        stiffness = Spring.StiffnessVeryLow // Kept low as requested!
+
+                                suppressScrollDetection = true
+                                try {
+                                    listState.animateScrollBy(
+                                        value = scrollDistance,
+                                        animationSpec = spring(
+                                            dampingRatio = Spring.DampingRatioNoBouncy,
+                                            stiffness = Spring.StiffnessVeryLow
+                                        )
                                     )
-                                )
+                                } catch (e: Exception) {
+                                    // Catch layout shift exceptions, but allow CancellationException to propagate
+                                } finally {
+                                    // CRITICAL: Instantly resets the flag if the user touches the screen
+                                    // and cancels the animation mid-flight!
+                                    suppressScrollDetection = false
+                                }
                             }
                         }
                     } else {
