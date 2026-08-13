@@ -9,12 +9,18 @@ import CONTACT_COLUMN_WIDTH
 import androidx.compose.foundation.ContextMenuArea
 import androidx.compose.foundation.ContextMenuItem
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Text
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -22,11 +28,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.zoffcc.applications.trifa.HelperGeneric.delete_friend_wrapper
 import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
 import com.zoffcc.applications.trifa.HelperGroup
@@ -51,7 +63,7 @@ import org.briarproject.briar.desktop.ui.VerticallyScrollableArea
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import randomDebugBorder
 
-@OptIn(DelicateCoroutinesApi::class)
+@OptIn(DelicateCoroutinesApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ContactList(
     contactList: StateContacts,
@@ -106,50 +118,116 @@ fun ContactList(
         )
     }
 
+
     if (showInviteDialog && contactToInvite != null) {
         val contactToInviteSnapshot = contactToInvite!!
         val dialogScope = rememberCoroutineScope()
+
         AlertDialog(
             onDismissRequest = {
                 showInviteDialog = false
                 contactToInvite = null
             },
-            title = { Text("Invite to Group") },
-            text = {
-                // Scrollable list container inside the dialog
-                Box(modifier = Modifier.sizeIn(maxHeight = 300.dp, maxWidth = 400.dp)) {
-                    LazyColumn {
-                        items(groupstore.state.groups) { group ->
-                            TextButton(
-                                onClick = {
-                                    dialogScope.launch {
-                                        val group_num = HelperGroup.tox_group_by_groupid__wrapper(group.groupId)
-                                        val friend_num = tox_friend_by_public_key(contactToInviteSnapshot.pubkey)
-                                        tox_group_invite_friend(group_num, friend_num)
-                                        update_savedata_file_wrapper()
-                                    }
-                                    showInviteDialog = false
-                                    contactToInvite = null
-                                },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(text = group.groupId.take(6) + " " + group.name, modifier = Modifier.fillMaxWidth())
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+            modifier = Modifier
+                .padding(24.dp)
+                .wrapContentHeight()
+                .widthIn(max = 360.dp),
+        ) {
+            Surface(
+                shape = RoundedCornerShape(28.dp),
+                tonalElevation = 6.dp,
+                color = MaterialTheme.colorScheme.surface
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp)
+                ) {
+                    // Header Title
+                    Text(
+                        text = "Invite to Group",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+
+                    // Scrollable Group Selection
+                    Box(
+                        modifier = Modifier
+                            .weight(weight = 1f, fill = false)
+                            .heightIn(max = 280.dp)
+                    ) {
+                        LazyColumn(
+                            verticalArrangement = Arrangement.spacedBy(2.dp),
+                            contentPadding = PaddingValues(vertical = 4.dp)
+                        ) {
+                            items(groupstore.state.groups) { group ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(8.dp)) // Modern edge-to-edge ripple bounds
+                                        .clickable {
+                                            dialogScope.launch {
+                                                val group_num = HelperGroup.tox_group_by_groupid__wrapper(group.groupId)
+                                                val friend_num = tox_friend_by_public_key(contactToInviteSnapshot.pubkey)
+                                                tox_group_invite_friend(group_num, friend_num)
+                                                update_savedata_file_wrapper()
+                                            }
+                                            showInviteDialog = false
+                                            contactToInvite = null
+                                        }
+                                        .padding(horizontal = 12.dp, vertical = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // Original data text items: ID prefix + Group Name
+                                    Text(
+                                        text = group.groupId.take(6),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontFamily = FontFamily.Monospace, // Monospace styling for the short hex ID
+                                        color = MaterialTheme.colorScheme.primary, // Highlights the ID subtly
+                                        fontWeight = FontWeight.Medium
+                                    )
+
+                                    Spacer(modifier = Modifier.width(12.dp))
+
+                                    Text(
+                                        text = group.name,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
                             }
                         }
                     }
-                }
-            },
-            confirmButton = {}, // Kept empty since selecting an item completes the action
-            dismissButton = {
-                TextButton(onClick = {
-                    showInviteDialog = false
-                    contactToInvite = null
-                }) {
-                    Text("Cancel")
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    // Bottom Action Layout
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        TextButton(
+                            onClick = {
+                                showInviteDialog = false
+                                contactToInvite = null
+                            }
+                        ) {
+                            Text(
+                                text = "Cancel",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
                 }
             }
-        )
+        }
     }
+
 
     VerticallyScrollableArea(modifier = Modifier.randomDebugBorder().fillMaxSize()) { scrollState ->
         LazyColumn(
