@@ -1,0 +1,24 @@
+name: check nonascii chars
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: dummy
+        default: dummy
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  check-for-non-ascii-chars:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: check if source files contain non-ascii chars
+        run: tools/find_non_ascii_chars_in_source.sh
+
