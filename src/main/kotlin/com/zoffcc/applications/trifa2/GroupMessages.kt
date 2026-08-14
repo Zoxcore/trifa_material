@@ -135,34 +135,50 @@ internal fun GroupMessages(
                 .width(10.dp)
         )
 
-        // ====================================================================
-        // JUMP TO BOTTOM FAB
-        // ====================================================================
-        AnimatedVisibility(
+        JumpToBottomFab(
             visible = !scrollManager.stickToBottom,
-            enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
-            exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }),
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                // Reduced 'bottom' padding to bring it closer to the bottom edge.
-                // Adjust this value depending on the height of your message input bar.
-                .padding(bottom = 24.dp, end = 16.dp)
-        ) {
-            SmallFloatingActionButton(
-                shape = CircleShape, // Makes the FAB perfectly circular
-                modifier = Modifier.size(40.dp),
-                onClick = {
-                    coroutineScope.launch {
-                        scrollManager.jumpToBottom(messagesSize)
-                    }
+                // We reduce these by 16.dp to compensate for the extra padding
+                // added to the FAB's modifier below. This ensures the button
+                // stays visually in the exact same position.
+                .padding(bottom = 8.dp, end = 0.dp),
+            onClick = {
+                coroutineScope.launch {
+                    scrollManager.jumpToBottom(messagesSize)
                 }
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowDownward,
-                    contentDescription = "Jump to bottom",
-                    modifier = Modifier.size(20.dp)
-                )
             }
+        )
+    }
+}
+
+@Composable
+fun JumpToBottomFab(
+    visible: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
+        exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }),
+        modifier = modifier
+    ) {
+        SmallFloatingActionButton(
+            shape = CircleShape,
+            modifier = Modifier
+                // Added padding to increase the layout bounds of the composable.
+                // This gives the shadow space to render so it doesn't get
+                // chopped into a square by the AnimatedVisibility layer.
+                .padding(16.dp)
+                .size(40.dp),
+            onClick = onClick
+        ) {
+            Icon(
+                imageVector = Icons.Filled.ArrowDownward,
+                contentDescription = "Jump to bottom",
+                modifier = Modifier.size(20.dp)
+            )
         }
     }
 }
