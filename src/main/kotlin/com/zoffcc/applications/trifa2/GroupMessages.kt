@@ -44,10 +44,12 @@ import kotlinx.coroutines.launch
 // ============================================================================
 
 @Composable
-internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
-                           onReplySelected: (UIGroupMessage) -> Unit,
-                           onDeleteSelected: (UIGroupMessage) -> Unit,
-                           onEmojiSelected: (UIGroupMessage, String) -> Unit
+internal fun GroupMessages(
+    ui_scale: Float,
+    selectedGroupId: String?,
+    onReplySelected: (UIGroupMessage) -> Unit,
+    onDeleteSelected: (UIGroupMessage) -> Unit,
+    onEmojiSelected: (UIGroupMessage, String) -> Unit
 ) {
     val listState = rememberLazyListState()
     val grpmsgs by groupmessagestore.stateFlow.collectAsState()
@@ -76,22 +78,33 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
 
     Box(Modifier.fillMaxSize()) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(start = 4.dp, end = 10.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = 4.dp, end = 10.dp),
             verticalArrangement = Arrangement.spacedBy(0.dp),
             state = listState
         ) {
-            item(key = "FIRST_ITEM") { Spacer(Modifier.size(SPACE_BEFORE_FIRST_MESSAGE)) }
+            item(key = "FIRST_ITEM") {
+                Spacer(Modifier.size(SPACE_BEFORE_FIRST_MESSAGE))
+            }
 
             if (!groupstore.state.fullHistoryActive) {
                 item(key = "load_more_button_key") {
                     Box(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Button(onClick = {
-                            if (DEBUG_MESSAGE_SCROLLING) println("[USER ACTION] Load Older Messages button clicked.")
-                            groupstore.fullHistoryActive(true)
-                        }) {
+                        Button(
+                            onClick = {
+                                if (DEBUG_MESSAGE_SCROLLING) {
+                                    println("[USER ACTION] Load Older Messages button clicked.")
+                                }
+
+                                groupstore.fullHistoryActive(true)
+                            }
+                        ) {
                             Text("Load Older Messages")
                         }
                     }
@@ -109,12 +122,17 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
                 )
             }
 
-            item(key = "LAST_ITEM") { Box(Modifier.height(SPACE_AFTER_LAST_MESSAGE)) }
+            item(key = "LAST_ITEM") {
+                Box(Modifier.height(SPACE_AFTER_LAST_MESSAGE))
+            }
         }
 
         VerticalScrollbar(
             adapter = rememberScrollbarAdapter(listState),
-            modifier = Modifier.fillMaxHeight().align(CenterEnd).width(10.dp)
+            modifier = Modifier
+                .fillMaxHeight()
+                .align(CenterEnd)
+                .width(10.dp)
         )
 
         // ====================================================================
@@ -126,16 +144,13 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
             exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }),
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                // Adjust bottom padding (90.dp) to ensure it floats above your message input bar
+                // Adjust bottom padding if needed so it floats above your message input bar.
                 .padding(bottom = 90.dp, end = 24.dp)
         ) {
-            // Using SmallFloatingActionButton (40x40dp) instead of standard FAB (56x56dp)
             SmallFloatingActionButton(
                 onClick = {
                     coroutineScope.launch {
-                        scrollManager.safeProgrammaticScroll {
-                            scrollManager.smoothScrollToBottom(messagesSize)
-                        }
+                        scrollManager.jumpToBottom(messagesSize)
                     }
                 }
             ) {
@@ -156,13 +171,16 @@ fun PeerPic(user: User, ui_scale: Float) {
         painterResource(it)
     } ?: object : Painter() {
         override val intrinsicSize: Size = Size(imageSize, imageSize)
+
         override fun DrawScope.onDraw() {
             drawRect(user.color, size = Size(imageSize * 4, imageSize * 4))
         }
     }
 
     Image(
-        modifier = Modifier.size(imageSize.dp).clip(CircleShape),
+        modifier = Modifier
+            .size(imageSize.dp)
+            .clip(CircleShape),
         contentScale = ContentScale.Crop,
         painter = painter,
         contentDescription = "Peer picture",
