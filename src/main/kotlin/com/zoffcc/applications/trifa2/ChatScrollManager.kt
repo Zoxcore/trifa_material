@@ -1,5 +1,10 @@
+@file:Suppress("FunctionName", "LocalVariableName", "SpellCheckingInspection", "PackageDirectoryMismatch", "SimplifyBooleanWithConstants")
+
 package com.zoffcc.applications.trifa2
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -10,9 +15,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import com.zoffcc.applications.trifa.MainActivity.Companion.DEBUG_MESSAGE_SCROLLING
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.gestures.animateScrollBy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -29,6 +31,7 @@ class ChatScrollManager(
 ) {
     var stickToBottom by mutableStateOf(true)
         private set
+
     var isInitialLoad by mutableStateOf(true)
         private set
 
@@ -48,8 +51,18 @@ class ChatScrollManager(
         isInitialLoad = true
         stickToBottom = true
         prevMsgSize = newSize
+
         if (DEBUG_MESSAGE_SCROLLING) {
             println("[ROOM SWITCH DETECTED] Reset state. stickToBottom: true, isInitialLoad: true, prevMsgSize: $prevMsgSize")
+        }
+    }
+
+    suspend fun jumpToBottom(minimumDbCount: Int) {
+        // The user explicitly wants to go to the bottom, so re-attach.
+        stickToBottom = true
+
+        safeProgrammaticScroll {
+            smoothScrollToBottom(minimumDbCount, force = true)
         }
     }
 
@@ -64,7 +77,10 @@ class ChatScrollManager(
             if (e::class.simpleName?.contains("CancellationException") == true) {
                 interrupted = true
             }
-            if (DEBUG_MESSAGE_SCROLLING) println("[PROGRAMMATIC SCROLL] Exception: ${e.message}")
+
+            if (DEBUG_MESSAGE_SCROLLING) {
+                println("[PROGRAMMATIC SCROLL] Exception: ${e.message}")
+            }
         } finally {
             if (!interrupted) {
                 snapshotFlow { listState.isScrollInProgress }.first { !it }
@@ -76,12 +92,13 @@ class ChatScrollManager(
         }
     }
 
-    suspend fun smoothScrollToBottom(minimumDbCount: Int) {
+    suspend fun smoothScrollToBottom(minimumDbCount: Int, force: Boolean = false) {
         var iteration = 0
 
-        while (iteration < 14 && stickToBottom) {
+        while (iteration < 14 && (stickToBottom || force)) {
             val expectedTotal = expectedItemCount(minimumDbCount)
 
+            // Wait a short time for LazyColumn to contain all known items.
             withTimeoutOrNull(120.milliseconds) {
                 snapshotFlow { listState.layoutInfo.totalItemsCount }
                     .first { it >= expectedTotal }
@@ -93,6 +110,7 @@ class ChatScrollManager(
                 if (DEBUG_MESSAGE_SCROLLING) {
                     println("[SMOOTH BOTTOM] Layout not ready. total=${layoutInfo.totalItemsCount}, expected=$expectedTotal")
                 }
+
                 delay(24.milliseconds)
                 iteration++
                 continue
@@ -102,6 +120,8 @@ class ChatScrollManager(
             val lastVisible = layoutInfo.visibleItemsInfo.lastOrNull() ?: break
 
             if (lastVisible.index >= targetIndex) {
+                // If the final item/spacer is visible but has not been measured yet,
+                // wait one more iteration.
                 if (lastVisible.size <= 0) {
                     delay(16.milliseconds)
                     iteration++
@@ -132,6 +152,28 @@ class ChatScrollManager(
             } else {
                 val hiddenItems = targetIndex - lastVisible.index
 
+                // If this is a manual FAB jump and we are far away, do not slowly animate.
+                // Snap directly to the bottom.
+                if (force && hiddenItems > 5) {
+                    if (DEBUG_MESSAGE_SCROLLING) {
+                        println("[SMOOTH BOTTOM] Forced jump is far away. hiddenItems=$hiddenItems, snapping to targetIndex=$targetIndex")
+                    }
+
+                    try {
+                        listState.scrollToItem(targetIndex.coerceAtLeast(0), scrollToBottomOffset)
+                    } catch (_: IndexOutOfBoundsException) {
+                        val retryIndex = (listState.layoutInfo.totalItemsCount - 1).coerceAtLeast(0)
+                        if (retryIndex >= 0) {
+                            try {
+                                listState.scrollToItem(retryIndex, scrollToBottomOffset)
+                            } catch (_: IndexOutOfBoundsException) {
+                            }
+                        }
+                    }
+
+                    break
+                }
+
                 val averageHeight = layoutInfo.visibleItemsInfo.map { it.size }.average().toFloat()
                 val itemHeight = if (averageHeight > 0f) averageHeight else 120f
 
@@ -152,6 +194,12 @@ class ChatScrollManager(
             delay(16.milliseconds)
         }
 
+        // -----------------------------------------------------------------
+        // Final synchronization.
+        //
+        // This prevents the case where the loop thinks it is finished, but
+        // the layout has just inserted one more item.
+        // -----------------------------------------------------------------
         val expectedTotal = expectedItemCount(minimumDbCount)
 
         withTimeoutOrNull(200.milliseconds) {
@@ -161,13 +209,14 @@ class ChatScrollManager(
 
         val finalLayoutInfo = listState.layoutInfo
 
-        if (!stickToBottom) return
+        if (!stickToBottom && !force) return
         if (finalLayoutInfo.totalItemsCount < expectedTotal) return
 
         val targetIndex = expectedTotal - 1
         val lastVisible = finalLayoutInfo.visibleItemsInfo.lastOrNull()
 
         if (lastVisible == null) {
+            // Very unusual, but do a safe correction.
             listState.scrollToItem(targetIndex.coerceAtLeast(0), scrollToBottomOffset)
             return
         }
@@ -209,17 +258,22 @@ class ChatScrollManager(
                     animationSpec = tween(durationMillis = duration, easing = FastOutSlowInEasing)
                 )
             } else {
+                // If we are still far away after all smooth attempts, force correctness.
                 if (DEBUG_MESSAGE_SCROLLING) {
                     println("[SMOOTH BOTTOM] Final fallback snap. hidden=$hidden")
                 }
+
                 listState.scrollToItem(targetIndex.coerceAtLeast(0), scrollToBottomOffset)
             }
         }
     }
 
     fun startScrollMonitoring(scope: CoroutineScope) {
-        if (DEBUG_MESSAGE_SCROLLING) println("[INIT] Setting up scroll monitoring flows.")
+        if (DEBUG_MESSAGE_SCROLLING) {
+            println("[INIT] Setting up scroll monitoring flows.")
+        }
 
+        // 1. Monitor exact scroll position changes
         scope.launch {
             snapshotFlow { listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset }
                 .collect { (index, offset) ->
@@ -240,20 +294,24 @@ class ChatScrollManager(
                 }
         }
 
+        // 2. Monitor layout item count changes
         scope.launch {
             snapshotFlow { listState.layoutInfo.totalItemsCount }
                 .collect { count ->
-                    if (DEBUG_MESSAGE_SCROLLING) println("[LAYOUT INFO] Total items count in LazyColumn changed to: $count")
+                    if (DEBUG_MESSAGE_SCROLLING) {
+                        println("[LAYOUT INFO] Total items count in LazyColumn changed to: $count")
+                    }
                 }
         }
 
-        // FIXED BOTTOM MONITOR
+        // 3. Bottom monitor
         scope.launch {
             snapshotFlow {
                 val layoutInfo = listState.layoutInfo
                 val lastVisibleIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
                 val totalItems = layoutInfo.totalItemsCount
                 val isScrolling = listState.isScrollInProgress
+
                 Triple(lastVisibleIndex, totalItems, isScrolling)
             }.collect { (lastVisibleIndex, totalItems, isScrolling) ->
                 if (suppressScrollDetection) return@collect
@@ -261,16 +319,22 @@ class ChatScrollManager(
                 val atBottom = lastVisibleIndex >= totalItems - 2
 
                 if (!atBottom) {
-                    // DETACH IMMEDIATELY if we are not at the bottom, regardless of scroll state
+                    // DETACH IMMEDIATELY if we are not at the bottom, regardless of scroll state.
                     if (stickToBottom) {
                         stickToBottom = false
-                        if (DEBUG_MESSAGE_SCROLLING) println("[BOTTOM MONITOR] Scrolled away from bottom. Detaching.")
+
+                        if (DEBUG_MESSAGE_SCROLLING) {
+                            println("[BOTTOM MONITOR] Scrolled away from bottom. Detaching.")
+                        }
                     }
                 } else if (!isScrolling) {
-                    // ATTACH only when at bottom AND scrolling has completely stopped
+                    // ATTACH only when at bottom AND scrolling has completely stopped.
                     if (!stickToBottom) {
                         stickToBottom = true
-                        if (DEBUG_MESSAGE_SCROLLING) println("[BOTTOM MONITOR] Reached bottom and stopped scrolling. Attaching.")
+
+                        if (DEBUG_MESSAGE_SCROLLING) {
+                            println("[BOTTOM MONITOR] Reached bottom and stopped scrolling. Attaching.")
+                        }
                     }
                 }
             }
@@ -294,10 +358,17 @@ class ChatScrollManager(
             safeProgrammaticScroll {
                 try {
                     listState.scrollToItem(targetIndex, scrollToBottomOffset)
-                    if (DEBUG_MESSAGE_SCROLLING) println("[ASYNC ENGINE INTERCEPTOR] Snap successful to index: $targetIndex")
+
+                    if (DEBUG_MESSAGE_SCROLLING) {
+                        println("[ASYNC ENGINE INTERCEPTOR] Snap successful to index: $targetIndex")
+                    }
                 } catch (_: IndexOutOfBoundsException) {
-                    if (DEBUG_MESSAGE_SCROLLING) println("[ASYNC ENGINE INTERCEPTOR] IndexOutOfBoundsException during snap! Retrying...")
+                    if (DEBUG_MESSAGE_SCROLLING) {
+                        println("[ASYNC ENGINE INTERCEPTOR] IndexOutOfBoundsException during snap! Retrying...")
+                    }
+
                     val retryIndex = (listState.layoutInfo.totalItemsCount - 1).coerceAtLeast(0)
+
                     if (retryIndex >= 0) {
                         try {
                             listState.scrollToItem(retryIndex, scrollToBottomOffset)
@@ -321,6 +392,8 @@ class ChatScrollManager(
                     if (currentSize != prevFollowSize) {
                         currentSize - prevFollowSize
                     } else {
+                        // Size didn't change but the last message ID changed.
+                        // This happens when a capped queue drops an old message to add a new one.
                         1
                     }
                 } else {
@@ -360,8 +433,12 @@ class ChatScrollManager(
                         try {
                             listState.scrollToItem(targetLayoutIndex, scrollToBottomOffset)
                         } catch (_: IndexOutOfBoundsException) {
-                            if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: INITIAL SNAP] IndexOutOfBoundsException. Retrying...")
+                            if (DEBUG_MESSAGE_SCROLLING) {
+                                println("[EXECUTION: INITIAL SNAP] IndexOutOfBoundsException. Retrying...")
+                            }
+
                             val retryIndex = (listState.layoutInfo.totalItemsCount - 1).coerceAtLeast(0)
+
                             if (retryIndex >= 0) {
                                 try {
                                     listState.scrollToItem(retryIndex, scrollToBottomOffset)
@@ -378,10 +455,14 @@ class ChatScrollManager(
                     println("[LAST SERIAL EFFECT] stickToBottom follow delegated to smooth follower.")
                 }
             } else {
-                if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: SKIPPED] User scrolled away from bottom.")
+                if (DEBUG_MESSAGE_SCROLLING) {
+                    println("[EXECUTION: SKIPPED] User scrolled away from bottom.")
+                }
             }
         } else {
-            if (DEBUG_MESSAGE_SCROLLING) println("[LAST SERIAL EFFECT] lastSerial is null. Skipping execution.")
+            if (DEBUG_MESSAGE_SCROLLING) {
+                println("[LAST SERIAL EFFECT] lastSerial is null. Skipping execution.")
+            }
         }
     }
 }
@@ -412,6 +493,7 @@ fun rememberChatScrollManager(
         if (DEBUG_MESSAGE_SCROLLING) {
             println("[ROOM SWITCH DETECTED] Resetting Parameters. Old: $prevGroupId, New: $selectedRoomId")
         }
+
         prevGroupId = selectedRoomId
         manager.resetForRoomSwitch(messagesSize)
     }
