@@ -1,3 +1,5 @@
+@file:Suppress("LocalVariableName", "ConvertToStringTemplate")
+
 package com.zoffcc.applications.trifa
 
 import SETTINGS_HEADER_SIZE
@@ -38,6 +40,16 @@ fun FriendSettingDetails(selectedContactPubkey: String?)
 {
     FriendSettingDetailV(i18n("ui.friend_settings_headline")) {
         Spacer(modifier = Modifier.height(20.dp))
+
+        var f: FriendList? = null
+        try
+        {
+            f = HelperFriend.main_get_friend(selectedContactPubkey)
+        }
+        catch (_: Exception)
+        {
+        }
+
         Row(Modifier.wrapContentHeight().fillMaxWidth().padding(start = 15.dp)) {
             val f_num = tox_friend_by_public_key(selectedContactPubkey)
             var f_name: String? = ""
@@ -53,14 +65,7 @@ fun FriendSettingDetails(selectedContactPubkey: String?)
                 f_name = ""
             }
 
-            var f: FriendList? = null
-            try
-            {
-                f = HelperFriend.main_get_friend(selectedContactPubkey)
-            }
-            catch (_: Exception)
-            {
-            }
+
 
             var caps: String = "BASIC"
             if (f != null)
@@ -68,17 +73,13 @@ fun FriendSettingDetails(selectedContactPubkey: String?)
                 caps = TOX_CAPABILITY_DECODE_TO_STRING(TOX_CAPABILITY_DECODE(f.capabilities))
             }
 
-            var pushurl_str = ""
-            if (f != null)
-            {
-                pushurl_str = if (f.push_url.isNullOrEmpty()) "" else ("\n" + "Push URL: " + f.push_url)
-            }
+
+
 
             val t = "Name: " + f_name + "\n" +
                     "Public Key: " + selectedContactPubkey + "\n" +
                     "Capabilities: " + caps + "\n" +
-                    "IP: " + get_friend_ip_str(selectedContactPubkey) +
-                    pushurl_str
+                    "IP: " + get_friend_ip_str(selectedContactPubkey)
             SelectionContainer(modifier = Modifier.padding(all = 0.dp)) {
                 Text(
                     text = t,
@@ -86,6 +87,23 @@ fun FriendSettingDetails(selectedContactPubkey: String?)
                     modifier = Modifier.padding(10.dp).weight(1.0f)
                 )
             }
+        }
+
+        Spacer(modifier = Modifier.height(5.dp))
+        var num_messages = "?"
+        try
+        {
+            num_messages = "" + TrifaToxService.orma!!.selectFromMessage().tox_friendpubkeyEq(selectedContactPubkey!!.uppercase()).count()
+        }
+        catch(_: Exception)
+        {
+        }
+        GroupDetailItem(selectable_text = true, label = "Number of Messages: " + num_messages, description = "Number of Messages in this chat")
+
+        Spacer(modifier = Modifier.height(5.dp))
+        if ((f != null) && (!f.push_url.isNullOrEmpty()))
+        {
+            GroupDetailItem(selectable_text = true, label = "Push URL: " + f.push_url, description = "This friends Push URL for Notifications")
         }
     }
 }
