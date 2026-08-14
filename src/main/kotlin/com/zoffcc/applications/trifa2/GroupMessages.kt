@@ -144,10 +144,13 @@ internal fun GroupMessages(
             exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }),
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                // Adjust bottom padding if needed so it floats above your message input bar.
-                .padding(bottom = 90.dp, end = 24.dp)
+                // Reduced 'bottom' padding to bring it closer to the bottom edge.
+                // Adjust this value depending on the height of your message input bar.
+                .padding(bottom = 24.dp, end = 16.dp)
         ) {
             SmallFloatingActionButton(
+                shape = CircleShape, // Makes the FAB perfectly circular
+                modifier = Modifier.size(40.dp),
                 onClick = {
                     coroutineScope.launch {
                         scrollManager.jumpToBottom(messagesSize)
@@ -156,7 +159,8 @@ internal fun GroupMessages(
             ) {
                 Icon(
                     imageVector = Icons.Filled.ArrowDownward,
-                    contentDescription = "Jump to bottom"
+                    contentDescription = "Jump to bottom",
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }
