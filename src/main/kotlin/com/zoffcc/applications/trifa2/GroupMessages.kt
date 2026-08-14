@@ -1,5 +1,10 @@
 @file:Suppress("FunctionName", "LocalVariableName", "SpellCheckingInspection", "PackageDirectoryMismatch", "SimplifyBooleanWithConstants")
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.*
@@ -8,11 +13,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterEnd
 import androidx.compose.ui.Modifier
@@ -27,6 +37,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.zoffcc.applications.trifa.MainActivity.Companion.DEBUG_MESSAGE_SCROLLING
 import com.zoffcc.applications.trifa2.rememberChatScrollManager
+import kotlinx.coroutines.launch
 
 // ============================================================================
 // UI COMPOSABLES
@@ -40,6 +51,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
 ) {
     val listState = rememberLazyListState()
     val grpmsgs by groupmessagestore.stateFlow.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
 
     if (DEBUG_MESSAGE_SCROLLING) {
         println("[STATE] GroupMessages recomposed. DB Messages: ${grpmsgs.groupmessages.size}, SelectedGroupId: $selectedGroupId")
@@ -104,6 +116,35 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
             adapter = rememberScrollbarAdapter(listState),
             modifier = Modifier.fillMaxHeight().align(CenterEnd).width(10.dp)
         )
+
+        // ====================================================================
+        // JUMP TO BOTTOM FAB
+        // ====================================================================
+        AnimatedVisibility(
+            visible = !scrollManager.stickToBottom,
+            enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
+            exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                // Adjust bottom padding (90.dp) to ensure it floats above your message input bar
+                .padding(bottom = 90.dp, end = 24.dp)
+        ) {
+            // Using SmallFloatingActionButton (40x40dp) instead of standard FAB (56x56dp)
+            SmallFloatingActionButton(
+                onClick = {
+                    coroutineScope.launch {
+                        scrollManager.safeProgrammaticScroll {
+                            scrollManager.smoothScrollToBottom(messagesSize)
+                        }
+                    }
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowDownward,
+                    contentDescription = "Jump to bottom"
+                )
+            }
+        }
     }
 }
 
