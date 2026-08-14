@@ -1,7 +1,12 @@
 @file:Suppress("LocalVariableName", "FunctionName", "SpellCheckingInspection", "PackageDirectoryMismatch")
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.gestures.animateScrollBy
@@ -12,7 +17,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,6 +29,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -36,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import com.zoffcc.applications.trifa.MainActivity.Companion.DEBUG_MESSAGE_SCROLLING
 import com.zoffcc.applications.trifa2.rememberChatScrollManager
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -55,6 +66,7 @@ internal fun Messages(ui_scale: Float, selectedContactPubkey: String?,
                       onEmojiSelected: (UIMessage, String) -> Unit ) {
     val listState = rememberLazyListState()
     val msgs by messagestore.stateFlow.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
 
     val lastSerial = msgs.messages.lastOrNull()?.msgDatabaseId
     val messagesSize = msgs.messages.size
@@ -115,6 +127,37 @@ internal fun Messages(ui_scale: Float, selectedContactPubkey: String?,
             adapter = rememberScrollbarAdapter(listState),
             modifier = Modifier.fillMaxHeight().align(CenterEnd).width(10.dp)
         )
+
+        // ====================================================================
+        // JUMP TO BOTTOM FAB
+        // ====================================================================
+        AnimatedVisibility(
+            visible = !scrollManager.stickToBottom,
+            enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
+            exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                // Reduced 'bottom' padding to bring it closer to the bottom edge.
+                // Adjust this value depending on the height of your message input bar.
+                .padding(bottom = 24.dp, end = 16.dp)
+        ) {
+            SmallFloatingActionButton(
+                shape = CircleShape, // Makes the FAB perfectly circular
+                modifier = Modifier.size(40.dp),
+                onClick = {
+                    coroutineScope.launch {
+                        scrollManager.jumpToBottom(messagesSize)
+                    }
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowDownward,
+                    contentDescription = "Jump to bottom",
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+
     }
 }
 
