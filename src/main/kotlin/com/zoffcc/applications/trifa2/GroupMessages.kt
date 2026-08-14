@@ -21,7 +21,9 @@ import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterEnd
@@ -61,6 +63,10 @@ internal fun GroupMessages(
 
     val lastSerial = grpmsgs.groupmessages.lastOrNull()?.msgDatabaseId
     val messagesSize = grpmsgs.groupmessages.size
+    val currentMessagesSize by remember {
+        derivedStateOf { grpmsgs.groupmessages.size }
+    }
+
 
     // All complex scrolling logic is neatly handled by the manager here
     val scrollManager = rememberChatScrollManager(
@@ -139,13 +145,10 @@ internal fun GroupMessages(
             visible = !scrollManager.stickToBottom,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                // We reduce these by 16.dp to compensate for the extra padding
-                // added to the FAB's modifier below. This ensures the button
-                // stays visually in the exact same position.
                 .padding(bottom = 8.dp, end = 0.dp),
             onClick = {
                 coroutineScope.launch {
-                    scrollManager.jumpToBottom(messagesSize)
+                    scrollManager.jumpToBottom(currentMessagesSize)
                 }
             }
         )

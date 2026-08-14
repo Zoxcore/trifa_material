@@ -26,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -70,6 +71,9 @@ internal fun Messages(ui_scale: Float, selectedContactPubkey: String?,
 
     val lastSerial = msgs.messages.lastOrNull()?.msgDatabaseId
     val messagesSize = msgs.messages.size
+    val currentMessagesSize by remember {
+        derivedStateOf { msgs.messages.size }
+    }
 
     // All complex scrolling logic is neatly handled by the manager here
     val scrollManager = rememberChatScrollManager(
@@ -132,13 +136,10 @@ internal fun Messages(ui_scale: Float, selectedContactPubkey: String?,
             visible = !scrollManager.stickToBottom,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                // We reduce these by 16.dp to compensate for the extra padding
-                // added to the FAB's modifier below. This ensures the button
-                // stays visually in the exact same position.
                 .padding(bottom = 8.dp, end = 0.dp),
             onClick = {
                 coroutineScope.launch {
-                    scrollManager.jumpToBottom(messagesSize)
+                    scrollManager.jumpToBottom(currentMessagesSize)
                 }
             }
         )
