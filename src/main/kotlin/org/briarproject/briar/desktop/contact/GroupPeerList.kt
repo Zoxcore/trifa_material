@@ -135,7 +135,6 @@ fun GroupPeerList(
 
     if (showPmDialog && activePmPeer != null) {
         val peerSnapshot = activePmPeer!!
-        val dialogScope = rememberCoroutineScope()
         val focusRequester = remember { FocusRequester() }
         LaunchedEffect(Unit) {
             focusRequester.requestFocus()
@@ -149,7 +148,7 @@ fun GroupPeerList(
             modifier = Modifier
                 .padding(24.dp)
                 .wrapContentHeight()
-                .widthIn(max = 360.dp)
+                .widthIn(max = 1200.dp)
         ) {
             Surface(
                 shape = RoundedCornerShape(28.dp),
@@ -169,10 +168,10 @@ fun GroupPeerList(
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = "To: ${peerSnapshot.name} (${peerSnapshot.pubkey.take(8).uppercase()})",
-                            style = MaterialTheme.typography.bodySmall,
-                            fontFamily = FontFamily.Monospace,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            text = "To: (${peerSnapshot.pubkey.take(8).uppercase()}) ${peerSnapshot.name.take(20)}",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
 
@@ -180,6 +179,7 @@ fun GroupPeerList(
                     OutlinedTextField(
                         value = pmTextMessage,
                         onValueChange = { pmTextMessage = it },
+                        textStyle = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Normal),
                         label = { Text("Your Message") },
                         shape = RoundedCornerShape(12.dp),
                         singleLine = false,
