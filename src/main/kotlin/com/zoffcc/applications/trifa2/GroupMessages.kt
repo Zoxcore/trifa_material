@@ -68,6 +68,9 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
         }
     }
 
+    // Track the last message ID at the top level to share across LaunchedEffects
+    val lastSerial = grpmsgs.groupmessages.lastOrNull()?.msgDatabaseId
+
     // ---------------------------------------------------------------------
     // Expected number of items in the LazyColumn.
     //
@@ -336,12 +339,12 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
     // ---------------------------------------------------------------------
     // SAFETY VALVE: Large asynchronous jumps still use a hard snap.
     // ---------------------------------------------------------------------
-    LaunchedEffect(grpmsgs.groupmessages.size) {
+    LaunchedEffect(grpmsgs.groupmessages.size, lastSerial) {
         val currentSize = grpmsgs.groupmessages.size
         val sizeDelta = kotlin.math.abs(currentSize - prevMsgSize)
 
         if (DEBUG_MESSAGE_SCROLLING) {
-            println("[MSG STORE] Size changed: $currentSize (prev: $prevMsgSize). Delta: $sizeDelta. Layout total items: ${listState.layoutInfo.totalItemsCount}")
+            println("[MSG STORE] Size/Serial changed: $currentSize (prev: $prevMsgSize). Delta: $sizeDelta. Layout total items: ${listState.layoutInfo.totalItemsCount}")
         }
 
         if (stickToBottom && grpmsgs.groupmessages.isNotEmpty() && sizeDelta >= SNAP_TO_BOTTOM_NEW_ITEM_COUNT) {
@@ -375,15 +378,27 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
     // SMOOTH FOLLOW PIPELINE
     // ---------------------------------------------------------------------
     LaunchedEffect(selectedGroupId) {
+        var prevFollowSerial = lastSerial
         var prevFollowSize = grpmsgs.groupmessages.size
 
-        snapshotFlow { grpmsgs.groupmessages.size }
-            .collect { currentSize ->
-                val delta = currentSize - prevFollowSize
+        // FIX: Track a Pair of (lastSerial, size) to detect capped queue updates
+        snapshotFlow { grpmsgs.groupmessages.lastOrNull()?.msgDatabaseId to grpmsgs.groupmessages.size }
+            .collect { (currentSerial, currentSize) ->
+                val logicalDelta = if (currentSerial != prevFollowSerial) {
+                    if (currentSize != prevFollowSize) {
+                        currentSize - prevFollowSize
+                    } else {
+                        // Size didn't change but the last message ID changed.
+                        // This happens when a capped queue drops an old message to add a new one.
+                        1
+                    }
+                } else {
+                    0
+                }
 
-                if (!isInitialLoad && stickToBottom && delta > 0 && delta < SNAP_TO_BOTTOM_NEW_ITEM_COUNT) {
+                if (!isInitialLoad && stickToBottom && logicalDelta > 0 && logicalDelta < SNAP_TO_BOTTOM_NEW_ITEM_COUNT) {
                     if (DEBUG_MESSAGE_SCROLLING) {
-                        println("[SMOOTH FOLLOW] New messages detected. Following bottom smoothly. delta=$delta")
+                        println("[SMOOTH FOLLOW] New messages detected. Following bottom smoothly. logicalDelta=$logicalDelta")
                     }
 
                     safeProgrammaticScroll {
@@ -391,6 +406,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
                     }
                 }
 
+                prevFollowSerial = currentSerial
                 prevFollowSize = currentSize
             }
     }
@@ -459,8 +475,6 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
         // ---------------------------------------------------------------------
         // Initial snap pipeline
         // ---------------------------------------------------------------------
-        val lastSerial = grpmsgs.groupmessages.lastOrNull()?.msgDatabaseId
-
         LaunchedEffect(lastSerial, selectedGroupId) {
             if (DEBUG_MESSAGE_SCROLLING) {
                 println("[LAST SERIAL EFFECT] Triggered. LastSerial: $lastSerial, SelectedGroupId: $selectedGroupId, isInitialLoad: $isInitialLoad, stickToBottom: $stickToBottom, DB size: ${grpmsgs.groupmessages.size}")
