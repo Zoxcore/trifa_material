@@ -58,6 +58,9 @@ class ChatScrollManager(
     }
 
     suspend fun jumpToBottom(minimumDbCount: Int) {
+        if (DEBUG_MESSAGE_SCROLLING) {
+            println("[JUMP TO BOTTOM] The user explicitly wants to go to the bottom, so re-attach")
+        }
         // The user explicitly wants to go to the bottom, so re-attach.
         stickToBottom = true
 
