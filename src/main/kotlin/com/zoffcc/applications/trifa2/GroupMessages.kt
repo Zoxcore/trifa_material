@@ -7,6 +7,7 @@ import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
@@ -19,6 +20,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -34,62 +36,51 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.zoffcc.applications.trifa.MainActivity.Companion.DEBUG_MESSAGE_SCROLLING
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.ExperimentalResourceApi
+import kotlin.math.abs
 import kotlin.time.Duration.Companion.milliseconds
 
-@Composable
-internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
-                           onReplySelected: (UIGroupMessage) -> Unit,
-                           onDeleteSelected: (UIGroupMessage) -> Unit,
-                           onEmojiSelected: (UIGroupMessage, String) -> Unit
-) {
-    val listState = rememberLazyListState()
-    val grpmsgs by groupmessagestore.stateFlow.collectAsState()
+// ============================================================================
+// REUSABLE SCROLL MANAGER (Can be moved to its own file: ChatScrollManager.kt)
+// ============================================================================
 
-    if (DEBUG_MESSAGE_SCROLLING) {
-        println("[STATE] GroupMessages recomposed. DB Messages: ${grpmsgs.groupmessages.size}, SelectedGroupId: $selectedGroupId")
+class ChatScrollManager(
+    val listState: LazyListState,
+    val scrollToBottomOffset: Int,
+    private val expectedItemCount: (Int) -> Int,
+    private val snapThreshold: Int
+) {
+    var stickToBottom by mutableStateOf(true)
+        private set
+    var isInitialLoad by mutableStateOf(true)
+        private set
+
+    var prevMsgSize by mutableStateOf(0)
+        private set
+
+    var suppressScrollDetection by mutableStateOf(false)
+        private set
+
+    private val scrollDebugState = object {
+        var programmaticScrollActive = false
+        var lastLoggedIndex = listState.firstVisibleItemIndex
+        var lastLoggedOffset = listState.firstVisibleItemScrollOffset
     }
 
-    var stickToBottom by remember { mutableStateOf(true) }
-    var suppressScrollDetection by remember { mutableStateOf(false) }
-    var prevMsgSize by remember { mutableStateOf(grpmsgs.groupmessages.size) }
-    var prevGroupId by remember { mutableStateOf(selectedGroupId) }
-    var isInitialLoad by remember { mutableStateOf(true) }
-
-    val scrollDebugState = remember {
-        object {
-            var programmaticScrollActive = false
-            var lastLoggedIndex = listState.firstVisibleItemIndex
-            var lastLoggedOffset = listState.firstVisibleItemScrollOffset
+    fun resetForRoomSwitch(newSize: Int) {
+        isInitialLoad = true
+        stickToBottom = true
+        prevMsgSize = newSize
+        if (DEBUG_MESSAGE_SCROLLING) {
+            println("[ROOM SWITCH DETECTED] Reset state. stickToBottom: true, isInitialLoad: true, prevMsgSize: $prevMsgSize")
         }
     }
 
-    // Track the last message ID at the top level to share across LaunchedEffects
-    val lastSerial = grpmsgs.groupmessages.lastOrNull()?.msgDatabaseId
-
-    // ---------------------------------------------------------------------
-    // Expected number of items in the LazyColumn.
-    //
-    // LazyColumn contains:
-    //   1x FIRST_ITEM spacer
-    //   0/1x Load Older Messages button
-    //   Nx group messages
-    //   1x LAST_ITEM spacer
-    // ---------------------------------------------------------------------
-    fun expectedLazyItemCount(minimumDbCount: Int = 0): Int {
-        val dbCount = maxOf(grpmsgs.groupmessages.size, minimumDbCount)
-        val loadMoreCount = if (!groupstore.state.fullHistoryActive) 1 else 0
-        return dbCount + loadMoreCount + 2
-    }
-
-    // ---------------------------------------------------------------------
-    // HELPER: Protect programmatic scrolling from being interpreted as user
-    // scrolling, and wait until the LazyColumn has really settled.
-    // ---------------------------------------------------------------------
     suspend fun safeProgrammaticScroll(block: suspend () -> Unit) {
         suppressScrollDetection = true
         scrollDebugState.programmaticScrollActive = true
@@ -113,20 +104,12 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
         }
     }
 
-    // ---------------------------------------------------------------------
-    // HELPER: Smooth chat-style follow-to-bottom.
-    //
-    // Important:
-    // We must wait until LazyColumn layout has caught up with the DB size.
-    // Otherwise we may scroll to the OLD bottom and stop too early.
-    // ---------------------------------------------------------------------
     suspend fun smoothScrollToBottom(minimumDbCount: Int) {
         var iteration = 0
 
         while (iteration < 14 && stickToBottom) {
-            val expectedTotal = expectedLazyItemCount(minimumDbCount)
+            val expectedTotal = expectedItemCount(minimumDbCount)
 
-            // Wait a short time for LazyColumn to contain all known items.
             withTimeoutOrNull(120.milliseconds) {
                 snapshotFlow { listState.layoutInfo.totalItemsCount }
                     .first { it >= expectedTotal }
@@ -147,8 +130,6 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
             val lastVisible = layoutInfo.visibleItemsInfo.lastOrNull() ?: break
 
             if (lastVisible.index >= targetIndex) {
-                // If the final item/spacer is visible but has not been measured yet,
-                // wait one more iteration.
                 if (lastVisible.size <= 0) {
                     delay(16.milliseconds)
                     iteration++
@@ -199,13 +180,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
             delay(16.milliseconds)
         }
 
-        // -----------------------------------------------------------------
-        // Final synchronization.
-        //
-        // This prevents the case where the loop thinks it is finished, but
-        // the layout has just inserted one more item.
-        // -----------------------------------------------------------------
-        val expectedTotal = expectedLazyItemCount(minimumDbCount)
+        val expectedTotal = expectedItemCount(minimumDbCount)
 
         withTimeoutOrNull(200.milliseconds) {
             snapshotFlow { listState.layoutInfo.totalItemsCount }
@@ -221,8 +196,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
         val lastVisible = finalLayoutInfo.visibleItemsInfo.lastOrNull()
 
         if (lastVisible == null) {
-            // Very unusual, but do a safe correction.
-            listState.scrollToItem(targetIndex.coerceAtLeast(0), LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
+            listState.scrollToItem(targetIndex.coerceAtLeast(0), scrollToBottomOffset)
             return
         }
 
@@ -263,23 +237,18 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
                     animationSpec = tween(durationMillis = duration, easing = FastOutSlowInEasing)
                 )
             } else {
-                // If we are still far away after all smooth attempts, force correctness.
                 if (DEBUG_MESSAGE_SCROLLING) {
                     println("[SMOOTH BOTTOM] Final fallback snap. hidden=$hidden")
                 }
-                listState.scrollToItem(targetIndex.coerceAtLeast(0), LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
+                listState.scrollToItem(targetIndex.coerceAtLeast(0), scrollToBottomOffset)
             }
         }
     }
 
-    // ---------------------------------------------------------------------
-    // SCROLL MONITORING & BOTTOM DETECTION
-    // ---------------------------------------------------------------------
-    LaunchedEffect(Unit) {
+    fun startScrollMonitoring(scope: CoroutineScope) {
         if (DEBUG_MESSAGE_SCROLLING) println("[INIT] Setting up scroll monitoring flows.")
 
-        // 1. Monitor exact scroll position changes
-        launch {
+        scope.launch {
             snapshotFlow { listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset }
                 .collect { (index, offset) ->
                     if (index != scrollDebugState.lastLoggedIndex || offset != scrollDebugState.lastLoggedOffset) {
@@ -299,16 +268,14 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
                 }
         }
 
-        // 2. Monitor layout item count changes
-        launch {
+        scope.launch {
             snapshotFlow { listState.layoutInfo.totalItemsCount }
                 .collect { count ->
                     if (DEBUG_MESSAGE_SCROLLING) println("[LAYOUT INFO] Total items count in LazyColumn changed to: $count")
                 }
         }
 
-        // 3. Bottom monitor
-        launch {
+        scope.launch {
             snapshotFlow { listState.isScrollInProgress }.collect { isScrolling ->
                 if (DEBUG_MESSAGE_SCROLLING) {
                     val cause = if (scrollDebugState.programmaticScrollActive) "PROGRAMMATIC" else "USER"
@@ -336,18 +303,14 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
         }
     }
 
-    // ---------------------------------------------------------------------
-    // SAFETY VALVE: Large asynchronous jumps still use a hard snap.
-    // ---------------------------------------------------------------------
-    LaunchedEffect(grpmsgs.groupmessages.size, lastSerial) {
-        val currentSize = grpmsgs.groupmessages.size
-        val sizeDelta = kotlin.math.abs(currentSize - prevMsgSize)
+    suspend fun handleSafetyValve(currentSize: Int) {
+        val sizeDelta = abs(currentSize - prevMsgSize)
 
         if (DEBUG_MESSAGE_SCROLLING) {
             println("[MSG STORE] Size/Serial changed: $currentSize (prev: $prevMsgSize). Delta: $sizeDelta. Layout total items: ${listState.layoutInfo.totalItemsCount}")
         }
 
-        if (stickToBottom && grpmsgs.groupmessages.isNotEmpty() && sizeDelta >= SNAP_TO_BOTTOM_NEW_ITEM_COUNT) {
+        if (stickToBottom && currentSize > 0 && sizeDelta >= snapThreshold) {
             val targetIndex = (listState.layoutInfo.totalItemsCount - 1).coerceAtLeast(0)
 
             if (DEBUG_MESSAGE_SCROLLING) {
@@ -356,14 +319,14 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
 
             safeProgrammaticScroll {
                 try {
-                    listState.scrollToItem(targetIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
+                    listState.scrollToItem(targetIndex, scrollToBottomOffset)
                     if (DEBUG_MESSAGE_SCROLLING) println("[ASYNC ENGINE INTERCEPTOR] Snap successful to index: $targetIndex")
                 } catch (_: IndexOutOfBoundsException) {
                     if (DEBUG_MESSAGE_SCROLLING) println("[ASYNC ENGINE INTERCEPTOR] IndexOutOfBoundsException during snap! Retrying...")
                     val retryIndex = (listState.layoutInfo.totalItemsCount - 1).coerceAtLeast(0)
                     if (retryIndex >= 0) {
                         try {
-                            listState.scrollToItem(retryIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
+                            listState.scrollToItem(retryIndex, scrollToBottomOffset)
                         } catch (_: Exception) {
                         }
                     }
@@ -374,15 +337,11 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
         prevMsgSize = currentSize
     }
 
-    // ---------------------------------------------------------------------
-    // SMOOTH FOLLOW PIPELINE
-    // ---------------------------------------------------------------------
-    LaunchedEffect(selectedGroupId) {
-        var prevFollowSerial = lastSerial
-        var prevFollowSize = grpmsgs.groupmessages.size
+    suspend fun startSmoothFollow(getState: () -> Pair<Any?, Int>) {
+        var prevFollowSerial = getState().first
+        var prevFollowSize = getState().second
 
-        // FIX: Track a Pair of (lastSerial, size) to detect capped queue updates
-        snapshotFlow { grpmsgs.groupmessages.lastOrNull()?.msgDatabaseId to grpmsgs.groupmessages.size }
+        snapshotFlow { getState() }
             .collect { (currentSerial, currentSize) ->
                 val logicalDelta = if (currentSerial != prevFollowSerial) {
                     if (currentSize != prevFollowSize) {
@@ -396,7 +355,7 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
                     0
                 }
 
-                if (!isInitialLoad && stickToBottom && logicalDelta > 0 && logicalDelta < SNAP_TO_BOTTOM_NEW_ITEM_COUNT) {
+                if (!isInitialLoad && stickToBottom && logicalDelta > 0 && logicalDelta < snapThreshold) {
                     if (DEBUG_MESSAGE_SCROLLING) {
                         println("[SMOOTH FOLLOW] New messages detected. Following bottom smoothly. logicalDelta=$logicalDelta")
                     }
@@ -410,6 +369,139 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
                 prevFollowSize = currentSize
             }
     }
+
+    suspend fun handleInitialSnap(lastSerial: Any?, currentSize: Int) {
+        if (DEBUG_MESSAGE_SCROLLING) {
+            println("[LAST SERIAL EFFECT] Triggered. LastSerial: $lastSerial, isInitialLoad: $isInitialLoad, stickToBottom: $stickToBottom, DB size: $currentSize")
+        }
+
+        if (lastSerial != null) {
+            if (isInitialLoad) {
+                if (currentSize > 0) {
+                    val targetLayoutIndex = (listState.layoutInfo.totalItemsCount - 1).coerceAtLeast(0)
+
+                    if (DEBUG_MESSAGE_SCROLLING) {
+                        println("[EXECUTION: INITIAL SNAP] Snapping to bottom index: $targetLayoutIndex. Total items in DB: $currentSize")
+                    }
+
+                    safeProgrammaticScroll {
+                        try {
+                            listState.scrollToItem(targetLayoutIndex, scrollToBottomOffset)
+                        } catch (_: IndexOutOfBoundsException) {
+                            if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: INITIAL SNAP] IndexOutOfBoundsException. Retrying...")
+                            val retryIndex = (listState.layoutInfo.totalItemsCount - 1).coerceAtLeast(0)
+                            if (retryIndex >= 0) {
+                                try {
+                                    listState.scrollToItem(retryIndex, scrollToBottomOffset)
+                                } catch (_: Exception) {
+                                }
+                            }
+                        }
+                    }
+                }
+
+                isInitialLoad = false
+            } else if (stickToBottom) {
+                if (DEBUG_MESSAGE_SCROLLING) {
+                    println("[LAST SERIAL EFFECT] stickToBottom follow delegated to smooth follower.")
+                }
+            } else {
+                if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: SKIPPED] User scrolled away from bottom.")
+            }
+        } else {
+            if (DEBUG_MESSAGE_SCROLLING) println("[LAST SERIAL EFFECT] lastSerial is null. Skipping execution.")
+        }
+    }
+}
+
+@Composable
+fun rememberChatScrollManager(
+    listState: LazyListState,
+    messagesSize: Int,
+    lastSerial: Any?,
+    selectedRoomId: String?,
+    expectedItemCount: (Int) -> Int,
+    snapToBottomNewItemCount: Int,
+    scrollToBottomOffset: Int
+): ChatScrollManager {
+
+    val manager = remember {
+        ChatScrollManager(
+            listState = listState,
+            scrollToBottomOffset = scrollToBottomOffset,
+            expectedItemCount = expectedItemCount,
+            snapThreshold = snapToBottomNewItemCount
+        )
+    }
+
+    var prevGroupId by remember { mutableStateOf(selectedRoomId) }
+
+    if (prevGroupId != selectedRoomId) {
+        if (DEBUG_MESSAGE_SCROLLING) {
+            println("[ROOM SWITCH DETECTED] Resetting Parameters. Old: $prevGroupId, New: $selectedRoomId")
+        }
+        prevGroupId = selectedRoomId
+        manager.resetForRoomSwitch(messagesSize)
+    }
+
+    // Use rememberUpdatedState to ensure the lambda inside startSmoothFollow
+    // always reads the absolute latest values without triggering a relaunch.
+    val currentMessagesSize by rememberUpdatedState(messagesSize)
+    val currentLastSerial by rememberUpdatedState(lastSerial)
+
+    LaunchedEffect(Unit) {
+        manager.startScrollMonitoring(this)
+    }
+
+    LaunchedEffect(messagesSize, lastSerial) {
+        manager.handleSafetyValve(messagesSize)
+    }
+
+    LaunchedEffect(selectedRoomId) {
+        manager.startSmoothFollow { currentLastSerial to currentMessagesSize }
+    }
+
+    LaunchedEffect(lastSerial, selectedRoomId) {
+        manager.handleInitialSnap(lastSerial, messagesSize)
+    }
+
+    return manager
+}
+
+
+// ============================================================================
+// UI COMPOSABLES
+// ============================================================================
+
+@Composable
+internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
+                           onReplySelected: (UIGroupMessage) -> Unit,
+                           onDeleteSelected: (UIGroupMessage) -> Unit,
+                           onEmojiSelected: (UIGroupMessage, String) -> Unit
+) {
+    val listState = rememberLazyListState()
+    val grpmsgs by groupmessagestore.stateFlow.collectAsState()
+
+    if (DEBUG_MESSAGE_SCROLLING) {
+        println("[STATE] GroupMessages recomposed. DB Messages: ${grpmsgs.groupmessages.size}, SelectedGroupId: $selectedGroupId")
+    }
+
+    val lastSerial = grpmsgs.groupmessages.lastOrNull()?.msgDatabaseId
+    val messagesSize = grpmsgs.groupmessages.size
+
+    // All complex scrolling logic is neatly handled by the manager here
+    val scrollManager = rememberChatScrollManager(
+        listState = listState,
+        messagesSize = messagesSize,
+        lastSerial = lastSerial,
+        selectedRoomId = selectedGroupId,
+        expectedItemCount = { dbCount ->
+            val loadMoreCount = if (!groupstore.state.fullHistoryActive) 1 else 0
+            dbCount + loadMoreCount + 2
+        },
+        snapToBottomNewItemCount = SNAP_TO_BOTTOM_NEW_ITEM_COUNT,
+        scrollToBottomOffset = LAST_MSG_SCROLL_TO_SCROLL_OFFSET
+    )
 
     Box(Modifier.fillMaxSize()) {
         LazyColumn(
@@ -453,72 +545,6 @@ internal fun GroupMessages(ui_scale: Float, selectedGroupId: String?,
             adapter = rememberScrollbarAdapter(listState),
             modifier = Modifier.fillMaxHeight().align(CenterEnd).width(10.dp)
         )
-
-        // ---------------------------------------------------------------------
-        // Room switch detector
-        // ---------------------------------------------------------------------
-        if (prevGroupId != selectedGroupId) {
-            if (DEBUG_MESSAGE_SCROLLING) {
-                println("[ROOM SWITCH DETECTED] Resetting Parameters. Old: $prevGroupId, New: $selectedGroupId")
-            }
-
-            prevGroupId = selectedGroupId
-            isInitialLoad = true
-            stickToBottom = true
-            prevMsgSize = grpmsgs.groupmessages.size
-
-            if (DEBUG_MESSAGE_SCROLLING) {
-                println("[ROOM SWITCH DETECTED] Reset state. stickToBottom: true, isInitialLoad: true, prevMsgSize: $prevMsgSize")
-            }
-        }
-
-        // ---------------------------------------------------------------------
-        // Initial snap pipeline
-        // ---------------------------------------------------------------------
-        LaunchedEffect(lastSerial, selectedGroupId) {
-            if (DEBUG_MESSAGE_SCROLLING) {
-                println("[LAST SERIAL EFFECT] Triggered. LastSerial: $lastSerial, SelectedGroupId: $selectedGroupId, isInitialLoad: $isInitialLoad, stickToBottom: $stickToBottom, DB size: ${grpmsgs.groupmessages.size}")
-            }
-
-            if (lastSerial != null) {
-                if (isInitialLoad) {
-                    if (grpmsgs.groupmessages.isNotEmpty()) {
-                        val targetLayoutIndex = (listState.layoutInfo.totalItemsCount - 1).coerceAtLeast(0)
-
-                        if (DEBUG_MESSAGE_SCROLLING) {
-                            println("[EXECUTION: INITIAL SNAP] Snapping to bottom index: $targetLayoutIndex. Total items in DB: ${grpmsgs.groupmessages.size}")
-                        }
-
-                        safeProgrammaticScroll {
-                            try {
-                                listState.scrollToItem(targetLayoutIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
-                            } catch (_: IndexOutOfBoundsException) {
-                                if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: INITIAL SNAP] IndexOutOfBoundsException. Retrying...")
-                                val retryIndex = (listState.layoutInfo.totalItemsCount - 1).coerceAtLeast(0)
-                                if (retryIndex >= 0) {
-                                    try {
-                                        listState.scrollToItem(retryIndex, LAST_MSG_SCROLL_TO_SCROLL_OFFSET)
-                                    } catch (_: Exception) {
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    isInitialLoad = false
-                } else if (stickToBottom) {
-                    // Normal new-message following is handled by the dedicated
-                    // smooth-follow LaunchedEffect(selectedGroupId) above.
-                    if (DEBUG_MESSAGE_SCROLLING) {
-                        println("[LAST SERIAL EFFECT] stickToBottom follow delegated to smooth follower.")
-                    }
-                } else {
-                    if (DEBUG_MESSAGE_SCROLLING) println("[EXECUTION: SKIPPED] User scrolled away from bottom.")
-                }
-            } else {
-                if (DEBUG_MESSAGE_SCROLLING) println("[LAST SERIAL EFFECT] lastSerial is null. Skipping execution.")
-            }
-        }
     }
 }
 
