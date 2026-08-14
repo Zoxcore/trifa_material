@@ -34,6 +34,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.zoffcc.applications.trifa.MainActivity.Companion.DEBUG_MESSAGE_SCROLLING
+import com.zoffcc.applications.trifa2.rememberChatScrollManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -126,7 +127,6 @@ fun calc_avatar_size(avatar_size: Float): Float
     return avatar_size
 }
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun UserPic(user: User, ui_scale: Float) {
     val imageSize = (calc_avatar_size(AVATAR_SIZE * ui_scale))
