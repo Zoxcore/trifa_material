@@ -1,8 +1,5 @@
 package com.zoffcc.applications.trifa2
 
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -13,6 +10,9 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import com.zoffcc.applications.trifa.MainActivity.Companion.DEBUG_MESSAGE_SCROLLING
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.gestures.animateScrollBy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -20,10 +20,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.math.abs
 import kotlin.time.Duration.Companion.milliseconds
-
-// ============================================================================
-// REUSABLE SCROLL MANAGER (Can be moved to its own file: ChatScrollManager.kt)
-// ============================================================================
 
 class ChatScrollManager(
     val listState: LazyListState,
@@ -251,28 +247,30 @@ class ChatScrollManager(
                 }
         }
 
+        // FIXED BOTTOM MONITOR
         scope.launch {
-            snapshotFlow { listState.isScrollInProgress }.collect { isScrolling ->
-                if (DEBUG_MESSAGE_SCROLLING) {
-                    val cause = if (scrollDebugState.programmaticScrollActive) "PROGRAMMATIC" else "USER"
-                    println("[BOTTOM MONITOR] Scroll state changed. isScrolling: $isScrolling. Cause: $cause")
-                }
-
+            snapshotFlow {
                 val layoutInfo = listState.layoutInfo
-                val lastVisible = layoutInfo.visibleItemsInfo.lastOrNull()
-                val atBottom = lastVisible != null && lastVisible.index >= layoutInfo.totalItemsCount - 2
+                val lastVisibleIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
+                val totalItems = layoutInfo.totalItemsCount
+                val isScrolling = listState.isScrollInProgress
+                Triple(lastVisibleIndex, totalItems, isScrolling)
+            }.collect { (lastVisibleIndex, totalItems, isScrolling) ->
+                if (suppressScrollDetection) return@collect
 
-                if (!isScrolling && !suppressScrollDetection) {
-                    if (DEBUG_MESSAGE_SCROLLING) {
-                        println("[BOTTOM MONITOR] Scroll stopped. TotalItems: ${layoutInfo.totalItemsCount}, LastVisibleIndex: ${lastVisible?.index}, atBottom: $atBottom, CurrentStickToBottom: $stickToBottom")
-                    }
+                val atBottom = lastVisibleIndex >= totalItems - 2
 
-                    if (atBottom) {
-                        if (!stickToBottom && DEBUG_MESSAGE_SCROLLING) println("[BOTTOM MONITOR] Reached bottom, attaching.")
-                        stickToBottom = true
-                    } else {
-                        if (stickToBottom && DEBUG_MESSAGE_SCROLLING) println("[BOTTOM MONITOR] User scrolled UP. Detaching from bottom.")
+                if (!atBottom) {
+                    // DETACH IMMEDIATELY if we are not at the bottom, regardless of scroll state
+                    if (stickToBottom) {
                         stickToBottom = false
+                        if (DEBUG_MESSAGE_SCROLLING) println("[BOTTOM MONITOR] Scrolled away from bottom. Detaching.")
+                    }
+                } else if (!isScrolling) {
+                    // ATTACH only when at bottom AND scrolling has completely stopped
+                    if (!stickToBottom) {
+                        stickToBottom = true
+                        if (DEBUG_MESSAGE_SCROLLING) println("[BOTTOM MONITOR] Reached bottom and stopped scrolling. Attaching.")
                     }
                 }
             }
@@ -323,8 +321,6 @@ class ChatScrollManager(
                     if (currentSize != prevFollowSize) {
                         currentSize - prevFollowSize
                     } else {
-                        // Size didn't change but the last message ID changed.
-                        // This happens when a capped queue drops an old message to add a new one.
                         1
                     }
                 } else {
@@ -420,8 +416,6 @@ fun rememberChatScrollManager(
         manager.resetForRoomSwitch(messagesSize)
     }
 
-    // Use rememberUpdatedState to ensure the lambda inside startSmoothFollow
-    // always reads the absolute latest values without triggering a relaunch.
     val currentMessagesSize by rememberUpdatedState(messagesSize)
     val currentLastSerial by rememberUpdatedState(lastSerial)
 
@@ -443,4 +437,3 @@ fun rememberChatScrollManager(
 
     return manager
 }
-
