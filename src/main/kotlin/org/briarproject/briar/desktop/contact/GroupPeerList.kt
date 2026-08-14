@@ -162,7 +162,7 @@ fun GroupPeerList(
                     // Modern Two-Tier Header Layout
                     Column(modifier = Modifier.padding(bottom = 16.dp)) {
                         Text(
-                            text = "Send Message",
+                            text = "Private Message",
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurface
