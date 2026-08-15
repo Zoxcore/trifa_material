@@ -75,6 +75,12 @@ fun ContactList(
     var showInviteDialog by remember { mutableStateOf(false) }
     var contactToInvite by remember { mutableStateOf<ContactItem?>(null) }
 
+    var showConfirmInviteDialog by remember { mutableStateOf(false) }
+    var pendingInviteGroupId by remember { mutableStateOf<String?>(null) }
+    var pendingInviteGroupName by remember { mutableStateOf<String?>(null) }
+
+    val dialogScope = rememberCoroutineScope()
+
     if (showDeleteDialog) {
         val itemToDeleteSnapshot = itemToDelete!!
         AlertDialog(
@@ -118,10 +124,54 @@ fun ContactList(
         )
     }
 
+    if (showConfirmInviteDialog && contactToInvite != null && pendingInviteGroupId != null) {
+        val contactToInviteSnapshot = contactToInvite!!
+        val groupIdSnapshot = pendingInviteGroupId!!
+        val groupNameSnapshot = pendingInviteGroupName ?: "the selected group"
+
+        AlertDialog(
+            onDismissRequest = {
+                showConfirmInviteDialog = false
+            },
+            title = { Text("Confirm Invitation") },
+            text = { Text("Are you sure you want to invite " +
+                    "(${contactToInviteSnapshot.pubkey.take(6)}) / ${contactToInviteSnapshot.name.take(20)} " +
+                    " to \"$groupNameSnapshot\"?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showConfirmInviteDialog = false
+                        dialogScope.launch {
+                            val group_num = HelperGroup.tox_group_by_groupid__wrapper(groupIdSnapshot)
+                            val friend_num = tox_friend_by_public_key(contactToInviteSnapshot.pubkey)
+                            tox_group_invite_friend(group_num, friend_num)
+                            update_savedata_file_wrapper()
+                        }
+                        contactToInvite = null
+                        pendingInviteGroupId = null
+                        pendingInviteGroupName = null
+                    }
+                ) {
+                    Text("Invite")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showConfirmInviteDialog = false
+                        contactToInvite = null
+                        pendingInviteGroupId = null
+                        pendingInviteGroupName = null
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 
     if (showInviteDialog && contactToInvite != null) {
         val contactToInviteSnapshot = contactToInvite!!
-        val dialogScope = rememberCoroutineScope()
 
         AlertDialog(
             onDismissRequest = {
@@ -185,14 +235,10 @@ fun ContactList(
                                             .fillMaxWidth()
                                             .clip(RoundedCornerShape(12.dp))
                                             .clickable {
-                                                dialogScope.launch {
-                                                    val group_num = HelperGroup.tox_group_by_groupid__wrapper(group.groupId)
-                                                    val friend_num = tox_friend_by_public_key(contactToInviteSnapshot.pubkey)
-                                                    tox_group_invite_friend(group_num, friend_num)
-                                                    update_savedata_file_wrapper()
-                                                }
+                                                pendingInviteGroupId = group.groupId
+                                                pendingInviteGroupName = group.name
+                                                showConfirmInviteDialog = true
                                                 showInviteDialog = false
-                                                contactToInvite = null
                                             }
                                             .padding(horizontal = 16.dp, vertical = 14.dp),
                                         verticalAlignment = Alignment.CenterVertically
@@ -267,12 +313,12 @@ fun ContactList(
                 val ListItemViewScope = rememberCoroutineScope()
                 ListItemView(
                     onSelect = {
-                                friendsettingsstore.visible(false)
-                                ListItemViewScope.launch { globalstore.try_clear_unread_message_count() }
-                                globalfrndstoreunreadmsgs.hard_clear_unread_per_friend_message_count(item.pubkey)
-                                contactstore.select(item.pubkey)
-                                contactstore.fullHistoryActive(false)
-                               },
+                        friendsettingsstore.visible(false)
+                        ListItemViewScope.launch { globalstore.try_clear_unread_message_count() }
+                        globalfrndstoreunreadmsgs.hard_clear_unread_per_friend_message_count(item.pubkey)
+                        contactstore.select(item.pubkey)
+                        contactstore.fullHistoryActive(false)
+                    },
                     selected = (contactList.selectedContactPubkey == item.pubkey)
                 ) {
                     var bgcolor = if (item.is_relay) Color(BG_COLOR_RELAY_CONTACT_ITEM) else Color.Transparent
