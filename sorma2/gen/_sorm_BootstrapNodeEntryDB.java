@@ -59,13 +59,7 @@ public class BootstrapNodeEntryDB
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     public String key_hex;
 
-    @Override
-    public String toString()
-    {
-        // return "" + num + ":" + ip + " port=" + port + " udp_node=" + udp_node + " key_hex=" + key_hex;
-        // return "" + num + ":" + ip + " port=" + port + " udp_node="+  udp_node;
-        return "" + num + ":" + ip + " port=" + port + " udp_node=" + udp_node + "\n";
-    }
+// ______@@SORMA_END@@______
 
     public long get_port()
     {
@@ -76,12 +70,6 @@ public class BootstrapNodeEntryDB
     {
         return ip;
     }
-
-    String sql_start = "";
-    String sql_set = "";
-    String sql_where = "where 1=1 "; // where
-    String sql_orderby = ""; // order by
-    String sql_limit = ""; // limit
 
     public static List<BootstrapNodeEntryDB> bootstrap_node_list = new ArrayList<>();
     public static List<BootstrapNodeEntryDB> tcprelay_node_list = new ArrayList<>();
@@ -229,6 +217,78 @@ public class BootstrapNodeEntryDB
         // @formatter:on
     }
 
+    public static void get_udp_nodelist_from_db(OrmaDatabase orma)
+    {
+        bootstrap_node_list.clear();
+
+        long udp_nodelist_count = 0;
+        try
+        {
+            udp_nodelist_count = orma.selectFromBootstrapNodeEntryDB().
+                    udp_nodeEq(true).count();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        Log.i(TAG, "get_udp_nodelist_from_db:udp_nodelist_count=" + udp_nodelist_count);
+
+        if (udp_nodelist_count == 0)
+        {
+            Log.i(TAG, "get_udp_nodelist_from_db:insert_default_udp_nodes_into_db");
+            insert_default_udp_nodes_into_db(orma);
+        }
+
+        // fill bootstrap_node_list with values from DB -----------------
+        try
+        {
+            bootstrap_node_list.addAll(orma.selectFromBootstrapNodeEntryDB().udp_nodeEq(true).orderByNumAsc().toList());
+            Log.i(TAG, "get_udp_nodelist_from_db:bootstrap_node_list.addAll");
+        }
+        catch (Exception e)
+        {
+        }
+        // fill bootstrap_node_list with values from DB -----------------
+    }
+
+    public static void get_tcprelay_nodelist_from_db(OrmaDatabase orma)
+    {
+        tcprelay_node_list.clear();
+
+        long tcprelay_nodelist_count = 0;
+        try
+        {
+            tcprelay_nodelist_count = orma.selectFromBootstrapNodeEntryDB().
+                    udp_nodeEq(false).count();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        Log.i(TAG, "get_tcprelay_nodelist_from_db:tcprelay_nodelist_count=" + tcprelay_nodelist_count);
+
+        if (tcprelay_nodelist_count == 0)
+        {
+            Log.i(TAG, "get_tcprelay_nodelist_from_db:insert_default_tcprelay_nodes_into_db");
+            insert_default_tcprelay_nodes_into_db(orma);
+        }
+
+        // fill tcprelay_node_list with values from DB -----------------
+        try
+        {
+            tcprelay_node_list.addAll(orma.selectFromBootstrapNodeEntryDB().udp_nodeEq(false).
+                    orderByNumAsc().toList());
+            Log.i(TAG, "get_tcprelay_nodelist_from_db:tcprelay_node_list.addAll");
+        }
+        catch (Exception e)
+        {
+        }
+        // fill tcprelay_node_list with values from DB -----------------
+    }
+
+
     public static BootstrapNodeEntryDB BootstrapNodeEntryDB_(boolean udp_node_, int num_, String ip_, long port_, String key_hex_)
     {
         BootstrapNodeEntryDB n = new BootstrapNodeEntryDB();
@@ -239,101 +299,6 @@ public class BootstrapNodeEntryDB
         n.key_hex = key_hex_;
 
         return n;
-    }
-
-    public int count()
-    {
-        int ret = 0;
-
-        try
-        {
-            Statement statement = sqldb.createStatement();
-            this.sql_start = "SELECT count(*) as count FROM " + this.getClass().getSimpleName();
-
-            final String sql = this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit;
-            if (ORMA_TRACE)
-            {
-                Log.i(TAG, "sql=" + sql);
-            }
-
-            ResultSet rs = statement.executeQuery(sql);
-
-            if (rs.next())
-            {
-                ret = rs.getInt("count");
-            }
-
-            try
-            {
-                statement.close();
-            }
-            catch (Exception ignored)
-            {
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        return ret;
-    }
-
-    public List<BootstrapNodeEntryDB> toList()
-    {
-        List<BootstrapNodeEntryDB> list = new ArrayList<>();
-
-        try
-        {
-            Statement statement = sqldb.createStatement();
-            ResultSet rs = statement.executeQuery(
-                    this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit);
-            while (rs.next())
-            {
-                BootstrapNodeEntryDB out = new BootstrapNodeEntryDB();
-
-                out.id = rs.getLong("id");
-                out.num = rs.getLong("num");
-                out.udp_node = rs.getBoolean("udp_node");
-                out.ip = rs.getString("ip");
-                out.port = rs.getLong("port");
-                out.key_hex = rs.getString("key_hex");
-
-                list.add(out);
-            }
-
-            try
-            {
-                statement.close();
-            }
-            catch (Exception ignored)
-            {
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        return list;
-    }
-
-    private BootstrapNodeEntryDB orderByNumAsc() {
-        if (this.sql_orderby.equals(""))
-        {
-            this.sql_orderby = " order by ";
-        }
-        else
-        {
-            this.sql_orderby = this.sql_orderby + " , ";
-        }
-        this.sql_orderby = this.sql_orderby + " num ASC ";
-        return this;
-    }
-
-    private BootstrapNodeEntryDB udp_nodeEq(boolean udp_node) {
-        this.sql_where = this.sql_where + " and udp_node='" + b(udp_node) + "' ";
-        return this;
     }
 
     public static void get_udp_nodelist_from_db(OrmaDatabase orma)
@@ -407,96 +372,4 @@ public class BootstrapNodeEntryDB
         // fill tcprelay_node_list with values from DB -----------------
     }
 
-    public long insert()
-    {
-        long ret = -1;
 
-        try
-        {
-            // @formatter:off
-            Statement statement = sqldb.createStatement();
-            final String sql_str="insert into " + this.getClass().getSimpleName() +
-                    "(" +
-                    "num,"+
-                    "udp_node,"+
-                    "ip,"	+
-                    "port,"	+
-                    "key_hex"+
-                    ")" +
-                    "values" +
-                    "(" +
-                    "'"+s(this.num)+"'," +
-                    "'"+b(this.udp_node)+"'," +
-                    "'"+s(this.ip)+"'," +
-                    "'"+s(this.port)+"'," +
-                    "'"+s(this.key_hex)+"'" +
-                    ")";
-
-            orma_semaphore_lastrowid_on_insert.acquire();
-            statement.execute(sql_str);
-            ret = get_last_rowid(statement);
-            orma_semaphore_lastrowid_on_insert.release();
-            // @formatter:on
-
-            try
-            {
-                statement.close();
-            }
-            catch (Exception ignored)
-            {
-            }
-        }
-        catch (Exception e)
-        {
-            orma_semaphore_lastrowid_on_insert.release();
-            throw new RuntimeException(e);
-        }
-
-        return ret;
-    }
-
-    public BootstrapNodeEntryDB idEq(long id) {
-        this.sql_where = this.sql_where + " and id='" + s(id) + "' ";
-        return this;
-    }
-
-    @NotNull
-    public BootstrapNodeEntryDB orderByIdAsc() {
-        if (this.sql_orderby.equals(""))
-        {
-            this.sql_orderby = " order by ";
-        }
-        else
-        {
-            this.sql_orderby = this.sql_orderby + " , ";
-        }
-        this.sql_orderby = this.sql_orderby + " id ASC ";
-        return this;
-    }
-
-    public void execute()
-    {
-        try
-        {
-            Statement statement = sqldb.createStatement();
-            final String sql = this.sql_start + " " + this.sql_set + " " + this.sql_where;
-            if (ORMA_TRACE)
-            {
-                Log.i(TAG, "sql=" + sql);
-            }
-            statement.executeUpdate(sql);
-            try
-            {
-                statement.close();
-            }
-            catch (Exception ignored)
-            {
-            }
-        }
-        catch (Exception e2)
-        {
-            e2.printStackTrace();
-            Log.i(TAG, "EE1:" + e2.getMessage());
-        }
-    }
-}
