@@ -14,10 +14,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Text
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -133,12 +136,87 @@ fun ContactList(
             onDismissRequest = {
                 showConfirmInviteDialog = false
             },
-            title = { Text("Confirm Invitation") },
-            text = { Text("Are you sure you want to invite " +
-                    "(${contactToInviteSnapshot.pubkey.take(6)}) / ${contactToInviteSnapshot.name.take(20)} " +
-                    " to \"$groupNameSnapshot\"?") },
+            modifier = Modifier
+                .padding(24.dp)
+                .widthIn(max = 420.dp),
+            shape = RoundedCornerShape(28.dp),
+            containerColor = MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp,
+            title = {
+                Text(
+                    text = "Confirm Invitation",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text(
+                        text = "You are about to invite the following contact:",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    // Modern Contact Card
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            // Avatar placeholder
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .background(
+                                        color = MaterialTheme.colorScheme.primaryContainer,
+                                        shape = CircleShape
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = contactToInviteSnapshot.name.take(1).ifEmpty { contactToInviteSnapshot.pubkey.take(1) }.uppercase(),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = contactToInviteSnapshot.name.take(20).ifEmpty { "Unknown Contact" },
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "ID: ${contactToInviteSnapshot.pubkey.take(6)}...",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontFamily = FontFamily.Monospace,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+                    }
+
+                    Text(
+                        text = "To the group: \"$groupNameSnapshot\"",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            },
             confirmButton = {
-                TextButton(
+                Button(
                     onClick = {
                         showConfirmInviteDialog = false
                         dialogScope.launch {
@@ -150,9 +228,13 @@ fun ContactList(
                         contactToInvite = null
                         pendingInviteGroupId = null
                         pendingInviteGroupName = null
-                    }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    ),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Invite")
+                    Text("Invite", fontWeight = FontWeight.SemiBold)
                 }
             },
             dismissButton = {
@@ -162,9 +244,10 @@ fun ContactList(
                         contactToInvite = null
                         pendingInviteGroupId = null
                         pendingInviteGroupName = null
-                    }
+                    },
+                    shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Cancel")
+                    Text("Cancel", fontWeight = FontWeight.SemiBold)
                 }
             }
         )
