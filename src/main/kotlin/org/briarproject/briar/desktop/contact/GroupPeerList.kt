@@ -168,7 +168,7 @@ fun GroupPeerList(
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = "To: (${peerSnapshot.pubkey.take(8).uppercase()}) ${peerSnapshot.name.take(20)}",
+                            text = "To: ${peerSnapshot.pubkey.take(6).uppercase()} / ${peerSnapshot.name.take(20)}",
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurface
