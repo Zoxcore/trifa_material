@@ -17,7 +17,10 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -169,7 +172,7 @@ fun ContactList(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            // Avatar placeholder
+                            // Avatar Circle
                             Box(
                                 modifier = Modifier
                                     .size(40.dp)
@@ -179,36 +182,26 @@ fun ContactList(
                                     ),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    text = contactToInviteSnapshot.name.take(1).ifEmpty { contactToInviteSnapshot.pubkey.take(1) }.uppercase(),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
+                                ProfileCircle(40.dp, contactToInviteSnapshot)
                             }
 
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = contactToInviteSnapshot.name.take(20).ifEmpty { "Unknown Contact" },
+                                    // First 6 of pubkey, then username
+                                    text = "${contactToInviteSnapshot.pubkey.take(6)} / ${contactToInviteSnapshot.name.take(20).ifEmpty { "Unknown" }}",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.SemiBold,
                                     color = MaterialTheme.colorScheme.onSecondaryContainer,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text(
-                                    text = "ID: ${contactToInviteSnapshot.pubkey.take(6)}...",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    fontFamily = FontFamily.Monospace,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
-                                )
                             }
                         }
                     }
 
                     Text(
-                        text = "To the group: \"$groupNameSnapshot\"",
+                        // First 8 of groupid, then groupname
+                        text = "To the group: ${groupIdSnapshot.take(8)} / $groupNameSnapshot",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = FontWeight.Medium
@@ -377,7 +370,6 @@ fun ContactList(
             }
         }
     }
-
 
     VerticallyScrollableArea(modifier = Modifier.randomDebugBorder().fillMaxSize()) { scrollState ->
         LazyColumn(
