@@ -199,20 +199,39 @@ fun ContactList(
                         }
                     }
 
-                    Text(
-                        // First 8 of groupid, then groupname
-                        text = "To the group: ${groupIdSnapshot.take(8)} / $groupNameSnapshot",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontWeight = FontWeight.Medium
-                    )
+                    // Stylish Group Item
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = "To the group",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                text = "${groupIdSnapshot.take(8)} / $groupNameSnapshot",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
                 }
             },
             confirmButton = {
                 Button(
                     onClick = {
                         showConfirmInviteDialog = false
-                        dialogScope.launch {
+                        GlobalScope.launch {
                             val group_num = HelperGroup.tox_group_by_groupid__wrapper(groupIdSnapshot)
                             val friend_num = tox_friend_by_public_key(contactToInviteSnapshot.pubkey)
                             tox_group_invite_friend(group_num, friend_num)
