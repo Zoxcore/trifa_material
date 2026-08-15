@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 
 public class Generator {
     private static final String TAG = "Generator";
-    static final String Version = "0.99.2";
+    static final String Version = "0.99.3";
     static final String prefix = "_sorm_";
     static final String tbl_f_ext = ".java";
     static final String tbl_s_ext = ".sql";
@@ -534,6 +534,23 @@ public class Generator {
         return tmp.substring(0, min3(i1, i2, i3)).trim();
     }
 
+    static String get_default_value(final String in)
+    {
+        String tmp = in.trim();
+        int i_eq = tmp.indexOf("=");
+        int i_semi = tmp.indexOf(";");
+
+        if (i_eq > 0 && (i_semi < 0 || i_eq < i_semi))
+        {
+            return " " + tmp.substring(i_eq);
+        }
+        else if (i_semi > 0)
+        {
+            return tmp.substring(i_semi);
+        }
+        return "";
+    }
+
     static COLTYPE get_type(final String in)
     {
         if (in.trim().toLowerCase().startsWith("long"))
@@ -555,13 +572,33 @@ public class Generator {
         return COLTYPE.UNKNOWN;
     }
 
+    private static String sanitizeColumnName(String input)
+    {
+        if (input == null) return "";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < input.length(); i++)
+        {
+            char c = input.charAt(i);
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c == '-')
+            {
+                sb.append(c);
+            }
+            else
+            {
+                sb.append('_');
+            }
+        }
+        return sb.toString();
+    }
+
     static String process_primary_key(final String workdir, final String infilename,
                                     final String outfilename, final String table_name,
                                     final String p)
     {
         final String p2 = remove_public(p);
         final String p3 = remove_type(p2);
-        final String column_name = get_name(p3);
+        final String column_name = sanitizeColumnName(get_name(p3));
+        final String default_value = get_default_value(p3);
         final COLTYPE p5 = get_type(p2);
         final String javatype_firstupper = p5.javatype.substring(0,1).toUpperCase() + p5.javatype.substring(1);
         System.out.println("P: " + column_name + " type: " + p5.name);
@@ -585,14 +622,14 @@ public class Generator {
             // -----------
             tbl_insert_sub03 += "            insert_pstmt.set"+javatype_firstupper+"("+column_num+", this."+column_name+");" + "\n";
         }
-        append_to_table(workdir, table_name, "    public " + p5.javatype + " "+column_name+";");
+        append_to_table(workdir, table_name, "    public " + p5.javatype + " "+column_name+default_value+(default_value.isEmpty() ? ";" : ""));
         append_to_table(workdir, table_name, "");
 
         append_to_sql(workdir, table_name, "  \""+column_name+"\" "+primary_key_column_sqlitetype+",");
 
         tbl_deepcopy += "        out."+column_name+" = in."+column_name+";" + "\n";
         tbl_tostring += "\""+column_name+"=\" + "+column_name+"";
-        tbl_tolist += "                out."+column_name+" = rs.get"+javatype_firstupper+"(\""+column_name+"\");" + "\n";
+        tbl_tolist += "                if (selectAll || selectedCols.contains(\""+column_name+"\".toLowerCase())) out."+column_name+" = rs.get"+javatype_firstupper+"(\""+column_name+"\");" + "\n";
 
         add_equal_func(table_name, column_name, p5, javatype_firstupper);
         add_orderby_func(table_name, column_name, p5, javatype_firstupper);
@@ -605,12 +642,13 @@ public class Generator {
     {
         final String c2 = remove_public(c);
         final String c3 = remove_type(c2);
-        final String column_name = get_name(c3);
+        final String column_name = sanitizeColumnName(get_name(c3));
+        final String default_value = get_default_value(c3);
         final COLTYPE c5 = get_type(c2);
         System.out.println("C: " + column_name + " type: " + c5.name);
 
         append_to_table(workdir, table_name, "    @Column(indexed = true, helpers = Column.Helpers.ALL)");
-        append_to_table(workdir, table_name, "    public " + c5.javatype + " " + column_name + ";");
+        append_to_table(workdir, table_name, "    public " + c5.javatype + " " + column_name + default_value + (default_value.isEmpty() ? ";" : ""));
         append_to_table(workdir, table_name, "");
 
         append_to_sql(workdir, table_name, "  \""+column_name+"\" "+c5.sqlitetype+",");
@@ -619,7 +657,7 @@ public class Generator {
         final String javatype_firstupper = c5.javatype.substring(0,1).toUpperCase() + c5.javatype.substring(1);
         tbl_deepcopy += "        out."+column_name+" = in."+column_name+";" + "\n";
         tbl_tostring += " + \", "+column_name+"=\" + "+column_name+"";
-        tbl_tolist += "                out."+column_name+" = rs.get"+javatype_firstupper+"(\""+column_name+"\");" + "\n";
+        tbl_tolist += "                if (selectAll || selectedCols.contains(\""+column_name+"\".toLowerCase())) out."+column_name+" = rs.get"+javatype_firstupper+"(\""+column_name+"\");" + "\n";
         // -----------
         String comma = "";
         if (column_num > 1) {comma = ",";}
