@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 
 public class Generator {
     private static final String TAG = "Generator";
-    static final String Version = "0.99.3";
+    static final String Version = "0.99.4";
     static final String prefix = "_sorm_";
     static final String tbl_f_ext = ".java";
     static final String tbl_s_ext = ".sql";
@@ -50,6 +50,7 @@ public class Generator {
     static String tbl_equalfuncs = "";
     static String tbl_orderbyfuncs = "";
     static String tbl_setfuncs = "";
+    static String custom_user_code = "";
     static final String java_quoted = "\\\"";
 
     enum COLTYPE
@@ -292,6 +293,17 @@ public class Generator {
             out.newLine();
             out.write(tbl_orderbyfuncs);
 
+            if (custom_user_code != null && !custom_user_code.trim().isEmpty())
+            {
+                out.newLine();
+                out.write("    // =========== CUSTOM USER CODE START ===========");
+                out.newLine();
+                out.newLine();
+                out.write(custom_user_code);
+                out.newLine();
+                out.write("    // =========== CUSTOM USER CODE END ===========");
+            }
+
             out.newLine();
             out.write(tbl99);
             out.newLine();
@@ -398,13 +410,22 @@ public class Generator {
         primary_key_column_name = "";
         primary_key_column_autoincr_if_needed = "";
         primary_key_column_sqlitetype = "";
+        custom_user_code = "";
         BufferedReader reader;
 		try {
 			reader = new BufferedReader(new FileReader(workdir + File.separator + infilename));
 			String line = reader.readLine();
 
             boolean ignore_line = true;
+            boolean capture_custom_code = false;
 			while (line != null) {
+                if (capture_custom_code)
+                {
+                    custom_user_code += line + "\n";
+                    line = reader.readLine();
+                    continue;
+                }
+
                 // System.out.println("LLLLLLL: " + line.trim());
                 if (line.trim().contains("@Table"))
                 {
@@ -425,7 +446,9 @@ public class Generator {
                 }
                 else if (line.contains("______@@SORMA_END@@______"))
                 {
-                    break;
+                    capture_custom_code = true;
+                    line = reader.readLine();
+                    continue;
                 }
                 else if (line.trim().contains("@PrimaryKey"))
                 {
