@@ -135,7 +135,7 @@ fun ContactList(
                 .widthIn(max = 360.dp),
         ) {
             Surface(
-                shape = RoundedCornerShape(28.dp),
+                shape = RoundedCornerShape(24.dp),
                 tonalElevation = 6.dp,
                 color = MaterialTheme.colorScheme.surface
             ) {
@@ -146,58 +146,79 @@ fun ContactList(
                     Text(
                         text = "Invite to Group",
                         style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.SemiBold,
+                        fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+
+                    Text(
+                        text = "Select a group to invite ${contactToInviteSnapshot.pubkey.take(6)} / ${contactToInviteSnapshot.name.take(20)} to:",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)
                     )
 
                     // Scrollable Group Selection
                     Box(
                         modifier = Modifier
                             .weight(weight = 1f, fill = false)
-                            .heightIn(max = 280.dp)
+                            .heightIn(max = 300.dp)
                     ) {
-                        LazyColumn(
-                            verticalArrangement = Arrangement.spacedBy(2.dp),
-                            contentPadding = PaddingValues(vertical = 4.dp)
-                        ) {
-                            items(groupstore.state.groups) { group ->
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clip(RoundedCornerShape(8.dp)) // Modern edge-to-edge ripple bounds
-                                        .clickable {
-                                            dialogScope.launch {
-                                                val group_num = HelperGroup.tox_group_by_groupid__wrapper(group.groupId)
-                                                val friend_num = tox_friend_by_public_key(contactToInviteSnapshot.pubkey)
-                                                tox_group_invite_friend(group_num, friend_num)
-                                                update_savedata_file_wrapper()
+                        if (groupstore.state.groups.isEmpty()) {
+                            Box(
+                                modifier = Modifier.fillMaxSize().padding(vertical = 32.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "No groups available",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        } else {
+                            LazyColumn(
+                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                                contentPadding = PaddingValues(vertical = 4.dp)
+                            ) {
+                                items(groupstore.state.groups) { group ->
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .clickable {
+                                                dialogScope.launch {
+                                                    val group_num = HelperGroup.tox_group_by_groupid__wrapper(group.groupId)
+                                                    val friend_num = tox_friend_by_public_key(contactToInviteSnapshot.pubkey)
+                                                    tox_group_invite_friend(group_num, friend_num)
+                                                    update_savedata_file_wrapper()
+                                                }
+                                                showInviteDialog = false
+                                                contactToInvite = null
                                             }
-                                            showInviteDialog = false
-                                            contactToInvite = null
+                                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = group.name,
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                color = MaterialTheme.colorScheme.onSurface,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
+                                                fontWeight = FontWeight.SemiBold
+                                            )
+
+                                            Spacer(modifier = Modifier.height(4.dp))
+
+                                            Text(
+                                                text = "ID: ${group.groupId.take(8)}...",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                fontFamily = FontFamily.Monospace,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
                                         }
-                                        .padding(horizontal = 12.dp, vertical = 12.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    // Original data text items: ID prefix + Group Name
-                                    Text(
-                                        text = group.groupId.take(6),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontFamily = FontFamily.Monospace, // Monospace styling for the short hex ID
-                                        color = MaterialTheme.colorScheme.primary, // Highlights the ID subtly
-                                        fontWeight = FontWeight.Medium
-                                    )
-
-                                    Spacer(modifier = Modifier.width(12.dp))
-
-                                    Text(
-                                        text = group.name,
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        modifier = Modifier.weight(1f)
-                                    )
+                                    }
                                 }
                             }
                         }
@@ -293,5 +314,3 @@ fun ContactList(
         }
     }
 }
-
-
