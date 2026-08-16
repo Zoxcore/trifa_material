@@ -35,7 +35,7 @@ public class ConferenceDB
 
     // conference id is always saved as lower case hex string!! -----------------
     @PrimaryKey
-    String conference_identifier = "";
+    String conference_identifier = ""; // conference id is always saved as lower case hex string!!
     // conference id is always saved as lower case hex string!! -----------------
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)

@@ -35,7 +35,7 @@ public class RelayListDB
 
     // pubkey is always saved as UPPER CASE hex string!! -----------------
     @PrimaryKey
-    public String tox_public_key_string = "";
+    public String tox_public_key_string = ""; // pubkey is always saved as UPPER CASE hex string!!
     // pubkey is always saved as UPPER CASE hex string!! -----------------
 
     @Column(indexed = true, defaultExpr = "0", helpers = Column.Helpers.ALL)
@@ -53,7 +53,7 @@ public class RelayListDB
     // pubkey is always saved as UPPER CASE hex string!! -----------------
     @Column(indexed = true, defaultExpr = "", helpers = Column.Helpers.ALL)
     @Nullable
-    public String tox_public_key_string_of_owner = "";
+    public String tox_public_key_string_of_owner = ""; // pubkey is always saved as UPPER CASE hex string!!
     // pubkey is always saved as UPPER CASE hex string!! -----------------
 
 

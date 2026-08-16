@@ -36,7 +36,7 @@ public class FriendList
 
     // pubkey is always saved as UPPER CASE hex string!! -----------------
     @PrimaryKey
-    public String tox_public_key_string = "";
+    public String tox_public_key_string = ""; // pubkey is always saved as UPPER CASE hex string!!
     // pubkey is always saved as UPPER CASE hex string!! -----------------
 
     @Column

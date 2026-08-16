@@ -39,7 +39,7 @@ public class ConferenceMessage
 
     @Column(indexed = true, helpers = Column.Helpers.ALL, defaultExpr = "")
     @Nullable
-    String message_id_tox = ""; // Tox Group Message_ID
+    String message_id_tox = ""; // Tox Group Message_ID, this rolls over at UINT32_MAX its unique for "tox_peerpubkey + message_id_tox" it only increases (until it rolls over) but may increase by more than 1
     // this rolls over at UINT32_MAX
     // its unique for "tox_peerpubkey + message_id_tox"
     // it only increases (until it rolls over) but may increase by more than 1
