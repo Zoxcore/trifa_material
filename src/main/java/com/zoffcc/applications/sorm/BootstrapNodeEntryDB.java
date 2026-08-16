@@ -1284,7 +1284,6 @@ public class BootstrapNodeEntryDB
         // fill tcprelay_node_list with values from DB -----------------
     }
 
-
     public static BootstrapNodeEntryDB BootstrapNodeEntryDB_(boolean udp_node_, int num_, String ip_, long port_, String key_hex_)
     {
         BootstrapNodeEntryDB n = new BootstrapNodeEntryDB();
@@ -1296,78 +1295,6 @@ public class BootstrapNodeEntryDB
 
         return n;
     }
-
-    public static void get_udp_nodelist_from_db(OrmaDatabase orma)
-    {
-        bootstrap_node_list.clear();
-
-        long udp_nodelist_count = 0;
-        try
-        {
-            udp_nodelist_count = orma.selectFromBootstrapNodeEntryDB().
-                    udp_nodeEq(true).count();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        Log.i(TAG, "get_udp_nodelist_from_db:udp_nodelist_count=" + udp_nodelist_count);
-
-        if (udp_nodelist_count == 0)
-        {
-            Log.i(TAG, "get_udp_nodelist_from_db:insert_default_udp_nodes_into_db");
-            insert_default_udp_nodes_into_db(orma);
-        }
-
-        // fill bootstrap_node_list with values from DB -----------------
-        try
-        {
-            bootstrap_node_list.addAll(orma.selectFromBootstrapNodeEntryDB().udp_nodeEq(true).orderByNumAsc().toList());
-            Log.i(TAG, "get_udp_nodelist_from_db:bootstrap_node_list.addAll");
-        }
-        catch (Exception e)
-        {
-        }
-        // fill bootstrap_node_list with values from DB -----------------
-    }
-
-    public static void get_tcprelay_nodelist_from_db(OrmaDatabase orma)
-    {
-        tcprelay_node_list.clear();
-
-        long tcprelay_nodelist_count = 0;
-        try
-        {
-            tcprelay_nodelist_count = orma.selectFromBootstrapNodeEntryDB().
-                    udp_nodeEq(false).count();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        Log.i(TAG, "get_tcprelay_nodelist_from_db:tcprelay_nodelist_count=" + tcprelay_nodelist_count);
-
-        if (tcprelay_nodelist_count == 0)
-        {
-            Log.i(TAG, "get_tcprelay_nodelist_from_db:insert_default_tcprelay_nodes_into_db");
-            insert_default_tcprelay_nodes_into_db(orma);
-        }
-
-        // fill tcprelay_node_list with values from DB -----------------
-        try
-        {
-            tcprelay_node_list.addAll(orma.selectFromBootstrapNodeEntryDB().udp_nodeEq(false).
-                    orderByNumAsc().toList());
-            Log.i(TAG, "get_tcprelay_nodelist_from_db:tcprelay_node_list.addAll");
-        }
-        catch (Exception e)
-        {
-        }
-        // fill tcprelay_node_list with values from DB -----------------
-    }
-
 
 
     // =========== CUSTOM USER CODE END ===========
