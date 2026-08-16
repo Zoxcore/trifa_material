@@ -1,92 +1,69 @@
-/**
- * [TRIfA], Java part of Tox Reference Implementation for Android
- * Copyright (C) 2017 Zoff <zoff@zoff.cc>
- * <p>
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- * <p>
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * <p>
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the
- * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA  02110-1301, USA.
+/* SPDX-License-Identifier: GPL-3.0-or-later
+ * [sorma2], Java part of sorma2
+ * Copyright (C) 2024 Zoff <zoff@zoff.cc>
  */
 
 package com.zoffcc.applications.sorm;
 
-import com.zoffcc.applications.trifa.Log;
+import com.zoffcc.applications.sorm.Log;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.zoffcc.applications.sorm.OrmaDatabase.*;
-import static com.zoffcc.applications.trifa.TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT;
+
 
 @Table
 public class ConferenceMessage
 {
     private static final String TAG = "DB.ConferenceMessage";
-
     @PrimaryKey(autoincrement = true, auto = true)
-    long id; // uniqe message id!!
-
-    @Column(indexed = true, helpers = Column.Helpers.ALL, defaultExpr = "")
-    @Nullable
-    String message_id_tox = ""; // Tox Group Message_ID
-    // this rolls over at UINT32_MAX
-    // its unique for "tox_peerpubkey + message_id_tox"
-    // it only increases (until it rolls over) but may increase by more than 1
-
-    @Column(indexed = true, defaultExpr = "-1", helpers = Column.Helpers.ALL)
-    String conference_identifier = "-1"; // f_key -> ConferenceDB.conference_identifier
+    public long id; // uniqe message id!!
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    String tox_peerpubkey;
-
-    @Column(indexed = true, defaultExpr = "", helpers = Column.Helpers.ALL)
-    @Nullable
-    String tox_peername = ""; // saved for backup, when conference is offline!
+    public String message_id_tox = ""; // Tox Group Message_ID, this rolls over at UINT32_MAX its unique for "tox_peerpubkey + message_id_tox" it only increases (until it rolls over) but may increase by more than 1
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    int direction = 0; // 0 -> msg received, 1 -> msg sent
-
-    @Column(indexed = true)
-    int TOX_MESSAGE_TYPE = 0; // 0 -> normal, 1 -> action
-
-    @Column(indexed = true, defaultExpr = "0")
-    int TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE_TEXT.value;
-
-    @Column(helpers = Column.Helpers.ALL)
-    @Nullable
-    long sent_timestamp = 0L;
-
-    @Column(indexed = true)
-    @Nullable
-    long rcvd_timestamp = 0L;
-
-    @Column(helpers = Column.Helpers.ALL)
-    boolean read = false;
+    public String conference_identifier = "-1"; // f_key -> ConferenceDB.conference_identifier
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    boolean is_new = true;
-
-    @Column(helpers = Column.Helpers.ALL)
-    @Nullable
-    String text = null;
+    public String tox_peerpubkey;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    @Nullable
-    boolean was_synced = false;
+    public String tox_peername = ""; // saved for backup, when conference is offline!
 
-    static ConferenceMessage deep_copy(ConferenceMessage in)
+    @Column(indexed = true, helpers = Column.Helpers.ALL)
+    public int direction = 0; // 0 -> msg received, 1 -> msg sent
+
+    @Column(indexed = true, helpers = Column.Helpers.ALL)
+    public int TOX_MESSAGE_TYPE = 0; // 0 -> normal, 1 -> action
+
+    @Column(indexed = true, helpers = Column.Helpers.ALL)
+    public int TRIFA_MESSAGE_TYPE = 0; // TRIFA_MSG_TYPE_TEXT.value;
+
+    @Column(indexed = true, helpers = Column.Helpers.ALL)
+    public long sent_timestamp = 0L;
+
+    @Column(indexed = true, helpers = Column.Helpers.ALL)
+    public long rcvd_timestamp = 0L;
+
+    @Column(indexed = true, helpers = Column.Helpers.ALL)
+    public boolean read = false;
+
+    @Column(indexed = true, helpers = Column.Helpers.ALL)
+    public boolean is_new = true;
+
+    @Column(indexed = true, helpers = Column.Helpers.ALL)
+    public String text = null;
+
+    @Column(indexed = true, helpers = Column.Helpers.ALL)
+    public boolean was_synced = false;
+
+    public static ConferenceMessage deep_copy(ConferenceMessage in)
     {
         ConferenceMessage out = new ConferenceMessage();
         out.id = in.id;
@@ -125,13 +102,66 @@ public class ConferenceMessage
     List<OrmaBindvar> bind_set_vars = new ArrayList<>();
     int bind_set_count = 0;
 
+    private String sanitizeColumnName(String input)
+    {
+        if (input == null) return "";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < input.length(); i++)
+        {
+            char c = input.charAt(i);
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c == '-')
+            {
+                sb.append(c);
+            }
+            else
+            {
+                sb.append('_');
+            }
+        }
+        return sb.toString();
+    }
+
     public List<ConferenceMessage> toList()
+    {
+        return toList(null);
+    }
+
+    public List<ConferenceMessage> toList(String[] columns)
     {
         List<ConferenceMessage> list = new ArrayList<>();
         orma_global_sqltolist_lock.lock();
         PreparedStatement statement = null;
+        boolean selectAll = (columns == null || columns.length == 0);
+        Set<String> selectedCols = new LinkedHashSet<>();
+        if (!selectAll) {
+            for (String c : columns) {
+                if (c == null || c.length() == 0) continue;
+                selectedCols.add(sanitizeColumnName(c.toLowerCase()));
+            }
+            if (selectedCols.isEmpty()) selectAll = true;
+        }
         try
         {
+            if (!selectAll)
+            {
+                StringBuilder cols = new StringBuilder();
+                boolean firstColumn = true;
+                for (String col : selectedCols)
+                {
+                    if (!firstColumn) cols.append(", ");
+                    cols.append("\"").append(col).append("\"");
+                    firstColumn = false;
+                }
+                if (this.sql_start != null && this.sql_start.contains("*"))
+                {
+                    this.sql_start = this.sql_start.replace("*", cols.toString());
+                }
+                else
+                {
+                    this.sql_start = "SELECT " + cols.toString() + " FROM \"" + this.getClass().getSimpleName() + "\"";
+                }
+            }
+
             final String sql = this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit;
             log_bindvars_where(sql, bind_where_count, bind_where_vars);
             final long t1 = System.currentTimeMillis();
@@ -160,20 +190,20 @@ public class ConferenceMessage
             while (rs.next())
             {
                 ConferenceMessage out = new ConferenceMessage();
-                out.id = rs.getLong("id");
-                out.message_id_tox = rs.getString("message_id_tox");
-                out.conference_identifier = rs.getString("conference_identifier");
-                out.tox_peerpubkey = rs.getString("tox_peerpubkey");
-                out.tox_peername = rs.getString("tox_peername");
-                out.direction = rs.getInt("direction");
-                out.TOX_MESSAGE_TYPE = rs.getInt("TOX_MESSAGE_TYPE");
-                out.TRIFA_MESSAGE_TYPE = rs.getInt("TRIFA_MESSAGE_TYPE");
-                out.sent_timestamp = rs.getLong("sent_timestamp");
-                out.rcvd_timestamp = rs.getLong("rcvd_timestamp");
-                out.read = rs.getBoolean("read");
-                out.is_new = rs.getBoolean("is_new");
-                out.text = rs.getString("text");
-                out.was_synced = rs.getBoolean("was_synced");
+                if (selectAll || selectedCols.contains("id".toLowerCase())) out.id = rs.getLong("id");
+                if (selectAll || selectedCols.contains("message_id_tox".toLowerCase())) out.message_id_tox = rs.getString("message_id_tox");
+                if (selectAll || selectedCols.contains("conference_identifier".toLowerCase())) out.conference_identifier = rs.getString("conference_identifier");
+                if (selectAll || selectedCols.contains("tox_peerpubkey".toLowerCase())) out.tox_peerpubkey = rs.getString("tox_peerpubkey");
+                if (selectAll || selectedCols.contains("tox_peername".toLowerCase())) out.tox_peername = rs.getString("tox_peername");
+                if (selectAll || selectedCols.contains("direction".toLowerCase())) out.direction = rs.getInt("direction");
+                if (selectAll || selectedCols.contains("TOX_MESSAGE_TYPE".toLowerCase())) out.TOX_MESSAGE_TYPE = rs.getInt("TOX_MESSAGE_TYPE");
+                if (selectAll || selectedCols.contains("TRIFA_MESSAGE_TYPE".toLowerCase())) out.TRIFA_MESSAGE_TYPE = rs.getInt("TRIFA_MESSAGE_TYPE");
+                if (selectAll || selectedCols.contains("sent_timestamp".toLowerCase())) out.sent_timestamp = rs.getLong("sent_timestamp");
+                if (selectAll || selectedCols.contains("rcvd_timestamp".toLowerCase())) out.rcvd_timestamp = rs.getLong("rcvd_timestamp");
+                if (selectAll || selectedCols.contains("read".toLowerCase())) out.read = rs.getBoolean("read");
+                if (selectAll || selectedCols.contains("is_new".toLowerCase())) out.is_new = rs.getBoolean("is_new");
+                if (selectAll || selectedCols.contains("text".toLowerCase())) out.text = rs.getString("text");
+                if (selectAll || selectedCols.contains("was_synced".toLowerCase())) out.was_synced = rs.getBoolean("was_synced");
 
                 list.add(out);
             }
