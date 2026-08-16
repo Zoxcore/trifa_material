@@ -10,11 +10,11 @@ import com.zoffcc.applications.sorm.Log;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.zoffcc.applications.sorm.OrmaDatabase.*;
-import static com.zoffcc.applications.trifa.TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_TYPE_TEXT;
-import static com.zoffcc.applications.trifa.ToxVars.Tox_Group_Role.TOX_GROUP_ROLE_USER;
 
 
 @Table
@@ -22,7 +22,7 @@ public class GroupMessage
 {
     private static final String TAG = "DB.GroupMessage";
     @PrimaryKey(autoincrement = true, auto = true)
-    public long id;
+    public long id; // uniqe message id!!
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     public String message_id_tox = ""; // Tox Group Message_ID (4 bytes as hex string lowercase)
@@ -31,7 +31,7 @@ public class GroupMessage
     public String group_identifier = "-1"; // f_key -> GroupDB.group_identifier
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    public String tox_group_peer_pubkey;
+    public String tox_group_peer_pubkey; // uppercase
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     public int tox_group_peer_role = TOX_GROUP_ROLE_USER.value;
@@ -49,7 +49,7 @@ public class GroupMessage
     public int TOX_MESSAGE_TYPE = 0; // 0 -> normal, 1 -> action
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    public int TRIFA_MESSAGE_TYPE = TRIFA_MSG_TYPE_TEXT.value;
+    public int TRIFA_MESSAGE_TYPE = 0; // TRIFA_MSG_TYPE_TEXT.value;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     public long sent_timestamp = 0L;
@@ -134,13 +134,66 @@ public class GroupMessage
     List<OrmaBindvar> bind_set_vars = new ArrayList<>();
     int bind_set_count = 0;
 
+    private String sanitizeColumnName(String input)
+    {
+        if (input == null) return "";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < input.length(); i++)
+        {
+            char c = input.charAt(i);
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c == '-')
+            {
+                sb.append(c);
+            }
+            else
+            {
+                sb.append('_');
+            }
+        }
+        return sb.toString();
+    }
+
     public List<GroupMessage> toList()
+    {
+        return toList(null);
+    }
+
+    public List<GroupMessage> toList(String[] columns)
     {
         List<GroupMessage> list = new ArrayList<>();
         orma_global_sqltolist_lock.lock();
         PreparedStatement statement = null;
+        boolean selectAll = (columns == null || columns.length == 0);
+        Set<String> selectedCols = new LinkedHashSet<>();
+        if (!selectAll) {
+            for (String c : columns) {
+                if (c == null || c.length() == 0) continue;
+                selectedCols.add(sanitizeColumnName(c.toLowerCase()));
+            }
+            if (selectedCols.isEmpty()) selectAll = true;
+        }
         try
         {
+            if (!selectAll)
+            {
+                StringBuilder cols = new StringBuilder();
+                boolean firstColumn = true;
+                for (String col : selectedCols)
+                {
+                    if (!firstColumn) cols.append(", ");
+                    cols.append("\"").append(col).append("\"");
+                    firstColumn = false;
+                }
+                if (this.sql_start != null && this.sql_start.contains("*"))
+                {
+                    this.sql_start = this.sql_start.replace("*", cols.toString());
+                }
+                else
+                {
+                    this.sql_start = "SELECT " + cols.toString() + " FROM \"" + this.getClass().getSimpleName() + "\"";
+                }
+            }
+
             final String sql = this.sql_start + " " + this.sql_where + " " + this.sql_orderby + " " + this.sql_limit;
             log_bindvars_where(sql, bind_where_count, bind_where_vars);
             final long t1 = System.currentTimeMillis();
@@ -169,28 +222,28 @@ public class GroupMessage
             while (rs.next())
             {
                 GroupMessage out = new GroupMessage();
-                out.id = rs.getLong("id");
-                out.message_id_tox = rs.getString("message_id_tox");
-                out.group_identifier = rs.getString("group_identifier");
-                out.tox_group_peer_pubkey = rs.getString("tox_group_peer_pubkey");
-                out.tox_group_peer_role = rs.getInt("tox_group_peer_role");
-                out.private_message = rs.getInt("private_message");
-                out.tox_group_peername = rs.getString("tox_group_peername");
-                out.direction = rs.getInt("direction");
-                out.TOX_MESSAGE_TYPE = rs.getInt("TOX_MESSAGE_TYPE");
-                out.TRIFA_MESSAGE_TYPE = rs.getInt("TRIFA_MESSAGE_TYPE");
-                out.sent_timestamp = rs.getLong("sent_timestamp");
-                out.rcvd_timestamp = rs.getLong("rcvd_timestamp");
-                out.read = rs.getBoolean("read");
-                out.is_new = rs.getBoolean("is_new");
-                out.text = rs.getString("text");
-                out.was_synced = rs.getBoolean("was_synced");
-                out.msg_id_hash = rs.getString("msg_id_hash");
-                out.sent_privately_to_tox_group_peer_pubkey = rs.getString("sent_privately_to_tox_group_peer_pubkey");
-                out.path_name = rs.getString("path_name");
-                out.file_name = rs.getString("file_name");
-                out.filename_fullpath = rs.getString("filename_fullpath");
-                out.filesize = rs.getLong("filesize");
+                if (selectAll || selectedCols.contains("id".toLowerCase())) out.id = rs.getLong("id");
+                if (selectAll || selectedCols.contains("message_id_tox".toLowerCase())) out.message_id_tox = rs.getString("message_id_tox");
+                if (selectAll || selectedCols.contains("group_identifier".toLowerCase())) out.group_identifier = rs.getString("group_identifier");
+                if (selectAll || selectedCols.contains("tox_group_peer_pubkey".toLowerCase())) out.tox_group_peer_pubkey = rs.getString("tox_group_peer_pubkey");
+                if (selectAll || selectedCols.contains("tox_group_peer_role".toLowerCase())) out.tox_group_peer_role = rs.getInt("tox_group_peer_role");
+                if (selectAll || selectedCols.contains("private_message".toLowerCase())) out.private_message = rs.getInt("private_message");
+                if (selectAll || selectedCols.contains("tox_group_peername".toLowerCase())) out.tox_group_peername = rs.getString("tox_group_peername");
+                if (selectAll || selectedCols.contains("direction".toLowerCase())) out.direction = rs.getInt("direction");
+                if (selectAll || selectedCols.contains("TOX_MESSAGE_TYPE".toLowerCase())) out.TOX_MESSAGE_TYPE = rs.getInt("TOX_MESSAGE_TYPE");
+                if (selectAll || selectedCols.contains("TRIFA_MESSAGE_TYPE".toLowerCase())) out.TRIFA_MESSAGE_TYPE = rs.getInt("TRIFA_MESSAGE_TYPE");
+                if (selectAll || selectedCols.contains("sent_timestamp".toLowerCase())) out.sent_timestamp = rs.getLong("sent_timestamp");
+                if (selectAll || selectedCols.contains("rcvd_timestamp".toLowerCase())) out.rcvd_timestamp = rs.getLong("rcvd_timestamp");
+                if (selectAll || selectedCols.contains("read".toLowerCase())) out.read = rs.getBoolean("read");
+                if (selectAll || selectedCols.contains("is_new".toLowerCase())) out.is_new = rs.getBoolean("is_new");
+                if (selectAll || selectedCols.contains("text".toLowerCase())) out.text = rs.getString("text");
+                if (selectAll || selectedCols.contains("was_synced".toLowerCase())) out.was_synced = rs.getBoolean("was_synced");
+                if (selectAll || selectedCols.contains("msg_id_hash".toLowerCase())) out.msg_id_hash = rs.getString("msg_id_hash");
+                if (selectAll || selectedCols.contains("sent_privately_to_tox_group_peer_pubkey".toLowerCase())) out.sent_privately_to_tox_group_peer_pubkey = rs.getString("sent_privately_to_tox_group_peer_pubkey");
+                if (selectAll || selectedCols.contains("path_name".toLowerCase())) out.path_name = rs.getString("path_name");
+                if (selectAll || selectedCols.contains("file_name".toLowerCase())) out.file_name = rs.getString("file_name");
+                if (selectAll || selectedCols.contains("filename_fullpath".toLowerCase())) out.filename_fullpath = rs.getString("filename_fullpath");
+                if (selectAll || selectedCols.contains("filesize".toLowerCase())) out.filesize = rs.getLong("filesize");
 
                 list.add(out);
             }
