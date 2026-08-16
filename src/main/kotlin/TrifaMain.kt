@@ -8,6 +8,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,9 +24,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.DrawerState
@@ -41,6 +45,7 @@ import androidx.compose.material.Slider
 import androidx.compose.material.SnackbarDuration
 import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
@@ -959,31 +964,53 @@ fun App()
                                         modifier = Modifier.size(AV_SELECTOR_ICON_SIZE)) {
                                         Icon(Icons.Filled.Refresh, null)
                                     }
-                                    DropdownMenu(
-                                        expanded = expanded_a,
-                                        onDismissRequest = { expanded_a = false },
-                                    ) {
-                                        if (audio_in_devices.size > 0)
-                                        {
-                                            audio_in_devices.forEach() {
-                                                if (it != null)
-                                                {
-                                                    DropdownMenuItem(onClick = { avstatestore.state.audio_in_source_set("");audio_in_sources.clear(); avstatestore.state.audio_in_device_set(it);expanded_a = false }) {
-                                                        Text("" + it)
+                                    if (expanded_a) {
+                                        AlertDialog(
+                                            onDismissRequest = { expanded_a = false },
+                                            title = { Text("Select Audio Device") },
+                                            text = {
+                                                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                                                    if (audio_in_devices.size > 0)
+                                                    {
+                                                        audio_in_devices.forEach() {
+                                                            if (it != null)
+                                                            {
+                                                                Text(
+                                                                    text = "" + it,
+                                                                    modifier = Modifier
+                                                                        .fillMaxWidth()
+                                                                        .clickable {
+                                                                            avstatestore.state.audio_in_source_set("")
+                                                                            audio_in_sources.clear()
+                                                                            avstatestore.state.audio_in_device_set(it)
+                                                                            expanded_a = false
+                                                                        }
+                                                                        .padding(12.dp)
+                                                                )
+                                                            }
+                                                        }
                                                     }
+                                                    Text(
+                                                        text = "-none-",
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .clickable {
+                                                                avstatestore.state.audio_in_source_set("")
+                                                                audio_in_sources.clear()
+                                                                avstatestore.state.audio_in_device_set("")
+                                                                expanded_a = false
+                                                            }
+                                                            .padding(12.dp)
+                                                    )
+                                                }
+                                            },
+                                            confirmButton = {},
+                                            dismissButton = {
+                                                TextButton(onClick = { expanded_a = false }) {
+                                                    Text("Cancel")
                                                 }
                                             }
-                                        }
-                                        DropdownMenuItem(
-                                            onClick = {
-                                                avstatestore.state.audio_in_source_set("")
-                                                audio_in_sources.clear()
-                                                avstatestore.state.audio_in_device_set("")
-                                                expanded_a = false
-                                            })
-                                        {
-                                            Text("-none-")
-                                        }
+                                        )
                                     }
                                 }
                                 Box {
@@ -1046,29 +1073,49 @@ fun App()
                                         modifier = Modifier.size(AV_SELECTOR_ICON_SIZE)) {
                                         Icon(Icons.Filled.Refresh, null)
                                     }
-                                    DropdownMenu(
-                                        expanded = expanded_as,
-                                        onDismissRequest = { expanded_as = false },
-                                    ) {
-                                        if (audio_in_sources.size > 0)
-                                        {
-                                            audio_in_sources.forEach() {
-                                                if (it != null)
-                                                {
-                                                    DropdownMenuItem(onClick = { avstatestore.state.audio_in_source_set(it.id);expanded_as = false }) {
-                                                        Text(if (it.description.isEmpty()) it.id else it.description + " (" + it.id + ")")
+                                    if (expanded_as) {
+                                        AlertDialog(
+                                            onDismissRequest = { expanded_as = false },
+                                            title = { Text("Select Audio Source") },
+                                            text = {
+                                                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                                                    if (audio_in_sources.size > 0)
+                                                    {
+                                                        audio_in_sources.forEach() {
+                                                            if (it != null)
+                                                            {
+                                                                Text(
+                                                                    text = if (it.description.isEmpty()) it.id else it.description + " (" + it.id + ")",
+                                                                    modifier = Modifier
+                                                                        .fillMaxWidth()
+                                                                        .clickable {
+                                                                            avstatestore.state.audio_in_source_set(it.id)
+                                                                            expanded_as = false
+                                                                        }
+                                                                        .padding(12.dp)
+                                                                )
+                                                            }
+                                                        }
                                                     }
+                                                    Text(
+                                                        text = "-none-",
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .clickable {
+                                                                avstatestore.state.audio_in_source_set("")
+                                                                expanded_as = false
+                                                            }
+                                                            .padding(12.dp)
+                                                    )
+                                                }
+                                            },
+                                            confirmButton = {},
+                                            dismissButton = {
+                                                TextButton(onClick = { expanded_as = false }) {
+                                                    Text("Cancel")
                                                 }
                                             }
-                                        }
-                                        DropdownMenuItem(
-                                            onClick = {
-                                                avstatestore.state.audio_in_source_set("")
-                                                expanded_as = false
-                                            })
-                                        {
-                                            Text("-none-")
-                                        }
+                                        )
                                     }
                                 }
 
@@ -1086,31 +1133,53 @@ fun App()
                                         modifier = Modifier.size(AV_SELECTOR_ICON_SIZE)) {
                                         Icon(Icons.Filled.Refresh, null)
                                     }
-                                    DropdownMenu(
-                                        expanded = expanded_v,
-                                        onDismissRequest = { expanded_v = false },
-                                    ) {
-                                        if (video_in_devices.size > 0)
-                                        {
-                                            video_in_devices.forEach() {
-                                                if (it != null)
-                                                {
-                                                    DropdownMenuItem(onClick = { avstatestore.state.video_in_source_set("");video_in_sources.clear(); avstatestore.state.video_in_device_set(it);expanded_v = false }) {
-                                                        Text("" + it)
+                                    if (expanded_v) {
+                                        AlertDialog(
+                                            onDismissRequest = { expanded_v = false },
+                                            title = { Text("Select Video Device") },
+                                            text = {
+                                                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                                                    if (video_in_devices.size > 0)
+                                                    {
+                                                        video_in_devices.forEach() {
+                                                            if (it != null)
+                                                            {
+                                                                Text(
+                                                                    text = "" + it,
+                                                                    modifier = Modifier
+                                                                        .fillMaxWidth()
+                                                                        .clickable {
+                                                                            avstatestore.state.video_in_source_set("")
+                                                                            video_in_sources.clear()
+                                                                            avstatestore.state.video_in_device_set(it)
+                                                                            expanded_v = false
+                                                                        }
+                                                                        .padding(12.dp)
+                                                                )
+                                                            }
+                                                        }
                                                     }
+                                                    Text(
+                                                        text = "-none-",
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .clickable {
+                                                                avstatestore.state.video_in_source_set("")
+                                                                video_in_sources.clear()
+                                                                avstatestore.state.video_in_device_set("")
+                                                                expanded_v = false
+                                                            }
+                                                            .padding(12.dp)
+                                                    )
+                                                }
+                                            },
+                                            confirmButton = {},
+                                            dismissButton = {
+                                                TextButton(onClick = { expanded_v = false }) {
+                                                    Text("Cancel")
                                                 }
                                             }
-                                        }
-                                        DropdownMenuItem(
-                                            onClick = {
-                                                avstatestore.state.video_in_source_set("")
-                                                video_in_sources.clear()
-                                                avstatestore.state.video_in_device_set("")
-                                                expanded_v = false
-                                            })
-                                        {
-                                            Text("-none-")
-                                        }
+                                        )
                                     }
                                 }
                                 Box {
@@ -1188,29 +1257,49 @@ fun App()
                                         modifier = Modifier.size(AV_SELECTOR_ICON_SIZE)) {
                                         Icon(Icons.Filled.Refresh, null)
                                     }
-                                    DropdownMenu(
-                                        expanded = expanded_vs,
-                                        onDismissRequest = { expanded_vs = false },
-                                    ) {
-                                        if (video_in_sources.size > 0)
-                                        {
-                                            video_in_sources.forEach() {
-                                                if (it != null)
-                                                {
-                                                    DropdownMenuItem(onClick = { avstatestore.state.video_in_source_set(it.id);expanded_vs = false }) {
-                                                        Text(if (it.description.isEmpty()) it.id else it.description + " (" + it.id + ")")
+                                    if (expanded_vs) {
+                                        AlertDialog(
+                                            onDismissRequest = { expanded_vs = false },
+                                            title = { Text("Select Video Source") },
+                                            text = {
+                                                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                                                    if (video_in_sources.size > 0)
+                                                    {
+                                                        video_in_sources.forEach() {
+                                                            if (it != null)
+                                                            {
+                                                                Text(
+                                                                    text = if (it.description.isEmpty()) it.id else it.description + " (" + it.id + ")",
+                                                                    modifier = Modifier
+                                                                        .fillMaxWidth()
+                                                                        .clickable {
+                                                                            avstatestore.state.video_in_source_set(it.id)
+                                                                            expanded_vs = false
+                                                                        }
+                                                                        .padding(12.dp)
+                                                                )
+                                                            }
+                                                        }
                                                     }
+                                                    Text(
+                                                        text = "-none-",
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .clickable {
+                                                                avstatestore.state.video_in_source_set("")
+                                                                expanded_vs = false
+                                                            }
+                                                            .padding(12.dp)
+                                                    )
+                                                }
+                                            },
+                                            confirmButton = {},
+                                            dismissButton = {
+                                                TextButton(onClick = { expanded_vs = false }) {
+                                                    Text("Cancel")
                                                 }
                                             }
-                                        }
-                                        DropdownMenuItem(
-                                            onClick = {
-                                                avstatestore.state.video_in_source_set("")
-                                                expanded_vs = false
-                                            })
-                                        {
-                                            Text("-none-")
-                                        }
+                                        )
                                     }
                                 }
                                 var resolution_expanded by remember { mutableStateOf(false) }
@@ -1223,26 +1312,41 @@ fun App()
                                     Icon(Icons.Filled.Refresh, null)
                                 }
                                 val items = listOf("480x270", "640x360", "640x480", "480x640", "960x540", "720x720", "1024x768", "1280x720", "720x1280", "1080x1080", "1920x1080", "1080x1920")
-                                DropdownMenu(
-                                    expanded = resolution_expanded,
-                                    onDismissRequest = { resolution_expanded = false },
-                                ) {
-                                    items.forEachIndexed { index, s ->
-                                        DropdownMenuItem(onClick = {
-                                            if (avstatestore.state.calling_state_get() != AVState.CALL_STATUS.CALL_STATUS_CALLING)
-                                            {
-                                                // HINT: only allow to change resolution when no call is active
-                                                avstatestore.state.video_in_resolution_set(s)
+                                if (resolution_expanded) {
+                                    AlertDialog(
+                                        onDismissRequest = { resolution_expanded = false },
+                                        title = { Text("Select Resolution") },
+                                        text = {
+                                            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                                                items.forEachIndexed { index, s ->
+                                                    Text(
+                                                        text = s,
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .clickable {
+                                                                if (avstatestore.state.calling_state_get() != AVState.CALL_STATUS.CALL_STATUS_CALLING)
+                                                                {
+                                                                    // HINT: only allow to change resolution when no call is active
+                                                                    avstatestore.state.video_in_resolution_set(s)
+                                                                }
+                                                                else
+                                                                {
+                                                                    SnackBarToast("Resolution change is only allowed when no call is active")
+                                                                }
+                                                                resolution_expanded = false
+                                                            }
+                                                            .padding(12.dp)
+                                                    )
+                                                }
                                             }
-                                            else
-                                            {
-                                                SnackBarToast("Resolution change is only allowed when no call is active")
+                                        },
+                                        confirmButton = {},
+                                        dismissButton = {
+                                            TextButton(onClick = { resolution_expanded = false }) {
+                                                Text("Cancel")
                                             }
-                                            resolution_expanded = false
-                                        }) {
-                                            Text(text = s)
                                         }
-                                    }
+                                    )
                                 }
                                 var capture_fps_expanded by remember { mutableStateOf(false) }
                                 val fps_int = avstatestore.state.video_capture_fps_get()
@@ -1260,30 +1364,38 @@ fun App()
                                     Icon(Icons.Filled.Refresh, null)
                                 }
                                 val items_capture_fps = listOf(-1, 5, 10, 15, 20, 24, 25, 30, 60)
-                                DropdownMenu(
-                                    expanded = capture_fps_expanded,
-                                    onDismissRequest = { capture_fps_expanded = false },
-                                ) {
-                                    items_capture_fps.forEachIndexed { index, s ->
-                                        DropdownMenuItem(onClick = {
-                                            try
-                                            {
-                                                avstatestore.state.video_capture_fps_set(s)
-                                            } catch (_: Exception)
-                                            {
+                                if (capture_fps_expanded) {
+                                    AlertDialog(
+                                        onDismissRequest = { capture_fps_expanded = false },
+                                        title = { Text("Select Capture FPS") },
+                                        text = {
+                                            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                                                items_capture_fps.forEachIndexed { index, s ->
+                                                    Text(
+                                                        text = if (s == -1) "Default" else "" + s,
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .clickable {
+                                                                try
+                                                                {
+                                                                    avstatestore.state.video_capture_fps_set(s)
+                                                                } catch (_: Exception)
+                                                                {
+                                                                }
+                                                                capture_fps_expanded = false
+                                                            }
+                                                            .padding(12.dp)
+                                                    )
+                                                }
                                             }
-                                            capture_fps_expanded = false
-                                        }) {
-                                            if (s == -1)
-                                            {
-                                                Text(text = "Default")
-                                            }
-                                            else
-                                            {
-                                                Text(text = "" + s)
+                                        },
+                                        confirmButton = {},
+                                        dismissButton = {
+                                            TextButton(onClick = { capture_fps_expanded = false }) {
+                                                Text("Cancel")
                                             }
                                         }
-                                    }
+                                    )
                                 }
                             }
                             // =========== audio and video selectors ===========
