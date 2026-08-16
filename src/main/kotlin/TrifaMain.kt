@@ -1902,7 +1902,6 @@ fun load_groupmessages(selectedGroupId: String?, full_history: Boolean = false)
                     .orderBySent_timestampAsc()
                     .toList()
                     //***********// .toList(arrayOf<String>("id","tox_group_peername","tox_group_peer_pubkey","direction","TOX_MESSAGE_TYPE","group_identifier","TRIFA_MESSAGE_TYPE"))
-                Log.i(TAG, messages.toString())
             }
             messages
                 .let { if (full_history) it else it.takeLast(MAX_ONE_ON_ONE_MESSAGES_TO_SHOW) }
