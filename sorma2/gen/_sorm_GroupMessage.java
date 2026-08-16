@@ -49,7 +49,7 @@ public class GroupMessage
     public String tox_group_peer_pubkey; // uppercase
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
-    public int tox_group_peer_role = TOX_GROUP_ROLE_USER.value;
+    public int tox_group_peer_role = 2; // TOX_GROUP_ROLE_USER.value;
 
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     @Nullable
