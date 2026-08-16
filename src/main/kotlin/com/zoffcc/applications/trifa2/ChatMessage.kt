@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
@@ -45,7 +46,13 @@ import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -70,11 +77,13 @@ import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withLink
@@ -105,6 +114,7 @@ import org.nibor.autolink.LinkExtractor
 import org.nibor.autolink.LinkType
 import java.io.File
 import kotlin.random.Random
+
 
 @Composable
 fun Triangle(risingToTheRight: Boolean, background: Color, padding_bottom: Dp = 10.dp) {
@@ -823,25 +833,128 @@ fun message_timestamp_and_info(message: UIMessage, msg_version_int: Int)
 }
 
 @Composable
-fun show_open_link_dialog(show_link_click: Boolean, link_str: String, setLinkVars: (Boolean, String) -> Unit)
-{
+fun show_open_link_dialog(
+    show_link_click: Boolean,
+    link_str: String,
+    setLinkVars: (Boolean, String) -> Unit
+) {
     var show_link_click1 = show_link_click
     var link_str1 = link_str
-    if (show_link_click1)
-    {
-        AlertDialog(onDismissRequest = { link_str1 = ""; show_link_click1 = false; setLinkVars(show_link_click1, link_str1) },
-            title = { Text("Open this URL ?") },
+
+    val clipboardManager = LocalClipboardManager.current
+
+    if (show_link_click1) {
+        val closeDialog: () -> Unit = {
+            link_str1 = ""
+            show_link_click1 = false
+            setLinkVars(show_link_click1, link_str1)
+        }
+
+        AlertDialog(
+            onDismissRequest = closeDialog,
+            modifier = Modifier
+                .padding(24.dp)
+                .widthIn(max = 420.dp),
+            shape = RoundedCornerShape(28.dp),
+            containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp,
+
+            title = {
+                Text(
+                    text = "Open this URL ?",
+                    style = androidx.compose.material3.MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface
+                )
+            },
+
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+
+                    // Highly Visual Warning Banner
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.errorContainer,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Warning,
+                                contentDescription = "Warning",
+                                tint = androidx.compose.material3.MaterialTheme.colorScheme.onErrorContainer
+                            )
+                            Text(
+                                text = "This could be potentially dangerous!",
+                                style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = androidx.compose.material3.MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        }
+                    }
+
+                    // Stylish Link Item Box
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.surfaceVariant,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            SelectionContainer {
+                                Text(
+                                    text = link_str1,
+                                    style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                                    color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+
             confirmButton = {
-                Button(onClick = { open_webpage(link_str1); link_str1 = ""; show_link_click1 = false; setLinkVars(show_link_click1, link_str1) }) {
-                    Text("Yes")
+                Button(
+                    onClick = {
+                        open_webpage(link_str1)
+                        closeDialog()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = androidx.compose.material3.MaterialTheme.colorScheme.error,
+                        contentColor = androidx.compose.material3.MaterialTheme.colorScheme.onError
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Yes", fontWeight = FontWeight.SemiBold)
                 }
             },
+
             dismissButton = {
-                Button(onClick = { link_str1 = ""; show_link_click1 = false;setLinkVars(show_link_click1, link_str1) }) {
-                    Text("No")
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    TextButton(
+                        onClick = closeDialog,
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("No", fontWeight = FontWeight.SemiBold)
+                    }
+                    TextButton(
+                        onClick = {
+                            clipboardManager.setText(AnnotatedString(link_str1))
+                            closeDialog()
+                        },
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("copy URL", fontWeight = FontWeight.SemiBold)
+                    }
                 }
-            },
-            text = { Text("This could be potentially dangerous!" + "\n\n" + link_str1) })
+            }
+        )
     }
 }
 
@@ -898,42 +1011,6 @@ fun message_text_block(message: UIMessage, ui_scale: Float, setLinkVars: (Boolea
         }
     }
 }
-
-@Preview
-@Composable
-fun PreviewTest() {
-    val string = "I am #hashtags or #hashtags# and @mentions in Jetpack Compose."
-    UrlHighlightTextView(string, Modifier.padding(16.dp),
-        style = MaterialTheme.typography.body1.copy(
-            fontSize = 13.sp,
-            lineHeight = TextUnit.Unspecified,
-            letterSpacing = 0.sp
-        )) {
-        println(it)
-    }
-}
-
-@Preview
-@Composable
-fun AlertDialogTest()
-{
-    AlertDialog(onDismissRequest = {},
-        title = { Text("Hello title") },
-        confirmButton = {
-            Button(onClick = {
-            }) {
-                Text("Confirm")
-            }
-        },
-        dismissButton = {
-            Button(onClick = {
-            }) {
-                Text("Dismiss")
-            }
-        },
-        text = { Text("Hello text") })
-}
-
 
 
 @Composable
