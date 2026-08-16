@@ -1735,6 +1735,8 @@ fun load_groupmessages(selectedGroupId: String?, full_history: Boolean = false)
                     .group_identifierEq(selectedGroupId)
                     .orderBySent_timestampAsc()
                     .toList()
+                    //***********// .toList(arrayOf<String>("id","tox_group_peername","tox_group_peer_pubkey","direction","TOX_MESSAGE_TYPE","group_identifier","TRIFA_MESSAGE_TYPE"))
+                Log.i(TAG, messages.toString())
             }
             messages
                 .let { if (full_history) it else it.takeLast(MAX_ONE_ON_ONE_MESSAGES_TO_SHOW) }
@@ -1789,7 +1791,10 @@ fun load_groupmessages(selectedGroupId: String?, full_history: Boolean = false)
                                     rcvdTimeMs = it.rcvd_timestamp,
                                     syncdTimeMs = it.rcvd_timestamp,
                                     peer_role = it.tox_group_peer_role,
-                                    msg_id_hash = it.msg_id_hash, message_id_tox = it.message_id_tox, msgDatabaseId = it.id, user = friend_user, timeMs = it.sent_timestamp, text = it.text, toxpk = it.tox_group_peer_pubkey.uppercase(), groupId = it.group_identifier.lowercase(), trifaMsgType = it.TRIFA_MESSAGE_TYPE, filename_fullpath = it.filename_fullpath,
+                                    msg_id_hash = it.msg_id_hash, message_id_tox = it.message_id_tox,
+                                    msgDatabaseId = it.id, user = friend_user, timeMs = it.sent_timestamp,
+                                    text = it.text ?: "",
+                                    toxpk = it.tox_group_peer_pubkey.uppercase(), groupId = it.group_identifier.lowercase(), trifaMsgType = it.TRIFA_MESSAGE_TYPE, filename_fullpath = it.filename_fullpath,
                                     sent_privately_to_tox_group_peer_pubkey = it.sent_privately_to_tox_group_peer_pubkey))
                             TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value ->
                                 uigroupmessages.add(UIGroupMessage(was_synced = it.was_synced,
@@ -1798,7 +1803,10 @@ fun load_groupmessages(selectedGroupId: String?, full_history: Boolean = false)
                                     rcvdTimeMs = it.rcvd_timestamp,
                                     syncdTimeMs = it.rcvd_timestamp,
                                     peer_role = it.tox_group_peer_role,
-                                    msg_id_hash = it.msg_id_hash, message_id_tox = it.message_id_tox, msgDatabaseId = it.id, user = friend_user, timeMs = it.sent_timestamp, text = it.text, toxpk = it.tox_group_peer_pubkey.uppercase(), groupId = it.group_identifier.lowercase(), trifaMsgType = it.TRIFA_MESSAGE_TYPE, filename_fullpath = it.filename_fullpath,
+                                    msg_id_hash = it.msg_id_hash, message_id_tox = it.message_id_tox,
+                                    msgDatabaseId = it.id, user = friend_user, timeMs = it.sent_timestamp,
+                                    text = it.text ?: "",
+                                    toxpk = it.tox_group_peer_pubkey.uppercase(), groupId = it.group_identifier.lowercase(), trifaMsgType = it.TRIFA_MESSAGE_TYPE, filename_fullpath = it.filename_fullpath,
                                     sent_privately_to_tox_group_peer_pubkey = it.sent_privately_to_tox_group_peer_pubkey))
 
                         }
@@ -1814,7 +1822,10 @@ fun load_groupmessages(selectedGroupId: String?, full_history: Boolean = false)
                                     rcvdTimeMs = it.rcvd_timestamp,
                                     syncdTimeMs = it.rcvd_timestamp,
                                     peer_role = it.tox_group_peer_role,
-                                    msg_id_hash = it.msg_id_hash, message_id_tox = it.message_id_tox, msgDatabaseId = it.id, user = myUser, timeMs = it.sent_timestamp, text = it.text, toxpk = it.tox_group_peer_pubkey.uppercase(), groupId = it.group_identifier.lowercase(), trifaMsgType = it.TRIFA_MESSAGE_TYPE, filename_fullpath = it.filename_fullpath,
+                                    msg_id_hash = it.msg_id_hash, message_id_tox = it.message_id_tox,
+                                    msgDatabaseId = it.id, user = myUser, timeMs = it.sent_timestamp,
+                                    text = it.text ?: "",
+                                    toxpk = it.tox_group_peer_pubkey.uppercase(), groupId = it.group_identifier.lowercase(), trifaMsgType = it.TRIFA_MESSAGE_TYPE, filename_fullpath = it.filename_fullpath,
                                     sent_privately_to_tox_group_peer_pubkey = it.sent_privately_to_tox_group_peer_pubkey))
                             TRIFAGlobals.TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value ->
                                 uigroupmessages.add(UIGroupMessage(was_synced = it.was_synced,
@@ -1823,7 +1834,10 @@ fun load_groupmessages(selectedGroupId: String?, full_history: Boolean = false)
                                     rcvdTimeMs = it.rcvd_timestamp,
                                     syncdTimeMs = it.rcvd_timestamp,
                                     peer_role = it.tox_group_peer_role,
-                                    msg_id_hash = it.msg_id_hash, message_id_tox = it.message_id_tox, msgDatabaseId = it.id, user = myUser, timeMs = it.sent_timestamp, text = it.text, toxpk = it.tox_group_peer_pubkey.uppercase(), groupId = it.group_identifier.lowercase(), trifaMsgType = it.TRIFA_MESSAGE_TYPE, filename_fullpath = it.filename_fullpath,
+                                    msg_id_hash = it.msg_id_hash, message_id_tox = it.message_id_tox,
+                                    msgDatabaseId = it.id, user = myUser, timeMs = it.sent_timestamp,
+                                    text = it.text ?: "",
+                                    toxpk = it.tox_group_peer_pubkey.uppercase(), groupId = it.group_identifier.lowercase(), trifaMsgType = it.TRIFA_MESSAGE_TYPE, filename_fullpath = it.filename_fullpath,
                                     sent_privately_to_tox_group_peer_pubkey = it.sent_privately_to_tox_group_peer_pubkey))
                         }
                     }
