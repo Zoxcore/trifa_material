@@ -10,12 +10,15 @@ import androidx.compose.foundation.ContextMenuArea
 import androidx.compose.foundation.ContextMenuItem
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
@@ -38,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
@@ -368,6 +372,8 @@ fun ContactList(
                         modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)
                     )
 
+                    val scrollState = rememberScrollState()
+
                     // Scrollable Group Selection
                     Box(
                         modifier = Modifier
@@ -386,47 +392,110 @@ fun ContactList(
                                 )
                             }
                         } else {
-                            LazyColumn(
-                                verticalArrangement = Arrangement.spacedBy(4.dp),
-                                contentPadding = PaddingValues(vertical = 4.dp)
-                            ) {
-                                items(groupstore.state.groups) { group ->
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clip(RoundedCornerShape(12.dp))
-                                            .clickable {
-                                                pendingInviteGroupId = group.groupId
-                                                pendingInviteGroupName = group.name
-                                                showConfirmInviteDialog = true
-                                                showInviteDialog = false
+                            Row(modifier = Modifier.fillMaxSize()) {
+                                Column(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .verticalScroll(scrollState),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    // Top padding equivalent to LazyColumn's contentPadding
+                                    Spacer(modifier = Modifier.height(4.dp))
+
+                                    groupstore.state.groups.forEach { group ->
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clip(RoundedCornerShape(12.dp))
+                                                .clickable {
+                                                    pendingInviteGroupId = group.groupId
+                                                    pendingInviteGroupName = group.name
+                                                    showConfirmInviteDialog = true
+                                                    showInviteDialog = false
+                                                }
+                                                .padding(horizontal = 16.dp, vertical = 14.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(
+                                                    text = group.name,
+                                                    style = MaterialTheme.typography.bodyLarge,
+                                                    color = MaterialTheme.colorScheme.onSurface,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                    fontWeight = FontWeight.SemiBold
+                                                )
+
+                                                Spacer(modifier = Modifier.height(4.dp))
+
+                                                Text(
+                                                    text = "ID: ${group.groupId.take(8)}...",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    fontFamily = FontFamily.Monospace,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
                                             }
-                                            .padding(horizontal = 16.dp, vertical = 14.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Column(modifier = Modifier.weight(1f)) {
-                                            Text(
-                                                text = group.name,
-                                                style = MaterialTheme.typography.bodyLarge,
-                                                color = MaterialTheme.colorScheme.onSurface,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis,
-                                                fontWeight = FontWeight.SemiBold
-                                            )
+                                        }
+                                    }
 
-                                            Spacer(modifier = Modifier.height(4.dp))
+                                    // Bottom padding equivalent to LazyColumn's contentPadding
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                }
 
-                                            Text(
-                                                text = "ID: ${group.groupId.take(8)}...",
-                                                style = MaterialTheme.typography.bodySmall,
-                                                fontFamily = FontFamily.Monospace,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
+                                @Composable
+                                fun CustomVerticalScrollbar(
+                                    scrollState: androidx.compose.foundation.ScrollState,
+                                    modifier: Modifier = Modifier
+                                ) {
+                                    if (scrollState.maxValue > 0) {
+                                        androidx.compose.foundation.layout.BoxWithConstraints(
+                                            modifier = modifier
+                                                .fillMaxHeight()
+                                                .width(6.dp)
+                                                .padding(vertical = 4.dp)
+                                        ) {
+                                            val totalContent = scrollState.maxValue + scrollState.viewportSize
+                                            if (totalContent > 0 && scrollState.viewportSize > 0) {
+                                                val density = androidx.compose.ui.platform.LocalDensity.current
+                                                val trackHeightPx = with(density) { maxHeight.toPx() }
+                                                val thumbHeightPx = (scrollState.viewportSize.toFloat() / totalContent) * trackHeightPx
+                                                val thumbOffsetPx = (scrollState.value.toFloat() / totalContent) * trackHeightPx
+
+                                                val thumbHeight = thumbHeightPx / density.density
+                                                val thumbOffset = thumbOffsetPx / density.density
+
+                                                val draggableDistance = trackHeightPx - thumbHeightPx
+                                                val scrollRatio = if (draggableDistance > 0) scrollState.maxValue.toFloat() / draggableDistance else 0f
+
+                                                androidx.compose.foundation.layout.Box(
+                                                    modifier = Modifier
+                                                        .offset(y = thumbOffset.dp)
+                                                        .height(thumbHeight.dp)
+                                                        .fillMaxWidth()
+                                                        .clip(RoundedCornerShape(3.dp))
+                                                        .background(androidx.compose.material3.MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                                                        .pointerInput(scrollState.maxValue, trackHeightPx, scrollRatio) {
+                                                            detectDragGestures { change, dragAmount ->
+                                                                change.consume()
+                                                                if (scrollRatio > 0f) {
+                                                                    val scrollDelta = dragAmount.y * scrollRatio
+                                                                    scrollState.dispatchRawDelta(scrollDelta)
+                                                                }
+                                                            }
+                                                        }
+                                                )
+                                            }
                                         }
                                     }
                                 }
+
+                                // The custom scrollbar placed next to the scrollable column
+                                CustomVerticalScrollbar(
+                                    scrollState = scrollState,
+                                    modifier = Modifier.fillMaxHeight()
+                                )
                             }
                         }
                     }
@@ -455,6 +524,7 @@ fun ContactList(
             }
         }
     }
+
 
     VerticallyScrollableArea(modifier = Modifier.randomDebugBorder().fillMaxSize()) { scrollState ->
         LazyColumn(
