@@ -929,6 +929,13 @@ fun App()
                                     }
                                 }
                             }
+
+
+
+
+                            // =========== audio and video selectors ===========
+                            // =========== audio and video selectors ===========
+                            // =========== audio and video selectors ===========
                             var expanded_a by remember { mutableStateOf(false) }
                             var expanded_v by remember { mutableStateOf(false) }
                             var expanded_as by remember { mutableStateOf(false) }
@@ -1279,6 +1286,12 @@ fun App()
                                     }
                                 }
                             }
+                            // =========== audio and video selectors ===========
+                            // =========== audio and video selectors ===========
+                            // =========== audio and video selectors ===========
+
+
+
                         }
                         Column(modifier = Modifier.randomDebugBorder().padding(4.dp)) {
                             val current_callstate3 by avstatestorecallstate.stateFlow.collectAsState()
