@@ -34,10 +34,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.zoffcc.applications.trifa.HelperGeneric
 import com.zoffcc.applications.trifa.HelperGeneric.delete_friend_wrapper
+import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
 import com.zoffcc.applications.trifa.HelperRelay.delete_relay
 import com.zoffcc.applications.trifa.HelperRelay.is_any_relay
 import com.zoffcc.applications.trifa.HelperRelay.is_own_relay
 import com.zoffcc.applications.trifa.HelperRelay.remove_own_relay_in_db
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_reconnect
 import com.zoffcc.applications.trifa.StateGroups
 import contactstore
 import globalstore
@@ -177,6 +179,12 @@ fun GroupList(
                         .padding(start = if(peercollapsed) 2.dp else 3.dp, end = if(peercollapsed) 0.dp else 3.dp)
                     ContextMenuArea(items = {
                         listOf(
+                            ContextMenuItem("reconnect") {
+                                GlobalScope.launch {
+                                    val group_num_temp: Long = tox_group_by_groupid__wrapper(item.groupId)
+                                    tox_group_reconnect(group_num_temp)
+                                }
+                            },
                             ContextMenuItem("delete") {
                                 itemToDelete = item
                                 showDeleteDialog = true
