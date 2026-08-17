@@ -45,6 +45,7 @@ import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
@@ -146,6 +147,7 @@ inline fun ChatMessage(isMyMessage: Boolean,
 ) {
     val TAG = "trifa.ChatMessage"
     var isHovered by remember { mutableStateOf(false) }
+    val clipboardManager = LocalClipboardManager.current
     Box(
         modifier = modifier.fillMaxWidth()
             .onPointerEvent(PointerEventType.Enter) { isHovered = true }
@@ -342,6 +344,28 @@ inline fun ChatMessage(isMyMessage: Boolean,
                             .height((16 * ui_scale).dp)
                             .background(MaterialTheme.colors.onSurface.copy(alpha = 0.12f))
                     )
+
+                    // --- COPY ACTION BUTTON ---
+                    TooltipArea(
+                        tooltip = { ActionTooltip(text = "Copy", ui_scale = ui_scale) },
+                        tooltipPlacement = TooltipPlacement.CursorPoint(
+                            alignment = Alignment.BottomCenter,
+                            offset = DpOffset(0.dp, 8.dp)
+                        ),
+                        delayMillis = 400
+                    ) {
+                        IconButton(
+                            onClick = { clipboardManager.setText(AnnotatedString(message.text)) },
+                            modifier = Modifier.size((28 * ui_scale).dp) // Reduced footprint size
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ContentCopy,
+                                contentDescription = "Copy",
+                                tint = MaterialTheme.colors.onSurface.copy(alpha = 0.7f),
+                                modifier = Modifier.size((14 * ui_scale).dp) // Reduced icon size
+                            )
+                        }
+                    }
 
                     // --- REPLY ACTION BUTTON ---
                     TooltipArea(
