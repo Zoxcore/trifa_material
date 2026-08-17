@@ -118,13 +118,18 @@ import kotlin.random.Random
 
 
 @Composable
-fun Triangle(risingToTheRight: Boolean, background: Color, padding_bottom: Dp = 10.dp) {
+fun Triangle(risingToTheRight: Boolean, peer_role: Int, background: Color, padding_bottom: Dp = 10.dp) {
+    var border_size = 5.dp
+    if (peer_role == ToxVars.Tox_Group_Role.TOX_GROUP_ROLE_MODERATOR.value)
+    {
+        border_size = 3.dp
+    }
     Box(
         Modifier
             .padding(bottom = padding_bottom, start = 0.dp)
             .clip(TriangleEdgeShape(risingToTheRight))
             .background(background)
-            .size(6.dp)
+            .size(border_size)
     )
 }
 
@@ -162,7 +167,7 @@ inline fun ChatMessage(isMyMessage: Boolean,
                 }
                 Spacer(Modifier.size(2.dp))
                 Column {
-                    Triangle(true, ChatColorsConfig.OTHERS_MESSAGE, MESSAGE_BOX_BOTTOM_PADDING)
+                    Triangle(true, -1, ChatColorsConfig.OTHERS_MESSAGE, MESSAGE_BOX_BOTTOM_PADDING)
                 }
             }
             Column {
@@ -276,7 +281,7 @@ inline fun ChatMessage(isMyMessage: Boolean,
             }
             if (isMyMessage) {
                 Column {
-                    Triangle(false, ChatColorsConfig.MY_MESSAGE, MESSAGE_BOX_BOTTOM_PADDING)
+                    Triangle(false, -1, ChatColorsConfig.MY_MESSAGE, MESSAGE_BOX_BOTTOM_PADDING)
                 }
             }
         }
