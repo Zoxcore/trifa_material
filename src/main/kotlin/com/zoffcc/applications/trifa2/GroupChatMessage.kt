@@ -299,7 +299,12 @@ inline fun GroupChatMessage(isMyMessage: Boolean,
             }
             if (isMyMessage) {
                 Column {
-                    Triangle(false, ChatColorsConfig.MY_MESSAGE, MESSAGE_BOX_BOTTOM_PADDING)
+                    val border_color = when (groupmessage.peer_role) {
+                        ToxVars.Tox_Group_Role.TOX_GROUP_ROLE_FOUNDER.value -> Color(NGC_FOUNDER_MESSAGE_COLOR)
+                        ToxVars.Tox_Group_Role.TOX_GROUP_ROLE_MODERATOR.value -> Color(NGC_MODERATOR_MESSAGE_COLOR)
+                        else -> ChatColorsConfig.MY_MESSAGE
+                    }
+                    Triangle(false, border_color, MESSAGE_BOX_BOTTOM_PADDING)
                 }
             }
         }
@@ -474,13 +479,13 @@ fun FounderBorder(groupmessage: UIGroupMessage): Modifier =
     {
         Modifier.border(width = 3.dp,
             color = Color(NGC_FOUNDER_MESSAGE_COLOR),
-            shape = RoundedCornerShape(10.dp, 10.dp, 10.dp, 0.dp))
+            shape = RoundedCornerShape(10.dp, 10.dp, 0.dp, 0.dp))
     }
     else if (groupmessage.peer_role == ToxVars.Tox_Group_Role.TOX_GROUP_ROLE_MODERATOR.value)
     {
         Modifier.border(width = 2.dp,
             color = Color(NGC_MODERATOR_MESSAGE_COLOR),
-            shape = RoundedCornerShape(10.dp, 10.dp, 10.dp, 0.dp))
+            shape = RoundedCornerShape(10.dp, 10.dp, 0.dp, 0.dp))
     }
     else
     {
