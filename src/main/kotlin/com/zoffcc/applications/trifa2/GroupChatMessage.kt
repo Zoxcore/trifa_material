@@ -304,7 +304,7 @@ inline fun GroupChatMessage(isMyMessage: Boolean,
                         ToxVars.Tox_Group_Role.TOX_GROUP_ROLE_MODERATOR.value -> Color(NGC_MODERATOR_MESSAGE_COLOR)
                         else -> ChatColorsConfig.MY_MESSAGE
                     }
-                    Triangle(false, border_color, MESSAGE_BOX_BOTTOM_PADDING)
+                    Triangle(false, groupmessage.peer_role, border_color, MESSAGE_BOX_BOTTOM_PADDING)
                 }
             }
         }
