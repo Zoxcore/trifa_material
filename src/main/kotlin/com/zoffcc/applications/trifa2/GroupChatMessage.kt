@@ -43,6 +43,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.BrokenImage
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
@@ -68,6 +69,8 @@ import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
@@ -127,14 +130,15 @@ inline fun GroupChatMessage(isMyMessage: Boolean,
                             crossinline onReplySelected: (UIGroupMessage) -> Unit,
                             crossinline onDeleteSelected: (UIGroupMessage) -> Unit,
                             crossinline onEmojiSelected: (UIGroupMessage, String) -> Unit
-                            ) {
+) {
 
     var isHovered by remember { mutableStateOf(false) }
+    val clipboardManager = LocalClipboardManager.current
 
     Box(
         modifier = modifier.fillMaxWidth()
-        .onPointerEvent(PointerEventType.Enter) { isHovered = true }
-        .onPointerEvent(PointerEventType.Exit) { isHovered = false },
+            .onPointerEvent(PointerEventType.Enter) { isHovered = true }
+            .onPointerEvent(PointerEventType.Exit) { isHovered = false },
         contentAlignment = if (isMyMessage) Alignment.CenterEnd else Alignment.CenterStart
     ) {
         Row(verticalAlignment = Alignment.Bottom) {
@@ -364,6 +368,28 @@ inline fun GroupChatMessage(isMyMessage: Boolean,
                             .height((16 * ui_scale).dp)
                             .background(MaterialTheme.colors.onSurface.copy(alpha = 0.12f))
                     )
+
+                    // --- COPY ACTION BUTTON ---
+                    TooltipArea(
+                        tooltip = { ActionTooltip(text = "Copy", ui_scale = ui_scale) },
+                        tooltipPlacement = TooltipPlacement.CursorPoint(
+                            alignment = Alignment.BottomCenter,
+                            offset = DpOffset(0.dp, 8.dp)
+                        ),
+                        delayMillis = 400
+                    ) {
+                        IconButton(
+                            onClick = { clipboardManager.setText(AnnotatedString(groupmessage.text)) },
+                            modifier = Modifier.size((28 * ui_scale).dp) // Reduced footprint size
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ContentCopy,
+                                contentDescription = "Copy",
+                                tint = MaterialTheme.colors.onSurface.copy(alpha = 0.7f),
+                                modifier = Modifier.size((14 * ui_scale).dp) // Reduced icon size
+                            )
+                        }
+                    }
 
                     // --- REPLY ACTION BUTTON ---
                     TooltipArea(
