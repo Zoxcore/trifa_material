@@ -180,7 +180,7 @@ dependencies {
     //
     //
     //
-    implementation("com.squareup.okhttp3:okhttp:5.4.0")
+    implementation("com.squareup.okhttp3:okhttp:5.5.0")
     implementation("ca.gosyer:kotlin-multiplatform-appdirs:1.2.0")
     implementation("com.sksamuel.scrimage:scrimage-core:4.6.7")
     implementation("com.sksamuel.scrimage:scrimage-webp:4.6.7")
