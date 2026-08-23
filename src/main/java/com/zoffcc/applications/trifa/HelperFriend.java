@@ -346,18 +346,18 @@ public class HelperFriend {
                     Proxy proxy = new Proxy(Proxy.Type.SOCKS, proxyAddr);
                     client = new OkHttpClient.Builder().
                             proxy(proxy).
-                            readTimeout(5, TimeUnit.SECONDS).
-                            callTimeout(6, TimeUnit.SECONDS).
-                            connectTimeout(8, TimeUnit.SECONDS).
-                            writeTimeout(5, TimeUnit.SECONDS).
+                            readTimeout(6, TimeUnit.SECONDS).
+                            callTimeout(8, TimeUnit.SECONDS).
+                            connectTimeout(15, TimeUnit.SECONDS).
+                            writeTimeout(8, TimeUnit.SECONDS).
                             build();
                 }
                 else {
                     client = new OkHttpClient.Builder().
-                            readTimeout(5, TimeUnit.SECONDS).
+                            readTimeout(6, TimeUnit.SECONDS).
                             callTimeout(6, TimeUnit.SECONDS).
-                            connectTimeout(8, TimeUnit.SECONDS).
-                            writeTimeout(5, TimeUnit.SECONDS).
+                            connectTimeout(12, TimeUnit.SECONDS).
+                            writeTimeout(6, TimeUnit.SECONDS).
                             build();
                     //                                   cacheControl(new CacheControl.Builder().noCache().build()).
                 }
@@ -394,12 +394,14 @@ public class HelperFriend {
                         }
                     }
                     response.body().close();
-                } catch (Exception ignored) {
+                } catch (Exception e4) {
+                    Log.i(TAG, "friend_call_push_url:044:EE:" + e4.getMessage());
                 }
             } catch (Exception e) {
                 Log.i(TAG, "friend_call_push_url:001:EE:" + e.getMessage());
             }
-        } catch (Exception ignored) {
+        } catch (Exception e2) {
+            Log.i(TAG, "friend_call_push_url:077:EE:" + e2.getMessage());
         }
         return false;
     }
