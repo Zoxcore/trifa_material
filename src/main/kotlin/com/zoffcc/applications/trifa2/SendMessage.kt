@@ -1,3 +1,5 @@
+@file:Suppress("LocalVariableName")
+
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
