@@ -1,4 +1,4 @@
-@file:Suppress("LocalVariableName", "SimplifyBooleanWithConstants")
+@file:Suppress("LocalVariableName", "SimplifyBooleanWithConstants", "LiftReturnOrAssignment")
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.VerticalScrollbar
