@@ -4,7 +4,7 @@
 #
 # config:
 #
-java_17_or_newer_dir=/usr/lib/jvm/temurin-26-jdk-amd64/
+java_17_or_newer_dir=/usr/lib/jvm/temurin-21-jdk-amd64/
 asan_runtime_lib=$(ls -1 /usr/lib/x86_64-linux-gnu/libasan.s*0.0)
 #
 #
@@ -19,12 +19,12 @@ h=$(echo $HOME)
 
 if [ "$1""x" == "buildx" ]; then
   if [ "$2""x" != "1x" ]; then
-    cp -av resources/common/libffmpeg_av_jni.so__ASAN resources/common/libffmpeg_av_jni.so
-    cp -av resources/common/libjni_notifications.so__ASAN resources/common/libjni_notifications.so
-    cp -av resources/common/libjni-c-toxcore.so__ASAN resources/common/libjni-c-toxcore.so
+    cp -av resources/common/libffmpeg_av_jni.so__ASAN resources/common/libffmpeg_av_jni.so  || exit 1
+    cp -av resources/common/libjni_notifications.so__ASAN resources/common/libjni_notifications.so || exit 1
+    cp -av resources/common/libjni-c-toxcore.so__ASAN resources/common/libjni-c-toxcore.so || exit 1
   fi
-  ./gradlew -Dorg.gradle.java.home="$java_17_or_newer_dir" packageDistributionForCurrentOS
-  ./gradlew -Dorg.gradle.java.home="$java_17_or_newer_dir" packageUberJarForCurrentOS
+  ./gradlew -Dorg.gradle.java.home="$java_17_or_newer_dir" packageDistributionForCurrentOS || exit 1
+  ./gradlew -Dorg.gradle.java.home="$java_17_or_newer_dir" packageUberJarForCurrentOS || exit 1
 fi
 
 # options to log GC stats, and limit memusage a lot
