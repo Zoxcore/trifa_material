@@ -42,7 +42,7 @@ NASM_VERSION="nasm-2.15.05" # "nasm-2.16.01"
 FFMPEG_VERSION="n9.0.1"
 OPUS_VERSION="v1.6.1"
 SODIUM_VERSION="1.0.22"
-VPX_VERSION="v1.16.0"
+VPX_VERSION="v1.17.0"
 _X264_VERSION_="b35605ace3ddf7c1a5d67a2eb553f034aef41d55"
 # ------- deps verisions ---------
 
