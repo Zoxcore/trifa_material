@@ -193,6 +193,16 @@ object HelperGeneric {
         }
     }
 
+    @JvmStatic fun delete_only_msgs_and_files_friend_wrapper(friend_pubkey: String, toast_message: String?)
+    {
+        delete_friend_all_filetransfers(friend_pubkey)
+        delete_friend_all_messages(friend_pubkey)
+        if (!toast_message.isNullOrEmpty())
+        {
+            SnackBarToast(toast_message)
+        }
+    }
+
     @JvmStatic fun bytesToHex(bytes: ByteArray, start: Int, len: Int): String {
         val hexChars = CharArray(len * 2)
         // System.out.println("blen=" + (len));
