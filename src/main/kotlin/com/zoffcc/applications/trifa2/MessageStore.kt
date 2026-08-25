@@ -1,3 +1,5 @@
+@file:Suppress("LocalVariableName")
+
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -8,6 +10,7 @@ interface MessageStore
 {
     fun send(action: MessageAction)
     fun remove(messageId: Long)
+    fun removeAllForPubkey(ContactPubkey: String?)
     val stateFlow: MutableStateFlow<MessageState>
     val state get() = stateFlow.value
 }
@@ -78,6 +81,17 @@ fun CoroutineScope.createMessageStore(): MessageStore
                 global_semaphore_messagelist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
                 channel.send(MessageAction.DeleteMessage(messageId))
                 global_semaphore_messagelist_ui.release()
+            }
+        }
+        override fun removeAllForPubkey(ContactPubkey: String?)
+        {
+            if ((!ContactPubkey.isNullOrEmpty()) && (contactstore.state.selectedContactPubkey == ContactPubkey))
+            {
+                launch {
+                    global_semaphore_messagelist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
+                    channel.send(MessageAction.DeleteAllMessagesForPubkey(ContactPubkey))
+                    global_semaphore_messagelist_ui.release()
+                }
             }
         }
 

@@ -50,6 +50,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.zoffcc.applications.trifa.HelperGeneric.delete_friend_wrapper
+import com.zoffcc.applications.trifa.HelperGeneric.delete_only_msgs_and_files_friend_wrapper
 import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
 import com.zoffcc.applications.trifa.HelperGroup
 import com.zoffcc.applications.trifa.HelperRelay.delete_relay
@@ -68,6 +69,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import messagestore
 import org.briarproject.briar.desktop.ui.ListItemView
 import org.briarproject.briar.desktop.ui.VerticallyScrollableArea
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
@@ -82,6 +84,11 @@ fun ContactList(
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
     var itemToDelete by remember { mutableStateOf<ContactItem?>(null) }
+
+    // New state variables for the separate "delete all messages and files" dialog
+    var showDeleteAllMessagesDialog by remember { mutableStateOf(false) }
+    var itemToDeleteAllMessages by remember { mutableStateOf<ContactItem?>(null) }
+
     var showInviteDialog by remember { mutableStateOf(false) }
     var contactToInvite by remember { mutableStateOf<ContactItem?>(null) }
 
@@ -112,7 +119,7 @@ fun ContactList(
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text(
-                        text = "Are you sure you want to delete this contact and all associated messages?",
+                        text = "Are you sure you want to delete this contact and all associated messages and files?",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -192,6 +199,102 @@ fun ContactList(
             dismissButton = {
                 TextButton(
                     onClick = { itemToDelete = null ; showDeleteDialog = false },
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Cancel", fontWeight = FontWeight.SemiBold)
+                }
+            }
+        )
+    }
+
+    // Separate dialog for deleting all messages and files
+    if (showDeleteAllMessagesDialog) {
+        val itemToDeleteAllMessagesSnapshot = itemToDeleteAllMessages!!
+        AlertDialog(
+            onDismissRequest = { showDeleteAllMessagesDialog = false },
+            modifier = Modifier
+                .padding(24.dp)
+                .widthIn(max = 420.dp),
+            shape = RoundedCornerShape(28.dp),
+            containerColor = MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp,
+            title = {
+                Text(
+                    text = "Delete All Messages and Files",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text(
+                        text = "Are you sure you want to delete all messages and files for this contact? The contact itself will remain",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    // Modern Contact Card
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            // Avatar Circle
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .background(
+                                        color = MaterialTheme.colorScheme.primaryContainer,
+                                        shape = CircleShape
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                ProfileCircle(40.dp, itemToDeleteAllMessagesSnapshot)
+                            }
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    // First 6 of pubkey, then username
+                                    text = "${itemToDeleteAllMessagesSnapshot.pubkey.take(6)} / ${itemToDeleteAllMessagesSnapshot.name.take(20).ifEmpty { "Unknown" }}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDeleteAllMessagesDialog = false
+                        GlobalScope.launch(Dispatchers.IO) {
+                            delete_only_msgs_and_files_friend_wrapper(itemToDeleteAllMessagesSnapshot.pubkey, "Messages and Files removed")
+                            messagestore.removeAllForPubkey(itemToDeleteAllMessagesSnapshot.pubkey)
+                        }
+                        itemToDeleteAllMessages = null
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Delete All", fontWeight = FontWeight.SemiBold)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { itemToDeleteAllMessages = null ; showDeleteAllMessagesDialog = false },
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text("Cancel", fontWeight = FontWeight.SemiBold)
@@ -577,6 +680,10 @@ fun ContactList(
                             ContextMenuItem("delete") {
                                 itemToDelete = item
                                 showDeleteDialog = true
+                            },
+                            ContextMenuItem("delete all messages and files") {
+                                itemToDeleteAllMessages = item
+                                showDeleteAllMessagesDialog = true
                             },
                         )
                     }) {
