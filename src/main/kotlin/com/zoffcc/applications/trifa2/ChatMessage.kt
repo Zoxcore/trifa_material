@@ -766,7 +766,8 @@ private fun show_filetransfer_image(ui_scale: Float,
                                     small: Boolean = false)
 {
     val isPaperclip = (icon == Icons.Default.Attachment)
-    val imgSize = if (isPaperclip) 16.dp else if (small) 32.dp else (IMAGE_PREVIEW_SIZE.dp * ui_scale)
+    val isBrokenImage = (fullpath == null)
+    val imgSize = if (isPaperclip || isBrokenImage) 16.dp else if (small) 32.dp else (IMAGE_PREVIEW_SIZE.dp * ui_scale)
     if (fullpath == null) {
         Icon(
             modifier = Modifier.size(imgSize),
@@ -1005,7 +1006,9 @@ fun message_text_block(message: UIMessage, ui_scale: Float, setLinkVars: (Boolea
         }
 
         if (message.trifaMsgType == TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value && !text_is_only_emoji) {
-            msg_fontsize = 11f
+            // broken image (null path) or paperclip (non-image) → even smaller text
+            val isBrokenOrPaperclip = message.filename_fullpath.isNullOrEmpty() || !check_filename_is_image(message.filename_fullpath)
+            msg_fontsize = if (isBrokenOrPaperclip) 9f else 11f
         }
 
         var message_text_string = message.text
