@@ -588,7 +588,7 @@ fun outgoing_filetransfer(message: UIMessage, ui_scale: Float)
                     },
                     strokeCap = StrokeCap.Round,
                     drawStopIndicator = {},
-                    modifier = Modifier.weight(1f).height(8.dp),
+                    modifier = Modifier.weight(1f).height(4.dp),
                 )
                 val currentTime = message.currentfileposTimeMs
                 val deltaBytes: Float = message.currentfilepos.toFloat() - message.startfilepos.toFloat()
@@ -606,15 +606,15 @@ fun outgoing_filetransfer(message: UIMessage, ui_scale: Float)
                         " "+message.startfileposTimeMs+" deltatime="+deltaTimeMs +" "+transferSpeedKbps)
                 */
                 Text(modifier = Modifier.padding(start = 8.dp),
-                    fontSize = 12.sp,
+                    fontSize = 9.sp,
                     text = "" + ((message.currentfilepos.toFloat() / message.filesize.toFloat()) * 100.0f).toLong() + "%" +
                             " " + formatSpeed(transferSpeedKbps)
                 )
                 IconButton(
                     icon = Icons.Filled.Cancel,
                     iconTint = Color.Red,
-                    iconSize = 20.dp,
-                    modifier = Modifier.size(24.dp),
+                    iconSize = 16.dp,
+                    modifier = Modifier.size(20.dp),
                     contentDescription = "cancel",
                     onClick = {
                         cancel_ft_from_ui(message)
@@ -654,7 +654,7 @@ fun incoming_filetransfer(message: UIMessage, ui_scale: Float)
                 },
                 strokeCap = StrokeCap.Round,
                 drawStopIndicator = {},
-                modifier = Modifier.weight(1f).height(8.dp),
+                modifier = Modifier.weight(1f).height(4.dp),
             )
             val currentTime = message.currentfileposTimeMs
             val deltaBytes: Float = message.currentfilepos.toFloat()
@@ -667,15 +667,15 @@ fun incoming_filetransfer(message: UIMessage, ui_scale: Float)
             }
 
             Text(modifier = Modifier.padding(start = 8.dp),
-                fontSize = 12.sp,
+                fontSize = 9.sp,
                 text = "" + ((message.currentfilepos.toFloat() / message.filesize.toFloat()) * 100.0f).toLong() + "%" +
                         " " + formatSpeed(transferSpeedKbps)
             )
             IconButton(
                 icon = Icons.Filled.Cancel,
                 iconTint = Color.Red,
-                iconSize = 20.dp,
-                modifier = Modifier.size(24.dp),
+                iconSize = 16.dp,
+                modifier = Modifier.size(20.dp),
                 contentDescription = "cancel",
                 onClick = {
                     cancel_ft_from_ui(message)
@@ -765,7 +765,8 @@ private fun show_filetransfer_image(ui_scale: Float,
                                     description: String = "failed",
                                     small: Boolean = false)
 {
-    val imgSize = if (small) 32.dp else (IMAGE_PREVIEW_SIZE.dp * ui_scale)
+    val isPaperclip = (icon == Icons.Default.Attachment)
+    val imgSize = if (isPaperclip) 16.dp else if (small) 32.dp else (IMAGE_PREVIEW_SIZE.dp * ui_scale)
     if (fullpath == null) {
         Icon(
             modifier = Modifier.size(imgSize),
@@ -1001,6 +1002,10 @@ fun message_text_block(message: UIMessage, ui_scale: Float, setLinkVars: (Boolea
             }
         } catch (_: Exception)
         {
+        }
+
+        if (message.trifaMsgType == TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value && !text_is_only_emoji) {
+            msg_fontsize = 11f
         }
 
         var message_text_string = message.text
