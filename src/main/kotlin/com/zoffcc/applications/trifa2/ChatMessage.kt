@@ -489,39 +489,39 @@ fun outgoing_filetransfer(message: UIMessage, ui_scale: Float)
         if (message.file_state == ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_PAUSE.value)
         {
             // we have the option to start or cancel the outgoing FT here
-            Column() {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 if (check_filename_is_image(message.filename_fullpath))
                 {
-                    show_filetransfer_image(ui_scale = ui_scale, clickable = true,
+                    show_filetransfer_image(ui_scale = ui_scale, clickable = true, small = true,
                         fullpath = message.filename_fullpath, description = "Image")
                 } else
                 {
-                    show_filetransfer_image(ui_scale = ui_scale, clickable = true,
+                    show_filetransfer_image(ui_scale = ui_scale, clickable = true, small = true,
                         icon = Icons.Default.Attachment,
                         tint = MaterialTheme.colors.primary,
                         fullpath = message.filename_fullpath, description = "File")
                 }
-                Spacer(Modifier.size(10.dp).align(Alignment.Start))
-                Row(modifier = Modifier.align(Alignment.Start)) {
-                    IconButton(
-                        icon = Icons.Filled.Check,
-                        iconTint = Color.Green,
-                        iconSize = 30.dp,
-                        contentDescription = "start",
-                        onClick = {
-                            set_message_queueing_from_id(message.msgDatabaseId, true)
-                        }
-                    )
-                    IconButton(
-                        icon = Icons.Filled.Cancel,
-                        iconTint = Color.Red,
-                        iconSize = 30.dp,
-                        contentDescription = "cancel",
-                        onClick = {
-                            cancel_ft_from_ui(message)
-                        }
-                    )
-                }
+                Spacer(Modifier.width(4.dp))
+                IconButton(
+                    icon = Icons.Filled.Check,
+                    iconTint = Color.Green,
+                    iconSize = 20.dp,
+                    modifier = Modifier.size(24.dp),
+                    contentDescription = "start",
+                    onClick = {
+                        set_message_queueing_from_id(message.msgDatabaseId, true)
+                    }
+                )
+                IconButton(
+                    icon = Icons.Filled.Cancel,
+                    iconTint = Color.Red,
+                    iconSize = 20.dp,
+                    modifier = Modifier.size(24.dp),
+                    contentDescription = "cancel",
+                    onClick = {
+                        cancel_ft_from_ui(message)
+                    }
+                )
             }
         } else if (message.file_state == ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_CANCEL.value)
         {
@@ -588,7 +588,7 @@ fun outgoing_filetransfer(message: UIMessage, ui_scale: Float)
                     },
                     strokeCap = StrokeCap.Round,
                     drawStopIndicator = {},
-                    modifier = Modifier.weight(10.0f).height(8.dp),
+                    modifier = Modifier.weight(1f).height(8.dp),
                 )
                 val currentTime = message.currentfileposTimeMs
                 val deltaBytes: Float = message.currentfilepos.toFloat() - message.startfilepos.toFloat()
@@ -605,19 +605,16 @@ fun outgoing_filetransfer(message: UIMessage, ui_scale: Float)
                         " startpos="+message.startfilepos +
                         " "+message.startfileposTimeMs+" deltatime="+deltaTimeMs +" "+transferSpeedKbps)
                 */
-                Text(modifier = Modifier.width(180.dp).padding(start = 15.dp),
-                    fontSize = 14.sp,
+                Text(modifier = Modifier.padding(start = 8.dp),
+                    fontSize = 12.sp,
                     text = "" + ((message.currentfilepos.toFloat() / message.filesize.toFloat()) * 100.0f).toLong() + "%" +
                             " " + formatSpeed(transferSpeedKbps)
                 )
-            }
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Spacer(Modifier.size(10.dp).align(Alignment.Start))
                 IconButton(
                     icon = Icons.Filled.Cancel,
                     iconTint = Color.Red,
-                    iconSize = 30.dp,
-                    modifier = Modifier.align(Alignment.Start),
+                    iconSize = 20.dp,
+                    modifier = Modifier.size(24.dp),
                     contentDescription = "cancel",
                     onClick = {
                         cancel_ft_from_ui(message)
@@ -657,7 +654,7 @@ fun incoming_filetransfer(message: UIMessage, ui_scale: Float)
                 },
                 strokeCap = StrokeCap.Round,
                 drawStopIndicator = {},
-                modifier = Modifier.weight(10.0f).height(8.dp),
+                modifier = Modifier.weight(1f).height(8.dp),
             )
             val currentTime = message.currentfileposTimeMs
             val deltaBytes: Float = message.currentfilepos.toFloat()
@@ -669,20 +666,16 @@ fun incoming_filetransfer(message: UIMessage, ui_scale: Float)
                 transferSpeedKbps = (deltaBytes / 1024f) / deltaTimeSeconds
             }
 
-            Text(modifier = Modifier.width(180.dp).padding(start = 15.dp),
-                fontSize = 14.sp,
+            Text(modifier = Modifier.padding(start = 8.dp),
+                fontSize = 12.sp,
                 text = "" + ((message.currentfilepos.toFloat() / message.filesize.toFloat()) * 100.0f).toLong() + "%" +
                         " " + formatSpeed(transferSpeedKbps)
             )
-        }
-
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Spacer(Modifier.size(10.dp).align(Alignment.Start))
             IconButton(
                 icon = Icons.Filled.Cancel,
                 iconTint = Color.Red,
-                iconSize = 30.dp,
-                modifier = Modifier.align(Alignment.Start),
+                iconSize = 20.dp,
+                modifier = Modifier.size(24.dp),
                 contentDescription = "cancel",
                 onClick = {
                     cancel_ft_from_ui(message)
@@ -769,18 +762,20 @@ private fun show_filetransfer_image(ui_scale: Float,
                                     icon: ImageVector? = null,
                                     tint: Color = MaterialTheme.colors.primary,
                                     fullpath: String? = null,
-                                    description: String = "failed")
+                                    description: String = "failed",
+                                    small: Boolean = false)
 {
+    val imgSize = if (small) 32.dp else (IMAGE_PREVIEW_SIZE.dp * ui_scale)
     if (fullpath == null) {
         Icon(
-            modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale),
+            modifier = Modifier.size(imgSize),
             imageVector = Icons.Default.BrokenImage,
             contentDescription = description,
             tint = tint
         )
     } else if (icon != null) {
         Icon(
-            modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale).combinedClickable(
+            modifier = Modifier.size(imgSize).combinedClickable(
                 onClick = { show_file_in_explorer_or_open(fullpath) },
                 onLongClick = { show_containing_dir_in_explorer(fullpath) }),
             imageVector = icon,
@@ -793,7 +788,7 @@ private fun show_filetransfer_image(ui_scale: Float,
             HelperGeneric.loadImageBitmap(File(fullpath))
         }, painterFor = { remember { BitmapPainter(it) } },
             contentDescription = description,
-            modifier = Modifier.size(IMAGE_PREVIEW_SIZE.dp * ui_scale).combinedClickable(
+            modifier = Modifier.size(imgSize).combinedClickable(
                 onClick = {
                     if (clickable)
                     {
