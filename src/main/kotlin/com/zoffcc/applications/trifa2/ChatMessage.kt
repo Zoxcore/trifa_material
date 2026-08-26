@@ -1006,7 +1006,6 @@ fun message_text_block(message: UIMessage, ui_scale: Float, setLinkVars: (Boolea
         }
 
         if (message.trifaMsgType == TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value && !text_is_only_emoji) {
-            // broken image (null path) or paperclip (non-image) → even smaller text
             val isBrokenOrPaperclip = message.filename_fullpath.isNullOrEmpty() || !check_filename_is_image(message.filename_fullpath)
             msg_fontsize = if (isBrokenOrPaperclip) 9f else 11f
         }
@@ -1014,6 +1013,8 @@ fun message_text_block(message: UIMessage, ui_scale: Float, setLinkVars: (Boolea
         var message_text_string = message.text
         if (message.trifaMsgType == TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value)
         {
+            // replace newlines with spaces for filetransfer messages
+            message_text_string = message_text_string.replace("\n", " ")
             text_is_only_emoji = false
             if (message.direction == TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_SENT.value)
             {
