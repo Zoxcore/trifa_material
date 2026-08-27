@@ -9,6 +9,8 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.interaction.DragInteraction
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -113,6 +115,50 @@ internal fun Messages(ui_scale: Float, selectedContactPubkey: String?,
         }
     }
 
+    // -------------------------------------------------------------------
+    // NEW: SCROLLBAR USER-DRAG DETECTION
+    //
+    // The desktop VerticalScrollbar does not reliably set
+    // LazyListState.isScrollInProgress while the thumb is dragged.
+    //
+    // Therefore we observe the scrollbar's own interaction source and tell
+    // the scroll manager when a real user scrollbar drag is active.
+    // -------------------------------------------------------------------
+    val scrollbarInteractionSource = remember { MutableInteractionSource() }
+
+    LaunchedEffect(scrollbarInteractionSource) {
+        scrollbarInteractionSource.interactions.collect { interaction ->
+            when (interaction) {
+                is DragInteraction.Start -> {
+                    // User started pulling the scrollbar thumb.
+                    if (DEBUG_MESSAGE_SCROLLING) {
+                        println("[SCROLLBAR UI] Messages scrollbar drag started")
+                    }
+
+                    scrollManager.onScrollbarDragChanged(true)
+                }
+
+                is DragInteraction.Stop -> {
+                    // User stopped pulling the scrollbar thumb.
+                    if (DEBUG_MESSAGE_SCROLLING) {
+                        println("[SCROLLBAR UI] Messages scrollbar drag stopped")
+                    }
+
+                    scrollManager.onScrollbarDragChanged(false)
+                }
+
+                is DragInteraction.Cancel -> {
+                    // Scrollbar drag was cancelled.
+                    if (DEBUG_MESSAGE_SCROLLING) {
+                        println("[SCROLLBAR UI] Messages scrollbar drag cancelled")
+                    }
+
+                    scrollManager.onScrollbarDragChanged(false)
+                }
+            }
+        }
+    }
+
     Box(Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(start = 4.dp, end = 10.dp),
@@ -133,7 +179,14 @@ internal fun Messages(ui_scale: Float, selectedContactPubkey: String?,
                     ) {
                         Button(onClick = {
                             // Older history is being loaded: never jump to the bottom afterwards.
+                            if (DEBUG_MESSAGE_SCROLLING) {
+                                println("[USER ACTION] Load Older Messages button clicked.")
+                            }
+
+                            // Tell the scroll manager that this is an explicit "load older history" action.
+                            // This disables stick-to-bottom and prevents an initial/safety snap to bottom.
                             scrollManager.userLoadedOlderMessages()
+
                             contactstore.fullHistoryActive(true)
                         }) {
                             Text("Load Older Messages")
@@ -157,7 +210,9 @@ internal fun Messages(ui_scale: Float, selectedContactPubkey: String?,
         }
         VerticalScrollbar(
             adapter = rememberScrollbarAdapter(listState),
-            modifier = Modifier.fillMaxHeight().align(CenterEnd).width(10.dp)
+            modifier = Modifier.fillMaxHeight().align(CenterEnd).width(10.dp),
+            // NEW: allow detection of real user scrollbar dragging
+            interactionSource = scrollbarInteractionSource
         )
 
         JumpToBottomFab(
