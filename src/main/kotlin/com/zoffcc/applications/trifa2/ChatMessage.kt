@@ -222,7 +222,12 @@ inline fun ChatMessage(isMyMessage: Boolean,
 
                         var show_link_click by remember { mutableStateOf(false) }
                         var link_str by remember { mutableStateOf("") }
-                        if (!image_save_ui_space)
+
+                        val isTransferring = message.trifaMsgType == TRIFA_MSG_TYPE.TRIFA_MSG_FILE.value &&
+                                ((message.direction == TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value && is_filetransfer_in_progress(message)) ||
+                                        (message.direction != TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value && message.filename_fullpath != null && message.file_state != ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_PAUSE.value && message.file_state != ToxVars.TOX_FILE_CONTROL.TOX_FILE_CONTROL_CANCEL.value))
+
+                        if (!image_save_ui_space && !isTransferring)
                         {
                             message_text_block(message, ui_scale) { show_link_click_, link_str_ ->
                                 show_link_click = show_link_click_
@@ -251,8 +256,22 @@ inline fun ChatMessage(isMyMessage: Boolean,
                         Row(
                             horizontalArrangement = if (isMyMessage) Arrangement.End else Arrangement.Start,
                             modifier = Modifier.randomDebugBorder().padding(all = 0.dp)
-                                .align(if (isMyMessage) Alignment.End else Alignment.Start)
+                                .align(if (isMyMessage) Alignment.End else Alignment.Start),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
+                            if (isTransferring && !image_save_ui_space) {
+                                Box(modifier = Modifier.padding(end = 4.dp)) {
+                                    message_text_block(message, ui_scale) { show_link_click_, link_str_ ->
+                                        show_link_click = show_link_click_
+                                        link_str = link_str_
+                                    }
+                                    show_open_link_dialog(show_link_click, link_str) { show_link_click_, link_str_ ->
+                                        show_link_click = show_link_click_
+                                        link_str = link_str_
+                                    }
+                                }
+                            }
+
                             var msg_version_int: Int = 1
                             if (message.msg_version == 1) {
                                 msg_version_int = 2
@@ -565,7 +584,7 @@ fun outgoing_filetransfer(message: UIMessage, ui_scale: Float)
             // filetransfer finished (either because of CANCEL or OK) ------------
         } else // TOX_FILE_CONTROL_RESUME
         {
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically)
+            Row(modifier = Modifier.fillMaxWidth().padding(0.dp), verticalAlignment = Alignment.CenterVertically)
             {
                 var progress_: Float = 0.0f
                 try
@@ -588,7 +607,7 @@ fun outgoing_filetransfer(message: UIMessage, ui_scale: Float)
                     },
                     strokeCap = StrokeCap.Round,
                     drawStopIndicator = {},
-                    modifier = Modifier.weight(1f).height(4.dp),
+                    modifier = Modifier.weight(1f).height(2.dp),
                 )
                 val currentTime = message.currentfileposTimeMs
                 val deltaBytes: Float = message.currentfilepos.toFloat() - message.startfilepos.toFloat()
@@ -605,7 +624,7 @@ fun outgoing_filetransfer(message: UIMessage, ui_scale: Float)
                         " startpos="+message.startfilepos +
                         " "+message.startfileposTimeMs+" deltatime="+deltaTimeMs +" "+transferSpeedKbps)
                 */
-                Text(modifier = Modifier.padding(start = 8.dp),
+                Text(modifier = Modifier.padding(start = 2.dp),
                     fontSize = 9.sp,
                     text = "" + ((message.currentfilepos.toFloat() / message.filesize.toFloat()) * 100.0f).toLong() + "%" +
                             " " + formatSpeed(transferSpeedKbps)
@@ -613,8 +632,8 @@ fun outgoing_filetransfer(message: UIMessage, ui_scale: Float)
                 IconButton(
                     icon = Icons.Filled.Cancel,
                     iconTint = Color.Red,
-                    iconSize = 16.dp,
-                    modifier = Modifier.size(20.dp),
+                    iconSize = 10.dp,
+                    modifier = Modifier.size(14.dp).padding(0.dp),
                     contentDescription = "cancel",
                     onClick = {
                         cancel_ft_from_ui(message)
@@ -631,7 +650,7 @@ fun incoming_filetransfer(message: UIMessage, ui_scale: Float)
 {
     if (is_filetransfer_in_progress(message))
     {
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically)
+        Row(modifier = Modifier.fillMaxWidth().padding(0.dp), verticalAlignment = Alignment.CenterVertically)
         {
             var progress_: Float = 0.0f
             try
@@ -654,7 +673,7 @@ fun incoming_filetransfer(message: UIMessage, ui_scale: Float)
                 },
                 strokeCap = StrokeCap.Round,
                 drawStopIndicator = {},
-                modifier = Modifier.weight(1f).height(4.dp),
+                modifier = Modifier.weight(1f).height(2.dp),
             )
             val currentTime = message.currentfileposTimeMs
             val deltaBytes: Float = message.currentfilepos.toFloat()
@@ -666,7 +685,7 @@ fun incoming_filetransfer(message: UIMessage, ui_scale: Float)
                 transferSpeedKbps = (deltaBytes / 1024f) / deltaTimeSeconds
             }
 
-            Text(modifier = Modifier.padding(start = 8.dp),
+            Text(modifier = Modifier.padding(start = 2.dp),
                 fontSize = 9.sp,
                 text = "" + ((message.currentfilepos.toFloat() / message.filesize.toFloat()) * 100.0f).toLong() + "%" +
                         " " + formatSpeed(transferSpeedKbps)
@@ -674,8 +693,8 @@ fun incoming_filetransfer(message: UIMessage, ui_scale: Float)
             IconButton(
                 icon = Icons.Filled.Cancel,
                 iconTint = Color.Red,
-                iconSize = 16.dp,
-                modifier = Modifier.size(20.dp),
+                iconSize = 10.dp,
+                modifier = Modifier.size(14.dp).padding(0.dp),
                 contentDescription = "cancel",
                 onClick = {
                     cancel_ft_from_ui(message)
