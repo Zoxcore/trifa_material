@@ -67,7 +67,6 @@ internal fun GroupMessages(
         derivedStateOf { grpmsgs.groupmessages.size }
     }
 
-
     // All complex scrolling logic is neatly handled by the manager here
     val scrollManager = rememberChatScrollManager(
         listState = listState,
@@ -81,6 +80,30 @@ internal fun GroupMessages(
         snapToBottomNewItemCount = SNAP_TO_BOTTOM_NEW_ITEM_COUNT,
         scrollToBottomOffset = LAST_MSG_SCROLL_TO_SCROLL_OFFSET
     )
+
+    // --- FAB VISIBILITY FIX ---
+    // Calculate exactly if the user is visually at the bottom directly from the LazyListState layout.
+    // This guarantees the FAB shows 100% of the time when scrolled away from the bottom,
+    // avoiding any delays or missed state updates from the complex scroll manager.
+    val isAtBottom by remember {
+        derivedStateOf {
+            val layoutInfo = listState.layoutInfo
+            val lastVisible = layoutInfo.visibleItemsInfo.lastOrNull()
+
+            // If the list is empty or no items are visible, assume we are at the bottom
+            if (lastVisible == null) return@derivedStateOf true
+
+            // 1. Check if the absolute last item (the bottom spacer) is visible
+            val isLastItemVisible = lastVisible.index >= layoutInfo.totalItemsCount - 1
+
+            // 2. Check if the second to last item (the last message) is fully visible
+            // We allow a 5px tolerance for viewport offsets
+            val isSecondLastItemFullyVisible = lastVisible.index == layoutInfo.totalItemsCount - 2 &&
+                    (lastVisible.offset + lastVisible.size <= layoutInfo.viewportEndOffset + 5)
+
+            isLastItemVisible || isSecondLastItemFullyVisible
+        }
+    }
 
     Box(Modifier.fillMaxSize()) {
         LazyColumn(
@@ -142,7 +165,7 @@ internal fun GroupMessages(
         )
 
         JumpToBottomFab(
-            visible = !scrollManager.stickToBottom,
+            visible = !isAtBottom, // Show FAB 100% reliably when the list is scrolled away from the bottom
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(bottom = 8.dp, end = 0.dp),
