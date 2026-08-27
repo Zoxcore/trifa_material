@@ -130,7 +130,8 @@ internal fun GroupMessages(
                                 if (DEBUG_MESSAGE_SCROLLING) {
                                     println("[USER ACTION] Load Older Messages button clicked.")
                                 }
-
+                                // Older history is being loaded: never jump to the bottom afterwards.
+                                scrollManager.userLoadedOlderMessages()
                                 groupstore.fullHistoryActive(true)
                             }
                         ) {

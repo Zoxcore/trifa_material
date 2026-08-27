@@ -131,7 +131,11 @@ internal fun Messages(ui_scale: Float, selectedContactPubkey: String?,
                             .padding(vertical = 8.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Button(onClick = { contactstore.fullHistoryActive(true) }) {
+                        Button(onClick = {
+                            // Older history is being loaded: never jump to the bottom afterwards.
+                            scrollManager.userLoadedOlderMessages()
+                            contactstore.fullHistoryActive(true)
+                        }) {
                             Text("Load Older Messages")
                         }
                     }
