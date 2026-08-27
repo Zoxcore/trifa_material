@@ -41,6 +41,18 @@ class ChatScrollManager(
     var suppressScrollDetection by mutableStateOf(false)
         private set
 
+    // -------------------------------------------------------------------
+    // NEW STATE:
+    //
+    // True while the user is dragging the vertical scrollbar thumb.
+    //
+    // Compose does not reliably set listState.isScrollInProgress while the
+    // desktop scrollbar is dragged, so we need this extra flag to classify
+    // those movements as real USER scrolling.
+    // -------------------------------------------------------------------
+    var isScrollbarDragging by mutableStateOf(false)
+        private set
+
     private val scrollDebugState = object {
         var programmaticScrollActive = false
         var lastLoggedIndex = listState.firstVisibleItemIndex
@@ -51,6 +63,9 @@ class ChatScrollManager(
         isInitialLoad = true
         stickToBottom = true
         prevMsgSize = newSize
+
+        // Also reset transient scrollbar drag state on room switch.
+        isScrollbarDragging = false
 
         if (DEBUG_MESSAGE_SCROLLING) {
             println("[ROOM SWITCH DETECTED] Reset state. stickToBottom: true, isInitialLoad: true, prevMsgSize: $prevMsgSize")
@@ -86,6 +101,24 @@ class ChatScrollManager(
             println("[LOAD OLDER MESSAGES] User requested older history. " +
                     "old stickToBottom=$oldStickToBottom, old isInitialLoad=$oldIsInitialLoad, " +
                     "new stickToBottom=false, new isInitialLoad=false")
+        }
+    }
+
+    // -------------------------------------------------------------------
+    // NEW FUNCTION:
+    //
+    // Called by the UI when the desktop scrollbar thumb is dragged.
+    // This lets the scroll manager treat scrollbar movement as USER input.
+    // -------------------------------------------------------------------
+    fun onScrollbarDragChanged(dragging: Boolean) {
+        if (isScrollbarDragging == dragging) {
+            return
+        }
+
+        isScrollbarDragging = dragging
+
+        if (DEBUG_MESSAGE_SCROLLING) {
+            println("[SCROLLBAR DRAG] Scrollbar drag state changed to: $dragging")
         }
     }
 
@@ -316,6 +349,12 @@ class ChatScrollManager(
                         val cause = when {
                             scrollDebugState.programmaticScrollActive -> "PROGRAMMATIC"
                             listState.isScrollInProgress -> "USER"
+
+                            // NEW:
+                            // The desktop scrollbar may move the list without setting
+                            // isScrollInProgress, so classify that as USER_SCROLLBAR.
+                            isScrollbarDragging -> "USER_SCROLLBAR"
+
                             else -> "LAYOUT_SHIFT"
                         }
 
@@ -342,6 +381,10 @@ class ChatScrollManager(
         // 3. Bottom monitor
         // Only detach stickToBottom when the USER manually scrolls away from the bottom.
         // Attach stickToBottom when the user manually scrolls to the bottom, or stops at the bottom.
+        //
+        // Manual scrolling means:
+        //   - mouse wheel / touch scroll / fling -> listState.isScrollInProgress == true
+        //   - desktop scrollbar thumb drag       -> isScrollbarDragging == true
         scope.launch {
             var prevFirstVisible = listState.firstVisibleItemIndex
             var prevFirstOffset = listState.firstVisibleItemScrollOffset
@@ -354,6 +397,9 @@ class ChatScrollManager(
                 val firstVisible = listState.firstVisibleItemIndex
                 val firstOffset = listState.firstVisibleItemScrollOffset
 
+                // NEW: include scrollbar drag state so this flow also reacts to scrollbar drags
+                val scrollbarDragging = isScrollbarDragging
+
                 // We define "atBottom" as:
                 // - The very last item (spacer) is visible
                 // - OR the second to last item (last message) is fully visible
@@ -362,7 +408,7 @@ class ChatScrollManager(
                         (lastVisibleItem.index == totalItems - 2 &&
                                 lastVisibleItem.offset + lastVisibleItem.size <= layoutInfo.viewportEndOffset + 5)
 
-                listOf(isScrolling, firstVisible, firstOffset, atBottom)
+                listOf(isScrolling, firstVisible, firstOffset, atBottom, scrollbarDragging)
             }.collect { state ->
                 // Do not process if a programmatic scroll is currently suppressing detection
                 if (suppressScrollDetection) return@collect
@@ -371,9 +417,15 @@ class ChatScrollManager(
                 val firstVisible = state[1] as Int
                 val firstOffset = state[2] as Int
                 val atBottom = state[3] as Boolean
+                val scrollbarDragging = state[4] as Boolean
 
-                if (isScrolling && !scrollDebugState.programmaticScrollActive) {
-                    // User is actively and manually scrolling (mousewheel, scrollbar, or touch fling)
+                // NEW:
+                // A real user scroll is either normal wheel/touch scrolling
+                // or dragging the desktop scrollbar thumb.
+                val userScrollActive = isScrolling || scrollbarDragging
+
+                if (userScrollActive && !scrollDebugState.programmaticScrollActive) {
+                    // User is actively and manually scrolling
 
                     // Determine if user is scrolling away from bottom (upwards)
                     val scrollingUp = firstVisible < prevFirstVisible ||
@@ -387,23 +439,30 @@ class ChatScrollManager(
                         // User manually scrolled up and is no longer at the bottom -> detach
                         if (stickToBottom) {
                             stickToBottom = false
+
                             if (DEBUG_MESSAGE_SCROLLING) {
-                                println("[BOTTOM MONITOR] User manually scrolled away from bottom. Detaching.")
+                                // NEW: log whether this was wheel/touch or scrollbar dragging
+                                val scrollSource = if (isScrolling) "wheel/touch" else "scrollbar"
+                                println("[BOTTOM MONITOR] User manually scrolled away from bottom via $scrollSource. Detaching.")
                             }
                         }
                     } else if (scrollingDown && atBottom) {
                         // User manually scrolled down and reached the bottom -> attach
                         if (!stickToBottom) {
                             stickToBottom = true
+
                             if (DEBUG_MESSAGE_SCROLLING) {
-                                println("[BOTTOM MONITOR] User manually scrolled to bottom. Attaching.")
+                                // NEW: log whether this was wheel/touch or scrollbar dragging
+                                val scrollSource = if (isScrolling) "wheel/touch" else "scrollbar"
+                                println("[BOTTOM MONITOR] User manually scrolled to bottom via $scrollSource. Attaching.")
                             }
                         }
                     }
-                } else if (!isScrolling && !scrollDebugState.programmaticScrollActive) {
+                } else if (!userScrollActive && !scrollDebugState.programmaticScrollActive) {
                     // When manual scrolling stops, if we happen to be at the bottom, we attach
                     if (atBottom && !stickToBottom) {
                         stickToBottom = true
+
                         if (DEBUG_MESSAGE_SCROLLING) {
                             println("[BOTTOM MONITOR] Manual scrolling stopped at bottom. Attaching.")
                         }
