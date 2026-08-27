@@ -308,38 +308,79 @@ class ChatScrollManager(
         }
 
         // 3. Bottom monitor
+        // Only detach stickToBottom when the USER manually scrolls away from the bottom.
+        // Attach stickToBottom when the user manually scrolls to the bottom, or stops at the bottom.
         scope.launch {
+            var prevFirstVisible = listState.firstVisibleItemIndex
+            var prevFirstOffset = listState.firstVisibleItemScrollOffset
+
             snapshotFlow {
                 val layoutInfo = listState.layoutInfo
-                val lastVisibleIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
+                val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
                 val totalItems = layoutInfo.totalItemsCount
                 val isScrolling = listState.isScrollInProgress
+                val firstVisible = listState.firstVisibleItemIndex
+                val firstOffset = listState.firstVisibleItemScrollOffset
 
-                Triple(lastVisibleIndex, totalItems, isScrolling)
-            }.collect { (lastVisibleIndex, totalItems, isScrolling) ->
+                // We define "atBottom" as:
+                // - The very last item (spacer) is visible
+                // - OR the second to last item (last message) is fully visible
+                val atBottom = lastVisibleItem == null ||
+                        lastVisibleItem.index == totalItems - 1 ||
+                        (lastVisibleItem.index == totalItems - 2 &&
+                                lastVisibleItem.offset + lastVisibleItem.size <= layoutInfo.viewportEndOffset + 5)
+
+                listOf(isScrolling, firstVisible, firstOffset, atBottom)
+            }.collect { state ->
+                // Do not process if a programmatic scroll is currently suppressing detection
                 if (suppressScrollDetection) return@collect
 
-                val atBottom = lastVisibleIndex >= totalItems - 2
+                val isScrolling = state[0] as Boolean
+                val firstVisible = state[1] as Int
+                val firstOffset = state[2] as Int
+                val atBottom = state[3] as Boolean
 
-                if (!atBottom) {
-                    // DETACH IMMEDIATELY if we are not at the bottom, regardless of scroll state.
-                    if (stickToBottom) {
-                        stickToBottom = false
+                if (isScrolling && !scrollDebugState.programmaticScrollActive) {
+                    // User is actively and manually scrolling (mousewheel, scrollbar, or touch fling)
 
-                        if (DEBUG_MESSAGE_SCROLLING) {
-                            println("[BOTTOM MONITOR] Scrolled away from bottom. Detaching.")
+                    // Determine if user is scrolling away from bottom (upwards)
+                    val scrollingUp = firstVisible < prevFirstVisible ||
+                            (firstVisible == prevFirstVisible && firstOffset < prevFirstOffset)
+
+                    // Determine if user is scrolling towards bottom (downwards)
+                    val scrollingDown = firstVisible > prevFirstVisible ||
+                            (firstVisible == prevFirstVisible && firstOffset > prevFirstOffset)
+
+                    if (scrollingUp && !atBottom) {
+                        // User manually scrolled up and is no longer at the bottom -> detach
+                        if (stickToBottom) {
+                            stickToBottom = false
+                            if (DEBUG_MESSAGE_SCROLLING) {
+                                println("[BOTTOM MONITOR] User manually scrolled away from bottom. Detaching.")
+                            }
+                        }
+                    } else if (scrollingDown && atBottom) {
+                        // User manually scrolled down and reached the bottom -> attach
+                        if (!stickToBottom) {
+                            stickToBottom = true
+                            if (DEBUG_MESSAGE_SCROLLING) {
+                                println("[BOTTOM MONITOR] User manually scrolled to bottom. Attaching.")
+                            }
                         }
                     }
-                } else if (!isScrolling) {
-                    // ATTACH only when at bottom AND scrolling has completely stopped.
-                    if (!stickToBottom) {
+                } else if (!isScrolling && !scrollDebugState.programmaticScrollActive) {
+                    // When manual scrolling stops, if we happen to be at the bottom, we attach
+                    if (atBottom && !stickToBottom) {
                         stickToBottom = true
-
                         if (DEBUG_MESSAGE_SCROLLING) {
-                            println("[BOTTOM MONITOR] Reached bottom and stopped scrolling. Attaching.")
+                            println("[BOTTOM MONITOR] Manual scrolling stopped at bottom. Attaching.")
                         }
                     }
                 }
+
+                // Update previous state for the next frame
+                prevFirstVisible = firstVisible
+                prevFirstOffset = firstOffset
             }
         }
     }
