@@ -53,6 +53,16 @@ class ChatScrollManager(
     var isScrollbarDragging by mutableStateOf(false)
         private set
 
+    // -------------------------------------------------------------------
+    // NEW STATE:
+    //
+    // True while a layout shift compensation is in progress.
+    // This prevents multiple concurrent compensations from being triggered
+    // when a bubble changes size (e.g., file transfer finishes).
+    // -------------------------------------------------------------------
+    var layoutShiftCompensationActive by mutableStateOf(false)
+        private set
+
     private val scrollDebugState = object {
         var programmaticScrollActive = false
         var lastLoggedIndex = listState.firstVisibleItemIndex
@@ -66,6 +76,9 @@ class ChatScrollManager(
 
         // Also reset transient scrollbar drag state on room switch.
         isScrollbarDragging = false
+
+        // NEW: reset layout shift compensation state on room switch.
+        layoutShiftCompensationActive = false
 
         if (DEBUG_MESSAGE_SCROLLING) {
             println("[ROOM SWITCH DETECTED] Reset state. stickToBottom: true, isInitialLoad: true, prevMsgSize: $prevMsgSize")
@@ -385,6 +398,9 @@ class ChatScrollManager(
         // Manual scrolling means:
         //   - mouse wheel / touch scroll / fling -> listState.isScrollInProgress == true
         //   - desktop scrollbar thumb drag       -> isScrollbarDragging == true
+        //
+        // NEW: Also detect layout shifts (e.g., bubble size changes) while stickToBottom is active,
+        // and automatically scroll down to keep the bottom visible.
         scope.launch {
             var prevFirstVisible = listState.firstVisibleItemIndex
             var prevFirstOffset = listState.firstVisibleItemScrollOffset
@@ -465,6 +481,32 @@ class ChatScrollManager(
 
                         if (DEBUG_MESSAGE_SCROLLING) {
                             println("[BOTTOM MONITOR] Manual scrolling stopped at bottom. Attaching.")
+                        }
+                    }
+                    // -------------------------------------------------------------------
+                    // NEW: LAYOUT SHIFT COMPENSATION
+                    //
+                    // If stickToBottom is active, but we're not at the bottom anymore,
+                    // and it's not a user scroll, it means a layout shift occurred
+                    // (e.g., a bubble at the bottom grew in size, pushing the bottom out of view).
+                    //
+                    // We need to scroll down to keep the bottom visible.
+                    // -------------------------------------------------------------------
+                    else if (!atBottom && stickToBottom && !layoutShiftCompensationActive) {
+                        if (DEBUG_MESSAGE_SCROLLING) {
+                            println("[BOTTOM MONITOR] Layout shift detected while stickToBottom is active. Scrolling to bottom to compensate.")
+                        }
+
+                        layoutShiftCompensationActive = true
+                        scope.launch {
+                            try {
+                                safeProgrammaticScroll {
+                                    // Pass prevMsgSize so it calculates the correct expected total items.
+                                    smoothScrollToBottom(prevMsgSize)
+                                }
+                            } finally {
+                                layoutShiftCompensationActive = false
+                            }
                         }
                     }
                 }
