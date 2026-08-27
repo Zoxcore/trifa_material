@@ -57,6 +57,38 @@ class ChatScrollManager(
         }
     }
 
+    // -------------------------------------------------------------------
+    // NEW FUNCTION:
+    //
+    // This must be called when the user clicks "Load Older Messages".
+    //
+    // Loading older history is a user action that wants to stay at the
+    // top/current position. It must never trigger an automatic jump to
+    // the bottom.
+    //
+    // Therefore:
+    //   - disable stick-to-bottom
+    //   - disable any pending initial snap
+    // -------------------------------------------------------------------
+    fun userLoadedOlderMessages() {
+        // Read old values only for debug logging.
+        val oldStickToBottom = stickToBottom
+        val oldIsInitialLoad = isInitialLoad
+
+        // Force detach from bottom so no safety valve / smooth follower can snap down.
+        stickToBottom = false
+
+        // Cancel the initial snap logic, otherwise a pending initial snap could still
+        // scroll the list to the bottom after the older messages are loaded.
+        isInitialLoad = false
+
+        if (DEBUG_MESSAGE_SCROLLING) {
+            println("[LOAD OLDER MESSAGES] User requested older history. " +
+                    "old stickToBottom=$oldStickToBottom, old isInitialLoad=$oldIsInitialLoad, " +
+                    "new stickToBottom=false, new isInitialLoad=false")
+        }
+    }
+
     suspend fun jumpToBottom(minimumDbCount: Int) {
         if (DEBUG_MESSAGE_SCROLLING) {
             println("[JUMP TO BOTTOM] The user explicitly wants to go to the bottom, so re-attach")
