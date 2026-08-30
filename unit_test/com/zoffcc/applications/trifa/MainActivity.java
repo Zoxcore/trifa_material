@@ -4,6 +4,8 @@ import java.nio.ByteBuffer;
 
 public class MainActivity {
 
+    final static boolean CTOXCORE_NATIVE_LOGGING = false;
+
     // =========================================================================
     // 1. INITIALIZATION & CORE
     // =========================================================================
@@ -259,7 +261,9 @@ public class MainActivity {
     // Logging callback (Matches: "(ILjava/lang/String;JLjava/lang/String;Ljava/lang/String;)V")
     public static void android_tox_log_cb_method(int level, String file, long line, String function, String message)
     {
-         System.out.println("C-TOXCORE:" + level + ":file=" + file + ":linenum=" +
-                       line + ":func=" + function + ":msg=" + message);
+        if (CTOXCORE_NATIVE_LOGGING) {
+            System.out.println("\u001B[38;5;208mC-TOXCORE:\u001B[0m" + level + ":file=" + file + ":linenum=" +
+                line + ":func=" + function + ":msg=" + message);
+        }
     }
 }

@@ -18,25 +18,23 @@ public class TestToxInit {
             String passphraseHash = "!00100000002200000000000000003300000000000000000aa000000xff0000$";
 
             MainActivity tox = new MainActivity();
-
-            System.out.println("[INFO] Calling tox init...");
+            System.out.println("\u001B[90m[INFO]\u001B[0m Calling tox init...");
             tox.init(dataDir, 1, 1, 0, "127.0.0.1", 9050L,
                      passphraseHash, 1, 0, 2500, 30, 64, 48000, 2);
-
             JniToxcoreUnitTest.assertCondition("tox init executes without crash", true);
 
+            // Set a test name to verify write/read bindings
+            tox.tox_self_set_name("JniTestUser");
+            JniToxcoreUnitTest.assertCondition("tox_self_set_name executes without crash", true);
+
             long nameSize = tox.tox_self_get_name_size();
-            JniToxcoreUnitTest.assertCondition("tox_self_get_name_size > 0 after init", nameSize > 0);
+            JniToxcoreUnitTest.assertCondition("tox_self_get_name_size > 0 after setting name", nameSize > 0);
 
             String name = tox.tox_self_get_name();
             JniToxcoreUnitTest.assertCondition("tox_self_get_name returns non-null after init", name != null);
-
-            if (name != null) {
-                System.out.println("[INFO] tox_self_get_name returned: '" + name + "' (length: " + name.length() + ")");
-            }
+            JniToxcoreUnitTest.assertCondition("tox_self_get_name matches what we set", "JniTestUser".equals(name));
 
             deleteDirectory(tempDir);
-
         } catch (UnsatisfiedLinkError e) {
             JniToxcoreUnitTest.assertCondition("init UnsatisfiedLinkError: " + e.getMessage(), false);
             e.printStackTrace();
@@ -54,4 +52,3 @@ public class TestToxInit {
         dir.delete();
     }
 }
-

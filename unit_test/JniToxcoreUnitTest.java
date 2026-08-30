@@ -1,3 +1,5 @@
+import com.zoffcc.applications.trifa.MainActivity;
+
 /**
  * JniToxcore Plain Java Unit Test Runner
  *
@@ -18,31 +20,72 @@ public class JniToxcoreUnitTest {
 
         try {
             System.loadLibrary("jni-c-toxcore");
-            System.out.println("[PASS] Successfully loaded libjni-c-toxcore.so");
+            // Added ANSI green color code
+            System.out.println("\u001B[32m[PASS]\u001B[0m Successfully loaded libjni-c-toxcore");
         } catch (UnsatisfiedLinkError e) {
-            System.out.println("[FAIL] Failed to load libjni-c-toxcore.so");
+            // Added ANSI red color code
+            System.out.println("\u001B[31m[FAIL]\u001B[0m Failed to load libjni-c-toxcore");
             System.out.println("Error: " + e.getMessage());
             System.exit(1);
         }
 
-        // =============================================
-        // Run all test suites
-        // =============================================
-        
-        // 1. Test basic JNI bindings before init
-        TestJniToxcore.run();
-        
-        // 2. Test full Tox initialization
-        TestToxInit.run();
+        try {
+            // =============================================
+            // Run all test suites
+            // =============================================
+            
+            // 1. Test basic JNI bindings before init
+            TestJniToxcore.run();
+            
+            // 2. Test full Tox initialization
+            TestToxInit.run();
 
-        // Print final summary
-        System.out.println("\n========================================");
-        System.out.println(" TEST SUMMARY");
-        System.out.println("========================================");
-        System.out.println("Passed: " + passed);
-        System.out.println("Failed: " + failed);
-        if (failed > 0) {
-            System.exit(1);
+            // 3. Start background iteration thread so Tox can process events
+            // (Started after init so the core is actually alive and needs iterating)
+            System.out.println("\n\u001B[90m[INFO]\u001B[0m Starting Tox background iteration thread...");
+            ToxIterateRunner.start();
+
+            // Optional: Give Tox a brief moment to stabilize (e.g., initial bootstrap steps)
+            Thread.sleep(500);
+
+            // TODO: Future tests (e.g., TestMessaging.run(), TestConferences.run()) 
+            // can be added here. They will execute while tox_iterate() is actively running.
+
+        } catch (Throwable t) {
+            // Added ANSI red color code
+            System.out.println("\u001B[31m[FAIL]\u001B[0m Test suite crashed: " + t.getMessage());
+            t.printStackTrace();
+            failed++;
+        } finally {
+            // =============================================
+            // Cleanup
+            // =============================================
+            
+            // 4. Stop the background thread
+            System.out.println("\n\u001B[90m[INFO]\u001B[0m Stopping Tox background iteration thread...");
+            ToxIterateRunner.stop();
+
+            // 5. Clean up Tox core globally
+            System.out.println("\u001B[90m[INFO]\u001B[0m Calling tox_kill() for cleanup...");
+            try {
+                MainActivity.tox_kill();
+                // Use the ANSI escape codes directly so it prints in green 
+                // without incrementing the 'passed' test counter.
+                System.out.println("\u001B[32m[PASS]\u001B[0m tox_kill() completed successfully.");
+            } catch (Throwable t) {
+                System.out.println("\u001B[31m[FAIL]\u001B[0m tox_kill() threw an exception: " + t.getMessage());
+                failed++;
+            }
+
+            // Print final summary
+            System.out.println("\n========================================");
+            System.out.println(" TEST SUMMARY");
+            System.out.println("========================================");
+            System.out.println("Passed: " + passed);
+            System.out.println("Failed: " + failed);
+            if (failed > 0) {
+                System.exit(1);
+            }
         }
     }
 
@@ -73,5 +116,4 @@ public class JniToxcoreUnitTest {
             failed++;
         }
     }
-
 }

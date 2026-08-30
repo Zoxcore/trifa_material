@@ -1,10 +1,17 @@
 package com.zoffcc.applications.trifa;
 
 public class TrifaToxService {
+
+    final static boolean CTOXCORE_JNI_LOGGING = false;
+
     // Called by C code for logging
     public static void logger(int level, String message) {
-        // Optional: uncomment to see Tox core logs during tests
-        // System.out.println("[TOX LOG " + level + "] " + message);
+        if (CTOXCORE_JNI_LOGGING) {
+            if (message != null && message.endsWith("\n")) {
+                message = message.substring(0, message.length() - 1);
+            }
+            System.out.println("\u001B[34m[TOX LOG " + level + "]\u001B[0m " + message);
+        }
     }
 
     // Called by C code to safely convert byte arrays to Java Strings
