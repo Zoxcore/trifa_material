@@ -10,22 +10,17 @@ public class TestJniToxcore {
         System.out.println("\n--- Test: JniToxcore Basic ---");
         try {
             MainActivity tox = new MainActivity();
-            
+
             // Test getting name size
             // If tox_global is NULL in C, it safely returns 0.
             long nameSize = tox.tox_self_get_name_size();
             JniToxcoreUnitTest.assertCondition("tox_self_get_name_size executes without crash", true);
             JniToxcoreUnitTest.assertCondition("tox_self_get_name_size returns >= 0", nameSize >= 0);
-            
+
             // Test getting name
             String name = tox.tox_self_get_name();
             JniToxcoreUnitTest.assertCondition("tox_self_get_name executes without crash", true);
-            
-            if (name == null) {
-                System.out.println("[INFO] tox_self_get_name returned null (expected if tox_global is uninitialized)");
-            } else {
-                System.out.println("[INFO] tox_self_get_name returned: '" + name + "'");
-            }
+            JniToxcoreUnitTest.assertCondition("tox_self_get_name returns null when uninitialized", name == null);
 
             // Test getting connection status for a dummy friend number (e.g., 0)
             // The C code returns TOX_CONNECTION_NONE (0) if tox_global is NULL.
