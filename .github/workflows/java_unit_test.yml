@@ -1,0 +1,83 @@
+name: java unit test
+on:
+  push:
+    paths-ignore:
+     - 'README.md'
+  pull_request:
+    paths-ignore:
+     - 'README.md'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: dummy
+        default: dummy
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v7
+
+    - uses: actions/setup-java@v6
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: run unit tests
+      run: |
+        pwd
+        cd unit_test/
+        make
+
+  test_linux_java_unittests_screenshot:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - name:
+        run: |
+
+      - name: install deps
+        run: |
+          sudo apt-get update && \
+          sudo DEBIAN_FRONTEND=noninteractive \
+          apt-get install -y --no-install-recommends \
+          fonts-freefont-otf \
+          ghostscript \
+          imagemagick
+
+      - name: run unit tests for screenshot
+        run: |
+          pwd
+          cd unit_test/
+          make 2>&1 | tail -10 | tee out.txt || true
+
+      - name: make image of console output
+        run: |
+          cd unit_test/
+          echo "" >> out.txt
+          git rev-parse --short HEAD >> out.txt
+          echo "" >> out.txt
+          date '+%Y-%m-%d %H:%M:%S' >> out.txt
+          echo "" >> out.txt
+          cat out.txt | convert -trim -border 20 -bordercolor black +repage -background black -fill '#00cc00' -pointsize 14 TEXT:- ../unit_test_java_screen.png
+
+      - name: show image file name
+        run: |
+          ls -rattl
+
+      - name: Upload to nightly release
+        uses: ncipollo/release-action@v1
+        if: github.ref == 'refs/heads/master'
+        with:
+          allowUpdates: true
+          tag: nightly
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          prerelease: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "unit_test_java_screen*.png"
