@@ -53,7 +53,7 @@ jobs:
         run: |
           pwd
           cd unit_test/
-          make 2>&1 | tail -10 | tee out.txt || true
+          make 2>&1 | tail -8 | tee out.txt || true
 
       - name: make image of console output
         run: |
