@@ -15,6 +15,9 @@ public class MainActivity {
                             int force_udp_only_mode, int ngc_video_bitrate, int max_quantizer,
                             int ngc_audio_bitrate, int ngc_audio_sampling_rate, int ngc_audio_channel_count);
 
+    public static native long tox_version_major();
+    public static native long tox_version_minor();
+    public static native long tox_version_patch();
     public native String getNativeLibAPI();
     public static native String getNativeLibGITHASH();
     public static native String getNativeLibTOXGITHASH();

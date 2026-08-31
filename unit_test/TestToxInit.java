@@ -8,19 +8,25 @@ import java.nio.file.Files;
  */
 public class TestToxInit {
 
+    // Exposed for other tests (like TestSavedataPersistence) to use
+    public static String testDataDir;
+    public static String testPassphraseHash;
+
     public static void run() {
         System.out.println("\n--- Test: Tox Initialization ---");
         try {
             File tempDir = Files.createTempDirectory("trifa_jni_test_").toFile();
-            tempDir.deleteOnExit();
-            String dataDir = tempDir.getAbsolutePath();
-
-            String passphraseHash = "!00100000002200000000000000003300000000000000000aa000000xff0000$";
+            tempDir.deleteOnExit(); // Will be cleaned up when JVM exits
+            testDataDir = tempDir.getAbsolutePath();
+            
+            testPassphraseHash = "!00100000002200000000000000003300000000000000000aa000000xff0000$";
 
             MainActivity tox = new MainActivity();
+
             System.out.println("\u001B[90m[INFO]\u001B[0m Calling tox init...");
-            tox.init(dataDir, 1, 1, 0, "127.0.0.1", 9050L,
-                     passphraseHash, 1, 0, 2500, 30, 64, 48000, 2);
+            tox.init(testDataDir, 1, 1, 0, "127.0.0.1", 9050L,
+                     testPassphraseHash, 1, 0, 2500, 30, 64, 48000, 2);
+
             JniToxcoreUnitTest.assertCondition("tox init executes without crash", true);
 
             // Set a test name to verify write/read bindings
@@ -34,7 +40,9 @@ public class TestToxInit {
             JniToxcoreUnitTest.assertCondition("tox_self_get_name returns non-null after init", name != null);
             JniToxcoreUnitTest.assertCondition("tox_self_get_name matches what we set", "JniTestUser".equals(name));
 
-            deleteDirectory(tempDir);
+            // NOTE: We intentionally DO NOT delete the tempDir here anymore.
+            // It is marked with deleteOnExit() and will be used by TestSavedataPersistence.
+
         } catch (UnsatisfiedLinkError e) {
             JniToxcoreUnitTest.assertCondition("init UnsatisfiedLinkError: " + e.getMessage(), false);
             e.printStackTrace();
@@ -42,13 +50,5 @@ public class TestToxInit {
             JniToxcoreUnitTest.assertCondition("init Exception: " + e.getMessage(), false);
             e.printStackTrace();
         }
-    }
-
-    private static void deleteDirectory(File dir) {
-        File[] contents = dir.listFiles();
-        if (contents != null) {
-            for (File f : contents) deleteDirectory(f);
-        }
-        dir.delete();
     }
 }
