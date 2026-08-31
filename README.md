@@ -155,6 +155,10 @@ https://github.com/Zoxcore/trifa_material/releases/download/nightly/bom_compilec
 Full list of run time dependencies:<br>
 https://github.com/Zoxcore/trifa_material/releases/download/nightly/bom_runtimeclasspath.txt
 
+## Unit Tests
+
+<img src="https://github.com/Zoxcore/trifa_material/releases/download/nightly/unit_test_java_screen.png" height="230">
+
 ## Custom fonts
 ```NotoColorEmoji.ttf```<br>
 downloaded from this repo https://github.com/googlefonts/noto-emoji<br>
