@@ -27,11 +27,18 @@ public class JniToxcoreUnitTest {
             // Run all test suites
             // =============================================
 
+            // 0. Test the Java-side UTF-8 sanitization bridge (No Tox init required)
+            TestSafeString.run();
+            TestSafeStringExtreme.run();
+
             // 1. Test basic JNI bindings before init
             TestJniToxcore.run();
 
             // 2. Test full Tox initialization
             TestToxInit.run();
+
+            // 2.5. Test Message V3 Buffer Handling
+            TestMessageV3Buffer.run();
 
             // 3. Start background iteration thread so Tox can process events
             System.out.println("\n\u001B[90m[INFO]\u001B[0m Starting Tox background iteration thread...");
@@ -47,7 +54,7 @@ public class JniToxcoreUnitTest {
             TestThreadPounding.run();
 
             // =============================================
-            // NEW CRITICAL TESTS
+            // CRITICAL TESTS
             // =============================================
 
             // 6. JNI Boundary & Security Validation
@@ -61,6 +68,12 @@ public class JniToxcoreUnitTest {
 
             // 9. Self Profile, State & ToxID Generation
             TestSelfProfile.run();
+
+            // 10. C Buffer Operations
+            TestCBufferOperations.run();
+
+            // 11. Text Messaging
+            TestTextMessaging.run();
 
         } catch (Throwable t) {
             System.out.println("\u001B[31m[FAIL]\u001B[0m Test suite crashed: " + t.getMessage());
