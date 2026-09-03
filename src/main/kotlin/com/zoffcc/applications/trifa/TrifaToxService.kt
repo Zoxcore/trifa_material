@@ -395,6 +395,12 @@ class TrifaToxService
                 ngc_audio_play_thread_running = false
                 try
                 {
+                    set_tox_network_health(ToxVars.TOX_NETWORK_HEALTH.TOX_NETWORK_HEALTH_UNKNOWN.value)
+                } catch (e: java.lang.Exception)
+                {
+                }
+                try
+                {
                     ngc_audio_play_thread!!.join(500)
                 }
                 catch(e: Exception)
