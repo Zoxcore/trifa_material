@@ -1,4 +1,4 @@
-@file:Suppress("ConvertToStringTemplate", "LocalVariableName", "ReplaceSizeCheckWithIsNotEmpty", "FunctionName")
+@file:Suppress("ConvertToStringTemplate", "LocalVariableName", "ReplaceSizeCheckWithIsNotEmpty", "FunctionName", "UnnecessaryVariable")
 
 package com.zoffcc.applications.trifa
 
@@ -59,6 +59,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_iteration_interv
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_kill
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_connection_status
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_friend_list
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_network_health
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_set_name
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_util_friend_resend_message_v2
 import com.zoffcc.applications.trifa.TRIFAGlobals.GROUP_ID_LENGTH
@@ -190,6 +191,19 @@ class TrifaToxService
                 Log.i(TAG, "tox_iteration_interval_ms=$tox_iteration_interval_ms")
                 tox_iterate()
                 global_self_connection_status == tox_self_get_connection_status()
+
+                val current_health_init: Int = tox_self_get_network_health()
+                val health_text_init: String = ToxVars.TOX_NETWORK_HEALTH.value_str(current_health_init).replace("TOX_NETWORK_HEALTH_", "")
+                Log.i(TAG, "tox_network_health: " + health_text_init)
+                try
+                {
+                    // ***** update UI here with "health_text_init" and "current_health_init" **** //
+                } catch (e: java.lang.Exception)
+                {
+                }
+                var last_health_check_ms: Long = 0
+                var last_network_health = current_health_init
+
                 // ------- MAIN TOX LOOP ---------------------------------------------------------------
                 // ------- MAIN TOX LOOP ---------------------------------------------------------------
                 // ------- MAIN TOX LOOP ---------------------------------------------------------------
@@ -242,6 +256,34 @@ class TrifaToxService
                     // Log.i(TAG, "=====>>>>> tox_iterate()")
                     tox_iteration_interval_ms = tox_iteration_interval()
                     // Log.i(TAG, "=====>>>>> tox_iteration_interval: "+ tox_iteration_interval_ms)
+
+                    // [ADDED] Check network health every 3 seconds
+                    val current_time_ms = System.currentTimeMillis()
+                    if ((current_time_ms - last_health_check_ms) >= 3000)
+                    {
+                        last_health_check_ms = current_time_ms
+
+                        try
+                        {
+                            val current_health = tox_self_get_network_health()
+                            if (current_health != last_network_health)
+                            {
+                                val health_text = ToxVars.TOX_NETWORK_HEALTH.value_str(current_health).replace("TOX_NETWORK_HEALTH_", "")
+                                last_network_health = current_health
+
+                                Log.i(TAG, "tox_network_health: " + health_text)
+
+                                try
+                                {
+                                    // ***** update UI here with "health_text" and "last_network_health" **** //
+                                } catch (e: java.lang.Exception)
+                                {
+                                }
+                            }
+                        } catch (e: java.lang.Exception)
+                        {
+                        }
+                    }
 
                     // --- send pending 1-on-1 text messages here --------------
                     if (online_button_text_wrapper != "offline")

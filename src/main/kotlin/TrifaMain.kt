@@ -512,26 +512,44 @@ fun App()
                                             delay(200) // Non-blocking delay
                                         }
                                     }
-                                    Button( // self connection state button
-                                        modifier = Modifier.width(120.dp),
-                                        onClick = {},
-                                        border = BorderStroke(
-                                            if (MainActivity.PREF__toxnoise_enabled_to_int_used_for_init == 1)
-                                                3.dp
-                                            else
-                                                0.dp,
-                                            if (MainActivity.PREF__toxnoise_enabled_to_int_used_for_init == 1)
-                                                Color.Red
-                                            else
-                                                Color.Transparent
-                                        ),
-                                        colors = ButtonDefaults.buttonColors(),
-                                        enabled = false) {
-                                        Box(modifier = Modifier.size(16.dp).border(1.dp,
-                                            Color.Black,
-                                            CircleShape).background(Color(online_button_color_wrapper), CircleShape))
-                                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                                        Text(getOnlineButtonText(online_button_text))
+
+                                    Tooltip(text = getOnlineButtonText(online_button_text)) {
+                                        Button( // self connection state button
+                                            modifier = Modifier.width(85.dp),
+                                            onClick = {},
+                                            border = BorderStroke(
+                                                if (MainActivity.PREF__toxnoise_enabled_to_int_used_for_init == 1)
+                                                    3.dp
+                                                else
+                                                    0.dp,
+                                                if (MainActivity.PREF__toxnoise_enabled_to_int_used_for_init == 1)
+                                                    Color.Red
+                                                else
+                                                    Color.Transparent
+                                            ),
+                                            colors = ButtonDefaults.buttonColors(),
+                                            enabled = false) {
+                                            Box(modifier = Modifier.size(16.dp).border(1.dp,
+                                                Color.Black,
+                                                CircleShape).background(Color(online_button_color_wrapper), CircleShape))
+                                            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                                            Text(text = getOnlineButtonText(online_button_text).take(2),
+                                                fontSize = 8.sp)
+                                        }
+                                    }
+
+                                    Tooltip(text = "longer tox health status text for tooltip") {
+                                        Button(
+                                            // tox network health button
+                                            modifier = Modifier.width(35.dp),
+                                            onClick = {},
+                                            // background color of button should be in correct color for health state
+                                        )
+                                        {
+                                            // text must be very short button should not expand!!!
+                                            Text(text = "S",
+                                                fontSize = 8.sp)
+                                        }
                                     }
                                 }
                                 Row(verticalAlignment = Alignment.Bottom) {
