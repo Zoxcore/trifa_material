@@ -544,8 +544,9 @@ fun App()
                                             Box(modifier = Modifier.size(16.dp).border(1.dp,
                                                 Color.Black,
                                                 CircleShape).background(Color(online_button_color_wrapper), CircleShape))
-                                            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                                            Text(text = getOnlineButtonText(online_button_text).take(2),
+                                            // HINT: if you remove the next 2 lines, the button wont update!!
+                                            val dummy = getOnlineButtonText(online_button_text)
+                                            Text(text = dummy.take(0),
                                                 fontSize = 8.sp)
                                         }
                                     }
@@ -556,10 +557,12 @@ fun App()
                                             modifier = Modifier.width(35.dp),
                                             onClick = {},
                                             colors = ButtonDefaults.buttonColors(backgroundColor = Color(tox_network_health_color_wrapper)),
+                                            enabled = true // HINT: if you set this to false the background color wont work!!
                                         )
                                         {
-                                            // text must be very short button should not expand!!!
-                                            Text(text = tox_network_health_text.take(1),
+                                            // HINT: if you remove the next 2 lines, the button wont update!!
+                                            val dummy = tox_network_health_text
+                                            Text(text = dummy.take(0),
                                                 fontSize = 8.sp)
                                         }
                                     }
