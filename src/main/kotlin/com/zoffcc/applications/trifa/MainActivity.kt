@@ -528,6 +528,9 @@ class MainActivity
         external fun bootstrap_single(ip: String?, key_hex: String?, port: Long): Int
 
         @JvmStatic
+        external fun tox_self_get_network_health(): Int
+
+        @JvmStatic
         external fun tox_self_get_connection_status(): Int
 
         @JvmStatic
