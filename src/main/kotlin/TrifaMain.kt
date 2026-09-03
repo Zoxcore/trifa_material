@@ -2155,27 +2155,27 @@ fun set_tox_network_health(health_val: Int)
     tox_network_health_text_wrapper = health_text
     if (health_val == ToxVars.TOX_NETWORK_HEALTH.TOX_NETWORK_HEALTH_EXCELLENT.value)
     {
-        tox_network_health_color_wrapper = Color(0xFF00FF00).toArgb() // Green
+        tox_network_health_color_wrapper = Color(0xFF388E3C).toArgb() // md_green_700
     }
     else if (health_val == ToxVars.TOX_NETWORK_HEALTH.TOX_NETWORK_HEALTH_GOOD.value)
     {
-        tox_network_health_color_wrapper = Color(0xFF88FF88).toArgb() // Light Green
+        tox_network_health_color_wrapper = Color(0xFF689F38).toArgb() // md_light_green_700
     }
     else if (health_val == ToxVars.TOX_NETWORK_HEALTH.TOX_NETWORK_HEALTH_FAIR.value)
     {
-        tox_network_health_color_wrapper = Color(0xFFFFFF00).toArgb() // Yellow
+        tox_network_health_color_wrapper = Color(0xFFFBC02D).toArgb() // md_yellow_700
     }
     else if (health_val == ToxVars.TOX_NETWORK_HEALTH.TOX_NETWORK_HEALTH_POOR.value)
     {
-        tox_network_health_color_wrapper = Color(0xFFFF8800).toArgb() // Orange
+        tox_network_health_color_wrapper = Color(0xFFF57C00).toArgb() // md_orange_700
     }
     else if (health_val == ToxVars.TOX_NETWORK_HEALTH.TOX_NETWORK_HEALTH_BAD.value)
     {
-        tox_network_health_color_wrapper = Color(0xFFFF0000).toArgb() // Red
+        tox_network_health_color_wrapper = Color(0xFFD32F2F).toArgb() // md_red_700
     }
     else
     {
-        tox_network_health_color_wrapper = Color(0xFF888888).toArgb() // Gray
+        tox_network_health_color_wrapper = Color(0xFF616161).toArgb() // md_grey_700
     }
     Log.i(TAG, "----> tox_network_health = $tox_network_health_text_wrapper")
 }
