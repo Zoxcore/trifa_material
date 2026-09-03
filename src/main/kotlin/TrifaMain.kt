@@ -262,6 +262,8 @@ var tox_running_state_wrapper = "start"
 var start_button_text_wrapper = "stopped"
 var online_button_text_wrapper = "offline"
 var online_button_color_wrapper = Color.White.toArgb()
+var tox_network_health_text_wrapper = "UNKNOWN"
+var tox_network_health_color_wrapper = Color.Gray.toArgb()
 var closing_application = false
 val global_prefs: Preferences = Preferences.userNodeForPackage(com.zoffcc.applications.trifa.PrefsSettings::class.java)
 val UISCALE_ITEM_HEIGHT = 30.dp
@@ -513,6 +515,16 @@ fun App()
                                         }
                                     }
 
+                                    var tox_network_health_text by remember { mutableStateOf("UNKNOWN") }
+                                    LaunchedEffect(tox_network_health_text_wrapper) {
+                                            while (isActive) {
+                                                    if (tox_network_health_text != tox_network_health_text_wrapper) {
+                                                            tox_network_health_text = tox_network_health_text_wrapper
+                                                    }
+                                                    delay(200) // Non-blocking delay
+                                                }
+                                        }
+
                                     Tooltip(text = getOnlineButtonText(online_button_text)) {
                                         Button( // self connection state button
                                             modifier = Modifier.width(85.dp),
@@ -538,16 +550,16 @@ fun App()
                                         }
                                     }
 
-                                    Tooltip(text = "longer tox health status text for tooltip") {
+                                    Tooltip(text = "Tox Network Health: $tox_network_health_text") {
                                         Button(
                                             // tox network health button
                                             modifier = Modifier.width(35.dp),
                                             onClick = {},
-                                            // background color of button should be in correct color for health state
+                                            colors = ButtonDefaults.buttonColors(backgroundColor = Color(tox_network_health_color_wrapper)),
                                         )
                                         {
                                             // text must be very short button should not expand!!!
-                                            Text(text = "S",
+                                            Text(text = tox_network_health_text.take(1),
                                                 fontSize = 8.sp)
                                         }
                                     }
@@ -2135,6 +2147,37 @@ fun set_tox_running_state(new_state: String)
         online_button_color_wrapper = Color.White.toArgb()
         online_button_text_wrapper = "offline"
     }
+}
+
+fun set_tox_network_health(health_val: Int)
+{
+    val health_text = ToxVars.TOX_NETWORK_HEALTH.value_str(health_val).replace("TOX_NETWORK_HEALTH_", "")
+    tox_network_health_text_wrapper = health_text
+    if (health_val == ToxVars.TOX_NETWORK_HEALTH.TOX_NETWORK_HEALTH_EXCELLENT.value)
+    {
+        tox_network_health_color_wrapper = Color(0xFF00FF00).toArgb() // Green
+    }
+    else if (health_val == ToxVars.TOX_NETWORK_HEALTH.TOX_NETWORK_HEALTH_GOOD.value)
+    {
+        tox_network_health_color_wrapper = Color(0xFF88FF88).toArgb() // Light Green
+    }
+    else if (health_val == ToxVars.TOX_NETWORK_HEALTH.TOX_NETWORK_HEALTH_FAIR.value)
+    {
+        tox_network_health_color_wrapper = Color(0xFFFFFF00).toArgb() // Yellow
+    }
+    else if (health_val == ToxVars.TOX_NETWORK_HEALTH.TOX_NETWORK_HEALTH_POOR.value)
+    {
+        tox_network_health_color_wrapper = Color(0xFFFF8800).toArgb() // Orange
+    }
+    else if (health_val == ToxVars.TOX_NETWORK_HEALTH.TOX_NETWORK_HEALTH_BAD.value)
+    {
+        tox_network_health_color_wrapper = Color(0xFFFF0000).toArgb() // Red
+    }
+    else
+    {
+        tox_network_health_color_wrapper = Color(0xFF888888).toArgb() // Gray
+    }
+    Log.i(TAG, "----> tox_network_health = $tox_network_health_text_wrapper")
 }
 
 fun set_tox_online_state(new_state: String)

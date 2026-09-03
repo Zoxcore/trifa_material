@@ -84,6 +84,7 @@ import online_button_text_wrapper
 import org.briarproject.briar.desktop.contact.ContactItem
 import org.briarproject.briar.desktop.contact.GroupItem
 import org.briarproject.briar.desktop.contact.GroupPeerItem
+import set_tox_network_health
 import set_tox_running_state
 import toxdatastore
 import unlock_data_dir_input
@@ -197,7 +198,7 @@ class TrifaToxService
                 Log.i(TAG, "tox_network_health: " + health_text_init)
                 try
                 {
-                    // ***** update UI here with "health_text_init" and "current_health_init" **** //
+                    set_tox_network_health(current_health_init)
                 } catch (e: java.lang.Exception)
                 {
                 }
@@ -275,7 +276,7 @@ class TrifaToxService
 
                                 try
                                 {
-                                    // ***** update UI here with "health_text" and "last_network_health" **** //
+                                    set_tox_network_health(last_network_health)
                                 } catch (e: java.lang.Exception)
                                 {
                                 }
