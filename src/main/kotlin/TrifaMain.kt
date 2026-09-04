@@ -264,6 +264,8 @@ var online_button_text_wrapper = "offline"
 var online_button_color_wrapper = Color.White.toArgb()
 var tox_network_health_text_wrapper = "UNKNOWN"
 var tox_network_health_color_wrapper = Color.Gray.toArgb()
+var tox_group_health_text_wrapper = "UNKNOWN"
+var tox_group_health_color_wrapper = Color.Gray.toArgb()
 var closing_application = false
 val global_prefs: Preferences = Preferences.userNodeForPackage(com.zoffcc.applications.trifa.PrefsSettings::class.java)
 val UISCALE_ITEM_HEIGHT = 30.dp
@@ -525,6 +527,16 @@ fun App()
                                                 }
                                         }
 
+                                    var tox_gc_health_text by remember { mutableStateOf("UNKNOWN") }
+                                    LaunchedEffect(tox_group_health_text_wrapper) {
+                                        while (isActive) {
+                                            if (tox_gc_health_text != tox_group_health_text_wrapper) {
+                                                tox_gc_health_text = tox_group_health_text_wrapper
+                                            }
+                                            delay(200) // Non-blocking delay
+                                        }
+                                    }
+
                                     Tooltip(text = getOnlineButtonText(online_button_text)) {
                                         Button( // self connection state button
                                             modifier = Modifier.width(85.dp),
@@ -551,21 +563,59 @@ fun App()
                                         }
                                     }
 
-                                    Tooltip(text = "Tox Network Health: $tox_network_health_text") {
+                                    Tooltip(text = "Tox Health: Net=$tox_network_health_text | Group=$tox_gc_health_text") {
                                         Button(
-                                            // tox network health button
-                                            modifier = Modifier.width(35.dp),
+                                            modifier = Modifier.width(35.dp), // No explicit height, just like the original
                                             onClick = {},
-                                            colors = ButtonDefaults.buttonColors(backgroundColor = Color(tox_network_health_color_wrapper)),
-                                            enabled = true // HINT: if you set this to false the background color wont work!!
-                                        )
-                                        {
-                                            // HINT: if you remove the next 2 lines, the button wont update!!
-                                            val dummy = tox_network_health_text
-                                            Text(text = dummy.take(0),
-                                                fontSize = 8.sp)
+                                            // Transparent so our inner Row handles the colors edge-to-edge
+                                            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
+                                            // Remove default padding so the colors touch the edges of the button
+                                            contentPadding = PaddingValues(0.dp),
+                                            enabled = true
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    // Ensure it respects the standard Material button minimum height
+                                                    .heightIn(min = 36.dp)
+                                                    // Clip to the button's rounded corners so colors don't poke out
+                                                    .clip(MaterialTheme.shapes.small)
+                                            ) {
+                                                // 1. The split colors: matches the exact size of the content Box below
+                                                Row(modifier = Modifier.matchParentSize()) {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .weight(1f)
+                                                            .fillMaxHeight()
+                                                            .background(Color(tox_network_health_color_wrapper))
+                                                    )
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .weight(1f)
+                                                            .fillMaxHeight()
+                                                            .background(Color(tox_group_health_color_wrapper))
+                                                    )
+                                                }
+
+                                                // 2. The invisible content: defines the natural height exactly like your original code
+                                                Row(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Box(modifier = Modifier.weight(1f)) {
+                                                        val dummyNet = tox_network_health_text
+                                                        Text(text = dummyNet.take(0), fontSize = 8.sp, color = Color.Transparent)
+                                                    }
+                                                    Box(modifier = Modifier.weight(1f)) {
+                                                        val dummyGc = tox_gc_health_text
+                                                        Text(text = dummyGc.take(0), fontSize = 8.sp, color = Color.Transparent)
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
+
+
                                 }
                                 Row(verticalAlignment = Alignment.Bottom) {
                                     Column {
@@ -2181,6 +2231,39 @@ fun set_tox_network_health(health_val: Int)
         tox_network_health_color_wrapper = Color(0xFF616161).toArgb() // md_grey_700
     }
     Log.i(TAG, "----> tox_network_health = $tox_network_health_text_wrapper")
+}
+
+fun set_tox_group_health(health_val: Int)
+{
+    val health_text = ToxVars.TOX_GROUP_HEALTH.value_str(health_val).replace("TOX_GROUP_HEALTH_", "")
+    tox_group_health_text_wrapper = health_text
+
+    if (health_val == ToxVars.TOX_GROUP_HEALTH.TOX_GROUP_HEALTH_EXCELLENT.value)
+    {
+        tox_group_health_color_wrapper = Color(0xFF388E3C).toArgb() // md_green_700
+    }
+    else if (health_val == ToxVars.TOX_GROUP_HEALTH.TOX_GROUP_HEALTH_GOOD.value)
+    {
+        tox_group_health_color_wrapper = Color(0xFF689F38).toArgb() // md_light_green_700
+    }
+    else if (health_val == ToxVars.TOX_GROUP_HEALTH.TOX_GROUP_HEALTH_FAIR.value)
+    {
+        tox_group_health_color_wrapper = Color(0xFFFBC02D).toArgb() // md_yellow_700
+    }
+    else if (health_val == ToxVars.TOX_GROUP_HEALTH.TOX_GROUP_HEALTH_POOR.value)
+    {
+        tox_group_health_color_wrapper = Color(0xFFF57C00).toArgb() // md_orange_700
+    }
+    else if (health_val == ToxVars.TOX_GROUP_HEALTH.TOX_GROUP_HEALTH_BAD.value)
+    {
+        tox_group_health_color_wrapper = Color(0xFFD32F2F).toArgb() // md_red_700
+    }
+    else
+    {
+        tox_group_health_color_wrapper = Color(0xFF616161).toArgb() // md_grey_700
+    }
+
+    Log.i(TAG, "----> tox_group_health = $tox_group_health_text_wrapper")
 }
 
 fun set_tox_online_state(new_state: String)

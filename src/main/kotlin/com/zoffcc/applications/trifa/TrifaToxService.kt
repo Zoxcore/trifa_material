@@ -44,6 +44,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_name
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_chat_id
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_grouplist
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_health
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_name
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_number_groups
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_peerlist
@@ -84,6 +85,7 @@ import online_button_text_wrapper
 import org.briarproject.briar.desktop.contact.ContactItem
 import org.briarproject.briar.desktop.contact.GroupItem
 import org.briarproject.briar.desktop.contact.GroupPeerItem
+import set_tox_group_health
 import set_tox_network_health
 import set_tox_running_state
 import toxdatastore
@@ -196,6 +198,11 @@ class TrifaToxService
                 val current_health_init: Int = tox_self_get_network_health()
                 val health_text_init: String = ToxVars.TOX_NETWORK_HEALTH.value_str(current_health_init).replace("TOX_NETWORK_HEALTH_", "")
                 Log.i(TAG, "tox_network_health: " + health_text_init)
+
+                val currenc_gc_health_init: Int = tox_group_get_health()
+                val gc_health_text_init: String = ToxVars.TOX_GROUP_HEALTH.value_str(current_health_init).replace("TOX_GROUP_HEALTH_", "")
+                Log.i(TAG, "tox_gc_health: " + gc_health_text_init)
+
                 try
                 {
                     set_tox_network_health(current_health_init)
@@ -204,6 +211,8 @@ class TrifaToxService
                 }
                 var last_health_check_ms: Long = 0
                 var last_network_health = current_health_init
+
+                var last_gc_health = currenc_gc_health_init
 
                 // ------- MAIN TOX LOOP ---------------------------------------------------------------
                 // ------- MAIN TOX LOOP ---------------------------------------------------------------
@@ -281,6 +290,23 @@ class TrifaToxService
                                 {
                                 }
                             }
+
+                            val current_gc_health: Int = tox_group_get_health()
+                            if (current_gc_health != last_gc_health)
+                            {
+                                val gc_health_text = ToxVars.TOX_GROUP_HEALTH.value_str(current_health).replace("TOX_GROUP_HEALTH_", "")
+                                last_gc_health = current_gc_health
+
+                                Log.i(TAG, "gc_health_text: " + gc_health_text)
+
+                                try
+                                {
+                                    set_tox_group_health(last_gc_health)
+                                } catch (e: java.lang.Exception)
+                                {
+                                }
+                            }
+
                         } catch (e: java.lang.Exception)
                         {
                         }
@@ -399,6 +425,14 @@ class TrifaToxService
                 } catch (e: java.lang.Exception)
                 {
                 }
+
+                try
+                {
+                    set_tox_group_health(ToxVars.TOX_GROUP_HEALTH.TOX_GROUP_HEALTH_UNKNOWN.value)
+                } catch (e: java.lang.Exception)
+                {
+                }
+
                 try
                 {
                     ngc_audio_play_thread!!.join(500)
