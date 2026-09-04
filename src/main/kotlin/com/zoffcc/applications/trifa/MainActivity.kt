@@ -906,6 +906,9 @@ class MainActivity
         external fun tox_group_get_privacy_state(group_number: Long): Int
 
         @JvmStatic
+        external fun tox_group_get_health(): Int
+
+        @JvmStatic
         external fun tox_group_mod_kick_peer(group_number: Long, peer_id: Long): Int
 
         @JvmStatic
