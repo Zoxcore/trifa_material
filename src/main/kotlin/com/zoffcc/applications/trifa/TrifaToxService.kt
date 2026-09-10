@@ -21,6 +21,7 @@ import com.zoffcc.applications.trifa.HelperGeneric.is_friend_online_real
 import com.zoffcc.applications.trifa.HelperGeneric.tox_friend_resend_msgv3_wrapper
 import com.zoffcc.applications.trifa.HelperGeneric.update_savedata_file_wrapper
 import com.zoffcc.applications.trifa.HelperGroup.hex_to_bytes
+import com.zoffcc.applications.trifa.HelperGroup.tox_group_by_groupid__wrapper
 import com.zoffcc.applications.trifa.HelperMessage.tox_friend_send_message_wrapper
 import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_messageid
 import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_no_read_recvedts
@@ -50,6 +51,9 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_number
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_peerlist
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_privacy_state
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_is_connected
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_mid_peer_list_count
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_mid_peer_list_get
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_peer_by_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_peer_count
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_peer_get_connection_status
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_peer_get_name
@@ -1054,7 +1058,97 @@ class TrifaToxService
             }
         }
 
-        fun load_grouppeers(groupID: String)
+        fun update_group_peers_ui_from_middleware(group_id: String)
+        {
+            // Only update the UI peer list if this group is currently selected in the UI
+            if (groupstore.stateFlow.value.selectedGroupId != group_id)
+            {
+                return
+            }
+
+            try
+            {
+                // 1. Get the total number of peers tracked by the middleware (includes offline)
+                val mid_peer_count = tox_group_mid_peer_list_count(group_id)
+
+                // If the roster is empty, clear the UI for this group and exit
+                if (mid_peer_count <= 0)
+                {
+                    grouppeerstore.replaceForGroup(group_id, emptyList())
+                    return
+                }
+
+                val new_peers_list = mutableListOf<GroupPeerItem>()
+
+                // 2. Iterate through the middleware roster
+                for (i in 0 until mid_peer_count.toInt())
+                {
+                    try
+                    {
+                        // Fetch the ENTIRE peer record in a single JNI call.
+                        // Returns an Array<Any?> mapping to the C MidPeerInfo struct.
+                        val peer_info = tox_group_mid_peer_list_get(group_id, i.toLong()) ?: continue
+
+                        // Extract fields from the returned Object array based on the C JNI implementation:
+                        val peer_pubkey = peer_info[0] as? String ?: continue
+                        // val peer_signing_key = peer_info[1] as? String
+                        // val peer_status = (peer_info[2] as? Int) ?: 0
+                        val peer_connection_status = (peer_info[3] as? Int) ?: 0
+                        // val peer_has_signature = (peer_info[4] as? Int) ?: 0
+                        // val peer_last_seen = (peer_info[5] as? Long) ?: 0L
+                        val peer_name = peer_info[6] as? String
+                        val peer_role = (peer_info[7] as? Int) ?: 2 // 2 == TOX_GROUP_ROLE_USER
+
+                        // 3. If the peer is online, query Toxcore for their live IP address
+                        var ip_addr_str = ""
+                        if (peer_connection_status != 0) // 0 == TOX_CONNECTION_NONE
+                        {
+                            try
+                            {
+                                val group_number = tox_group_by_groupid__wrapper(group_id)
+                                if (group_number != -1L)
+                                {
+                                    val tox_peer_id = tox_group_peer_by_public_key(group_number, peer_pubkey)
+                                    if (tox_peer_id != -1L)
+                                    {
+                                        ip_addr_str = get_group_peer_ip_str(group_number, tox_peer_id)
+                                    }
+                                }
+                            }
+                            catch (_: Exception)
+                            {
+                                // IP resolution failed, but we still want to show the peer
+                            }
+                        }
+
+                        // 4. Construct the UI item
+                        new_peers_list.add(
+                            GroupPeerItem(
+                                groupID = group_id,
+                                pubkey = peer_pubkey.uppercase(),
+                                name = if (!peer_name.isNullOrEmpty()) peer_name else "peer $i",
+                                connectionStatus = peer_connection_status,
+                                peerRole = peer_role,
+                                ip_addr = ip_addr_str
+                            )
+                        )
+                    }
+                    catch (_: Exception)
+                    {
+                        // Ignore individual peer parsing errors and continue to the next peer
+                    }
+                }
+
+                // 5. Single atomic transaction to replace all peers for this group in the UI!
+                grouppeerstore.replaceForGroup(group_id, new_peers_list)
+            }
+            catch (_: Exception)
+            {
+                // Log general failure if needed
+            }
+        }
+
+        fun load_grouppeers__XXX__unused_replaced_by_NGCMID(groupID: String)
         {
             val groupnum = HelperGroup.tox_group_by_groupid__wrapper(groupID)
             val num_peers: Long = tox_group_peer_count(groupnum)

@@ -75,6 +75,7 @@ export CFLAGS=" -fPIC -D_FORTIFY_SOURCE=2 -std=gnu99 -I$_INST_/include/ -L$_INST
 
 x86_64-w64-mingw32-gcc-win32 $CFLAGS \
 -Wall -D_JNI_IMPLEMENTATION_ -Wl,-kill-at \
+-DTOX_HAVE_NGCMID \
 -DGIT_HASH=\"$git_hash_for_jni\" \
 -DJAVA_LINUX \
 -DNOGLOBALVARS \

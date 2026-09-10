@@ -102,6 +102,7 @@ export CFLAGS=" -fPIC -std=gnu99 -I$_INST_/include/ -I$_INST_/jinclude/ -L$_INST
 
 gcc $CFLAGS \
 -Wall \
+-DTOX_HAVE_NGCMID \
 -DGIT_HASH=\"$git_hash_for_jni\" \
 -DJAVA_LINUX \
 -DNOGLOBALVARS \

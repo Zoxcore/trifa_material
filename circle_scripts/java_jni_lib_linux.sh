@@ -53,6 +53,7 @@ git clone https://github.com/zoff99/ToxAndroidRefImpl
 
 # -- git hash for jni code --
 cd ToxAndroidRefImpl/
+
 git_hash_for_jni=$(git rev-parse --verify --short=8 HEAD 2>/dev/null|tr -dc '[A-Fa-f0-9]' 2>/dev/null)
 echo "XX:""$git_hash_for_jni"":YY"
 cd ..
@@ -111,10 +112,12 @@ else
   CFLAGS_ASAN=""
 fi
 
+cat jni-c-toxcore.c|grep mid_
 
 $GCC_ $CFLAGS \
 -Wall \
 $CFLAGS_ASAN \
+-DTOX_HAVE_NGCMID \
 -DGIT_HASH=\"$git_hash_for_jni\" \
 -DJAVA_LINUX \
 -DNOGLOBALVARS \
