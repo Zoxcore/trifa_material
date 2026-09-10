@@ -209,8 +209,8 @@ import com.zoffcc.applications.trifa.TRIFAGlobals
 import com.zoffcc.applications.trifa.ToxVars
 import com.zoffcc.applications.trifa.TrifaToxService
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.clear_grouppeers
-import com.zoffcc.applications.trifa.TrifaToxService.Companion.load_grouppeers
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
+import com.zoffcc.applications.trifa.TrifaToxService.Companion.update_group_peers_ui_from_middleware
 import com.zoffcc.applications.trifa_material.trifa_material.BuildConfig
 import io.github.alexzhirkevich.qrose.options.QrBrush
 import io.github.alexzhirkevich.qrose.options.solid
@@ -1670,7 +1670,8 @@ fun App()
                                             clear_grouppeers()
                                             if (groups.selectedGroupId != null)
                                             {
-                                                load_grouppeers(groups.selectedGroupId!!)
+                                                // load_grouppeers(groups.selectedGroupId!!)
+                                                update_group_peers_ui_from_middleware(groups.selectedGroupId!!)
                                             }
                                             val GroupPeerListScope = rememberCoroutineScope()
                                             Box(modifier = Modifier.animateContentSize()) {

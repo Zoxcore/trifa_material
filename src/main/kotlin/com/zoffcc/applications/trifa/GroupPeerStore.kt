@@ -22,6 +22,7 @@ interface GroupPeerStore
     fun add(item: GroupPeerItem)
     fun remove(item: GroupPeerItem)
     fun select(pubkey: String?)
+    fun replaceForGroup(groupID: String, items: List<GroupPeerItem>)
     fun clear()
     fun update(item: GroupPeerItem)
     fun update_ipaddr(groupID: String, pubkey: String, ipaddr: String)
@@ -36,6 +37,53 @@ fun CoroutineScope.createGroupPeerStore(): GroupPeerStore
     return object : GroupPeerStore
     {
         override val stateFlow: StateFlow<StateGroupPeers> = mutableStateFlow
+
+        override fun replaceForGroup(groupID: String, items: List<GroupPeerItem>)
+        {
+            @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+            global_semaphore_grouppeerlist_ui.acquire((Throwable().stackTrace[0].fileName + ":" + Throwable().stackTrace[0].lineNumber))
+
+            val groupIDLower = groupID.lowercase()
+
+            // 2. Combine them with the new list of peers for THIS group
+            var new_peers = ArrayList(items)
+
+            // 3. Preserve selection state
+            var sel_pubkey = state.selectedGrouppeerPubkey
+            var sel_item = state.selectedGrouppeer
+
+            // If the currently selected peer belongs to the group we are replacing,
+            // check if they still exist in the new list. If not, clear the selection.
+            if (sel_item != null && sel_item.groupID.lowercase() == groupIDLower)
+            {
+                val stillExists = new_peers.any { it.pubkey == sel_pubkey }
+                if (!stillExists)
+                {
+                    sel_pubkey = null
+                    sel_item = null
+                }
+                else
+                {
+                    // Update the selected item reference to the newly provided instance
+                    sel_item = new_peers.firstOrNull { it.pubkey == sel_pubkey }
+                }
+            }
+
+            // 4. Sort the combined list
+            val self_group_pubkey = MainActivity.tox_group_self_get_public_key(
+                HelperGroup.tox_group_by_groupid__wrapper(groupIDLower))
+
+            new_peers = getListWithGroupingAndSorting(new_peers, self_group_pubkey)
+
+            // 5. Emit the new state
+            mutableStateFlow.value = state.copy(
+                grouppeers = new_peers,
+                selectedGrouppeerPubkey = sel_pubkey,
+                selectedGrouppeer = sel_item
+            )
+
+            global_semaphore_grouppeerlist_ui.release()
+        }
 
         override fun add(item: GroupPeerItem)
         {

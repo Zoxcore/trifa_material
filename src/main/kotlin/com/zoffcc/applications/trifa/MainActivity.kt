@@ -115,6 +115,7 @@ import com.zoffcc.applications.trifa.ToxVars.TOX_PUBLIC_KEY_SIZE
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.resend_old_messages
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.resend_v3_messages
+import com.zoffcc.applications.trifa.TrifaToxService.Companion.update_group_peers_ui_from_middleware
 import com.zoffcc.applications.trifa.VideoInFrame.new_video_in_frame
 import com.zoffcc.applications.trifa.VideoInFrame.setup_video_in_resolution
 import com.zoffcc.applications.trifa2.timestampMs
@@ -1033,6 +1034,45 @@ class MainActivity
         external fun tox_group_invite_accept(friend_number: Long, invite_data_buffer: ByteBuffer?, invite_data_length: Long, my_peer_name: String?, password: String?): Long
 
         @JvmStatic
+        external fun tox_group_mid_peer_count(group_id: String?): Long
+
+        @JvmStatic
+        external fun tox_group_mid_signed_count(group_id: String?): Long
+
+        @JvmStatic
+        external fun tox_group_mid_online_count(group_id: String?): Long
+
+        @JvmStatic
+        external fun tox_group_mid_offline_count(group_id: String?): Long
+
+        /**
+         * Call IMMEDIATELY BEFORE tox_group_leave().
+         * Broadcasts a signed LEFT tombstone.
+         * Returns: 1=success, 0=failure, -99=tox NULL
+         */
+        @JvmStatic
+        external fun tox_group_mid_announce_leave(group_number: Long): Int
+
+        /**
+         * Call AFTER tox_group_leave().
+         * Wipes middleware state for this group.
+         * Returns: 0=success, -99=tox NULL
+         */
+        @JvmStatic
+        external fun tox_group_mid_on_group_delete(group_number: Long): Int
+
+        /**
+         * Returns the number of peers in the persistent middleware roster.
+         * Includes offline peers and LEFT tombstones.
+         * Returns: count >= 0, or -99 if middleware not initialized.
+         */
+        @JvmStatic
+        external fun tox_group_mid_peer_list_count(group_id: String?): Long
+
+        @JvmStatic
+        external fun tox_group_mid_peer_list_get(group_id: String?, index: Long): Array<Any?>?
+
+        @JvmStatic
         external fun toxav_ngc_video_encode(vbitrate: Int, max_quantizer: Int, width: Int, height: Int, y: ByteArray, y_bytes: Int, u: ByteArray, u_bytes: Int, v: ByteArray, v_bytes: Int, encoded_frame_bytes: ByteArray): Int
 
         @JvmStatic
@@ -1432,26 +1472,26 @@ class MainActivity
         {
             if (a_TOXAV_CALL_COMM_INFO == ToxVars.TOXAV_CALL_COMM_INFO.TOXAV_CALL_COMM_DECODER_CURRENT_BITRATE.value.toLong())
             {
-                //Log.i(TAG, "call_comm_cb: fnum: " + friend_number
+                // Log.i(TAG, "call_comm_cb: fnum: " + friend_number
                 //        + " DECODER_CURRENT_BITRATE = " + comm_number)
                 avstatestorevplayfpsstate.updateDecoderVBitrate(comm_number.toInt())
             }
             else if (a_TOXAV_CALL_COMM_INFO == ToxVars.TOXAV_CALL_COMM_INFO.TOXAV_CALL_COMM_ENCODER_CURRENT_BITRATE.value.toLong())
             {
-                //Log.i(TAG, "call_comm_cb: fnum: " + friend_number
+                // Log.i(TAG, "call_comm_cb: fnum: " + friend_number
                 //        + " ENCODER_CURRENT_BITRATE = " + comm_number)
                 avstatestorevcapfpsstate.updateEncoderVBitrate(comm_number.toInt())
 
             }
             else if (a_TOXAV_CALL_COMM_INFO == ToxVars.TOXAV_CALL_COMM_INFO.TOXAV_CALL_COMM_NETWORK_ROUND_TRIP_MS.value.toLong())
             {
-                //Log.i(TAG, "call_comm_cb: fnum: " + friend_number
+                // Log.i(TAG, "call_comm_cb: fnum: " + friend_number
                 //        + " NETWORK_ROUND_TRIP_MS = " + comm_number)
                 avstatestorevplayfpsstate.updateNetworkRTT(comm_number.toInt())
             }
             else if (a_TOXAV_CALL_COMM_INFO == ToxVars.TOXAV_CALL_COMM_INFO.TOXAV_CALL_COMM_PLAY_DELAY.value.toLong())
             {
-                //Log.i(TAG, "call_comm_cb: fnum: " + friend_number
+                // Log.i(TAG, "call_comm_cb: fnum: " + friend_number
                 //        + " PLAY_DELAY = " + comm_number)
                 avstatestorevplayfpsstate.updatePlayDelay(comm_number.toInt())
             }
@@ -3704,6 +3744,35 @@ class MainActivity
                     }
                 }
             }
+        }
+
+        /**
+         * Called from JNI whenever the persistent peer roster changes for a group.
+         * Refresh your UI list here.
+         *
+         * THREAD SAFETY:
+         * - This may be called from ANY thread (JNI callback thread).
+         * - We use a single-threaded executor + Future cancellation to ensure only
+         *   one update runs at a time. If a new callback arrives while an update is
+         *   in progress, the old one is cancelled and a fresh update starts.
+         * - The final peer list is built completely in the background, then swapped
+         *   atomically via AtomicReference. Readers never see a half-built list.
+         *
+         * @noinspection ExtractMethodRecommender
+         */
+        @JvmStatic
+        @Suppress("unused")
+        fun android_tox_callback_group_mid_peer_list_changed_cb(group_id: String)
+        {
+            // Log.i(TAG, "android_tox_callback_group_mid_peer_list_changed_cb:" + group_id)
+
+            // Only update the UI peer list if this group is currently selected in the UI
+            if (groupstore.stateFlow.value.selectedGroupId != group_id)
+            {
+                return
+            }
+
+            update_group_peers_ui_from_middleware(group_id)
         }
 
         @JvmStatic
