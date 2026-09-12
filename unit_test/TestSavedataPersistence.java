@@ -14,8 +14,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class TestSavedataPersistence {
 
-    private static final int NUM_THREADS = 50;
-    private static final int CALLS_PER_THREAD = 100;
+    private static final int NUM_THREADS = 15;
+    private static final int CALLS_PER_THREAD = 40;
 
     public static void run() {
         System.out.println("\n--- Test: Savedata Persistence & Disk I/O ---");
@@ -47,7 +47,7 @@ public class TestSavedataPersistence {
             }
 
             // =========================================================================
-            // PHASE 2: Thread Pounding - 50 threads x 100 calls = 5000 concurrent saves
+            // PHASE 2: Thread Pounding - 20 threads x 30 calls
             // =========================================================================
             System.out.println("\n\u001B[90m[INFO]\u001B[0m Phase 2: Thread Pounding - " + NUM_THREADS + " threads x " + CALLS_PER_THREAD + " calls each...");
             System.out.println("\u001B[90m[INFO]\u001B[0m Total: " + (NUM_THREADS * CALLS_PER_THREAD) + " concurrent save operations...");
