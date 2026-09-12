@@ -11,7 +11,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * Verifies that the JNI layer correctly writes the Tox savedata file to the 
  * filesystem using the data_dir provided during initialization.
  * 
- * Also stress-tests thread safety by pounding the save function from 50 concurrent threads.
+ * Also stress-tests thread safety by pounding the save function from concurrent threads,
+ * and measures single-threaded throughput.
  */
 public class TestSavedataPersistence {
 
@@ -48,9 +49,56 @@ public class TestSavedataPersistence {
             }
 
             // =========================================================================
-            // PHASE 2: Thread Pounding - 15 threads x 40 calls
+            // PHASE 2: Single-Thread Throughput Test
             // =========================================================================
-            System.out.println("\n\u001B[90m[INFO]\u001B[0m Phase 2: Thread Pounding - " + NUM_THREADS + " threads x " + CALLS_PER_THREAD + " calls each...");
+            System.out.println("\n\u001B[90m[INFO]\u001B[0m Phase 2: Single-thread throughput test (200 sequential calls)...");
+            int singleThreadCalls = 200;
+
+            long singleThreadTotalTimeNanos = 0;
+            long singleThreadMinTimeNanos = Long.MAX_VALUE;
+            long singleThreadMaxTimeNanos = Long.MIN_VALUE;
+            int singleThreadSuccesses = 0;
+
+            long singleThreadStartTime = System.currentTimeMillis();
+
+            for (int i = 0; i < singleThreadCalls; i++) {
+                try {
+                    long opStart = System.nanoTime();
+                    MainActivity.update_savedata_file(passphraseHash);
+                    long opElapsed = System.nanoTime() - opStart;
+
+                    singleThreadTotalTimeNanos += opElapsed;
+                    if (opElapsed < singleThreadMinTimeNanos) singleThreadMinTimeNanos = opElapsed;
+                    if (opElapsed > singleThreadMaxTimeNanos) singleThreadMaxTimeNanos = opElapsed;
+                    singleThreadSuccesses++;
+                } catch (Throwable e) {
+                    System.err.println("\u001B[31m[ERROR]\u001B[0m Single-thread save iteration " + i + " threw: " + e.getMessage());
+                }
+            }
+
+            long singleThreadElapsedMs = System.currentTimeMillis() - singleThreadStartTime;
+
+            System.out.println("\u001B[90m[INFO]\u001B[0m Single-thread throughput completed in " + singleThreadElapsedMs + "ms");
+            System.out.println("\u001B[90m[INFO]\u001B[0m Successful saves: " + singleThreadSuccesses + " / " + singleThreadCalls);
+
+            if (singleThreadSuccesses > 0) {
+                double avgNanos = (double) singleThreadTotalTimeNanos / singleThreadSuccesses;
+                double avgMs = avgNanos / 1_000_000.0;
+                double minMs = singleThreadMinTimeNanos / 1_000_000.0;
+                double maxMs = singleThreadMaxTimeNanos / 1_000_000.0;
+
+                System.out.println("\n\u001B[96m[TIMING]\u001B[0m Single-thread per-operation statistics (" + singleThreadSuccesses + " saves):");
+                System.out.println("\u001B[96m[TIMING]\u001B[0m   Average: " + String.format("%.3f ms", avgMs) + "  (" + String.format("%.0f ns", avgNanos) + ")");
+                System.out.println("\u001B[96m[TIMING]\u001B[0m   Minimum: " + String.format("%.3f ms", minMs) + "  (" + singleThreadMinTimeNanos + " ns)");
+                System.out.println("\u001B[96m[TIMING]\u001B[0m   Maximum: " + String.format("%.3f ms", maxMs) + "  (" + singleThreadMaxTimeNanos + " ns)");
+                System.out.println("\u001B[96m[TIMING]\u001B[0m   Wall-clock throughput: " + String.format("%.1f ops/sec", singleThreadSuccesses / (singleThreadElapsedMs / 1000.0)));
+            }
+            JniToxcoreUnitTest.assertCondition("All " + singleThreadCalls + " single-threaded saves succeeded", singleThreadSuccesses == singleThreadCalls);
+
+            // =========================================================================
+            // PHASE 3: Thread Pounding - 15 threads x 40 calls
+            // =========================================================================
+            System.out.println("\n\u001B[90m[INFO]\u001B[0m Phase 3: Thread Pounding - " + NUM_THREADS + " threads x " + CALLS_PER_THREAD + " calls each...");
             System.out.println("\u001B[90m[INFO]\u001B[0m Total: " + (NUM_THREADS * CALLS_PER_THREAD) + " concurrent save operations...");
 
             CountDownLatch startLatch = new CountDownLatch(1);
@@ -145,7 +193,7 @@ public class TestSavedataPersistence {
                     double minMs = minNanos / 1_000_000.0;
                     double maxMs = maxNanos / 1_000_000.0;
 
-                    System.out.println("\n\u001B[96m[TIMING]\u001B[0m Per-operation statistics (" + successes + " successful saves):");
+                    System.out.println("\n\u001B[96m[TIMING]\u001B[0m Multi-thread per-operation statistics (" + successes + " successful saves):");
                     System.out.println("\u001B[96m[TIMING]\u001B[0m   Average: " + String.format("%.3f ms", avgMs) + "  (" + String.format("%.0f ns", avgNanos) + ")");
                     System.out.println("\u001B[96m[TIMING]\u001B[0m   Minimum: " + String.format("%.3f ms", minMs) + "  (" + minNanos + " ns)");
                     System.out.println("\u001B[96m[TIMING]\u001B[0m   Maximum: " + String.format("%.3f ms", maxMs) + "  (" + maxNanos + " ns)");
@@ -158,9 +206,9 @@ public class TestSavedataPersistence {
             }
 
             // =========================================================================
-            // PHASE 3: Verify file integrity after pounding
+            // PHASE 4: Verify file integrity after pounding
             // =========================================================================
-            System.out.println("\n\u001B[90m[INFO]\u001B[0m Phase 3: Verifying file integrity after pounding...");
+            System.out.println("\n\u001B[90m[INFO]\u001B[0m Phase 4: Verifying file integrity after pounding...");
 
             // Force a final single save to ensure clean state
             MainActivity.update_savedata_file(passphraseHash);
@@ -186,9 +234,9 @@ public class TestSavedataPersistence {
             }
 
             // =========================================================================
-            // PHASE 4: Verify Tox core is still functional after pounding
+            // PHASE 5: Verify Tox core is still functional after pounding
             // =========================================================================
-            System.out.println("\n\u001B[90m[INFO]\u001B[0m Phase 4: Verifying Tox core still functional after pounding...");
+            System.out.println("\n\u001B[90m[INFO]\u001B[0m Phase 5: Verifying Tox core still functional after pounding...");
             
             String nameAfterPound = MainActivity.tox_self_get_name();
             JniToxcoreUnitTest.assertCondition("tox_self_get_name still works after pounding", nameAfterPound != null);
