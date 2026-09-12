@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * TEST: Savedata Persistence & Disk I/O
@@ -47,7 +48,7 @@ public class TestSavedataPersistence {
             }
 
             // =========================================================================
-            // PHASE 2: Thread Pounding - 20 threads x 30 calls
+            // PHASE 2: Thread Pounding - 15 threads x 40 calls
             // =========================================================================
             System.out.println("\n\u001B[90m[INFO]\u001B[0m Phase 2: Thread Pounding - " + NUM_THREADS + " threads x " + CALLS_PER_THREAD + " calls each...");
             System.out.println("\u001B[90m[INFO]\u001B[0m Total: " + (NUM_THREADS * CALLS_PER_THREAD) + " concurrent save operations...");
@@ -57,6 +58,11 @@ public class TestSavedataPersistence {
             AtomicInteger errorCount = new AtomicInteger(0);
             AtomicInteger successCount = new AtomicInteger(0);
             List<Thread> threads = new ArrayList<>();
+
+            // --- Timing accumulators (thread-safe) ---
+            AtomicLong totalTimeNanos = new AtomicLong(0);
+            AtomicLong minTimeNanos = new AtomicLong(Long.MAX_VALUE);
+            AtomicLong maxTimeNanos = new AtomicLong(Long.MIN_VALUE);
 
             long poundStartTime = System.currentTimeMillis();
 
@@ -69,8 +75,27 @@ public class TestSavedataPersistence {
 
                         for (int j = 0; j < CALLS_PER_THREAD; j++) {
                             try {
+                                long opStart = System.nanoTime();
                                 MainActivity.update_savedata_file(passphraseHash);
+                                long opElapsed = System.nanoTime() - opStart;
+
                                 successCount.incrementAndGet();
+                                totalTimeNanos.addAndGet(opElapsed);
+
+                                // Update min (CAS loop)
+                                long currentMin;
+                                do {
+                                    currentMin = minTimeNanos.get();
+                                    if (opElapsed >= currentMin) break;
+                                } while (!minTimeNanos.compareAndSet(currentMin, opElapsed));
+
+                                // Update max (CAS loop)
+                                long currentMax;
+                                do {
+                                    currentMax = maxTimeNanos.get();
+                                    if (opElapsed <= currentMax) break;
+                                } while (!maxTimeNanos.compareAndSet(currentMax, opElapsed));
+
                             } catch (Throwable e) {
                                 errorCount.incrementAndGet();
                                 if (errorCount.get() <= 3) {
@@ -108,6 +133,25 @@ public class TestSavedataPersistence {
                 System.out.println("\u001B[90m[INFO]\u001B[0m Thread pounding completed in " + poundElapsed + "ms");
                 System.out.println("\u001B[90m[INFO]\u001B[0m Successful saves: " + successes + " / " + (NUM_THREADS * CALLS_PER_THREAD));
                 System.out.println("\u001B[90m[INFO]\u001B[0m Failed saves: " + errors);
+
+                // --- Print per-operation timing statistics ---
+                if (successes > 0) {
+                    long totalNanos = totalTimeNanos.get();
+                    long minNanos = minTimeNanos.get();
+                    long maxNanos = maxTimeNanos.get();
+
+                    double avgNanos = (double) totalNanos / successes;
+                    double avgMs = avgNanos / 1_000_000.0;
+                    double minMs = minNanos / 1_000_000.0;
+                    double maxMs = maxNanos / 1_000_000.0;
+
+                    System.out.println("\n\u001B[96m[TIMING]\u001B[0m Per-operation statistics (" + successes + " successful saves):");
+                    System.out.println("\u001B[96m[TIMING]\u001B[0m   Average: " + String.format("%.3f ms", avgMs) + "  (" + String.format("%.0f ns", avgNanos) + ")");
+                    System.out.println("\u001B[96m[TIMING]\u001B[0m   Minimum: " + String.format("%.3f ms", minMs) + "  (" + minNanos + " ns)");
+                    System.out.println("\u001B[96m[TIMING]\u001B[0m   Maximum: " + String.format("%.3f ms", maxMs) + "  (" + maxNanos + " ns)");
+                    System.out.println("\u001B[96m[TIMING]\u001B[0m   Total cumulative time: " + String.format("%.3f ms", totalNanos / 1_000_000.0));
+                    System.out.println("\u001B[96m[TIMING]\u001B[0m   Wall-clock throughput: " + String.format("%.1f ops/sec", successes / (poundElapsed / 1000.0)));
+                }
 
                 JniToxcoreUnitTest.assertCondition("Savedata thread pounding completed within timeout", true);
                 JniToxcoreUnitTest.assertCondition("All " + (NUM_THREADS * CALLS_PER_THREAD) + " saves succeeded without errors", errors == 0);
