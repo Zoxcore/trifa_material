@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class TestSavedataPersistence {
 
-    private static final int NUM_THREADS = 15;
+    private static final int NUM_THREADS = 25;
     private static final int CALLS_PER_THREAD = 40;
 
     public static void run() {
