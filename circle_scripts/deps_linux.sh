@@ -470,22 +470,7 @@ else
     git clone https://github.com/zoff99/c-toxcore c-toxcore
 fi
 cd c-toxcore/
-
-####### DEBUG #######
-####### DEBUG #######
-####### DEBUG #######
-####### DEBUG #######
-####### DEBUG #######
-####### DEBUG #######
-####### DEBUG #######
-# git checkout "zoff99/zoxcore_local_fork"
-git checkout "ngc_join_not_working_AI"
-####### DEBUG #######
-####### DEBUG #######
-####### DEBUG #######
-####### DEBUG #######
-####### DEBUG #######
-####### DEBUG #######
+git checkout "zoff99/zoxcore_local_fork"
 
 # ------ set c-toxcore git commit hash ------
 git_hash_for_toxcore=$(git rev-parse --verify --short=8 HEAD 2>/dev/null|tr -dc '[A-Fa-f0-9]' 2>/dev/null)
@@ -523,7 +508,7 @@ else
   fi
   ./configure \
      CXXFLAGS="$CXXFLAGS_ADDON" \
-     CFLAGS="-fPIC $CFLAGS_ADDON -DNGC_DEBUG $CFLAGS_MORE -DTOX_CAPABILITIES_ACTIVE $LOGG $CFLAGS_ASAN" \
+     CFLAGS="-fPIC $CFLAGS_ADDON $CFLAGS_MORE -DTOX_CAPABILITIES_ACTIVE $LOGG $CFLAGS_ASAN" \
     --prefix="$_INST_" \
     --enable-feature-h265="$h265_feature" \
     --disable-soname-versions \
