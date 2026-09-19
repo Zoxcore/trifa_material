@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.NetworkCheck
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -32,6 +33,7 @@ enum class UiMode(val icon: ImageVector, val contentDescriptionKey: String)
     CONTACTS(Icons.Filled.Contacts, "access.mode.contacts"),
     GROUPS(Icons.Filled.Group, "access.mode.groups"),
     SETTINGS(Icons.Filled.Settings, "access.mode.settings"),
+    NETPROFILER(Icons.Filled.NetworkCheck, "access.mode.netprofiler"),
     ADDFRIEND(Icons.Filled.PersonAdd, "access.mode.addfriend"),
     ADDGROUP(Icons.Filled.GroupAdd, "access.mode.addgroup"),
     ABOUT(Icons.Filled.Info, "access.mode.about"),
