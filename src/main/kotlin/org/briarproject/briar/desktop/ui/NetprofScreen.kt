@@ -58,8 +58,19 @@ import kotlin.time.Duration.Companion.milliseconds
 // --- Netprof Color Palette ---
 // Note: Kotlin's `const val` only supports primitives and Strings.
 // For Compose `Color`, we use top-level `val` to act as constants.
-private val NetprofColorSent = Color(0xFF2196F3)
-private val NetprofColorRecv = Color(0xFF4CAF50)
+//
+// HIGH-CONTRAST, THEME-ADAPTIVE ACCENTS for the summary cards:
+//  - Light theme: deep, saturated tones (>= 7:1 contrast on white)
+//  - Dark theme:  bright tones (>= 7:1 contrast on dark surfaces)
+// The big numeric values additionally use MaterialTheme.colors.onSurface
+// (pure theme foreground) so they are always maximally readable.
+private val NetprofSentAccentLight = Color(0xFF0D47A1) // deep blue
+private val NetprofSentAccentDark = Color(0xFF82B1FF)  // bright blue
+private val NetprofRecvAccentLight = Color(0xFF1B5E20) // deep green
+private val NetprofRecvAccentDark = Color(0xFF69F0AE)  // bright green
+private val NetprofUptimeAccentLight = Color(0xFF00695C) // deep teal
+private val NetprofUptimeAccentDark = Color(0xFF64FFDA)  // bright teal
+
 private val NetprofColorMiddleware = Color(0xFF9C27B0)
 
 private val NetprofColorHeatNone = Color(0xFF2C2C2E)
@@ -72,9 +83,14 @@ private val NetprofColorTextDark = Color.Black
 private val NetprofColorTextLight = Color.White
 // -----------------------------
 
+@Composable
+fun netprofAccent(lightVariant: Color, darkVariant: Color): Color =
+    if (MaterialTheme.colors.isLight) lightVariant else darkVariant
+
 data class PacketStat(
     val id: ToxVars.TOX_NETPROF_PACKET_ID,
     val name: String,
+    val transport: String, // "TCP" or "UDP"
     val sentCount: Long,
     val recvCount: Long,
     val sentBytes: Long,
@@ -92,17 +108,20 @@ data class NetprofData(
     val midSentBytes: Long,
     val midRecvBytes: Long,
     val midBytesPerSec: Long,
-    val packets: List<PacketStat>
+    val packets: List<PacketStat>,
+    val uptimeMillis: Long
 )
 
 // Holds the previous sample so we can compute per-second rates (deltas).
+// packetBytes is keyed by "<PACKET_ID_NAME>@<TCP|UDP>" so TCP and UDP
+// rates are tracked independently per packet type.
 private class NetprofPrevStats {
     var initialized = false
     var lastTimestamp: Long = System.currentTimeMillis()
     var sentBytes: Long = 0L
     var recvBytes: Long = 0L
     var midBytes: Long = 0L
-    val packetBytes = mutableMapOf<ToxVars.TOX_NETPROF_PACKET_ID, Long>()
+    val packetBytes = mutableMapOf<String, Long>()
 }
 
 fun formatBytes(bytes: Long): String {
@@ -124,6 +143,15 @@ fun formatRate(bytesPerSec: Long): String {
     if (mb < 1024) return String.format("%.2f MB/s", mb)
     val gb = mb / 1024.0
     return String.format("%.2f GB/s", gb)
+}
+
+fun formatUptime(millis: Long): String {
+    if (millis < 0) return "00:00:00"
+    val totalSeconds = millis / 1000
+    val hours = totalSeconds / 3600
+    val minutes = (totalSeconds % 3600) / 60
+    val seconds = totalSeconds % 60
+    return String.format("%02d:%02d:%02d", hours, minutes, seconds)
 }
 
 /**
@@ -172,18 +200,38 @@ fun getHeatColor(ratio: Float): Color {
 }
 
 @Composable
-fun RowScope.SummaryCard(title: String, bytes: String, packets: String, rate: String, color: Color) {
+fun RowScope.SummaryCard(title: String, bytes: String, packets: String, rate: String, accent: Color) {
+    val isLight = MaterialTheme.colors.isLight
+    // Maximum contrast for the important numbers: pure theme foreground color
+    val mainText = MaterialTheme.colors.onSurface
+    val secondaryText = mainText.copy(alpha = 0.85f)
     Column(
         modifier = Modifier
             .weight(1f)
             .clip(RoundedCornerShape(8.dp))
-            .background(color.copy(alpha = 0.1f))
+            .background(accent.copy(alpha = if (isLight) 0.10f else 0.20f))
             .padding(12.dp)
     ) {
-        Text(text = title, style = MaterialTheme.typography.caption, color = color, fontWeight = FontWeight.SemiBold, fontSize = 11.sp)
-        Text(text = bytes, style = MaterialTheme.typography.h6, fontWeight = FontWeight.Bold, color = color)
-        Text(text = rate, style = MaterialTheme.typography.body2, color = color.copy(alpha = 0.9f), fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
-        Text(text = "$packets pkts", style = MaterialTheme.typography.caption, color = color.copy(alpha = 0.8f), fontSize = 11.sp)
+        Text(text = title, color = accent, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+        Text(text = bytes, style = MaterialTheme.typography.h6, fontWeight = FontWeight.Bold, color = mainText)
+        Text(text = rate, color = accent, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+        Text(text = "$packets pkts", color = secondaryText, fontWeight = FontWeight.SemiBold, fontSize = 11.sp)
+    }
+}
+
+@Composable
+fun UptimeCard(title: String, uptime: String, accent: Color) {
+    val isLight = MaterialTheme.colors.isLight
+    Column(
+        modifier = Modifier
+            .width(130.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(accent.copy(alpha = if (isLight) 0.10f else 0.20f))
+            .padding(horizontal = 10.dp, vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = title, color = accent, fontWeight = FontWeight.Bold, fontSize = 10.sp)
+        Text(text = uptime, color = MaterialTheme.colors.onSurface, fontWeight = FontWeight.Bold, fontSize = 15.sp)
     }
 }
 
@@ -194,6 +242,7 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
     if (global_store.toxRunning) {
         var netprofData by remember { mutableStateOf<NetprofData?>(null) }
         val prevStats = remember { NetprofPrevStats() }
+        val startTs = global_store.toxStartedTimestamp
 
         LaunchedEffect(Unit) {
             while (isActive) {
@@ -239,16 +288,20 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                     val recvBps = rateOf(totalRecvBytes - prevStats.recvBytes)
                     val midBps = rateOf(midTotalBytes - prevStats.midBytes)
 
-                    val stats = ToxVars.TOX_NETPROF_PACKET_ID.entries.map { id ->
-                        val sC = tox_netprof_get_packet_id_count(typeTcp, id.value, dirSent) + tox_netprof_get_packet_id_count(typeUdp, id.value, dirSent)
-                        val rC = tox_netprof_get_packet_id_count(typeTcp, id.value, dirRecv) + tox_netprof_get_packet_id_count(typeUdp, id.value, dirRecv)
-                        val sB = tox_netprof_get_packet_id_bytes(typeTcp, id.value, dirSent) + tox_netprof_get_packet_id_bytes(typeUdp, id.value, dirSent)
-                        val rB = tox_netprof_get_packet_id_bytes(typeTcp, id.value, dirRecv) + tox_netprof_get_packet_id_bytes(typeUdp, id.value, dirRecv)
-                        val totalBytesNow = sB + rB
-                        val prevB = prevStats.packetBytes[id] ?: 0L
-                        val bps = rateOf(totalBytesNow - prevB)
-                        prevStats.packetBytes[id] = totalBytesNow
-                        PacketStat(id, id.name.removePrefix("TOX_NETPROF_PACKET_ID_"), sC, rC, sB, rB, bps)
+                    // One box per (packet ID, transport): TCP and UDP separately
+                    val stats = ToxVars.TOX_NETPROF_PACKET_ID.entries.flatMap { id ->
+                        listOf(typeTcp to "TCP", typeUdp to "UDP").map { (typeVal, transportLabel) ->
+                            val sC = tox_netprof_get_packet_id_count(typeVal, id.value, dirSent)
+                            val rC = tox_netprof_get_packet_id_count(typeVal, id.value, dirRecv)
+                            val sB = tox_netprof_get_packet_id_bytes(typeVal, id.value, dirSent)
+                            val rB = tox_netprof_get_packet_id_bytes(typeVal, id.value, dirRecv)
+                            val totalBytesNow = sB + rB
+                            val mapKey = "${id.name}@$transportLabel"
+                            val prevB = prevStats.packetBytes[mapKey] ?: 0L
+                            val bps = rateOf(totalBytesNow - prevB)
+                            prevStats.packetBytes[mapKey] = totalBytesNow
+                            PacketStat(id, id.name.removePrefix("TOX_NETPROF_PACKET_ID_"), transportLabel, sC, rC, sB, rB, bps)
+                        }
                     }
 
                     prevStats.initialized = true
@@ -257,9 +310,11 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                     prevStats.midBytes = midTotalBytes
                     prevStats.lastTimestamp = currentTime
 
+                    val uptimeMillis = currentTime - startTs
+
                     NetprofData(
                         totalSentCount, totalRecvCount, totalSentBytes, totalRecvBytes,
-                        sentBps, recvBps, midSentBytes, midRecvBytes, midBps, stats
+                        sentBps, recvBps, midSentBytes, midRecvBytes, midBps, stats, uptimeMillis
                     )
                 }
                 netprofData = data
@@ -280,9 +335,30 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                     Text("Loading network statistics...", style = MaterialTheme.typography.h6)
                 }
             } else {
-                Row(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    SummaryCard("Total Sent", formatBytes(data.totalSentBytes), data.totalSentCount.toString(), formatRate(data.sentBytesPerSec), NetprofColorSent)
-                    SummaryCard("Total Received", formatBytes(data.totalRecvBytes), data.totalRecvCount.toString(), formatRate(data.recvBytesPerSec), NetprofColorRecv)
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    SummaryCard(
+                        "Total Sent",
+                        formatBytes(data.totalSentBytes),
+                        data.totalSentCount.toString(),
+                        formatRate(data.sentBytesPerSec),
+                        netprofAccent(NetprofSentAccentLight, NetprofSentAccentDark)
+                    )
+                    SummaryCard(
+                        "Total Received",
+                        formatBytes(data.totalRecvBytes),
+                        data.totalRecvCount.toString(),
+                        formatRate(data.recvBytesPerSec),
+                        netprofAccent(NetprofRecvAccentLight, NetprofRecvAccentDark)
+                    )
+                    UptimeCard(
+                        "Tox Uptime",
+                        formatUptime(data.uptimeMillis),
+                        netprofAccent(NetprofUptimeAccentLight, NetprofUptimeAccentDark)
+                    )
                 }
 
                 // Overall Network Heat Bars:
@@ -362,10 +438,11 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                             .fillMaxSize()
                             .verticalScroll(scrollState)
                             .padding(end = 12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        val itemModifier = Modifier.width(150.dp).height(75.dp)
+                        // smaller boxes: we now have 2x as many (TCP + UDP per packet ID)
+                        val itemModifier = Modifier.width(118.dp).height(64.dp)
 
                         val totalMidBytes = data.midSentBytes + data.midRecvBytes
                         val tooltipTextMid = buildString {
@@ -381,30 +458,42 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                         Tooltip(text = tooltipTextMid) {
                             Column(
                                 modifier = itemModifier
-                                    .clip(RoundedCornerShape(8.dp))
+                                    .clip(RoundedCornerShape(6.dp))
                                     .background(NetprofColorMiddleware)
-                                    .padding(8.dp),
+                                    .padding(6.dp),
                                 verticalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text(
-                                    text = "MIDDLEWARE CUSTOM",
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = NetprofColorTextLight,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    lineHeight = 11.sp
-                                )
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Text(
+                                        text = "MIDDLEWARE",
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = NetprofColorTextLight,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f, fill = false)
+                                    )
+                                    Text(
+                                        text = "NGC",
+                                        fontSize = 8.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = NetprofColorTextLight.copy(alpha = 0.7f)
+                                    )
+                                }
                                 Column {
                                     Text(
                                         text = formatBytes(totalMidBytes),
-                                        fontSize = 13.sp,
+                                        fontSize = 11.sp,
                                         fontWeight = FontWeight.SemiBold,
                                         color = NetprofColorTextLight
                                     )
                                     Text(
                                         text = "S: ${formatBytes(data.midSentBytes)} | R: ${formatBytes(data.midRecvBytes)}",
-                                        fontSize = 9.sp,
+                                        fontSize = 8.sp,
                                         color = NetprofColorTextLight.copy(alpha = 0.8f)
                                     )
                                 }
@@ -415,7 +504,7 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                             val totalBytes = stat.sentBytes + stat.recvBytes
                             val totalPkts = stat.sentCount + stat.recvCount
 
-                            // Heat is based on the CURRENT RATE (bytes/sec), log-scaled
+                            // Heat is based on the CURRENT RATE (bytes/sec) of THIS transport, log-scaled
                             val heatRatio = rateToHeatRatio(stat.bytesPerSec)
                             val bgColor = getHeatColor(heatRatio)
 
@@ -423,6 +512,7 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
 
                             val tooltipText = buildString {
                                 appendLine("Packet: ${stat.name}")
+                                appendLine("Transport: ${stat.transport}")
                                 appendLine("ID: 0x${stat.id.value.toString(16).uppercase().padStart(2, '0')}")
                                 appendLine("━━━━━━━━━━━━━━━━━━━━━━━━")
                                 appendLine("Sent: ${stat.sentCount} pkts (${formatBytes(stat.sentBytes)})")
@@ -435,30 +525,42 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                             Tooltip(text = tooltipText) {
                                 Column(
                                     modifier = itemModifier
-                                        .clip(RoundedCornerShape(8.dp))
+                                        .clip(RoundedCornerShape(6.dp))
                                         .background(bgColor)
-                                        .padding(8.dp),
+                                        .padding(6.dp),
                                     verticalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Text(
-                                        text = stat.name,
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = textColor,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        lineHeight = 11.sp
-                                    )
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Text(
+                                            text = stat.name,
+                                            fontSize = 9.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = textColor,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            modifier = Modifier.weight(1f, fill = false)
+                                        )
+                                        Text(
+                                            text = stat.transport,
+                                            fontSize = 8.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = textColor.copy(alpha = 0.7f)
+                                        )
+                                    }
                                     Column {
                                         Text(
                                             text = formatBytes(totalBytes),
-                                            fontSize = 13.sp,
+                                            fontSize = 11.sp,
                                             fontWeight = FontWeight.SemiBold,
                                             color = textColor
                                         )
                                         Text(
                                             text = "${formatRate(stat.bytesPerSec)} | $totalPkts pkts",
-                                            fontSize = 9.sp,
+                                            fontSize = 8.sp,
                                             color = textColor.copy(alpha = 0.8f)
                                         )
                                     }
