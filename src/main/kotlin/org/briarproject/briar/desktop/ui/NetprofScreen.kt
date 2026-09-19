@@ -285,12 +285,18 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                     SummaryCard("Total Received", formatBytes(data.totalRecvBytes), data.totalRecvCount.toString(), formatRate(data.recvBytesPerSec), NetprofColorRecv)
                 }
 
-                // Overall Network Heat Bars: rate-based (log scale), NOT relative to each other
+                // Overall Network Heat Bars:
+                // COLOR is logarithmic (turns red quickly at low speeds)
+                // WIDTH is linear (only fills the whole bar when hitting 500 KB/s)
                 val sentHeatRatio = rateToHeatRatio(data.sentBytesPerSec)
                 val recvHeatRatio = rateToHeatRatio(data.recvBytesPerSec)
 
                 val sentHeatColor = getHeatColor(sentHeatRatio)
                 val recvHeatColor = getHeatColor(recvHeatRatio)
+
+                val maxBpsLinear = 500.0 * 1024.0 // 500 KiB/s
+                val sentWidthRatio = if (data.sentBytesPerSec > 0) (data.sentBytesPerSec / maxBpsLinear).coerceIn(0.02, 1.0).toFloat() else 0f
+                val recvWidthRatio = if (data.recvBytesPerSec > 0) (data.recvBytesPerSec / maxBpsLinear).coerceIn(0.02, 1.0).toFloat() else 0f
 
                 Column(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -305,7 +311,7 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxHeight()
-                                    .fillMaxWidth(sentHeatRatio)
+                                    .fillMaxWidth(sentWidthRatio)
                                     .background(sentHeatColor)
                             )
                         }
@@ -323,7 +329,7 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxHeight()
-                                    .fillMaxWidth(recvHeatRatio)
+                                    .fillMaxWidth(recvWidthRatio)
                                     .background(recvHeatColor)
                             )
                         }
