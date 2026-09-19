@@ -35,6 +35,7 @@ data class globalstore_state(
     val ui_density: Float = 1.0f,
     val default_density: Float = 1.0f,
     val toxRunning: Boolean = false,
+    val toxStartedTimestamp: Long = -1L,
     val ormaRunning: Boolean = false,
     val native_ffmpegav_lib_loaded: Boolean = false,
     val native_notification_lib_loaded: Boolean = false,
@@ -64,6 +65,7 @@ interface GlobalStore {
     fun getUiDensity(): Float
     fun setToxRunning(value: Boolean)
     fun getToxRunning(): Boolean
+    fun gettoxStartedTimestamp(): Long
     fun setNative_ffmpegav_lib_loaded(value: Boolean)
     fun getNative_ffmpegav_lib_loaded(): Boolean
     fun setApp_startup(value: Boolean)
@@ -181,9 +183,21 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
             return state.toxRunning
         }
 
+        override fun gettoxStartedTimestamp(): Long
+        {
+            return state.toxStartedTimestamp
+        }
+
         override fun setToxRunning(value: Boolean)
         {
-            mutableStateFlow.value = state.copy(toxRunning = value)
+            if (value == true)
+            {
+                mutableStateFlow.value = state.copy(toxRunning = value, toxStartedTimestamp = System.currentTimeMillis())
+            }
+            else
+            {
+                mutableStateFlow.value = state.copy(toxRunning = value, toxStartedTimestamp = -1L)
+            }
         }
 
         override fun getNative_ffmpegav_lib_loaded(): Boolean
