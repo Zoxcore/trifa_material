@@ -1092,6 +1092,13 @@ class MainActivity
         @JvmStatic
         external fun tox_group_mid_peer_list_get(group_id: String?, index: Long): Array<Any?>?
 
+        /**
+         * Get middleware custom packet network stats.
+         * @return long array of size 2: [sent_bytes, recv_bytes], or null if unavailable.
+         */
+        @JvmStatic
+        external fun tox_group_mid_get_network_stats(): LongArray?
+
         @JvmStatic
         external fun toxav_ngc_video_encode(vbitrate: Int, max_quantizer: Int, width: Int, height: Int, y: ByteArray, y_bytes: Int, u: ByteArray, u_bytes: Int, v: ByteArray, v_bytes: Int, encoded_frame_bytes: ByteArray): Int
 
