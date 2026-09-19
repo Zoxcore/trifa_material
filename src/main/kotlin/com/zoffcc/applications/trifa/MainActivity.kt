@@ -747,6 +747,26 @@ class MainActivity
         // --------------- Message V3 -------------
         // --------------- Message V3 -------------
         // --------------- Message V3 -------------
+
+        // --------------- Network Profiling (netprof) -------------
+        // --------------- Network Profiling (netprof) -------------
+        // --------------- Network Profiling (netprof) -------------
+        @JvmStatic
+        external fun tox_netprof_get_packet_id_count(type: Int, id: Int, direction: Int): Long
+
+        @JvmStatic
+        external fun tox_netprof_get_packet_total_count(type: Int, direction: Int): Long
+
+        @JvmStatic
+        external fun tox_netprof_get_packet_id_bytes(type: Int, id: Int, direction: Int): Long
+
+        @JvmStatic
+        external fun tox_netprof_get_packet_total_bytes(type: Int, direction: Int): Long
+        // --------------- Network Profiling (netprof) -------------
+        // --------------- Network Profiling (netprof) -------------
+        // --------------- Network Profiling (netprof) -------------
+
+
         // --------------- Conference -------------
         // --------------- Conference -------------
         // --------------- Conference -------------
