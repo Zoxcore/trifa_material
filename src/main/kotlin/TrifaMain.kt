@@ -242,6 +242,7 @@ import org.briarproject.briar.desktop.ui.ExplainerGroup
 import org.briarproject.briar.desktop.ui.ExplainerInfoIsRelay
 import org.briarproject.briar.desktop.ui.ExplainerToxNotRunning
 import org.briarproject.briar.desktop.ui.HorizontalDivider
+import org.briarproject.briar.desktop.ui.NetprofScreen
 import org.briarproject.briar.desktop.ui.Tooltip
 import org.briarproject.briar.desktop.ui.UiMode
 import org.briarproject.briar.desktop.ui.UiPlaceholder
@@ -1720,6 +1721,14 @@ fun App()
                                 contactstore.visible(false)
                                 groupstore.visible(false)
                                 SettingDetails()
+                            }
+                            UiMode.NETPROFILER ->
+                            {
+                                groupsettingsstore.visible(false)
+                                friendsettingsstore.visible(false)
+                                contactstore.visible(false)
+                                groupstore.visible(false)
+                                NetprofScreen()
                             }
                             UiMode.ABOUT ->
                             {
