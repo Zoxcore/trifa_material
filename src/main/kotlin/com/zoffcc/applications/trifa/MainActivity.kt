@@ -748,6 +748,19 @@ class MainActivity
         // --------------- Message V3 -------------
         // --------------- Message V3 -------------
 
+
+        // --------------- CPU cycles Profiling -------------
+        // --------------- CPU cycles Profiling -------------
+        // --------------- CPU cycles Profiling -------------
+        @JvmStatic
+        external fun tox_get_estimated_cpu_cycles(): Long
+
+        @JvmStatic
+        external fun tox_reset_estimated_cpu_cycles()
+        // --------------- CPU cycles Profiling -------------
+        // --------------- CPU cycles Profiling -------------
+        // --------------- CPU cycles Profiling -------------
+
         // --------------- Network Profiling (netprof) -------------
         // --------------- Network Profiling (netprof) -------------
         // --------------- Network Profiling (netprof) -------------
