@@ -43,6 +43,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_by_public
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_connection_status
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_name
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_public_key
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_get_estimated_cpu_cycles
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_chat_id
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_grouplist
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_get_health
@@ -62,6 +63,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_peer_get_r
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_iterate
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_iteration_interval
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_kill
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_reset_estimated_cpu_cycles
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_connection_status
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_friend_list
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_network_health
@@ -217,6 +219,7 @@ class TrifaToxService
                 var last_network_health = current_health_init
 
                 var last_gc_health = currenc_gc_health_init
+                tox_reset_estimated_cpu_cycles()
 
                 // ------- MAIN TOX LOOP ---------------------------------------------------------------
                 // ------- MAIN TOX LOOP ---------------------------------------------------------------
@@ -466,6 +469,8 @@ class TrifaToxService
 
                 update_savedata_file_wrapper()
                 is_tox_started = false
+
+                tox_reset_estimated_cpu_cycles()
 
                 clear_friends()
                 clear_groups()
