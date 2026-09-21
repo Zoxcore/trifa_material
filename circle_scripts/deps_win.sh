@@ -338,7 +338,7 @@ cat toxcore/tox.h | grep 'TOX_GIT_COMMIT_HASH'
 autoreconf -fi
 ./configure \
     CXXFLAGS="$CXXFLAGS_ADDON" \
-    CFLAGS="-fPIC $CFLAGS_ADDON $CFLAGS_MORE -DTOX_CAPABILITIES_ACTIVE" \
+    CFLAGS="-fPIC $CFLAGS_ADDON $CFLAGS_MORE -DTOX_CPU_CYCLES_PROFILER_ENABLED -DTOX_CAPABILITIES_ACTIVE" \
     --prefix="$_INST_" \
     --disable-soname-versions \
     --host="$ARCH-w64-mingw32" \

@@ -487,7 +487,7 @@ if [ "$1""x" == "raspix" ]; then
   echo "*** RASPI ***"
   ./configure --host="$CROSS_TRIPLE" \
      CXXFLAGS="$CXXFLAGS_ADDON" \
-     CFLAGS="-fPIC $CFLAGS_ADDON $CFLAGS_MORE -DTOX_CAPABILITIES_ACTIVE $LOGG" \
+     CFLAGS="-fPIC $CFLAGS_ADDON $CFLAGS_MORE -DTOX_CPU_CYCLES_PROFILER_ENABLED -DTOX_CAPABILITIES_ACTIVE $LOGG" \
     --prefix="$_INST_" \
     --disable-soname-versions \
     --disable-shared \
@@ -508,7 +508,7 @@ else
   fi
   ./configure \
      CXXFLAGS="$CXXFLAGS_ADDON" \
-     CFLAGS="-fPIC $CFLAGS_ADDON $CFLAGS_MORE -DTOX_CAPABILITIES_ACTIVE $LOGG $CFLAGS_ASAN" \
+     CFLAGS="-fPIC $CFLAGS_ADDON $CFLAGS_MORE -DTOX_CPU_CYCLES_PROFILER_ENABLED -DTOX_CAPABILITIES_ACTIVE $LOGG $CFLAGS_ASAN" \
     --prefix="$_INST_" \
     --enable-feature-h265="$h265_feature" \
     --disable-soname-versions \
