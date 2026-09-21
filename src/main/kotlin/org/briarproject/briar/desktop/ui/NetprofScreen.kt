@@ -41,6 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_get_estimated_cpu_cycles
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_mid_get_network_stats
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_netprof_get_packet_id_bytes
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_netprof_get_packet_id_count
@@ -109,7 +110,9 @@ data class NetprofData(
     val midRecvBytes: Long,
     val midBytesPerSec: Long,
     val packets: List<PacketStat>,
-    val uptimeMillis: Long
+    val uptimeMillis: Long,
+    val cpuCycles: Long,
+    val cpuCyclesPerSec: Long
 )
 
 // Holds the previous sample so we can compute per-second rates (deltas).
@@ -121,6 +124,7 @@ private class NetprofPrevStats {
     var sentBytes: Long = 0L
     var recvBytes: Long = 0L
     var midBytes: Long = 0L
+    var cpuCycles: Long = 0L
     val packetBytes = mutableMapOf<String, Long>()
 }
 
@@ -145,6 +149,17 @@ fun formatRate(bytesPerSec: Long): String {
     return String.format("%.2f GB/s", gb)
 }
 
+fun formatCycles(cps: Long): String {
+    if (cps <= 0) return "0 c/s"
+    if (cps < 1000) return "$cps c/s"
+    val k = cps / 1000.0
+    if (k < 1000) return String.format("%.1f Kc/s", k)
+    val m = k / 1000.0
+    if (m < 1000) return String.format("%.1f Mc/s", m)
+    val g = m / 1000.0
+    return String.format("%.2f Gc/s", g)
+}
+
 fun formatUptime(millis: Long): String {
     if (millis < 0) return "00:00:00"
     val totalSeconds = millis / 1000
@@ -152,6 +167,18 @@ fun formatUptime(millis: Long): String {
     val minutes = (totalSeconds % 3600) / 60
     val seconds = totalSeconds % 60
     return String.format("%02d:%02d:%02d", hours, minutes, seconds)
+}
+
+/**
+ * Map a generic positive value to a 0..1 heat ratio using a logarithmic scale.
+ */
+fun valueToHeatRatio(value: Long, maxVal: Double): Float {
+    if (value <= 0) return 0f
+    val logMax = log10(maxVal)
+    val logVal = log10(value.toDouble().coerceAtLeast(1.0))
+    val ratio = (logVal / logMax).coerceIn(0.0, 1.0).toFloat()
+    // any traffic/activity at all should at least show a tiny bit of heat
+    return ratio.coerceAtLeast(0.05f)
 }
 
 /**
@@ -168,13 +195,26 @@ fun formatUptime(millis: Long): String {
  *   100 KB/s     -> ~0.88 (High)
  *   >= 500 KiB/s -> 1.00 (Max / Red)
  */
-fun rateToHeatRatio(bytesPerSec: Long): Float {
-    if (bytesPerSec <= 0) return 0f
-    val maxBps = 500.0 * 1024.0 // 500 KiB/s = 512,000 B/s
-    val logMax = log10(maxBps)
-    val logVal = log10(bytesPerSec.toDouble().coerceAtLeast(1.0))
+fun rateToHeatRatio(bytesPerSec: Long): Float = valueToHeatRatio(bytesPerSec, 500.0 * 1024.0)
+
+/**
+ * Map CPU cycles per second to a 0..1 heat ratio.
+ * Since baseline CPU usage for a desktop app doing crypto/networking is often
+ * in the hundreds of millions of cycles per second (e.g. 600 Mc/s), we use a
+ * shifted log scale from 10 Mc/s to 10 Gc/s.
+ *
+ * Scale:
+ *   < 10 Mc/s    -> 0.00 (None/Idle)
+ *   100 Mc/s     -> 0.33 (Green)
+ *   600 Mc/s     -> 0.59 (Yellow/Orange - typical moderate load)
+ *   1 Gc/s       -> 0.66 (Orange)
+ *   10 Gc/s      -> 1.00 (Red / Max)
+ */
+fun cpuToHeatRatio(cps: Long): Float {
+    if (cps <= 10_000_000L) return 0f // Below 10 Mc/s is essentially idle
+    val logMax = 3.0 // 10 Mc/s to 10 Gc/s is 3 decades (log10(1000) = 3)
+    val logVal = log10(cps.toDouble() / 10_000_000.0)
     val ratio = (logVal / logMax).coerceIn(0.0, 1.0).toFloat()
-    // any traffic at all should at least show a tiny bit of heat
     return ratio.coerceAtLeast(0.05f)
 }
 
@@ -275,6 +315,9 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                     val midRecvBytes = midStats?.getOrNull(1) ?: 0L
                     val midTotalBytes = midSentBytes + midRecvBytes
 
+                    val cpuCyclesRaw = tox_get_estimated_cpu_cycles()
+                    val cpuCycles = if (cpuCyclesRaw < 0) 0L else cpuCyclesRaw
+
                     // On the very first sample we have no baseline yet, so rates are 0
                     // (otherwise the first tick would report the whole cumulative total as "rate").
                     val first = !prevStats.initialized
@@ -287,6 +330,7 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                     val sentBps = rateOf(totalSentBytes - prevStats.sentBytes)
                     val recvBps = rateOf(totalRecvBytes - prevStats.recvBytes)
                     val midBps = rateOf(midTotalBytes - prevStats.midBytes)
+                    val cpuCyclesPerSec = rateOf(cpuCycles - prevStats.cpuCycles)
 
                     // One box per (packet ID, transport): TCP and UDP separately
                     val stats = ToxVars.TOX_NETPROF_PACKET_ID.entries.flatMap { id ->
@@ -308,13 +352,14 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                     prevStats.sentBytes = totalSentBytes
                     prevStats.recvBytes = totalRecvBytes
                     prevStats.midBytes = midTotalBytes
+                    prevStats.cpuCycles = cpuCycles
                     prevStats.lastTimestamp = currentTime
 
                     val uptimeMillis = currentTime - startTs
 
                     NetprofData(
                         totalSentCount, totalRecvCount, totalSentBytes, totalRecvBytes,
-                        sentBps, recvBps, midSentBytes, midRecvBytes, midBps, stats, uptimeMillis
+                        sentBps, recvBps, midSentBytes, midRecvBytes, midBps, stats, uptimeMillis, cpuCycles, cpuCyclesPerSec
                     )
                 }
                 netprofData = data
@@ -361,18 +406,26 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                     )
                 }
 
-                // Overall Network Heat Bars:
+                // Overall Network & CPU Heat Bars:
                 // COLOR is logarithmic (turns red quickly at low speeds)
-                // WIDTH is linear (only fills the whole bar when hitting 500 KB/s)
+                // WIDTH is linear (only fills the whole bar when hitting the max threshold)
                 val sentHeatRatio = rateToHeatRatio(data.sentBytesPerSec)
                 val recvHeatRatio = rateToHeatRatio(data.recvBytesPerSec)
 
+                // CPU cycles: 600 Mc/s is a normal moderate load for a desktop app.
+                // We use a shifted log scale (10 Mc/s to 10 Gc/s) for color,
+                // and a linear scale up to 3 Gc/s for the bar width so it doesn't look half-full.
+                val maxCpsLinear = 3_000_000_000.0
+                val cpuHeatRatio = cpuToHeatRatio(data.cpuCyclesPerSec)
+
                 val sentHeatColor = getHeatColor(sentHeatRatio)
                 val recvHeatColor = getHeatColor(recvHeatRatio)
+                val cpuHeatColor = getHeatColor(cpuHeatRatio)
 
                 val maxBpsLinear = 500.0 * 1024.0 // 500 KiB/s
                 val sentWidthRatio = if (data.sentBytesPerSec > 0) (data.sentBytesPerSec / maxBpsLinear).coerceIn(0.02, 1.0).toFloat() else 0f
                 val recvWidthRatio = if (data.recvBytesPerSec > 0) (data.recvBytesPerSec / maxBpsLinear).coerceIn(0.02, 1.0).toFloat() else 0f
+                val cpuWidthRatio = if (data.cpuCyclesPerSec > 0) (data.cpuCyclesPerSec / maxCpsLinear).coerceIn(0.02, 1.0).toFloat() else 0f
 
                 Column(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -410,6 +463,24 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                             )
                         }
                         Text(formatRate(data.recvBytesPerSec), fontSize = 11.sp, modifier = Modifier.width(90.dp), textAlign = TextAlign.End)
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("CPU Heat", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.width(70.dp))
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(14.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(NetprofColorHeatNone)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .fillMaxWidth(cpuWidthRatio)
+                                    .background(cpuHeatColor)
+                            )
+                        }
+                        Text(formatCycles(data.cpuCyclesPerSec), fontSize = 11.sp, modifier = Modifier.width(90.dp), textAlign = TextAlign.End)
                     }
                 }
 
