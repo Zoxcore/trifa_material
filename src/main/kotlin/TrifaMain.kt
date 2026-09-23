@@ -186,6 +186,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.ORBOT_PROXY_HOST
 import com.zoffcc.applications.trifa.MainActivity.Companion.ORBOT_PROXY_PORT
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__audio_input_filter
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__do_not_sync_av
+import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__ngc_mid_active
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__orbot_enabled_to_int
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__v4l2_capture_force_mjpeg
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__video_bitrate_mode
@@ -209,6 +210,7 @@ import com.zoffcc.applications.trifa.TRIFAGlobals
 import com.zoffcc.applications.trifa.ToxVars
 import com.zoffcc.applications.trifa.TrifaToxService
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.clear_grouppeers
+import com.zoffcc.applications.trifa.TrifaToxService.Companion.load_grouppeers
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.update_group_peers_ui_from_middleware
 import com.zoffcc.applications.trifa_material.trifa_material.BuildConfig
@@ -1671,8 +1673,14 @@ fun App()
                                             clear_grouppeers()
                                             if (groups.selectedGroupId != null)
                                             {
-                                                // load_grouppeers(groups.selectedGroupId!!)
-                                                update_group_peers_ui_from_middleware(groups.selectedGroupId!!)
+                                                if (!PREF__ngc_mid_active)
+                                                {
+                                                    load_grouppeers(groups.selectedGroupId!!)
+                                                }
+                                                else
+                                                {
+                                                    update_group_peers_ui_from_middleware(groups.selectedGroupId!!)
+                                                }
                                             }
                                             val GroupPeerListScope = rememberCoroutineScope()
                                             Box(modifier = Modifier.animateContentSize()) {
