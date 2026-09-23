@@ -1079,6 +1079,13 @@ class MainActivity
         external fun tox_group_mid_offline_count(group_id: String?): Long
 
         /**
+         *
+         * @param enable 1 to enable the ngc mid feature, 0 to disable
+         */
+        @JvmStatic
+        external fun ngcmidenable(enable: Int)
+
+        /**
          * Call IMMEDIATELY BEFORE tox_group_leave().
          * Broadcasts a signed LEFT tombstone.
          * Returns: 1=success, 0=failure, -99=tox NULL
