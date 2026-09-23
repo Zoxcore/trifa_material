@@ -369,7 +369,7 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
 
         Column(modifier = modifier.fillMaxSize()) {
             Text(
-                text = "Network Profiler Matrix",
+                text = "Tox Profiler",
                 style = MaterialTheme.typography.h4,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 16.dp)
