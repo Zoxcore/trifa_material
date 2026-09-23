@@ -114,7 +114,7 @@ fun BriarSidebar(
         Tooltip(text = "Add Group") {
             BriarSidebarButtonFunc(UiMode.ADDGROUP)
         }
-        Tooltip(text = "Network Profiler") {
+        Tooltip(text = "Tox Profiler") {
             BriarSidebarButtonFunc(UiMode.NETPROFILER)
         }
         BriarSidebarButtonFunc(UiMode.ABOUT)
