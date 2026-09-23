@@ -181,6 +181,7 @@ class MainActivity
         var PREF__v4l2_capture_force_mjpeg: Int = 0 // 0 -> auto, 1 -> force MJPEG video capture with v4l2 devices
         var PREF__video_bitrate_mode: Int = 0 // 0 -> low, 1 -> normal, 2 -> high quality video capture and sending, 3 -> super high bitrate
         var PREF__orbot_enabled_to_int = 0
+        var PREF__ngc_mid_active = false
         var PREF__orbot_enabled_to_int_used_for_init = -1
         @JvmStatic var PREF__toxnoise_enabled_to_int_used_for_init = -1
         var PREF__local_discovery_enabled = 1
@@ -341,6 +342,29 @@ class MainActivity
             }
             PREF__orbot_enabled_to_int = tox_tor_proxy_int
             Log.i(TAG, "PREF__orbot_enabled_to_int:" + PREF__orbot_enabled_to_int)
+
+
+            var ngc_mid_active = false
+            try
+            {
+                if (global_prefs.getBoolean("tox.settings.persistent_peerlist", false))
+                {
+                    ngc_mid_active = true
+                }
+            } catch (_: Exception)
+            {
+            }
+            PREF__ngc_mid_active = ngc_mid_active
+            Log.i(TAG, "PREF__ngc_mid_active:" + PREF__ngc_mid_active)
+            if (PREF__ngc_mid_active)
+            {
+                ngcmidenable(1)
+            }
+            else
+            {
+                ngcmidenable(0)
+            }
+
 
             lock_data_dir_input()
 

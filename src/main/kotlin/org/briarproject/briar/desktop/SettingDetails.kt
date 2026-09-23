@@ -22,6 +22,12 @@ package org.briarproject.briar.desktop
 import SETTINGS_HEADER_SIZE
 import SnackBarToast
 import UIScaleItem
+import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,6 +36,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -93,6 +100,8 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__notificatio
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__open_files_directly
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__send_push_notifications
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__use_other_toxproxies
+import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__ngc_mid_active
+import com.zoffcc.applications.trifa.MainActivity.Companion.ngcmidenable
 import com.zoffcc.applications.trifa.MainActivity.Companion.password_hash
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_name
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_get_nospam
@@ -133,6 +142,8 @@ fun SettingDetails()
         general_settings()
         Spacer(modifier = Modifier.height(60.dp))
         tox_settings()
+        ngc_middleware_settings()
+        Spacer(modifier = Modifier.height(60.dp))
         Spacer(modifier = Modifier.height(60.dp))
         if (global_store.ormaRunning)
         {
@@ -154,6 +165,165 @@ fun SettingDetails()
         // Locale.setDefault(Locale.GERMAN)
         // ResourceBundle.clearCache()
         // --------------------------------------
+    }
+}
+
+@Composable
+private fun ngc_middleware_settings()
+{
+    var persistent_peerlist by remember { mutableStateOf(false) }
+    try
+    {
+        if (global_prefs.getBoolean("tox.settings.persistent_peerlist", false))
+        {
+            persistent_peerlist = true
+        }
+    } catch (_: Exception)
+    {
+    }
+
+    var showWarningDialog by remember { mutableStateOf(false) }
+
+    DetailItem(label = "Persistent Peerlist (NGC Middleware)",
+        description = "Shows group members even when they are offline. In exchange, the group receives verifiable notices of when you are online.") {
+        Switch(
+            checked = persistent_peerlist,
+            onCheckedChange = { isChecked ->
+                if (isChecked) {
+                    showWarningDialog = true
+                } else {
+                    global_prefs.putBoolean("tox.settings.persistent_peerlist", false)
+                    PREF__ngc_mid_active = false
+                    persistent_peerlist = false
+                    ngcmidenable(0)
+                }
+            },
+        )
+    }
+
+    if (showWarningDialog) {
+        PersistentPeerlistWarningDialog(
+            onDismiss = { showWarningDialog = false },
+            onConfirm = {
+                global_prefs.putBoolean("tox.settings.persistent_peerlist", true)
+                PREF__ngc_mid_active = true
+                persistent_peerlist = true
+                showWarningDialog = false
+                ngcmidenable(1)
+            }
+        )
+    }
+}
+
+@Composable
+fun PersistentPeerlistWarningDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Persistent Peerlist") },
+        text = {
+            val scrollState = rememberScrollState()
+
+            // Box allows us to overlay the Scrollbar on the right edge
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(scrollState)
+                        .padding(end = 12.dp) // Prevents text from hiding under the scrollbar
+                ) {
+                    Text(
+                        text = "⚠️  Privacy Warning",
+                        style = MaterialTheme.typography.h6,
+                        color = Color(0xFFD32F2F),
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+                    Text(
+                        text = "Enabling the Persistent Peerlist makes your presence in NGC groups CRYPTOGRAPHICALLY PROVABLE and PERSISTENT (30-day cache) instead of ephemeral and deniable.",
+                        style = MaterialTheme.typography.body1,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+
+                    WarningScenarioItem(
+                        color = Color(0xFF4CAF50), // Green
+                        title = "Everyday use: friends, family, hobby groups",
+                        likelihood = "Negligible",
+                        effect = "This feature provides undeniable proof that your ToxID was in the group. Without it, someone can only say 'I saw them there'. With it, they have proof they can show to others. For most people, this changes nothing.\n(Note: 'you' here means your ToxID, not your real name or real identity.)"
+                    )
+                    WarningScenarioItem(
+                        color = Color(0xFFF44336), // Red
+                        title = "Activism, journalism, support group",
+                        likelihood = "Think carefully",
+                        effect = "In sensitive groups, the danger is someone reporting on you. Normally, an infiltrator can only say 'I saw them in the chat' (which you can deny). With this feature, they get a mathematical proof they can hand to others: 'Here is undeniable proof this ToxID was in this group.'\n(Note: 'you' means your ToxID, not your real name or real identity.)"
+                    )
+                    WarningScenarioItem(
+                        color = Color(0xFF9E9E9E), // Grey
+                        title = "State actor or high-risk target",
+                        likelihood = "Changes nothing",
+                        effect = "If a powerful adversary is targeting you, they don't need this feature to prove your ToxID is in a group. They likely already have spyware on your phone, can read your screen, and can see your messages. This feature doesn't make you safer, but it also doesn't give them anything they didn't already have.\n(Note: 'you' means your ToxID, not your real name or real identity.)"
+                    )
+
+                    Text(
+                        text = "Do you understand these trade-offs and still want to enable the Persistent Peerlist?",
+                        style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
+                        modifier = Modifier.padding(top = 20.dp, bottom = 8.dp)
+                    )
+                }
+
+                // The visible Desktop Scrollbar
+                VerticalScrollbar(
+                    modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                    adapter = rememberScrollbarAdapter(scrollState)
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = onConfirm) {
+                Text("I Understand & Enable")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+fun WarningScenarioItem(color: Color, title: String, likelihood: String, effect: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 14.dp)
+            .height(IntrinsicSize.Min) // Allows the color stripe to stretch to the full height of the text
+    ) {
+        // Severity color stripe
+        Box(
+            modifier = Modifier
+                .width(4.dp)
+                .fillMaxHeight()
+                .background(color)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Likelihood: $likelihood",
+                style = MaterialTheme.typography.body2.copy(fontWeight = FontWeight.Bold),
+                color = color
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = effect,
+                style = MaterialTheme.typography.body2,
+                // 0.75f alpha ensures it acts as secondary text, readable in both light and dark modes
+                color = MaterialTheme.colors.onSurface.copy(alpha = 0.75f)
+            )
+        }
     }
 }
 
