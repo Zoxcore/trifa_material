@@ -3843,7 +3843,10 @@ class MainActivity
                 return
             }
 
-            update_group_peers_ui_from_middleware(group_id)
+            if (PREF__ngc_mid_active)
+            {
+                update_group_peers_ui_from_middleware(group_id)
+            }
         }
 
         @JvmStatic

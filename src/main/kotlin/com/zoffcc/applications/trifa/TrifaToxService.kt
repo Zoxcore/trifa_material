@@ -1153,7 +1153,7 @@ class TrifaToxService
             }
         }
 
-        fun load_grouppeers__XXX__unused_replaced_by_NGCMID(groupID: String)
+        fun load_grouppeers(groupID: String)
         {
             val groupnum = HelperGroup.tox_group_by_groupid__wrapper(groupID)
             val num_peers: Long = tox_group_peer_count(groupnum)

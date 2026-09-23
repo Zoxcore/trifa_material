@@ -184,7 +184,7 @@ private fun ngc_middleware_settings()
 
     var showWarningDialog by remember { mutableStateOf(false) }
 
-    DetailItem(label = "Persistent Peerlist (NGC Middleware)",
+    DetailItem(label = "Persistent Peerlist (NGC Middleware). this needs an app restart !!",
         description = "Shows group members even when they are offline. In exchange, the group receives verifiable notices of when you are online.") {
         Switch(
             checked = persistent_peerlist,
