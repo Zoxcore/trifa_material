@@ -148,11 +148,11 @@ $_INST_/lib/libsodium.a \
 -shared \
 -Wl,-soname,libjni-c-toxcore.so -o libjni-c-toxcore.so || exit 1
 
-sha256sum /home/runner/work/trifa_material/trifa_material/libjni-c-toxcore.so
+sha256sum libjni-c-toxcore.so
 
+pwd
 
 ls -al libjni-c-toxcore.so || exit 1
-pwd
 
 if [ "$2""x" == "asanx" ]; then
     # check if we actually have ASAN symbols in the library file
