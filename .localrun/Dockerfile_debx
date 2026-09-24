@@ -1,0 +1,45 @@
+# syntax=docker/dockerfile:1
+FROM debian:13
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && \
+        apt-get -y --force-yes install \
+        ca-certificates \
+        libconfig-dev \
+        wget \
+        unzip \
+        zip \
+        automake \
+        autotools-dev \
+        build-essential \
+        check \
+        checkinstall \
+        libtool \
+        pkg-config \
+        rsync \
+        git \
+        gdb \
+        nano \
+        g++ \
+        cmake \
+        yasm
+
+RUN apt-get update && \
+        apt-get -y --force-yes install \
+        nasm \
+        sudo
+
+RUN mkdir -p /workdocker/
+WORKDIR /workdocker/
+COPY deps_linux_curhost.sh /workdocker/deps_linux.sh
+RUN chmod a+rx /workdocker/deps_linux.sh
+RUN ls -al /workdocker/
+
+RUN cd /workdocker/ ; /workdocker/deps_linux.sh "" "" "" "" phase1
+
+RUN ls -al /workdocker/inst/
+
+RUN ls -al /workdocker/inst/lib/
+
+
