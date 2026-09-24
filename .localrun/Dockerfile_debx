@@ -42,4 +42,7 @@ RUN ls -al /workdocker/inst/
 
 RUN ls -al /workdocker/inst/lib/
 
+RUN apt-get update && \
+        apt-get -y --force-yes install \
+        openjdk-21-jdk-headless
 
