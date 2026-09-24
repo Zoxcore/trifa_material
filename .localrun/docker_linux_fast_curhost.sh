@@ -76,6 +76,8 @@ else
 fi
 
 
+cp -av /workspace/data/jni-c-toxcore/libjni-c-toxcore.so /artefacts/
+
 #------------------------
 
 
