@@ -52,13 +52,26 @@ cd /workspace/data/jni-c-toxcore/ || exit 1
 
 ls -al
 
-set -x
+ls -al /workdocker/
 
 if [ "$1""x" == "localx" ]; then
-    ../circle_scripts/deps_linux.sh local "" "" "" phase2 || exit 1
+    cd /workdocker/ ; /workdocker/deps_linux.sh local "" "" "" phase2 || exit 1
+else
+    cd /workdocker/ ; /workdocker/deps_linux.sh "" "" "" "" phase2 || exit 1
+fi
+
+
+mkdir -p /workspace/data/jni-c-toxcore/inst/
+cp -a /workdocker/inst/* /workspace/data/jni-c-toxcore/inst/
+
+mkdir -p /workspace/data/jni-c-toxcore/lib/
+cp -av /workdocker/lib/* /workspace/data/jni-c-toxcore/lib/
+
+cd /workspace/data/jni-c-toxcore/ || exit 1
+
+if [ "$1""x" == "localx" ]; then
     ../circle_scripts/java_jni_lib_linux.sh local || exit 1
 else
-    ../circle_scripts/deps_linux.sh "" "" "" "" phase2 || exit 1
     ../circle_scripts/java_jni_lib_linux.sh || exit 1
 fi
 

@@ -462,7 +462,7 @@ fi
 fi
 
 
-if [ "$5""x" == "phase2" ]; then
+if [ "$5""x" == "phase2x" ]; then
 
 echo "PHASE 2"
 echo "PHASE 2"
