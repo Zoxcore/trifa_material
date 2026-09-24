@@ -246,19 +246,19 @@ fun PersistentPeerlistWarningDialog(onDismiss: () -> Unit, onConfirm: () -> Unit
                         color = Color(0xFF4CAF50), // Green
                         title = "Everyday use: friends, family, hobby groups",
                         likelihood = "Negligible",
-                        effect = "This feature provides undeniable proof that your ToxID was in the group. Without it, someone can only say 'I saw them there'. With it, they have proof they can show to others. For most people, this changes nothing.\n(Note: 'you' here means your ToxID, not your real name or real identity.)"
+                        effect = "This feature provides undeniable proof that your ToxID was in the group. Without it, someone can only say 'I saw them there'. With it, they have proof they can show to others. For most people, this changes nothing."
                     )
                     WarningScenarioItem(
                         color = Color(0xFFF44336), // Red
                         title = "Activism, journalism, support group",
                         likelihood = "Think carefully",
-                        effect = "In sensitive groups, the danger is someone reporting on you. Normally, an infiltrator can only say 'I saw them in the chat' (which you can deny). With this feature, they get a mathematical proof they can hand to others: 'Here is undeniable proof this ToxID was in this group.'\n(Note: 'you' means your ToxID, not your real name or real identity.)"
+                        effect = "In sensitive groups, the danger is someone reporting on you. Normally, an infiltrator can only say 'I saw them in the chat' (which you can deny). With this feature, they get a mathematical proof they can hand to others: 'Here is undeniable proof this ToxID was in this group.'"
                     )
                     WarningScenarioItem(
                         color = Color(0xFF9E9E9E), // Grey
                         title = "State actor or high-risk target",
                         likelihood = "Changes nothing",
-                        effect = "If a powerful adversary is targeting you, they don't need this feature to prove your ToxID is in a group. They likely already have spyware on your phone, can read your screen, and can see your messages. This feature doesn't make you safer, but it also doesn't give them anything they didn't already have.\n(Note: 'you' means your ToxID, not your real name or real identity.)"
+                        effect = "If a powerful adversary is targeting you, they don't need this feature to prove your ToxID is in a group. They likely already have spyware on your phone, can read your screen, and can see your messages. This feature doesn't make you safer, but it also doesn't give them anything they didn't already have."
                     )
 
                     Text(
