@@ -287,6 +287,7 @@ val GROUP_COLLAPSED_PEER_COLUMN_WIDTH = 45.dp
 const val GROUP_PEER_COLUMN_PEERNAME_LEN_THRESHOLD = 12
 val MESSAGE_INPUT_LINE_HEIGHT = 58.dp
 val MAIN_TOP_TAB_HEIGHT = 160.dp
+val MAIN_TOP_TAB_MAPMODE_HEIGHT = 50.dp
 const val IMAGE_PREVIEW_SIZE = 70f
 const val AVATAR_SIZE = 40f
 const val MAX_AVATAR_SIZE = 70f
@@ -400,10 +401,10 @@ fun App()
                     BriarSidebar(uiMode = uiMode, setUiMode = { uiMode = it })
                     VerticalDivider()
                     Column(Modifier.randomDebugBorder()) {
-                        Row(modifier = Modifier.randomDebugBorder().fillMaxWidth().height(main_top_tab_height)) {
+                        Row(modifier = Modifier.randomDebugBorder().fillMaxWidth()
+                            .height(if (uiMode != UiMode.NETPROFILER) main_top_tab_height else MAIN_TOP_TAB_MAPMODE_HEIGHT)) {
                             Column(modifier = Modifier.randomDebugBorder()) {
                                 Row(Modifier.wrapContentHeight(), Arrangement.spacedBy(5.dp)) {
-
                                     if (globalstore.getApp_startup())
                                     {
                                         Log.i(TAG, "XXXXXXXXX:00:" + globalstore.getApp_startup())
@@ -489,7 +490,6 @@ fun App()
                                             TrifaToxService.stop_me = false
                                             savepathstore.createPathDirectories()
                                             main_init()
-
                                             // ************* DEBUG ONLY *************
                                             // ************* DEBUG ONLY *************
                                             // ************* DEBUG ONLY *************
@@ -512,28 +512,32 @@ fun App()
                                     }
                                     var online_button_text by remember { mutableStateOf("offline") }
                                     LaunchedEffect(online_button_text_wrapper) {
-                                        while (isActive) {
-                                            if (online_button_text != online_button_text_wrapper) {
+                                        while (isActive)
+                                        {
+                                            if (online_button_text != online_button_text_wrapper)
+                                            {
                                                 online_button_text = online_button_text_wrapper
                                             }
                                             delay(200) // Non-blocking delay
                                         }
                                     }
-
                                     var tox_network_health_text by remember { mutableStateOf("UNKNOWN") }
                                     LaunchedEffect(tox_network_health_text_wrapper) {
-                                            while (isActive) {
-                                                    if (tox_network_health_text != tox_network_health_text_wrapper) {
-                                                            tox_network_health_text = tox_network_health_text_wrapper
-                                                    }
-                                                    delay(200) // Non-blocking delay
-                                                }
+                                        while (isActive)
+                                        {
+                                            if (tox_network_health_text != tox_network_health_text_wrapper)
+                                            {
+                                                tox_network_health_text = tox_network_health_text_wrapper
+                                            }
+                                            delay(200) // Non-blocking delay
                                         }
-
+                                    }
                                     var tox_gc_health_text by remember { mutableStateOf("UNKNOWN") }
                                     LaunchedEffect(tox_group_health_text_wrapper) {
-                                        while (isActive) {
-                                            if (tox_gc_health_text != tox_group_health_text_wrapper) {
+                                        while (isActive)
+                                        {
+                                            if (tox_gc_health_text != tox_group_health_text_wrapper)
+                                            {
                                                 tox_gc_health_text = tox_group_health_text_wrapper
                                             }
                                             delay(200) // Non-blocking delay
@@ -599,7 +603,6 @@ fun App()
                                                             .background(Color(tox_group_health_color_wrapper))
                                                     )
                                                 }
-
                                                 // 2. The invisible content: defines the natural height exactly like your original code
                                                 Row(
                                                     modifier = Modifier.fillMaxWidth(),
@@ -617,160 +620,164 @@ fun App()
                                             }
                                         }
                                     }
-
-
                                 }
-                                Row(verticalAlignment = Alignment.Bottom) {
-                                    Column {
-                                        SaveDataPath()
-                                        ToxIDTextField()
+                                if (uiMode != UiMode.NETPROFILER)
+                                {
+                                    Row(verticalAlignment = Alignment.Bottom) {
+                                        Column {
+                                            SaveDataPath()
+                                            ToxIDTextField()
+                                        }
+                                        ToxIDQRCode()
                                     }
-                                    ToxIDQRCode()
                                 }
                             }
-                            Spacer(modifier = Modifier.width(5.dp))
-                            val current_callstate2 by avstatestorecallstate.stateFlow.collectAsState()
-                            when (current_callstate2.call_state)
+
+                            if (uiMode != UiMode.NETPROFILER)
                             {
-                                AVState.CALL_STATUS.CALL_STATUS_INCOMING ->
+                                Spacer(modifier = Modifier.width(5.dp))
+                                val current_callstate2 by avstatestorecallstate.stateFlow.collectAsState()
+                                when (current_callstate2.call_state)
                                 {
-                                    Row() {
-                                        Column(modifier = Modifier.fillMaxHeight(1.0f).width(400.dp)
-                                            .padding(10.dp)
-                                            .dashedBorder(color = Color.Red,
-                                                strokeWidth = 5.dp,
-                                                cornerRadiusDp = 25.dp)) {
-                                            Row(modifier = Modifier.padding(15.dp)) {
-                                                Spacer(Modifier.size(2.dp).weight(0.3f))
-                                                var fname: String? = ""
-                                                try
-                                                {
-                                                    fname = tox_friend_get_name(tox_friend_by_public_key(avstatestore.state.call_with_friend_pubkey_get()))
-                                                } catch (_: Exception)
-                                                {
-                                                }
-                                                var text_value = "incoming Call"
-                                                if ((fname != null) && (fname != ""))
-                                                {
-                                                    text_value = "incoming Call from: " + fname
-                                                }
-                                                Text(modifier = Modifier.align(Alignment.CenterVertically),
-                                                    fontSize = 20.sp,
-                                                    textAlign = TextAlign.Center,
-                                                    text = text_value)
-                                                Spacer(Modifier.size(2.dp).weight(0.3f))
-                                            }
-                                            Row(modifier = Modifier.padding(15.dp)) {
-                                                Spacer(Modifier.width(70.dp))
-                                                IconButton(
-                                                    icon = Icons.Filled.Check,
-                                                    iconTint = Color.Green,
-                                                    iconSize = 30.dp,
-                                                    contentDescription = "start",
-                                                    onClick = {
-                                                        val calling_friend_pk = avstatestore.state.call_with_friend_pubkey_get()
-                                                        if (calling_friend_pk != null)
-                                                        {
-                                                            accept_incoming_av_call(calling_friend_pk)
-                                                        }
+                                    AVState.CALL_STATUS.CALL_STATUS_INCOMING ->
+                                    {
+                                        Row() {
+                                            Column(modifier = Modifier.fillMaxHeight(1.0f).width(400.dp)
+                                                .padding(10.dp)
+                                                .dashedBorder(color = Color.Red,
+                                                    strokeWidth = 5.dp,
+                                                    cornerRadiusDp = 25.dp)) {
+                                                Row(modifier = Modifier.padding(15.dp)) {
+                                                    Spacer(Modifier.size(2.dp).weight(0.3f))
+                                                    var fname: String? = ""
+                                                    try
+                                                    {
+                                                        fname = tox_friend_get_name(tox_friend_by_public_key(avstatestore.state.call_with_friend_pubkey_get()))
+                                                    } catch (_: Exception)
+                                                    {
                                                     }
-                                                )
-                                                Spacer(Modifier.width(2.dp).weight(0.3f))
-                                                IconButton(
-                                                    icon = Icons.Filled.Cancel,
-                                                    iconTint = Color.Red,
-                                                    iconSize = 30.dp,
-                                                    contentDescription = "cancel",
-                                                    onClick = {
-                                                        if (avstatestore.state.call_with_friend_pubkey_get() != null)
-                                                        {
-                                                            decline_incoming_av_call()
-                                                        }
+                                                    var text_value = "incoming Call"
+                                                    if ((fname != null) && (fname != ""))
+                                                    {
+                                                        text_value = "incoming Call from: " + fname
                                                     }
-                                                )
-                                                Spacer(Modifier.width(70.dp))
-                                            }
-                                            Row()
-                                            {
-                                                Spacer(Modifier.size(10.dp))
-                                            }
-                                        }
-                                    }
-                                }
-                                AVState.CALL_STATUS.CALL_STATUS_NONE,
-                                AVState.CALL_STATUS.CALL_STATUS_CALLING,
-                                AVState.CALL_STATUS.CALL_STATUS_ENDING ->
-                                {
-                                    Row(modifier = Modifier.randomDebugBorder().padding(3.dp)) {
-                                        var video_in_box_width by remember { mutableStateOf(VIDEO_IN_BOX_WIDTH_SMALL) }
-                                        var video_in_box_height by remember { mutableStateOf(VIDEO_IN_BOX_HEIGHT_SMALL) }
-                                        val video_in_box_small by remember { mutableStateOf(true) }
-                                        val video_in_box_width_fraction by remember { mutableStateOf(VIDEO_IN_BOX_WIDTH_FRACTION_SMALL) }
-                                        var h265_encoder by remember { mutableStateOf(false) }
-                                        Column(modifier = Modifier.fillMaxHeight(1.0f)) {
-                                            if ((current_callstate2.call_state == AVState.CALL_STATUS.CALL_STATUS_NONE) &&
-                                                ((ngc_video_frame_last_incoming_ts + 2000) < System.currentTimeMillis()))
-                                            {
-                                                val painter = painterResource("Tv-test-pattern-146649_640.png")
-                                                Tooltip(text = "incoming Video") {
-                                                    Image(
-                                                        modifier = Modifier.fillMaxWidth(video_in_box_width_fraction)
-                                                            .padding(5.dp)
-                                                            .weight(80.0f)
-                                                            .clip(RoundedCornerShape(10.dp))
-                                                            .border(1.dp, color = Color.Gray, RoundedCornerShape(10.dp)),
-                                                        alpha = VIDEO_PLACEHOLDER_ALPHA,
-                                                        contentScale = ContentScale.Crop,
-                                                        painter = painter,
-                                                        contentDescription = "incoming Video"
-                                                    )
+                                                    Text(modifier = Modifier.align(Alignment.CenterVertically),
+                                                        fontSize = 20.sp,
+                                                        textAlign = TextAlign.Center,
+                                                        text = text_value)
+                                                    Spacer(Modifier.size(2.dp).weight(0.3f))
                                                 }
-                                            } else
-                                            {
-                                                if (avstatestorecallstate.state.video_in_popout)
-                                                {
+                                                Row(modifier = Modifier.padding(15.dp)) {
+                                                    Spacer(Modifier.width(70.dp))
                                                     IconButton(
-                                                        modifier = Modifier.fillMaxWidth(video_in_box_width_fraction)
-                                                            .padding(5.dp)
-                                                            .weight(80.0f)
-                                                            .clip(RoundedCornerShape(10.dp))
-                                                            .border(1.dp, color = Color.Gray, RoundedCornerShape(10.dp)),
                                                         icon = Icons.Filled.Check,
-                                                        iconTint = DELIVERY_CHECKMARK_COLOR,
-                                                        enabled = false,
-                                                        iconSize = 20.dp,
-                                                        contentDescription = "Video in popout Window",
-                                                        onClick = {}
-                                                    )
-                                                } else
-                                                {
-                                                    SwingPanel(
-                                                        background = VIDEO_BOX_BG_COLOR,
-                                                        modifier = Modifier.fillMaxWidth(video_in_box_width_fraction)
-                                                            .padding(5.dp)
-                                                            .weight(80.0f)
-                                                            .combinedClickable(onClick = {
-                                                                if (video_in_box_small)
-                                                                {
-                                                                    video_in_box_width = VIDEO_IN_BOX_WIDTH_BIG
-                                                                    video_in_box_height = VIDEO_IN_BOX_HEIGHT_BIG
-                                                                } else
-                                                                {
-                                                                    video_in_box_width = VIDEO_IN_BOX_WIDTH_SMALL
-                                                                    video_in_box_height = VIDEO_IN_BOX_HEIGHT_SMALL
-                                                                }
-                                                                video_in_box_small != video_in_box_small
-                                                            }),
-                                                        factory = {
-                                                            JPanel(SingleComponentAspectRatioKeeperLayout(), DOUBLE_BUFFER_VIDEOIN).apply {
-                                                                add(JPictureBox.videoinbox)
+                                                        iconTint = Color.Green,
+                                                        iconSize = 30.dp,
+                                                        contentDescription = "start",
+                                                        onClick = {
+                                                            val calling_friend_pk = avstatestore.state.call_with_friend_pubkey_get()
+                                                            if (calling_friend_pk != null)
+                                                            {
+                                                                accept_incoming_av_call(calling_friend_pk)
                                                             }
                                                         }
                                                     )
+                                                    Spacer(Modifier.width(2.dp).weight(0.3f))
+                                                    IconButton(
+                                                        icon = Icons.Filled.Cancel,
+                                                        iconTint = Color.Red,
+                                                        iconSize = 30.dp,
+                                                        contentDescription = "cancel",
+                                                        onClick = {
+                                                            if (avstatestore.state.call_with_friend_pubkey_get() != null)
+                                                            {
+                                                                decline_incoming_av_call()
+                                                            }
+                                                        }
+                                                    )
+                                                    Spacer(Modifier.width(70.dp))
+                                                }
+                                                Row()
+                                                {
+                                                    Spacer(Modifier.size(10.dp))
                                                 }
                                             }
-                                            val current_vplayfps_state by avstatestorevplayfpsstate.stateFlow.collectAsState()
-                                            /*
+                                        }
+                                    }
+                                    AVState.CALL_STATUS.CALL_STATUS_NONE,
+                                    AVState.CALL_STATUS.CALL_STATUS_CALLING,
+                                    AVState.CALL_STATUS.CALL_STATUS_ENDING ->
+                                    {
+                                        Row(modifier = Modifier.randomDebugBorder().padding(3.dp)) {
+                                            var video_in_box_width by remember { mutableStateOf(VIDEO_IN_BOX_WIDTH_SMALL) }
+                                            var video_in_box_height by remember { mutableStateOf(VIDEO_IN_BOX_HEIGHT_SMALL) }
+                                            val video_in_box_small by remember { mutableStateOf(true) }
+                                            val video_in_box_width_fraction by remember { mutableStateOf(VIDEO_IN_BOX_WIDTH_FRACTION_SMALL) }
+                                            var h265_encoder by remember { mutableStateOf(false) }
+                                            Column(modifier = Modifier.fillMaxHeight(1.0f)) {
+                                                if ((current_callstate2.call_state == AVState.CALL_STATUS.CALL_STATUS_NONE) &&
+                                                    ((ngc_video_frame_last_incoming_ts + 2000) < System.currentTimeMillis()))
+                                                {
+                                                    val painter = painterResource("Tv-test-pattern-146649_640.png")
+                                                    Tooltip(text = "incoming Video") {
+                                                        Image(
+                                                            modifier = Modifier.fillMaxWidth(video_in_box_width_fraction)
+                                                                .padding(5.dp)
+                                                                .weight(80.0f)
+                                                                .clip(RoundedCornerShape(10.dp))
+                                                                .border(1.dp, color = Color.Gray, RoundedCornerShape(10.dp)),
+                                                            alpha = VIDEO_PLACEHOLDER_ALPHA,
+                                                            contentScale = ContentScale.Crop,
+                                                            painter = painter,
+                                                            contentDescription = "incoming Video"
+                                                        )
+                                                    }
+                                                } else
+                                                {
+                                                    if (avstatestorecallstate.state.video_in_popout)
+                                                    {
+                                                        IconButton(
+                                                            modifier = Modifier.fillMaxWidth(video_in_box_width_fraction)
+                                                                .padding(5.dp)
+                                                                .weight(80.0f)
+                                                                .clip(RoundedCornerShape(10.dp))
+                                                                .border(1.dp, color = Color.Gray, RoundedCornerShape(10.dp)),
+                                                            icon = Icons.Filled.Check,
+                                                            iconTint = DELIVERY_CHECKMARK_COLOR,
+                                                            enabled = false,
+                                                            iconSize = 20.dp,
+                                                            contentDescription = "Video in popout Window",
+                                                            onClick = {}
+                                                        )
+                                                    } else
+                                                    {
+                                                        SwingPanel(
+                                                            background = VIDEO_BOX_BG_COLOR,
+                                                            modifier = Modifier.fillMaxWidth(video_in_box_width_fraction)
+                                                                .padding(5.dp)
+                                                                .weight(80.0f)
+                                                                .combinedClickable(onClick = {
+                                                                    if (video_in_box_small)
+                                                                    {
+                                                                        video_in_box_width = VIDEO_IN_BOX_WIDTH_BIG
+                                                                        video_in_box_height = VIDEO_IN_BOX_HEIGHT_BIG
+                                                                    } else
+                                                                    {
+                                                                        video_in_box_width = VIDEO_IN_BOX_WIDTH_SMALL
+                                                                        video_in_box_height = VIDEO_IN_BOX_HEIGHT_SMALL
+                                                                    }
+                                                                    video_in_box_small != video_in_box_small
+                                                                }),
+                                                            factory = {
+                                                                JPanel(SingleComponentAspectRatioKeeperLayout(), DOUBLE_BUFFER_VIDEOIN).apply {
+                                                                    add(JPictureBox.videoinbox)
+                                                                }
+                                                            }
+                                                        )
+                                                    }
+                                                }
+                                                val current_vplayfps_state by avstatestorevplayfpsstate.stateFlow.collectAsState()
+                                                /*
                                     // !! IMPORTANT !!
                                     // because for some reason the whole UI and all chat messages will repaint when this
                                     // element changes. i do not know why :-(
@@ -786,25 +793,25 @@ fun App()
                                         modifier = Modifier.height(VIDEO_STATS_TEXT_HEIGHT),
                                         maxLines = 1)
                                     */
-                                            // !! IMPORTANT !!
-                                            // because for some reason the whole UI and all chat messages will repaint when this
-                                            // element changes. i do not know why :-(
-                                            Text(" " + current_vplayfps_state.incomingResolution,
-                                                fontSize = 11.sp,
-                                                modifier = Modifier.height(VIDEO_STATS_TEXT_HEIGHT),
-                                                maxLines = 1)
-                                        }
-                                        Row() {
-                                            val aux_icons_start_padding = 5.dp
-                                            val aux_icons_end_padding = 5.dp
-                                            val aux_icons_top_padding = 3.dp
-                                            val aux_icons_size = 18.dp
-                                            Column {
-                                                Tooltip(text = "toggle large incoming video size") {
-                                                    Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
-                                                        onClick = {
-                                                            avstatestorecallstate.video_in_popout_update(!avstatestorecallstate.state.video_in_popout)
-                                                            /*
+                                                // !! IMPORTANT !!
+                                                // because for some reason the whole UI and all chat messages will repaint when this
+                                                // element changes. i do not know why :-(
+                                                Text(" " + current_vplayfps_state.incomingResolution,
+                                                    fontSize = 11.sp,
+                                                    modifier = Modifier.height(VIDEO_STATS_TEXT_HEIGHT),
+                                                    maxLines = 1)
+                                            }
+                                            Row() {
+                                                val aux_icons_start_padding = 5.dp
+                                                val aux_icons_end_padding = 5.dp
+                                                val aux_icons_top_padding = 3.dp
+                                                val aux_icons_size = 18.dp
+                                                Column {
+                                                    Tooltip(text = "toggle large incoming video size") {
+                                                        Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
+                                                            onClick = {
+                                                                avstatestorecallstate.video_in_popout_update(!avstatestorecallstate.state.video_in_popout)
+                                                                /*
                                                     if (video_in_box_small)
                                                     {
                                                         video_in_box_width = VIDEO_IN_BOX_WIDTH_BIG
@@ -821,191 +828,191 @@ fun App()
                                                     video_in_box_small = video_in_box_small.not()
                                                     Log.i(TAG, "update3: " + video_in_box_small)
                                                     */
-                                                        }), imageVector = Icons.Default.Fullscreen,
-                                                        contentDescription = "toggle large incoming video size"
-                                                    )
-                                                }
-                                                var audio_filter_current_value by remember { mutableStateOf(PREF__audio_input_filter) }
-                                                Tooltip(text = "enable Noise Suppresion on audio capture") {
-                                                    Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
-                                                        onClick = {
-                                                            if (PREF__audio_input_filter == 0)
-                                                            {
-                                                                PREF__audio_input_filter = 1
-                                                            } else
-                                                            {
-                                                                PREF__audio_input_filter = 0
-                                                            }
-                                                            audio_filter_current_value = PREF__audio_input_filter
-                                                            AVActivity.ffmpegav_apply_audio_filter(PREF__audio_input_filter)
-                                                        }),
-                                                        imageVector = Icons.Default.NoiseAware,
-                                                        contentDescription = "enable Noise Suppresion on audio capture",
-                                                        tint = if (audio_filter_current_value == 1) Color.Red else Color.DarkGray)
-                                                }
-                                                var video_force_mjpeg_value by remember { mutableStateOf(PREF__v4l2_capture_force_mjpeg) }
-                                                Tooltip(text = "force MJPEG on video capture") {
-                                                    Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
-                                                        onClick = {
-                                                            if (PREF__v4l2_capture_force_mjpeg == 0)
-                                                            {
-                                                                PREF__v4l2_capture_force_mjpeg = 1
-                                                            } else
-                                                            {
-                                                                PREF__v4l2_capture_force_mjpeg = 0
-                                                            }
-                                                            video_force_mjpeg_value = PREF__v4l2_capture_force_mjpeg
-                                                        }),
-                                                        imageVector = Icons.Default.RawOff,
-                                                        contentDescription = "force MJPEG on video capture",
-                                                        tint = if (video_force_mjpeg_value == 1) Color.Red else Color.DarkGray)
-                                                }
-                                                var do_not_sync_av_value by remember { mutableStateOf(PREF__do_not_sync_av) }
-                                                Tooltip(text = "force AV sync OFF") {
-                                                    Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
-                                                        onClick = {
-                                                            if (PREF__do_not_sync_av == 0)
-                                                            {
-                                                                PREF__do_not_sync_av = 1
-                                                            } else
-                                                            {
-                                                                PREF__do_not_sync_av = 0
-                                                            }
-                                                            do_not_sync_av_value = PREF__do_not_sync_av
-                                                            MainActivity.tox_set_do_not_sync_av(PREF__do_not_sync_av)
-                                                            println("tox_set_do_not_sync_av:2: " + PREF__do_not_sync_av)
-                                                        }),
-                                                        imageVector = Icons.Default.LinkOff,
-                                                        contentDescription = "force AV sync OFF",
-                                                        tint = if (do_not_sync_av_value == 1) Color.Red else Color.DarkGray)
-                                                }
-                                                var video_bitrate_mode_value by remember { mutableStateOf(PREF__video_bitrate_mode) }
-                                                Tooltip(text = "toggle video capture quality") {
-                                                    Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
-                                                        onClick = {
-                                                            if (PREF__video_bitrate_mode == 0)
-                                                            {
-                                                                PREF__video_bitrate_mode = 1
-                                                            } else if (PREF__video_bitrate_mode == 1)
-                                                            {
-                                                                PREF__video_bitrate_mode = 2
-                                                            } else if (PREF__video_bitrate_mode == 2)
-                                                            {
-                                                                PREF__video_bitrate_mode = 3
-                                                            } else // PREF__video_bitrate_mode == 3
-                                                            {
-                                                                PREF__video_bitrate_mode = 0
-                                                            }
-                                                            video_bitrate_mode_value = PREF__video_bitrate_mode
-
-                                                            try
-                                                            {
-                                                                if (!savepathstore.isEnabled())
-                                                                {
-                                                                    set_toxav_video_sending_quality(PREF__video_bitrate_mode)
-                                                                }
-                                                            } catch (_: java.lang.Exception)
-                                                            {
-                                                            }
-                                                        }),
-                                                        imageVector = Icons.Default.HighQuality,
-                                                        contentDescription = "toggle video capture quality",
-                                                        tint =
-                                                        if (video_bitrate_mode_value == 0) Color.DarkGray
-                                                        else if (video_bitrate_mode_value == 1) Color.Green
-                                                        else if (video_bitrate_mode_value == 2) Color.Red
-                                                        else Color(0xFFF900FF))
-                                                }
-                                                val current_callstate3 by avstatestorecallstate.stateFlow.collectAsState()
-                                                if (current_callstate3.call_state == AVState.CALL_STATUS.CALL_STATUS_CALLING)
-                                                {
-                                                    Icon(modifier = Modifier.size(36.dp)
-                                                        .align(Alignment.CenterHorizontally)
-                                                        .combinedClickable(
+                                                            }), imageVector = Icons.Default.Fullscreen,
+                                                            contentDescription = "toggle large incoming video size"
+                                                        )
+                                                    }
+                                                    var audio_filter_current_value by remember { mutableStateOf(PREF__audio_input_filter) }
+                                                    Tooltip(text = "enable Noise Suppresion on audio capture") {
+                                                        Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
                                                             onClick = {
-                                                                val friendnum = tox_friend_by_public_key(avstatestore.state.call_with_friend_pubkey_get())
-                                                                Log.i(TAG, "ffmpeg_devices_stop:002")
-                                                                avstatestore.state.ffmpeg_devices_stop()
-                                                                MainActivity.toxav_call_control(friendnum, ToxVars.TOXAV_CALL_CONTROL.TOXAV_CALL_CONTROL_CANCEL.value)
-                                                                MainActivity.on_call_ended_actions()
+                                                                if (PREF__audio_input_filter == 0)
+                                                                {
+                                                                    PREF__audio_input_filter = 1
+                                                                } else
+                                                                {
+                                                                    PREF__audio_input_filter = 0
+                                                                }
+                                                                audio_filter_current_value = PREF__audio_input_filter
+                                                                AVActivity.ffmpegav_apply_audio_filter(PREF__audio_input_filter)
                                                             }),
-                                                        imageVector = Icons.Filled.Cancel,
-                                                        tint = Color.Red,
-                                                        contentDescription = "stop Call")
+                                                            imageVector = Icons.Default.NoiseAware,
+                                                            contentDescription = "enable Noise Suppresion on audio capture",
+                                                            tint = if (audio_filter_current_value == 1) Color.Red else Color.DarkGray)
+                                                    }
+                                                    var video_force_mjpeg_value by remember { mutableStateOf(PREF__v4l2_capture_force_mjpeg) }
+                                                    Tooltip(text = "force MJPEG on video capture") {
+                                                        Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
+                                                            onClick = {
+                                                                if (PREF__v4l2_capture_force_mjpeg == 0)
+                                                                {
+                                                                    PREF__v4l2_capture_force_mjpeg = 1
+                                                                } else
+                                                                {
+                                                                    PREF__v4l2_capture_force_mjpeg = 0
+                                                                }
+                                                                video_force_mjpeg_value = PREF__v4l2_capture_force_mjpeg
+                                                            }),
+                                                            imageVector = Icons.Default.RawOff,
+                                                            contentDescription = "force MJPEG on video capture",
+                                                            tint = if (video_force_mjpeg_value == 1) Color.Red else Color.DarkGray)
+                                                    }
+                                                    var do_not_sync_av_value by remember { mutableStateOf(PREF__do_not_sync_av) }
+                                                    Tooltip(text = "force AV sync OFF") {
+                                                        Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
+                                                            onClick = {
+                                                                if (PREF__do_not_sync_av == 0)
+                                                                {
+                                                                    PREF__do_not_sync_av = 1
+                                                                } else
+                                                                {
+                                                                    PREF__do_not_sync_av = 0
+                                                                }
+                                                                do_not_sync_av_value = PREF__do_not_sync_av
+                                                                MainActivity.tox_set_do_not_sync_av(PREF__do_not_sync_av)
+                                                                println("tox_set_do_not_sync_av:2: " + PREF__do_not_sync_av)
+                                                            }),
+                                                            imageVector = Icons.Default.LinkOff,
+                                                            contentDescription = "force AV sync OFF",
+                                                            tint = if (do_not_sync_av_value == 1) Color.Red else Color.DarkGray)
+                                                    }
+                                                    var video_bitrate_mode_value by remember { mutableStateOf(PREF__video_bitrate_mode) }
+                                                    Tooltip(text = "toggle video capture quality") {
+                                                        Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
+                                                            onClick = {
+                                                                if (PREF__video_bitrate_mode == 0)
+                                                                {
+                                                                    PREF__video_bitrate_mode = 1
+                                                                } else if (PREF__video_bitrate_mode == 1)
+                                                                {
+                                                                    PREF__video_bitrate_mode = 2
+                                                                } else if (PREF__video_bitrate_mode == 2)
+                                                                {
+                                                                    PREF__video_bitrate_mode = 3
+                                                                } else // PREF__video_bitrate_mode == 3
+                                                                {
+                                                                    PREF__video_bitrate_mode = 0
+                                                                }
+                                                                video_bitrate_mode_value = PREF__video_bitrate_mode
+
+                                                                try
+                                                                {
+                                                                    if (!savepathstore.isEnabled())
+                                                                    {
+                                                                        set_toxav_video_sending_quality(PREF__video_bitrate_mode)
+                                                                    }
+                                                                } catch (_: java.lang.Exception)
+                                                                {
+                                                                }
+                                                            }),
+                                                            imageVector = Icons.Default.HighQuality,
+                                                            contentDescription = "toggle video capture quality",
+                                                            tint =
+                                                                if (video_bitrate_mode_value == 0) Color.DarkGray
+                                                                else if (video_bitrate_mode_value == 1) Color.Green
+                                                                else if (video_bitrate_mode_value == 2) Color.Red
+                                                                else Color(0xFFF900FF))
+                                                    }
+                                                    val current_callstate3 by avstatestorecallstate.stateFlow.collectAsState()
+                                                    if (current_callstate3.call_state == AVState.CALL_STATUS.CALL_STATUS_CALLING)
+                                                    {
+                                                        Icon(modifier = Modifier.size(36.dp)
+                                                            .align(Alignment.CenterHorizontally)
+                                                            .combinedClickable(
+                                                                onClick = {
+                                                                    val friendnum = tox_friend_by_public_key(avstatestore.state.call_with_friend_pubkey_get())
+                                                                    Log.i(TAG, "ffmpeg_devices_stop:002")
+                                                                    avstatestore.state.ffmpeg_devices_stop()
+                                                                    MainActivity.toxav_call_control(friendnum, ToxVars.TOXAV_CALL_CONTROL.TOXAV_CALL_CONTROL_CANCEL.value)
+                                                                    MainActivity.on_call_ended_actions()
+                                                                }),
+                                                            imageVector = Icons.Filled.Cancel,
+                                                            tint = Color.Red,
+                                                            contentDescription = "stop Call")
+                                                    }
+                                                }
+                                                Column {
+                                                    Tooltip(text = "toggle H265 video encoder") {
+                                                        Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
+                                                            onClick = {
+                                                                h265_encoder = h265_encoder.not()
+                                                                if (h265_encoder)
+                                                                {
+                                                                    toxav_option_set(
+                                                                        tox_friend_by_public_key(avstatestore.state.call_with_friend_pubkey_get()),
+                                                                        ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_CODEC_USED.value.toLong(),
+                                                                        ToxVars.TOXAV_ENCODER_CODEC_USED_VALUE.TOXAV_ENCODER_CODEC_USED_H265.value.toLong())
+                                                                } else
+                                                                {
+                                                                    toxav_option_set(
+                                                                        tox_friend_by_public_key(avstatestore.state.call_with_friend_pubkey_get()),
+                                                                        ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_CODEC_USED.value.toLong(),
+                                                                        ToxVars.TOXAV_ENCODER_CODEC_USED_VALUE.TOXAV_ENCODER_CODEC_USED_VP8.value.toLong())
+                                                                }
+                                                            }), imageVector = Icons.Default.VideoLabel,
+                                                            tint = if (h265_encoder) Color.Red else Color.DarkGray,
+                                                            contentDescription = "toggle H265 video encoder"
+                                                        )
+                                                    }
                                                 }
                                             }
                                             Column {
-                                                Tooltip(text = "toggle H265 video encoder") {
-                                                    Icon(modifier = Modifier.padding(start = aux_icons_start_padding, end = aux_icons_end_padding, top = aux_icons_top_padding).size(aux_icons_size).combinedClickable(
-                                                        onClick = {
-                                                            h265_encoder = h265_encoder.not()
-                                                            if (h265_encoder)
-                                                            {
-                                                                toxav_option_set(
-                                                                    tox_friend_by_public_key(avstatestore.state.call_with_friend_pubkey_get()),
-                                                                    ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_CODEC_USED.value.toLong(),
-                                                                    ToxVars.TOXAV_ENCODER_CODEC_USED_VALUE.TOXAV_ENCODER_CODEC_USED_H265.value.toLong())
-                                                            } else
-                                                            {
-                                                                toxav_option_set(
-                                                                    tox_friend_by_public_key(avstatestore.state.call_with_friend_pubkey_get()),
-                                                                    ToxVars.TOXAV_OPTIONS_OPTION.TOXAV_ENCODER_CODEC_USED.value.toLong(),
-                                                                    ToxVars.TOXAV_ENCODER_CODEC_USED_VALUE.TOXAV_ENCODER_CODEC_USED_VP8.value.toLong())
-                                                            }
-                                                        }), imageVector = Icons.Default.VideoLabel,
-                                                        tint = if (h265_encoder) Color.Red else Color.DarkGray,
-                                                        contentDescription = "toggle H265 video encoder"
-                                                    )
-                                                }
-                                            }
-                                        }
-                                        Column {
-                                            Spacer(modifier = Modifier.height(5.dp))
-                                            var video_out_box_width by remember { mutableStateOf(VIDEO_OUT_BOX_WIDTH_SMALL) }
-                                            var video_out_box_height by remember { mutableStateOf(VIDEO_OUT_BOX_HEIGHT_SMALL) }
-                                            var video_out_box_small by remember { mutableStateOf(true) }
-                                            if (current_callstate2.call_state == AVState.CALL_STATUS.CALL_STATUS_NONE)
-                                            {
-                                                val painter = painterResource("Tv-test-pattern-146649_640.png")
-                                                Tooltip(text = "own Video") {
-                                                    Image(
+                                                Spacer(modifier = Modifier.height(5.dp))
+                                                var video_out_box_width by remember { mutableStateOf(VIDEO_OUT_BOX_WIDTH_SMALL) }
+                                                var video_out_box_height by remember { mutableStateOf(VIDEO_OUT_BOX_HEIGHT_SMALL) }
+                                                var video_out_box_small by remember { mutableStateOf(true) }
+                                                if (current_callstate2.call_state == AVState.CALL_STATUS.CALL_STATUS_NONE)
+                                                {
+                                                    val painter = painterResource("Tv-test-pattern-146649_640.png")
+                                                    Tooltip(text = "own Video") {
+                                                        Image(
+                                                            modifier = Modifier.size(video_out_box_width, video_out_box_height)
+                                                                .clip(RoundedCornerShape(10.dp))
+                                                                .border(1.dp, color = Color.Gray, RoundedCornerShape(10.dp)),
+                                                            alpha = VIDEO_PLACEHOLDER_ALPHA,
+                                                            contentScale = ContentScale.Crop,
+                                                            painter = painter,
+                                                            contentDescription = "own Video"
+                                                        )
+                                                    }
+                                                } else
+                                                {
+                                                    SwingPanel(
+                                                        background = VIDEO_BOX_BG_COLOR,
                                                         modifier = Modifier.size(video_out_box_width, video_out_box_height)
-                                                            .clip(RoundedCornerShape(10.dp))
-                                                            .border(1.dp, color = Color.Gray, RoundedCornerShape(10.dp)),
-                                                        alpha = VIDEO_PLACEHOLDER_ALPHA,
-                                                        contentScale = ContentScale.Crop,
-                                                        painter = painter,
-                                                        contentDescription = "own Video"
+                                                            .combinedClickable(onClick = {
+                                                                if (video_out_box_small)
+                                                                {
+                                                                    video_out_box_width = VIDEO_OUT_BOX_WIDTH_BIG
+                                                                    video_out_box_height = VIDEO_OUT_BOX_HEIGHT_BIG
+                                                                } else
+                                                                {
+                                                                    video_out_box_width = VIDEO_OUT_BOX_WIDTH_SMALL
+                                                                    video_out_box_height = VIDEO_OUT_BOX_HEIGHT_SMALL
+                                                                }
+                                                                video_out_box_small = !video_out_box_small
+                                                                Log.i(TAG, "update1: " + video_out_box_small)
+                                                            }),
+                                                        factory = {
+                                                            JPanel(SingleComponentAspectRatioKeeperLayout(), DOUBLE_BUFFER_VIDEOOUT).apply {
+                                                                add(JPictureBoxOut.videooutbox)
+                                                            }
+                                                        },
+                                                        update = { Log.i(TAG, "update2: " + video_out_box_small) }
                                                     )
                                                 }
-                                            } else
-                                            {
-                                                SwingPanel(
-                                                    background = VIDEO_BOX_BG_COLOR,
-                                                    modifier = Modifier.size(video_out_box_width, video_out_box_height)
-                                                        .combinedClickable(onClick = {
-                                                            if (video_out_box_small)
-                                                            {
-                                                                video_out_box_width = VIDEO_OUT_BOX_WIDTH_BIG
-                                                                video_out_box_height = VIDEO_OUT_BOX_HEIGHT_BIG
-                                                            } else
-                                                            {
-                                                                video_out_box_width = VIDEO_OUT_BOX_WIDTH_SMALL
-                                                                video_out_box_height = VIDEO_OUT_BOX_HEIGHT_SMALL
-                                                            }
-                                                            video_out_box_small = !video_out_box_small
-                                                            Log.i(TAG, "update1: " + video_out_box_small)
-                                                        }),
-                                                    factory = {
-                                                        JPanel(SingleComponentAspectRatioKeeperLayout(), DOUBLE_BUFFER_VIDEOOUT).apply {
-                                                            add(JPictureBoxOut.videooutbox)
-                                                        }
-                                                    },
-                                                    update = { Log.i(TAG, "update2: " + video_out_box_small) }
-                                                )
-                                            }
-                                            val current_vicfps_state by avstatestorevcapfpsstate.stateFlow.collectAsState()
-                                            /*
+                                                val current_vicfps_state by avstatestorevcapfpsstate.stateFlow.collectAsState()
+                                                /*
                                     // !! IMPORTANT !!
                                     // because for some reason the whole UI and all chat messages will repaint when this
                                     // element changes. i do not know why :-(
@@ -1021,575 +1028,635 @@ fun App()
                                         modifier = Modifier.height(VIDEO_STATS_TEXT_HEIGHT),
                                         maxLines = 1)
                                     */
-                                            // !! IMPORTANT !!
-                                            // because for some reason the whole UI and all chat messages will repaint when this
-                                            // element changes. i do not know why :-(
-                                            Text("" + current_vicfps_state.sourceResolution,
-                                                fontSize = 11.sp,
-                                                modifier = Modifier.height(VIDEO_STATS_TEXT_HEIGHT),
-                                                maxLines = 1)
-                                            // !! IMPORTANT !!
-                                            // because for some reason the whole UI and all chat messages will repaint when this
-                                            // element changes. i do not know why :-(
-                                            Text("" + current_vicfps_state.sourceFormat,
-                                                fontSize = 11.sp,
-                                                modifier = Modifier.height(VIDEO_STATS_TEXT_HEIGHT),
-                                                maxLines = 1)
+                                                // !! IMPORTANT !!
+                                                // because for some reason the whole UI and all chat messages will repaint when this
+                                                // element changes. i do not know why :-(
+                                                Text("" + current_vicfps_state.sourceResolution,
+                                                    fontSize = 11.sp,
+                                                    modifier = Modifier.height(VIDEO_STATS_TEXT_HEIGHT),
+                                                    maxLines = 1)
+                                                // !! IMPORTANT !!
+                                                // because for some reason the whole UI and all chat messages will repaint when this
+                                                // element changes. i do not know why :-(
+                                                Text("" + current_vicfps_state.sourceFormat,
+                                                    fontSize = 11.sp,
+                                                    modifier = Modifier.height(VIDEO_STATS_TEXT_HEIGHT),
+                                                    maxLines = 1)
+                                            }
                                         }
                                     }
                                 }
-                            }
 
-                            @Composable
-                            fun CustomVerticalScrollbar(
-                                scrollState: androidx.compose.foundation.ScrollState,
-                                modifier: Modifier = Modifier
-                            ) {
-                                if (scrollState.maxValue > 0) {
-                                    androidx.compose.foundation.layout.BoxWithConstraints(
-                                        modifier = modifier
-                                            .fillMaxHeight()
-                                            .width(6.dp)
-                                            .padding(vertical = 4.dp)
-                                    ) {
-                                        val totalContent = scrollState.maxValue + scrollState.viewportSize
-                                        if (totalContent > 0 && scrollState.viewportSize > 0) {
-                                            val density = androidx.compose.ui.platform.LocalDensity.current
-                                            val trackHeightPx = with(density) { maxHeight.toPx() }
-                                            val thumbHeightPx = (scrollState.viewportSize.toFloat() / totalContent) * trackHeightPx
-                                            val thumbOffsetPx = (scrollState.value.toFloat() / totalContent) * trackHeightPx
+                                @Composable
+                                fun CustomVerticalScrollbar(
+                                    scrollState: androidx.compose.foundation.ScrollState,
+                                    modifier: Modifier = Modifier
+                                )
+                                {
+                                    if (scrollState.maxValue > 0)
+                                    {
+                                        androidx.compose.foundation.layout.BoxWithConstraints(
+                                            modifier = modifier
+                                                .fillMaxHeight()
+                                                .width(6.dp)
+                                                .padding(vertical = 4.dp)
+                                        ) {
+                                            val totalContent = scrollState.maxValue + scrollState.viewportSize
+                                            if (totalContent > 0 && scrollState.viewportSize > 0)
+                                            {
+                                                val density = androidx.compose.ui.platform.LocalDensity.current
+                                                val trackHeightPx = with(density) { maxHeight.toPx() }
+                                                val thumbHeightPx = (scrollState.viewportSize.toFloat() / totalContent) * trackHeightPx
+                                                val thumbOffsetPx = (scrollState.value.toFloat() / totalContent) * trackHeightPx
+                                                val thumbHeight = thumbHeightPx / density.density
+                                                val thumbOffset = thumbOffsetPx / density.density
+                                                val draggableDistance = trackHeightPx - thumbHeightPx
+                                                val scrollRatio = if (draggableDistance > 0) scrollState.maxValue.toFloat() / draggableDistance else 0f
 
-                                            val thumbHeight = thumbHeightPx / density.density
-                                            val thumbOffset = thumbOffsetPx / density.density
-
-                                            val draggableDistance = trackHeightPx - thumbHeightPx
-                                            val scrollRatio = if (draggableDistance > 0) scrollState.maxValue.toFloat() / draggableDistance else 0f
-
-                                            androidx.compose.foundation.layout.Box(
-                                                modifier = Modifier
-                                                    .offset(y = thumbOffset.dp)
-                                                    .height(thumbHeight.dp)
-                                                    .fillMaxWidth()
-                                                    .clip(RoundedCornerShape(3.dp))
-                                                    .background(androidx.compose.material3.MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
-                                                    .pointerInput(scrollState.maxValue, trackHeightPx, scrollRatio) {
-                                                        detectDragGestures { change, dragAmount ->
-                                                            change.consume()
-                                                            if (scrollRatio > 0f) {
-                                                                val scrollDelta = dragAmount.y * scrollRatio
-                                                                scrollState.dispatchRawDelta(scrollDelta)
+                                                androidx.compose.foundation.layout.Box(
+                                                    modifier = Modifier
+                                                        .offset(y = thumbOffset.dp)
+                                                        .height(thumbHeight.dp)
+                                                        .fillMaxWidth()
+                                                        .clip(RoundedCornerShape(3.dp))
+                                                        .background(androidx.compose.material3.MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                                                        .pointerInput(scrollState.maxValue, trackHeightPx, scrollRatio) {
+                                                            detectDragGestures { change, dragAmount ->
+                                                                change.consume()
+                                                                if (scrollRatio > 0f)
+                                                                {
+                                                                    val scrollDelta = dragAmount.y * scrollRatio
+                                                                    scrollState.dispatchRawDelta(scrollDelta)
+                                                                }
                                                             }
                                                         }
-                                                    }
-                                            )
+                                                )
+                                            }
                                         }
                                     }
                                 }
-                            }
-
-
-                            // =========== audio and video selectors ===========
-                            // =========== audio and video selectors ===========
-                            // =========== audio and video selectors ===========
-                            var expanded_a by remember { mutableStateOf(false) }
-                            var expanded_v by remember { mutableStateOf(false) }
-                            var expanded_as by remember { mutableStateOf(false) }
-                            var expanded_vs by remember { mutableStateOf(false) }
-                            var resolution_expanded by remember { mutableStateOf(false) }
-                            var capture_fps_expanded by remember { mutableStateOf(false) }
-
-                            val audio_in_devices by remember { mutableStateOf(ArrayList<String>()) }
-                            val audio_in_sources by remember { mutableStateOf(ArrayList<AVActivity.ffmpegav_descrid>()) }
-                            val video_in_devices by remember { mutableStateOf(ArrayList<String>()) }
-                            val video_in_sources by remember { mutableStateOf(ArrayList<AVActivity.ffmpegav_descrid>()) }
-
-                            val fps_int = avstatestore.state.video_capture_fps_get()
-                            var fps_info_str = "" + fps_int
-                            if (fps_int == -1) { fps_info_str = "Default" }
-
-                            fun sourceDisplayName(sources: ArrayList<AVActivity.ffmpegav_descrid>, selectedId: String?): String {
-                                if (selectedId == null || selectedId.isEmpty()) return ""
-                                val source = sources.firstOrNull { it != null && it.id == selectedId }
-                                if (source == null) return selectedId
-                                val id = source.id ?: selectedId
-                                val desc = source.description
-                                return if (desc == null || desc.isEmpty()) id else desc + " (" + id + ")"
-                            }
-
-                            val audio_source_display = sourceDisplayName(audio_in_sources, avstatestore.state.audio_in_source_get())
-                            val video_source_display = sourceDisplayName(video_in_sources, avstatestore.state.video_in_source_get())
-
-                            @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
-                            @Composable
-                            fun CompactSelectorRow(
-                                icon: androidx.compose.ui.graphics.vector.ImageVector,
-                                title: String,
-                                value: String?,
-                                onClick: () -> Unit
-                            ) {
-                                Tooltip(text = (value ?: "").ifEmpty { "None" })
+                                // =========== audio and video selectors ===========
+                                // =========== audio and video selectors ===========
+                                // =========== audio and video selectors ===========
+                                var expanded_a by remember { mutableStateOf(false) }
+                                var expanded_v by remember { mutableStateOf(false) }
+                                var expanded_as by remember { mutableStateOf(false) }
+                                var expanded_vs by remember { mutableStateOf(false) }
+                                var resolution_expanded by remember { mutableStateOf(false) }
+                                var capture_fps_expanded by remember { mutableStateOf(false) }
+                                val audio_in_devices by remember { mutableStateOf(ArrayList<String>()) }
+                                val audio_in_sources by remember { mutableStateOf(ArrayList<AVActivity.ffmpegav_descrid>()) }
+                                val video_in_devices by remember { mutableStateOf(ArrayList<String>()) }
+                                val video_in_sources by remember { mutableStateOf(ArrayList<AVActivity.ffmpegav_descrid>()) }
+                                val fps_int = avstatestore.state.video_capture_fps_get()
+                                var fps_info_str = "" + fps_int
+                                if (fps_int == -1)
                                 {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(36.dp)
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .background(androidx.compose.material3.MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-                                            .padding(start = 10.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            imageVector = icon,
-                                            contentDescription = null,
-                                            tint = androidx.compose.material3.MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Column(
-                                            modifier = Modifier.weight(1f),
-                                            verticalArrangement = Arrangement.Center
-                                        ) {
-                                            Text(
-                                                text = title,
-                                                style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
-                                                color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
-                                                maxLines = 1,
-                                                lineHeight = 12.sp,
-                                                fontSize = 10.sp
-                                            )
-                                            Text(
-                                                text = (value ?: "").ifEmpty { "None" },
-                                                style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                                                color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface,
-                                                fontWeight = FontWeight.Bold,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis,
-                                                lineHeight = 14.sp,
-                                                fontSize = 12.sp
-                                            )
-                                        }
-                                        androidx.compose.material3.IconButton(
-                                            onClick = onClick,
-                                            modifier = Modifier.size(36.dp)
+                                    fps_info_str = "Default"
+                                }
+
+                                fun sourceDisplayName(sources: ArrayList<AVActivity.ffmpegav_descrid>, selectedId: String?): String
+                                {
+                                    if (selectedId == null || selectedId.isEmpty()) return ""
+                                    val source = sources.firstOrNull { it != null && it.id == selectedId }
+                                    if (source == null) return selectedId
+                                    val id = source.id ?: selectedId
+                                    val desc = source.description
+                                    return if (desc == null || desc.isEmpty()) id else desc + " (" + id + ")"
+                                }
+
+                                val audio_source_display = sourceDisplayName(audio_in_sources, avstatestore.state.audio_in_source_get())
+                                val video_source_display = sourceDisplayName(video_in_sources, avstatestore.state.video_in_source_get())
+
+                                @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+                                @Composable
+                                fun CompactSelectorRow(
+                                    icon: androidx.compose.ui.graphics.vector.ImageVector,
+                                    title: String,
+                                    value: String?,
+                                    onClick: () -> Unit
+                                )
+                                {
+                                    Tooltip(text = (value ?: "").ifEmpty { "None" })
+                                    {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(36.dp)
+                                                .clip(RoundedCornerShape(8.dp))
+                                                .background(androidx.compose.material3.MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                                                .padding(start = 10.dp),
+                                            verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Icon(
-                                                imageVector = Icons.Filled.KeyboardArrowDown,
-                                                contentDescription = "Select",
+                                                imageVector = icon,
+                                                contentDescription = null,
                                                 tint = androidx.compose.material3.MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier.size(20.dp)
+                                                modifier = Modifier.size(16.dp)
                                             )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Column(
+                                                modifier = Modifier.weight(1f),
+                                                verticalArrangement = Arrangement.Center
+                                            ) {
+                                                Text(
+                                                    text = title,
+                                                    style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
+                                                    color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    maxLines = 1,
+                                                    lineHeight = 12.sp,
+                                                    fontSize = 10.sp
+                                                )
+                                                Text(
+                                                    text = (value ?: "").ifEmpty { "None" },
+                                                    style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                                                    color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface,
+                                                    fontWeight = FontWeight.Bold,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                    lineHeight = 14.sp,
+                                                    fontSize = 12.sp
+                                                )
+                                            }
+                                            androidx.compose.material3.IconButton(
+                                                onClick = onClick,
+                                                modifier = Modifier.size(36.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.KeyboardArrowDown,
+                                                    contentDescription = "Select",
+                                                    tint = androidx.compose.material3.MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                            }
                                         }
                                     }
                                 }
-                            }
 
-                            Column(modifier = Modifier.randomDebugBorder()) {
-                                // 2-Column Grid Layout
-                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-
-                                    // LEFT COLUMN
-                                    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-
-                                        // 1. Audio Device (Top Left)
-                                        CompactSelectorRow(icon = Icons.Filled.Mic, title = "Audio Device", value = avstatestore.state.audio_in_device_get()) {
-                                            avstatestore.state.ffmpeg_init_do()
-                                            val audio_in_devices_get = AVActivity.ffmpegav_get_audio_in_devices_wrapper()
-                                            println("ffmpeg audio in devices: " + audio_in_devices_get.size)
-                                            audio_in_devices.clear()
-                                            audio_in_devices.addAll(audio_in_devices_get)
-                                            expanded_a = true
-                                        }
-
-                                        // 3. Video Device (Middle Left)
-                                        CompactSelectorRow(icon = Icons.Filled.Videocam, title = "Video Device", value = avstatestore.state.video_in_device_get()) {
-                                            avstatestore.state.ffmpeg_init_do()
-                                            val video_in_devices_get = AVActivity.ffmpegav_get_video_in_devices()
-                                            println("ffmpeg video in devices: " + video_in_devices_get.size)
-                                            video_in_devices.clear()
-                                            video_in_devices.addAll(video_in_devices_get)
-                                            expanded_v = true
-                                        }
-
-                                        // 5. Resolution (Bottom Left)
-                                        CompactSelectorRow(icon = Icons.Filled.AspectRatio, title = "Resolution", value = avstatestore.state.video_in_resolution_get()) {
-                                            resolution_expanded = true
-                                        }
-                                    }
-
-                                    // RIGHT COLUMN
-                                    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-
-                                        // 2. Audio Source (Top Right)
-                                        CompactSelectorRow(icon = Icons.Filled.MusicNote, title = "Audio Source", value = audio_source_display) {
-                                            if ((avstatestore.state.audio_in_device_get() != null) && (avstatestore.state.audio_in_device_get() != "")) {
+                                Column(modifier = Modifier.randomDebugBorder()) {
+                                    // 2-Column Grid Layout
+                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        // LEFT COLUMN
+                                        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            // 1. Audio Device (Top Left)
+                                            CompactSelectorRow(icon = Icons.Filled.Mic, title = "Audio Device", value = avstatestore.state.audio_in_device_get()) {
                                                 avstatestore.state.ffmpeg_init_do()
-                                                var audio_in_sources_get: Array<AVActivity.ffmpegav_descrid> = emptyArray()
-                                                val tmp = AVActivity.ffmpegav_get_in_sources(avstatestore.state.audio_in_device_get(), 0)
-                                                if (tmp == null) {
-                                                    if (avstatestore.state.audio_in_device_get() == JAVA_AUDIO_IN_DEVICE_NAME) {
-                                                        val tmp0 = AVActivity.ffmpegav_descrid(); tmp0.id = "default"
-                                                        val tmp2 = ArrayList<AVActivity.ffmpegav_descrid>(); tmp2.add(tmp0)
+                                                val audio_in_devices_get = AVActivity.ffmpegav_get_audio_in_devices_wrapper()
+                                                println("ffmpeg audio in devices: " + audio_in_devices_get.size)
+                                                audio_in_devices.clear()
+                                                audio_in_devices.addAll(audio_in_devices_get)
+                                                expanded_a = true
+                                            }
+                                            // 3. Video Device (Middle Left)
+                                            CompactSelectorRow(icon = Icons.Filled.Videocam, title = "Video Device", value = avstatestore.state.video_in_device_get()) {
+                                                avstatestore.state.ffmpeg_init_do()
+                                                val video_in_devices_get = AVActivity.ffmpegav_get_video_in_devices()
+                                                println("ffmpeg video in devices: " + video_in_devices_get.size)
+                                                video_in_devices.clear()
+                                                video_in_devices.addAll(video_in_devices_get)
+                                                expanded_v = true
+                                            }
+                                            // 5. Resolution (Bottom Left)
+                                            CompactSelectorRow(icon = Icons.Filled.AspectRatio, title = "Resolution", value = avstatestore.state.video_in_resolution_get()) {
+                                                resolution_expanded = true
+                                            }
+                                        }
+                                        // RIGHT COLUMN
+                                        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            // 2. Audio Source (Top Right)
+                                            CompactSelectorRow(icon = Icons.Filled.MusicNote, title = "Audio Source", value = audio_source_display) {
+                                                if ((avstatestore.state.audio_in_device_get() != null) && (avstatestore.state.audio_in_device_get() != ""))
+                                                {
+                                                    avstatestore.state.ffmpeg_init_do()
+                                                    var audio_in_sources_get: Array<AVActivity.ffmpegav_descrid> = emptyArray()
+                                                    val tmp = AVActivity.ffmpegav_get_in_sources(avstatestore.state.audio_in_device_get(), 0)
+                                                    if (tmp == null)
+                                                    {
+                                                        if (avstatestore.state.audio_in_device_get() == JAVA_AUDIO_IN_DEVICE_NAME)
+                                                        {
+                                                            val tmp0 = AVActivity.ffmpegav_descrid(); tmp0.id = "default"
+                                                            val tmp2 = ArrayList<AVActivity.ffmpegav_descrid>(); tmp2.add(tmp0)
+                                                            audio_in_sources_get = tmp2.toTypedArray()
+                                                        } else
+                                                        {
+                                                            audio_in_sources_get = emptyArray()
+                                                        }
+                                                    } else if (avstatestore.state.audio_in_device_get() == JAVA_AUDIO_IN_DEVICE_NAME)
+                                                    {
+                                                        val tmp2 = ArrayList<AVActivity.ffmpegav_descrid>()
+                                                        tmp.iterator().forEach() {
+                                                            if ((it != null) && (it.id != null))
+                                                            {
+                                                                tmp2.add(it)
+                                                            }
+                                                        }
+                                                        val tmp0 = AVActivity.ffmpegav_descrid(); tmp0.id = "default"; tmp2.add(tmp0)
                                                         audio_in_sources_get = tmp2.toTypedArray()
-                                                    } else { audio_in_sources_get = emptyArray() }
-                                                } else if (avstatestore.state.audio_in_device_get() == JAVA_AUDIO_IN_DEVICE_NAME) {
-                                                    val tmp2 = ArrayList<AVActivity.ffmpegav_descrid>()
-                                                    tmp.iterator().forEach() { if ((it != null) && (it.id != null)) { tmp2.add(it) } }
-                                                    val tmp0 = AVActivity.ffmpegav_descrid(); tmp0.id = "default"; tmp2.add(tmp0)
-                                                    audio_in_sources_get = tmp2.toTypedArray()
-                                                } else {
-                                                    val tmp2 = ArrayList<AVActivity.ffmpegav_descrid>()
-                                                    tmp.iterator().forEach() { if ((it != null) && (it.id != null)) { tmp2.add(it) } }
-                                                    audio_in_sources_get = tmp2.toTypedArray()
-                                                }
-                                                audio_in_sources.clear()
-                                                if (audio_in_sources_get.isNotEmpty()) {
-                                                    println("ffmpeg audio in sources: " + audio_in_sources_get.size)
-                                                    audio_in_sources.addAll(audio_in_sources_get)
-                                                    expanded_as = true
-                                                }
-                                            }
-                                        }
-
-                                        // 4. Video Source (Middle Right)
-                                        CompactSelectorRow(icon = Icons.Filled.Camera, title = "Video Source", value = video_source_display) {
-                                            if ((avstatestore.state.video_in_device_get() != null) && (avstatestore.state.video_in_device_get() != "")) {
-                                                avstatestore.state.ffmpeg_init_do()
-                                                var video_in_sources_get: Array<AVActivity.ffmpegav_descrid> = emptyArray()
-                                                if (avstatestore.state.video_in_device_get() == "video4linux2,v4l2") {
-                                                    val tmp = AVActivity.ffmpegav_get_in_sources("v4l2", 1)
-                                                    if (tmp == null) { video_in_sources_get = emptyArray() }
-                                                    else {
+                                                    } else
+                                                    {
                                                         val tmp2 = ArrayList<AVActivity.ffmpegav_descrid>()
-                                                        tmp.iterator().forEach() { if ((it != null) && (it.id != null)) { tmp2.add(it) } }
-                                                        video_in_sources_get = tmp2.toTypedArray()
+                                                        tmp.iterator().forEach() {
+                                                            if ((it != null) && (it.id != null))
+                                                            {
+                                                                tmp2.add(it)
+                                                            }
+                                                        }
+                                                        audio_in_sources_get = tmp2.toTypedArray()
                                                     }
-                                                } else {
-                                                    val tmp = AVActivity.ffmpegav_get_in_sources(avstatestore.state.video_in_device_get(), 1)
-                                                    if (tmp == null) { video_in_sources_get = emptyArray() }
-                                                    else {
-                                                        val tmp2 = ArrayList<AVActivity.ffmpegav_descrid>()
-                                                        tmp.iterator().forEach() { if ((it != null) && (it.id != null)) { tmp2.add(it) } }
-                                                        video_in_sources_get = tmp2.toTypedArray()
+                                                    audio_in_sources.clear()
+                                                    if (audio_in_sources_get.isNotEmpty())
+                                                    {
+                                                        println("ffmpeg audio in sources: " + audio_in_sources_get.size)
+                                                        audio_in_sources.addAll(audio_in_sources_get)
+                                                        expanded_as = true
                                                     }
-                                                }
-                                                Log.i(TAG, "video_in_device=" + avstatestore.state.video_in_device_get())
-                                                if (avstatestore.state.video_in_device_get() == "x11grab") {
-                                                    val tmp0 = AVActivity.ffmpegav_descrid(); tmp0.id = ":0.0"; video_in_sources_get += listOf(tmp0)
-                                                    val tmp1 = AVActivity.ffmpegav_descrid(); tmp1.id = ":1.0"; video_in_sources_get += listOf(tmp1)
-                                                    val tmp2 = AVActivity.ffmpegav_descrid(); tmp2.id = ":2.0"; video_in_sources_get += listOf(tmp2)
-                                                    val tmp3 = AVActivity.ffmpegav_descrid(); tmp3.id = ":3.0"; video_in_sources_get += listOf(tmp3)
-                                                    val tmp4 = AVActivity.ffmpegav_descrid(); tmp4.id = ":4.0"; video_in_sources_get += listOf(tmp4)
-                                                    val tmp5 = AVActivity.ffmpegav_descrid(); tmp5.id = ":5.0"; video_in_sources_get += listOf(tmp5)
-                                                }
-                                                video_in_sources.clear()
-                                                if (video_in_sources_get.isNotEmpty()) {
-                                                    println("ffmpeg video in sources: " + video_in_sources_get.size)
-                                                    video_in_sources.addAll(video_in_sources_get)
-                                                    expanded_vs = true
                                                 }
                                             }
-                                        }
-
-                                        // 6. Capture FPS (Bottom Right)
-                                        CompactSelectorRow(icon = Icons.Filled.Timer, title = "Capture FPS", value = fps_info_str) {
-                                            capture_fps_expanded = true
+                                            // 4. Video Source (Middle Right)
+                                            CompactSelectorRow(icon = Icons.Filled.Camera, title = "Video Source", value = video_source_display) {
+                                                if ((avstatestore.state.video_in_device_get() != null) && (avstatestore.state.video_in_device_get() != ""))
+                                                {
+                                                    avstatestore.state.ffmpeg_init_do()
+                                                    var video_in_sources_get: Array<AVActivity.ffmpegav_descrid> = emptyArray()
+                                                    if (avstatestore.state.video_in_device_get() == "video4linux2,v4l2")
+                                                    {
+                                                        val tmp = AVActivity.ffmpegav_get_in_sources("v4l2", 1)
+                                                        if (tmp == null)
+                                                        {
+                                                            video_in_sources_get = emptyArray()
+                                                        } else
+                                                        {
+                                                            val tmp2 = ArrayList<AVActivity.ffmpegav_descrid>()
+                                                            tmp.iterator().forEach() {
+                                                                if ((it != null) && (it.id != null))
+                                                                {
+                                                                    tmp2.add(it)
+                                                                }
+                                                            }
+                                                            video_in_sources_get = tmp2.toTypedArray()
+                                                        }
+                                                    } else
+                                                    {
+                                                        val tmp = AVActivity.ffmpegav_get_in_sources(avstatestore.state.video_in_device_get(), 1)
+                                                        if (tmp == null)
+                                                        {
+                                                            video_in_sources_get = emptyArray()
+                                                        } else
+                                                        {
+                                                            val tmp2 = ArrayList<AVActivity.ffmpegav_descrid>()
+                                                            tmp.iterator().forEach() {
+                                                                if ((it != null) && (it.id != null))
+                                                                {
+                                                                    tmp2.add(it)
+                                                                }
+                                                            }
+                                                            video_in_sources_get = tmp2.toTypedArray()
+                                                        }
+                                                    }
+                                                    Log.i(TAG, "video_in_device=" + avstatestore.state.video_in_device_get())
+                                                    if (avstatestore.state.video_in_device_get() == "x11grab")
+                                                    {
+                                                        val tmp0 = AVActivity.ffmpegav_descrid(); tmp0.id = ":0.0"; video_in_sources_get += listOf(tmp0)
+                                                        val tmp1 = AVActivity.ffmpegav_descrid(); tmp1.id = ":1.0"; video_in_sources_get += listOf(tmp1)
+                                                        val tmp2 = AVActivity.ffmpegav_descrid(); tmp2.id = ":2.0"; video_in_sources_get += listOf(tmp2)
+                                                        val tmp3 = AVActivity.ffmpegav_descrid(); tmp3.id = ":3.0"; video_in_sources_get += listOf(tmp3)
+                                                        val tmp4 = AVActivity.ffmpegav_descrid(); tmp4.id = ":4.0"; video_in_sources_get += listOf(tmp4)
+                                                        val tmp5 = AVActivity.ffmpegav_descrid(); tmp5.id = ":5.0"; video_in_sources_get += listOf(tmp5)
+                                                    }
+                                                    video_in_sources.clear()
+                                                    if (video_in_sources_get.isNotEmpty())
+                                                    {
+                                                        println("ffmpeg video in sources: " + video_in_sources_get.size)
+                                                        video_in_sources.addAll(video_in_sources_get)
+                                                        expanded_vs = true
+                                                    }
+                                                }
+                                            }
+                                            // 6. Capture FPS (Bottom Right)
+                                            CompactSelectorRow(icon = Icons.Filled.Timer, title = "Capture FPS", value = fps_info_str) {
+                                                capture_fps_expanded = true
+                                            }
                                         }
                                     }
-                                }
-
-                                // ================= ALL DIALOGS =================
-
-                                if (expanded_a) {
-                                    androidx.compose.material3.AlertDialog(
-                                        onDismissRequest = { expanded_a = false },
-                                        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
-                                        modifier = Modifier.padding(24.dp).wrapContentHeight().widthIn(max = 360.dp),
-                                    ) {
-                                        androidx.compose.material3.Surface(shape = RoundedCornerShape(24.dp), tonalElevation = 6.dp, color = androidx.compose.material3.MaterialTheme.colorScheme.surface) {
-                                            Column(modifier = Modifier.padding(24.dp)) {
-                                                Text(text = "Select Audio Device", style = androidx.compose.material3.MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
-                                                Text(text = "Choose an audio input device from the list below:", style = androidx.compose.material3.MaterialTheme.typography.bodyMedium, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp, bottom = 16.dp))
-                                                val scrollState_a = rememberScrollState()
-                                                Row(modifier = Modifier.heightIn(max = 300.dp).padding(vertical = 4.dp)) {
-                                                    Column(
-                                                        modifier = Modifier.weight(1f).verticalScroll(scrollState_a),
-                                                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                                                    ) {
-                                                        if (audio_in_devices.isNotEmpty()) {
-                                                            audio_in_devices.forEach { device ->
-                                                                if (device != null) {
-                                                                    Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable {
-                                                                        avstatestore.state.audio_in_source_set(""); audio_in_sources.clear(); avstatestore.state.audio_in_device_set(device); expanded_a = false
-                                                                    }.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-                                                                        Column(modifier = Modifier.weight(1f)) { Text(text = device, style = androidx.compose.material3.MaterialTheme.typography.bodyLarge, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold) }
+                                    // ================= ALL DIALOGS =================
+                                    if (expanded_a)
+                                    {
+                                        androidx.compose.material3.AlertDialog(
+                                            onDismissRequest = { expanded_a = false },
+                                            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
+                                            modifier = Modifier.padding(24.dp).wrapContentHeight().widthIn(max = 360.dp),
+                                        ) {
+                                            androidx.compose.material3.Surface(shape = RoundedCornerShape(24.dp), tonalElevation = 6.dp, color = androidx.compose.material3.MaterialTheme.colorScheme.surface) {
+                                                Column(modifier = Modifier.padding(24.dp)) {
+                                                    Text(text = "Select Audio Device", style = androidx.compose.material3.MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
+                                                    Text(text = "Choose an audio input device from the list below:", style = androidx.compose.material3.MaterialTheme.typography.bodyMedium, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp, bottom = 16.dp))
+                                                    val scrollState_a = rememberScrollState()
+                                                    Row(modifier = Modifier.heightIn(max = 300.dp).padding(vertical = 4.dp)) {
+                                                        Column(
+                                                            modifier = Modifier.weight(1f).verticalScroll(scrollState_a),
+                                                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                                                        ) {
+                                                            if (audio_in_devices.isNotEmpty())
+                                                            {
+                                                                audio_in_devices.forEach { device ->
+                                                                    if (device != null)
+                                                                    {
+                                                                        Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable {
+                                                                            avstatestore.state.audio_in_source_set(""); audio_in_sources.clear(); avstatestore.state.audio_in_device_set(device); expanded_a = false
+                                                                        }.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+                                                                            Column(modifier = Modifier.weight(1f)) { Text(text = device, style = androidx.compose.material3.MaterialTheme.typography.bodyLarge, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold) }
+                                                                        }
                                                                     }
                                                                 }
                                                             }
-                                                        }
-                                                        Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable {
-                                                            avstatestore.state.audio_in_source_set(""); audio_in_sources.clear(); avstatestore.state.audio_in_device_set(""); expanded_a = false
-                                                        }.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-                                                            Column(modifier = Modifier.weight(1f)) { Text(text = "-none-", style = androidx.compose.material3.MaterialTheme.typography.bodyLarge, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.SemiBold) }
-                                                        }
-                                                    }
-                                                    CustomVerticalScrollbar(scrollState = scrollState_a, modifier = Modifier.padding(start = 4.dp))
-                                                }
-                                                Spacer(modifier = Modifier.height(20.dp))
-                                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) { androidx.compose.material3.TextButton(onClick = { expanded_a = false }) { Text(text = "Cancel", style = androidx.compose.material3.MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold) } }
-                                            }
-                                        }
-                                    }
-                                }
-
-                                if (expanded_as) {
-                                    androidx.compose.material3.AlertDialog(
-                                        onDismissRequest = { expanded_as = false },
-                                        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
-                                        modifier = Modifier.padding(24.dp).wrapContentHeight().widthIn(max = 360.dp),
-                                    ) {
-                                        androidx.compose.material3.Surface(shape = RoundedCornerShape(24.dp), tonalElevation = 6.dp, color = androidx.compose.material3.MaterialTheme.colorScheme.surface) {
-                                            Column(modifier = Modifier.padding(24.dp)) {
-                                                Text(text = "Select Audio Source", style = androidx.compose.material3.MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
-                                                Text(text = "Choose an audio source for the selected device:", style = androidx.compose.material3.MaterialTheme.typography.bodyMedium, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp, bottom = 16.dp))
-                                                val scrollState_as = rememberScrollState()
-                                                Row(modifier = Modifier.heightIn(max = 300.dp).padding(vertical = 4.dp)) {
-                                                    Column(
-                                                        modifier = Modifier.weight(1f).verticalScroll(scrollState_as),
-                                                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                                                    ) {
-                                                        if (audio_in_sources.isNotEmpty()) {
-                                                            audio_in_sources.forEach { source ->
-                                                                if (source != null) {
-                                                                    Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable { avstatestore.state.audio_in_source_set(source.id); expanded_as = false }.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-                                                                        Column(modifier = Modifier.weight(1f)) { Text(text = if (source.description.isEmpty()) source.id else source.description + " (" + source.id + ")", style = androidx.compose.material3.MaterialTheme.typography.bodyLarge, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold) }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                        Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable { avstatestore.state.audio_in_source_set(""); expanded_as = false }.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-                                                            Column(modifier = Modifier.weight(1f)) { Text(text = "-none-", style = androidx.compose.material3.MaterialTheme.typography.bodyLarge, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.SemiBold) }
-                                                        }
-                                                    }
-                                                    CustomVerticalScrollbar(scrollState = scrollState_as, modifier = Modifier.padding(start = 4.dp))
-                                                }
-                                                Spacer(modifier = Modifier.height(20.dp))
-                                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) { androidx.compose.material3.TextButton(onClick = { expanded_as = false }) { Text(text = "Cancel", style = androidx.compose.material3.MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold) } }
-                                            }
-                                        }
-                                    }
-                                }
-
-                                if (expanded_v) {
-                                    androidx.compose.material3.AlertDialog(
-                                        onDismissRequest = { expanded_v = false },
-                                        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
-                                        modifier = Modifier.padding(24.dp).wrapContentHeight().widthIn(max = 360.dp),
-                                    ) {
-                                        androidx.compose.material3.Surface(shape = RoundedCornerShape(24.dp), tonalElevation = 6.dp, color = androidx.compose.material3.MaterialTheme.colorScheme.surface) {
-                                            Column(modifier = Modifier.padding(24.dp)) {
-                                                Text(text = "Select Video Device", style = androidx.compose.material3.MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
-                                                Text(text = "Choose a video input device from the list below:", style = androidx.compose.material3.MaterialTheme.typography.bodyMedium, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp, bottom = 16.dp))
-                                                val scrollState_v = rememberScrollState()
-                                                Row(modifier = Modifier.heightIn(max = 300.dp).padding(vertical = 4.dp)) {
-                                                    Column(
-                                                        modifier = Modifier.weight(1f).verticalScroll(scrollState_v),
-                                                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                                                    ) {
-                                                        if (video_in_devices.isNotEmpty()) {
-                                                            video_in_devices.forEach { device ->
-                                                                if (device != null) {
-                                                                    Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable { avstatestore.state.video_in_source_set(""); video_in_sources.clear(); avstatestore.state.video_in_device_set(device); expanded_v = false }.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-                                                                        Column(modifier = Modifier.weight(1f)) { Text(text = device, style = androidx.compose.material3.MaterialTheme.typography.bodyLarge, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold) }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                        Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable { avstatestore.state.video_in_source_set(""); video_in_sources.clear(); avstatestore.state.video_in_device_set(""); expanded_v = false }.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-                                                            Column(modifier = Modifier.weight(1f)) { Text(text = "-none-", style = androidx.compose.material3.MaterialTheme.typography.bodyLarge, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.SemiBold) }
-                                                        }
-                                                    }
-                                                    CustomVerticalScrollbar(scrollState = scrollState_v, modifier = Modifier.padding(start = 4.dp))
-                                                }
-                                                Spacer(modifier = Modifier.height(20.dp))
-                                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) { androidx.compose.material3.TextButton(onClick = { expanded_v = false }) { Text(text = "Cancel", style = androidx.compose.material3.MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold) } }
-                                            }
-                                        }
-                                    }
-                                }
-
-                                if (expanded_vs) {
-                                    androidx.compose.material3.AlertDialog(
-                                        onDismissRequest = { expanded_vs = false },
-                                        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
-                                        modifier = Modifier.padding(24.dp).wrapContentHeight().widthIn(max = 360.dp),
-                                    ) {
-                                        androidx.compose.material3.Surface(shape = RoundedCornerShape(24.dp), tonalElevation = 6.dp, color = androidx.compose.material3.MaterialTheme.colorScheme.surface) {
-                                            Column(modifier = Modifier.padding(24.dp)) {
-                                                Text(text = "Select Video Source", style = androidx.compose.material3.MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
-                                                Text(text = "Choose a video source for the selected device:", style = androidx.compose.material3.MaterialTheme.typography.bodyMedium, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp, bottom = 16.dp))
-                                                val scrollState_vs = rememberScrollState()
-                                                Row(modifier = Modifier.heightIn(max = 300.dp).padding(vertical = 4.dp)) {
-                                                    Column(
-                                                        modifier = Modifier.weight(1f).verticalScroll(scrollState_vs),
-                                                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                                                    ) {
-                                                        if (video_in_sources.isNotEmpty()) {
-                                                            video_in_sources.forEach { source ->
-                                                                if (source != null) {
-                                                                    Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable { avstatestore.state.video_in_source_set(source.id); expanded_vs = false }.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-                                                                        Column(modifier = Modifier.weight(1f)) { Text(text = if (source.description.isEmpty()) source.id else source.description + " (" + source.id + ")", style = androidx.compose.material3.MaterialTheme.typography.bodyLarge, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold) }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                        Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable { avstatestore.state.video_in_source_set(""); expanded_vs = false }.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-                                                            Column(modifier = Modifier.weight(1f)) { Text(text = "-none-", style = androidx.compose.material3.MaterialTheme.typography.bodyLarge, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.SemiBold) }
-                                                        }
-                                                    }
-                                                    CustomVerticalScrollbar(scrollState = scrollState_vs, modifier = Modifier.padding(start = 4.dp))
-                                                }
-                                                Spacer(modifier = Modifier.height(20.dp))
-                                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) { androidx.compose.material3.TextButton(onClick = { expanded_vs = false }) { Text(text = "Cancel", style = androidx.compose.material3.MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold) } }
-                                            }
-                                        }
-                                    }
-                                }
-
-                                if (resolution_expanded) {
-                                    val items = listOf("480x270", "640x360", "640x480", "480x640", "960x540", "720x720", "1024x768", "1280x720", "720x1280", "1080x1080", "1920x1080", "1080x1920")
-                                    androidx.compose.material3.AlertDialog(
-                                        onDismissRequest = { resolution_expanded = false },
-                                        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
-                                        modifier = Modifier.padding(24.dp).wrapContentHeight().widthIn(max = 360.dp),
-                                    ) {
-                                        androidx.compose.material3.Surface(shape = RoundedCornerShape(24.dp), tonalElevation = 6.dp, color = androidx.compose.material3.MaterialTheme.colorScheme.surface) {
-                                            Column(modifier = Modifier.padding(24.dp)) {
-                                                Text(text = "Select Resolution", style = androidx.compose.material3.MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
-                                                Text(text = "Choose the video capture resolution:", style = androidx.compose.material3.MaterialTheme.typography.bodyMedium, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp, bottom = 16.dp))
-                                                val scrollState_res = rememberScrollState()
-                                                Row(modifier = Modifier.heightIn(max = 300.dp).padding(vertical = 4.dp)) {
-                                                    Column(
-                                                        modifier = Modifier.weight(1f).verticalScroll(scrollState_res),
-                                                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                                                    ) {
-                                                        items.forEach { res ->
                                                             Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable {
-                                                                if (avstatestore.state.calling_state_get() != AVState.CALL_STATUS.CALL_STATUS_CALLING) { avstatestore.state.video_in_resolution_set(res) }
-                                                                else { SnackBarToast("Resolution change is only allowed when no call is active") }
-                                                                resolution_expanded = false
+                                                                avstatestore.state.audio_in_source_set(""); audio_in_sources.clear(); avstatestore.state.audio_in_device_set(""); expanded_a = false
                                                             }.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-                                                                Column(modifier = Modifier.weight(1f)) { Text(text = res, style = androidx.compose.material3.MaterialTheme.typography.bodyLarge, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.SemiBold) }
+                                                                Column(modifier = Modifier.weight(1f)) { Text(text = "-none-", style = androidx.compose.material3.MaterialTheme.typography.bodyLarge, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.SemiBold) }
                                                             }
                                                         }
+                                                        CustomVerticalScrollbar(scrollState = scrollState_a, modifier = Modifier.padding(start = 4.dp))
                                                     }
-                                                    CustomVerticalScrollbar(scrollState = scrollState_res, modifier = Modifier.padding(start = 4.dp))
+                                                    Spacer(modifier = Modifier.height(20.dp))
+                                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) { androidx.compose.material3.TextButton(onClick = { expanded_a = false }) { Text(text = "Cancel", style = androidx.compose.material3.MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold) } }
                                                 }
-                                                Spacer(modifier = Modifier.height(20.dp))
-                                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) { androidx.compose.material3.TextButton(onClick = { resolution_expanded = false }) { Text(text = "Cancel", style = androidx.compose.material3.MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold) } }
+                                            }
+                                        }
+                                    }
+
+                                    if (expanded_as)
+                                    {
+                                        androidx.compose.material3.AlertDialog(
+                                            onDismissRequest = { expanded_as = false },
+                                            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
+                                            modifier = Modifier.padding(24.dp).wrapContentHeight().widthIn(max = 360.dp),
+                                        ) {
+                                            androidx.compose.material3.Surface(shape = RoundedCornerShape(24.dp), tonalElevation = 6.dp, color = androidx.compose.material3.MaterialTheme.colorScheme.surface) {
+                                                Column(modifier = Modifier.padding(24.dp)) {
+                                                    Text(text = "Select Audio Source", style = androidx.compose.material3.MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
+                                                    Text(text = "Choose an audio source for the selected device:", style = androidx.compose.material3.MaterialTheme.typography.bodyMedium, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp, bottom = 16.dp))
+                                                    val scrollState_as = rememberScrollState()
+                                                    Row(modifier = Modifier.heightIn(max = 300.dp).padding(vertical = 4.dp)) {
+                                                        Column(
+                                                            modifier = Modifier.weight(1f).verticalScroll(scrollState_as),
+                                                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                                                        ) {
+                                                            if (audio_in_sources.isNotEmpty())
+                                                            {
+                                                                audio_in_sources.forEach { source ->
+                                                                    if (source != null)
+                                                                    {
+                                                                        Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable { avstatestore.state.audio_in_source_set(source.id); expanded_as = false }.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+                                                                            Column(modifier = Modifier.weight(1f)) { Text(text = if (source.description.isEmpty()) source.id else source.description + " (" + source.id + ")", style = androidx.compose.material3.MaterialTheme.typography.bodyLarge, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold) }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                            Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable { avstatestore.state.audio_in_source_set(""); expanded_as = false }.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+                                                                Column(modifier = Modifier.weight(1f)) { Text(text = "-none-", style = androidx.compose.material3.MaterialTheme.typography.bodyLarge, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.SemiBold) }
+                                                            }
+                                                        }
+                                                        CustomVerticalScrollbar(scrollState = scrollState_as, modifier = Modifier.padding(start = 4.dp))
+                                                    }
+                                                    Spacer(modifier = Modifier.height(20.dp))
+                                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) { androidx.compose.material3.TextButton(onClick = { expanded_as = false }) { Text(text = "Cancel", style = androidx.compose.material3.MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold) } }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if (expanded_v)
+                                    {
+                                        androidx.compose.material3.AlertDialog(
+                                            onDismissRequest = { expanded_v = false },
+                                            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
+                                            modifier = Modifier.padding(24.dp).wrapContentHeight().widthIn(max = 360.dp),
+                                        ) {
+                                            androidx.compose.material3.Surface(shape = RoundedCornerShape(24.dp), tonalElevation = 6.dp, color = androidx.compose.material3.MaterialTheme.colorScheme.surface) {
+                                                Column(modifier = Modifier.padding(24.dp)) {
+                                                    Text(text = "Select Video Device", style = androidx.compose.material3.MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
+                                                    Text(text = "Choose a video input device from the list below:", style = androidx.compose.material3.MaterialTheme.typography.bodyMedium, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp, bottom = 16.dp))
+                                                    val scrollState_v = rememberScrollState()
+                                                    Row(modifier = Modifier.heightIn(max = 300.dp).padding(vertical = 4.dp)) {
+                                                        Column(
+                                                            modifier = Modifier.weight(1f).verticalScroll(scrollState_v),
+                                                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                                                        ) {
+                                                            if (video_in_devices.isNotEmpty())
+                                                            {
+                                                                video_in_devices.forEach { device ->
+                                                                    if (device != null)
+                                                                    {
+                                                                        Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable { avstatestore.state.video_in_source_set(""); video_in_sources.clear(); avstatestore.state.video_in_device_set(device); expanded_v = false }.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+                                                                            Column(modifier = Modifier.weight(1f)) { Text(text = device, style = androidx.compose.material3.MaterialTheme.typography.bodyLarge, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold) }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                            Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable { avstatestore.state.video_in_source_set(""); video_in_sources.clear(); avstatestore.state.video_in_device_set(""); expanded_v = false }.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+                                                                Column(modifier = Modifier.weight(1f)) { Text(text = "-none-", style = androidx.compose.material3.MaterialTheme.typography.bodyLarge, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.SemiBold) }
+                                                            }
+                                                        }
+                                                        CustomVerticalScrollbar(scrollState = scrollState_v, modifier = Modifier.padding(start = 4.dp))
+                                                    }
+                                                    Spacer(modifier = Modifier.height(20.dp))
+                                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) { androidx.compose.material3.TextButton(onClick = { expanded_v = false }) { Text(text = "Cancel", style = androidx.compose.material3.MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold) } }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if (expanded_vs)
+                                    {
+                                        androidx.compose.material3.AlertDialog(
+                                            onDismissRequest = { expanded_vs = false },
+                                            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
+                                            modifier = Modifier.padding(24.dp).wrapContentHeight().widthIn(max = 360.dp),
+                                        ) {
+                                            androidx.compose.material3.Surface(shape = RoundedCornerShape(24.dp), tonalElevation = 6.dp, color = androidx.compose.material3.MaterialTheme.colorScheme.surface) {
+                                                Column(modifier = Modifier.padding(24.dp)) {
+                                                    Text(text = "Select Video Source", style = androidx.compose.material3.MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
+                                                    Text(text = "Choose a video source for the selected device:", style = androidx.compose.material3.MaterialTheme.typography.bodyMedium, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp, bottom = 16.dp))
+                                                    val scrollState_vs = rememberScrollState()
+                                                    Row(modifier = Modifier.heightIn(max = 300.dp).padding(vertical = 4.dp)) {
+                                                        Column(
+                                                            modifier = Modifier.weight(1f).verticalScroll(scrollState_vs),
+                                                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                                                        ) {
+                                                            if (video_in_sources.isNotEmpty())
+                                                            {
+                                                                video_in_sources.forEach { source ->
+                                                                    if (source != null)
+                                                                    {
+                                                                        Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable { avstatestore.state.video_in_source_set(source.id); expanded_vs = false }.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+                                                                            Column(modifier = Modifier.weight(1f)) { Text(text = if (source.description.isEmpty()) source.id else source.description + " (" + source.id + ")", style = androidx.compose.material3.MaterialTheme.typography.bodyLarge, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.SemiBold) }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                            Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable { avstatestore.state.video_in_source_set(""); expanded_vs = false }.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+                                                                Column(modifier = Modifier.weight(1f)) { Text(text = "-none-", style = androidx.compose.material3.MaterialTheme.typography.bodyLarge, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.SemiBold) }
+                                                            }
+                                                        }
+                                                        CustomVerticalScrollbar(scrollState = scrollState_vs, modifier = Modifier.padding(start = 4.dp))
+                                                    }
+                                                    Spacer(modifier = Modifier.height(20.dp))
+                                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) { androidx.compose.material3.TextButton(onClick = { expanded_vs = false }) { Text(text = "Cancel", style = androidx.compose.material3.MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold) } }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if (resolution_expanded)
+                                    {
+                                        val items = listOf("480x270", "640x360", "640x480", "480x640", "960x540", "720x720", "1024x768", "1280x720", "720x1280", "1080x1080", "1920x1080", "1080x1920")
+                                        androidx.compose.material3.AlertDialog(
+                                            onDismissRequest = { resolution_expanded = false },
+                                            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
+                                            modifier = Modifier.padding(24.dp).wrapContentHeight().widthIn(max = 360.dp),
+                                        ) {
+                                            androidx.compose.material3.Surface(shape = RoundedCornerShape(24.dp), tonalElevation = 6.dp, color = androidx.compose.material3.MaterialTheme.colorScheme.surface) {
+                                                Column(modifier = Modifier.padding(24.dp)) {
+                                                    Text(text = "Select Resolution", style = androidx.compose.material3.MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
+                                                    Text(text = "Choose the video capture resolution:", style = androidx.compose.material3.MaterialTheme.typography.bodyMedium, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp, bottom = 16.dp))
+                                                    val scrollState_res = rememberScrollState()
+                                                    Row(modifier = Modifier.heightIn(max = 300.dp).padding(vertical = 4.dp)) {
+                                                        Column(
+                                                            modifier = Modifier.weight(1f).verticalScroll(scrollState_res),
+                                                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                                                        ) {
+                                                            items.forEach { res ->
+                                                                Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable {
+                                                                    if (avstatestore.state.calling_state_get() != AVState.CALL_STATUS.CALL_STATUS_CALLING)
+                                                                    {
+                                                                        avstatestore.state.video_in_resolution_set(res)
+                                                                    } else
+                                                                    {
+                                                                        SnackBarToast("Resolution change is only allowed when no call is active")
+                                                                    }
+                                                                    resolution_expanded = false
+                                                                }.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+                                                                    Column(modifier = Modifier.weight(1f)) { Text(text = res, style = androidx.compose.material3.MaterialTheme.typography.bodyLarge, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.SemiBold) }
+                                                                }
+                                                            }
+                                                        }
+                                                        CustomVerticalScrollbar(scrollState = scrollState_res, modifier = Modifier.padding(start = 4.dp))
+                                                    }
+                                                    Spacer(modifier = Modifier.height(20.dp))
+                                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) { androidx.compose.material3.TextButton(onClick = { resolution_expanded = false }) { Text(text = "Cancel", style = androidx.compose.material3.MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold) } }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if (capture_fps_expanded)
+                                    {
+                                        val items_capture_fps = listOf(-1, 5, 10, 15, 20, 24, 25, 30, 60)
+                                        androidx.compose.material3.AlertDialog(
+                                            onDismissRequest = { capture_fps_expanded = false },
+                                            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
+                                            modifier = Modifier.padding(24.dp).wrapContentHeight().widthIn(max = 360.dp),
+                                        ) {
+                                            androidx.compose.material3.Surface(shape = RoundedCornerShape(24.dp), tonalElevation = 6.dp, color = androidx.compose.material3.MaterialTheme.colorScheme.surface) {
+                                                Column(modifier = Modifier.padding(24.dp)) {
+                                                    Text(text = "Select Capture FPS", style = androidx.compose.material3.MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
+                                                    Text(text = "Choose the video capture frame rate:", style = androidx.compose.material3.MaterialTheme.typography.bodyMedium, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp, bottom = 16.dp))
+                                                    val scrollState_fps = rememberScrollState()
+                                                    Row(modifier = Modifier.heightIn(max = 300.dp).padding(vertical = 4.dp)) {
+                                                        Column(
+                                                            modifier = Modifier.weight(1f).verticalScroll(scrollState_fps),
+                                                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                                                        ) {
+                                                            items_capture_fps.forEach { fps ->
+                                                                Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable {
+                                                                    try
+                                                                    {
+                                                                        avstatestore.state.video_capture_fps_set(fps)
+                                                                    } catch (_: Exception)
+                                                                    {
+                                                                    }
+                                                                    capture_fps_expanded = false
+                                                                }.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+                                                                    Column(modifier = Modifier.weight(1f)) { Text(text = if (fps == -1) "Default" else "" + fps, style = androidx.compose.material3.MaterialTheme.typography.bodyLarge, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.SemiBold) }
+                                                                }
+                                                            }
+                                                        }
+                                                        CustomVerticalScrollbar(scrollState = scrollState_fps, modifier = Modifier.padding(start = 4.dp))
+                                                    }
+                                                    Spacer(modifier = Modifier.height(20.dp))
+                                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) { androidx.compose.material3.TextButton(onClick = { capture_fps_expanded = false }) { Text(text = "Cancel", style = androidx.compose.material3.MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold) } }
+                                                }
                                             }
                                         }
                                     }
                                 }
+                                // =========== audio and video selectors ===========
+                                // =========== audio and video selectors ===========
+                                // =========== audio and video selectors ===========
 
-                                if (capture_fps_expanded) {
-                                    val items_capture_fps = listOf(-1, 5, 10, 15, 20, 24, 25, 30, 60)
-                                    androidx.compose.material3.AlertDialog(
-                                        onDismissRequest = { capture_fps_expanded = false },
-                                        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
-                                        modifier = Modifier.padding(24.dp).wrapContentHeight().widthIn(max = 360.dp),
-                                    ) {
-                                        androidx.compose.material3.Surface(shape = RoundedCornerShape(24.dp), tonalElevation = 6.dp, color = androidx.compose.material3.MaterialTheme.colorScheme.surface) {
-                                            Column(modifier = Modifier.padding(24.dp)) {
-                                                Text(text = "Select Capture FPS", style = androidx.compose.material3.MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
-                                                Text(text = "Choose the video capture frame rate:", style = androidx.compose.material3.MaterialTheme.typography.bodyMedium, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp, bottom = 16.dp))
-                                                val scrollState_fps = rememberScrollState()
-                                                Row(modifier = Modifier.heightIn(max = 300.dp).padding(vertical = 4.dp)) {
-                                                    Column(
-                                                        modifier = Modifier.weight(1f).verticalScroll(scrollState_fps),
-                                                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                                                    ) {
-                                                        items_capture_fps.forEach { fps ->
-                                                            Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable {
-                                                                try { avstatestore.state.video_capture_fps_set(fps) } catch (_: Exception) {}
-                                                                capture_fps_expanded = false
-                                                            }.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-                                                                Column(modifier = Modifier.weight(1f)) { Text(text = if (fps == -1) "Default" else "" + fps, style = androidx.compose.material3.MaterialTheme.typography.bodyLarge, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.SemiBold) }
-                                                            }
-                                                        }
-                                                    }
-                                                    CustomVerticalScrollbar(scrollState = scrollState_fps, modifier = Modifier.padding(start = 4.dp))
-                                                }
-                                                Spacer(modifier = Modifier.height(20.dp))
-                                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) { androidx.compose.material3.TextButton(onClick = { capture_fps_expanded = false }) { Text(text = "Cancel", style = androidx.compose.material3.MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold) } }
+                            }
+                        }
+                        if (uiMode != UiMode.NETPROFILER)
+                        {
+                            Column(modifier = Modifier.randomDebugBorder().padding(4.dp)) {
+                                val current_callstate3 by avstatestorecallstate.stateFlow.collectAsState()
+                                val audio_bar_bgcolor = MaterialTheme.colors.background
+                                if ((current_callstate3.call_state == AVState.CALL_STATUS.CALL_STATUS_NONE) &&
+                                    ((ngc_video_frame_last_incoming_ts + 2000) < System.currentTimeMillis()))
+                                {
+                                    Box(modifier = Modifier.size(200.dp, 5.dp))
+                                } else
+                                {
+                                    SwingPanel(
+                                        modifier = Modifier.size(200.dp, 5.dp),
+                                        factory = {
+                                            JPanel(SingleComponentAspectRatioKeeperLayout(), true).apply {
+                                                add(audio_out_bar)
+                                                AudioBar.set_bar_bgcolor(audio_bar_bgcolor.toArgb(), audio_out_bar)
                                             }
-                                        }
-                                    }
+                                        },
+                                        update = { }
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(5.dp))
+                                if ((current_callstate3.call_state == AVState.CALL_STATUS.CALL_STATUS_NONE) &&
+                                    ((ngc_video_frame_last_incoming_ts + 2000) < System.currentTimeMillis()))
+                                {
+                                    Box(modifier = Modifier.size(200.dp, 5.dp))
+                                } else
+                                {
+                                    SwingPanel(
+                                        modifier = Modifier.size(200.dp, 5.dp),
+                                        factory = {
+                                            JPanel(SingleComponentAspectRatioKeeperLayout(), true).apply {
+                                                add(audio_in_bar)
+                                                AudioBar.set_bar_bgcolor(audio_bar_bgcolor.toArgb(), audio_in_bar)
+                                            }
+                                        },
+                                        update = { }
+                                    )
                                 }
                             }
-                            // =========== audio and video selectors ===========
-                            // =========== audio and video selectors ===========
-                            // =========== audio and video selectors ===========
-
-
-                        }
-                        Column(modifier = Modifier.randomDebugBorder().padding(4.dp)) {
-                            val current_callstate3 by avstatestorecallstate.stateFlow.collectAsState()
-                            val audio_bar_bgcolor = MaterialTheme.colors.background
-                            if ((current_callstate3.call_state == AVState.CALL_STATUS.CALL_STATUS_NONE) &&
-                                ((ngc_video_frame_last_incoming_ts + 2000) < System.currentTimeMillis()))
-                            {
-                                Box(modifier = Modifier.size(200.dp, 5.dp))
-                            } else
-                            {
-                                SwingPanel(
-                                    modifier = Modifier.size(200.dp, 5.dp),
-                                    factory = {
-                                        JPanel(SingleComponentAspectRatioKeeperLayout(), true).apply {
-                                            add(audio_out_bar)
-                                            AudioBar.set_bar_bgcolor(audio_bar_bgcolor.toArgb(), audio_out_bar)
-                                        }
-                                    },
-                                    update = { }
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(5.dp))
-                            if ((current_callstate3.call_state == AVState.CALL_STATUS.CALL_STATUS_NONE) &&
-                                ((ngc_video_frame_last_incoming_ts + 2000) < System.currentTimeMillis()))
-                            {
-                                Box(modifier = Modifier.size(200.dp, 5.dp))
-                            } else
-                            {
-                                SwingPanel(
-                                    modifier = Modifier.size(200.dp, 5.dp),
-                                    factory = {
-                                        JPanel(SingleComponentAspectRatioKeeperLayout(), true).apply {
-                                            add(audio_in_bar)
-                                            AudioBar.set_bar_bgcolor(audio_bar_bgcolor.toArgb(), audio_in_bar)
-                                        }
-                                    },
-                                    update = { }
-                                )
-                            }
-                        }
-                        UIScaleItem(
-                            label = i18n("ui.ui_textscale"),
-                            description = "${i18n("ui.current_value")}: "
-                                    + " " + ui_scale + ", " + i18n("ui.drag_slider_to_change")) {
-                            Row(horizontalArrangement = Arrangement.spacedBy(2.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.width(200.dp)) {
-                                Icon(Icons.Default.FormatSize, null, Modifier.scale(0.7f))
-                                Slider(value = ui_scale,
-                                    onValueChange = {
-                                        ui_scale = it
-                                        globalstore.updateUiScale(it)
-                                        Log.i(TAG, "updateUiScale:density: $ui_scale")
-                                    },
-                                    onValueChangeFinished = { },
-                                    valueRange = 0.6f..3f, steps = 6, // todo: without setting the width explicitly,
-                                    //  the slider takes up the whole remaining space
-                                    modifier = Modifier.width(150.dp))
-                                Icon(imageVector = Icons.Default.FormatSize, contentDescription = null)
+                            UIScaleItem(
+                                label = i18n("ui.ui_textscale"),
+                                description = "${i18n("ui.current_value")}: "
+                                        + " " + ui_scale + ", " + i18n("ui.drag_slider_to_change")) {
+                                Row(horizontalArrangement = Arrangement.spacedBy(2.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.width(200.dp)) {
+                                    Icon(Icons.Default.FormatSize, null, Modifier.scale(0.7f))
+                                    Slider(value = ui_scale,
+                                        onValueChange = {
+                                            ui_scale = it
+                                            globalstore.updateUiScale(it)
+                                            Log.i(TAG, "updateUiScale:density: $ui_scale")
+                                        },
+                                        onValueChangeFinished = { },
+                                        valueRange = 0.6f..3f, steps = 6, // todo: without setting the width explicitly,
+                                        //  the slider takes up the whole remaining space
+                                        modifier = Modifier.width(150.dp))
+                                    Icon(imageVector = Icons.Default.FormatSize, contentDescription = null)
+                                }
                             }
                         }
                         HorizontalDivider(modifier = Modifier.fillMaxWidth())
