@@ -104,6 +104,10 @@ data class NetprofData(
     val totalRecvCount: Long,
     val totalSentBytes: Long,
     val totalRecvBytes: Long,
+    val tcpSentBytes: Long,
+    val udpSentBytes: Long,
+    val tcpRecvBytes: Long,
+    val udpRecvBytes: Long,
     val sentBytesPerSec: Long,
     val recvBytesPerSec: Long,
     val midSentBytes: Long,
@@ -240,11 +244,19 @@ fun getHeatColor(ratio: Float): Color {
 }
 
 @Composable
-fun RowScope.SummaryCard(title: String, bytes: String, packets: String, rate: String, accent: Color) {
+fun RowScope.SummaryCard(
+    title: String,
+    bytes: String,
+    packets: String,
+    rate: String,
+    accent: Color,
+    tcpBytes: String,
+    udpBytes: String
+) {
     val isLight = MaterialTheme.colors.isLight
-    // Maximum contrast for the important numbers: pure theme foreground color
     val mainText = MaterialTheme.colors.onSurface
     val secondaryText = mainText.copy(alpha = 0.85f)
+
     Column(
         modifier = Modifier
             .weight(1f)
@@ -252,10 +264,68 @@ fun RowScope.SummaryCard(title: String, bytes: String, packets: String, rate: St
             .background(accent.copy(alpha = if (isLight) 0.10f else 0.20f))
             .padding(12.dp)
     ) {
-        Text(text = title, color = accent, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-        Text(text = bytes, style = MaterialTheme.typography.h6, fontWeight = FontWeight.Bold, color = mainText)
-        Text(text = rate, color = accent, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-        Text(text = "$packets pkts", color = secondaryText, fontWeight = FontWeight.SemiBold, fontSize = 11.sp)
+        // --- TOP ROW: Title and Total Bytes ---
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title,
+                color = accent,
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp
+            )
+            Text(
+                text = bytes,
+                style = MaterialTheme.typography.h6,
+                fontWeight = FontWeight.Bold,
+                color = mainText
+            )
+        }
+
+        // --- BOTTOM ROW: Details (Left) and Breakdown (Right) ---
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
+        ) {
+            // Bottom Left: Rate & Packets
+            Column {
+                Text(
+                    text = rate,
+                    color = accent,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp
+                )
+                Text(
+                    text = "$packets pkts",
+                    color = secondaryText,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 11.sp
+                )
+            }
+
+            // Bottom Right: TCP & UDP
+            Column(
+                horizontalAlignment = Alignment.Start
+            ) {
+                Text(
+                    text = "TCP: $tcpBytes",
+                    color = secondaryText,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 14.sp
+                )
+                Text(
+                    text = "UDP: $udpBytes",
+                    color = secondaryText,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 14.sp
+                )
+            }
+        }
     }
 }
 
@@ -359,6 +429,7 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
 
                     NetprofData(
                         totalSentCount, totalRecvCount, totalSentBytes, totalRecvBytes,
+                        tcpSentBytes, udpSentBytes, tcpRecvBytes, udpRecvBytes,
                         sentBps, recvBps, midSentBytes, midRecvBytes, midBps, stats, uptimeMillis, cpuCycles, cpuCyclesPerSec
                     )
                 }
@@ -390,14 +461,18 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                         formatBytes(data.totalSentBytes),
                         data.totalSentCount.toString(),
                         formatRate(data.sentBytesPerSec),
-                        netprofAccent(NetprofSentAccentLight, NetprofSentAccentDark)
+                        netprofAccent(NetprofSentAccentLight, NetprofSentAccentDark),
+                        formatBytes(data.tcpSentBytes),
+                        formatBytes(data.udpSentBytes)
                     )
                     SummaryCard(
                         "Total Received",
                         formatBytes(data.totalRecvBytes),
                         data.totalRecvCount.toString(),
                         formatRate(data.recvBytesPerSec),
-                        netprofAccent(NetprofRecvAccentLight, NetprofRecvAccentDark)
+                        netprofAccent(NetprofRecvAccentLight, NetprofRecvAccentDark),
+                        formatBytes(data.tcpRecvBytes),
+                        formatBytes(data.udpRecvBytes)
                     )
                     UptimeCard(
                         "Tox Uptime",
