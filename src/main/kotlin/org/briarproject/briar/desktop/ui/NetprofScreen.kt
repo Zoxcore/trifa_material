@@ -2,6 +2,7 @@
 
 package org.briarproject.briar.desktop.ui
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -57,20 +60,12 @@ import kotlin.math.log10
 import kotlin.time.Duration.Companion.milliseconds
 
 // --- Netprof Color Palette ---
-// Note: Kotlin's `const val` only supports primitives and Strings.
-// For Compose `Color`, we use top-level `val` to act as constants.
-//
-// HIGH-CONTRAST, THEME-ADAPTIVE ACCENTS for the summary cards:
-//  - Light theme: deep, saturated tones (>= 7:1 contrast on white)
-//  - Dark theme:  bright tones (>= 7:1 contrast on dark surfaces)
-// The big numeric values additionally use MaterialTheme.colors.onSurface
-// (pure theme foreground) so they are always maximally readable.
-private val NetprofSentAccentLight = Color(0xFF0D47A1) // deep blue
-private val NetprofSentAccentDark = Color(0xFF82B1FF)  // bright blue
-private val NetprofRecvAccentLight = Color(0xFF1B5E20) // deep green
-private val NetprofRecvAccentDark = Color(0xFF69F0AE)  // bright green
-private val NetprofUptimeAccentLight = Color(0xFF00695C) // deep teal
-private val NetprofUptimeAccentDark = Color(0xFF64FFDA)  // bright teal
+private val NetprofSentAccentLight = Color(0xFF0D47A1)
+private val NetprofSentAccentDark = Color(0xFF82B1FF)
+private val NetprofRecvAccentLight = Color(0xFF1B5E20)
+private val NetprofRecvAccentDark = Color(0xFF69F0AE)
+private val NetprofUptimeAccentLight = Color(0xFF00695C)
+private val NetprofUptimeAccentDark = Color(0xFF64FFDA)
 
 private val NetprofColorMiddleware = Color(0xFF9C27B0)
 
@@ -91,7 +86,7 @@ fun netprofAccent(lightVariant: Color, darkVariant: Color): Color =
 data class PacketStat(
     val id: ToxVars.TOX_NETPROF_PACKET_ID,
     val name: String,
-    val transport: String, // "TCP" or "UDP"
+    val transport: String,
     val sentCount: Long,
     val recvCount: Long,
     val sentBytes: Long,
@@ -119,9 +114,6 @@ data class NetprofData(
     val cpuCyclesPerSec: Long
 )
 
-// Holds the previous sample so we can compute per-second rates (deltas).
-// packetBytes is keyed by "<PACKET_ID_NAME>@<TCP|UDP>" so TCP and UDP
-// rates are tracked independently per packet type.
 private class NetprofPrevStats {
     var initialized = false
     var lastTimestamp: Long = System.currentTimeMillis()
@@ -130,6 +122,22 @@ private class NetprofPrevStats {
     var midBytes: Long = 0L
     var cpuCycles: Long = 0L
     val packetBytes = mutableMapOf<String, Long>()
+}
+
+private class ChartHistory {
+    val sentHistory = mutableStateListOf<Float>()
+    val recvHistory = mutableStateListOf<Float>()
+
+    fun addPoint(sentBps: Long, recvBps: Long) {
+        val sentKBs = sentBps / 1024f
+        val recvKBs = recvBps / 1024f
+        sentHistory.add(sentKBs)
+        recvHistory.add(recvKBs)
+        if (sentHistory.size > 300) {
+            sentHistory.removeAt(0)
+            recvHistory.removeAt(0)
+        }
+    }
 }
 
 fun formatBytes(bytes: Long): String {
@@ -173,50 +181,19 @@ fun formatUptime(millis: Long): String {
     return String.format("%02d:%02d:%02d", hours, minutes, seconds)
 }
 
-/**
- * Map a generic positive value to a 0..1 heat ratio using a logarithmic scale.
- */
 fun valueToHeatRatio(value: Long, maxVal: Double): Float {
     if (value <= 0) return 0f
     val logMax = log10(maxVal)
     val logVal = log10(value.toDouble().coerceAtLeast(1.0))
     val ratio = (logVal / logMax).coerceIn(0.0, 1.0).toFloat()
-    // any traffic/activity at all should at least show a tiny bit of heat
     return ratio.coerceAtLeast(0.05f)
 }
 
-/**
- * Map a bytes-per-second RATE to a 0..1 heat ratio using a logarithmic scale.
- * Cumulative byte totals must NOT be used for heat (they only grow, so everything
- * would permanently show "Max" heat).
- *
- * Scale (log10, 1 B/s .. 500 KiB/s):
- *   0 B/s        -> 0.00 (None)
- *   10 B/s       -> ~0.17 (Low)
- *   100 B/s      -> 0.35 (Low/Med boundary)
- *   1 KB/s       -> ~0.53 (Med)
- *   10 KB/s      -> 0.70 (Med/High boundary)
- *   100 KB/s     -> ~0.88 (High)
- *   >= 500 KiB/s -> 1.00 (Max / Red)
- */
 fun rateToHeatRatio(bytesPerSec: Long): Float = valueToHeatRatio(bytesPerSec, 500.0 * 1024.0)
 
-/**
- * Map CPU cycles per second to a 0..1 heat ratio.
- * Since baseline CPU usage for a desktop app doing crypto/networking is often
- * in the hundreds of millions of cycles per second (e.g. 600 Mc/s), we use a
- * shifted log scale from 10 Mc/s to 10 Gc/s.
- *
- * Scale:
- *   < 10 Mc/s    -> 0.00 (None/Idle)
- *   100 Mc/s     -> 0.33 (Green)
- *   600 Mc/s     -> 0.59 (Yellow/Orange - typical moderate load)
- *   1 Gc/s       -> 0.66 (Orange)
- *   10 Gc/s      -> 1.00 (Red / Max)
- */
 fun cpuToHeatRatio(cps: Long): Float {
-    if (cps <= 10_000_000L) return 0f // Below 10 Mc/s is essentially idle
-    val logMax = 3.0 // 10 Mc/s to 10 Gc/s is 3 decades (log10(1000) = 3)
+    if (cps <= 10_000_000L) return 0f
+    val logMax = 3.0
     val logVal = log10(cps.toDouble() / 10_000_000.0)
     val ratio = (logVal / logMax).coerceIn(0.0, 1.0).toFloat()
     return ratio.coerceAtLeast(0.05f)
@@ -264,66 +241,26 @@ fun RowScope.SummaryCard(
             .background(accent.copy(alpha = if (isLight) 0.10f else 0.20f))
             .padding(12.dp)
     ) {
-        // --- TOP ROW: Title and Total Bytes ---
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = title,
-                color = accent,
-                fontWeight = FontWeight.Bold,
-                fontSize = 12.sp
-            )
-            Text(
-                text = bytes,
-                style = MaterialTheme.typography.h6,
-                fontWeight = FontWeight.Bold,
-                color = mainText
-            )
+            Text(text = title, color = accent, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+            Text(text = bytes, style = MaterialTheme.typography.h6, fontWeight = FontWeight.Bold, color = mainText)
         }
-
-        // --- BOTTOM ROW: Details (Left) and Breakdown (Right) ---
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Top
         ) {
-            // Bottom Left: Rate & Packets
             Column {
-                Text(
-                    text = rate,
-                    color = accent,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp
-                )
-                Text(
-                    text = "$packets pkts",
-                    color = secondaryText,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 11.sp
-                )
+                Text(text = rate, color = accent, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Text(text = "$packets pkts", color = secondaryText, fontWeight = FontWeight.SemiBold, fontSize = 11.sp)
             }
-
-            // Bottom Right: TCP & UDP
-            Column(
-                horizontalAlignment = Alignment.Start
-            ) {
-                Text(
-                    text = "TCP: $tcpBytes",
-                    color = secondaryText,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 14.sp
-                )
-                Text(
-                    text = "UDP: $udpBytes",
-                    color = secondaryText,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 14.sp
-                )
+            Column(horizontalAlignment = Alignment.Start) {
+                Text(text = "TCP: $tcpBytes", color = secondaryText, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                Text(text = "UDP: $udpBytes", color = secondaryText, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
             }
         }
     }
@@ -345,6 +282,162 @@ fun UptimeCard(title: String, uptime: String, accent: Color) {
     }
 }
 
+@Composable
+fun NetworkChart(
+    sentHistory: List<Float>,
+    recvHistory: List<Float>,
+    modifier: Modifier = Modifier
+) {
+    val maxVal = (sentHistory.maxOrNull() ?: 0f)
+        .coerceAtLeast(recvHistory.maxOrNull() ?: 0f)
+        .coerceAtLeast(1f)
+
+    // Highly contrasting colors specifically for the chart lines
+    val sentColor = Color(0xFF2196F3) // Bright Blue
+    val recvColor = Color(0xFFFF5722) // Bright Deep Orange
+
+    val textColor = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
+    val gridColor = MaterialTheme.colors.onSurface.copy(alpha = 0.15f)
+    val bgColor = if (MaterialTheme.colors.isLight) Color(0xFFF5F5F5) else Color(0xFF1E1E1E)
+
+    Column(modifier = modifier.padding(top = 8.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp, start = 4.dp, end = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Network Traffic (Last 5 Minutes)", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colors.onSurface)
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(modifier = Modifier.width(12.dp).height(4.dp).background(sentColor).clip(RoundedCornerShape(2.dp)))
+                    Text(text = " Sent", fontSize = 11.sp, color = textColor)
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(modifier = Modifier.width(12.dp).height(4.dp).background(recvColor).clip(RoundedCornerShape(2.dp)))
+                    Text(text = " Recv", fontSize = 11.sp, color = textColor)
+                }
+                Text(text = String.format("Max: %.1f KB/s", maxVal), fontSize = 11.sp, color = textColor, fontWeight = FontWeight.SemiBold)
+            }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(180.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(bgColor)
+        ) {
+            // Y-Axis with unit label
+            Column(
+                modifier = Modifier.width(50.dp).fillMaxHeight().padding(end = 2.dp)
+            ) {
+                Text(
+                    text = "KB/s",
+                    fontSize = 8.sp,
+                    color = textColor.copy(alpha = 0.6f),
+                    textAlign = TextAlign.End,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
+                )
+                Column(
+                    modifier = Modifier.weight(1f).fillMaxWidth().padding(top = 2.dp, bottom = 20.dp),
+                    verticalArrangement = Arrangement.SpaceBetween,
+                    horizontalAlignment = Alignment.End
+                ) {
+                    val steps = 5
+                    for (i in steps downTo 0) {
+                        val value = maxVal * i / steps
+                        Text(
+                            text = String.format("%.0f", value),
+                            fontSize = 9.sp,
+                            color = textColor,
+                            fontWeight = FontWeight.Bold, // <-- Added Bold
+                            textAlign = TextAlign.End
+                        )
+                    }
+                }
+            }
+
+            // Canvas and X-Axis
+            Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                Canvas(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) {
+                    val width = size.width
+                    val height = size.height
+                    if (width <= 0f || height <= 0f) return@Canvas
+
+                    val maxPoints = 300 // always represent 5 minutes
+                    val pointCount = sentHistory.size
+                    val dx = width / (maxPoints - 1)
+                    val startOffset = (maxPoints - pointCount) * dx
+                    val scale = height / maxVal
+
+                    // Draw grid lines
+                    val gridLines = 5
+                    for (i in 0..gridLines) {
+                        val y = height * i / gridLines
+                        drawLine(
+                            color = gridColor,
+                            start = androidx.compose.ui.geometry.Offset(0f, y),
+                            end = androidx.compose.ui.geometry.Offset(width, y),
+                            strokeWidth = 1f
+                        )
+                    }
+
+                    if (pointCount < 2) return@Canvas
+
+                    fun drawDataLine(history: List<Float>, color: Color) {
+                        val path = androidx.compose.ui.graphics.Path()
+                        var started = false
+                        for (i in history.indices) {
+                            val x = startOffset + i * dx
+                            val y = height - (history[i] * scale)
+                            if (!started) {
+                                path.moveTo(x, y)
+                                started = true
+                            } else {
+                                path.lineTo(x, y)
+                            }
+                        }
+                        drawPath(
+                            path = path,
+                            color = color,
+                            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f)
+                        )
+                    }
+
+                    drawDataLine(recvHistory, recvColor)
+                    drawDataLine(sentHistory, sentColor)
+                }
+
+                // X-Axis Labels — always show full 5-minute range
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(20.dp).padding(top = 4.dp, start = 2.dp, end = 2.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    val labels = listOf("5m", "4m", "3m", "2m", "1m", "Now")
+                    labels.forEachIndexed { index, label ->
+                        Text(
+                            text = label,
+                            fontSize = 9.sp,
+                            color = textColor,
+                            fontWeight = FontWeight.Bold, // <-- Added Bold
+                            textAlign = when (index) {
+                                0 -> TextAlign.Start
+                                labels.lastIndex -> TextAlign.End
+                                else -> TextAlign.Center
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
@@ -352,6 +445,7 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
     if (global_store.toxRunning) {
         var netprofData by remember { mutableStateOf<NetprofData?>(null) }
         val prevStats = remember { NetprofPrevStats() }
+        val chartHistory = remember { ChartHistory() }
         val startTs = global_store.toxStartedTimestamp
 
         LaunchedEffect(Unit) {
@@ -388,8 +482,6 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                     val cpuCyclesRaw = tox_get_estimated_cpu_cycles()
                     val cpuCycles = if (cpuCyclesRaw < 0) 0L else cpuCyclesRaw
 
-                    // On the very first sample we have no baseline yet, so rates are 0
-                    // (otherwise the first tick would report the whole cumulative total as "rate").
                     val first = !prevStats.initialized
 
                     fun rateOf(deltaBytes: Long): Long {
@@ -402,7 +494,6 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                     val midBps = rateOf(midTotalBytes - prevStats.midBytes)
                     val cpuCyclesPerSec = rateOf(cpuCycles - prevStats.cpuCycles)
 
-                    // One box per (packet ID, transport): TCP and UDP separately
                     val stats = ToxVars.TOX_NETPROF_PACKET_ID.entries.flatMap { id ->
                         listOf(typeTcp to "TCP", typeUdp to "UDP").map { (typeVal, transportLabel) ->
                             val sC = tox_netprof_get_packet_id_count(typeVal, id.value, dirSent)
@@ -434,6 +525,9 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                     )
                 }
                 netprofData = data
+
+                data?.let { chartHistory.addPoint(it.sentBytesPerSec, it.recvBytesPerSec) }
+
                 delay(1000.milliseconds)
             }
         }
@@ -481,15 +575,8 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                     )
                 }
 
-                // Overall Network & CPU Heat Bars:
-                // COLOR is logarithmic (turns red quickly at low speeds)
-                // WIDTH is linear (only fills the whole bar when hitting the max threshold)
                 val sentHeatRatio = rateToHeatRatio(data.sentBytesPerSec)
                 val recvHeatRatio = rateToHeatRatio(data.recvBytesPerSec)
-
-                // CPU cycles: 600 Mc/s is a normal moderate load for a desktop app.
-                // We use a shifted log scale (10 Mc/s to 10 Gc/s) for color,
-                // and a linear scale up to 3 Gc/s for the bar width so it doesn't look half-full.
                 val maxCpsLinear = 3_000_000_000.0
                 val cpuHeatRatio = cpuToHeatRatio(data.cpuCyclesPerSec)
 
@@ -497,7 +584,7 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                 val recvHeatColor = getHeatColor(recvHeatRatio)
                 val cpuHeatColor = getHeatColor(cpuHeatRatio)
 
-                val maxBpsLinear = 500.0 * 1024.0 // 500 KiB/s
+                val maxBpsLinear = 500.0 * 1024.0
                 val sentWidthRatio = if (data.sentBytesPerSec > 0) (data.sentBytesPerSec / maxBpsLinear).coerceIn(0.02, 1.0).toFloat() else 0f
                 val recvWidthRatio = if (data.recvBytesPerSec > 0) (data.recvBytesPerSec / maxBpsLinear).coerceIn(0.02, 1.0).toFloat() else 0f
                 val cpuWidthRatio = if (data.cpuCyclesPerSec > 0) (data.cpuCyclesPerSec / maxCpsLinear).coerceIn(0.02, 1.0).toFloat() else 0f
@@ -506,56 +593,29 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text("Sent Heat", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.width(70.dp))
                         Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(14.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(NetprofColorHeatNone)
+                            modifier = Modifier.weight(1f).height(14.dp).clip(RoundedCornerShape(4.dp)).background(NetprofColorHeatNone)
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .fillMaxWidth(sentWidthRatio)
-                                    .background(sentHeatColor)
-                            )
+                            Box(modifier = Modifier.fillMaxHeight().fillMaxWidth(sentWidthRatio).background(sentHeatColor))
                         }
-                        Text(formatRate(data.sentBytesPerSec), fontSize = 11.sp, modifier = Modifier.width(90.dp), textAlign = TextAlign.End)
+                        Text(formatRate(data.sentBytesPerSec), fontSize = 11.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.width(90.dp), textAlign = TextAlign.End)
                     }
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text("Recv Heat", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.width(70.dp))
                         Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(14.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(NetprofColorHeatNone)
+                            modifier = Modifier.weight(1f).height(14.dp).clip(RoundedCornerShape(4.dp)).background(NetprofColorHeatNone)
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .fillMaxWidth(recvWidthRatio)
-                                    .background(recvHeatColor)
-                            )
+                            Box(modifier = Modifier.fillMaxHeight().fillMaxWidth(recvWidthRatio).background(recvHeatColor))
                         }
-                        Text(formatRate(data.recvBytesPerSec), fontSize = 11.sp, modifier = Modifier.width(90.dp), textAlign = TextAlign.End)
+                        Text(formatRate(data.recvBytesPerSec), fontSize = 11.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.width(90.dp), textAlign = TextAlign.End)
                     }
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text("CPU Heat", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.width(70.dp))
                         Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(14.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(NetprofColorHeatNone)
+                            modifier = Modifier.weight(1f).height(14.dp).clip(RoundedCornerShape(4.dp)).background(NetprofColorHeatNone)
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .fillMaxWidth(cpuWidthRatio)
-                                    .background(cpuHeatColor)
-                            )
+                            Box(modifier = Modifier.fillMaxHeight().fillMaxWidth(cpuWidthRatio).background(cpuHeatColor))
                         }
-                        Text(formatCycles(data.cpuCyclesPerSec), fontSize = 11.sp, modifier = Modifier.width(90.dp), textAlign = TextAlign.End)
+                        Text(formatCycles(data.cpuCyclesPerSec), fontSize = 11.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.width(90.dp), textAlign = TextAlign.End)
                     }
                 }
 
@@ -578,142 +638,95 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                 }
 
                 val scrollState = rememberScrollState()
+
+                // Scroll container now includes BOTH the FlowRow boxes AND the Chart
                 Box(modifier = Modifier.fillMaxSize()) {
-                    FlowRow(
+                    Column(
                         modifier = Modifier
                             .fillMaxSize()
                             .verticalScroll(scrollState)
-                            .padding(end = 12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                            .padding(end = 12.dp, bottom = 16.dp)
                     ) {
-                        // smaller boxes: we now have 2x as many (TCP + UDP per packet ID)
-                        val itemModifier = Modifier.width(118.dp).height(64.dp)
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            val itemModifier = Modifier.width(118.dp).height(64.dp)
 
-                        val totalMidBytes = data.midSentBytes + data.midRecvBytes
-                        val tooltipTextMid = buildString {
-                            appendLine("Middleware Custom Packets (NGC)")
-                            appendLine("━━━━━━━━━━━━━━━━━━━━━━━━")
-                            appendLine("Sent: ${formatBytes(data.midSentBytes)}")
-                            appendLine("Recv: ${formatBytes(data.midRecvBytes)}")
-                            appendLine("Rate: ${formatRate(data.midBytesPerSec)}")
-                            appendLine("━━━━━━━━━━━━━━━━━━━━━━━━")
-                            appendLine("Total: ${formatBytes(totalMidBytes)}")
-                        }
-
-                        Tooltip(text = tooltipTextMid) {
-                            Column(
-                                modifier = itemModifier
-                                    .clip(RoundedCornerShape(6.dp))
-                                    .background(NetprofColorMiddleware)
-                                    .padding(6.dp),
-                                verticalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Text(
-                                        text = "MIDDLEWARE",
-                                        fontSize = 9.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = NetprofColorTextLight,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        modifier = Modifier.weight(1f, fill = false)
-                                    )
-                                    Text(
-                                        text = "NGC",
-                                        fontSize = 8.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = NetprofColorTextLight.copy(alpha = 0.7f)
-                                    )
-                                }
-                                Column {
-                                    Text(
-                                        text = formatBytes(totalMidBytes),
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = NetprofColorTextLight
-                                    )
-                                    Text(
-                                        text = "S: ${formatBytes(data.midSentBytes)} | R: ${formatBytes(data.midRecvBytes)}",
-                                        fontSize = 8.sp,
-                                        color = NetprofColorTextLight.copy(alpha = 0.8f)
-                                    )
-                                }
-                            }
-                        }
-
-                        data.packets.forEach { stat ->
-                            val totalBytes = stat.sentBytes + stat.recvBytes
-                            val totalPkts = stat.sentCount + stat.recvCount
-
-                            // Heat is based on the CURRENT RATE (bytes/sec) of THIS transport, log-scaled
-                            val heatRatio = rateToHeatRatio(stat.bytesPerSec)
-                            val bgColor = getHeatColor(heatRatio)
-
-                            val textColor = if (heatRatio > 0.6f) NetprofColorTextDark else NetprofColorTextLight
-
-                            val tooltipText = buildString {
-                                appendLine("Packet: ${stat.name}")
-                                appendLine("Transport: ${stat.transport}")
-                                appendLine("ID: 0x${stat.id.value.toString(16).uppercase().padStart(2, '0')}")
+                            val totalMidBytes = data.midSentBytes + data.midRecvBytes
+                            val tooltipTextMid = buildString {
+                                appendLine("Middleware Custom Packets (NGC)")
                                 appendLine("━━━━━━━━━━━━━━━━━━━━━━━━")
-                                appendLine("Sent: ${stat.sentCount} pkts (${formatBytes(stat.sentBytes)})")
-                                appendLine("Recv: ${stat.recvCount} pkts (${formatBytes(stat.recvBytes)})")
-                                appendLine("Rate: ${formatRate(stat.bytesPerSec)}")
+                                appendLine("Sent: ${formatBytes(data.midSentBytes)}")
+                                appendLine("Recv: ${formatBytes(data.midRecvBytes)}")
+                                appendLine("Rate: ${formatRate(data.midBytesPerSec)}")
                                 appendLine("━━━━━━━━━━━━━━━━━━━━━━━━")
-                                appendLine("Total: $totalPkts pkts (${formatBytes(totalBytes)})")
+                                appendLine("Total: ${formatBytes(totalMidBytes)}")
                             }
 
-                            Tooltip(text = tooltipText) {
+                            Tooltip(text = tooltipTextMid) {
                                 Column(
-                                    modifier = itemModifier
-                                        .clip(RoundedCornerShape(6.dp))
-                                        .background(bgColor)
-                                        .padding(6.dp),
+                                    modifier = itemModifier.clip(RoundedCornerShape(6.dp)).background(NetprofColorMiddleware).padding(6.dp),
                                     verticalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Text(
-                                            text = stat.name,
-                                            fontSize = 9.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = textColor,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis,
-                                            modifier = Modifier.weight(1f, fill = false)
-                                        )
-                                        Text(
-                                            text = stat.transport,
-                                            fontSize = 8.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = textColor.copy(alpha = 0.7f)
-                                        )
+                                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        Text(text = "MIDDLEWARE", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = NetprofColorTextLight, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                                        Text(text = "NGC", fontSize = 8.sp, fontWeight = FontWeight.Bold, color = NetprofColorTextLight.copy(alpha = 0.7f))
                                     }
                                     Column {
-                                        Text(
-                                            text = formatBytes(totalBytes),
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.SemiBold,
-                                            color = textColor
-                                        )
-                                        Text(
-                                            text = "${formatRate(stat.bytesPerSec)} | $totalPkts pkts",
-                                            fontSize = 8.sp,
-                                            color = textColor.copy(alpha = 0.8f)
-                                        )
+                                        Text(text = formatBytes(totalMidBytes), fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = NetprofColorTextLight)
+                                        Text(text = "S: ${formatBytes(data.midSentBytes)} | R: ${formatBytes(data.midRecvBytes)}", fontSize = 8.sp, color = NetprofColorTextLight.copy(alpha = 0.8f))
+                                    }
+                                }
+                            }
+
+                            data.packets.forEach { stat ->
+                                val totalBytes = stat.sentBytes + stat.recvBytes
+                                val totalPkts = stat.sentCount + stat.recvCount
+                                val heatRatio = rateToHeatRatio(stat.bytesPerSec)
+                                val bgColor = getHeatColor(heatRatio)
+                                val textColor = if (heatRatio > 0.6f) NetprofColorTextDark else NetprofColorTextLight
+
+                                val tooltipText = buildString {
+                                    appendLine("Packet: ${stat.name}")
+                                    appendLine("Transport: ${stat.transport}")
+                                    appendLine("ID: 0x${stat.id.value.toString(16).uppercase().padStart(2, '0')}")
+                                    appendLine("━━━━━━━━━━━━━━━━━━━━━━━━")
+                                    appendLine("Sent: ${stat.sentCount} pkts (${formatBytes(stat.sentBytes)})")
+                                    appendLine("Recv: ${stat.recvCount} pkts (${formatBytes(stat.recvBytes)})")
+                                    appendLine("Rate: ${formatRate(stat.bytesPerSec)}")
+                                    appendLine("━━━━━━━━━━━━━━━━━━━━━━━━")
+                                    appendLine("Total: $totalPkts pkts (${formatBytes(totalBytes)})")
+                                }
+
+                                Tooltip(text = tooltipText) {
+                                    Column(
+                                        modifier = itemModifier.clip(RoundedCornerShape(6.dp)).background(bgColor).padding(6.dp),
+                                        verticalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                            Text(text = stat.name, fontSize = 9.sp, fontWeight = FontWeight.Bold, color = textColor, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                                            Text(text = stat.transport, fontSize = 8.sp, fontWeight = FontWeight.Bold, color = textColor.copy(alpha = 0.7f))
+                                        }
+                                        Column {
+                                            Text(text = formatBytes(totalBytes), fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = textColor)
+                                            Text(text = "${formatRate(stat.bytesPerSec)} | $totalPkts pkts", fontSize = 8.sp, color = textColor.copy(alpha = 0.8f))
+                                        }
                                     }
                                 }
                             }
                         }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Chart is now inside the scrollable area, below the boxes
+                        NetworkChart(
+                            sentHistory = chartHistory.sentHistory,
+                            recvHistory = chartHistory.recvHistory,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
+
                     CustomVerticalScrollbar2(
                         scrollState = scrollState,
                         modifier = Modifier.align(Alignment.CenterEnd)
