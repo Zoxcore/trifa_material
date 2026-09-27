@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -267,18 +268,120 @@ fun RowScope.SummaryCard(
 }
 
 @Composable
-fun UptimeCard(title: String, uptime: String, accent: Color) {
+fun UptimeCard(
+    title: String,
+    uptime: String,
+    avgSendRate: String,
+    avgRecvRate: String,
+    estimate24h: String,
+    accent: Color,
+    modifier: Modifier = Modifier
+) {
     val isLight = MaterialTheme.colors.isLight
+    val mainText = MaterialTheme.colors.onSurface
+    val secondaryText = mainText.copy(alpha = 0.75f)
+
     Column(
-        modifier = Modifier
-            .width(130.dp)
+        modifier = modifier
             .clip(RoundedCornerShape(8.dp))
             .background(accent.copy(alpha = if (isLight) 0.10f else 0.20f))
-            .padding(horizontal = 10.dp, vertical = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(12.dp, 12.dp, 5.dp, 9.dp),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Text(text = title, color = accent, fontWeight = FontWeight.Bold, fontSize = 10.sp)
-        Text(text = uptime, color = MaterialTheme.colors.onSurface, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+        // Row 1: Tox uptime | 00:00:00
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title,
+                color = accent,
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp
+            )
+            Text(
+                text = uptime,
+                color = mainText,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                fontFamily = FontFamily.Monospace // Prevents jitter on ticking clock
+            )
+        }
+
+        // Row 2: average: | S: xx kb/s   R: yy kb/s
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "average:",
+                color = secondaryText,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 11.sp
+            )
+
+            // Split S and R into their own isolated layout blocks
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "S:",
+                    color = secondaryText,
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(end = 4.dp)
+                )
+                Text(
+                    text = avgSendRate,
+                    color = mainText,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.End,
+                    fontFamily = FontFamily.Monospace,
+                    modifier = Modifier.width(75.dp) // Fixed width prevents S from jumping
+                )
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Text(
+                    text = "R:",
+                    color = secondaryText,
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(end = 4.dp)
+                )
+                Text(
+                    text = avgRecvRate,
+                    color = mainText,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.End,
+                    fontFamily = FontFamily.Monospace,
+                    modifier = Modifier.width(75.dp) // R expands left inside this box only
+                )
+            }
+        }
+
+        // Row 3: 24hrs: | x.xx GB
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "24hrs:",
+                color = secondaryText,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 11.sp
+            )
+            Text(
+                text = estimate24h,
+                color = mainText,
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp,
+                textAlign = TextAlign.End,
+                fontFamily = FontFamily.Monospace // Prevents jitter when bytes roll over
+            )
+        }
     }
 }
 
@@ -548,7 +651,7 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.Top // Align to top since card heights vary now
                 ) {
                     SummaryCard(
                         "Total Sent",
@@ -568,10 +671,23 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                         formatBytes(data.tcpRecvBytes),
                         formatBytes(data.udpRecvBytes)
                     )
+
+                    // --- NEW: Calculate averages and 24h estimate ---
+                    val uptimeSec = data.uptimeMillis / 1000.0
+                    val avgSentBps = if (uptimeSec > 0) (data.totalSentBytes / uptimeSec).toLong() else 0L
+                    val avgRecvBps = if (uptimeSec > 0) (data.totalRecvBytes / uptimeSec).toLong() else 0L
+                    val totalNetBytes = data.totalSentBytes + data.totalRecvBytes
+                    // Multiply by 86400000 (ms in 24 hours) to get the 24h estimate
+                    val estimate24hBytes = if (data.uptimeMillis > 0) ((totalNetBytes.toDouble() / data.uptimeMillis) * 86400000.0).toLong() else 0L
+
                     UptimeCard(
-                        "Tox Uptime",
-                        formatUptime(data.uptimeMillis),
-                        netprofAccent(NetprofUptimeAccentLight, NetprofUptimeAccentDark)
+                        title = "Tox Uptime",
+                        uptime = formatUptime(data.uptimeMillis),
+                        avgSendRate = formatRate(avgSentBps),
+                        avgRecvRate = formatRate(avgRecvBps),
+                        estimate24h = formatBytes(estimate24hBytes),
+                        accent = netprofAccent(NetprofUptimeAccentLight, NetprofUptimeAccentDark),
+                        modifier = Modifier.weight(1f) // Makes it exactly 1/3 of the row width
                     )
                 }
 
