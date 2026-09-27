@@ -482,6 +482,7 @@ if [ "$1""x" == "localx" ]; then
     LOGG=" -DMIN_LOGGER_LEVEL=LOGGER_LEVEL_DEBUG "
 else
     unset LOGG
+    rm -Rf c-toxcore
     git clone https://github.com/zoff99/c-toxcore c-toxcore
 fi
 cd c-toxcore/
