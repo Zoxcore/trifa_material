@@ -1379,8 +1379,8 @@ class TrifaToxService
                         {
                             if (is_friend_online_real(tox_friend_by_public_key(m_resend_v0.tox_friendpubkey)) == 0)
                             {
-                                Log.i(TAG, "resend_old_messages:RET:01:" +
-                                            get_friend_name_from_pubkey(m_resend_v0.tox_friendpubkey))
+                                // Log.i(TAG, "resend_old_messages:RET:01:friend not online:" +
+                                //            get_friend_name_from_pubkey(m_resend_v0.tox_friendpubkey))
                                 continue
                             }
                         }
