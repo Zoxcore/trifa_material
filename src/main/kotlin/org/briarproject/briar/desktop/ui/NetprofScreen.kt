@@ -516,7 +516,7 @@ fun NetworkChart(
                     drawDataLine(sentHistory, sentColor)
                 }
 
-                // X-Axis Labels — always show full 5-minute range
+                // X-Axis Labels - always show full 5-minute range
                 Row(
                     modifier = Modifier.fillMaxWidth().height(20.dp).padding(top = 4.dp, start = 2.dp, end = 2.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
