@@ -1126,7 +1126,7 @@ class MainActivity
          * Returns: 0=success, -99=tox NULL
          */
         @JvmStatic
-        external fun tox_group_mid_on_group_delete(group_number: Long): Int
+        external fun tox_group_mid_on_group_delete(group_id: String): Int
 
         /**
          * Returns the number of peers in the persistent middleware roster.

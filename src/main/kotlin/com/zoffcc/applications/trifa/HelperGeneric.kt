@@ -56,6 +56,8 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_delete
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_capabilities
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_friend_get_connection_status
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_leave
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_mid_announce_leave
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_mid_on_group_delete
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_peer_get_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_group_self_get_public_key
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_messagev3_friend_send_message
@@ -163,7 +165,9 @@ object HelperGeneric {
         delete_group(group_id)
         if (group_num_temp > -1)
         {
+            tox_group_mid_announce_leave(group_num_temp)
             tox_group_leave(group_num_temp, "quit")
+            tox_group_mid_on_group_delete(group_id)
             update_savedata_file_wrapper()
 
             try
