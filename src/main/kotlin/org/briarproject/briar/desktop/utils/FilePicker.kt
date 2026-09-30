@@ -28,6 +28,24 @@ object FilePicker {
 
     private val SUPPORTED_EXTENSIONS_IMAGE = setOf("png", "jpg", "jpeg", "gif", "webp")
 
+    fun saveFileUsingDialog(parent: Frame? = null, onCloseRequest: (directory: String?, filename: String?) -> Unit) {
+        val dialog = java.awt.FileDialog(parent)
+        dialog.isMultipleMode = false
+        // FileDialog.SAVE allows the user to pick a directory and enter/overwrite a filename
+        dialog.mode = FileDialog.SAVE
+        dialog.isVisible = true
+        val files = dialog.files
+        val file = if (files == null || files.isEmpty()) null else files[0]
+        Log.i(TAG, "Saving to file '$file'")
+        if (file != null) {
+            try {
+                onCloseRequest(file.absoluteFile.parent, file.absoluteFile.name)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     fun pickFileUsingDialog(parent: Frame? = null, onCloseRequest: (directory: String?, filename: String?) -> Unit) {
         val dialog = java.awt.FileDialog(parent)
         dialog.isMultipleMode = false

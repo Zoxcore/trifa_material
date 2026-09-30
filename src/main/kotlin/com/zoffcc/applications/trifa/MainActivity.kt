@@ -544,6 +544,9 @@ class MainActivity
         external fun update_savedata_file(tox_encrypt_passphrase_hash: String?)
 
         @JvmStatic
+        external fun export_savedata_file_unsecure(tox_encrypt_passphrase_hash: String, export_full_path_of_file: String)
+
+        @JvmStatic
         external fun get_my_toxid(): String
 
         @JvmStatic

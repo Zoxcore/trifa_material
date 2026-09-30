@@ -115,6 +115,7 @@ import globalstore
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.briarproject.briar.desktop.ui.VerticallyScrollableArea
+import org.briarproject.briar.desktop.utils.FilePicker.saveFileUsingDialog
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import savepathstore
 import update_bootstrap_nodes_from_internet
@@ -343,6 +344,29 @@ private fun button_settings()
                 Text(i18n("ui.setting.open_data"))
             }
         }
+
+        Row(Modifier.wrapContentHeight().fillMaxWidth().padding(start = 15.dp)) {
+            Button(modifier = Modifier.width(400.dp),
+                enabled = true,
+                onClick = {
+                    saveFileUsingDialog(onCloseRequest = { dir, file ->
+                        if (dir != null && file != null) {
+                            val exportPath = dir + File.separator + file
+                            GlobalScope.launch {
+                                try {
+                                    MainActivity.export_savedata_file_unsecure(password_hash ?: "", exportPath)
+                                    SnackBarToast("Tox save exported successfully")
+                                } catch (e: Exception) {
+                                    SnackBarToast("Error exporting Tox save: ${e.message}")
+                                }
+                            }
+                        }
+                    })
+                })
+            {
+                Text("Export Tox Save")
+            }
+        }
     }
 
     Row(Modifier.wrapContentHeight().fillMaxWidth().padding(start = 15.dp)) {
@@ -359,26 +383,28 @@ private fun button_settings()
         }
     }
 
-    Row(Modifier.wrapContentHeight().fillMaxWidth().padding(start = 15.dp)) {
-        var loading_nodes by remember { mutableStateOf(false) }
-        Button(modifier = Modifier.width(400.dp),
-            enabled = if (loading_nodes) false else true,
-            onClick = {
-                GlobalScope.launch {
-                    loading_nodes = true
-                    try
-                    {
-                        update_bootstrap_nodes_from_internet()
+    if (!savepathdata.savePathEnabled)
+    {
+        Row(Modifier.wrapContentHeight().fillMaxWidth().padding(start = 15.dp)) {
+            var loading_nodes by remember { mutableStateOf(false) }
+            Button(modifier = Modifier.width(400.dp),
+                enabled = if (loading_nodes) false else true,
+                onClick = {
+                    GlobalScope.launch {
+                        loading_nodes = true
+                        try
+                        {
+                            update_bootstrap_nodes_from_internet()
+                        } catch (_: Exception)
+                        {
+                        }
+                        loading_nodes = false
+                        SnackBarToast(i18n("ui.setting.nodes_updated"))
                     }
-                    catch(_: Exception)
-                    {
-                    }
-                    loading_nodes = false
-                    SnackBarToast(i18n("ui.setting.nodes_updated"))
-                }
-            })
-        {
-            Text(i18n("ui.setting.update_bootstrap"))
+                })
+            {
+                Text(i18n("ui.setting.update_bootstrap"))
+            }
         }
     }
 }
