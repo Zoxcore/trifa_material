@@ -516,6 +516,10 @@ fun App()
                                                 Log.i(TAG, "is stopped now")
                                                 tox_running_state = tox_running_state_wrapper
                                                 start_button_text = "start"
+                                                // reset passwords to default -----------
+                                                MainActivity.password_hash = password_hash_unencrypted_default
+                                                MainActivity.db_password = db_password_unencrypted_default
+                                                // reset passwords to default -----------
                                             }.start()
                                             TrifaToxService.stop_me = true
                                         } else if (tox_running_state == "stopped")
