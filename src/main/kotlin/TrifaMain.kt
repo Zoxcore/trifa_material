@@ -79,6 +79,7 @@ import androidx.compose.material.icons.filled.SafetyCheck
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.VideoLabel
 import androidx.compose.material.icons.filled.Videocam
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -375,6 +376,7 @@ fun App()
     // --- New State Variables for Password Dialogs ---
     var showSetPasswordDialog by remember { mutableStateOf(false) }
     var showUnlockDialog by remember { mutableStateOf(false) }
+    var showSkipWarningDialog by remember { mutableStateOf(false) }
     var passwordInput by remember { mutableStateOf("") }
     var newPasswordInput by remember { mutableStateOf("") }
     var confirmPasswordInput by remember { mutableStateOf("") }
@@ -1974,7 +1976,7 @@ fun App()
     }
 
     if (showSetPasswordDialog) {
-        AlertDialog(
+        androidx.compose.material3.AlertDialog(
             onDismissRequest = { /* Block UI; prevent clicking outside */ },
             properties = DialogProperties(usePlatformDefaultWidth = false),
             modifier = Modifier
@@ -1982,7 +1984,7 @@ fun App()
                 .wrapContentHeight()
                 .widthIn(max = 500.dp)
         ) {
-            Surface(
+            androidx.compose.material3.Surface(
                 shape = RoundedCornerShape(28.dp),
                 tonalElevation = 6.dp,
                 color = androidx.compose.material3.MaterialTheme.colorScheme.surface
@@ -1992,16 +1994,17 @@ fun App()
                 ) {
                     // Modern Two-Tier Header Layout
                     Column(modifier = Modifier.padding(bottom = 16.dp)) {
-                        Text(
+                        androidx.compose.material3.Text(
                             text = "Set Password",
                             style = androidx.compose.material3.MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.SemiBold,
                             color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text(
+                        androidx.compose.material3.Text(
                             text = "This is a fresh start. Please set a password to encrypt your data on disk.",
-                            style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                            style = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
+                            fontSize = 18.sp, // Explicitly larger text
                             color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -2009,15 +2012,15 @@ fun App()
                     Spacer(modifier = Modifier.height(8.dp))
 
                     // New Password Field
-                    OutlinedTextField(
+                    androidx.compose.material3.OutlinedTextField(
                         value = newPasswordInput,
                         onValueChange = { newPasswordInput = it; passwordError = "" },
-                        label = { Text("New Password") },
+                        label = { androidx.compose.material3.Text("New Password") },
                         singleLine = true,
                         visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth(),
-                        colors = OutlinedTextFieldDefaults.colors(
+                        colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = androidx.compose.material3.MaterialTheme.colorScheme.primary,
                             unfocusedBorderColor = androidx.compose.material3.MaterialTheme.colorScheme.outlineVariant
                         )
@@ -2035,16 +2038,16 @@ fun App()
                         androidx.compose.material3.MaterialTheme.colorScheme.error // Red
                     }
 
-                    OutlinedTextField(
+                    androidx.compose.material3.OutlinedTextField(
                         value = confirmPasswordInput,
                         onValueChange = { confirmPasswordInput = it; passwordError = "" },
-                        label = { Text("Confirm Password") },
+                        label = { androidx.compose.material3.Text("Confirm Password") },
                         singleLine = true,
                         visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth(),
                         isError = confirmPasswordInput.isNotEmpty() && !passwordsMatch,
-                        colors = OutlinedTextFieldDefaults.colors(
+                        colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = confirmBorderColor,
                             unfocusedBorderColor = confirmBorderColor,
                             focusedTextColor = if (confirmPasswordInput.isNotEmpty() && !passwordsMatch) androidx.compose.material3.MaterialTheme.colorScheme.error else androidx.compose.material3.MaterialTheme.colorScheme.onSurface,
@@ -2056,14 +2059,14 @@ fun App()
                     if (confirmPasswordInput.isNotEmpty() && !passwordsMatch) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
+                            androidx.compose.material3.Icon(
                                 Icons.Filled.Error,
                                 contentDescription = null,
                                 tint = androidx.compose.material3.MaterialTheme.colorScheme.error,
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(Modifier.width(8.dp))
-                            Text(
+                            androidx.compose.material3.Text(
                                 "Passwords do not match",
                                 color = androidx.compose.material3.MaterialTheme.colorScheme.error,
                                 style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
@@ -2076,14 +2079,14 @@ fun App()
                     if (passwordError.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(12.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
+                            androidx.compose.material3.Icon(
                                 Icons.Filled.Error,
                                 contentDescription = null,
                                 tint = androidx.compose.material3.MaterialTheme.colorScheme.error,
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(Modifier.width(8.dp))
-                            Text(
+                            androidx.compose.material3.Text(
                                 passwordError,
                                 color = androidx.compose.material3.MaterialTheme.colorScheme.error,
                                 style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
@@ -2100,13 +2103,13 @@ fun App()
                         horizontalArrangement = Arrangement.End,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        TextButton(
+                        androidx.compose.material3.TextButton(
                             onClick = {
-                                showSetPasswordDialog = false
-                                startTox(password_hash_unencrypted_default, db_password_unencrypted_default)
+                                // Trigger the warning dialog instead of skipping immediately
+                                showSkipWarningDialog = true
                             }
                         ) {
-                            Text(
+                            androidx.compose.material3.Text(
                                 text = "Skip Password",
                                 style = androidx.compose.material3.MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.SemiBold
@@ -2115,7 +2118,7 @@ fun App()
 
                         Spacer(modifier = Modifier.width(8.dp))
 
-                        Button(
+                        androidx.compose.material3.Button(
                             enabled = newPasswordInput.isNotEmpty() && newPasswordInput == confirmPasswordInput,
                             shape = RoundedCornerShape(100.dp),
                             onClick = {
@@ -2129,8 +2132,102 @@ fun App()
                                 }
                             }
                         ) {
-                            Text(
+                            androidx.compose.material3.Text(
                                 text = "Set Password",
+                                style = androidx.compose.material3.MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // --- NEW: Skip Password Warning Dialog ---
+    if (showSkipWarningDialog) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showSkipWarningDialog = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+            modifier = Modifier
+                .padding(24.dp)
+                .wrapContentHeight()
+                .widthIn(max = 500.dp)
+        ) {
+            androidx.compose.material3.Surface(
+                shape = RoundedCornerShape(28.dp),
+                tonalElevation = 6.dp,
+                color = androidx.compose.material3.MaterialTheme.colorScheme.surface
+            ) {
+                Column(modifier = Modifier.padding(24.dp)) {
+                    // Warning Header
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    ) {
+                        androidx.compose.material3.Icon(
+                            imageVector = Icons.Filled.Warning,
+                            contentDescription = "Warning",
+                            tint = androidx.compose.material3.MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(32.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        androidx.compose.material3.Text(
+                            text = "Security Warning",
+                            style = androidx.compose.material3.MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = androidx.compose.material3.MaterialTheme.colorScheme.error
+                        )
+                    }
+
+                    androidx.compose.material3.Text(
+                        text = "You are about to skip setting a password. This means your Tox save file and database will NOT be encrypted on disk.",
+                        style = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium,
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    androidx.compose.material3.Text(
+                        text = "Anyone with physical or remote access to your files will be able to read your messages, contacts, and profile data in plain text. Are you sure you want to continue without encryption?",
+                        style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 16.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        androidx.compose.material3.TextButton(
+                            onClick = { showSkipWarningDialog = false }
+                        ) {
+                            androidx.compose.material3.Text(
+                                text = "Go Back",
+                                style = androidx.compose.material3.MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        androidx.compose.material3.Button(
+                            shape = RoundedCornerShape(100.dp),
+                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                containerColor = androidx.compose.material3.MaterialTheme.colorScheme.error
+                            ),
+                            onClick = {
+                                showSkipWarningDialog = false
+                                showSetPasswordDialog = false
+                                startTox(password_hash_unencrypted_default, db_password_unencrypted_default)
+                            }
+                        ) {
+                            androidx.compose.material3.Text(
+                                text = "Continue Unencrypted",
                                 style = androidx.compose.material3.MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.SemiBold
                             )
