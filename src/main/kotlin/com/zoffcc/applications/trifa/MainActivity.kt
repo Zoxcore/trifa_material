@@ -160,6 +160,7 @@ class MainActivity
         // --------- global config ---------
         // --------- global config ---------
         const val CTOXCORE_NATIVE_LOGGING = false // set "false" for release builds
+        const val ORMA_CURRENT_DB_SCHEMA_VERSION = 14 // increase for database schema changes
         const val AUDIO_PCM_DEBUG_FILES = false // set "false" for release builds
         const val DEBUG_COMPOSE_UI_UPDATES = false // set "false" for release builds
         const val DEBUG_SET_FAKE_WEBCAM = false // set "false" for release builds
@@ -229,16 +230,27 @@ class MainActivity
         var PREF__database_files_dir = "."
 
         //
-        // !!!!!! DEBUG !!!!!! change to real password later !!!!!!
-        // !!!!!! DEBUG !!!!!! change to real password later !!!!!!
+        // !!!!!! default, unencrypted password, never change !!!!!!
+        // !!!!!! default, unencrypted password, never change !!!!!!
         //
-        var password_hash = """passXY!7$9%"""
-        var db_password = """"""
+        var password_hash_unencrypted_default = """passXY!7$9%"""
+        var db_password_unencrypted_default = """"""
+        //
+        // !!!!!! default, unencrypted password, never change !!!!!!
+        // !!!!!! default, unencrypted password, never change !!!!!!
+        //
 
         //
-        // !!!!!! DEBUG !!!!!! change to real password later !!!!!!
-        // !!!!!! DEBUG !!!!!! change to real password later !!!!!!
+        // !!!!!! will change to real password on startup !!!!!!
+        // !!!!!! will change to real password on startup !!!!!!
         //
+        var password_hash = password_hash_unencrypted_default
+        var db_password = db_password_unencrypted_default
+        //
+        // !!!!!! will change to real password on startup !!!!!!
+        // !!!!!! will change to real password on startup !!!!!!
+        //
+
         var semaphore_tox_savedata: CustomSemaphore? = CustomSemaphore(1)
         fun main_init()
         {
