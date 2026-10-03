@@ -67,6 +67,31 @@ buildConfig {
     buildConfigField("String", "PROJECT_VERSION", "\"${project.version}\"")
     buildConfigField("String", "KOTLIN_VERSION", "\"${kotlin.coreLibrariesVersion}\"")
     buildConfigField("String", "COMPOSE_VERSION", "\"${project.findProperty("compose.version")}\"")
+
+    var running_on_nixos = false
+    try
+    {
+        if (os_java_runtime_version!!.contains("nixos"))
+        {
+            running_on_nixos = true
+        }
+        else if (os_java_vm_version!!.contains("nixos"))
+        {
+            running_on_nixos = true
+        }
+    }
+    catch(_: Exception)
+    {
+    }
+    if ((os!!.isLinux) && (os_arch == "amd64") && (!running_on_nixos) && (!build_with_appimage))
+    {
+        buildConfigField("Boolean", "SQLCIPHER_ENABLED", "true")
+    }
+    else
+    {
+        buildConfigField("Boolean", "SQLCIPHER_ENABLED", "false")
+    }
+
     try
     {
         val grgit = if (extra.has("grgit")) null else the<Grgit>()
