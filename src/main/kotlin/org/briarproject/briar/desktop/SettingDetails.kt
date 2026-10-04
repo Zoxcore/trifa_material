@@ -90,6 +90,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import avstatestorecallstate
 import com.zoffcc.applications.sorm.OrmaDatabase
+import com.zoffcc.applications.sorm.OrmaDatabase.set_schema_upgrade_callback
 import com.zoffcc.applications.trifa.HelperFriend.get_g_opts
 import com.zoffcc.applications.trifa.HelperFriend.set_g_opts
 import com.zoffcc.applications.trifa.HelperGeneric
@@ -106,6 +107,9 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__notificatio
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__open_files_directly
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__send_push_notifications
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__use_other_toxproxies
+import com.zoffcc.applications.trifa.MainActivity.Companion.ORMA_CURRENT_DB_SCHEMA_VERSION
+import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__DB_wal_mode
+import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__database_files_dir
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__ngc_mid_active
 import com.zoffcc.applications.trifa.MainActivity.Companion.db_password
 import com.zoffcc.applications.trifa.MainActivity.Companion.db_password_unencrypted_default
@@ -118,7 +122,9 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_set_name
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_self_set_nospam
 import com.zoffcc.applications.trifa.MainActivity.Companion.update_toxid_while_running
 import com.zoffcc.applications.trifa.TAG
+import com.zoffcc.applications.trifa.TrifaToxService
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
+import com.zoffcc.applications.trifa.upgrade_db_schema_do
 import global_prefs
 import globalstore
 import kotlinx.coroutines.GlobalScope
@@ -990,7 +996,7 @@ fun ChangePasswordDialog(onDismiss: () -> Unit) {
                 // Header
                 Column(modifier = Modifier.padding(bottom = 16.dp)) {
                     androidx.compose.material3.Text(
-                        text = "Change Password",
+                        text = if (isCurrentlyUnencrypted) "Set New Password" else "Change Password",
                         style = androidx.compose.material3.MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface
@@ -998,162 +1004,223 @@ fun ChangePasswordDialog(onDismiss: () -> Unit) {
                     Spacer(modifier = Modifier.height(4.dp))
                     androidx.compose.material3.Text(
                         text = if (isCurrentlyUnencrypted)
-                            "Your data is currently unencrypted.\nEncrypting from unencrypted state is not yet supported."
+                            "Your data is currently unencrypted.\nSet a password to encrypt your database and Tox save file on disk."
                         else
                             "Update your encryption password for the database and Tox save file.",
                         style = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
+                        fontSize = 18.sp,
                         color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
-                if (isCurrentlyUnencrypted) {
-                    // Unencrypted state: Show info and close button
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        androidx.compose.material3.Button(
-                            onClick = onDismiss,
-                            shape = RoundedCornerShape(100.dp)
-                        ) {
-                            androidx.compose.material3.Text(
-                                "OK",
-                                style = androidx.compose.material3.MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-                    }
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // ---------- New Password Field ----------
+                androidx.compose.material3.OutlinedTextField(
+                    value = newPasswordInput,
+                    onValueChange = { newPasswordInput = it; passwordError = "" },
+                    label = { androidx.compose.material3.Text("New Password") },
+                    singleLine = true,
+                    visualTransformation = PasswordVisualTransformation(),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = androidx.compose.material3.MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = androidx.compose.material3.MaterialTheme.colorScheme.outlineVariant
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // ---------- Confirm Password Field ----------
+                val passwordsMatch = newPasswordInput.isNotEmpty() && newPasswordInput == confirmPasswordInput
+                val confirmBorderColor = if (confirmPasswordInput.isEmpty()) {
+                    androidx.compose.material3.MaterialTheme.colorScheme.outlineVariant
+                } else if (passwordsMatch) {
+                    Color(0xFF4CAF50)
                 } else {
-                    // Encrypted state: Show password fields
+                    androidx.compose.material3.MaterialTheme.colorScheme.error
+                }
+
+                androidx.compose.material3.OutlinedTextField(
+                    value = confirmPasswordInput,
+                    onValueChange = { confirmPasswordInput = it; passwordError = "" },
+                    label = { androidx.compose.material3.Text("Confirm Password") },
+                    singleLine = true,
+                    visualTransformation = PasswordVisualTransformation(),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = confirmPasswordInput.isNotEmpty() && !passwordsMatch,
+                    colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = confirmBorderColor,
+                        unfocusedBorderColor = confirmBorderColor,
+                        focusedTextColor = if (confirmPasswordInput.isNotEmpty() && !passwordsMatch)
+                            androidx.compose.material3.MaterialTheme.colorScheme.error
+                        else
+                            androidx.compose.material3.MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = if (confirmPasswordInput.isNotEmpty() && !passwordsMatch)
+                            androidx.compose.material3.MaterialTheme.colorScheme.error
+                        else
+                            androidx.compose.material3.MaterialTheme.colorScheme.onSurface
+                    )
+                )
+
+                // ---------- Mismatch Indicator ----------
+                if (confirmPasswordInput.isNotEmpty() && !passwordsMatch) {
                     Spacer(modifier = Modifier.height(8.dp))
-
-                    androidx.compose.material3.OutlinedTextField(
-                        value = newPasswordInput,
-                        onValueChange = { newPasswordInput = it; passwordError = "" },
-                        label = { androidx.compose.material3.Text("New Password") },
-                        singleLine = true,
-                        visualTransformation = PasswordVisualTransformation(),
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = androidx.compose.material3.MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = androidx.compose.material3.MaterialTheme.colorScheme.outlineVariant
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        androidx.compose.material3.Icon(
+                            Icons.Filled.Error,
+                            contentDescription = null,
+                            tint = androidx.compose.material3.MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(20.dp)
                         )
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    val passwordsMatch = newPasswordInput.isNotEmpty() && newPasswordInput == confirmPasswordInput
-                    val confirmBorderColor = if (confirmPasswordInput.isEmpty()) {
-                        androidx.compose.material3.MaterialTheme.colorScheme.outlineVariant
-                    } else if (passwordsMatch) {
-                        Color(0xFF4CAF50) // Green
-                    } else {
-                        androidx.compose.material3.MaterialTheme.colorScheme.error // Red
-                    }
-
-                    androidx.compose.material3.OutlinedTextField(
-                        value = confirmPasswordInput,
-                        onValueChange = { confirmPasswordInput = it; passwordError = "" },
-                        label = { androidx.compose.material3.Text("Confirm Password") },
-                        singleLine = true,
-                        visualTransformation = PasswordVisualTransformation(),
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.fillMaxWidth(),
-                        isError = confirmPasswordInput.isNotEmpty() && !passwordsMatch,
-                        colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = confirmBorderColor,
-                            unfocusedBorderColor = confirmBorderColor,
-                            focusedTextColor = if (confirmPasswordInput.isNotEmpty() && !passwordsMatch) androidx.compose.material3.MaterialTheme.colorScheme.error else androidx.compose.material3.MaterialTheme.colorScheme.onSurface,
-                            unfocusedTextColor = if (confirmPasswordInput.isNotEmpty() && !passwordsMatch) androidx.compose.material3.MaterialTheme.colorScheme.error else androidx.compose.material3.MaterialTheme.colorScheme.onSurface
+                        Spacer(Modifier.width(8.dp))
+                        androidx.compose.material3.Text(
+                            "Passwords do not match",
+                            color = androidx.compose.material3.MaterialTheme.colorScheme.error,
+                            style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium
                         )
-                    )
-
-                    if (confirmPasswordInput.isNotEmpty() && !passwordsMatch) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            androidx.compose.material3.Icon(
-                                Icons.Filled.Error,
-                                contentDescription = null,
-                                tint = androidx.compose.material3.MaterialTheme.colorScheme.error,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            androidx.compose.material3.Text(
-                                "Passwords do not match",
-                                color = androidx.compose.material3.MaterialTheme.colorScheme.error,
-                                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
                     }
+                }
 
-                    if (passwordError.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            androidx.compose.material3.Icon(
-                                Icons.Filled.Error,
-                                contentDescription = null,
-                                tint = androidx.compose.material3.MaterialTheme.colorScheme.error,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            androidx.compose.material3.Text(
-                                passwordError,
-                                color = androidx.compose.material3.MaterialTheme.colorScheme.error,
-                                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
+                // ---------- General Error ----------
+                if (passwordError.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        androidx.compose.material3.Icon(
+                            Icons.Filled.Error,
+                            contentDescription = null,
+                            tint = androidx.compose.material3.MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        androidx.compose.material3.Text(
+                            passwordError,
+                            color = androidx.compose.material3.MaterialTheme.colorScheme.error,
+                            style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
+                }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically
+                // ---------- Action Buttons ----------
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    androidx.compose.material3.TextButton(
+                        onClick = onDismiss,
+                        enabled = !isLoading
                     ) {
-                        androidx.compose.material3.TextButton(
-                            onClick = onDismiss,
-                            enabled = !isLoading
-                        ) {
-                            androidx.compose.material3.Text(
-                                text = "Cancel",
-                                style = androidx.compose.material3.MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
+                        androidx.compose.material3.Text(
+                            text = "Cancel",
+                            style = androidx.compose.material3.MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
 
-                        Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
 
-                        androidx.compose.material3.Button(
-                            enabled = newPasswordInput.isNotEmpty() && newPasswordInput == confirmPasswordInput && !isLoading,
-                            shape = RoundedCornerShape(100.dp),
-                            onClick = {
-                                isLoading = true
-                                passwordError = ""
+                    androidx.compose.material3.Button(
+                        enabled = newPasswordInput.isNotEmpty()
+                                && newPasswordInput == confirmPasswordInput
+                                && !isLoading,
+                        shape = RoundedCornerShape(100.dp),
+                        onClick = {
+                            isLoading = true
+                            passwordError = ""
 
+                            val safeSqlPass = newPasswordInput.replace("'", "''")
+
+                            if (isCurrentlyUnencrypted) {
+                                // =============================================
+                                //  UNENCRYPTED  ->  ENCRYPTED
+                                // =============================================
+                                try {
+                                    val dbDir = MainActivity.PREF__database_files_dir
+                                    val originalDbPath = dbDir + File.separator + "main.db"
+                                    val encryptedDbPath = dbDir + File.separator + "encrypted_temp.db"
+
+                                    // remove leftover temp file from a previous failed attempt
+                                    val leftover = File(encryptedDbPath)
+                                    if (leftover.exists()) leftover.delete()
+
+                                    // 1. attach a new encrypted database
+                                    val attachQuery = """ATTACH DATABASE '$encryptedDbPath' AS encrypted KEY '$safeSqlPass'"""
+                                    OrmaDatabase.run_query_for_single_result(attachQuery)
+
+                                    // 2. clone schema + data into the encrypted database
+                                    OrmaDatabase.run_query_for_single_result("""SELECT sqlcipher_export('encrypted')""")
+
+                                    // 3. detach to close the handle safely
+                                    OrmaDatabase.run_query_for_single_result("""DETACH DATABASE encrypted""")
+
+                                    // 4. swap files: delete original, rename encrypted -> original
+                                    val originalFile = File(originalDbPath)
+                                    val encryptedFile = File(encryptedDbPath)
+
+                                    orma = null
+                                    try {
+                                        OrmaDatabase.shutdown()
+                                    } catch(e: java.lang.Exception) {
+                                        e.printStackTrace()
+                                    }
+
+                                    if (originalFile.exists()) originalFile.delete()
+                                    val renamed = encryptedFile.renameTo(originalFile)
+                                    if (!renamed) {
+                                        throw java.lang.Exception("Failed to rename encrypted database file")
+                                    }
+
+                                    // update global passwords + re-encrypt tox save
+                                    db_password = newPasswordInput
+                                    password_hash = newPasswordInput
+                                    update_savedata_file_wrapper()
+
+                                    // re-initialize orma with the new password
+                                    try {
+                                        set_schema_upgrade_callback { old_version, new_version ->
+                                            Log.i(TrifaToxService.TAG, "REAL:rekey:trying to upgrade schema from " + old_version + " to " + new_version)
+                                            upgrade_db_schema_do(old_version, new_version)
+                                        }
+                                        orma = OrmaDatabase(PREF__database_files_dir + "/main.db", db_password, PREF__DB_wal_mode);
+                                        OrmaDatabase.init(ORMA_CURRENT_DB_SCHEMA_VERSION)
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                        throw java.lang.Exception("Failed to re-initialize database: ${e.message}")
+                                    }
+
+                                    SnackBarToast("Database encrypted successfully")
+                                    onDismiss()
+
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                    passwordError = "Encryption failed: ${e.message}"
+                                }
+
+                            } else {
+                                // =============================================
+                                //  ENCRYPTED  ->  NEW ENCRYPTED  (rekey)
+                                // =============================================
                                 var dbSuccess = false
                                 try {
-                                    val safeSqlPass = newPasswordInput.replace("'", "''")
                                     val query = """PRAGMA rekey = '$safeSqlPass'"""
                                     OrmaDatabase.run_query_for_single_result(query)
                                     dbSuccess = true
                                 } catch (e: Exception) {
-                                    // PRAGMA rekey failed
-                                    e.printStackTrace()
-                                    passwordError = "Failed to change password."
+                                        e.printStackTrace()
+                                        passwordError = "Failed to update database password."
                                 }
 
                                 if (dbSuccess) {
                                     try {
-                                        // Update global variables
-                                        MainActivity.db_password = newPasswordInput
+                                        db_password = newPasswordInput
                                         password_hash = newPasswordInput
-
-                                        // Trigger Tox save update
                                         update_savedata_file_wrapper()
 
                                         SnackBarToast("Password changed successfully")
@@ -1162,22 +1229,23 @@ fun ChangePasswordDialog(onDismiss: () -> Unit) {
                                         passwordError = "Failed to update Tox save: ${e.message}"
                                     }
                                 }
-                                isLoading = false
                             }
-                        ) {
-                            if (isLoading) {
-                                androidx.compose.material3.CircularProgressIndicator(
-                                    modifier = Modifier.size(20.dp),
-                                    color = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary,
-                                    strokeWidth = 2.dp
-                                )
-                            } else {
-                                androidx.compose.material3.Text(
-                                    text = "Change Password",
-                                    style = androidx.compose.material3.MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            }
+
+                            isLoading = false
+                        }
+                    ) {
+                        if (isLoading) {
+                            androidx.compose.material3.CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                color = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            androidx.compose.material3.Text(
+                                text = if (isCurrentlyUnencrypted) "Set Password" else "Change Password",
+                                style = androidx.compose.material3.MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold
+                            )
                         }
                     }
                 }
