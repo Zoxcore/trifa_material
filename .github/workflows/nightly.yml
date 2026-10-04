@@ -902,25 +902,29 @@ jobs:
                printf 'sleep 20\n' >> /tmp/a.sh
                printf 'xdotool mousemove --sync 140 74 click 1\n' >> /tmp/a.sh
                printf 'pwd\n' >> /tmp/a.sh
+               printf 'sleep 1\n' >> /tmp/a.sh
                #######################
                # enter password
                printf 'xdotool mousemove --sync 408 345 click 1\n' >> /tmp/a.sh
                printf 'xdotool type "passW3rd?"\n' >> /tmp/a.sh
+               printf 'sleep 1\n' >> /tmp/a.sh
                # enter confirm password
                printf 'xdotool mousemove --sync 408 429 click 1\n' >> /tmp/a.sh
                printf 'import -window root /tmp/screenshot-linux_001.png\n' >> /tmp/a.sh
                printf 'xdotool type "passW3rd?"\n' >> /tmp/a.sh
                # press "set password"
                printf 'sleep 5\n' >> /tmp/a.sh
-               #######################
+               printf 'import -window root /tmp/screenshot-linux_001a.png\n' >> /tmp/a.sh
                printf 'xdotool mousemove --sync 613 503 click 1\n' >> /tmp/a.sh
+               #######################
                printf 'sleep 5\n' >> /tmp/a.sh
-               printf 'sleep 60\n' >> /tmp/a.sh
+               printf 'import -window root /tmp/screenshot-linux_001b.png\n' >> /tmp/a.sh
+               printf 'sleep 70\n' >> /tmp/a.sh
                printf 'ls -ratl\n' >> /tmp/a.sh
                printf 'cat /home/runner/work/trifa_material/trifa_material/toxid.txt;echo\n' >> /tmp/a.sh
                printf 'cd /home/runner/work/trifa_material/trifa_material/java_tox_tester-ipv6only/\n' >> /tmp/a.sh
                printf './do_run.sh $(cat /home/runner/work/trifa_material/trifa_material/toxid.txt) >/home/runner/work/trifa_material/trifa_material/tester.log 2>&1 &\n' >> /tmp/a.sh
-               printf 'sleep 220\n' >> /tmp/a.sh
+               printf 'sleep 240\n' >> /tmp/a.sh
                printf 'xdotool mousemove --sync 214 295 click 1\n' >> /tmp/a.sh
                printf 'sleep 4\n' >> /tmp/a.sh
                printf 'xdotool mousemove --sync 750 602 click 1\n' >> /tmp/a.sh
@@ -1141,6 +1145,17 @@ jobs:
                printf 'import -window root /tmp/screenshot-linux_002.png\n' >> /tmp/a.sh
                printf 'xdotool mousemove --sync 140 74 click 1\n' >> /tmp/a.sh
                printf 'pwd\n' >> /tmp/a.sh
+               printf 'sleep 10\n' >> /tmp/a.sh
+               #######################
+               # press "skip password"
+               printf 'xdotool mousemove --sync 426 484 click 1\n' >> /tmp/a.sh
+               printf 'sleep 4\n' >> /tmp/a.sh
+               printf 'import -window root /tmp/screenshot-linux_003.png\n' >> /tmp/a.sh
+               # press "confirm warning"
+               printf 'xdotool mousemove --sync 562 469 click 1\n' >> /tmp/a.sh
+               printf 'sleep 4\n' >> /tmp/a.sh
+               printf 'import -window root /tmp/screenshot-linux_003a.png\n' >> /tmp/a.sh
+               #######################
                printf 'sleep 5\n' >> /tmp/a.sh
                printf 'sleep 60\n' >> /tmp/a.sh
                printf 'ls -ratl\n' >> /tmp/a.sh
@@ -1148,7 +1163,6 @@ jobs:
                printf 'cd /home/runner/work/trifa_material/trifa_material/java_tox_tester-master/\n' >> /tmp/a.sh
                printf './do_run.sh $(cat /home/runner/work/trifa_material/trifa_material/toxid.txt) >/home/runner/work/trifa_material/trifa_material/tester.log 2>&1 &\n' >> /tmp/a.sh
                printf 'sleep 220\n' >> /tmp/a.sh
-               printf 'import -window root /tmp/screenshot-linux_003.png\n' >> /tmp/a.sh
                printf 'xdotool mousemove --sync 214 295 click 1\n' >> /tmp/a.sh
                printf 'sleep 4\n' >> /tmp/a.sh
                printf 'import -window root /tmp/screenshot-linux_004.png\n' >> /tmp/a.sh
