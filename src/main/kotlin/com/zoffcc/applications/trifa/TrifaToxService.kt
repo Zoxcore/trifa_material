@@ -28,7 +28,6 @@ import com.zoffcc.applications.trifa.HelperMessage.tox_friend_send_message_wrapp
 import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_messageid
 import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_no_read_recvedts
 import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_resend_count
-import com.zoffcc.applications.trifa.Log.i
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__send_push_notifications
 import com.zoffcc.applications.trifa.MainActivity.Companion.ORMA_CURRENT_DB_SCHEMA_VERSION
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__DB_wal_mode
@@ -120,7 +119,7 @@ class TrifaToxService
                 }
 
                 set_schema_upgrade_callback { old_version, new_version ->
-                    i(TAG, "REAL:trying to upgrade schema from " + old_version + " to " + new_version)
+                    Log.i(TAG, "REAL:trying to upgrade schema from " + old_version + " to " + new_version)
                     upgrade_db_schema_do(old_version, new_version)
                 }
 
@@ -257,15 +256,15 @@ class TrifaToxService
                                 {
                                     // HINT: never iterate faster than TOX_ITERATE_MS_MIN_NORMAL
                                     sleep(TOX_ITERATE_MS_MIN_NORMAL.toLong())
-                                    // Log.i(TAG, "=====>>>>> tox_iteration_interval: "+ TOX_ITERATE_MS_MIN_NORMAL)
+                                    Log.i(TAG, "=====>>>>> tox_iteration_interval: " + tox_iteration_interval_ms)
                                 }
                                 else
                                 {
                                     sleep(tox_iteration_interval_ms)
-                                    if (tox_iteration_interval_ms != 50L)
-                                    {
-                                        Log.i(TAG, "=====>>>>> tox_iteration_interval: " + tox_iteration_interval_ms)
-                                    }
+                                    //if (tox_iteration_interval_ms != 50L)
+                                    //{
+                                    //    Log.i(TAG, "=====>>>>> tox_iteration_interval: " + tox_iteration_interval_ms)
+                                    //}
                                 }
                             }
                         }
