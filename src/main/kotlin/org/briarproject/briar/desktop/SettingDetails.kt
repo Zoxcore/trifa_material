@@ -107,6 +107,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__notificatio
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__open_files_directly
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__send_push_notifications
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__use_other_toxproxies
+import com.zoffcc.applications.trifa.MainActivity.Companion.HALT_TOX_THREAD
 import com.zoffcc.applications.trifa.MainActivity.Companion.ORMA_CURRENT_DB_SCHEMA_VERSION
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__DB_wal_mode
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__database_files_dir
@@ -135,6 +136,7 @@ import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import savepathstore
 import update_bootstrap_nodes_from_internet
 import java.io.File
+import java.lang.Thread.sleep
 import kotlin.random.Random
 import kotlin.random.nextUInt
 import kotlin.random.nextULong
@@ -964,7 +966,7 @@ private fun change_tox_and_db_pass()
     }
 
     if (showChangePasswordDialog) {
-        ChangePasswordDialog(onDismiss = { showChangePasswordDialog = false })
+        ChangePasswordDialog(onDismiss = { HALT_TOX_THREAD = false ; showChangePasswordDialog = false })
     }
 }
 
@@ -1150,6 +1152,9 @@ fun ChangePasswordDialog(onDismiss: () -> Unit) {
                                     val leftover = File(encryptedDbPath)
                                     if (leftover.exists()) leftover.delete()
 
+                                    HALT_TOX_THREAD = true
+                                    sleep(100)
+
                                     // 1. attach a new encrypted database
                                     val attachQuery = """ATTACH DATABASE '$encryptedDbPath' AS encrypted KEY '$safeSqlPass'"""
                                     OrmaDatabase.run_query_for_single_result(attachQuery)
@@ -1174,6 +1179,7 @@ fun ChangePasswordDialog(onDismiss: () -> Unit) {
                                     if (originalFile.exists()) originalFile.delete()
                                     val renamed = encryptedFile.renameTo(originalFile)
                                     if (!renamed) {
+                                        HALT_TOX_THREAD = false
                                         throw java.lang.Exception("Failed to rename encrypted database file")
                                     }
 
@@ -1192,8 +1198,11 @@ fun ChangePasswordDialog(onDismiss: () -> Unit) {
                                         OrmaDatabase.init(ORMA_CURRENT_DB_SCHEMA_VERSION)
                                     } catch (e: Exception) {
                                         e.printStackTrace()
+                                        HALT_TOX_THREAD = false
                                         throw java.lang.Exception("Failed to re-initialize database: ${e.message}")
                                     }
+
+                                    HALT_TOX_THREAD = false
 
                                     SnackBarToast("Database encrypted successfully")
                                     onDismiss()
@@ -1201,7 +1210,10 @@ fun ChangePasswordDialog(onDismiss: () -> Unit) {
                                 } catch (e: Exception) {
                                     e.printStackTrace()
                                     passwordError = "Encryption failed: ${e.message}"
+                                    HALT_TOX_THREAD = false
                                 }
+
+                                HALT_TOX_THREAD = false
 
                             } else {
                                 // =============================================

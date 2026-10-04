@@ -29,6 +29,7 @@ import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_messagei
 import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_no_read_recvedts
 import com.zoffcc.applications.trifa.HelperMessage.update_message_in_db_resend_count
 import com.zoffcc.applications.trifa.MainActivity.Companion.DB_PREF__send_push_notifications
+import com.zoffcc.applications.trifa.MainActivity.Companion.HALT_TOX_THREAD
 import com.zoffcc.applications.trifa.MainActivity.Companion.ORMA_CURRENT_DB_SCHEMA_VERSION
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__DB_wal_mode
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__database_files_dir
@@ -277,6 +278,12 @@ class TrifaToxService
                     }
                     check_if_need_bootstrap_again()
                     tox_iterate()
+
+                    while (HALT_TOX_THREAD)
+                    {
+                        sleep(100)
+                    }
+
                     // Log.i(TAG, "=====>>>>> tox_iterate()")
                     tox_iteration_interval_ms = tox_iteration_interval()
                     // Log.i(TAG, "=====>>>>> tox_iteration_interval: "+ tox_iteration_interval_ms)
