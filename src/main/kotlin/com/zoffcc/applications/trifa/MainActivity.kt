@@ -226,6 +226,10 @@ class MainActivity
         var buffer_size_in_bytes = 0
         var _recBuffer: ByteBuffer? = null
 
+        // HINT: use this to halt the tox thread and stop iterating
+        //       use only for short periods of time (for example to migrate the database)
+        var HALT_TOX_THREAD: Boolean = false
+
         @JvmField
         var PREF__database_files_dir = "."
 
