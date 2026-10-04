@@ -199,6 +199,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__orbot_enabled_
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__v4l2_capture_force_mjpeg
 import com.zoffcc.applications.trifa.MainActivity.Companion.PREF__video_bitrate_mode
 import com.zoffcc.applications.trifa.MainActivity.Companion.accept_incoming_av_call
+import com.zoffcc.applications.trifa.MainActivity.Companion.db_password
 import com.zoffcc.applications.trifa.MainActivity.Companion.db_password_unencrypted_default
 import com.zoffcc.applications.trifa.MainActivity.Companion.decline_incoming_av_call
 import com.zoffcc.applications.trifa.MainActivity.Companion.main_init
@@ -333,6 +334,8 @@ const val MAX_EMOJI_POP_RESULT = 15
 const val MAX_ONE_ON_ONE_MESSAGES_TO_SHOW = 20000
 const val MAX_GROUP_MESSAGES_TO_SHOW = 20000
 const val SNACKBAR_TOAST_MS_DURATION: Long = 1200
+const val COLOR_SQLCIPHER_USING_PASSWORD = 0xff116B1B
+const val COLOR_SQLCIPHER_BUT_NOT_ENCRYPTED = 0xff6685C4
 const val BG_COLOR_RELAY_CONTACT_ITEM = 0x448ABEB9
 const val BG_COLOR_OWN_RELAY_CONTACT_ITEM = 0x44FFFFB9
 const val URL_TEXTVIEW_URL_COLOR = 0xFF223DDC
@@ -1890,7 +1893,15 @@ fun App()
                                 else Icons.Filled.Info,
                             iconSize = 16.dp,
                             enabled = false,
-                            iconTint = if (globalstore2.native_sqlite_type == SQLITE_TYPE.SQLCIPHER) Color(0xff116B1B)
+                            iconTint = if (globalstore2.native_sqlite_type == SQLITE_TYPE.SQLCIPHER) {
+                                if (db_password == db_password_unencrypted_default) {
+                                    Color(COLOR_SQLCIPHER_BUT_NOT_ENCRYPTED)
+                                }
+                                else
+                                {
+                                    Color(COLOR_SQLCIPHER_USING_PASSWORD)
+                                }
+                            }
                                 else if (globalstore2.native_sqlite_type == SQLITE_TYPE.UNLOADED) Color.DarkGray.copy(alpha = 0.7f)
                                 else Color.DarkGray.copy(alpha = 0.7f),
                             contentDescription = "",
