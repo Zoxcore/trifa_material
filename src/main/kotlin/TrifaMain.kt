@@ -1882,7 +1882,7 @@ fun App()
                     val globalstore2 by globalstore.stateFlow.collectAsState()
                     Tooltip(
                         modifier = Modifier.randomDebugBorder().width(18.dp),
-                        text = if (globalstore2.native_sqlite_type == SQLITE_TYPE.SQLCIPHER) "using sqlcipher encrypted database"
+                        text = if (globalstore2.native_sqlite_type == SQLITE_TYPE.SQLCIPHER) "using sqlcipher"
                         else if (globalstore2.native_sqlite_type == SQLITE_TYPE.UNLOADED) "sqlite lib not yet loaded"
                         else "regular sqlite database",
                         textcolor = Color.Black) {
