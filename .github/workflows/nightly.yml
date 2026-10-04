@@ -902,6 +902,18 @@ jobs:
                printf 'sleep 20\n' >> /tmp/a.sh
                printf 'xdotool mousemove --sync 140 74 click 1\n' >> /tmp/a.sh
                printf 'pwd\n' >> /tmp/a.sh
+               #######################
+               # enter password
+               printf 'xdotool mousemove --sync 408 345 click 1\n' >> /tmp/a.sh
+               printf 'xdotool type "passW3rd?"\n' >> /tmp/a.sh
+               # enter confirm password
+               printf 'xdotool mousemove --sync 408 429 click 1\n' >> /tmp/a.sh
+               printf 'import -window root /tmp/screenshot-linux_001.png\n' >> /tmp/a.sh
+               printf 'xdotool type "passW3rd?"\n' >> /tmp/a.sh
+               # press "set password"
+               printf 'sleep 5\n' >> /tmp/a.sh
+               #######################
+               printf 'xdotool mousemove --sync 613 503 click 1\n' >> /tmp/a.sh
                printf 'sleep 5\n' >> /tmp/a.sh
                printf 'sleep 60\n' >> /tmp/a.sh
                printf 'ls -ratl\n' >> /tmp/a.sh
@@ -988,7 +1000,7 @@ jobs:
           uses: actions/upload-artifact@v7
           with:
             name: screenshot-linux
-            path: /tmp/screenshot-linux.png
+            path: /tmp/screenshot-linux*.png
 
         - name: upload-screenshots
           uses: actions/upload-artifact@v7
@@ -1122,9 +1134,11 @@ jobs:
                printf '/home/runner/work/trifa_material/trifa_material/gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64/ run &\n' >> /tmp/a.sh
                printf 'sleep 20\n' >> /tmp/a.sh
                printf 'xwininfo -id $(xdotool getactivewindow)\n' >> /tmp/a.sh
+               printf 'import -window root /tmp/screenshot-linux_001.png\n' >> /tmp/a.sh
                printf 'xdotool mousemove --sync 80 74 click 1\n' >> /tmp/a.sh
                printf 'sleep 2\n' >> /tmp/a.sh
                printf 'sleep 20\n' >> /tmp/a.sh
+               printf 'import -window root /tmp/screenshot-linux_002.png\n' >> /tmp/a.sh
                printf 'xdotool mousemove --sync 140 74 click 1\n' >> /tmp/a.sh
                printf 'pwd\n' >> /tmp/a.sh
                printf 'sleep 5\n' >> /tmp/a.sh
@@ -1134,8 +1148,10 @@ jobs:
                printf 'cd /home/runner/work/trifa_material/trifa_material/java_tox_tester-master/\n' >> /tmp/a.sh
                printf './do_run.sh $(cat /home/runner/work/trifa_material/trifa_material/toxid.txt) >/home/runner/work/trifa_material/trifa_material/tester.log 2>&1 &\n' >> /tmp/a.sh
                printf 'sleep 220\n' >> /tmp/a.sh
+               printf 'import -window root /tmp/screenshot-linux_003.png\n' >> /tmp/a.sh
                printf 'xdotool mousemove --sync 214 295 click 1\n' >> /tmp/a.sh
                printf 'sleep 4\n' >> /tmp/a.sh
+               printf 'import -window root /tmp/screenshot-linux_004.png\n' >> /tmp/a.sh
                printf 'xdotool mousemove --sync 750 602 click 1\n' >> /tmp/a.sh
                printf 'sleep 2\n' >> /tmp/a.sh
                printf 'import -window root /tmp/screenshot-linux-tor_before_wm.png\n' >> /tmp/a.sh
@@ -1200,7 +1216,7 @@ jobs:
           uses: actions/upload-artifact@v7
           with:
             name: screenshot-linux-tor_before_wm
-            path: /tmp/screenshot-linux-tor_before_wm.png
+            path: /tmp/screenshot-linux*.png
 
         - name: Upload to nightly release
           uses: ncipollo/release-action@v1
