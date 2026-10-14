@@ -262,10 +262,10 @@ class TrifaToxService
                                 else
                                 {
                                     sleep(tox_iteration_interval_ms)
-                                    if (tox_iteration_interval_ms != 50L)
-                                    {
-                                        Log.i(TAG, "=====>>>>> tox_iteration_interval: " + tox_iteration_interval_ms)
-                                    }
+                                    //if (tox_iteration_interval_ms != 50L)
+                                    //{
+                                    //    Log.i(TAG, "=====>>>>> tox_iteration_interval: " + tox_iteration_interval_ms)
+                                    //}
                                 }
                             }
                         }
