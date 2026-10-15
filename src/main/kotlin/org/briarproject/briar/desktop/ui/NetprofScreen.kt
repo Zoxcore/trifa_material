@@ -54,6 +54,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_netprof_get_pack
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_netprof_get_packet_total_count
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_iteration_interval
 import com.zoffcc.applications.trifa.ToxVars
+import com.zoffcc.applications.trifa.TrifaToxService
 import globalstore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -136,6 +137,7 @@ object ProfilerState {
     val sentHistory = mutableStateListOf<Float>()
     val recvHistory = mutableStateListOf<Float>()
     val iterHistory = mutableStateListOf<Float>()
+    val sleepHistory = mutableStateListOf<Float>()
     val prevStats = NetprofPrevStats()
     var job: Job? = null
 
@@ -152,10 +154,12 @@ object ProfilerState {
         sentHistory.add(sentKBs)
         recvHistory.add(recvKBs)
         iterHistory.add(data.iterationIntervalMs.toFloat())
+        sleepHistory.add(TrifaToxService.current_tox_sleep_ms.toFloat())
         if (sentHistory.size > 300) {
             sentHistory.removeAt(0)
             recvHistory.removeAt(0)
             iterHistory.removeAt(0)
+            sleepHistory.removeAt(0)
         }
     }
 
@@ -163,6 +167,7 @@ object ProfilerState {
         sentHistory.clear()
         recvHistory.clear()
         iterHistory.clear()
+        sleepHistory.clear()
         latestData = null
     }
 }
@@ -502,12 +507,17 @@ fun NetworkChart(
                     val pointCount = sentHistory.size
                     val dx = width / (maxPoints - 1)
                     val startOffset = (maxPoints - pointCount) * dx
-                    val scale = height / maxVal
 
-                    // Draw grid lines
+                    // FIXED: Reserve 20dp at bottom for X-axis labels so Y-axis grid lines align correctly
+                    val xAxisLabelHeightPx = 20f * density
+                    val drawHeight = height - xAxisLabelHeightPx
+                    if (drawHeight <= 0f) return@Canvas
+                    val scale = drawHeight / maxVal
+
+                    // Draw grid lines within the drawable area only
                     val gridLines = 5
                     for (i in 0..gridLines) {
-                        val y = height * i / gridLines
+                        val y = drawHeight * i / gridLines
                         drawLine(
                             color = gridColor,
                             start = androidx.compose.ui.geometry.Offset(0f, y),
@@ -523,7 +533,7 @@ fun NetworkChart(
                         var started = false
                         for (i in history.indices) {
                             val x = startOffset + i * dx
-                            val y = height - (history[i] * scale)
+                            val y = drawHeight - (history[i] * scale)
                             if (!started) {
                                 path.moveTo(x, y)
                                 started = true
@@ -568,10 +578,15 @@ fun NetworkChart(
 @Composable
 fun IterationChart(
     iterHistory: List<Float>,
+    sleepHistory: List<Float>,
     modifier: Modifier = Modifier
 ) {
-    val maxVal = (iterHistory.maxOrNull() ?: 0f).coerceAtLeast(1f)
-    val iterColor = Color(0xFF9C27B0)
+    val maxIter = iterHistory.maxOrNull() ?: 0f
+    val maxSleep = sleepHistory.maxOrNull() ?: 0f
+    val maxVal = maxIter.coerceAtLeast(maxSleep).coerceAtLeast(1f)
+
+    val iterColor = Color(0xFF9C27B0)  // Purple for interval
+    val sleepColor = Color(0xFFFF9800) // Orange for actual sleep
     val textColor = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
     val gridColor = MaterialTheme.colors.onSurface.copy(alpha = 0.15f)
     val bgColor = if (MaterialTheme.colors.isLight) Color(0xFFF5F5F5) else Color(0xFF1E1E1E)
@@ -582,11 +597,15 @@ fun IterationChart(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Tox Iteration Interval (Last 5 Minutes)", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colors.onSurface)
+            Text("Tox Timing (Last 5 Minutes)", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colors.onSurface)
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(modifier = Modifier.width(12.dp).height(4.dp).background(iterColor).clip(RoundedCornerShape(2.dp)))
                     Text(text = " Interval", fontSize = 11.sp, color = textColor)
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(modifier = Modifier.width(12.dp).height(4.dp).background(sleepColor).clip(RoundedCornerShape(2.dp)))
+                    Text(text = " Sleep", fontSize = 11.sp, color = textColor)
                 }
                 Text(text = String.format("Max: %.0f ms", maxVal), fontSize = 11.sp, color = textColor, fontWeight = FontWeight.SemiBold)
             }
@@ -640,11 +659,16 @@ fun IterationChart(
                     val pointCount = iterHistory.size
                     val dx = width / (maxPoints - 1)
                     val startOffset = (maxPoints - pointCount) * dx
-                    val scale = height / maxVal
+
+                    // FIXED: Reserve 20dp at bottom for X-axis labels so Y-axis grid lines align correctly
+                    val xAxisLabelHeightPx = 20f * density
+                    val drawHeight = height - xAxisLabelHeightPx
+                    if (drawHeight <= 0f) return@Canvas
+                    val scale = drawHeight / maxVal
 
                     val gridLines = 5
                     for (i in 0..gridLines) {
-                        val y = height * i / gridLines
+                        val y = drawHeight * i / gridLines
                         drawLine(
                             color = gridColor,
                             start = androidx.compose.ui.geometry.Offset(0f, y),
@@ -658,7 +682,9 @@ fun IterationChart(
                         var started = false
                         for (i in history.indices) {
                             val x = startOffset + i * dx
-                            val y = height - (history[i] * scale)
+                            // Subtract 20ms from data value before computing y position
+                            val adjustedValue = (history[i] - 20f).coerceAtLeast(0f)
+                            val y = drawHeight - (adjustedValue * scale)
                             if (!started) {
                                 path.moveTo(x, y)
                                 started = true
@@ -672,6 +698,7 @@ fun IterationChart(
                             style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f)
                         )
                     }
+                    drawDataLine(sleepHistory, sleepColor)
                     drawDataLine(iterHistory, iterColor)
                 }
                 Row(
@@ -704,7 +731,9 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
     val global_store by globalstore.stateFlow.collectAsState()
     if (global_store.toxRunning) {
         var netprofData by remember { mutableStateOf<NetprofData?>(null) }
-        val prevStats = remember { ProfilerState.prevStats }
+
+        // FIXED: Use separate prevStats for foreground vs background to prevent stale delta calculations
+        val localPrevStats = remember { NetprofPrevStats() }
         val startTs = global_store.toxStartedTimestamp
 
         // FIXED: Local chart history for foreground-only mode.
@@ -712,11 +741,15 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
         val localSentHistory = remember { mutableStateListOf<Float>() }
         val localRecvHistory = remember { mutableStateListOf<Float>() }
         val localIterHistory = remember { mutableStateListOf<Float>() }
+        val localSleepHistory = remember { mutableStateListOf<Float>() }
 
         suspend fun fetchLoop(isBackground: Boolean) {
+            // Select the correct prevStats tracker based on execution mode
+            val activePrevStats = if (isBackground) ProfilerState.prevStats else localPrevStats
+
             while (currentCoroutineContext().isActive) {
                 val currentTime = System.currentTimeMillis()
-                val deltaTimeSec = (currentTime - prevStats.lastTimestamp) / 1000.0
+                val deltaTimeSec = (currentTime - activePrevStats.lastTimestamp) / 1000.0
 
                 val data = withContext(Dispatchers.IO) {
                     val typeTcp = ToxVars.TOX_NETPROF_PACKET_TYPE.TOX_NETPROF_PACKET_TYPE_TCP.value
@@ -749,16 +782,16 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
 
                     val iterInterval = tox_iteration_interval()
 
-                    val first = !prevStats.initialized
+                    val first = !activePrevStats.initialized
                     fun rateOf(deltaBytes: Long): Long {
                         if (first || deltaTimeSec <= 0.0) return 0L
                         return (deltaBytes.coerceAtLeast(0L) / deltaTimeSec).toLong()
                     }
 
-                    val sentBps = rateOf(totalSentBytes - prevStats.sentBytes)
-                    val recvBps = rateOf(totalRecvBytes - prevStats.recvBytes)
-                    val midBps = rateOf(midTotalBytes - prevStats.midBytes)
-                    val cpuCyclesPerSec = rateOf(cpuCycles - prevStats.cpuCycles)
+                    val sentBps = rateOf(totalSentBytes - activePrevStats.sentBytes)
+                    val recvBps = rateOf(totalRecvBytes - activePrevStats.recvBytes)
+                    val midBps = rateOf(midTotalBytes - activePrevStats.midBytes)
+                    val cpuCyclesPerSec = rateOf(cpuCycles - activePrevStats.cpuCycles)
 
                     val stats = ToxVars.TOX_NETPROF_PACKET_ID.entries.flatMap { id ->
                         listOf(typeTcp to "TCP", typeUdp to "UDP").map { (typeVal, transportLabel) ->
@@ -768,19 +801,19 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                             val rB = tox_netprof_get_packet_id_bytes(typeVal, id.value, dirRecv)
                             val totalBytesNow = sB + rB
                             val mapKey = "${id.name}@$transportLabel"
-                            val prevB = prevStats.packetBytes[mapKey] ?: 0L
+                            val prevB = activePrevStats.packetBytes[mapKey] ?: 0L
                             val bps = rateOf(totalBytesNow - prevB)
-                            prevStats.packetBytes[mapKey] = totalBytesNow
+                            activePrevStats.packetBytes[mapKey] = totalBytesNow
                             PacketStat(id, id.name.removePrefix("TOX_NETPROF_PACKET_ID_"), transportLabel, sC, rC, sB, rB, bps)
                         }
                     }
 
-                    prevStats.initialized = true
-                    prevStats.sentBytes = totalSentBytes
-                    prevStats.recvBytes = totalRecvBytes
-                    prevStats.midBytes = midTotalBytes
-                    prevStats.cpuCycles = cpuCycles
-                    prevStats.lastTimestamp = currentTime
+                    activePrevStats.initialized = true
+                    activePrevStats.sentBytes = totalSentBytes
+                    activePrevStats.recvBytes = totalRecvBytes
+                    activePrevStats.midBytes = midTotalBytes
+                    activePrevStats.cpuCycles = cpuCycles
+                    activePrevStats.lastTimestamp = currentTime
 
                     val uptimeMillis = currentTime - startTs
 
@@ -803,10 +836,12 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                         localSentHistory.add(sentKBs)
                         localRecvHistory.add(recvKBs)
                         localIterHistory.add(d.iterationIntervalMs.toFloat())
+                        localSleepHistory.add(TrifaToxService.current_tox_sleep_ms.toFloat())
                         if (localSentHistory.size > 300) {
                             localSentHistory.removeAt(0)
                             localRecvHistory.removeAt(0)
                             localIterHistory.removeAt(0)
+                            localSleepHistory.removeAt(0)
                         }
                     }
                 }
@@ -814,7 +849,7 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
             }
         }
 
-        // FIXED: Properly cancel background job when switch is turned OFF
+        // FIXED: Properly cancel background job AND clear stale history when switch is turned OFF
         LaunchedEffect(ProfilerState.backgroundEnabled, global_store.toxRunning) {
             if (global_store.toxRunning && ProfilerState.backgroundEnabled) {
                 if (ProfilerState.job == null || ProfilerState.job?.isActive != true) {
@@ -825,6 +860,8 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
             } else {
                 ProfilerState.job?.cancel()
                 ProfilerState.job = null
+                // Clear global history so charts don't show stale background data when switch is off
+                ProfilerState.clearHistory()
             }
         }
 
@@ -840,6 +877,7 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
         val displaySentHistory = if (ProfilerState.backgroundEnabled) ProfilerState.sentHistory else localSentHistory
         val displayRecvHistory = if (ProfilerState.backgroundEnabled) ProfilerState.recvHistory else localRecvHistory
         val displayIterHistory = if (ProfilerState.backgroundEnabled) ProfilerState.iterHistory else localIterHistory
+        val displaySleepHistory = if (ProfilerState.backgroundEnabled) ProfilerState.sleepHistory else localSleepHistory
 
         Column(modifier = modifier.fillMaxSize()) {
             Row(
@@ -1061,6 +1099,7 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                         Spacer(modifier = Modifier.height(16.dp))
                         IterationChart(
                             iterHistory = displayIterHistory,
+                            sleepHistory = displaySleepHistory,
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
