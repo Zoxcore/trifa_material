@@ -24,6 +24,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -51,11 +52,16 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_netprof_get_pack
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_netprof_get_packet_id_count
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_netprof_get_packet_total_bytes
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_netprof_get_packet_total_count
+import com.zoffcc.applications.trifa.MainActivity.Companion.tox_iteration_interval
 import com.zoffcc.applications.trifa.ToxVars
 import globalstore
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.log10
 import kotlin.time.Duration.Companion.milliseconds
@@ -112,10 +118,11 @@ data class NetprofData(
     val packets: List<PacketStat>,
     val uptimeMillis: Long,
     val cpuCycles: Long,
-    val cpuCyclesPerSec: Long
+    val cpuCyclesPerSec: Long,
+    val iterationIntervalMs: Long
 )
 
-private class NetprofPrevStats {
+class NetprofPrevStats {
     var initialized = false
     var lastTimestamp: Long = System.currentTimeMillis()
     var sentBytes: Long = 0L
@@ -125,19 +132,38 @@ private class NetprofPrevStats {
     val packetBytes = mutableMapOf<String, Long>()
 }
 
-private class ChartHistory {
+object ProfilerState {
     val sentHistory = mutableStateListOf<Float>()
     val recvHistory = mutableStateListOf<Float>()
+    val iterHistory = mutableStateListOf<Float>()
+    val prevStats = NetprofPrevStats()
+    var job: Job? = null
 
-    fun addPoint(sentBps: Long, recvBps: Long) {
-        val sentKBs = sentBps / 1024f
-        val recvKBs = recvBps / 1024f
+    // Persist the background state across UI navigations
+    var backgroundEnabled by mutableStateOf(false)
+
+    // FIXED: Persist the latest data so it survives navigation when background mode is on
+    var latestData by mutableStateOf<NetprofData?>(null)
+
+    fun addPoint(data: NetprofData) {
+        latestData = data
+        val sentKBs = data.sentBytesPerSec / 1024f
+        val recvKBs = data.recvBytesPerSec / 1024f
         sentHistory.add(sentKBs)
         recvHistory.add(recvKBs)
+        iterHistory.add(data.iterationIntervalMs.toFloat())
         if (sentHistory.size > 300) {
             sentHistory.removeAt(0)
             recvHistory.removeAt(0)
+            iterHistory.removeAt(0)
         }
+    }
+
+    fun clearHistory() {
+        sentHistory.clear()
+        recvHistory.clear()
+        iterHistory.clear()
+        latestData = null
     }
 }
 
@@ -515,8 +541,139 @@ fun NetworkChart(
                     drawDataLine(recvHistory, recvColor)
                     drawDataLine(sentHistory, sentColor)
                 }
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(20.dp).padding(top = 4.dp, start = 2.dp, end = 2.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    val labels = listOf("5m", "4m", "3m", "2m", "1m", "Now")
+                    labels.forEachIndexed { index, label ->
+                        Text(
+                            text = label,
+                            fontSize = 9.sp,
+                            color = textColor,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = when (index) {
+                                0 -> TextAlign.Start
+                                labels.lastIndex -> TextAlign.End
+                                else -> TextAlign.Center
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
 
-                // X-Axis Labels - always show full 5-minute range
+@Composable
+fun IterationChart(
+    iterHistory: List<Float>,
+    modifier: Modifier = Modifier
+) {
+    val maxVal = (iterHistory.maxOrNull() ?: 0f).coerceAtLeast(1f)
+    val iterColor = Color(0xFF9C27B0)
+    val textColor = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
+    val gridColor = MaterialTheme.colors.onSurface.copy(alpha = 0.15f)
+    val bgColor = if (MaterialTheme.colors.isLight) Color(0xFFF5F5F5) else Color(0xFF1E1E1E)
+
+    Column(modifier = modifier.padding(top = 8.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp, start = 4.dp, end = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Tox Iteration Interval (Last 5 Minutes)", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colors.onSurface)
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(modifier = Modifier.width(12.dp).height(4.dp).background(iterColor).clip(RoundedCornerShape(2.dp)))
+                    Text(text = " Interval", fontSize = 11.sp, color = textColor)
+                }
+                Text(text = String.format("Max: %.0f ms", maxVal), fontSize = 11.sp, color = textColor, fontWeight = FontWeight.SemiBold)
+            }
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(150.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(bgColor)
+        ) {
+            Column(
+                modifier = Modifier.width(50.dp).fillMaxHeight().padding(end = 2.dp)
+            ) {
+                Text(
+                    text = "ms",
+                    fontSize = 8.sp,
+                    color = textColor.copy(alpha = 0.6f),
+                    textAlign = TextAlign.End,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
+                )
+                Column(
+                    modifier = Modifier.weight(1f).fillMaxWidth().padding(top = 2.dp, bottom = 20.dp),
+                    verticalArrangement = Arrangement.SpaceBetween,
+                    horizontalAlignment = Alignment.End
+                ) {
+                    val steps = 5
+                    for (i in steps downTo 0) {
+                        val value = maxVal * i / steps
+                        Text(
+                            text = String.format("%.0f", value),
+                            fontSize = 9.sp,
+                            color = textColor,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.End
+                        )
+                    }
+                }
+            }
+            Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                Canvas(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) {
+                    val width = size.width
+                    val height = size.height
+                    if (width <= 0f || height <= 0f) return@Canvas
+                    val maxPoints = 300
+                    val pointCount = iterHistory.size
+                    val dx = width / (maxPoints - 1)
+                    val startOffset = (maxPoints - pointCount) * dx
+                    val scale = height / maxVal
+
+                    val gridLines = 5
+                    for (i in 0..gridLines) {
+                        val y = height * i / gridLines
+                        drawLine(
+                            color = gridColor,
+                            start = androidx.compose.ui.geometry.Offset(0f, y),
+                            end = androidx.compose.ui.geometry.Offset(width, y),
+                            strokeWidth = 1f
+                        )
+                    }
+                    if (pointCount < 2) return@Canvas
+                    fun drawDataLine(history: List<Float>, color: Color) {
+                        val path = androidx.compose.ui.graphics.Path()
+                        var started = false
+                        for (i in history.indices) {
+                            val x = startOffset + i * dx
+                            val y = height - (history[i] * scale)
+                            if (!started) {
+                                path.moveTo(x, y)
+                                started = true
+                            } else {
+                                path.lineTo(x, y)
+                            }
+                        }
+                        drawPath(
+                            path = path,
+                            color = color,
+                            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f)
+                        )
+                    }
+                    drawDataLine(iterHistory, iterColor)
+                }
                 Row(
                     modifier = Modifier.fillMaxWidth().height(20.dp).padding(top = 4.dp, start = 2.dp, end = 2.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -547,12 +704,17 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
     val global_store by globalstore.stateFlow.collectAsState()
     if (global_store.toxRunning) {
         var netprofData by remember { mutableStateOf<NetprofData?>(null) }
-        val prevStats = remember { NetprofPrevStats() }
-        val chartHistory = remember { ChartHistory() }
+        val prevStats = remember { ProfilerState.prevStats }
         val startTs = global_store.toxStartedTimestamp
 
-        LaunchedEffect(Unit) {
-            while (isActive) {
+        // FIXED: Local chart history for foreground-only mode.
+        // This is destroyed when navigating away, so charts reset properly.
+        val localSentHistory = remember { mutableStateListOf<Float>() }
+        val localRecvHistory = remember { mutableStateListOf<Float>() }
+        val localIterHistory = remember { mutableStateListOf<Float>() }
+
+        suspend fun fetchLoop(isBackground: Boolean) {
+            while (currentCoroutineContext().isActive) {
                 val currentTime = System.currentTimeMillis()
                 val deltaTimeSec = (currentTime - prevStats.lastTimestamp) / 1000.0
 
@@ -585,8 +747,9 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                     val cpuCyclesRaw = tox_get_estimated_cpu_cycles()
                     val cpuCycles = if (cpuCyclesRaw < 0) 0L else cpuCyclesRaw
 
-                    val first = !prevStats.initialized
+                    val iterInterval = tox_iteration_interval()
 
+                    val first = !prevStats.initialized
                     fun rateOf(deltaBytes: Long): Long {
                         if (first || deltaTimeSec <= 0.0) return 0L
                         return (deltaBytes.coerceAtLeast(0L) / deltaTimeSec).toLong()
@@ -624,25 +787,79 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                     NetprofData(
                         totalSentCount, totalRecvCount, totalSentBytes, totalRecvBytes,
                         tcpSentBytes, udpSentBytes, tcpRecvBytes, udpRecvBytes,
-                        sentBps, recvBps, midSentBytes, midRecvBytes, midBps, stats, uptimeMillis, cpuCycles, cpuCyclesPerSec
+                        sentBps, recvBps, midSentBytes, midRecvBytes, midBps, stats, uptimeMillis, cpuCycles, cpuCyclesPerSec,
+                        iterInterval
                     )
                 }
-                netprofData = data
 
-                data?.let { chartHistory.addPoint(it.sentBytesPerSec, it.recvBytesPerSec) }
-
+                // FIXED: Only update global state when running in background mode
+                if (isBackground) {
+                    data?.let { ProfilerState.addPoint(it) }
+                } else {
+                    netprofData = data
+                    data?.let { d ->
+                        val sentKBs = d.sentBytesPerSec / 1024f
+                        val recvKBs = d.recvBytesPerSec / 1024f
+                        localSentHistory.add(sentKBs)
+                        localRecvHistory.add(recvKBs)
+                        localIterHistory.add(d.iterationIntervalMs.toFloat())
+                        if (localSentHistory.size > 300) {
+                            localSentHistory.removeAt(0)
+                            localRecvHistory.removeAt(0)
+                            localIterHistory.removeAt(0)
+                        }
+                    }
+                }
                 delay(1000.milliseconds)
             }
         }
 
+        // FIXED: Properly cancel background job when switch is turned OFF
+        LaunchedEffect(ProfilerState.backgroundEnabled, global_store.toxRunning) {
+            if (global_store.toxRunning && ProfilerState.backgroundEnabled) {
+                if (ProfilerState.job == null || ProfilerState.job?.isActive != true) {
+                    ProfilerState.job = GlobalScope.launch {
+                        fetchLoop(isBackground = true)
+                    }
+                }
+            } else {
+                ProfilerState.job?.cancel()
+                ProfilerState.job = null
+            }
+        }
+
+        // Foreground loop: only runs when background is disabled
+        if (!ProfilerState.backgroundEnabled && global_store.toxRunning) {
+            LaunchedEffect(Unit) {
+                fetchLoop(isBackground = false)
+            }
+        }
+
+        // FIXED: Choose data source based on current switch state
+        val displayData = if (ProfilerState.backgroundEnabled) ProfilerState.latestData else netprofData
+        val displaySentHistory = if (ProfilerState.backgroundEnabled) ProfilerState.sentHistory else localSentHistory
+        val displayRecvHistory = if (ProfilerState.backgroundEnabled) ProfilerState.recvHistory else localRecvHistory
+        val displayIterHistory = if (ProfilerState.backgroundEnabled) ProfilerState.iterHistory else localIterHistory
+
         Column(modifier = modifier.fillMaxSize()) {
-            Text(
-                text = "Tox Profiler",
-                style = MaterialTheme.typography.h4,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-            val data = netprofData
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Tox Profiler",
+                    style = MaterialTheme.typography.h4,
+                    fontWeight = FontWeight.Bold,
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Run in background", fontSize = 14.sp)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Switch(checked = ProfilerState.backgroundEnabled, onCheckedChange = { ProfilerState.backgroundEnabled = it })
+                }
+            }
+
+            val data = displayData
             if (data == null) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Center) {
                     Text("Loading network statistics...", style = MaterialTheme.typography.h6)
@@ -837,8 +1054,13 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
 
                         // Chart is now inside the scrollable area, below the boxes
                         NetworkChart(
-                            sentHistory = chartHistory.sentHistory,
-                            recvHistory = chartHistory.recvHistory,
+                            sentHistory = displaySentHistory,
+                            recvHistory = displayRecvHistory,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        IterationChart(
+                            iterHistory = displayIterHistory,
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
