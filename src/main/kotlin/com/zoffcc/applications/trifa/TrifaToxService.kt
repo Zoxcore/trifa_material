@@ -1,4 +1,4 @@
-@file:Suppress("ConvertToStringTemplate", "LocalVariableName", "ReplaceSizeCheckWithIsNotEmpty", "FunctionName", "UnnecessaryVariable")
+@file:Suppress("ConvertToStringTemplate", "LocalVariableName", "ReplaceSizeCheckWithIsNotEmpty", "FunctionName", "UnnecessaryVariable", "PropertyName")
 
 package com.zoffcc.applications.trifa
 
@@ -242,12 +242,14 @@ class TrifaToxService
                     {
                         if ((global_last_activity_outgoung_ft_ts > -1) && ((global_last_activity_outgoung_ft_ts + 200) > System.currentTimeMillis())) {
                             // HINT: iterate much faster if there are active filetransfers
+                            current_tox_sleep_ms = 0
                             sleep(0, 50)
                             // Log.i(TAG, "=====>>>>> tox_iteration_interval: "+ "2")
                         } else {
                             if (avstatestore.state.calling_state_get() != AVState.CALL_STATUS.CALL_STATUS_NONE)
                             {
                                 // HINT: iterate faster if there are active toxav calls
+                                current_tox_sleep_ms = 4
                                 sleep(4, 0)
                                 // Log.i(TAG, "=====>>>>> tox_iteration_interval: "+ "4")
                             }
@@ -256,11 +258,13 @@ class TrifaToxService
                                 if (tox_iteration_interval_ms < TOX_ITERATE_MS_MIN_NORMAL)
                                 {
                                     // HINT: never iterate faster than TOX_ITERATE_MS_MIN_NORMAL
+                                    current_tox_sleep_ms = TOX_ITERATE_MS_MIN_NORMAL
                                     sleep(TOX_ITERATE_MS_MIN_NORMAL.toLong())
                                     // Log.i(TAG, "=====>>>>> tox_iteration_interval: " + tox_iteration_interval_ms)
                                 }
                                 else
                                 {
+                                    current_tox_sleep_ms = tox_iteration_interval_ms.toInt()
                                     sleep(tox_iteration_interval_ms)
                                     //if (tox_iteration_interval_ms != 50L)
                                     //{
@@ -927,6 +931,8 @@ class TrifaToxService
         var ToxServiceThread: Thread? = null
         var stop_me = false
         var is_tox_started = false
+        @JvmStatic
+        var current_tox_sleep_ms = 50
         @JvmStatic
         public var orma: OrmaDatabase? = null
         public var TOX_SERVICE_STARTED = false
