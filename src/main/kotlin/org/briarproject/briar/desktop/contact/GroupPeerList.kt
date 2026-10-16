@@ -98,12 +98,49 @@ fun GroupPeerList(
 
     if (showKickDialog) {
         val kickPeerSnapshot = kickPeer!!
-        AlertDialog(
+        androidx.compose.material3.AlertDialog(
             onDismissRequest = { showKickDialog = false },
-            title = { Text("Kick Peer") },
-            text = { Text("Are you sure you want to kick this peer out of the group?") },
+            modifier = Modifier
+                .padding(24.dp)
+                .widthIn(max = 420.dp),
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(28.dp),
+            containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp,
+            title = {
+                androidx.compose.material3.Text(
+                    text = "Kick Peer",
+                    style = androidx.compose.material3.MaterialTheme.typography.headlineSmall,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                    color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface
+                )
+            },
+            text = {
+                androidx.compose.foundation.layout.Column(verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)) {
+                    androidx.compose.material3.Text(
+                        text = "Are you sure you want to kick this peer out of the group?",
+                        style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    androidx.compose.material3.Surface(
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                        modifier = androidx.compose.ui.Modifier.fillMaxWidth()
+                    ) {
+                        androidx.compose.material3.Text(
+                            text = "${kickPeerSnapshot.pubkey.take(6).uppercase()} / ${kickPeerSnapshot.name.take(20)}",
+                            style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                            color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = androidx.compose.ui.Modifier.padding(12.dp),
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            },
             confirmButton = {
-                androidx.compose.material3.TextButton(
+                androidx.compose.material3.Button(
                     onClick = {
                         showKickDialog = false
                         GlobalScope.launch(Dispatchers.IO) {
@@ -119,19 +156,26 @@ fun GroupPeerList(
                             kickPeer = null
                         }
                         // kick a peer
-                    }
+                    },
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                        containerColor = androidx.compose.material3.MaterialTheme.colorScheme.error,
+                        contentColor = androidx.compose.material3.MaterialTheme.colorScheme.onError
+                    ),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
                 ) {
-                    Text("Kick", color = Color.Red)
+                    androidx.compose.material3.Text("Kick", fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
                 }
             },
             dismissButton = {
-                androidx.compose.material3.TextButton(onClick = { kickPeer = null; showKickDialog = false }) {
-                    Text("Cancel")
+                androidx.compose.material3.TextButton(
+                    onClick = { kickPeer = null; showKickDialog = false },
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                ) {
+                    androidx.compose.material3.Text("Cancel", fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
                 }
             }
         )
     }
-
 
     if (showPmDialog && activePmPeer != null) {
         val peerSnapshot = activePmPeer!!
