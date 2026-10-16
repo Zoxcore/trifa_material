@@ -52,10 +52,9 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_netprof_get_pack
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_netprof_get_packet_id_count
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_netprof_get_packet_total_bytes
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_netprof_get_packet_total_count
-import com.zoffcc.applications.trifa.MainActivity.Companion.tox_iteration_interval
 import com.zoffcc.applications.trifa.ToxVars
 import com.zoffcc.applications.trifa.TrifaToxService
-import dashedBorder
+import com.zoffcc.applications.trifa.TrifaToxService.Companion.current_tox_sleep_ms
 import globalstore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -65,7 +64,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import randomDebugBorder
 import kotlin.math.log10
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -156,7 +154,7 @@ object ProfilerState {
         sentHistory.add(sentKBs)
         recvHistory.add(recvKBs)
         iterHistory.add(data.iterationIntervalMs.toFloat())
-        sleepHistory.add(TrifaToxService.current_tox_sleep_ms.toFloat())
+        sleepHistory.add(TrifaToxService.current_trifa_sleep_ms.toFloat())
         if (sentHistory.size > 300) {
             sentHistory.removeAt(0)
             recvHistory.removeAt(0)
@@ -794,7 +792,7 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                     val cpuCyclesRaw = tox_get_estimated_cpu_cycles()
                     val cpuCycles = if (cpuCyclesRaw < 0) 0L else cpuCyclesRaw
 
-                    val iterInterval = tox_iteration_interval()
+                    val iterInterval = current_tox_sleep_ms
 
                     val first = !activePrevStats.initialized
                     fun rateOf(deltaBytes: Long): Long {
@@ -835,7 +833,7 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                         totalSentCount, totalRecvCount, totalSentBytes, totalRecvBytes,
                         tcpSentBytes, udpSentBytes, tcpRecvBytes, udpRecvBytes,
                         sentBps, recvBps, midSentBytes, midRecvBytes, midBps, stats, uptimeMillis, cpuCycles, cpuCyclesPerSec,
-                        iterInterval
+                        iterInterval.toLong()
                     )
                 }
 
@@ -850,7 +848,7 @@ fun NetprofScreen(modifier: Modifier = Modifier.padding(16.dp)) {
                         localSentHistory.add(sentKBs)
                         localRecvHistory.add(recvKBs)
                         localIterHistory.add(d.iterationIntervalMs.toFloat())
-                        localSleepHistory.add(TrifaToxService.current_tox_sleep_ms.toFloat())
+                        localSleepHistory.add(TrifaToxService.current_trifa_sleep_ms.toFloat())
                         if (localSentHistory.size > 300) {
                             localSentHistory.removeAt(0)
                             localRecvHistory.removeAt(0)
