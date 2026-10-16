@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -26,12 +27,14 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterStart
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Alignment.Companion.TopStart
@@ -437,21 +440,122 @@ fun show_report_bug_dialog(show_link_click: Boolean, link_str: String, setLinkVa
 {
     var show_link_click1 = show_link_click
     var link_str1 = link_str
+
+    val clipboardManager = LocalClipboardManager.current
+
     if (show_link_click1)
     {
-        AlertDialog(onDismissRequest = { link_str1 = ""; show_link_click1 = false; setLinkVars(show_link_click1, link_str1) },
-            title = { Text("Open this URL ?") },
+        val closeDialog = {
+            link_str1 = ""
+            show_link_click1 = false
+            setLinkVars(show_link_click1, link_str1)
+        }
+
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = closeDialog,
+            modifier = Modifier
+                .padding(24.dp)
+                .widthIn(max = 420.dp),
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(28.dp),
+            containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp,
+
+            title = {
+                androidx.compose.material3.Text(
+                    text = "Open this URL ?",
+                    style = androidx.compose.material3.MaterialTheme.typography.headlineSmall,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                    color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface
+                )
+            },
+
+            text = {
+                androidx.compose.foundation.layout.Column(verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp)) {
+
+                    // Highly Visual Warning Banner
+                    androidx.compose.material3.Surface(
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.errorContainer,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        androidx.compose.foundation.layout.Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
+                        ) {
+                            androidx.compose.material3.Icon(
+                                imageVector = androidx.compose.material.icons.Icons.Filled.Warning,
+                                contentDescription = "Warning",
+                                tint = androidx.compose.material3.MaterialTheme.colorScheme.onErrorContainer
+                            )
+                            androidx.compose.material3.Text(
+                                text = "This could be potentially dangerous!",
+                                style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                                color = androidx.compose.material3.MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        }
+                    }
+
+                    // Stylish Link Item Box
+                    androidx.compose.material3.Surface(
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.surfaceVariant,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        androidx.compose.foundation.layout.Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp)
+                        ) {
+                            androidx.compose.foundation.text.selection.SelectionContainer {
+                                androidx.compose.material3.Text(
+                                    text = link_str1,
+                                    style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                                    color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface,
+                                    fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+
             confirmButton = {
-                Button(onClick = { HelperOSFile.open_webpage(link_str1); link_str1 = ""; show_link_click1 = false; setLinkVars(show_link_click1, link_str1) }) {
-                    Text("Yes")
+                androidx.compose.material3.Button(
+                    onClick = {
+                        HelperOSFile.open_webpage(link_str1)
+                        closeDialog()
+                    },
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                        containerColor = androidx.compose.material3.MaterialTheme.colorScheme.error,
+                        contentColor = androidx.compose.material3.MaterialTheme.colorScheme.onError
+                    ),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                ) {
+                    androidx.compose.material3.Text("Yes", fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
                 }
             },
+
             dismissButton = {
-                Button(onClick = { link_str1 = ""; show_link_click1 = false;setLinkVars(show_link_click1, link_str1) }) {
-                    Text("No")
+                androidx.compose.foundation.layout.Row(horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp)) {
+                    androidx.compose.material3.TextButton(
+                        onClick = closeDialog,
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                    ) {
+                        androidx.compose.material3.Text("No", fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
+                    }
+                    androidx.compose.material3.TextButton(
+                        onClick = {
+                            clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(link_str1))
+                            closeDialog()
+                        },
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                    ) {
+                        androidx.compose.material3.Text("copy URL", fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
+                    }
                 }
-            },
-            text = { Text("This could be potentially dangerous!" + "\n\n" + link_str1) })
+            }
+        )
     }
 }
 
