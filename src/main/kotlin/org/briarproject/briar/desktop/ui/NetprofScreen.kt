@@ -459,7 +459,7 @@ fun NetworkChart(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(180.dp)
+                .height(250.dp) // Increased from 180.dp to match IterationChart fix
                 .clip(RoundedCornerShape(8.dp))
                 .background(bgColor)
         ) {
@@ -467,14 +467,9 @@ fun NetworkChart(
             Column(
                 modifier = Modifier.width(50.dp).fillMaxHeight().padding(end = 2.dp)
             ) {
-                Text(
-                    text = "KB/s",
-                    fontSize = 8.sp,
-                    color = textColor.copy(alpha = 0.6f),
-                    textAlign = TextAlign.End,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
-                )
+                // 1. Top spacer to align with Canvas top padding
+                Spacer(modifier = Modifier.fillMaxWidth().height(1.dp))
+
                 Column(
                     modifier = Modifier.weight(1f).fillMaxWidth().padding(top = 2.dp, bottom = 20.dp),
                     verticalArrangement = Arrangement.SpaceBetween,
@@ -487,15 +482,28 @@ fun NetworkChart(
                             text = String.format("%.0f", value),
                             fontSize = 9.sp,
                             color = textColor,
-                            fontWeight = FontWeight.Bold, // <-- Added Bold
+                            fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.End
                         )
                     }
                 }
+
+                // 2. Unit label moved to the bottom with fixed 20.dp height to match X-axis labels
+                Text(
+                    text = "KB/s",
+                    fontSize = 8.sp,
+                    color = textColor.copy(alpha = 0.6f),
+                    textAlign = TextAlign.End,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.fillMaxWidth().height(20.dp).padding(top = 4.dp, start = 2.dp, end = 2.dp)
+                )
             }
 
             // Canvas and X-Axis
             Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                // 3. Top spacer to align Canvas drawing area with Y-axis labels
+                Spacer(modifier = Modifier.fillMaxWidth().height(15.dp))
+
                 Canvas(
                     modifier = Modifier
                         .weight(1f)
@@ -510,7 +518,6 @@ fun NetworkChart(
                     val dx = width / (maxPoints - 1)
                     val startOffset = (maxPoints - pointCount) * dx
 
-                    // FIXED: Reserve 20dp at bottom for X-axis labels so Y-axis grid lines align correctly
                     val xAxisLabelHeightPx = 20f * density
                     val drawHeight = height - xAxisLabelHeightPx
                     if (drawHeight <= 0f) return@Canvas
@@ -553,6 +560,10 @@ fun NetworkChart(
                     drawDataLine(recvHistory, recvColor)
                     drawDataLine(sentHistory, sentColor)
                 }
+
+                // 4. Bottom spacer to separate Canvas from X-axis labels
+                Spacer(modifier = Modifier.fillMaxWidth().height(10.dp))
+
                 Row(
                     modifier = Modifier.fillMaxWidth().height(20.dp).padding(top = 4.dp, start = 2.dp, end = 2.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
