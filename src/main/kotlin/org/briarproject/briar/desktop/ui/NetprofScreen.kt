@@ -55,6 +55,7 @@ import com.zoffcc.applications.trifa.MainActivity.Companion.tox_netprof_get_pack
 import com.zoffcc.applications.trifa.MainActivity.Companion.tox_iteration_interval
 import com.zoffcc.applications.trifa.ToxVars
 import com.zoffcc.applications.trifa.TrifaToxService
+import dashedBorder
 import globalstore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -64,6 +65,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import randomDebugBorder
 import kotlin.math.log10
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -613,21 +615,14 @@ fun IterationChart(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(150.dp)
+                .height(250.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .background(bgColor)
         ) {
             Column(
                 modifier = Modifier.width(50.dp).fillMaxHeight().padding(end = 2.dp)
             ) {
-                Text(
-                    text = "ms",
-                    fontSize = 8.sp,
-                    color = textColor.copy(alpha = 0.6f),
-                    textAlign = TextAlign.End,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
-                )
+                Spacer(modifier = Modifier.fillMaxWidth().height(1.dp))
                 Column(
                     modifier = Modifier.weight(1f).fillMaxWidth().padding(top = 2.dp, bottom = 20.dp),
                     verticalArrangement = Arrangement.SpaceBetween,
@@ -645,8 +640,17 @@ fun IterationChart(
                         )
                     }
                 }
+                Text(
+                    text = "ms",
+                    fontSize = 8.sp,
+                    color = textColor.copy(alpha = 0.6f),
+                    textAlign = TextAlign.End,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.fillMaxWidth().height(20.dp).padding(top = 4.dp, start = 2.dp, end = 2.dp)
+                )
             }
             Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                Spacer(modifier = Modifier.fillMaxWidth().height(15.dp))
                 Canvas(
                     modifier = Modifier
                         .weight(1f)
@@ -660,7 +664,6 @@ fun IterationChart(
                     val dx = width / (maxPoints - 1)
                     val startOffset = (maxPoints - pointCount) * dx
 
-                    // FIXED: Reserve 20dp at bottom for X-axis labels so Y-axis grid lines align correctly
                     val xAxisLabelHeightPx = 20f * density
                     val drawHeight = height - xAxisLabelHeightPx
                     if (drawHeight <= 0f) return@Canvas
@@ -682,8 +685,7 @@ fun IterationChart(
                         var started = false
                         for (i in history.indices) {
                             val x = startOffset + i * dx
-                            // Subtract 20ms from data value before computing y position
-                            val adjustedValue = (history[i] - 20f).coerceAtLeast(0f)
+                            val adjustedValue = history[i].coerceAtLeast(0f)
                             val y = drawHeight - (adjustedValue * scale)
                             if (!started) {
                                 path.moveTo(x, y)
@@ -720,6 +722,7 @@ fun IterationChart(
                         )
                     }
                 }
+                Spacer(modifier = Modifier.fillMaxWidth().height(10.dp))
             }
         }
     }
