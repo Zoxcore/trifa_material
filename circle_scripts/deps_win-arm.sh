@@ -144,6 +144,8 @@ chmod a+rx package_version
               --enable-static \
               --disable-soname-versions \
               --disable-extra-programs \
+              --disable-rtcd \
+              --disable-asm \
               --disable-doc || exit 1
   make || exit 1
   make install
@@ -197,7 +199,7 @@ cd libvpx*/
                                          --disable-shared \
                                          --size-limit=16384x16384 \
                                          --enable-onthefly-bitpacking \
-                                         --enable-runtime-cpu-detect \
+                                         --disable-runtime-cpu-detect \
                                          --enable-realtime-only \
                                          --enable-multi-res-encoding \
                                          --enable-temporal-denoising \
