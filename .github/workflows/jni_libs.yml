@@ -368,7 +368,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "jni-c-toxcore.dll"
 
-  build-windows-jni-artifact:
+  build-windows-arm-jni-artifact:
     name: JNI Artifact Windows arm Build
     runs-on: ubuntu-22.04
     permissions:
