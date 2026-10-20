@@ -11,6 +11,8 @@ on:
      - '.github/workflows/screens_only_for_nightly_macos.yml'
      - '.github/workflows/screens_only_for_nightly_win.yml'
      - '.github/workflows/jni_libs.yml'
+     - 'circle_scripts/java_jni_lib_win-arm.sh'
+     - 'circle_scripts/deps_win-arm.sh'
   pull_request:
     paths-ignore:
      - 'README.md'
