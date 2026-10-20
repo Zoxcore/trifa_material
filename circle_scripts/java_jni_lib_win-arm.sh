@@ -82,41 +82,40 @@ export CFLAGS="-fPIC -D_FORTIFY_SOURCE=2 -std=gnu99 -I$_INST_/include/ -L$_INST_
 
 # Compile and link for Windows ARM64
 aarch64-w64-mingw32-gcc $CFLAGS \
-    -Wall -D_JNI_IMPLEMENTATION_ \
-    -DTOX_HAVE_NGCMID \
-    -DGIT_HASH=\"$git_hash_for_jni\" \
-    -DJAVA_LINUX \
-    -DNOGLOBALVARS \
-    -D_FILE_OFFSET_BITS=64 -D__USE_GNU=1 \
-    -I"$JAVADIR1/" \
-    -I"$JAVADIR2/" \
-    jni-c-toxcore.c \
-    $_INST_/lib/libtoxcore.a \
-    $_INST_/lib/libtoxav.a \
-    $_INST_/lib/libtoxencryptsave.a \
-    $_INST_/lib/libavcodec.a \
-    $_INST_/lib/libavdevice.a \
-    $_INST_/lib/libavformat.a \
-    $_INST_/lib/libavutil.a \
-    $_INST_/lib/libopus.a \
-    $_INST_/lib/libvpx.a \
-    $_INST_/lib/libx264.a \
-    $_INST_/lib/libtoxav.a \
-    $_INST_/lib/libtoxcore.a \
-    $_INST_/lib/libtoxencryptsave.a \
-    $_INST_/lib/libsodium.a \
-    -Wl,-Bstatic -lws2_32 \
-    -l:libiphlpapi.a \
-    -Wl,-Bstatic -lbcrypt \
-    -shared \
-    -lpthread \
-    -lm \
-    -o jni-c-toxcore_arm.dll || exit 1
+-Wall -D_JNI_IMPLEMENTATION_ \
+-DTOX_HAVE_NGCMID \
+-DGIT_HASH=\"$git_hash_for_jni\" \
+-DJAVA_LINUX \
+-DNOGLOBALVARS \
+$C_FLAGS $CXX_FLAGS $LD_FLAGS \
+-D_FILE_OFFSET_BITS=64 -D__USE_GNU=1 \
+-I"$JAVADIR1/" \
+-I"$JAVADIR2/" \
+jni-c-toxcore.c \
+$_INST_/lib/libtoxcore.a \
+$_INST_/lib/libtoxav.a \
+$_INST_/lib/libtoxencryptsave.a \
+$_INST_/lib/libavcodec.a \
+$_INST_/lib/libavdevice.a \
+$_INST_/lib/libavformat.a \
+$_INST_/lib/libavutil.a \
+$_INST_/lib/libopus.a \
+$_INST_/lib/libvpx.a \
+$_INST_/lib/libx264.a \
+$_INST_/lib/libsodium.a \
+-Wl,-Bstatic -lws2_32 \
+-l:libiphlpapi.a \
+-Wl,-Bstatic -lbcrypt \
+-shared \
+-lpthread \
+-lm \
+-o jni-c-toxcore_arm.dll || exit 1
 
-echo "Build successful!"
-
-sha256sum ./jni-c-toxcore_arm.dll
+sha256sum /home/runner/work/trifa_material/trifa_material/jni-c-toxcore_arm.dll
 
 ls -al jni-c-toxcore_arm.dll || exit 1
 pwd
 file jni-c-toxcore_arm.dll
+
+
+
