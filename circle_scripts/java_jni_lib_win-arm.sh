@@ -77,6 +77,10 @@ export JAVADIR2=$(dirname "$JAVADIR2_RAW")
 echo "JAVADIR1: $JAVADIR1"
 echo "JAVADIR2: $JAVADIR2"
 
+nm "$_INST_/lib/libx264.a"
+nm "$_INST_/lib/libx264.a" | grep x264_param_default_preset
+file "$_INST_/lib/libx264.a"
+
 # Note: Removed empty $C_FLAGS, $CXX_FLAGS, $LD_FLAGS variables to prevent shell expansion issues.
 export CFLAGS="-fPIC -D_FORTIFY_SOURCE=2 -std=gnu99 -I$_INST_/include/ -L$_INST_/lib -fstack-protector-all"
 
