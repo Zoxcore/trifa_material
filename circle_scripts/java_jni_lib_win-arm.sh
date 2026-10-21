@@ -77,9 +77,10 @@ export JAVADIR2=$(dirname "$JAVADIR2_RAW")
 echo "JAVADIR1: $JAVADIR1"
 echo "JAVADIR2: $JAVADIR2"
 
-nm "$_INST_/lib/libx264.a"
-nm "$_INST_/lib/libx264.a" | grep x264_param_default_preset
-file "$_INST_/lib/libx264.a"
+set -x
+nm "$_INST_"/lib/libx264.a
+nm "$_INST_"/lib/libx264.a 2>&1 | grep x264_param_default_preset
+file "$_INST_"/lib/libx264.a
 
 # Note: Removed empty $C_FLAGS, $CXX_FLAGS, $LD_FLAGS variables to prevent shell expansion issues.
 export CFLAGS="-fPIC -D_FORTIFY_SOURCE=2 -std=gnu99 -I$_INST_/include/ -L$_INST_/lib -fstack-protector-all"
@@ -96,6 +97,7 @@ $C_FLAGS $CXX_FLAGS $LD_FLAGS \
 -I"$JAVADIR1/" \
 -I"$JAVADIR2/" \
 jni-c-toxcore.c \
+-Wl,--start-group \
 $_INST_/lib/libtoxcore.a \
 $_INST_/lib/libtoxav.a \
 $_INST_/lib/libtoxencryptsave.a \
@@ -107,6 +109,7 @@ $_INST_/lib/libopus.a \
 $_INST_/lib/libvpx.a \
 $_INST_/lib/libx264.a \
 $_INST_/lib/libsodium.a \
+-Wl,--end-group \
 -Wl,-Bstatic -lws2_32 \
 -l:libiphlpapi.a \
 -Wl,-Bstatic -lbcrypt \
