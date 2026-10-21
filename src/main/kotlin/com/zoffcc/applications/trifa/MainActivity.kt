@@ -471,6 +471,9 @@ class MainActivity
                 } else if (OperatingSystem.getCurrent() == OperatingSystem.WINDOWS)
                 {
                     libFile = File(resourcesDir, "jni-c-toxcore${noise_jni_name_addon}.dll")
+                } else if (OperatingSystem.getCurrent() == OperatingSystem.WINDOWSARM)
+                {
+                    libFile = File(resourcesDir, "jni-c-toxcore_arm${noise_jni_name_addon}.dll")
                 } else if (OperatingSystem.getCurrent() == OperatingSystem.MACOS)
                 {
                     libFile = File(resourcesDir, "libjni-c-toxcore${noise_jni_name_addon}.jnilib")
