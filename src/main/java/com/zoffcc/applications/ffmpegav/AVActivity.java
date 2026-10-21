@@ -517,7 +517,7 @@ public class AVActivity {
     public enum OperatingSystem
     {
 
-        WINDOWS("windows"), MACOS("mac"), MACARM("silicone"), RASPI("aarm64"), LINUX("linux"), UNIX("nix"), SOLARIS("solaris"),
+        WINDOWS("windows"), WINDOWSARM("windowsarm"), MACOS("mac"), MACARM("silicone"), RASPI("aarm64"), LINUX("linux"), UNIX("nix"), SOLARIS("solaris"),
 
         UNKNOWN("unknown")
                 {
@@ -579,16 +579,26 @@ public class AVActivity {
                 {
                     if (os == OperatingSystem.MACOS)
                     {
-                        if (getArchitecture().equalsIgnoreCase("aarch64"))
+                        String arch = getArchitecture().toLowerCase();
+                        if (arch.equalsIgnoreCase("aarch64") || arch.contains("arm64"))
                         {
                             return OperatingSystem.MACARM;
                         }
                     }
                     else if (os == OperatingSystem.LINUX)
                     {
-                        if (getArchitecture().equalsIgnoreCase("aarch64"))
+                        String arch = getArchitecture().toLowerCase();
+                        if (arch.equalsIgnoreCase("aarch64") || arch.contains("arm64"))
                         {
                             return OperatingSystem.RASPI;
+                        }
+                    }
+                    else if (os == OperatingSystem.WINDOWS)
+                    {
+                        String arch = getArchitecture().toLowerCase();
+                        if (arch.equalsIgnoreCase("aarch64") || arch.contains("arm64"))
+                        {
+                            return OperatingSystem.WINDOWSARM;
                         }
                     }
                     return os;
@@ -609,6 +619,9 @@ public class AVActivity {
         } else if (OperatingSystem.getCurrent() == OperatingSystem.WINDOWS)
         {
             linux_lib_filename = jnilib_path + "/ffmpeg_av_jni.dll";
+        } else if (OperatingSystem.getCurrent() == OperatingSystem.WINDOWSARM)
+        {
+           linux_lib_filename = jnilib_path + "/ffmpeg_av_jni_arm.dll";
         } else if (OperatingSystem.getCurrent() == OperatingSystem.MACOS)
         {
             linux_lib_filename = jnilib_path + "/libffmpeg_av_jni.jnilib";
