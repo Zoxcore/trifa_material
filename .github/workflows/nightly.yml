@@ -1494,6 +1494,11 @@ jobs:
           sleep 20
           pwd
           ls -al
+          cat runlog.txt
+          echo "xxxxxxxxxxxxxxxxxxxx"
+          echo "xxxxxxxxxxxxxxxxxxxx"
+          echo "xxxxxxxxxxxxxxxxxxxx"
+          ps -ef || echo "NOERR"
 
       - name: tester_startup
         shell: bash
