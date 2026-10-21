@@ -409,8 +409,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
-          name: jni-c-toxcore.dll
-          path: jni-c-toxcore.dll
+          name: jni-c-toxcore_arm.dll
+          path: jni-c-toxcore_arm.dll
       - name: Upload to nightly release
         uses: ncipollo/release-action@v1
         if: github.ref == 'refs/heads/master'
