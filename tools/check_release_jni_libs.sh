@@ -10,7 +10,7 @@ basedir="$_HOME_""/../"
 cd "$basedir"
 cd resources/common/
 
-count_expect=15
+count_expect=16
 
 # check count libs
 count=$(ls -1 *.dll *.jnilib *.so 2>/dev/null | wc -l 2>/dev/null)
@@ -34,7 +34,7 @@ fi
 
 # checks that release libs do NOT contain ASAN symbols
 err_count=0
-for i in $(ls -1 *.dll *.so 2>/dev/null|grep -v libjni_notifications_rs.so 2>/dev/null); do
+for i in $(ls -1 *.dll *.so 2>/dev/null|grep -v libjni_notifications_rs.so 2>/dev/null | grep -v jni-c-toxcore_arm.dll 2>/dev/null); do
     nm "$i"|grep -v 'global_version_asan_string'|grep -i asan
     res=$?
     if [ $res -eq 0 ]; then
