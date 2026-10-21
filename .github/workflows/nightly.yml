@@ -1039,6 +1039,10 @@ jobs:
         - name: os version
           run:  uname -a
 
+#        - name: install deps
+#          run: |
+#               echo "deb http://ubuntu.com $(lsb_release -cs)-proposed main restricted universe multiverse" | sudo tee /etc/apt/sources.list.d/ubuntu-proposed.list
+
         - name: install deps
           run: |
                sudo apt-get update
@@ -1051,6 +1055,11 @@ jobs:
                sudo apt-get install xvfb
                sudo apt-get install libpulse0 libnotify4
                sudo apt-get install tor
+
+        - name: Add Proposed Repository and Install Modules
+          run: |
+               echo "deb http://archive.ubuntu.com/ubuntu $(lsb_release -cs)-proposed main restricted universe multiverse" | sudo tee /etc/apt/sources.list.d/ubuntu-proposed.list
+               sudo apt-get update
 
         - name: install deps for fake webcam
           run: |
