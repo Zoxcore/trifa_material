@@ -10,7 +10,7 @@ basedir="$_HOME_""/../"
 cd "$basedir"
 cd resources/common/
 
-count_expect=16
+count_expect=17
 
 # check count libs
 count=$(ls -1 *.dll *.jnilib *.so 2>/dev/null | wc -l 2>/dev/null)
