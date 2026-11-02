@@ -188,7 +188,7 @@ dependencies {
         {
             // use regular "sqlite-jdbc"
             System.err.println("other OS -> unsing org.xerial:sqlite-jdbc")
-            implementation("org.xerial:sqlite-jdbc:3.53.4.0")
+            implementation("org.xerial:sqlite-jdbc:3.54.1.0")
             // HINT: DISABLE the witness checker
             project.extensions.extraProperties["runWitnessChecker"] = false
         }
@@ -197,7 +197,7 @@ dependencies {
     {
         // use regular "sqlite-jdbc"
         System.err.println("error detecting OS -> unsing org.xerial:sqlite-jdbc")
-        implementation("org.xerial:sqlite-jdbc:3.53.4.0")
+        implementation("org.xerial:sqlite-jdbc:3.54.1.0")
         // HINT: DISABLE the witness checker
         project.extensions.extraProperties["runWitnessChecker"] = false
     }
