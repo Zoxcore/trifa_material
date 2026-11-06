@@ -811,8 +811,15 @@ jobs:
 
         - name: install deps for fake webcam
           run: |
+            kernel="$(uname -r)"
+            if (( ${kernel%%.*} < 7 )); then
+             sudo apt-get update
+              sudo apt-get install --yes "linux-modules-extra-${kernel}"
+            fi
+
+        - name: install deps for fake webcam
+          run: |
                sudo apt-get install v4l2loopback-utils ffmpeg
-               sudo apt-get install linux-modules-extra-$(uname -r)
 
         - name: start fake webcam
           run: |
