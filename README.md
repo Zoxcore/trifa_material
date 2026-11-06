@@ -4,7 +4,6 @@
 
 Automated screenshots:<br>
 <img src="https://github.com/Zoxcore/trifa_material/releases/download/nightly/screenshot-macos-15arm.png" height="230"></a>
-<img src="https://github.com/Zoxcore/trifa_material/releases/download/nightly/screenshot-macos-14arm.png" height="230"></a>
 <img src="https://github.com/Zoxcore/trifa_material/releases/download/nightly/screenshot-windows.png" height="230"></a>
 <img src="https://github.com/Zoxcore/trifa_material/releases/download/nightly/screenshot-linux.png" height="230"></a>
 <img src="https://github.com/Zoxcore/trifa_material/releases/download/nightly/screenshot-linux-tor.png" height="230"></a> 
