@@ -116,8 +116,6 @@ import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.resend_old_messages
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.resend_v3_messages
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.update_group_peers_ui_from_middleware
-import com.zoffcc.applications.trifa.VideoInFrame.new_video_in_frame
-import com.zoffcc.applications.trifa.VideoInFrame.setup_video_in_resolution
 import com.zoffcc.applications.trifa2.timestampMs
 import com.zoffcc.applications.trifa_material.trifa_material.BuildConfig
 import contactstore
@@ -1320,18 +1318,20 @@ class MainActivity
                 Log.i(TAG, "android_toxav_callback_video_receive_frame_cb_method:11:1")
                 video_buffer_1 = ByteBuffer.allocateDirect(buffer_size_in_bytes)
                 set_JNI_video_buffer(video_buffer_1, frame_width_px1, frame_height_px1)
-                setup_video_in_resolution(frame_width_px1, frame_height_px1, buffer_size_in_bytes)
+                VideoManager.currentInWidth = frame_width_px1
+                VideoManager.currentInHeight = frame_height_px1
                 Log.i(TAG, "android_toxav_callback_video_receive_frame_cb_method:11:2")
             } else {
-                if (VideoInFrame.width != frame_width_px1 || VideoInFrame.height != frame_height_px1) {
+                if (VideoManager.currentInWidth != frame_width_px1 || VideoManager.currentInHeight != frame_height_px1) {
                     Log.i(TAG, "android_toxav_callback_video_receive_frame_cb_method:22:1")
                     video_buffer_1 = ByteBuffer.allocateDirect(buffer_size_in_bytes)
                     set_JNI_video_buffer(video_buffer_1, frame_width_px1, frame_height_px1)
-                    setup_video_in_resolution(frame_width_px1, frame_height_px1, buffer_size_in_bytes)
+                    VideoManager.currentInWidth = frame_width_px1
+                    VideoManager.currentInHeight = frame_height_px1
                     Log.i(TAG, "android_toxav_callback_video_receive_frame_cb_method:22:2")
                 }
             }
-            new_video_in_frame(video_buffer_1, frame_width_px1, frame_height_px1)
+            VideoManager.incomingProcessor?.processFrame(video_buffer_1!!, frame_width_px1, frame_height_px1)
             try
             {
                 if (!("" + frame_width_px + "x" + frame_height_px).equals(avstatestorevplayfpsstate.state.incomingResolution)) {
@@ -1420,8 +1420,8 @@ class MainActivity
             }
             catch(_: Exception)
             {}
-            VideoOutFrame.clear_video_out_frame()
-            VideoInFrame.clear_video_in_frame()
+            VideoManager.outgoingProcessor?.clear()
+            VideoManager.incomingProcessor?.clear()
             AudioBar.set_cur_value(0, audio_in_bar)
             AudioBar.set_cur_value(0, audio_out_bar)
             avstatestorevplayfpsstate.updateIncomingResolution("")

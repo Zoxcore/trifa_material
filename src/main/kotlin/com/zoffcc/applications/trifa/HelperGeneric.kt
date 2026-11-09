@@ -947,11 +947,7 @@ object HelperGeneric {
                         //
                     }
                     yuv_frame_data_buf.rewind()
-                    if ((VideoInFrame.width != w2_decoder || VideoInFrame.height != h2_decoder) || (VideoInFrame.imageInByte == null))
-                    {
-                        VideoInFrame.setup_video_in_resolution(w2_decoder, h2_decoder, (y_bytes2_decoder + u_bytes2_decoder + v_bytes2_decoder))
-                    }
-                    VideoInFrame.new_video_in_frame(yuv_frame_data_buf, w2_decoder, h2_decoder)
+                    VideoManager.incomingProcessor?.processFrame(yuv_frame_data_buf!!, w2_decoder, h2_decoder)
                 }
                 ngc_video_frame_last_incoming_ts = System.currentTimeMillis()
             } catch (e: java.lang.Exception) {

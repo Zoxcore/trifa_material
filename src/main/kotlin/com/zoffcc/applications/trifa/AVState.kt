@@ -3,6 +3,7 @@
 package com.zoffcc.applications.trifa
 
 import RESOURCESDIR
+import VideoManager
 import avstatestore
 import avstatestorecallstate
 import avstatestorevcapfpsstate
@@ -96,9 +97,9 @@ data class AVState(val a: Int)
         semaphore_avstate.release()
 
         Log.i(TAG, "ffmpeg_devices_start:clear_video_out_frame")
-        VideoOutFrame.clear_video_out_frame()
+        VideoManager.outgoingProcessor?.clear()
         Log.i(TAG, "ffmpeg_devices_start:clear_video_in_frame")
-        VideoInFrame.clear_video_in_frame()
+        VideoManager.incomingProcessor?.clear()
 
         if (devices_state_copy == CALL_DEVICES_STATE.CALL_DEVICES_STATE_CLOSED)
         {
@@ -163,9 +164,9 @@ data class AVState(val a: Int)
                 Log.i(TAG, "ffmpeg_devices_stop:set_cur_value2")
                 AudioBar.set_cur_value(0, AudioBar.audio_out_bar)
                 Log.i(TAG, "ffmpeg_devices_stop:clear_video_out_frame")
-                VideoOutFrame.clear_video_out_frame()
+                VideoManager.outgoingProcessor?.clear()
                 Log.i(TAG, "ffmpeg_devices_stop:clear_video_in_frame")
-                VideoInFrame.clear_video_in_frame()
+                VideoManager.incomingProcessor?.clear()
                 Log.i(TAG, "ffmpeg_devices_stop:DONE")
             }
             else
@@ -695,7 +696,6 @@ data class AVState(val a: Int)
                         val buffer_size_in_bytes3 = (frame_width_px * frame_height_px * 1.5f).toInt()
                         video_buffer_2 = ByteBuffer.allocateDirect(buffer_size_in_bytes3)
                         MainActivity.set_JNI_video_buffer2(video_buffer_2, frame_width_px, frame_height_px)
-                        VideoOutFrame.setup_video_out_resolution(frame_width_px, frame_height_px, buffer_size_in_bytes3)
                         frame_width_px2 = frame_width_px
                         frame_height_px2 = frame_height_px
                         Log.i(TAG, "ffmpeg open video capture: sizes changed: finished")
@@ -721,7 +721,7 @@ data class AVState(val a: Int)
                     MainActivity.toxav_video_send_frame_age(friendnum = friendnum, frame_width_px = width.toInt(), frame_height_px = height.toInt(), age_ms = pts.toInt())
 
                     video_buffer_2!!.rewind()
-                    VideoOutFrame.new_video_out_frame(video_buffer_2, frame_width_px, frame_height_px)
+                    VideoManager.outgoingProcessor?.processFrame(video_buffer_2!!, frame_width_px, frame_height_px)
                 }
 
                 // WARNING: you need to make this thread safe !!!!!
