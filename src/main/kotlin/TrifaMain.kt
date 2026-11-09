@@ -11,6 +11,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -89,6 +90,7 @@ import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -184,8 +186,6 @@ import com.zoffcc.applications.trifa.HelperGroup.group_get_last_know_peername
 import com.zoffcc.applications.trifa.HelperGroup.update_group_peername_in_all_missing_messages
 import com.zoffcc.applications.trifa.HelperNotification.init_system_tray
 import com.zoffcc.applications.trifa.HelperNotification.set_resouces_dir
-import com.zoffcc.applications.trifa.JPictureBox
-import com.zoffcc.applications.trifa.JPictureBoxOut
 import com.zoffcc.applications.trifa.Log
 import com.zoffcc.applications.trifa.MainActivity
 import com.zoffcc.applications.trifa.MainActivity.Companion.DEBUG_COMPOSE_UI_UPDATES
@@ -224,6 +224,7 @@ import com.zoffcc.applications.trifa.TrifaToxService.Companion.clear_grouppeers
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.load_grouppeers
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.orma
 import com.zoffcc.applications.trifa.TrifaToxService.Companion.update_group_peers_ui_from_middleware
+import com.zoffcc.applications.trifa.VideoBox
 import com.zoffcc.applications.trifa_material.trifa_material.BuildConfig
 import io.github.alexzhirkevich.qrose.options.QrBrush
 import io.github.alexzhirkevich.qrose.options.solid
@@ -368,6 +369,18 @@ var NotoEmojiFont: FontFamily? = null
 var DefaultFont: FontFamily? = null
 const val DISPLAY_SINGLE_INSTANCE_INFO = 1000L
 
+object VideoManager {
+    var incomingProcessor: VideoStreamProcessor? = null
+    var outgoingProcessor: VideoStreamProcessor? = null
+
+    // Keep track of the direct ByteBuffers for JNI
+    var video_buffer_in: java.nio.ByteBuffer? = null
+    var video_buffer_out: java.nio.ByteBuffer? = null
+
+    var currentInWidth = 0
+    var currentInHeight = 0
+}
+
 @OptIn(DelicateCoroutinesApi::class, ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 @Preview
@@ -448,6 +461,22 @@ fun App()
     var ui_scale by remember { mutableStateOf(globalstore.getUiScale()) }
     scaffoldState = rememberScaffoldState()
     ScaffoldCoroutineScope = rememberCoroutineScope()
+
+    val videoInProcessor = remember { VideoStreamProcessor() }
+    val videoOutProcessor = remember { VideoStreamProcessor() }
+
+    DisposableEffect(Unit) {
+        VideoManager.incomingProcessor = videoInProcessor
+        VideoManager.outgoingProcessor = videoOutProcessor
+
+        onDispose {
+            VideoManager.incomingProcessor = null
+            VideoManager.outgoingProcessor = null
+            videoInProcessor.release()
+            videoOutProcessor.release()
+        }
+    }
+
     Theme {
         Scaffold(modifier = Modifier.randomDebugBorder(), scaffoldState = scaffoldState) {
             Column() {
@@ -800,28 +829,11 @@ fun App()
                                                         )
                                                     } else
                                                     {
-                                                        SwingPanel(
-                                                            background = VIDEO_BOX_BG_COLOR,
+                                                        VideoBox(
+                                                            processor = videoInProcessor,
                                                             modifier = Modifier.fillMaxWidth(video_in_box_width_fraction)
-                                                                .padding(5.dp)
-                                                                .weight(80.0f)
-                                                                .combinedClickable(onClick = {
-                                                                    if (video_in_box_small)
-                                                                    {
-                                                                        video_in_box_width = VIDEO_IN_BOX_WIDTH_BIG
-                                                                        video_in_box_height = VIDEO_IN_BOX_HEIGHT_BIG
-                                                                    } else
-                                                                    {
-                                                                        video_in_box_width = VIDEO_IN_BOX_WIDTH_SMALL
-                                                                        video_in_box_height = VIDEO_IN_BOX_HEIGHT_SMALL
-                                                                    }
-                                                                    video_in_box_small != video_in_box_small
-                                                                }),
-                                                            factory = {
-                                                                JPanel(SingleComponentAspectRatioKeeperLayout(), DOUBLE_BUFFER_VIDEOIN).apply {
-                                                                    add(JPictureBox.videoinbox)
-                                                                }
-                                                            }
+                                                                    .padding(5.dp)
+                                                                    .weight(80.0f)
                                                         )
                                                     }
                                                 }
@@ -1036,29 +1048,30 @@ fun App()
                                                     }
                                                 } else
                                                 {
-                                                    SwingPanel(
-                                                        background = VIDEO_BOX_BG_COLOR,
-                                                        modifier = Modifier.size(video_out_box_width, video_out_box_height)
-                                                            .combinedClickable(onClick = {
-                                                                if (video_out_box_small)
-                                                                {
-                                                                    video_out_box_width = VIDEO_OUT_BOX_WIDTH_BIG
-                                                                    video_out_box_height = VIDEO_OUT_BOX_HEIGHT_BIG
-                                                                } else
-                                                                {
-                                                                    video_out_box_width = VIDEO_OUT_BOX_WIDTH_SMALL
-                                                                    video_out_box_height = VIDEO_OUT_BOX_HEIGHT_SMALL
-                                                                }
-                                                                video_out_box_small = !video_out_box_small
-                                                                Log.i(TAG, "update1: " + video_out_box_small)
-                                                            }),
-                                                        factory = {
-                                                            JPanel(SingleComponentAspectRatioKeeperLayout(), DOUBLE_BUFFER_VIDEOOUT).apply {
-                                                                add(JPictureBoxOut.videooutbox)
-                                                            }
-                                                        },
-                                                        update = { Log.i(TAG, "update2: " + video_out_box_small) }
-                                                    )
+                                                    VideoManager.outgoingProcessor?.let {
+                                                        VideoBox(
+                                                            processor = it,
+                                                            backgroundColor = Color(VIDEO_BOX_BG_COLOR.red, VIDEO_BOX_BG_COLOR.green, VIDEO_BOX_BG_COLOR.blue),
+                                                            modifier = Modifier.size(video_out_box_width, video_out_box_height)
+                                                                .combinedClickable(
+                                                                    interactionSource = remember { MutableInteractionSource() },
+                                                                    indication = null,
+                                                                    onClick = {
+                                                                        if (video_out_box_small)
+                                                                        {
+                                                                            video_out_box_width = VIDEO_OUT_BOX_WIDTH_BIG
+                                                                            video_out_box_height = VIDEO_OUT_BOX_HEIGHT_BIG
+                                                                        } else
+                                                                        {
+                                                                            video_out_box_width = VIDEO_OUT_BOX_WIDTH_SMALL
+                                                                            video_out_box_height = VIDEO_OUT_BOX_HEIGHT_SMALL
+                                                                        }
+                                                                        video_out_box_small = !video_out_box_small
+                                                                        Log.i(TAG, "update1: " + video_out_box_small)
+                                                                    }
+                                                                )
+                                                        )
+                                                    }
                                                 }
                                                 val current_vicfps_state by avstatestorevcapfpsstate.stateFlow.collectAsState()
                                                 /*
@@ -3581,17 +3594,13 @@ private fun MainAppStart()
                     title = "incoming Video",
                     icon = appIcon) {
                     Column(Modifier.randomDebugBorder().fillMaxSize()) {
-                        SwingPanel(
-                            background = VIDEO_BOX_BG_COLOR,
-                            modifier = Modifier.randomDebugBorder().fillMaxSize()
-                                .combinedClickable(onClick = {
-                                }),
-                            factory = {
-                                JPanel(SingleComponentAspectRatioKeeperLayout(), DOUBLE_BUFFER_VIDEOIN).apply {
-                                    add(JPictureBox.videoinbox)
-                                }
-                            }
-                        )
+                        VideoManager.incomingProcessor?.let {
+                            VideoBox(
+                                processor = it,
+                                backgroundColor = Color(VIDEO_BOX_BG_COLOR.red, VIDEO_BOX_BG_COLOR.green, VIDEO_BOX_BG_COLOR.blue),
+                                modifier = Modifier.randomDebugBorder().fillMaxSize()
+                            )
+                        }
                     }
                 }
             }
