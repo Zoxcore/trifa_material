@@ -52,7 +52,12 @@ class VideoStreamProcessor {
             val timeSinceLastFrame = System.currentTimeMillis() - lastFrameReceivedTime
             val sleepTime = if (timeSinceLastFrame > 500) 100L else 5L
 
-            Thread.sleep(sleepTime)
+            try {
+                Thread.sleep(sleepTime)
+            } catch (_: InterruptedException) {
+                // Expected when release() interrupts the thread during app shutdown
+                break
+            }
         }
     }
 
