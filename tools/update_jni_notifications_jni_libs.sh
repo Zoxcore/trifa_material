@@ -2,6 +2,7 @@
 base_url='https://github.com/zoff99/jni_notifications/releases/download/nightly/'
 
 file_mac='libjni_notifications.jnilib'
+file_mac_arm='libjni_notifications_arm64.jnilib'
 file_lix='libjni_notifications.so'
 file_asan_lix='libjni_notifications.so__ASAN'
 file_lix_rust='libjni_notifications_rs.so'
@@ -19,6 +20,7 @@ basedir="$_HOME_""/../resources/common/"
 
 cd "$basedir"
 wget "$base_url""$file_mac" -O "$file_mac"
+wget "$base_url""$file_mac_arm" -O "$file_mac_arm"
 wget "$base_url""$file_lix" -O "$file_lix"
 wget "$base_url""$file_asan_lix" -O "$file_asan_lix"
 wget "$base_url""$file_lix_rust" -O "$file_lix_rust"
