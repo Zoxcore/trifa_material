@@ -45,7 +45,7 @@ export CFLAGS_ADDON_MORE="--param=ssp-buffer-size=1 -fstack-protector-all"
 # ----------- config ------------
 
 # ------- deps versions ---------
-FFMPEG_VERSION="n9.0.2"
+FFMPEG_VERSION="n9.1"
 OPUS_VERSION="v1.6.1"
 SODIUM_VERSION="1.0.22"
 VPX_VERSION="v1.17.0"
